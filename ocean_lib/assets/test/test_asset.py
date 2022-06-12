@@ -29,7 +29,7 @@ def test_asset_utils(web3):
         == "did:op:68a7f03e59c70d59607e3f0a536ed4d32e0599db07f587d66bd1221573d38c21"
     )
     did = ddo_dict["id"]
-    assert ddo_dict["version"] == "4.0.0"
+    assert ddo_dict["version"] == "4.1.0"
     assert ddo_dict["chainId"] == web3.eth.chain_id
     chain_id = ddo_dict["chainId"]
 

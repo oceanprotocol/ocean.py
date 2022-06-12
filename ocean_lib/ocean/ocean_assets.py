@@ -28,6 +28,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -76,7 +77,7 @@ class OceanAssets:
 
     @enforce_types
     def _add_defaults(
-        self, services: list, datatoken: str, files: str, provider_uri: str
+        self, services: list, datatoken: str, files: List[FilesType], provider_uri: str
     ) -> list:
         has_access_service = any(
             map(
@@ -98,22 +99,25 @@ class OceanAssets:
 
         return services
 
-    @staticmethod
     @enforce_types
     def build_access_service(
+        self,
         service_id: str,
         service_endpoint: str,
         datatoken: str,
-        files: str,
+        files: List[FilesType],
         timeout: Optional[int] = 3600,
     ) -> Service:
+        encrypted_files = self.encrypt_files(
+            files, datatoken, ServiceTypes.ASSET_ACCESS
+        )
 
         return Service(
             service_id=service_id,
             service_type=ServiceTypes.ASSET_ACCESS,
             service_endpoint=service_endpoint,
             datatoken=datatoken,
-            files=files,
+            files=encrypted_files,
             timeout=timeout,
         )
 
@@ -255,7 +259,7 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        encrypted_files: Optional[str] = None,
+        files: Optional[List[FilesType]] = None,
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
@@ -287,7 +291,7 @@ class OceanAssets:
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
-        :param encrypted_files: str of the files that need to be encrypted before publishing.
+        :param files: list of files that need to be encrypted before publishing.
         :param services: list of Service objects.
         :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
@@ -427,7 +431,7 @@ class OceanAssets:
             if not services:
                 for datatoken_address in datatoken_addresses:
                     services = self._add_defaults(
-                        services, datatoken_address, encrypted_files, provider_uri
+                        services, datatoken_address, files, provider_uri
                     )
             for datatoken_address in datatoken_addresses:
                 deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
@@ -439,7 +443,7 @@ class OceanAssets:
             if not services:
                 for datatoken in deployed_datatokens:
                     services = self._add_defaults(
-                        services, datatoken.address, encrypted_files, provider_uri
+                        services, datatoken.address, files, provider_uri
                     )
 
             datatokens = self.build_datatokens_list(
@@ -773,9 +777,13 @@ class OceanAssets:
         )
 
     @enforce_types
-    def encrypt_files(self, files: list):
+    def encrypt_files(self, files: List[FilesType], datatoken: str, service_type: str):
         data_provider = DataServiceProvider
+        files = list(map(lambda file: file.to_dict(), files))
 
-        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
+        encrypt_response = data_provider.encrypt(
+            {"datatokenAddress": datatoken, "type": service_type, "files": files},
+            self._config.provider_url,
+        )
 
         return encrypt_response.content.decode("utf-8")

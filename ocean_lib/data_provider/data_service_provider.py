@@ -63,11 +63,10 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str, bytes], provider_uri: str
+        objects_to_encrypt: Union[list, str, bytes, dict], provider_uri: str
     ) -> Response:
-        if isinstance(objects_to_encrypt, list):
-            data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
-            data = json.dumps(data_items, separators=(",", ":"))
+        if isinstance(objects_to_encrypt, dict):
+            data = json.dumps(objects_to_encrypt, separators=(",", ":"))
             payload = data.encode("utf-8")
         elif isinstance(objects_to_encrypt, str):
             payload = objects_to_encrypt.encode("utf-8")

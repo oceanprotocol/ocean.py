@@ -34,12 +34,10 @@ def test_aqua_functions_for_single_ddo(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
-
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=[file1],
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],
         datatoken_symbols=["DT1"],

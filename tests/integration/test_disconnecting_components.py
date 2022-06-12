@@ -64,6 +64,7 @@ def _create_ddo(ocean, publisher):
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
+    # todo: remove encryption
     encrypted_files = _encrypt(DEFAULT_PROVIDER_URL)
     try:
         ocean.assets.create(

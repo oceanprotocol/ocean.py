@@ -40,7 +40,7 @@ class Asset(AddressCredential):
         self.chain_id = chain_id
         self.nft_address = nft_address
         self.metadata = metadata
-        self.version = "4.0.0"
+        self.version = "4.1.0"
         self.services = services or []
         self.credentials = credentials or {}
         self.nft = nft
