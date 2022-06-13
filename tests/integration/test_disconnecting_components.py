@@ -10,6 +10,7 @@ from unittest.mock import patch
 import requests
 
 from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
+from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
@@ -64,13 +65,17 @@ def _create_ddo(ocean, publisher):
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
-    # todo: remove encryption
-    encrypted_files = _encrypt(DEFAULT_PROVIDER_URL)
+
+    file_url = "https://foo.txt"
+    file_dict = {"type": "url", "url": file_url, "method": "GET"}
+    file = FilesTypeFactory(file_dict)
+    files = [file]
+
     try:
         ocean.assets.create(
             metadata,
             publisher,
-            encrypted_files,
+            files,
             datatoken_templates=[1],
             datatoken_names=["Datatoken 1"],
             datatoken_symbols=["DT1"],
@@ -81,6 +86,9 @@ def _create_ddo(ocean, publisher):
             datatoken_publish_market_order_fee_amounts=[0],
             datatoken_bytess=[[b""]],
         )
+    except requests.exceptions.InvalidURL as err:
+        exception_flag = 1
+        assert err.args[0] == "InvalidURL http://foourl.com."
     except requests.exceptions.SSLError:
         exception_flag = 2
 
@@ -91,24 +99,14 @@ def _iterative_create_ddo(ocean, publisher):
         time.sleep(1)
 
 
-def _encrypt(provider_url):
-    global exception_flag
-    file_url = "https://foo.txt"
-    file_dict = {"type": "url", "url": file_url, "method": "GET"}
-    file = FilesTypeFactory(file_dict)
-    files = [file]
-
-    # Encrypt file objects
-    try:
-        return DataServiceProvider.encrypt(files, provider_url)
-    except requests.exceptions.InvalidURL as err:
-        exception_flag = 1
-        assert err.args[0] == "InvalidURL http://foourl.com."
-
-
 def _iterative_encrypt(mock):
+    global exception_flag
     for _ in range(5):
-        _encrypt(mock.return_value)
+        try:
+            DataEncryptor.encrypt({}, mock.return_value)
+        except requests.exceptions.InvalidURL as err:
+            exception_flag = 1
+            assert err.args[0] == "InvalidURL http://foourl.com."
         time.sleep(1)
 
 
