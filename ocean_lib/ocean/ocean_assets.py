@@ -417,7 +417,7 @@ class OceanAssets:
             len(datatoken_addresses) == 1
             or len(deployed_datatokens) == 1
             or (datatoken_names and len(datatoken_names) == 1)
-        ) and not isinstance(files[0], list):
+        ) and (files and not isinstance(files[0], list)):
             # for the simplest case, where 1 dt is expected,
             # allow files not to be a nested list
             files = [files]

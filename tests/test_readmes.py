@@ -82,7 +82,7 @@ def test_script_execution(script, monkeypatch):
                 "ZERO_ADDRESS",
                 "did",
                 "metadata",
-                "files",
+                "url_file",
             ]:
                 globs[key] = result[key]
 

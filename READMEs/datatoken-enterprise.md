@@ -68,7 +68,7 @@ Asset creation will be based on the deployment of Datatoken Enterprise token lik
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
-    files,
+    [url_file],
     deployed_datatokens=[datatoken_enterprise_token]
 )
 access_service = asset.services[0]
@@ -177,7 +177,7 @@ Asset creation will be based on the deployment of Datatoken Enterprise token lik
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
-    files,
+    [url_file],
     deployed_datatokens=[datatoken_enterprise_token]
 )
 access_service = asset.services[0]
