@@ -62,7 +62,16 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service.id}")
+    counter = None
+    for index, s in enumerate(asset.services):
+        if s.id == service.id:
+            counter = index
+    if counter is None:
+        raise AssertionError(
+            f"service {service.id} does not belong to asset {asset.did}"
+        )
+
+    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{counter}")
     if not os.path.exists(asset_folder):
         os.makedirs(asset_folder)
 
