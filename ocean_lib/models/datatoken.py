@@ -215,7 +215,7 @@ class Datatoken(ContractBase):
         service_index: int,
         provider_fee_address: str,
         provider_fee_token: str,
-        provider_fee_amount: int,
+        provider_fee_amount: str,
         v: int,
         r: Union[str, bytes],
         s: Union[str, bytes],
@@ -234,7 +234,7 @@ class Datatoken(ContractBase):
                 (
                     provider_fee_address,
                     provider_fee_token,
-                    provider_fee_amount,
+                    int(provider_fee_amount),
                     v,
                     r,
                     s,

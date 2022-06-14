@@ -27,8 +27,8 @@ jobs:
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
-          PROVIDER_VERSION: schema-v4.1.0
-          AQUARIUS_VERSION: schema-4.1.0
+          PROVIDER_VERSION: v1.0.18
+          AQUARIUS_VERSION: v4.1.0
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
           for i in $(seq 1 50); do
