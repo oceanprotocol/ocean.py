@@ -62,29 +62,22 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    counter = None
     for index, s in enumerate(asset.services):
         if s.id == service.id:
-            counter = index
-    if counter is None:
-        raise AssertionError(
-            f"service {service.id} does not belong to asset {asset.did}"
-        )
+            asset_folder = os.path.join(destination, f"datafile.{asset.did}.{index}")
+            if not os.path.exists(asset_folder):
+                os.makedirs(asset_folder)
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{counter}")
-    if not os.path.exists(asset_folder):
-        os.makedirs(asset_folder)
-
-    data_provider.download(
-        did=asset.did,
-        service=service,
-        tx_id=order_tx_id,
-        consumer_wallet=consumer_wallet,
-        destination_folder=asset_folder,
-        index=index,
-        userdata=userdata,
-    )
-    return asset_folder
+            data_provider.download(
+                did=asset.did,
+                service=service,
+                tx_id=order_tx_id,
+                consumer_wallet=consumer_wallet,
+                destination_folder=asset_folder,
+                index=index,
+                userdata=userdata,
+            )
+            return asset_folder
 
 
 @enforce_types
