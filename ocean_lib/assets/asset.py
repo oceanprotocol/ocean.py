@@ -147,6 +147,7 @@ class Asset(AddressCredential):
 
         :param service: To add service, Service
         """
+        service.encrypt_files(self.nft_address)
 
         logger.debug(
             f"Adding service with service type {service.type} with did {self.did}"

@@ -63,9 +63,6 @@ class Service:
         if additional_information:
             self.additional_information = additional_information
 
-        if self.files and not isinstance(self.files, str):
-            self.files = self.encrypt_files(files)
-
         if not name or not description:
             service_to_default_name = {
                 ServiceTypes.ASSET_ACCESS: ServiceTypesNames.DEFAULT_ACCESS_NAME,
@@ -306,12 +303,19 @@ class Service:
         self.compute_values["allowNetworkAccess"] = allow_network_access
         self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
 
-    def encrypt_files(self, files: List[FilesType]):
-        files = list(map(lambda file: file.to_dict(), files))
+    def encrypt_files(self, nft_address):
+        if self.files and isinstance(self.files, str):
+            return
+
+        files = list(map(lambda file: file.to_dict(), self.files))
 
         encrypt_response = DataEncryptor.encrypt(
-            {"datatokenAddress": self.datatoken, "type": self.type, "files": files},
+            {
+                "datatokenAddress": self.datatoken,
+                "nftAddress": nft_address,
+                "files": files,
+            },
             self.service_endpoint,
         )
 
-        return encrypt_response.content.decode("utf-8")
+        self.files = encrypt_response.content.decode("utf-8")
