@@ -158,3 +158,8 @@ class OceanCompute:
     @enforce_types
     def get_c2d_environments(self, service_endpoint: str) -> str:
         return DataServiceProvider.get_c2d_environments(service_endpoint)
+
+    @enforce_types
+    def get_free_c2d_environment(self, service_endpoint: str) -> str:
+        environments = self.get_c2d_environments(service_endpoint)
+        return next(env for env in environments if float(env["priceMin"]) == float(0))
