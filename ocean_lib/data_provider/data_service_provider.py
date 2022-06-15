@@ -369,7 +369,7 @@ class DataServiceProvider(DataServiceProviderBase):
     @enforce_types
     def compute_job_result(
         job_id: str, index: int, dataset_compute_service: Any, consumer: Wallet
-    ) -> Dict[str, Any]:
+    ) -> bytes:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
@@ -420,7 +420,7 @@ class DataServiceProvider(DataServiceProviderBase):
         dataset_compute_service: Any,
         consumer: Wallet,
         log_type="output",
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
