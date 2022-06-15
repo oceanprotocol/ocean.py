@@ -290,6 +290,10 @@ class DataServiceProviderBase:
 
                 raise DataProviderException(f"{endpoint_name} failed: {error}")
 
+            raise DataProviderException(
+                f"Failed to get a response for request: {endpoint_name}={endpoint}, payload={payload}, response is {response}"
+            )
+
         if not success_codes:
             success_codes = [200]
 
