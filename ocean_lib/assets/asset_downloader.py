@@ -62,22 +62,25 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    for index, s in enumerate(asset.services):
-        if s.id == service.id:
-            asset_folder = os.path.join(destination, f"datafile.{asset.did}.{index}")
-            if not os.path.exists(asset_folder):
-                os.makedirs(asset_folder)
+    service_index_in_asset = asset.get_index_of_service(service)
+    asset_folder = os.path.join(
+        destination, f"datafile.{asset.did},{service_index_in_asset}"
+    )
 
-            data_provider.download(
-                did=asset.did,
-                service=service,
-                tx_id=order_tx_id,
-                consumer_wallet=consumer_wallet,
-                destination_folder=asset_folder,
-                index=index,
-                userdata=userdata,
-            )
-            return asset_folder
+    if not os.path.exists(asset_folder):
+        os.makedirs(asset_folder)
+
+    data_provider.download(
+        did=asset.did,
+        service=service,
+        tx_id=order_tx_id,
+        consumer_wallet=consumer_wallet,
+        destination_folder=asset_folder,
+        index=index,
+        userdata=userdata,
+    )
+
+    return asset_folder
 
 
 @enforce_types
