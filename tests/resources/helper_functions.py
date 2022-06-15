@@ -380,7 +380,7 @@ def get_provider_fees(
     provider_fee = {
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": provider_fee_amount,
+        "providerFeeAmount": str(provider_fee_amount),
         "providerData": web3.toHex(web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         "v": (signed.v + 27) if signed.v <= 1 else signed.v,
