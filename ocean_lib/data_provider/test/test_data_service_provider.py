@@ -127,8 +127,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         )
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
-        DataProviderException,
-        match=f"Start Compute failed at the computeStartEndpoint {DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
+        DataProviderException, match="The dataset.documentId field is required."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
@@ -540,7 +539,9 @@ def test_initialize_compute_failure(config):
     DataSP.set_http_client(http_client)
     valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
 
-    with pytest.raises(DataProviderException, match="Initialize compute failed"):
+    with pytest.raises(
+        DataProviderException, match="request failed at the initializeComputeEndpoint"
+    ):
         DataSP.initialize_compute(
             [compute_input.as_dictionary()],
             compute_input.as_dictionary(),

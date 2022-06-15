@@ -9,7 +9,7 @@ import os
 import re
 from datetime import datetime
 from json import JSONDecodeError
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
 
 import requests
@@ -23,6 +23,7 @@ from requests.sessions import Session
 from web3.main import Web3
 
 from ocean_lib.config import Config
+from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
@@ -270,6 +271,37 @@ class DataServiceProviderBase:
                 f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
             )
             raise
+
+    @staticmethod
+    @enforce_types
+    def check_response(
+        response: Any,
+        endpoint_name: str,
+        endpoint: str,
+        payload: Union[Dict, bytes],
+        success_codes: Optional[List] = None,
+        exception_type=DataProviderException,
+    ):
+        if not response or not hasattr(response, "status_code"):
+            if isinstance(response, Response) and response.status_code == 400:
+                error = response.json().get("error", None)
+                if error is None:
+                    error = response.json().get("errors", "unknown error")
+
+                raise DataProviderException(f"{endpoint_name} failed: {error}")
+
+        if not success_codes:
+            success_codes = [200]
+
+        if response.status_code not in success_codes:
+            msg = (
+                f"request failed at the {endpoint_name}"
+                f"{endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise exception_type(msg)
+
+        return None
 
 
 @enforce_types

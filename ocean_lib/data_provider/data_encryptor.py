@@ -14,7 +14,7 @@ from eth_keys.backends import NativeECCBackend
 from requests.models import Response
 
 from ocean_lib.data_provider.base import DataServiceProviderBase
-from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
+from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 
 logger = logging.getLogger(__name__)
 keys = KeyAPI(NativeECCBackend)
@@ -46,18 +46,14 @@ class DataEncryptor(DataServiceProviderBase):
             headers={"Content-type": "application/octet-stream"},
         )
 
-        if not response or not hasattr(response, "status_code"):
-            raise DataProviderException(
-                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
-            )
-
-        if response.status_code != 201:
-            msg = (
-                f"Encrypt file urls failed at the encryptEndpoint "
-                f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise OceanEncryptAssetUrlsError(msg)
+        DataServiceProviderBase.check_response(
+            response,
+            "encryptEndpoint",
+            encrypt_endpoint,
+            payload,
+            [201],
+            OceanEncryptAssetUrlsError,
+        )
 
         logger.info(
             f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
