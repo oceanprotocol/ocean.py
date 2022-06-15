@@ -469,13 +469,13 @@ def test_encrypt_failure(config):
     DataEncryptor.set_http_client(http_client)
 
     with pytest.raises(OceanEncryptAssetUrlsError):
-        DataEncryptor.encrypt([], config.provider_url)
+        DataEncryptor.encrypt({}, config.provider_url)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataEncryptor.encrypt([], config.provider_url)
+        DataEncryptor.encrypt({}, config.provider_url)
 
     DataSP.set_http_client(get_requests_session())
 
