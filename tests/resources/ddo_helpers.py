@@ -117,15 +117,12 @@ def create_asset(ocean, publisher, metadata=None, files=None):
         file1 = FilesTypeFactory(file1_dict)
         files = [file1]
 
-    # Encrypt file(s) using provider
-    encrypted_files = ocean.assets.encrypt_files(files)
-
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
     asset = ocean.assets.create(
         metadata,
         publisher,
-        encrypted_files,
+        files,
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],
         datatoken_symbols=["DT1"],
@@ -171,11 +168,7 @@ def create_basics(
     if files is None:
         files = [get_file1(), get_file2()]
 
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt(files, config.provider_url)
-    encrypted_files = encrypt_response.content.decode("utf-8")
-
-    return data_nft_factory, metadata, encrypted_files
+    return data_nft_factory, metadata, files
 
 
 def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
@@ -200,9 +193,7 @@ def get_registered_asset_with_compute_service(
     arff_file = UrlFile(
         url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
     )
-    _, metadata, encrypted_files = create_basics(
-        config, web3, data_provider, files=[arff_file]
-    )
+    _, metadata, files = create_basics(config, web3, data_provider, files=[arff_file])
 
     # Set the compute values for compute service
     compute_values = {
@@ -216,7 +207,7 @@ def get_registered_asset_with_compute_service(
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=data_provider.get_url(config),
         datatoken=datatoken.address,
-        files=encrypted_files,
+        files=files,
         timeout=3600,
         compute_values=compute_values,
     )

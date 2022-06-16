@@ -40,14 +40,14 @@ def asset_displayed_on_sale(ocean: Ocean):
     )
 
     # Encrypt file(s) using provider
-    encrypted_files = ocean.assets.encrypt_files([url_file])
+    files = [url_file]
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
     asset = ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],

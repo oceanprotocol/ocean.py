@@ -250,9 +250,7 @@ def create_asset_with_order_fee_and_timeout(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt([file], config.provider_url)
-    encrypted_files = encrypt_response.content.decode("utf-8")
+    files = [file]
 
     # Create service with timeout
     service = Service(
@@ -260,7 +258,7 @@ def create_asset_with_order_fee_and_timeout(
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=data_provider.get_url(config),
         datatoken=datatoken.address,
-        files=encrypted_files,
+        files=files,
         timeout=timeout,
     )
 

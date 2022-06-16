@@ -40,7 +40,7 @@ class Asset(AddressCredential):
         self.chain_id = chain_id
         self.nft_address = nft_address
         self.metadata = metadata
-        self.version = "4.0.0"
+        self.version = "4.1.0"
         self.services = services or []
         self.credentials = credentials or {}
         self.nft = nft
@@ -147,6 +147,7 @@ class Asset(AddressCredential):
 
         :param service: To add service, Service
         """
+        service.encrypt_files(self.nft_address)
 
         logger.debug(
             f"Adding service with service type {service.type} with did {self.did}"
