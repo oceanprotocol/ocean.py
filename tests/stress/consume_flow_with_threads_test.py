@@ -39,15 +39,13 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     data_nft, datatoken = deploy_erc721_erc20(
         ocean.web3, config, publisher_wallet, publisher_wallet
     )
-    encrypt_response = data_provider.encrypt(
-        [random.choice(files)], config.provider_url
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
+
+    files = [random.choice(files)]
 
     ddo = ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],

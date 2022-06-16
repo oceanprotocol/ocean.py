@@ -13,8 +13,9 @@ from requests.models import Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
+from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
+from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
-from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
@@ -126,8 +127,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         )
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
-        DataProviderException,
-        match=f"Start Compute failed at the computeStartEndpoint {DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
+        DataProviderException, match="The dataset.documentId field is required."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
@@ -197,7 +197,8 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
     # Encrypt file objects
-    result = DataSP.encrypt([file1, file2], config.provider_url)
+    res = {"files": [file1.to_dict(), file2.to_dict()]}
+    result = DataEncryptor.encrypt(res, config.provider_url)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -207,13 +208,11 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
         encrypted_files = web3.toBytes(hexstr=encrypted_files)
     decrypted_document = ecies.decrypt(key, encrypted_files)
     decrypted_document_string = decrypted_document.decode("utf-8")
-    assert decrypted_document_string == json.dumps(
-        [file1.to_dict(), file2.to_dict()], separators=(",", ":")
-    )
+    assert decrypted_document_string == json.dumps(res, separators=(",", ":"))
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataSP.encrypt(test_string, config.provider_url)
+    encrypt_result = DataEncryptor.encrypt(test_string, config.provider_url)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -230,12 +229,12 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
 def test_fileinfo(
     web3, config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
 ):
-    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+    _, metadata, files = create_basics(config, web3, DataSP)
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
@@ -262,11 +261,11 @@ def test_initialize(
     data_nft,
     datatoken,
 ):
-    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+    _, metadata, files = create_basics(config, web3, DataSP)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
@@ -391,8 +390,8 @@ def test_build_endpoint():
         _endpoints.update({"newEndpoint": ["GET", "/api/services/newthing"]})
         return _endpoints
 
-    original_func = DataSP.get_service_endpoints
-    DataSP.get_service_endpoints = get_service_endpoints
+    original_func = DataServiceProviderBase.get_service_endpoints
+    DataServiceProviderBase.get_service_endpoints = get_service_endpoints
 
     endpoints = get_service_endpoints()
     uri = "http://localhost:8030"
@@ -467,16 +466,16 @@ def test_check_single_file_info():
 def test_encrypt_failure(config):
     """Tests encrypt failures."""
     http_client = HttpClientEvilMock()
-    DataSP.set_http_client(http_client)
+    DataEncryptor.set_http_client(http_client)
 
     with pytest.raises(OceanEncryptAssetUrlsError):
-        DataSP.encrypt([], config.provider_url)
+        DataEncryptor.encrypt({}, config.provider_url)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.encrypt([], config.provider_url)
+        DataEncryptor.encrypt({}, config.provider_url)
 
     DataSP.set_http_client(get_requests_session())
 
@@ -540,7 +539,9 @@ def test_initialize_compute_failure(config):
     DataSP.set_http_client(http_client)
     valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
 
-    with pytest.raises(DataProviderException, match="Initialize compute failed"):
+    with pytest.raises(
+        DataProviderException, match="request failed at the initializeComputeEndpoint"
+    ):
         DataSP.initialize_compute(
             [compute_input.as_dictionary()],
             compute_input.as_dictionary(),

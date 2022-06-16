@@ -78,8 +78,7 @@ DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
-# Encrypt file(s) using provider
-DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
+DATA_files = [DATA_url_file]
 
 # Set the compute values for compute service
 DATA_compute_values = {
@@ -96,7 +95,7 @@ DATA_compute_service = Service(
     service_type="compute",
     service_endpoint=ocean.config.provider_url,
     datatoken=DATA_datatoken.address,
-    files=DATA_encrypted_files,
+    files=DATA_files,
     timeout=3600,
     compute_values=DATA_compute_values,
 )
@@ -105,7 +104,7 @@ DATA_compute_service = Service(
 DATA_asset = ocean.assets.create(
     metadata=DATA_metadata,
     publisher_wallet=alice_wallet,
-    encrypted_files=DATA_encrypted_files,
+    files=DATA_files,
     services=[DATA_compute_service],
     data_nft_address=data_nft.address,
     deployed_datatokens=[DATA_datatoken],
@@ -157,15 +156,14 @@ ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 )
 
-# Encrypt file(s) using provider
-ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
+ALGO_files = [ALGO_url_file]
 
 # Publish asset with compute service on-chain.
 # The download (access service) is automatically created, but you can explore other options as well
 ALGO_asset = ocean.assets.create(
     metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
-    encrypted_files=ALGO_encrypted_files,
+    files=ALGO_files,
     data_nft_address=ALGO_nft_token.address,
     deployed_datatokens=[ALGO_datatoken],
 )

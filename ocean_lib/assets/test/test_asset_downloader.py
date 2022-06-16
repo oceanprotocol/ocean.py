@@ -175,11 +175,11 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
 
-    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, web3, data_provider)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )

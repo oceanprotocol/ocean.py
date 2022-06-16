@@ -9,12 +9,14 @@
 import copy
 import logging
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
+from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.services.consumer_parameters import ConsumerParameters
+from ocean_lib.structures.file_objects import FilesType
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +30,7 @@ class Service:
         service_type: str,
         service_endpoint: Optional[str],
         datatoken: Optional[str],
-        files: Optional[str],
+        files: Optional[Union[List[FilesType], str]],
         timeout: Optional[int],
         compute_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
@@ -300,3 +302,20 @@ class Service:
         ] = trusted_algo_publishers
         self.compute_values["allowNetworkAccess"] = allow_network_access
         self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
+
+    def encrypt_files(self, nft_address):
+        if self.files and isinstance(self.files, str):
+            return
+
+        files = list(map(lambda file: file.to_dict(), self.files))
+
+        encrypt_response = DataEncryptor.encrypt(
+            {
+                "datatokenAddress": self.datatoken,
+                "nftAddress": nft_address,
+                "files": files,
+            },
+            self.service_endpoint,
+        )
+
+        self.files = encrypt_response.content.decode("utf-8")

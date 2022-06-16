@@ -41,17 +41,14 @@ def test_consume_flow(
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
-    files = [file1]
 
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt(files, config.provider_url)
-    encrypted_files = encrypt_response.content.decode("utf-8")
+    files = [file1]
 
     # Publish a plain asset with one data token on chain
     asset = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=[file1],
         data_nft_address=data_nft.address,
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],

@@ -54,16 +54,12 @@ url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
-# Encrypt file(s) using provider
-encrypted_files = ocean.assets.encrypt_files([url_file])
-
-
 # Publish asset with services on-chain.
 # The download (access service) is automatically created, but you can explore other options as well
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
-    encrypted_files,
+    [url_file],
     datatoken_templates=[1],
     datatoken_names=["Datatoken 1"],
     datatoken_symbols=["DT1"],

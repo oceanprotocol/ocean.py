@@ -229,6 +229,7 @@ def run_compute_test(
     time_difference = (
         timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
     )
+    valid_until = int((datetime.utcnow() + time_difference).timestamp())
 
     if "just_fees" in scenarios:
         fees_response = ocean_instance.retrieve_provider_fees_for_compute(
@@ -236,7 +237,7 @@ def run_compute_test(
             algorithm if algorithm else algorithm_meta,
             consumer_address=free_c2d_env["consumerAddress"],
             compute_environment=free_c2d_env["id"],
-            valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+            valid_until=valid_until,
         )
 
         assert "algorithm" in fees_response
@@ -249,7 +250,7 @@ def run_compute_test(
         algorithm if algorithm else algorithm_meta,
         consumer_address=free_c2d_env["consumerAddress"],
         compute_environment=free_c2d_env["id"],
-        valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+        valid_until=valid_until,
         consume_market_order_fee_address=consumer_wallet.address,
         wallet=consumer_wallet,
     )
@@ -316,7 +317,7 @@ def run_compute_test(
             algorithm if algorithm else algorithm_meta,
             consumer_address=free_c2d_env["consumerAddress"],
             compute_environment=free_c2d_env["id"],
-            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
         )
@@ -330,12 +331,14 @@ def run_compute_test(
         prev_algo_tx_id = algorithm.transfer_tx_id
         # ensure order expires
         time.sleep(time_difference.seconds + 1)
+
+        valid_until = int((datetime.utcnow() + time_difference).timestamp())
         datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
             consumer_address=free_c2d_env["consumerAddress"],
             compute_environment=free_c2d_env["id"],
-            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
         )

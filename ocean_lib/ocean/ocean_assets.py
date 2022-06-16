@@ -19,6 +19,7 @@ from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.config import Config
+from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
@@ -28,6 +29,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -76,7 +78,7 @@ class OceanAssets:
 
     @enforce_types
     def _add_defaults(
-        self, services: list, datatoken: str, files: str, provider_uri: str
+        self, services: list, datatoken: str, files: List[FilesType], provider_uri: str
     ) -> list:
         has_access_service = any(
             map(
@@ -98,16 +100,15 @@ class OceanAssets:
 
         return services
 
-    @staticmethod
     @enforce_types
     def build_access_service(
+        self,
         service_id: str,
         service_endpoint: str,
         datatoken: str,
-        files: str,
+        files: List[FilesType],
         timeout: Optional[int] = 3600,
     ) -> Service:
-
         return Service(
             service_id=service_id,
             service_type=ServiceTypes.ASSET_ACCESS,
@@ -213,7 +214,7 @@ class OceanAssets:
         if encrypt_flag and not compress_flag:
             flags = bytes([2])
             # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
+            encrypt_response = DataEncryptor.encrypt(
                 objects_to_encrypt=ddo_string, provider_uri=provider_uri
             )
             document = encrypt_response.text
@@ -225,7 +226,7 @@ class OceanAssets:
         compressed_document = lzma.compress(ddo_bytes)
 
         # Encrypt DDO
-        encrypt_response = DataServiceProvider.encrypt(
+        encrypt_response = DataEncryptor.encrypt(
             objects_to_encrypt=compressed_document, provider_uri=provider_uri
         )
 
@@ -255,7 +256,7 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        encrypted_files: Optional[str] = None,
+        files: Optional[List[FilesType]] = None,
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
@@ -287,7 +288,7 @@ class OceanAssets:
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
-        :param encrypted_files: str of the files that need to be encrypted before publishing.
+        :param files: list of files that need to be encrypted before publishing.
         :param services: list of Service objects.
         :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
@@ -396,6 +397,31 @@ class OceanAssets:
         datatoken_addresses = []
         services = services or []
         deployed_datatokens = deployed_datatokens or []
+
+        if datatoken_names and len(datatoken_names) > 1:
+            assert len(files) == len(
+                datatoken_names
+            ), "Files structure should be a list of files for each datatoken."
+
+        if len(datatoken_addresses) > 1:
+            assert len(files) == len(
+                datatoken_addresses
+            ), "Files structure should be a list of files for each datatoken."
+
+        if len(deployed_datatokens) > 1:
+            assert len(files) == len(
+                deployed_datatokens
+            ), "Files structure should be a list of files for each datatoken."
+
+        if (
+            len(datatoken_addresses) == 1
+            or len(deployed_datatokens) == 1
+            or (datatoken_names and len(datatoken_names) == 1)
+        ) and (files and not isinstance(files[0], list)):
+            # for the simplest case, where 1 dt is expected,
+            # allow files not to be a nested list
+            files = [files]
+
         if not deployed_datatokens:
             for datatoken_data_counter in range(len(datatoken_templates)):
                 datatoken_addresses.append(
@@ -425,11 +451,11 @@ class OceanAssets:
                     f"{datatoken_addresses[-1]}."
                 )
             if not services:
-                for datatoken_address in datatoken_addresses:
+                for i, datatoken_address in enumerate(datatoken_addresses):
                     services = self._add_defaults(
-                        services, datatoken_address, encrypted_files, provider_uri
+                        services, datatoken_address, files[i], provider_uri
                     )
-            for datatoken_address in datatoken_addresses:
+            for i, datatoken_address in enumerate(datatoken_addresses):
                 deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
 
             datatokens = self.build_datatokens_list(
@@ -437,9 +463,9 @@ class OceanAssets:
             )
         else:
             if not services:
-                for datatoken in deployed_datatokens:
+                for i, datatoken in enumerate(deployed_datatokens):
                     services = self._add_defaults(
-                        services, datatoken.address, encrypted_files, provider_uri
+                        services, datatoken.address, files[i], provider_uri
                     )
 
             datatokens = self.build_datatokens_list(
@@ -517,6 +543,9 @@ class OceanAssets:
         data_nft = DataNFT(self._web3, data_nft_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
+
+        for service in asset.services:
+            service.encrypt_files(asset.nft_address)
 
         # Validation by Aquarius
         validation_result, validation_errors = self.validate(asset)
@@ -771,11 +800,3 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
-
-    @enforce_types
-    def encrypt_files(self, files: list):
-        data_provider = DataServiceProvider
-
-        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
-
-        return encrypt_response.content.decode("utf-8")
