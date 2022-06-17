@@ -4,7 +4,12 @@
 #
 import pytest
 
-from ocean_lib.structures.file_objects import ArweaveFile, FilesTypeFactory, IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import (
+    ArweaveFile,
+    FilesTypeFactory,
+    IpfsFile,
+    UrlFile,
+)
 
 
 @pytest.mark.unit
@@ -28,8 +33,13 @@ def test_ipfs_file():
 
 @pytest.mark.unit
 def test_arweave_file():
-    arweave_file = ArweaveFile(transactionId="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w")
-    assert arweave_file.to_dict() == {"type": "arweave", "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"}
+    arweave_file = ArweaveFile(
+        transactionId="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
+    )
+    assert arweave_file.to_dict() == {
+        "type": "arweave",
+        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+    }
 
 
 @pytest.mark.unit
