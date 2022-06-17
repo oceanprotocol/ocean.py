@@ -4,7 +4,7 @@
 #
 import pytest
 
-from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import ArweaveFile, FilesTypeFactory, IpfsFile, UrlFile
 
 
 @pytest.mark.unit
@@ -27,6 +27,12 @@ def test_ipfs_file():
 
 
 @pytest.mark.unit
+def test_arweave_file():
+    arweave_file = ArweaveFile(transactionId="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w")
+    assert arweave_file.to_dict() == {"type": "arweave", "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"}
+
+
+@pytest.mark.unit
 def test_filetype_factory():
     factory_file = FilesTypeFactory(
         {
@@ -46,6 +52,15 @@ def test_filetype_factory():
     )
 
     assert factory_file.hash == "abc"
+
+    factory_file = FilesTypeFactory(
+        {
+            "type": "arweave",
+            "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+        }
+    )
+
+    assert factory_file.transactionId == "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
 
     with pytest.raises(Exception):
         factory_file = FilesTypeFactory({"type": "somethingelse"})
