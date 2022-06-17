@@ -43,6 +43,17 @@ class IpfsFile(FilesType):
         return {"type": self.type, "hash": self.hash}
 
 
+class ArweaveFile(FilesType):
+    @enforce_types
+    def __init__(self, transactionId: str) -> None:
+        self.transactionId = transactionId
+        self.type = "arweave"
+
+    @enforce_types
+    def to_dict(self) -> dict:
+        return {"type": self.type, "transactionId": self.transactionId}
+
+
 @enforce_types
 def FilesTypeFactory(file_obj: dict) -> FilesType:
     """Factory Method"""
@@ -50,5 +61,7 @@ def FilesTypeFactory(file_obj: dict) -> FilesType:
         return UrlFile(file_obj["url"], file_obj["method"])
     elif file_obj["type"] == "ipfs":
         return IpfsFile(file_obj["hash"])
+    elif file_obj["type"] == "arweave":
+        return ArweaveFile(file_obj["transactionId"])
     else:
         raise Exception("Unrecognized file type")
