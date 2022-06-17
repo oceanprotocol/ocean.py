@@ -62,7 +62,11 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service.id}")
+    service_index_in_asset = asset.get_index_of_service(service)
+    asset_folder = os.path.join(
+        destination, f"datafile.{asset.did},{service_index_in_asset}"
+    )
+
     if not os.path.exists(asset_folder):
         os.makedirs(asset_folder)
 
@@ -75,6 +79,7 @@ def download_asset_files(
         index=index,
         userdata=userdata,
     )
+
     return asset_folder
 
 

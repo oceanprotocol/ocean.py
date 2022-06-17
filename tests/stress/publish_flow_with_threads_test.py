@@ -19,8 +19,8 @@ from tests.resources.helper_functions import deploy_erc721_erc20, generate_walle
 def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
     data_nft, datatoken = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
     data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-    return data_nft, datatoken, metadata, encrypted_files
+    _, metadata, files = create_basics(config, ocean.web3, data_provider)
+    return data_nft, datatoken, metadata, files
 
 
 def publish_flow(ocean: Ocean, config: Config):
@@ -29,12 +29,12 @@ def publish_flow(ocean: Ocean, config: Config):
         data_nft,
         datatoken,
         metadata,
-        encrypted_files,
+        files,
     ) = _get_publishing_requirements(ocean, publisher_wallet, config)
     asset = ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,

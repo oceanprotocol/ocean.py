@@ -6,38 +6,29 @@
 """Provider module."""
 import json
 import logging
-import os
-import re
-from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
-from unittest.mock import Mock
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
-from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
-from requests.sessions import Session
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.config import Config
-from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
+from ocean_lib.data_provider.base import DataServiceProviderBase
+from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
 keys = KeyAPI(NativeECCBackend)
 
 
-class DataServiceProvider:
+class DataServiceProvider(DataServiceProviderBase):
     """DataServiceProvider class.
 
     The main functions available are:
@@ -47,60 +38,6 @@ class DataServiceProvider:
 
     _http_client = get_requests_session()
     provider_info = None
-
-    @staticmethod
-    @enforce_types
-    def get_http_client() -> Session:
-        """Get the http client."""
-        return DataServiceProvider._http_client
-
-    @staticmethod
-    @enforce_types
-    def set_http_client(http_client: Session) -> None:
-        """Set the http client to something other than the default `requests`."""
-        DataServiceProvider._http_client = http_client
-
-    @staticmethod
-    @enforce_types
-    def encrypt(
-        objects_to_encrypt: Union[list, str, bytes], provider_uri: str
-    ) -> Response:
-        if isinstance(objects_to_encrypt, list):
-            data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
-            data = json.dumps(data_items, separators=(",", ":"))
-            payload = data.encode("utf-8")
-        elif isinstance(objects_to_encrypt, str):
-            payload = objects_to_encrypt.encode("utf-8")
-        else:
-            payload = objects_to_encrypt
-
-        _, encrypt_endpoint = DataServiceProvider.build_encrypt_endpoint(provider_uri)
-        response = DataServiceProvider._http_method(
-            "post",
-            encrypt_endpoint,
-            data=payload,
-            headers={"Content-type": "application/octet-stream"},
-        )
-
-        if not response or not hasattr(response, "status_code"):
-            raise DataProviderException(
-                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
-            )
-
-        if response.status_code != 201:
-            msg = (
-                f"Encrypt file urls failed at the encryptEndpoint "
-                f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise OceanEncryptAssetUrlsError(msg)
-
-        logger.info(
-            f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
-            f" encryptedEndpoint {encrypt_endpoint}"
-        )
-
-        return response
 
     @staticmethod
     @enforce_types
@@ -116,18 +53,9 @@ class DataServiceProvider:
             "post", fileinfo_endpoint, json=payload
         )
 
-        if not response or not hasattr(response, "status_code"):
-            raise DataProviderException(
-                f"Failed to get a response for request: fileinfoEndpoint={fileinfo_endpoint}, payload={payload}, response is {response}"
-            )
-
-        if response.status_code != 200:
-            msg = (
-                f"Fileinfo service failed at the FileInfoEndpoint "
-                f"{fileinfo_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise DataProviderException(msg)
+        DataServiceProvider.check_response(
+            response, "fileInfoEndpoint", fileinfo_endpoint, payload
+        )
 
         logger.info(
             f"Retrieved asset files successfully"
@@ -218,22 +146,9 @@ class DataServiceProvider:
             headers={"content-type": "application/json"},
         )
 
-        if not response or not hasattr(response, "status_code"):
-            if isinstance(response, Response) and response.status_code == 400:
-                error = response.json().get("error", "unknown error")
-                raise DataProviderException(f"initializeComputeEndpoint: {error}")
-
-            raise DataProviderException(
-                f"Failed to get a response for request: initializeComputeEndpoint={initialize_compute_endpoint}, payload={payload}, response is {response}"
-            )
-
-        if response.status_code != 200:
-            msg = (
-                f"Initialize compute failed at the initializeEndpoint "
-                f"{initialize_compute_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise DataProviderException(msg)
+        DataServiceProviderBase.check_response(
+            response, "initializeComputeEndpoint", initialize_compute_endpoint, payload
+        )
 
         logger.info(
             f"Service initialized successfully"
@@ -290,18 +205,9 @@ class DataServiceProvider:
                 "get", url=download_endpoint, params=payload, stream=True, timeout=3
             )
 
-            if not response or not hasattr(response, "status_code"):
-                raise DataProviderException(
-                    f"Failed to get a response for request: downloadEndpoint={service_endpoint}, payload={payload}, response is {response.content}"
-                )
-
-            if response.status_code != 200:
-                msg = (
-                    f"Download asset failed at the downloadEndpoint "
-                    f"{download_endpoint}, reason {response.text}, status {response.status_code}"
-                )
-                logger.error(msg)
-                raise DataProviderException(msg)
+            DataServiceProviderBase.check_response(
+                response, "downloadEndpoint", download_endpoint, payload
+            )
 
             file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(response, destination_folder, file_name)
@@ -310,17 +216,6 @@ class DataServiceProvider:
                 f"Asset downloaded successfully"
                 f" downloadEndpoint {download_endpoint}"
             )
-
-    @staticmethod
-    @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.utcnow().timestamp())
-        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        message_hash = Web3.solidityKeccak(
-            ["bytes"],
-            [Web3.toBytes(text=f"{msg}{nonce}")],
-        )
-        return nonce, sign_hash(encode_defunct(message_hash), wallet)
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
@@ -377,22 +272,14 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        if response is None:
-            raise DataProviderException(
-                f"Failed to get a response for request: computeStartEndpoint={compute_endpoint}, payload={payload}, response is {response}"
-            )
 
         logger.debug(
             f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
         )
 
-        if response.status_code not in (201, 200):
-            msg = (
-                f"Start Compute failed at the computeStartEndpoint "
-                f"{compute_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise DataProviderException(msg)
+        DataServiceProviderBase.check_response(
+            response, "computeStartEndpoint", compute_endpoint, payload, [200, 201]
+        )
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))
@@ -482,7 +369,7 @@ class DataServiceProvider:
     @enforce_types
     def compute_job_result(
         job_id: str, index: int, dataset_compute_service: Any, consumer: Wallet
-    ) -> Dict[str, Any]:
+    ) -> bytes:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
@@ -519,11 +406,9 @@ class DataServiceProvider:
         )
         response = DataServiceProvider._http_method("get", compute_job_result_file_url)
 
-        if not response:
-            raise DataProviderException("No response on job result endpoint.")
-
-        if response.status_code != 200:
-            raise DataProviderException(response.content)
+        DataServiceProviderBase.check_response(
+            response, "jobResultEndpoint", compute_job_result_endpoint, params
+        )
 
         return response.content
 
@@ -535,7 +420,7 @@ class DataServiceProvider:
         dataset_compute_service: Any,
         consumer: Wallet,
         log_type="output",
-    ) -> Dict[str, Any]:
+    ) -> List[Dict[str, Any]]:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
@@ -564,185 +449,6 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def _remove_slash(path: str) -> str:
-        if path.endswith("/"):
-            path = path[:-1]
-        if path.startswith("/"):
-            path = path[1:]
-        return path
-
-    @staticmethod
-    @enforce_types
-    def get_url(config: Config) -> str:
-        """
-        Return the DataProvider component url.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider._remove_slash(config.provider_url)
-
-    @staticmethod
-    @enforce_types
-    def get_service_endpoints(provider_uri: str) -> Dict[str, List[str]]:
-        """
-        Return the service endpoints from the provider URL.
-        """
-        provider_info = DataServiceProvider._http_method("get", url=provider_uri).json()
-
-        return provider_info["serviceEndpoints"]
-
-    @staticmethod
-    @enforce_types
-    def get_c2d_environments(provider_uri: str) -> Optional[str]:
-        """
-        Return the provider address
-        """
-        try:
-            _, envs_endpoint = DataServiceProvider.build_c2d_environments_endpoint(
-                provider_uri
-            )
-            environments = DataServiceProvider._http_method("get", envs_endpoint).json()
-
-            return environments
-        except requests.exceptions.RequestException:
-            pass
-
-        return []
-
-    @staticmethod
-    @enforce_types
-    def get_provider_address(provider_uri: str) -> Optional[str]:
-        """
-        Return the provider address
-        """
-        try:
-            provider_info = DataServiceProvider._http_method("get", provider_uri).json()
-
-            return provider_info["providerAddress"]
-        except requests.exceptions.RequestException:
-            pass
-
-        return None
-
-    @staticmethod
-    @enforce_types
-    def get_root_uri(service_endpoint: str) -> str:
-        provider_uri = service_endpoint
-
-        if "/api" in provider_uri:
-            i = provider_uri.find("/api")
-            provider_uri = provider_uri[:i]
-
-        parts = provider_uri.split("/")
-
-        if len(parts) < 2:
-            raise InvalidURL(f"InvalidURL {service_endpoint}.")
-
-        if parts[-2] == "services":
-            provider_uri = "/".join(parts[:-2])
-
-        result = DataServiceProvider._remove_slash(provider_uri)
-
-        if not result:
-            raise InvalidURL(f"InvalidURL {service_endpoint}.")
-
-        try:
-            root_result = "/".join(parts[0:3])
-            response = requests.get(root_result).json()
-        except (requests.exceptions.RequestException, JSONDecodeError):
-            raise InvalidURL(f"InvalidURL {service_endpoint}.")
-
-        if "providerAddress" not in response:
-            raise InvalidURL(
-                f"Invalid Provider URL {service_endpoint}, no providerAddress."
-            )
-
-        return result
-
-    @staticmethod
-    @enforce_types
-    def is_valid_provider(provider_uri: str) -> bool:
-        try:
-            DataServiceProvider.get_root_uri(provider_uri)
-        except InvalidURL:
-            return False
-
-        return True
-
-    @staticmethod
-    @enforce_types
-    def build_endpoint(service_name: str, provider_uri: str) -> Tuple[str, str]:
-        provider_uri = DataServiceProvider.get_root_uri(provider_uri)
-        service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
-
-        method, url = service_endpoints[service_name]
-        return method, urljoin(provider_uri, url)
-
-    @staticmethod
-    @enforce_types
-    def build_encrypt_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("encrypt", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_initialize_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("initialize", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_initialize_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("initializeCompute", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_download_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("download", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_compute_result_file_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("computeResult", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_fileinfo(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_c2d_environments_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("computeEnvironments", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def write_file(
-        response: Response,
-        destination_folder: Union[str, bytes, os.PathLike],
-        file_name: str,
-    ) -> None:
-        """
-        Write the response content in a file in the destination folder.
-        :param response: Response
-        :param destination_folder: Destination folder, string
-        :param file_name: File name, string
-        :return: None
-        """
-        if response.status_code == 200:
-            with open(os.path.join(destination_folder, file_name), "wb") as f:
-                for chunk in response.iter_content(chunk_size=4096):
-                    f.write(chunk)
-            logger.info(f"Saved downloaded file in {f.name}")
-        else:
-            logger.warning(f"consume failed: {response.reason}")
-
-    @staticmethod
-    @enforce_types
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
@@ -765,24 +471,15 @@ class DataServiceProvider:
         logger.debug(
             f"got provider execute response: {response.content} with status-code {response.status_code} "
         )
-        if response.status_code != 200:
-            raise Exception(response.content.decode("utf-8"))
+
+        DataServiceProviderBase.check_response(
+            response, "compute Endpoint", req.url, payload
+        )
 
         resp_content = json.loads(response.content.decode("utf-8"))
         if isinstance(resp_content, list):
             return resp_content[0]
         return resp_content
-
-    @staticmethod
-    @enforce_types
-    def _get_file_name(response: Response) -> Optional[str]:
-        try:
-            return re.match(
-                r"attachment;filename=(.+)", response.headers.get("content-disposition")
-            )[1]
-        except Exception as e:
-            logger.warning(f"It was not possible to get the file name. {e}")
-            return None
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
@@ -860,17 +557,6 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def _http_method(method: str, *args, **kwargs) -> Optional[Union[Mock, Response]]:
-        try:
-            return getattr(DataServiceProvider._http_client, method)(*args, **kwargs)
-        except Exception:
-            logger.error(
-                f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
-            )
-            raise
-
-    @staticmethod
-    @enforce_types
     def check_single_file_info(url_object: dict, provider_uri: str) -> bool:
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         response = requests.post(endpoint, json=url_object)
@@ -902,10 +588,3 @@ class DataServiceProvider:
             return ddo_info["valid"]
 
         return False
-
-
-@enforce_types
-def urljoin(*args) -> str:
-    trailing_slash = "/" if args[-1].endswith("/") else ""
-
-    return "/".join(map(lambda x: str(x).strip("/"), args)) + trailing_slash

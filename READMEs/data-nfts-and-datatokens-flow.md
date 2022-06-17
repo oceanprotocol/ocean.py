@@ -36,7 +36,7 @@ the `artifacts` directory and `address.json` file are successfully created and c
 ```console
 for i in $(seq 1 50); do
     sleep 5
-    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean/c2d/ready" ] && break
+    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
     done
 ```
 

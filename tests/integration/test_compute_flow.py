@@ -229,6 +229,7 @@ def run_compute_test(
     time_difference = (
         timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
     )
+    valid_until = int((datetime.utcnow() + time_difference).timestamp())
 
     if "just_fees" in scenarios:
         fees_response = ocean_instance.retrieve_provider_fees_for_compute(

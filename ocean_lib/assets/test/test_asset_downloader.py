@@ -16,7 +16,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import (
-    create_asset,
     create_basics,
     get_first_service_by_type,
     get_sample_ddo,
@@ -141,18 +140,6 @@ def test_ocean_assets_download_indexes(
             index=index,
         )
 
-    index = 4
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
-    with pytest.raises(AssertionError):
-        download_asset_files(
-            ddo,
-            ddo.services[0],
-            publisher_wallet,
-            str(tmpdir),
-            "test_order_tx_id",
-            index=index,
-        )
-
 
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
@@ -188,11 +175,11 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
 
-    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, web3, data_provider)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
@@ -238,3 +225,14 @@ def ocean_assets_download_destination_file_helper(
     )
 
     assert os.path.exists(written_path)
+
+    # index not found, even though tx_id exists
+    with pytest.raises(AssertionError):
+        download_asset_files(
+            ddo,
+            ddo.services[0],
+            publisher_wallet,
+            str(tmpdir),
+            tx_id,
+            index=4,
+        )
