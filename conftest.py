@@ -20,6 +20,7 @@ from ocean_lib.web3_internal.utils import get_ether_balance
 from tests.resources.helper_functions import (
     get_address_of_type,
     get_another_consumer_wallet,
+    get_arweave_file,
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_example_config,
@@ -259,3 +260,8 @@ def file2():
 @pytest.fixture
 def file3():
     return get_file3()
+
+
+@pytest.fixture
+def arweave_file():
+    return get_arweave_file()

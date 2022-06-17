@@ -29,6 +29,7 @@ def test_consume_flow(
     consumer_wallet: Wallet,
     data_nft: DataNFT,
     file1: FilesType,
+    arweave_file: FilesType,
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
@@ -42,13 +43,13 @@ def test_consume_flow(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    files = [file1]
+    files = [file1, arweave_file]
 
     # Publish a plain asset with one data token on chain
     asset = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=[file1],
+        files=files,
         data_nft_address=data_nft.address,
         datatoken_templates=[1],
         datatoken_names=["Datatoken 1"],
@@ -132,6 +133,7 @@ def test_consume_flow(
         order_tx_id=tx_id,
     )
 
-    assert len(
-        os.listdir(os.path.join(destination, os.listdir(destination)[0]))
-    ) == len(files), "The asset folder is empty."
+    downloaded_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
+    assert len(downloaded_files) == len(files), "The asset folder is empty."
+    assert downloaded_files[0] == "shs_dataset_test.txt"
+    # assert downloaded_files[1] == ""

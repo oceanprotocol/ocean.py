@@ -25,7 +25,12 @@ from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_arweave_file,
+    get_file1,
+    get_file2,
+)
 
 
 def get_resource_path(dir_name, file_name):
@@ -166,7 +171,7 @@ def create_basics(
     }
 
     if files is None:
-        files = [get_file1(), get_file2()]
+        files = [get_file1(), get_file2(), get_arweave_file()]
 
     return data_nft_factory, metadata, files
 

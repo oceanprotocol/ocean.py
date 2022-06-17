@@ -193,11 +193,11 @@ def test_delete_job_result(provider_wallet, config):
 
 
 @pytest.mark.integration
-def test_encrypt(web3, config, provider_wallet, file1, file2):
+def test_encrypt(web3, config, provider_wallet, file1, file2, arweave_file):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
     # Encrypt file objects
-    res = {"files": [file1.to_dict(), file2.to_dict()]}
+    res = {"files": [file1.to_dict(), file2.to_dict(), arweave_file.to_dict()]}
     result = DataEncryptor.encrypt(res, config.provider_url)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201

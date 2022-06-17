@@ -129,9 +129,9 @@ def concurrent_consume_flow(concurrent_flows: int, repetitions: int, tmpdir, fil
     ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
 )
 def test_concurrent_consume_flow(
-    concurrent_flows, repetitions, tmpdir, file1, file2, file3
+    concurrent_flows, repetitions, tmpdir, file1, file2, file3, arweave_file
 ):
-    files = [file1, file2, file3]
+    files = [file1, file2, file3, arweave_file]
     concurrent_consume_flow(concurrent_flows, repetitions, tmpdir, files)
 
 

@@ -642,3 +642,12 @@ def get_file3():
     }
 
     return FilesTypeFactory(file3_dict)
+
+
+def get_arweave_file():
+    arweave_file_dict = {
+        "type": "arweave",
+        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+    }
+
+    return FilesTypeFactory(arweave_file_dict)
