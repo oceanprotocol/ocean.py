@@ -134,6 +134,5 @@ def test_consume_flow(
     )
 
     downloaded_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
-    assert len(downloaded_files) == len(files), "The asset folder is empty."
-    assert downloaded_files[0] == "shs_dataset_test.txt"
-    # assert downloaded_files[1] == ""
+    assert len(downloaded_files) == len(files), "Wrong number of files downloaded."
+    assert "shs_dataset_test.txt" in downloaded_files
