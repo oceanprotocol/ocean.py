@@ -22,7 +22,12 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
+from ocean_lib.structures.file_objects import (
+    ArweaveFile,
+    FilesType,
+    FilesTypeFactory,
+    UrlFile,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
@@ -186,6 +191,7 @@ def get_registered_asset_with_compute_service(
     allow_raw_algorithms: bool = False,
     trusted_algorithms: List[Asset] = [],
     trusted_algorithm_publishers: List[str] = [],
+    file_type: str = "url",
 ):
     data_nft, datatoken = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
@@ -195,9 +201,17 @@ def get_registered_asset_with_compute_service(
     config = ocean_instance.config
     data_provider = DataServiceProvider
 
-    arff_file = UrlFile(
-        url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
-    )
+    if file_type == "url":
+        arff_file = UrlFile(
+            url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
+        )
+    elif file_type == "arweave":
+        arff_file = ArweaveFile(
+            transactionId="a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
+        )
+    else:
+        raise ValueError(f"Unsupported file_type {file_type}")
+
     _, metadata, files = create_basics(config, web3, data_provider, files=[arff_file])
 
     # Set the compute values for compute service

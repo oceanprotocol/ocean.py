@@ -55,6 +55,19 @@ def dataset_with_compute_service_generator(publisher_wallet, publisher_ocean_ins
 
 
 @pytest.fixture
+def dataset_with_compute_service_stored_in_arweave(
+    publisher_wallet, publisher_ocean_instance
+):
+    """Returns a dataset stored in Arweave with compute service."""
+    asset = get_registered_asset_with_compute_service(
+        publisher_ocean_instance, publisher_wallet, file_type="arweave"
+    )
+    # verify the asset is available in Aquarius
+    publisher_ocean_instance.assets.resolve(asset.did)
+    return asset
+
+
+@pytest.fixture
 def dataset_with_compute_service_allow_raw_algo(
     publisher_wallet, publisher_ocean_instance
 ):
@@ -393,6 +406,24 @@ def test_compute_raw_algo(
 
 @pytest.mark.integration
 def test_compute_registered_algo(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service,
+    algorithm,
+):
+    """Tests that a compute job with a registered algorithm starts properly."""
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+    )
+
+
+@pytest.mark.integration
+def test_compute_registered_algo_arweave_dataset(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
