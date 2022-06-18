@@ -243,12 +243,14 @@ def test_fileinfo(
     fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
     assert fileinfo_result.status_code == 200
     files_info = fileinfo_result.json()
-    assert len(files_info) == 2
+
+    assert len(files_info) == 3
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
         assert file["valid"] is True
-        matches = "text/plain" if file_index == 0 else "text/xml"
-        assert file["contentType"] == matches
+    assert files_info[0]["contentType"] == "text/plain"
+    assert files_info[1]["contentType"] == "text/xml"
+    assert files_info[2]["contentType"] == "application/json"
 
 
 @pytest.mark.integration
