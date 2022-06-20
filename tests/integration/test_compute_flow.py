@@ -427,7 +427,7 @@ def test_compute_registered_algo_arweave_dataset(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    dataset_with_compute_service,
+    dataset_with_compute_service_stored_in_arweave,
     algorithm,
 ):
     """Tests that a compute job with a registered algorithm starts properly."""
@@ -435,7 +435,9 @@ def test_compute_registered_algo_arweave_dataset(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_stored_in_arweave, None
+        ),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
     )
 
