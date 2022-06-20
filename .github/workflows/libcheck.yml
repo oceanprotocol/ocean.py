@@ -2,7 +2,7 @@
 ## Copyright 2022 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: Ocean.py slow tests
+name: Ocean.py library check 
 
 on:
   schedule:
