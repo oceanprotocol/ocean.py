@@ -2,7 +2,7 @@
 ## Copyright 2022 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: Ocean.py library check 
+name: Ocean.py library check
 
 on:
   schedule:
@@ -25,7 +25,6 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
-          ref: v4
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         run: |
@@ -39,10 +38,19 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           python -m pip install --upgrade pip
-          pip install ocean_lib
-      - name: Test with pytest
+          pip install ocean_lib mkcodes pytest matplotlib
+      - name: Generate and test readmes
+        working-directory: ${{ github.workspace }}
+        env:
+          TEST_PRIVATE_KEY1: "0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99"
+          TEST_PRIVATE_KEY2: "0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc"
+          ADDRESS_FILE: "~/.ocean/ocean-contracts/artifacts/address.json"
+          OCEAN_NETWORK_URL: "http://127.0.0.1:8545"
+          OCEAN_CONFIG_FILE: "config.ini"
+          FACTORY_DEPLOYER_PRIVATE_KEY: "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
         run: |
-          py.test -m slow
+          mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
+          py.test tests/test_readmes.py
       - name: Slack notify via webhook
         uses: up9cloud/action-notify@master
         if: cancelled() == false
