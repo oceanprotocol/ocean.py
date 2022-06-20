@@ -27,17 +27,7 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-# The `--with-c2d` option tells barge to include the Compute-to-Data backend
-./start_ocean.sh --with-c2d
-```
-
-When running barge with c2d enabled, use the following bash script to wait until
-the `artifacts` directory and `address.json` file are successfully created and c2d is fully deployed:
-```console
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
-    done
+./start_ocean.sh
 ```
 
 ## Install the library from v4 sources
