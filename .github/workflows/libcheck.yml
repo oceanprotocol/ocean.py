@@ -39,6 +39,14 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ocean_lib mkcodes pytest
+      - name: Generate and test readmes
+        working-directory: ${{ github.workspace }}
+        env:
+          TEST_PRIVATE_KEY1: "0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99"
+          TEST_PRIVATE_KEY2: "0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc"
+          ADDRESS_FILE: "~/.ocean/ocean-contracts/artifacts/address.json"
+          OCEAN_NETWORK_URL: "http://127.0.0.1:8545"
+        run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           py.test tests/test_readmes.py
       - name: Slack notify via webhook
