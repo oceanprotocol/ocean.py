@@ -29,6 +29,15 @@ docker system prune -a --volumes
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
+Wait for the `artifacts` directory and `address.json` file are successfully created
+by using the following snippet in your console:
+
+```console
+for i in $(seq 1 50); do
+    sleep 5
+    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
+    done
+```
 
 ## Install the library from v4 sources
 

@@ -28,11 +28,11 @@ Use the `--with-c2d` option when running barge in order to include the Compute-t
 ./start_ocean.sh --with-c2d
 ```
 When running barge with c2d enabled, use the following bash script to wait until
-the `artifacts` directory and `address.json` file are successfully created and c2d is fully deployed:
+c2d is fully deployed:
 ```console
 for i in $(seq 1 50); do
     sleep 5
-    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
+    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
     done
 ```
 To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
