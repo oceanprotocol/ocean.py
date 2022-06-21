@@ -48,7 +48,8 @@ class ContractBase(object):
         self.web3 = web3
         self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
-            self.contract.address == address and self.address == address
+            self.contract.address.lower() == address.lower()
+            and self.address.lower() == address.lower()
         )
         assert self.contract.caller is not None
 
@@ -192,7 +193,7 @@ class ContractBase(object):
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
         _transact = {
-            "from": from_wallet.address,
+            "from": ContractBase.to_checksum_address(from_wallet.address.lower()),
             "account_key": from_wallet.key,
             "chainId": self.web3.eth.chain_id,
             "gasPrice": self.get_gas_price(self.web3),
@@ -238,7 +239,12 @@ class ContractBase(object):
 
         _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
-            {"from": deployer_wallet.address, "gasPrice": cls.get_gas_price(web3)}
+            {
+                "from": ContractBase.to_checksum_address(
+                    deployer_wallet.address.lower()
+                ),
+                "gasPrice": cls.get_gas_price(web3),
+            }
         )
         if "chainId" not in built_tx:
             built_tx["chainId"] = web3.eth.chain_id
@@ -455,7 +461,7 @@ class ContractBase(object):
         _, event_filter_params = construct_event_filter_params(
             abi,
             event.web3.codec,
-            contract_address=address,
+            contract_address=ContractBase.to_checksum_address(address.lower()),
             argument_filters=_filters,
             fromBlock=fromBlock,
             toBlock=toBlock,

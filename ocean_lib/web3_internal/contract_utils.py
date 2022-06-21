@@ -33,7 +33,9 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
-    contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
+    contract = web3.eth.contract(
+        address=web3.toChecksumAddress(address.lower()), abi=abi, bytecode=bytecode
+    )
     return contract
 
 
@@ -52,5 +54,34 @@ def get_contracts_addresses(
     network_addresses = addresses.get(network, None)
     if network_addresses is None and network in network_alias:
         network_addresses = addresses.get(network_alias[network], None)
+
+    for key, value in network_addresses.items():
+        if key == "chainId":
+            continue
+        if isinstance(value, int):
+            continue
+        if isinstance(value, dict):
+            for k, v in value.items():
+                value.update({k: v.lower()})
+        else:
+            network_addresses.update({key: value.lower()})
+
+    return _checksum_contract_addresses(network_addresses=network_addresses)
+
+
+@enforce_types
+def _checksum_contract_addresses(
+    network_addresses: Dict[str, str]
+) -> Optional[Dict[str, str]]:
+    for key, value in network_addresses.items():
+        if key == "chainId":
+            continue
+        if isinstance(value, int):
+            continue
+        if isinstance(value, dict):
+            for k, v in value.items():
+                value.update({k: v.lower()})
+        else:
+            network_addresses.update({key: value.lower()})
 
     return network_addresses
