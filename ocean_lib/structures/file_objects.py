@@ -27,16 +27,16 @@ class FilesType:
         self.headers = headers
 
     @enforce_types
-    @staticmethod
-    def from_dict(dict: Dict[str, Any]) -> "FilesType":
+    @classmethod
+    def from_dict(cls, dictionary: Dict[str, Any]) -> "FilesType":
         if type not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
 
-        return FilesType(
-            dict["type"],
-            dict["value"],
-            dict.get("method"),
-            dict.get("headers"),
+        return cls(
+            dictionary["type"],
+            dictionary["value"],
+            dictionary.get("method"),
+            dictionary.get("headers"),
         )
 
     @enforce_types
