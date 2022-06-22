@@ -14,14 +14,14 @@ class FilesType:
     @enforce_types
     def __init__(
         self,
-        type: str,
+        file_type: str,
         value: str,
         method: Optional[str] = None,
         headers: Optional[List[Dict[str, str]]] = None,
     ):
-        if type not in FilesType.supported_types:
+        if file_type not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
-        self.type = type
+        self.type = file_type
         self.value = value
         self.method = method
         self.headers = headers
