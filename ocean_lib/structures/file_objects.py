@@ -5,7 +5,6 @@
 from typing import Any, Dict, List, Optional
 
 from enforce_typing import enforce_types
-from typing_extensions import Self
 
 
 class FilesType:
@@ -29,7 +28,7 @@ class FilesType:
 
     @enforce_types
     @staticmethod
-    def from_dict(dict: Dict[str, Any]) -> Self:
+    def from_dict(dict: Dict[str, Any]) -> "FilesType":
         if type not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
 
