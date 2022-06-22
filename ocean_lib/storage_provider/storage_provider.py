@@ -63,7 +63,7 @@ class StorageProvider:
         return response
 
     @enforce_types
-    def download(cid: str) -> Response:
+    def download(self, cid: str) -> Response:
         if self.storage_type == "web3.storage":
             url = f"https://{cid}.ipfs.dweb.link/"
             response = self.requests_session.get(
