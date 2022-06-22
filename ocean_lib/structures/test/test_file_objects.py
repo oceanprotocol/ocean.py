@@ -4,73 +4,83 @@
 #
 import pytest
 
-from ocean_lib.structures.file_objects import (
-    ArweaveFile,
-    FilesTypeFactory,
-    IpfsFile,
-    UrlFile,
-)
+from ocean_lib.structures.file_objects import FilesType
 
 
 @pytest.mark.unit
 def test_url_file():
-    url_file = UrlFile(url="https://url.com")
-    assert url_file.to_dict() == {"type": "url", "url": "https://url.com"}
+    url_file = FilesType(type="url", value="https://url.com")
+    assert url_file.to_dict() == {"type": "url", "value": "https://url.com"}
 
-    url_file = UrlFile(url="https://url.com", method="POST")
+    url_file = FilesType(type="url", value="https://url.com", method="POST")
     assert url_file.to_dict() == {
         "type": "url",
-        "url": "https://url.com",
+        "value": "https://url.com",
         "method": "POST",
+    }
+
+    url_file = FilesType(
+        type="url",
+        value="https://url.com",
+        headers=[{"Authorization": "Bearer 123"}, {"APIKEY": "124"}],
+    )
+    assert url_file.to_dict() == {
+        "type": "url",
+        "value": "https://url.com",
+        "headers": [{"Authorization": "Bearer 123"}, {"APIKEY": "124"}],
     }
 
 
 @pytest.mark.unit
 def test_ipfs_file():
-    ipfs_file = IpfsFile(hash="abc")
-    assert ipfs_file.to_dict() == {"type": "ipfs", "hash": "abc"}
+    ipfs_file = FilesType(type="ipfs", value="abc")
+    assert ipfs_file.to_dict() == {"type": "ipfs", "value": "abc"}
 
 
 @pytest.mark.unit
 def test_arweave_file():
-    arweave_file = ArweaveFile(
-        transactionId="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
+    arweave_file = FilesType(
+        type="arweave", value="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
     )
     assert arweave_file.to_dict() == {
         "type": "arweave",
-        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+        "value": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
     }
 
 
 @pytest.mark.unit
-def test_filetype_factory():
-    factory_file = FilesTypeFactory(
+def test_filestype_from_dict():
+    factory_file = FilesType.from_dict(
         {
             "type": "url",
-            "url": "https://url.com",
+            "value": "https://url.com",
             "method": "GET",
         }
     )
 
-    assert factory_file.url == "https://url.com"
+    assert factory_file.type == "url"
+    assert factory_file.value == "https://url.com"
+    assert factory_file.method == "GET"
 
-    factory_file = FilesTypeFactory(
+    factory_file = FilesType.from_dict(
         {
             "type": "ipfs",
-            "hash": "abc",
+            "value": "abc",
         }
     )
 
-    assert factory_file.hash == "abc"
+    assert factory_file.type == "ipfs"
+    assert factory_file.value == "abc"
 
-    factory_file = FilesTypeFactory(
+    factory_file = FilesType.from_dict(
         {
             "type": "arweave",
-            "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+            "value": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
         }
     )
 
-    assert factory_file.transactionId == "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
+    assert factory_file.type == "arweave"
+    assert factory_file.value == "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
 
-    with pytest.raises(Exception):
-        factory_file = FilesTypeFactory({"type": "somethingelse"})
+    with pytest.raises(ValueError):
+        factory_file = FilesType.from_dict({"type": "somethingelse"})

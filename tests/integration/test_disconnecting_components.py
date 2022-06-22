@@ -13,7 +13,7 @@ from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.file_objects import FilesTypeFactory
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 exception_flag = 0
@@ -68,7 +68,7 @@ def _create_ddo(ocean, publisher):
 
     file_url = "https://foo.txt"
     file_dict = {"type": "url", "url": file_url, "method": "GET"}
-    file = FilesTypeFactory(file_dict)
+    file = FilesType.from_dict(file_dict)
     files = [file]
 
     try:
