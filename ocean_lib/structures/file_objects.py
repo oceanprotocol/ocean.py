@@ -28,8 +28,8 @@ class FilesType:
         self.headers = headers
 
     @enforce_types
-    @classmethod
-    def from_dict(cls, dict: Dict[str, Any]) -> Self:
+    @staticmethod
+    def from_dict(dict: Dict[str, Any]) -> Self:
         if type not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
 
