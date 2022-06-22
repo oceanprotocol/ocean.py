@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 import eth_keys
 import pytest
+from web3.logs import DISCARD
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -162,6 +163,17 @@ def test_update_datatokens(
     assert len(_asset.datatokens) == 1
     assert _asset.datatokens[0].get("address") == old_datatokens[0].get("address")
     assert _asset.services[0].datatoken == old_datatokens[0].get("address")
+
+    nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
+    bn = publisher_ocean_instance.web3.eth.block_number
+    tx_id = nft_token.get_event_log(
+        event_name="MetadataUpdated", from_block=bn, to_block=bn, filters=None
+    )[0].transactionHash
+    receipt = publisher_ocean_instance.web3.eth.get_transaction_receipt(tx_id)
+    validation_event = nft_token.events.MetadataValidated().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
+    assert validation_event.args.validator.startswith("0x")
 
 
 @pytest.mark.integration
