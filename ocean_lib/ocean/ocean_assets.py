@@ -479,7 +479,13 @@ class OceanAssets:
             asset.add_service(service)
 
         # Validation by Aquarius
-        self.validate(asset)
+        _, proof = self.validate(asset)
+        proof = (
+            proof["publicKey"],
+            proof["v"],
+            proof["r"][0],
+            proof["s"][0],
+        )
 
         document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
@@ -492,7 +498,7 @@ class OceanAssets:
             flags=flags,
             data=document,
             data_hash=ddo_hash,
-            metadata_proofs=[],
+            metadata_proofs=[proof],
             from_wallet=publisher_wallet,
         )
 
