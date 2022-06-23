@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from copy import deepcopy
 from typing import Any, Dict, List, Optional
 
 from enforce_typing import enforce_types
@@ -26,17 +27,19 @@ class FilesType:
         self.method = method
         self.headers = headers
 
-    @enforce_types
     @classmethod
-    def from_dict(cls, dictionary: Dict[str, Any]):
-        if dictionary["type"] not in FilesType.supported_types:
+    @enforce_types
+    def from_dict(cls, dictionary: Dict[str, Any]) -> "FilesType":
+        ft = deepcopy(dictionary)
+
+        if ft["type"] not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
 
         return cls(
-            dictionary["type"],
-            dictionary["value"],
-            dictionary.get("method"),
-            dictionary.get("headers"),
+            ft["type"],
+            ft["value"],
+            ft.get("method"),
+            ft.get("headers"),
         )
 
     @enforce_types
