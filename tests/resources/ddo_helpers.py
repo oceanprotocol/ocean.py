@@ -198,12 +198,12 @@ def get_registered_asset_with_compute_service(
 
     if file_type == "url":
         arff_file = FilesType(
-            file_type="url",
+            type="url",
             value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
         )
     elif file_type == "arweave":
         arff_file = FilesType(
-            file_type="arweave",
+            type="arweave",
             value="a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ",  # branin.arff stored in Arweave
         )
     else:
