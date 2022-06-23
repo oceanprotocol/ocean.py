@@ -12,7 +12,6 @@ class FilesType:
 
     supported_types = ["url", "ipfs", "arweave"]
 
-    @enforce_types
     def __init__(
         self,
         file_type: str,
