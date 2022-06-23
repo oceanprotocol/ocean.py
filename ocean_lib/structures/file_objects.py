@@ -28,7 +28,7 @@ class FilesType:
 
     @enforce_types
     @classmethod
-    def from_dict(cls, dictionary: Dict[str, Any]) -> "FilesType":
+    def from_dict(cls, dictionary: Dict[str, Any]):
         if dictionary["type"] not in FilesType.supported_types:
             raise ValueError("Unrecognized file type")
 
