@@ -17,7 +17,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
-from ocean_lib.structures.file_objects import UrlFile
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -103,7 +103,7 @@ def c2d_flow_readme(
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    DATA_url_file = UrlFile(url=dataset_url)
+    DATA_url_file = FilesType(type="url", value=dataset_url)
     DATA_files = [DATA_url_file]
 
     # Set the compute values for compute service
@@ -176,7 +176,7 @@ def c2d_flow_readme(
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    ALGO_url_file = UrlFile(url=algorithm_url)
+    ALGO_url_file = FilesType(type="url", value=algorithm_url)
     ALGO_files = [ALGO_url_file]
 
     # Publish asset with compute service on-chain.

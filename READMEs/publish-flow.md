@@ -49,9 +49,10 @@ metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+from ocean_lib.structures.file_objects import FilesType
+url_file = FilesType(
+    type="url",
+    value="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
 # Publish asset with services on-chain.

@@ -84,9 +84,10 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-DATA_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
+from ocean_lib.structures.file_objects import FilesType
+DATA_url_file = FilesType(
+    type="url",
+    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
 DATA_files = [DATA_url_file]
@@ -162,9 +163,10 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
+from ocean_lib.structures.file_objects import FilesType
+ALGO_url_file = FilesType(
+    type="url",
+    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 )
 
 ALGO_files = [ALGO_url_file]
