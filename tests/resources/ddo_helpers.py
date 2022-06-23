@@ -116,7 +116,7 @@ def create_asset(ocean, publisher, metadata=None, files=None):
     if not files:
         file1_dict = {
             "type": "url",
-            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+            "value": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
             "method": "GET",
         }
         file1 = FilesType.from_dict(file1_dict)

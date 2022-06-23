@@ -67,7 +67,7 @@ def _create_ddo(ocean, publisher):
     }
 
     file_url = "https://foo.txt"
-    file_dict = {"type": "url", "url": file_url, "method": "GET"}
+    file_dict = {"type": "url", "value": file_url, "method": "GET"}
     file = FilesType.from_dict(file_dict)
     files = [file]
 
