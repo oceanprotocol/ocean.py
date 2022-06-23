@@ -455,11 +455,11 @@ def test_build_specific_endpoints(config):
 @pytest.mark.integration
 def test_check_single_file_info():
     assert DataSP.check_single_file_info(
-        {"value": "http://www.google.com", "type": "url"},
+        {"url": "http://www.google.com", "type": "url"},
         provider_uri="http://172.15.0.4:8030",
     )
     assert not DataSP.check_single_file_info(
-        {"value": "http://www.google.com"}, provider_uri="http://172.15.0.4:8030"
+        {"url": "http://www.google.com"}, provider_uri="http://172.15.0.4:8030"
     )
     assert not DataSP.check_single_file_info({}, provider_uri="http://172.15.0.4:8030")
 

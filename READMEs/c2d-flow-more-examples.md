@@ -31,10 +31,9 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import FilesType
-DATA_url_file = FilesType(
-    type="url",
-    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/peppers.tiff"
+from ocean_lib.structures.file_objects import UrlFile
+DATA_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/peppers.tiff"
 )
 ```
 
@@ -67,10 +66,9 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import FilesType
-ALGO_url_file = FilesType(
-    type="url",
-    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/grayscale.py"
+from ocean_lib.structures.file_objects import UrlFile
+ALGO_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/grayscale.py"
 )
 ```
 
@@ -119,10 +117,9 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import FilesType
-DATA_url_file = FilesType(
-    type="url",
-    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/dataset_61_iris.csv"
+from ocean_lib.structures.file_objects import UrlFile
+DATA_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/dataset_61_iris.csv"
 )
 ```
 
@@ -155,10 +152,9 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import FilesType
-ALGO_url_file = FilesType(
-    type="url",
-    value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/logistic_regression.py"
+from ocean_lib.structures.file_objects import UrlFile
+ALGO_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/logistic_regression.py"
 )
 ```
 

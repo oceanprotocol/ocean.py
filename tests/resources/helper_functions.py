@@ -26,7 +26,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
-from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -617,37 +617,37 @@ def swap_exact_amount_in_base_token(bpool, datatoken, base_token, wallet, amt: i
 def get_file1():
     file1_dict = {
         "type": "url",
-        "value": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
+        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
         "method": "GET",
     }
 
-    return FilesType.from_dict(file1_dict)
+    return FilesTypeFactory(file1_dict)
 
 
 def get_file2():
     file2_dict = {
         "type": "url",
-        "value": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
         "method": "GET",
     }
 
-    return FilesType.from_dict(file2_dict)
+    return FilesTypeFactory(file2_dict)
 
 
 def get_file3():
     file3_dict = {
         "type": "url",
-        "value": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz",
         "method": "GET",
     }
 
-    return FilesType.from_dict(file3_dict)
+    return FilesTypeFactory(file3_dict)
 
 
 def get_arweave_file():
     arweave_file_dict = {
         "type": "arweave",
-        "value": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
     }
 
-    return FilesType.from_dict(arweave_file_dict)
+    return FilesTypeFactory(arweave_file_dict)

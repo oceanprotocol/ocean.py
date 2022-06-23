@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from tests.resources.ddo_helpers import get_first_service_by_type
@@ -35,9 +35,8 @@ def asset_displayed_on_sale(ocean: Ocean):
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    url_file = FilesType(
-        type="url",
-        value="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
+    url_file = UrlFile(
+        url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     )
 
     # Encrypt file(s) using provider

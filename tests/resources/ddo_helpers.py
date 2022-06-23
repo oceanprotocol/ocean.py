@@ -22,7 +22,12 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.structures.file_objects import (
+    ArweaveFile,
+    FilesType,
+    FilesTypeFactory,
+    UrlFile,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
@@ -116,10 +121,10 @@ def create_asset(ocean, publisher, metadata=None, files=None):
     if not files:
         file1_dict = {
             "type": "url",
-            "value": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
             "method": "GET",
         }
-        file1 = FilesType.from_dict(file1_dict)
+        file1 = FilesTypeFactory(file1_dict)
         files = [file1]
 
     # Publish asset with services on-chain.
@@ -153,7 +158,7 @@ def create_basics(
 
     Optional arguments:
     :param asset_type: used to populate metadata.type, optionally set to "algorithm"
-    :param files: list of FilesType objects
+    :param files: list of file objects creates with FilesTypeFactory
     """
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
@@ -197,14 +202,12 @@ def get_registered_asset_with_compute_service(
     data_provider = DataServiceProvider
 
     if file_type == "url":
-        arff_file = FilesType(
-            type="url",
-            value="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
+        arff_file = UrlFile(
+            url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
         )
     elif file_type == "arweave":
-        arff_file = FilesType(
-            type="arweave",
-            value="a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ",  # branin.arff stored in Arweave
+        arff_file = ArweaveFile(
+            transactionId="a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
         )
     else:
         raise ValueError(f"Unsupported file_type {file_type}")
@@ -269,10 +272,10 @@ def get_registered_algorithm_with_access_service(
     }
     metadata.update(algorithm_values)
 
-    algorithm_file = FilesType.from_dict(
+    algorithm_file = FilesTypeFactory(
         {
             "type": "url",
-            "value": "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
+            "url": "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
             "method": "GET",
         }
     )

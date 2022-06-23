@@ -2,52 +2,66 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from copy import deepcopy
-from typing import Any, Dict, List, Optional
+from abc import abstractmethod
+from typing import Optional, Protocol
 
 from enforce_typing import enforce_types
 
 
-class FilesType:
+class FilesType(Protocol):
+    @enforce_types
+    @abstractmethod
+    def to_dict(self) -> dict:
+        raise NotImplementedError
 
-    supported_types = ["url", "ipfs", "arweave"]
 
-    def __init__(
-        self,
-        type: str,
-        value: str,
-        method: Optional[str] = None,
-        headers: Optional[List[Dict[str, str]]] = None,
-    ):
-        if type not in FilesType.supported_types:
-            raise ValueError("Unrecognized file type")
-        self.type = type
-        self.value = value
+class UrlFile(FilesType):
+    @enforce_types
+    def __init__(self, url: str, method: Optional[str] = None) -> None:
+        self.url = url
         self.method = method
-        self.headers = headers
-
-    @classmethod
-    @enforce_types
-    def from_dict(cls, dictionary: Dict[str, Any]) -> "FilesType":
-        ft = deepcopy(dictionary)
-
-        if ft["type"] not in FilesType.supported_types:
-            raise ValueError("Unrecognized file type")
-
-        return cls(
-            ft["type"],
-            ft["value"],
-            ft.get("method"),
-            ft.get("headers"),
-        )
+        self.type = "url"
 
     @enforce_types
-    def to_dict(self) -> Dict[str, Any]:
-        result = {"type": self.type, "value": self.value}
+    def to_dict(self) -> dict:
+        result = {"type": self.type, "url": self.url}
 
-        if self.method is not None:
+        if self.method:
             result["method"] = self.method
-        if self.headers is not None:
-            result["headers"] = self.headers
 
         return result
+
+
+class IpfsFile(FilesType):
+    @enforce_types
+    def __init__(self, hash: str) -> None:
+        self.hash = hash
+        self.type = "ipfs"
+
+    @enforce_types
+    def to_dict(self) -> dict:
+        return {"type": self.type, "hash": self.hash}
+
+
+class ArweaveFile(FilesType):
+    @enforce_types
+    def __init__(self, transactionId: str) -> None:
+        self.transactionId = transactionId
+        self.type = "arweave"
+
+    @enforce_types
+    def to_dict(self) -> dict:
+        return {"type": self.type, "transactionId": self.transactionId}
+
+
+@enforce_types
+def FilesTypeFactory(file_obj: dict) -> FilesType:
+    """Factory Method"""
+    if file_obj["type"] == "url":
+        return UrlFile(file_obj["url"], file_obj["method"])
+    elif file_obj["type"] == "ipfs":
+        return IpfsFile(file_obj["hash"])
+    elif file_obj["type"] == "arweave":
+        return ArweaveFile(file_obj["transactionId"])
+    else:
+        raise Exception("Unrecognized file type")
