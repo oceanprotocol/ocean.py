@@ -42,12 +42,15 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def fileinfo(
-        did: str, service: Any
+        did: str, service: Any, with_checksum: bool = False
     ) -> Response:  # Can not add Service typing due to enforce_type errors.
         _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(
             service.service_endpoint
         )
         payload = {"did": did, "serviceId": service.id}
+
+        if with_checksum:
+            payload["checksum"] = 1
 
         response = DataServiceProvider._http_method(
             "post", fileinfo_endpoint, json=payload
