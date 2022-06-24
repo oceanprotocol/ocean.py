@@ -194,7 +194,7 @@ class Asset(AddressCredential):
         container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
-            "filesChecksum": files_checksum,
+            "filesChecksum": "".join(files_checksum),
             "containerSectionChecksum": create_checksum(
                 json.dumps(container, separators=(",", ":"))
             ),
