@@ -18,6 +18,7 @@ from requests.models import PreparedRequest, Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.base import DataServiceProviderBase
+from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
@@ -38,33 +39,6 @@ class DataServiceProvider(DataServiceProviderBase):
 
     _http_client = get_requests_session()
     provider_info = None
-
-    @staticmethod
-    @enforce_types
-    def fileinfo(
-        did: str, service: Any, with_checksum: bool = False
-    ) -> Response:  # Can not add Service typing due to enforce_type errors.
-        _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(
-            service.service_endpoint
-        )
-        payload = {"did": did, "serviceId": service.id}
-
-        if with_checksum:
-            payload["checksum"] = 1
-
-        response = DataServiceProvider._http_method(
-            "post", fileinfo_endpoint, json=payload
-        )
-
-        DataServiceProvider.check_response(
-            response, "fileInfoEndpoint", fileinfo_endpoint, payload
-        )
-
-        logger.info(
-            f"Retrieved asset files successfully"
-            f" FileInfoEndpoint {fileinfo_endpoint} from did {did} with service id {service.id}"
-        )
-        return response
 
     @staticmethod
     @enforce_types
@@ -172,7 +146,7 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> None:
         service_endpoint = service.service_endpoint
-        fileinfo_response = DataServiceProvider.fileinfo(did, service)
+        fileinfo_response = FileInfoProvider.fileinfo(did, service)
 
         files = fileinfo_response.json()
         indexes = range(len(files))
