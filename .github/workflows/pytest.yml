@@ -25,6 +25,8 @@ jobs:
           repository: "oceanprotocol/barge"
           path: 'barge'
       - name: Run Barge
+        env:
+          PROVIDER_VERSION: docker-checksums
         working-directory: ${{ github.workspace }}/barge
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
