@@ -79,5 +79,6 @@ class StorageProvider:
 def get_storage_type(storage_url):
     domain = storage_url.split('/')[2]
     domain_to_type_dict = {'api.web3.storage':'web3.storage', 
-                            'api.estuary.tech':'estuary'}
+                           'api.estuary.tech':'estuary',
+                           'shuttle-5.estuary.tech': 'estuary'}
     return domain_to_type_dict[domain]
