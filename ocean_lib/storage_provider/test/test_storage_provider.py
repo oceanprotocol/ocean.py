@@ -43,7 +43,7 @@ def with_nice_storage_url():
 def with_evil_api_key():
     return EVIL_API_KEY
 
-# @pytest.mark.unit
+@pytest.mark.unit
 def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     store = SP(with_nice_storage_url)
     os.environ["STORAGE_TOKEN"] = with_evil_api_key
@@ -51,5 +51,11 @@ def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     with pytest.raises(
         StorageProviderException, match=f"StorageProviderException:"
     ):
-        SP.store("hello.txt")
-    
+        store.upload("hello.txt")
+
+@pytest.mark.unit
+def test_evil_url(with_evil_storage_url):
+    with pytest.raises(
+        IndexError, match=f"IndexError: list index out of range:"
+    ):
+        SP(with_evil_storage_url)
