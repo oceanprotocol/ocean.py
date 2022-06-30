@@ -10,7 +10,6 @@ from unittest.mock import patch
 
 import eth_keys
 import pytest
-from web3.logs import DISCARD
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -139,7 +138,7 @@ def test_update_datatokens(
     assert _asset.services[1].datatoken == datatoken.address
 
     # Delete datatoken
-    new_asset = new_metadata = copy.deepcopy(_asset)
+    new_asset = copy.deepcopy(_asset)
     new_metadata = copy.deepcopy(_asset.metadata)
     _description = "Test delete datatoken"
     new_metadata["description"] = _description
@@ -166,12 +165,13 @@ def test_update_datatokens(
 
     nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
     bn = publisher_ocean_instance.web3.eth.block_number
-    tx_id = nft_token.get_event_log(
+    updated_event = nft_token.get_event_log(
         event_name="MetadataUpdated", from_block=bn, to_block=bn, filters=None
-    )[0].transactionHash
-    receipt = publisher_ocean_instance.web3.eth.get_transaction_receipt(tx_id)
-    validation_event = nft_token.events.MetadataValidated().processReceipt(
-        receipt, errors=DISCARD
+    )[0]
+    assert updated_event.args.updatedBy == publisher_wallet.address
+
+    validation_event = nft_token.get_event_log(
+        event_name="MetadataValidated", from_block=bn, to_block=bn, filters=None
     )[0]
     assert validation_event.args.validator.startswith("0x")
 
