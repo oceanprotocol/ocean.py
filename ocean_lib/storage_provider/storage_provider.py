@@ -11,6 +11,7 @@ from enforce_typing import enforce_types
 from huggingface_hub import create_repo
 from pathlib import Path
 from requests.models import Response
+from requests.sessions import Session
 import requests
 
 from ocean_lib.config import Config
@@ -21,6 +22,17 @@ logger = logging.getLogger(__name__)
 
 class StorageProvider:
     """StorageProvider class."""
+    @staticmethod
+    @enforce_types
+    def getrequests_session() -> Session:
+        """Get the http client."""
+        return StorageProvider.requests_session
+
+    @staticmethod
+    @enforce_types
+    def setrequests_session(requests_session: Session) -> None:
+        """Set the http client to something other than the default `requests`."""
+        StorageProvider.requests_session = requests_session
 
     def __init__(self, config: Config) -> None:
         self.config = config
