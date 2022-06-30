@@ -2,11 +2,49 @@ import pytest
 import os
 
 from ocean_lib.storage_provider.storage_provider import StorageProvider as SP
+from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.exceptions import StorageProviderException
+
+from tests.resources.mocks.http_client_mock import (
+    TEST_SERVICE_ENDPOINTS,
+    HttpClientEmptyMock,
+    HttpClientEvilMock,
+    HttpClientNiceMock,
+)
 
 EVIL_API_KEY = 'evil_api_key'
 EVIL_STORAGE_URL = 'evil_storage_url'
 NICE_STORAGE_URL = 'https://shuttle-5.estuary.tech/content/add'
+
+
+@pytest.fixture
+def with_evil_client():
+    requests_session = HttpClientEvilMock()
+    SP.set_requests_session(requests_session)
+    yield
+    SP.set_requests_session(get_requests_session())
+
+
+@pytest.fixture
+def with_nice_client():
+    requests_session = HttpClientNiceMock()
+    SP.set_requests_session(requests_session)
+    yield
+    SP.set_requests_session(get_requests_session())
+
+
+@pytest.fixture
+def with_empty_client():
+    requests_session = HttpClientEmptyMock()
+    SP.set_requests_session(requests_session)
+    yield
+    SP.set_requests_session(get_requests_session())
+
+
+def test_set_requests_session(with_nice_client):
+    """Tests that a custom http client can be set on the DataServiceProvider."""
+    assert isinstance(SP.get_requests_session(), HttpClientNiceMock)
+
 
 @pytest.fixture
 def with_evil_storage_url():
