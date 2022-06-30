@@ -33,11 +33,11 @@ def test_ganache_example_config(monkeypatch):
 def test_polygon_example_config(monkeypatch):
     """Tests the config structure of Polygon network."""
 
-    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://rpc.polygon.oceanprotocol.com")
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://polygon-rpc.com")
     config = ExampleConfig.get_config()
 
     assert config.chain_id == 137
-    assert config.network_url == "https://rpc.polygon.oceanprotocol.com"
+    assert config.network_url == "https://polygon-rpc.com"
     assert config.metadata_cache_uri == METADATA_CACHE_URI
     assert config.provider_url == "https://v4.provider.polygon.oceanprotocol.com"
     assert config.block_confirmations.value == 15
