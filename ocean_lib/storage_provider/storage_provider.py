@@ -24,19 +24,19 @@ class StorageProvider:
     """StorageProvider class."""
     @staticmethod
     @enforce_types
-    def getrequests_session() -> Session:
+    def get_requests_session() -> Session:
         """Get the http client."""
         return StorageProvider.requests_session
 
     @staticmethod
     @enforce_types
-    def setrequests_session(requests_session: Session) -> None:
+    def set_requests_session(requests_session: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         StorageProvider.requests_session = requests_session
 
     def __init__(self, config: Config) -> None:
         self.config = config
-        self.storage_url = self.config.storage_url
+        self.storage_url = self.config['storage_url']
         self.storage_type = get_storage_type(self.storage_url)
         self.requests_session = get_requests_session()
         self.payload_key = {"estuary" : "data", "web3.storage" : "file"}
