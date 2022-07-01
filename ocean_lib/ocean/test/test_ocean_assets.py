@@ -174,6 +174,7 @@ def test_update_datatokens(
         event_name="MetadataValidated", from_block=bn, to_block=bn, filters=None
     )[0]
     assert validation_event.args.validator.startswith("0x")
+    assert updated_event.transactionHash == validation_event.transactionHash
 
 
 @pytest.mark.integration
