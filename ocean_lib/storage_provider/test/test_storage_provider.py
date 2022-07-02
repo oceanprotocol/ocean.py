@@ -1,3 +1,4 @@
+from xmlrpc.client import ResponseError
 import pytest
 import os
 
@@ -13,6 +14,7 @@ from tests.resources.mocks.http_client_mock import (
 )
 
 EVIL_API_KEY = 'evil_api_key'
+EVIL_CID = '32df345ds65432w934009df4qpx12gh83wd5'
 EVIL_STORAGE_URL = 'evil_storage_url'
 NICE_STORAGE_URL = 'https://shuttle-5.estuary.tech/content/add'
 
@@ -81,6 +83,10 @@ def with_nice_storage_url():
 def with_evil_api_key():
     return EVIL_API_KEY
 
+@pytest.fixture
+def with_evil_cid():
+    return EVIL_CID
+
 # @pytest.mark.unit
 def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     store = SP(with_nice_storage_url)
@@ -91,9 +97,32 @@ def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     ):
         store.upload("hello.txt")
 
+def test_evil_path(with_evil_api_key, with_nice_storage_url):
+    store = SP(with_nice_storage_url)
+    os.environ["STORAGE_TOKEN"] = with_evil_api_key
+
+    with pytest.raises(
+        IsADirectoryError, match=f"Is a directory: '.'"
+    ):
+        store.upload("")
+
 # @pytest.mark.unit
 def test_evil_url(with_evil_storage_url):
     with pytest.raises(
         IndexError, match=f"list index out of range"
     ):
         SP(with_evil_storage_url)
+
+
+def test_upload_fails():
+    return
+
+def test_download_fails(with_evil_api_key, with_nice_storage_url, with_evil_cid):
+    store = SP(with_nice_storage_url)
+    os.environ["STORAGE_TOKEN"] = with_evil_api_key
+
+    # with pytest.raises(
+    #     TypeError, match=f""
+    # ):
+    response = store.download(with_evil_cid)
+    assert response.status_code == 404
