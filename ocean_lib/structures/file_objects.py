@@ -58,16 +58,6 @@ class IpfsFile(FilesType):
         return {"type": self.type, "hash": self.hash}
 
 
-class PathFile(object):
-    @enforce_types
-    def __init__(self, path: str) -> None:
-        self.path = path
-        self.type = "path"
-
-    @enforce_types
-    def to_dict(self) -> dict:
-        return {"type": self.type, "path": self.path}    
-
 @enforce_types
 def FilesTypeFactory(file_obj: dict) -> FilesType:
     """Factory Method"""
