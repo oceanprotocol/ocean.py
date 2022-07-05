@@ -816,7 +816,7 @@ class OceanAssets:
         )
 
     @enforce_types
-    def encrypt_files(self, files: list):
+    def encrypt_files(self, files: Union[list, bytes]):
         data_provider = DataServiceProvider
 
         encrypt_response = data_provider.encrypt(files, self._config.provider_url)

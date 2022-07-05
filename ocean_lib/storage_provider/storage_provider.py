@@ -13,6 +13,7 @@ from pathlib import Path
 from requests.models import Response
 from requests.sessions import Session
 import requests
+from typing import Union
 
 from ocean_lib.config import Config
 from ocean_lib.exceptions import StorageProviderException
@@ -22,6 +23,14 @@ logger = logging.getLogger(__name__)
 
 class StorageProvider:
     """StorageProvider class."""
+
+    def __init__(self, config: Config) -> None:
+        self.config = config
+        self.storage_url = self.config.storage_url
+        self.storage_type = get_storage_type(self.storage_url)
+        self.requests_session = get_requests_session()
+        self.payload_key = {"estuary" : "data", "web3.storage" : "file"}
+
     @staticmethod
     @enforce_types
     def get_requests_session() -> Session:
@@ -34,19 +43,9 @@ class StorageProvider:
         """Set the http client to something other than the default `requests`."""
         StorageProvider.requests_session = requests_session
 
-    def __init__(self, config: Config) -> None:
-        self.config = config
-        self.storage_url = self.config['storage_url']
-        self.storage_type = get_storage_type(self.storage_url)
-        self.requests_session = get_requests_session()
-        self.payload_key = {"estuary" : "data", "web3.storage" : "file"}
 
     @enforce_types
-    def upload(self, object_path: str) -> Response:
-        
-        path = Path(object_path)
-        with open(path, "rb") as f:
-            object_to_upload = f.read()
+    def upload(self, object_to_upload: Union[str, bytes]) -> Response:
 
         response = self.requests_session.post(
             self.storage_url,
