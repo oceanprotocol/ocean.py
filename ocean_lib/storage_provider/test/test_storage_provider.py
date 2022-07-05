@@ -87,16 +87,13 @@ def with_evil_api_key():
 def with_evil_cid():
     return EVIL_CID
 
-def test_evil_client(with_evil_client):
-    with pytest.raises(Exception):
-        SP.download("")
+def test_evil_url(with_evil_storage_url):
+    with pytest.raises(
+        IndexError, match=f"list index out of range"
+    ):
+        SP(with_evil_storage_url)
 
-def test_empty_client(with_empty_client):
-    with pytest.raises(Exception):
-        SP.download("")
-
-# @pytest.mark.unit
-def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
+def test_upload_fails_evil_api_key(with_evil_api_key, with_nice_storage_url):
     store = SP(with_nice_storage_url)
     os.environ["STORAGE_TOKEN"] = with_evil_api_key
 
@@ -105,7 +102,7 @@ def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     ):
         store.upload("hello.txt")
 
-def test_evil_path(with_evil_api_key, with_nice_storage_url):
+def test_upload_fails_evil_path(with_evil_api_key, with_nice_storage_url):
     store = SP(with_nice_storage_url)
     os.environ["STORAGE_TOKEN"] = with_evil_api_key
 
@@ -114,16 +111,14 @@ def test_evil_path(with_evil_api_key, with_nice_storage_url):
     ):
         store.upload("")
 
-# @pytest.mark.unit
-def test_evil_url(with_evil_storage_url):
-    with pytest.raises(
-        IndexError, match=f"list index out of range"
-    ):
-        SP(with_evil_storage_url)
+def test_upload_fails_evil_client(with_evil_client):
+    with pytest.raises(Exception):
+        SP.upload("")
 
+def test_upload_fails_empty_client(with_empty_client):
+    with pytest.raises(Exception):
+        SP.upload("")
 
-def test_upload_fails():
-    return
 
 def test_download_fails(with_evil_api_key, with_nice_storage_url, with_evil_cid):
     store = SP(with_nice_storage_url)
@@ -134,3 +129,11 @@ def test_download_fails(with_evil_api_key, with_nice_storage_url, with_evil_cid)
     # ):
     response = store.download(with_evil_cid)
     assert response.status_code == 404
+
+def test_download_fails_evil_client(with_evil_client):
+    with pytest.raises(Exception):
+        SP.download("")
+
+def test_download_fails_empty_client(with_empty_client):
+    with pytest.raises(Exception):
+        SP.download("")
