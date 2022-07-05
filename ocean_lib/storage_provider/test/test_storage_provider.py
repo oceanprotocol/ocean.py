@@ -87,6 +87,14 @@ def with_evil_api_key():
 def with_evil_cid():
     return EVIL_CID
 
+def test_evil_client(with_evil_client):
+    with pytest.raises(Exception):
+        SP.download("")
+
+def test_empty_client(with_empty_client):
+    with pytest.raises(Exception):
+        SP.download("")
+
 # @pytest.mark.unit
 def test_evil_api_key(with_evil_api_key, with_nice_storage_url):
     store = SP(with_nice_storage_url)
