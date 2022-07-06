@@ -24,6 +24,13 @@ def test_url_file():
         "method": "POST",
     }
 
+    url_file = UrlFile(url="https://url.com", headers={"test": "test_header"})
+    assert url_file.to_dict() == {
+        "type": "url",
+        "url": "https://url.com",
+        "headers": {"test": "test_header"},
+    }
+
 
 @pytest.mark.unit
 def test_ipfs_file():
