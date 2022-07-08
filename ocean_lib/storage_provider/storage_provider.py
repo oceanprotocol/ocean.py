@@ -6,10 +6,12 @@
 """Storage module."""
 import logging
 import os
+from json import JSONDecodeError
 
 from enforce_typing import enforce_types
 from huggingface_hub import create_repo
 from pathlib import Path
+from requests.exceptions import InvalidURL
 from requests.models import Response
 from requests.sessions import Session
 import requests
@@ -28,7 +30,7 @@ class StorageProvider:
     def __init__(self, config: Config) -> None:
         self.config = config
         self.storage_url = self.config.storage_url
-        self.storage_type = get_storage_type(self.storage_url)
+        self.storage_type = self.get_storage_type(self.config.storage_url)
         self.requests_session = get_requests_session()
         self.payload_key = {"estuary": "data", "web3.storage": "file"}
 
@@ -85,12 +87,25 @@ class StorageProvider:
                 f.write(response.content)
         return response
 
-
-def get_storage_type(storage_url):
-    domain = storage_url.split("/")[2]
-    domain_to_type_dict = {
-        "api.web3.storage": "web3.storage",
-        "api.estuary.tech": "estuary",
-        "shuttle-5.estuary.tech": "estuary",
-    }
-    return domain_to_type_dict[domain]
+    @staticmethod
+    @enforce_types
+    def get_storage_type(storage_url: str) -> str:
+        parts = storage_url.split("/")
+        
+        if len(parts) < 2:
+            raise InvalidURL(f"InvalidURL {storage_url}.")
+        
+        try:
+            root_result = "/".join(parts[0:3])
+            response = requests.get(root_result).json()
+        except (requests.exceptions.RequestException, JSONDecodeError):
+            raise InvalidURL(f"InvalidURL {storage_url}.")
+        
+        domain = parts[2]
+    
+        domain_to_type_dict = {
+            "api.web3.storage": "web3.storage",
+            "api.estuary.tech": "estuary",
+            "shuttle-5.estuary.tech": "estuary",
+        }
+        return domain_to_type_dict[domain]
