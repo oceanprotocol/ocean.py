@@ -7,6 +7,7 @@ import threading
 import time
 from unittest.mock import patch
 
+import pytest
 import requests
 
 from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
@@ -19,20 +20,20 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 exception_flag = 0
 
 
-def test_with_wrong_provider(config, caplog):
+@pytest.mark.integration
+@pytest.mark.parametrize("provider_url", [DEFAULT_PROVIDER_URL, "http://foourl.com"])
+def test_with_wrong_provider(provider_url, caplog):
     """Tests encrypt with a good provider URL and then switch to a bad one."""
+    global exception_flag
+    try:
+        DataEncryptor.encrypt({}, provider_url)
+    except requests.exceptions.InvalidURL as err:
+        exception_flag = 1
+        assert err.args[0] == "InvalidURL http://foourl.com."
 
-    with patch("ocean_lib.config.Config.provider_url") as mock:
-        mock.return_value = DEFAULT_PROVIDER_URL
-        updating_thread = threading.Thread(
-            target=_update_with_wrong_component,
-            args=(mock,),
-        )
-        updating_thread.start()
-        _iterative_encrypt(mock)
-        updating_thread.join()
-
+    if provider_url == DEFAULT_PROVIDER_URL:
         assert "Asset urls encrypted successfully" in caplog.text
+    if provider_url == "http://foourl.com":
         assert exception_flag == 1
 
 
@@ -109,22 +110,6 @@ def _create_ddo(ocean, publisher):
 def _iterative_create_ddo(mock_ocean, publisher):
     time.sleep(10)
     _create_ddo(mock_ocean.return_value, publisher)
-
-
-def _iterative_encrypt(mock):
-    global exception_flag
-    for _ in range(5):
-        try:
-            DataEncryptor.encrypt({}, mock.return_value)
-        except requests.exceptions.InvalidURL as err:
-            exception_flag = 1
-            assert err.args[0] == "InvalidURL http://foourl.com."
-        time.sleep(1)
-
-
-def _update_with_wrong_component(mock):
-    time.sleep(2)
-    mock.return_value = "http://foourl.com"
 
 
 def _update_config_file(mock, mock_ocean, monkeypatch):
