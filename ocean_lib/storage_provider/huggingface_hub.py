@@ -30,13 +30,12 @@ class HuggingFaceHub:
 
     def upload(
         self,
-        object_path: str,
+        path_or_fileobj: str,
         object_name: str,
         object_type: str = 'model',
         use_auth_token=True,
         exist_ok=True,
     ) -> str:
-        path_name = Path(object_path).name
 
         repo_id = f'{self.user}/{object_name}'
         repo_url = f'https://huggingface.co/{self.user}/{object_name}'
@@ -46,8 +45,8 @@ class HuggingFaceHub:
                     exist_ok=exist_ok)
 
         repo_url = upload_file(
-                        path_or_fileobj=object_path, 
-                        path_in_repo=path_name, 
+                        path_or_fileobj=path_or_fileobj, 
+                        path_in_repo="encrypted_pytorch_model", 
                         repo_id=repo_id,
                         repo_type=object_type,
                         )
