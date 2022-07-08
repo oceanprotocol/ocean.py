@@ -41,10 +41,8 @@ def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch):
 
     with patch("ocean_lib.config.Config") as mock:
         mock.return_value = Config(os.getenv("OCEAN_CONFIG_FILE"))
-        print(mock.return_value)
         with patch("ocean_lib.ocean.ocean.Ocean") as mock_ocean:
             mock_ocean.return_value = Ocean(mock.return_value, DataServiceProvider)
-            print(mock_ocean.return_value)
 
             updating_thread = threading.Thread(
                 target=_update_config_file,
