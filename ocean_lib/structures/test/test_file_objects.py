@@ -35,11 +35,14 @@ def test_ipfs_file():
 
 @pytest.mark.unit
 def test_filecoin_file():
-    filecoin_file = FilecoinFile(hash="bafybeigsvqhocrg45mm4ffdqkq24yigwonjlndsjk3xujrawhxhfsglooe")
+    filecoin_file = FilecoinFile(
+        hash="bafybeigsvqhocrg45mm4ffdqkq24yigwonjlndsjk3xujrawhxhfsglooe"
+    )
     assert filecoin.to_dict() == {
         "type": "filecoin",
         "hash": "bafybeigsvqhocrg45mm4ffdqkq24yigwonjlndsjk3xujrawhxhfsglooe",
     }
+
 
 @pytest.mark.unit
 def test_filetype_factory():

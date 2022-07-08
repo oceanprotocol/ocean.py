@@ -37,6 +37,7 @@ class UrlFile(FilesType):
 
         return result
 
+
 class FilecoinFile(object):
     @enforce_types
     def __init__(self, hash: str) -> None:
@@ -46,6 +47,7 @@ class FilecoinFile(object):
     @enforce_types
     def to_dict(self) -> dict:
         return {"type": self.type, "hash": self.hash}
+
 
 class IpfsFile(FilesType):
     @enforce_types

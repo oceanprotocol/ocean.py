@@ -21,6 +21,7 @@ from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger(__name__)
 
+
 class StorageProvider:
     """StorageProvider class."""
 
@@ -29,7 +30,7 @@ class StorageProvider:
         self.storage_url = self.config.storage_url
         self.storage_type = get_storage_type(self.storage_url)
         self.requests_session = get_requests_session()
-        self.payload_key = {"estuary" : "data", "web3.storage" : "file"}
+        self.payload_key = {"estuary": "data", "web3.storage": "file"}
 
     @staticmethod
     @enforce_types
@@ -42,7 +43,6 @@ class StorageProvider:
     def set_requests_session(requests_session: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         StorageProvider.requests_session = requests_session
-
 
     @enforce_types
     def upload(self, object_to_upload: Union[str, bytes]) -> Response:
@@ -77,19 +77,20 @@ class StorageProvider:
     def download(self, cid: str) -> Response:
         if self.storage_type == "web3.storage":
             url = f"https://{cid}.ipfs.dweb.link/"
-            response = self.requests_session.get(
-                url, timeout=20
-            )
+            response = self.requests_session.get(url, timeout=20)
         elif self.storage_type == "estuary":
-            url = f'https://dweb.link/ipfs/{cid}'
+            url = f"https://dweb.link/ipfs/{cid}"
             response = requests.get(url, allow_redirects=True)  # to get content
-            with open(cid, 'wb') as f:
+            with open(cid, "wb") as f:
                 f.write(response.content)
         return response
 
+
 def get_storage_type(storage_url):
-    domain = storage_url.split('/')[2]
-    domain_to_type_dict = {'api.web3.storage':'web3.storage', 
-                           'api.estuary.tech':'estuary',
-                           'shuttle-5.estuary.tech': 'estuary'}
+    domain = storage_url.split("/")[2]
+    domain_to_type_dict = {
+        "api.web3.storage": "web3.storage",
+        "api.estuary.tech": "estuary",
+        "shuttle-5.estuary.tech": "estuary",
+    }
     return domain_to_type_dict[domain]
