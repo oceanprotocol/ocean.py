@@ -29,8 +29,8 @@ docker system prune -a --volumes
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
-Wait for the `artifacts` directory and `address.json` file are successfully created
-by using the following snippet in your console:
+
+Wait until the `artifacts` directory and `address.json` file are created. In the console:
 
 ```console
 for i in $(seq 1 50); do
@@ -39,7 +39,7 @@ for i in $(seq 1 50); do
     done
 ```
 
-## Install the library from v4 sources
+## Install the library
 
 In a new console:
 
@@ -132,7 +132,7 @@ print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 # data NFT
 print(f"data NFT token name: {data_nft.token_name()}")
-print(f"data NFT token symbol: {data_nft.symbol()}")
+print(f"data NFT symbol: {data_nft.symbol()}")
 
 # datatoken
 print(f"datatoken name: {datatoken.token_name()}")
