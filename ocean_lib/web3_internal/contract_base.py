@@ -99,7 +99,7 @@ class ContractBase(object):
         :param address: Address, hex str
         :return: address, hex str
         """
-        return Web3.toChecksumAddress(address)
+        return Web3.toChecksumAddress(address.lower())
 
     @enforce_types
     def get_event_signature(self, event_name: str) -> str:
@@ -193,7 +193,7 @@ class ContractBase(object):
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
         _transact = {
-            "from": ContractBase.to_checksum_address(from_wallet.address.lower()),
+            "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
             "chainId": self.web3.eth.chain_id,
             "gasPrice": self.get_gas_price(self.web3),
@@ -240,9 +240,7 @@ class ContractBase(object):
         _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
             {
-                "from": ContractBase.to_checksum_address(
-                    deployer_wallet.address.lower()
-                ),
+                "from": ContractBase.to_checksum_address(deployer_wallet.address),
                 "gasPrice": cls.get_gas_price(web3),
             }
         )
@@ -461,7 +459,7 @@ class ContractBase(object):
         _, event_filter_params = construct_event_filter_params(
             abi,
             event.web3.codec,
-            contract_address=ContractBase.to_checksum_address(address.lower()),
+            contract_address=ContractBase.to_checksum_address(address),
             argument_filters=_filters,
             fromBlock=fromBlock,
             toBlock=toBlock,

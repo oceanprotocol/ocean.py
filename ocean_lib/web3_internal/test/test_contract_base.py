@@ -59,7 +59,10 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert isinstance(factory.contract.caller, ContractCaller)
     assert factory.contract is not None
     assert factory.contract.address == nft_factory_address
-    assert ContractBase.to_checksum_address(nft_factory_address) == nft_factory_address
+    assert (
+        ContractBase.to_checksum_address(nft_factory_address)
+        == nft_factory_address.lower()
+    )
 
     # test methods
     assert "configured_address" in dir(factory)

@@ -62,9 +62,9 @@ def get_contracts_addresses(
             continue
         if isinstance(value, dict):
             for k, v in value.items():
-                value.update({k: v.lower()})
+                value.update({k: Web3.toChecksumAddress(v.lower())})
         else:
-            network_addresses.update({key: value.lower()})
+            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
 
     return _checksum_contract_addresses(network_addresses=network_addresses)
 
@@ -80,8 +80,10 @@ def _checksum_contract_addresses(
             continue
         if isinstance(value, dict):
             for k, v in value.items():
-                value.update({k: v.lower()})
+                value.update({k: Web3.toChecksumAddress(v.lower())})
         else:
-            network_addresses.update({key: value.lower()})
+            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
+    # import pdb;
+    # pdb.set_trace()
 
     return network_addresses

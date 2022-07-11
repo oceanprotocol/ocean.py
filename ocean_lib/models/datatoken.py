@@ -229,11 +229,11 @@ class Datatoken(ContractBase):
         return self.send_transaction(
             "startOrder",
             (
-                consumer,
+                ContractBase.to_checksum_address(consumer),
                 service_index,
                 (
-                    provider_fee_address,
-                    provider_fee_token,
+                    ContractBase.to_checksum_address(provider_fee_address),
+                    ContractBase.to_checksum_address(provider_fee_token),
                     int(provider_fee_amount),
                     v,
                     r,
@@ -242,8 +242,8 @@ class Datatoken(ContractBase):
                     provider_data,
                 ),
                 (
-                    consume_market_order_fee_address,
-                    consume_market_order_fee_token,
+                    ContractBase.to_checksum_address(consume_market_order_fee_address),
+                    ContractBase.to_checksum_address(consume_market_order_fee_token),
                     consume_market_order_fee_amount,
                 ),
             ),
