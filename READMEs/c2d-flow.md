@@ -23,7 +23,18 @@ Let's go through each step.
 ## 1. Setup
 
 ### First steps
-
+Use the `--with-c2d` option when running barge in order to include the Compute-to-Data backend
+```console
+./start_ocean.sh --with-c2d
+```
+When running barge with c2d enabled, use the following bash script to wait until
+c2d is fully deployed:
+```console
+for i in $(seq 1 50); do
+    sleep 5
+    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
+    done
+```
 To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
