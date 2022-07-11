@@ -92,12 +92,11 @@ class StorageProvider:
     def get_storage_type(storage_url: str) -> str:
         parts = storage_url.split("/")
         
-        if len(parts) < 2:
+        if len(parts) < 3:
             raise InvalidURL(f"InvalidURL {storage_url}.")
         
         try:
-            root_result = "/".join(parts[0:3])
-            response = requests.get(root_result).json()
+            response = requests.get(storage_url).json()
         except (requests.exceptions.RequestException, JSONDecodeError):
             raise InvalidURL(f"InvalidURL {storage_url}.")
         
@@ -109,3 +108,13 @@ class StorageProvider:
             "shuttle-5.estuary.tech": "estuary",
         }
         return domain_to_type_dict[domain]
+
+    @staticmethod
+    @enforce_types
+    def is_valid_storage_provider(storage_url: str) -> bool:
+        try:
+            self.get_storage_type(storage_url)
+        except InvalidURL:
+            return False
+
+        return True
