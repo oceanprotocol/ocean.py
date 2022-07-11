@@ -16,6 +16,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
+from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
@@ -237,12 +238,15 @@ def test_fileinfo(
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
-    fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
+    fileinfo_result = FileInfoProvider.fileinfo(
+        ddo.did, access_service, with_checksum=True
+    )
     assert fileinfo_result.status_code == 200
     files_info = fileinfo_result.json()
     assert len(files_info) == 2
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
+        assert file["checksum"]
         assert file["valid"] is True
         matches = "text/plain" if file_index == 0 else "text/xml"
         assert file["contentType"] == matches
@@ -485,13 +489,13 @@ def test_fileinfo_failure(config):
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.fileinfo("0xabc", service)
+        FileInfoProvider.fileinfo("0xabc", service)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.fileinfo("0xabc", service)
+        FileInfoProvider.fileinfo("0xabc", service)
 
     DataSP.set_http_client(get_requests_session())
 
