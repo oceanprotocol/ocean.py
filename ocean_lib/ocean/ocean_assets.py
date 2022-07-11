@@ -815,10 +815,3 @@ class OceanAssets:
             from_wallet=wallet,
         )
 
-    @enforce_types
-    def encrypt_files(self, files: Union[list, bytes]):
-        data_provider = DataServiceProvider
-
-        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
-
-        return encrypt_response.content.decode("utf-8")
