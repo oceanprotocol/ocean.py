@@ -335,7 +335,7 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata_token_uri(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address="0x123",
+        metadata_decryptor_address=publisher_addr,
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
