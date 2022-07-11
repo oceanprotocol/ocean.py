@@ -23,10 +23,7 @@ from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
-from tests.resources.helper_functions import (
-    get_provider_fees,
-    get_publisher_ocean_instance,
-)
+from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     TEST_SERVICE_ENDPOINTS,
     HttpClientEmptyMock,
@@ -279,12 +276,9 @@ def test_initialize(
     assert initialize_result
     assert initialize_result.status_code == 200
     response_json = initialize_result.json()
-    assert response_json["providerFee"] == get_provider_fees(
-        web3,
-        provider_wallet,
-        get_ocean_token_address(config.address_file),
-        0,
-        0,
+    assert response_json["providerFee"]["providerFeeAmount"] == "0"
+    assert response_json["providerFee"]["providerFeeToken"] == get_ocean_token_address(
+        config.address_file
     )
 
 
