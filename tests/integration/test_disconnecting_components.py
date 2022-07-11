@@ -7,8 +7,10 @@ import threading
 import time
 from unittest.mock import patch
 
+import pytest
 import requests
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -38,28 +40,20 @@ def test_with_wrong_provider(config, caplog):
 
 def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch):
     """Tests DDO creation with a good config.ini and then switch to a bad one."""
+    monkeypatch.setenv("METADATA_CACHE_URI", "http:://not-valid-aqua.com")
+    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
 
-    with patch("ocean_lib.config.Config") as mock:
-        mock.return_value = Config(os.getenv("OCEAN_CONFIG_FILE"))
-        with patch("ocean_lib.ocean.ocean.Ocean") as mock_ocean:
-            mock_ocean.return_value = Ocean(mock.return_value, DataServiceProvider)
+    with pytest.raises(Exception, match="Invalid or unresponsive aquarius url"):
+        ocean = Ocean(config, DataServiceProvider)
 
-            updating_thread = threading.Thread(
-                target=_update_config_file,
-                args=(
-                    mock,
-                    mock_ocean,
-                    monkeypatch,
-                ),
-            )
+    monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
+    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
+    ocean = Ocean(config, DataServiceProvider)
 
-            updating_thread.start()
-            _iterative_create_ddo(mock_ocean, publisher_wallet)
-            updating_thread.join()
-            monkeypatch.delenv("OCEAN_CONFIG_FILE")
-
-            assert "Successfully created NFT" in caplog.text
-            assert exception_flag == 2
+    # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
+    ocean.assets._aquarius.base_url = "http://not-valid-aqua.com"
+    with pytest.raises(Exception):
+        ocean.assets._aquarius.validate_asset(Asset())
 
 
 def _create_ddo(ocean, publisher):
@@ -125,12 +119,3 @@ def _iterative_encrypt(mock):
 def _update_with_wrong_component(mock):
     time.sleep(2)
     mock.return_value = "http://foourl.com"
-
-
-def _update_config_file(mock, mock_ocean, monkeypatch):
-    print(os.getenv("OCEAN_CONFIG_FILE"))
-    monkeypatch.setenv("OCEAN_CONFIG_FILE", "bad-aqua-config.ini")
-    print(os.getenv("OCEAN_CONFIG_FILE"))
-    mock.return_value = Config(os.getenv("OCEAN_CONFIG_FILE"))
-    print(mock.return_value.metadata_cache_uri)
-    mock_ocean.return_value = Ocean(mock.return_value, DataServiceProvider)

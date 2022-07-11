@@ -35,13 +35,20 @@ class Aquarius:
         if "/api/aquarius/assets" in aquarius_url:
             aquarius_url = aquarius_url[: aquarius_url.find("/api/aquarius/assets")]
 
+        self.requests_session = get_requests_session()
+        try:
+            response = self.requests_session.get(f"{aquarius_url}")
+        except Exception:
+            response = None
+
+        if not response or response.status_code != 200:
+            raise Exception(f"Invalid or unresponsive aquarius url {aquarius_url}")
+
         self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
         logging.debug(f"Metadata Store connected at {aquarius_url}")
         logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
         logging.debug(f"Metadata assets at {self.base_url}")
-
-        self.requests_session = get_requests_session()
 
     @classmethod
     def get_instance(cls, metadata_cache_uri: str) -> "Aquarius":
