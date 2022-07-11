@@ -7,6 +7,7 @@ import logging
 import logging.config
 import os
 import secrets
+from datetime import datetime
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
@@ -349,6 +350,7 @@ def get_provider_fees(
     provider_fee_amount: int,
     valid_until: int,
     compute_env: str = None,
+    timestamp: int = None,
 ) -> Dict[str, Any]:
     """Copied and adapted from
     https://github.com/oceanprotocol/provider/blob/b9eb303c3470817d11b3bba01a49f220953ed963/ocean_provider/utils/provider_fees.py#L22-L74
@@ -357,7 +359,10 @@ def get_provider_fees(
     """
     provider_fee_address = provider_wallet.address
 
-    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
+    provider_data = json.dumps(
+        {"environment": compute_env, "timestamp": datetime.utcnow().timestamp()},
+        separators=(",", ":"),
+    )
     message_hash = web3.solidityKeccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [

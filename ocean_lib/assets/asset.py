@@ -10,6 +10,7 @@ from typing import Optional
 from enforce_typing import enforce_types
 
 from ocean_lib.assets.credentials import AddressCredential
+from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 
@@ -186,11 +187,14 @@ class Asset(AddressCredential):
     @enforce_types
     def generate_trusted_algorithms(self) -> dict:
         """Returns a trustedAlgorithm dictionary for service at index 0."""
-        files = self.get_service_by_index(0).files
+        resp = FileInfoProvider.fileinfo(
+            self.did, self.get_service_by_index(0), with_checksum=True
+        )
+        files_checksum = [resp_item["checksum"] for resp_item in resp.json()]
         container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
-            "filesChecksum": create_checksum(files),
+            "filesChecksum": "".join(files_checksum),
             "containerSectionChecksum": create_checksum(
                 json.dumps(container, separators=(",", ":"))
             ),
