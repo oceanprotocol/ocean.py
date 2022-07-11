@@ -72,7 +72,7 @@ def _create_ddo(ocean, publisher):
     file_dict = {"type": "url", "url": file_url, "method": "GET"}
     file = FilesTypeFactory(file_dict)
     files = [file]
-
+    time.sleep(5)
     try:
         ocean.assets.create(
             metadata,
@@ -84,21 +84,25 @@ def _create_ddo(ocean, publisher):
             datatoken_minters=[publisher.address],
             datatoken_fee_managers=[publisher.address],
             datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-            datatoken_publish_market_order_fee_tokens=ocean.OCEAN_address,
+            datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
             datatoken_publish_market_order_fee_amounts=[0],
             datatoken_bytess=[[b""]],
         )
     except requests.exceptions.InvalidURL as err:
         exception_flag = 1
         assert err.args[0] == "InvalidURL http://foourl.com."
-    except requests.exceptions.SSLError:
+    except requests.exceptions.ConnectionError as e:
         exception_flag = 2
+        assert (
+            e.args[0]
+            .args[0]
+            .startswith("HTTPConnectionPool(host='fooaqua.com', port=80)")
+        )
 
 
-def _iterative_create_ddo(ocean, publisher):
-    for _ in range(5):
-        _create_ddo(ocean, publisher)
-        time.sleep(1)
+def _iterative_create_ddo(mock_ocean, publisher):
+    time.sleep(10)
+    _create_ddo(mock_ocean.return_value, publisher)
 
 
 def _iterative_encrypt(mock):

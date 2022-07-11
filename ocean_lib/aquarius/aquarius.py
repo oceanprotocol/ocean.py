@@ -132,7 +132,7 @@ class Aquarius:
         :return: bool
         """
         asset_dict = asset.as_dictionary()
-        data = json.dumps(asset_dict).encode("utf-8")
+        data = json.dumps(asset_dict, separators=(",", ":")).encode("utf-8")
 
         response = self.requests_session.post(
             f"{self.base_url.replace('/v1/', '/')}/ddo/validate",
