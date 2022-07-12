@@ -34,7 +34,7 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
     contract = web3.eth.contract(
-        address=web3.toChecksumAddress(address), abi=abi, bytecode=bytecode
+        address=address, abi=abi, bytecode=bytecode
     )
     return contract
 
