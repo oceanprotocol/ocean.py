@@ -138,7 +138,7 @@ def test_update_datatokens(
     assert _asset.services[1].datatoken == datatoken.address
 
     # Delete datatoken
-    new_asset = new_metadata = copy.deepcopy(_asset)
+    new_asset = copy.deepcopy(_asset)
     new_metadata = copy.deepcopy(_asset.metadata)
     _description = "Test delete datatoken"
     new_metadata["description"] = _description
@@ -162,6 +162,19 @@ def test_update_datatokens(
     assert len(_asset.datatokens) == 1
     assert _asset.datatokens[0].get("address") == old_datatokens[0].get("address")
     assert _asset.services[0].datatoken == old_datatokens[0].get("address")
+
+    nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
+    bn = publisher_ocean_instance.web3.eth.block_number
+    updated_event = nft_token.get_event_log(
+        event_name="MetadataUpdated", from_block=bn, to_block=bn, filters=None
+    )[0]
+    assert updated_event.args.updatedBy == publisher_wallet.address
+
+    validation_event = nft_token.get_event_log(
+        event_name="MetadataValidated", from_block=bn, to_block=bn, filters=None
+    )[0]
+    assert validation_event.args.validator.startswith("0x")
+    assert updated_event.transactionHash == validation_event.transactionHash
 
 
 @pytest.mark.integration

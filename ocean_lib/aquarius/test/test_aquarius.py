@@ -13,9 +13,9 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 @pytest.mark.unit
 def test_init():
     """Tests initialisation of Aquarius objects."""
-    aqua = Aquarius("http://something/api/aquarius/assets")
+    aqua = Aquarius("http://172.15.0.5:5000/api/aquarius/assets")
     assert (
-        aqua.base_url == "http://something/api/aquarius/assets"
+        aqua.base_url == "http://172.15.0.5:5000/api/aquarius/assets"
     ), "Different URL from the specified one."
 
 

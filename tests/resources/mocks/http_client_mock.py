@@ -23,6 +23,8 @@ TEST_SERVICE_ENDPOINTS = {
     "initializeCompute": ["GET", "/api/services/initializeCompute"],
     "nonce": ["GET", "/api/services/nonce"],
     "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
+    "create_auth_token": ["GET", "/api/services/createAuthToken"],
+    "delete_auth_token": ["DELETE", "/api/services/deleteAuthToken"],
 }
 
 

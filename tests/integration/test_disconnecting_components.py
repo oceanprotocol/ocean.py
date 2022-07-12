@@ -7,8 +7,10 @@ import threading
 import time
 from unittest.mock import patch
 
+import pytest
 import requests
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -38,20 +40,20 @@ def test_with_wrong_provider(config, caplog):
 
 def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch):
     """Tests DDO creation with a good config.ini and then switch to a bad one."""
+    monkeypatch.setenv("METADATA_CACHE_URI", "http:://not-valid-aqua.com")
+    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
 
-    updating_thread = threading.Thread(
-        target=_update_config_file,
-        args=(monkeypatch,),
-    )
+    with pytest.raises(Exception, match="Invalid or unresponsive aquarius url"):
+        ocean = Ocean(config, DataServiceProvider)
+
+    monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
     config = Config(os.getenv("OCEAN_CONFIG_FILE"))
     ocean = Ocean(config, DataServiceProvider)
-    updating_thread.start()
-    _iterative_create_ddo(ocean, publisher_wallet)
-    updating_thread.join()
-    monkeypatch.delenv("OCEAN_CONFIG_FILE")
 
-    assert "Successfully created NFT" in caplog.text
-    assert exception_flag == 2
+    # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
+    ocean.assets._aquarius.base_url = "http://not-valid-aqua.com"
+    with pytest.raises(Exception):
+        ocean.assets._aquarius.validate_asset(Asset())
 
 
 def _create_ddo(ocean, publisher):
@@ -70,7 +72,7 @@ def _create_ddo(ocean, publisher):
     file_dict = {"type": "url", "url": file_url, "method": "GET"}
     file = FilesTypeFactory(file_dict)
     files = [file]
-
+    time.sleep(5)
     try:
         ocean.assets.create(
             metadata,
@@ -82,21 +84,25 @@ def _create_ddo(ocean, publisher):
             datatoken_minters=[publisher.address],
             datatoken_fee_managers=[publisher.address],
             datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-            datatoken_publish_market_order_fee_tokens=ocean.OCEAN_address,
+            datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
             datatoken_publish_market_order_fee_amounts=[0],
             datatoken_bytess=[[b""]],
         )
     except requests.exceptions.InvalidURL as err:
         exception_flag = 1
         assert err.args[0] == "InvalidURL http://foourl.com."
-    except requests.exceptions.SSLError:
+    except requests.exceptions.ConnectionError as e:
         exception_flag = 2
+        assert (
+            e.args[0]
+            .args[0]
+            .startswith("HTTPConnectionPool(host='fooaqua.com', port=80)")
+        )
 
 
-def _iterative_create_ddo(ocean, publisher):
-    for _ in range(5):
-        _create_ddo(ocean, publisher)
-        time.sleep(1)
+def _iterative_create_ddo(mock_ocean, publisher):
+    time.sleep(10)
+    _create_ddo(mock_ocean.return_value, publisher)
 
 
 def _iterative_encrypt(mock):
@@ -113,8 +119,3 @@ def _iterative_encrypt(mock):
 def _update_with_wrong_component(mock):
     time.sleep(2)
     mock.return_value = "http://foourl.com"
-
-
-def _update_config_file(monkeypatch):
-    time.sleep(2)
-    monkeypatch.setenv("OCEAN_CONFIG_FILE", "bad-aqua-config.ini")
