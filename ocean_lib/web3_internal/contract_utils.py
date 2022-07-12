@@ -34,7 +34,7 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
     contract = web3.eth.contract(
-        address=web3.toChecksumAddress(address.lower()), abi=abi, bytecode=bytecode
+        address=web3.toChecksumAddress(address), abi=abi, bytecode=bytecode
     )
     return contract
 
@@ -55,17 +55,6 @@ def get_contracts_addresses(
     if network_addresses is None and network in network_alias:
         network_addresses = addresses.get(network_alias[network], None)
 
-    for key, value in network_addresses.items():
-        if key == "chainId":
-            continue
-        if isinstance(value, int):
-            continue
-        if isinstance(value, dict):
-            for k, v in value.items():
-                value.update({k: Web3.toChecksumAddress(v.lower())})
-        else:
-            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
-
     return _checksum_contract_addresses(network_addresses=network_addresses)
 
 
@@ -83,7 +72,5 @@ def _checksum_contract_addresses(
                 value.update({k: Web3.toChecksumAddress(v.lower())})
         else:
             network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
-    # import pdb;
-    # pdb.set_trace()
 
     return network_addresses
