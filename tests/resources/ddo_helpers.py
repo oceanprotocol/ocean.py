@@ -247,7 +247,7 @@ def get_registered_algorithm_with_access_service(
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
                 "tag": "python-branin",
-                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+                "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
             },
         }
     }
@@ -283,7 +283,7 @@ def get_raw_algorithm() -> str:
                 "entrypoint": "node $ALGO",
                 "image": "ubuntu",
                 "tag": "latest",
-                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+                "checksum": "sha256:cd3d86f1fb368c6a53659d467560010ab9e0695528127ea336fe32f68f7ba09f",
             },
         }
     )
