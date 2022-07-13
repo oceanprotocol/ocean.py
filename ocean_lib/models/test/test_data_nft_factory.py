@@ -61,7 +61,14 @@ def test_properties(web3, config):
 
 
 @pytest.mark.unit
-def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet):
+def test_main(
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    provider_wallet,
+):
     """Tests the utils functions."""
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
@@ -465,7 +472,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_owner=publisher_wallet.address,
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
-        metadata_decryptor_address="0x123",
+        metadata_decryptor_address=provider_wallet.address,
         metadata_flags=bytes(0),
         metadata_data=Web3.toHex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),
@@ -630,8 +637,8 @@ def test_start_multiple_order(
         consumer_wallet.address,
         1,
         (
-            provider_fee_address,
-            provider_fee_token,
+            web3.toChecksumAddress(provider_fee_address.lower()),
+            web3.toChecksumAddress(provider_fee_token.lower()),
             provider_fee_amount,
             signature.v,
             signature.r,
@@ -640,8 +647,8 @@ def test_start_multiple_order(
             provider_data,
         ),
         (
-            consumer_wallet.address,
-            mock_dai_contract_address,
+            web3.toChecksumAddress(consumer_wallet.address.lower()),
+            web3.toChecksumAddress(mock_dai_contract_address.lower()),
             0,
         ),
     )
