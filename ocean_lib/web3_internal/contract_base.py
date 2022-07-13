@@ -459,7 +459,7 @@ class ContractBase(object):
         _, event_filter_params = construct_event_filter_params(
             abi,
             event.web3.codec,
-            contract_address=ContractBase.to_checksum_address(address),
+            contract_address=address,
             argument_filters=_filters,
             fromBlock=fromBlock,
             toBlock=toBlock,
