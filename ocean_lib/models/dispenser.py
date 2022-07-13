@@ -52,17 +52,26 @@ class Dispenser(ContractBase):
         self, datatoken: str, max_tokens: int, max_balance: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "activate", (datatoken, max_tokens, max_balance), from_wallet
+            "activate",
+            (ContractBase.to_checksum_address(datatoken), max_tokens, max_balance),
+            from_wallet,
         )
 
     def deactivate(self, datatoken: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("deactivate", (datatoken,), from_wallet)
+        return self.send_transaction(
+            "deactivate", (ContractBase.to_checksum_address(datatoken),), from_wallet
+        )
 
     def set_allowed_swapper(
         self, datatoken: str, new_allowed_swapper: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setAllowedSwapper", (datatoken, new_allowed_swapper), from_wallet
+            "setAllowedSwapper",
+            (
+                ContractBase.to_checksum_address(datatoken),
+                ContractBase.to_checksum_address(new_allowed_swapper),
+            ),
+            from_wallet,
         )
 
     @enforce_types
@@ -70,12 +79,20 @@ class Dispenser(ContractBase):
         self, datatoken: str, amount: int, destination: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "dispense", (datatoken, amount, destination), from_wallet
+            "dispense",
+            (
+                ContractBase.to_checksum_address(datatoken),
+                amount,
+                ContractBase.to_checksum_address(destination),
+            ),
+            from_wallet,
         )
 
     @enforce_types
     def owner_withdraw(self, datatoken: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("ownerWithdraw", (datatoken,), from_wallet)
+        return self.send_transaction(
+            "ownerWithdraw", (ContractBase.to_checksum_address(datatoken),), from_wallet
+        )
 
     @enforce_types
     def dispense_tokens(

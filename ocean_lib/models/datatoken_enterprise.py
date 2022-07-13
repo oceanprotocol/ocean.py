@@ -40,11 +40,11 @@ class DatatokenEnterprise(Datatoken):
             "buyFromFreAndOrder",
             (
                 (
-                    consumer,
+                    Datatoken.to_checksum_address(consumer),
                     service_index,
                     (
-                        provider_fee_address,
-                        provider_fee_token,
+                        Datatoken.to_checksum_address(provider_fee_address),
+                        Datatoken.to_checksum_address(provider_fee_token),
                         int(provider_fee_amount),
                         v,
                         r,
@@ -53,17 +53,17 @@ class DatatokenEnterprise(Datatoken):
                         provider_data,
                     ),
                     (
-                        consume_market_order_fee_address,
-                        consume_market_order_fee_token,
+                        Datatoken.to_checksum_address(consume_market_order_fee_address),
+                        Datatoken.to_checksum_address(consume_market_order_fee_token),
                         consume_market_order_fee_amount,
                     ),
                 ),
                 (
-                    exchange_contract,
+                    Datatoken.to_checksum_address(exchange_contract),
                     exchange_id,
                     max_base_token_amount,
                     consume_market_swap_fee_amount,
-                    consume_market_swap_fee_address,
+                    Datatoken.to_checksum_address(consume_market_swap_fee_address),
                 ),
             ),
             from_wallet,
@@ -92,11 +92,11 @@ class DatatokenEnterprise(Datatoken):
             "buyFromDispenserAndOrder",
             (
                 (
-                    consumer,
+                    Datatoken.to_checksum_address(consumer),
                     service_index,
                     (
-                        provider_fee_address,
-                        provider_fee_token,
+                        Datatoken.to_checksum_address(provider_fee_address),
+                        Datatoken.to_checksum_address(provider_fee_token),
                         int(provider_fee_amount),
                         v,
                         r,
@@ -105,12 +105,12 @@ class DatatokenEnterprise(Datatoken):
                         provider_data,
                     ),
                     (
-                        consume_market_order_fee_address,
-                        consume_market_order_fee_token,
+                        Datatoken.to_checksum_address(consume_market_order_fee_address),
+                        Datatoken.to_checksum_address(consume_market_order_fee_token),
                         consume_market_order_fee_amount,
                     ),
                 ),
-                dispenser_address,
+                Datatoken.to_checksum_address(dispenser_address),
             ),
             from_wallet,
         )
