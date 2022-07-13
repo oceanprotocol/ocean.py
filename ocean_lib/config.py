@@ -228,7 +228,7 @@ class Config(configparser.ConfigParser):
         else:
             file_path = str(
                 Path(artifacts.__file__)
-                .parent.joinpath("address.json")
+                .parent.parent.joinpath("addresses/address.json")
                 .expanduser()
                 .resolve()
             )
