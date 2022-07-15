@@ -278,7 +278,7 @@ class Ocean:
             allowed_swapper=ZERO_ADDRESS,
             base_token_decimals=base_token.decimals(),
             datatoken_decimals=datatoken.decimals(),
-            fixed_rate=self.to_wei(1),
+            fixed_rate=amount,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
             from_wallet=from_wallet,
