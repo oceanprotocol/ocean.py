@@ -78,12 +78,12 @@ Use the `exchange_id` for buying at fixed rate.
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fixed_price_address = ocean.fixed_rate_exchange.address
 datatoken.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
-OCEAN_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
+OCEAN_token.approve(fixed_price_address, ocean.to_wei(2500), bob_wallet)
 
 tx_result = ocean.fixed_rate_exchange.buy_dt(
     exchange_id=exchange_id,
     datatoken_amount=ocean.to_wei(20),
-    max_base_token_amount=ocean.to_wei(50),
+    max_base_token_amount=ocean.to_wei(2500),
     consume_market_swap_fee_address=ZERO_ADDRESS,
     consume_market_swap_fee_amount=0,
     from_wallet=bob_wallet,
