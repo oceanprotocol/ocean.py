@@ -238,11 +238,11 @@ ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
 datasets, algorithm = ocean.assets.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
-    consume_market_order_fee_address=ocean.web3.toChecksumAddress(bob_wallet.address),
+    consume_market_order_fee_address=bob_wallet.address,
     wallet=bob_wallet,
     compute_environment=free_c2d_env["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-    consumer_address=ocean.web3.toChecksumAddress(free_c2d_env["consumerAddress"]),
+    consumer_address=free_c2d_env["consumerAddress"],
 )
 assert datasets, "pay for dataset unsuccessful"
 assert algorithm, "pay for algorithm unsuccessful"

@@ -13,6 +13,7 @@ from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.constants import MAX_UINT256
+from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -88,13 +89,11 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 name,
                 symbol,
                 template_index,
-                ERC721TokenFactoryBase.to_checksum_address(additional_metadata_updater),
-                ERC721TokenFactoryBase.to_checksum_address(
-                    additional_datatoken_deployer
-                ),
+                ContractBase.to_checksum_address(additional_metadata_updater),
+                ContractBase.to_checksum_address(additional_datatoken_deployer),
                 token_uri,
                 transferable,
-                ERC721TokenFactoryBase.to_checksum_address(owner),
+                ContractBase.to_checksum_address(owner),
             ),
             from_wallet,
         )
@@ -114,7 +113,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     @enforce_types
     def is_contract(self, account_address: str) -> bool:
         return self.contract.caller.isContract(
-            ERC721TokenFactoryBase.to_checksum_address(account_address)
+            ContractBase.to_checksum_address(account_address)
         )
 
     @enforce_types
@@ -185,20 +184,18 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     nft_template,
                     nft_token_uri,
                     nft_transferable,
-                    ERC721TokenFactoryBase.to_checksum_address(nft_owner),
+                    ContractBase.to_checksum_address(nft_owner),
                 ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(datatoken_minter),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            datatoken_fee_manager
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(datatoken_minter),
+                        ContractBase.to_checksum_address(datatoken_fee_manager),
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_address
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_token
                         ),
                     ],
@@ -253,20 +250,18 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     nft_template,
                     nft_token_uri,
                     nft_transferable,
-                    ERC721TokenFactoryBase.to_checksum_address(nft_owner),
+                    ContractBase.to_checksum_address(nft_owner),
                 ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(datatoken_minter),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            datatoken_fee_manager
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(datatoken_minter),
+                        ContractBase.to_checksum_address(datatoken_fee_manager),
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_address
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_token
                         ),
                     ],
@@ -288,18 +283,14 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                         pool_publish_market_swap_fee_amount,
                     ],
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(pool_side_staking),
-                        ERC721TokenFactoryBase.to_checksum_address(pool_base_token),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            pool_base_token_sender
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(pool_publisher),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(pool_side_staking),
+                        ContractBase.to_checksum_address(pool_base_token),
+                        ContractBase.to_checksum_address(pool_base_token_sender),
+                        ContractBase.to_checksum_address(pool_publisher),
+                        ContractBase.to_checksum_address(
                             pool_publish_market_swap_fee_collector
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            pool_template_address
-                        ),
+                        ContractBase.to_checksum_address(pool_template_address),
                     ],
                 ),
             ),
@@ -349,20 +340,18 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     nft_template,
                     nft_token_uri,
                     nft_transferable,
-                    ERC721TokenFactoryBase.to_checksum_address(nft_owner),
+                    ContractBase.to_checksum_address(nft_owner),
                 ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(datatoken_minter),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            datatoken_fee_manager
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(datatoken_minter),
+                        ContractBase.to_checksum_address(datatoken_fee_manager),
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_address
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_token
                         ),
                     ],
@@ -370,18 +359,14 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     datatoken_bytess,
                 ),
                 (
-                    ERC721TokenFactoryBase.to_checksum_address(fixed_price_address),
+                    ContractBase.to_checksum_address(fixed_price_address),
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            fixed_price_base_token
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(fixed_price_owner),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(fixed_price_base_token),
+                        ContractBase.to_checksum_address(fixed_price_owner),
+                        ContractBase.to_checksum_address(
                             fixed_price_publish_market_swap_fee_collector
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            fixed_price_allowed_swapper
-                        ),
+                        ContractBase.to_checksum_address(fixed_price_allowed_swapper),
                     ],
                     [
                         fixed_price_base_token_decimals,
@@ -433,20 +418,18 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     nft_template,
                     nft_token_uri,
                     nft_transferable,
-                    ERC721TokenFactoryBase.to_checksum_address(nft_owner),
+                    ContractBase.to_checksum_address(nft_owner),
                 ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
                     [
-                        ERC721TokenFactoryBase.to_checksum_address(datatoken_minter),
-                        ERC721TokenFactoryBase.to_checksum_address(
-                            datatoken_fee_manager
-                        ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(datatoken_minter),
+                        ContractBase.to_checksum_address(datatoken_fee_manager),
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_address
                         ),
-                        ERC721TokenFactoryBase.to_checksum_address(
+                        ContractBase.to_checksum_address(
                             datatoken_publish_market_order_fee_token
                         ),
                     ],
@@ -454,13 +437,11 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     datatoken_bytess,
                 ),
                 (
-                    ERC721TokenFactoryBase.to_checksum_address(dispenser_address),
+                    ContractBase.to_checksum_address(dispenser_address),
                     dispenser_max_tokens,
                     dispenser_max_balance,
                     dispenser_with_mint,
-                    ERC721TokenFactoryBase.to_checksum_address(
-                        dispenser_allowed_swapper
-                    ),
+                    ContractBase.to_checksum_address(dispenser_allowed_swapper),
                 ),
             ),
             from_wallet,
@@ -493,14 +474,12 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     nft_template,
                     nft_token_uri,
                     nft_transferable,
-                    ERC721TokenFactoryBase.to_checksum_address(nft_owner),
+                    ContractBase.to_checksum_address(nft_owner),
                 ),
                 (
                     metadata_state,
                     metadata_decryptor_url,
-                    ERC721TokenFactoryBase.to_checksum_address(
-                        metadata_decryptor_address
-                    ),
+                    ContractBase.to_checksum_address(metadata_decryptor_address),
                     metadata_flags,
                     metadata_data,
                     metadata_data_hash,
