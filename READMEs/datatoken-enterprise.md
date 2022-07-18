@@ -260,7 +260,7 @@ tx_id = datatoken_enterprise_token.buy_from_fre_and_order(
     consume_market_order_fee_amount=0,
     exchange_contract=fixed_rate_exchange.address,
     exchange_id=exchange_id,
-    max_base_token_amount=ocean.to_wei(10),
+    max_base_token_amount=ocean.to_wei(100),
     consume_market_swap_fee_amount=ocean.to_wei("0.001"),  # 1e15 => 0.1%
     consume_market_swap_fee_address=bob_wallet.address,
     from_wallet=alice_wallet,
