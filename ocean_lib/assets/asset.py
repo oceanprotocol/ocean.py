@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
-import json
 import logging
 from typing import Optional
 
@@ -196,7 +195,7 @@ class Asset(AddressCredential):
             "did": self.did,
             "filesChecksum": "".join(files_checksum),
             "containerSectionChecksum": create_checksum(
-                json.dumps(container, separators=(",", ":"))
+                container["entrypoint"] + container["checksum"]
             ),
         }
 
