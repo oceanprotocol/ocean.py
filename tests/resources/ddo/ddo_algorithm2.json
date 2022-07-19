@@ -16,7 +16,8 @@
         "container": {
             "entrypoint": "node $ALGO",
           "  image": "node",
-          "  tag": "10"
+          "  tag": "10",
+            "checksum": "test"
         }
     }
   },
