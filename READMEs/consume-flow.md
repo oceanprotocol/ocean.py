@@ -13,7 +13,8 @@ Here are the steps:
 
 1.  Setup
 2.  Alice publishes data asset
-3.  Bob downloads it
+3.  Alice gives Bob access
+4.  Bob downloads it
 
 Let's go through each step.
 
@@ -37,36 +38,30 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
 - [x] 2. Publish Dataset
 
-## 3. Bob downloads the dataset
-Now, you're Bob the data consumer.
-In usual cases, Bob buys the dataset but here, let's have Alice send him some tokens directly.
+## 3. Alice gives Bob access
 
-Needed to mint fake OCEAN for testing with ganache:
-
-`export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58`
+Now, you're Bob. You want to consume the dataset that Alice just published. The first step is to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet. This README uses (d) - minting.
 
 Then, in the same console:
 
 ```python
-# Bob's wallet
+# Initialize Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
-# Verify that Bob has ganache OCEAN
-OCEAN_token = ocean.OCEAN_token
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
-
-# Mint 1 datatoken in consumer wallet from publisher
+# Alice mints a datatoken into Bob's wallet
 datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
 datatoken.mint(
     account_address=bob_wallet.address,
     value=ocean.to_wei("1"),
     from_wallet=alice_wallet,
 )
+
+## 4. Bob downloads the dataset
+
+# Verify that Bob has ganache ETH
+assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
