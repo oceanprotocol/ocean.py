@@ -35,7 +35,6 @@ def test_script_execution(script, monkeypatch):
         "c2d-flow",
         "dispenser-flow",
         "datatoken-enterprise",
-        "fixed-rate-exchange-flow",
         "marketplace-flow",
         "key-value-flow",
         "profile-nfts-flow",
@@ -63,7 +62,6 @@ def test_script_execution(script, monkeypatch):
                 globs[key] = result[key]
 
     runs_with_publish = [
-        "marketplace-flow",
         "consume-flow",
         "datatoken-enterprise",
     ]

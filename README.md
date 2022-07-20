@@ -53,8 +53,7 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - the essence of Ocean - creating a data NFT & datatoken.
 - **[Publish flow](READMEs/publish-flow.md)** - a dataset is published.
 - **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
-- **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale in a datatoken pool, then purchased. Includes metadata.
-- **[Fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
+- **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
 - **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 - **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain.
