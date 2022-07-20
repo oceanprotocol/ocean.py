@@ -101,12 +101,12 @@ class Datatoken(ContractBase):
         return self.send_transaction(
             "createFixedRate",
             (
-                fixed_price_address,
+                ContractBase.to_checksum_address(fixed_price_address),
                 [
-                    base_token_address,
-                    owner,
-                    publish_market_swap_fee_collector,
-                    allowed_swapper,
+                    ContractBase.to_checksum_address(base_token_address),
+                    ContractBase.to_checksum_address(owner),
+                    ContractBase.to_checksum_address(publish_market_swap_fee_collector),
+                    ContractBase.to_checksum_address(allowed_swapper),
                 ],
                 [
                     base_token_decimals,
@@ -131,13 +131,23 @@ class Datatoken(ContractBase):
     ) -> str:
         return self.send_transaction(
             "createDispenser",
-            (dispenser_address, max_tokens, max_balance, with_mint, allowed_swapper),
+            (
+                ContractBase.to_checksum_address(dispenser_address),
+                max_tokens,
+                max_balance,
+                with_mint,
+                ContractBase.to_checksum_address(allowed_swapper),
+            ),
             from_wallet,
         )
 
     @enforce_types
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (account_address, value), from_wallet)
+        return self.send_transaction(
+            "mint",
+            (ContractBase.to_checksum_address(account_address), value),
+            from_wallet,
+        )
 
     @enforce_types
     def check_provider_fee(
@@ -155,8 +165,8 @@ class Datatoken(ContractBase):
         return self.send_transaction(
             "checkProviderFee",
             (
-                provider_fee_address,
-                provider_fee_token,
+                ContractBase.to_checksum_address(provider_fee_address),
+                ContractBase.to_checksum_address(provider_fee_token),
                 int(provider_fee_amount),
                 v,
                 r,
@@ -188,11 +198,11 @@ class Datatoken(ContractBase):
         return self.send_transaction(
             "startOrder",
             (
-                consumer,
+                ContractBase.to_checksum_address(consumer),
                 service_index,
                 (
-                    provider_fee_address,
-                    provider_fee_token,
+                    ContractBase.to_checksum_address(provider_fee_address),
+                    ContractBase.to_checksum_address(provider_fee_token),
                     int(provider_fee_amount),
                     v,
                     r,
@@ -201,8 +211,8 @@ class Datatoken(ContractBase):
                     provider_data,
                 ),
                 (
-                    consume_market_order_fee_address,
-                    consume_market_order_fee_token,
+                    ContractBase.to_checksum_address(consume_market_order_fee_address),
+                    ContractBase.to_checksum_address(consume_market_order_fee_token),
                     consume_market_order_fee_amount,
                 ),
             ),
@@ -228,8 +238,8 @@ class Datatoken(ContractBase):
             (
                 order_tx_id,
                 (
-                    provider_fee_address,
-                    provider_fee_token,
+                    ContractBase.to_checksum_address(provider_fee_address),
+                    ContractBase.to_checksum_address(provider_fee_token),
                     int(provider_fee_amount),
                     v,
                     r,
@@ -260,29 +270,42 @@ class Datatoken(ContractBase):
                 provider_signature,
                 consumer_data,
                 consumer_signature,
-                consumer,
+                ContractBase.to_checksum_address(consumer),
             ),
             from_wallet,
         )
 
     @enforce_types
     def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, amount), from_wallet)
+        return self.send_transaction(
+            "transfer", (ContractBase.to_checksum_address(to), amount), from_wallet
+        )
 
     @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
-        return self.contract.caller.allowance(owner_address, spender_address)
+        return self.contract.caller.allowance(
+            ContractBase.to_checksum_address(owner_address),
+            ContractBase.to_checksum_address(spender_address),
+        )
 
     @enforce_types
     def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (spender, amount), from_wallet)
+        return self.send_transaction(
+            "approve", (ContractBase.to_checksum_address(spender), amount), from_wallet
+        )
 
     @enforce_types
     def transferFrom(
         self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (from_address, to_address, amount), from_wallet
+            "transferFrom",
+            (
+                ContractBase.to_checksum_address(from_address),
+                ContractBase.to_checksum_address(to_address),
+                amount,
+            ),
+            from_wallet,
         )
 
     @enforce_types
@@ -291,28 +314,46 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def burn_from(self, from_address: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("burnFrom", (from_address, amount), from_wallet)
+        return self.send_transaction(
+            "burnFrom",
+            (ContractBase.to_checksum_address(from_address), amount),
+            from_wallet,
+        )
 
     @enforce_types
     def is_minter(self, account: str) -> bool:
-        return self.contract.caller.isMinter(account)
+        return self.contract.caller.isMinter(ContractBase.to_checksum_address(account))
 
     @enforce_types
     def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addMinter", (minter_address,), from_wallet)
+        return self.send_transaction(
+            "addMinter",
+            (ContractBase.to_checksum_address(minter_address),),
+            from_wallet,
+        )
 
     @enforce_types
     def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeMinter", (minter_address,), from_wallet)
+        return self.send_transaction(
+            "removeMinter",
+            (ContractBase.to_checksum_address(minter_address),),
+            from_wallet,
+        )
 
     @enforce_types
     def add_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addPaymentManager", (fee_manager,), from_wallet)
+        return self.send_transaction(
+            "addPaymentManager",
+            (ContractBase.to_checksum_address(fee_manager),),
+            from_wallet,
+        )
 
     @enforce_types
     def remove_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
-            "removePaymentManager", (fee_manager,), from_wallet
+            "removePaymentManager",
+            (ContractBase.to_checksum_address(fee_manager),),
+            from_wallet,
         )
 
     @enforce_types
@@ -332,7 +373,9 @@ class Datatoken(ContractBase):
         self, publish_market_order_fee_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setPaymentCollector", (publish_market_order_fee_address,), from_wallet
+            "setPaymentCollector",
+            (ContractBase.to_checksum_address(publish_market_order_fee_address),),
+            from_wallet,
         )
 
     @enforce_types
@@ -350,8 +393,8 @@ class Datatoken(ContractBase):
         return self.send_transaction(
             "setPublishingMarketFee",
             (
-                publish_market_order_fee_address,
-                publish_market_order_fee_token,
+                ContractBase.to_checksum_address(publish_market_order_fee_address),
+                ContractBase.to_checksum_address(publish_market_order_fee_token),
                 publish_market_order_fee_amount,
             ),
             from_wallet,
@@ -399,7 +442,15 @@ class Datatoken(ContractBase):
     ) -> str:
         return self.send_transaction(
             "permit",
-            (owner_address, spender_address, value, deadline, v, r, s),
+            (
+                ContractBase.to_checksum_address(owner_address),
+                ContractBase.to_checksum_address(spender_address),
+                value,
+                deadline,
+                v,
+                r,
+                s,
+            ),
             from_wallet,
         )
 
@@ -441,11 +492,13 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def get_permissions(self, user: str) -> list:
-        return self.contract.caller.getPermissions(user)
+        return self.contract.caller.getPermissions(
+            ContractBase.to_checksum_address(user)
+        )
 
     @enforce_types
     def permissions(self, user: str) -> list:
-        return self.contract.caller.permissions(user)
+        return self.contract.caller.permissions(ContractBase.to_checksum_address(user))
 
     @enforce_types
     def get_total_supply(self) -> int:

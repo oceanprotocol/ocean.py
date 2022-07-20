@@ -42,7 +42,7 @@ Then, please refer to [publish-flow](publish-flow.md) and complete the following
 
 Now, you're Bob. You want to consume the dataset that Alice just published. The first step is to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet. This README uses (d) - minting.
 
-Then, in the same console:
+In the same Python console as before:
 
 ```python
 # Initialize Bob's wallet
@@ -57,9 +57,13 @@ datatoken.mint(
     value=ocean.to_wei("1"),
     from_wallet=alice_wallet,
 )
+```
 
 ## 4. Bob downloads the dataset
 
+In the same Python console:
+
+```python
 # Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
@@ -100,7 +104,28 @@ ls branin.arff
 
 Congrats to Bob for buying and consuming a data asset!
 
-_Note_. The file is in ARFF format, used by some AI/ML tools. In this case there are two input variables (x0, x1) and one output.
+## 5. Tips and Tricks
+
+**On encrypting or compressing assets**
+
+In some cases, you may want to encrypt the asset, e.g. for a private market or metadata cache.
+
+Ocean supports this, as follows. When you create an asset, use the `encrypt_flag` keyword:
+
+`asset = ocean.assets.create(..., encrypt_flag=True)`
+
+In some cases, you may want to compress the asset. To do so, use the `compress_flag` keyword:
+
+`asset = ocean.assets.create(..., compress_flag=True)`
+
+
+You can encrypt _and_ compress at once:
+
+`asset = ocean.assets.create(..., encrypt_flag=True, compress_flag=True)`
+
+**On the format of the downloaded file**
+
+The file is in ARFF format, used by some AI/ML tools. In our example, it has two input variables (x0, x1) and one output.
 
 ```console
 % 1. Title: Branin Function
@@ -119,6 +144,3 @@ _Note_. The file is in ARFF format, used by some AI/ML tools. In this case there
 ...
 ```
 
-Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
-Same for compression and you can use a combination of the two. E.g:
-`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`

@@ -85,7 +85,7 @@ def get_address_of_type(
         if not isinstance(addresses[address_type], dict)
         else addresses[address_type].get(key, addresses[address_type]["1"])
     )
-    return Web3.toChecksumAddress(address)
+    return Web3.toChecksumAddress(address.lower())
 
 
 @enforce_types
@@ -98,4 +98,4 @@ def get_ocean_token_address(
     addresses = get_contracts_addresses(
         address_file, network or get_network_name(web3=web3)
     )
-    return Web3.toChecksumAddress(addresses.get("Ocean")) if addresses else None
+    return Web3.toChecksumAddress(addresses.get("Ocean").lower()) if addresses else None
