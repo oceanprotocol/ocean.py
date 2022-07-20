@@ -29,10 +29,13 @@ class StorageProvider:
 
     def __init__(self, config: Config) -> None:
         self.config = config
-        self.storage_url = self.config.storage_url
-        self.storage_type = self.get_storage_type(self.config.storage_url)
+        self.gateway = os.getenv("IPFS_GATEWAY")
+        if not self.gateway:
+            raise StorageProviderException("No IPFS_GATEWAY defined.")
+        self.gateway_uri = StorageProvider.get_gateway_uri(self.gateway)
+        self.gateway_type = StorageProvider.get_gateway_type(self.gateway_uri)
         self.requests_session = get_requests_session()
-        self.payload_key = {"estuary": "data", "web3.storage": "file"}
+        self.payload_key = {"estuary.tech": "data", "web3.storage": "file"}
 
     @staticmethod
     @enforce_types
@@ -50,37 +53,37 @@ class StorageProvider:
     def upload(self, object_to_upload: Union[str, bytes]) -> Response:
 
         response = self.requests_session.post(
-            self.storage_url,
-            files={self.payload_key[self.storage_type]: object_to_upload},
+            self.gateway_uri,
+            files={self.payload_key[self.gateway_type]: object_to_upload},
             headers={"Authorization": "Bearer " + os.environ["STORAGE_TOKEN"]},
         )
 
         if not hasattr(response, "status_code"):
             raise StorageProviderException(
-                f"Failed to get a response for request: storageEndpoint={self.storage_url}, response is {response}"
+                f"Failed to get a response for request: storageEndpoint={self.gateway}, response is {response}"
             )
 
         if response.status_code != 200:
             msg = (
                 f"Upload file failed at the storageEndpoint "
-                f"{self.storage_url}, reason {response.text}, status {response.status_code}"
+                f"{self.gateway}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise StorageProviderException
 
         logger.info(
             f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
-            f" encryptedEndpoint {self.storage_url}"
+            f" encryptedEndpoint {self.gateway}"
         )
 
         return response
 
     @enforce_types
     def download(self, cid: str) -> Response:
-        if self.storage_type == "web3.storage":
+        if self.gateway_type == "web3.storage":
             url = f"https://{cid}.ipfs.dweb.link/"
             response = self.requests_session.get(url, timeout=20)
-        elif self.storage_type == "estuary":
+        elif self.gateway_type == "estuary.tech":
             url = f"https://dweb.link/ipfs/{cid}"
             response = requests.get(url, allow_redirects=True)  # to get content
             with open(cid, "wb") as f:
@@ -89,31 +92,42 @@ class StorageProvider:
 
     @staticmethod
     @enforce_types
-    def get_storage_type(storage_url: str) -> str:
-        parts = storage_url.split("/")
+    def get_gateway_uri(gateway: str) -> str:
+        parts = gateway.split("/")
         
-        if len(parts) < 3:
-            raise InvalidURL(f"InvalidURL {storage_url}.")
+        if len(parts) < 2:
+            raise InvalidURL(f"InvalidURL {gateway}.")
         
         try:
-            response = requests.get(storage_url).json()
+            response = requests.get(gateway).json()
         except (requests.exceptions.RequestException, JSONDecodeError):
-            raise InvalidURL(f"InvalidURL {storage_url}.")
-        
-        domain = parts[2]
-    
-        domain_to_type_dict = {
-            "api.web3.storage": "web3.storage",
-            "api.estuary.tech": "estuary",
-            "shuttle-5.estuary.tech": "estuary",
-        }
-        return domain_to_type_dict[domain]
+            raise InvalidURL(f"InvalidURL {gateway}.")
+
+        gateway_type = StorageProvider.get_gateway_type(gateway)
+
+        if gateway_type not in ['web3.storage', "estuary.tech"]:
+            raise InvalidURL(f"InvalidURL {gateway}.")
+
+        if gateway not in ["https://api.web3.storage/upload", "https://api.estuary.tech/content/add", "https://shuttle-5.estuary.tech/content/add"]:
+            raise InvalidURL(f"InvalidURL {gateway}.")
+
+        return gateway
 
     @staticmethod
     @enforce_types
-    def is_valid_storage_provider(storage_url: str) -> bool:
+    def get_gateway_type(gateway_uri: str) -> str:
+        parts = gateway_uri.split("/")[2]
+        parts = parts.split(".")[1:]
+    
+        gateway_type = parts[0] + '.' + parts[1]
+
+        return gateway_type
+
+    @staticmethod
+    @enforce_types
+    def is_valid_gateway(gateway: str) -> bool:
         try:
-            self.get_storage_type(storage_url)
+            StorageProvider.get_gateway_uri(gateway)
         except InvalidURL:
             return False
 
