@@ -206,88 +206,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert datatoken2.contract.caller.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
 
-    # Tests creating NFT with ERC20 and with Pool successfully.
-    side_staking_address = get_address_of_type(config, "Staking")
-    pool_template_address = get_address_of_type(config, "poolTemplate")
-    initial_pool_liquidity = to_wei("0.02")
-
-    datatoken.mint(publisher_wallet.address, initial_pool_liquidity, publisher_wallet)
-    datatoken.approve(
-        data_nft_factory_address, initial_pool_liquidity, publisher_wallet
-    )
-    tx = data_nft_factory.create_nft_erc20_with_pool(
-        nft_name="72120Bundle",
-        nft_symbol="72Bundle",
-        nft_template=1,
-        nft_token_uri="https://oceanprotocol.com/nft/",
-        nft_transferable=True,
-        nft_owner=publisher_wallet.address,
-        datatoken_template=1,
-        datatoken_name="DTWithPool",
-        datatoken_symbol="DTP",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publish_market_order_fee_address=publisher_wallet.address,
-        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_publish_market_order_fee_amount=0,
-        datatoken_bytess=[b""],
-        pool_rate=to_wei("1"),
-        pool_base_token_decimals=datatoken.decimals(),
-        pool_base_token_amount=initial_pool_liquidity,
-        pool_lp_swap_fee_amount=to_wei("0.001"),
-        pool_publish_market_swap_fee_amount=to_wei("0.001"),
-        pool_side_staking=side_staking_address,
-        pool_base_token=datatoken_address,
-        pool_base_token_sender=data_nft_factory_address,
-        pool_publisher=publisher_wallet.address,
-        pool_publish_market_swap_fee_collector=consumer_wallet.address,
-        pool_template_address=pool_template_address,
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_nft_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    # Verify if the NFT was created.
-    assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event[0].event == "NFTCreated"
-    assert registered_nft_event[0].args.admin == publisher_wallet.address
-    data_nft_token3 = registered_nft_event[0].args.newTokenAddress
-    data_nft_token3 = DataNFT(web3, data_nft_token3)
-    assert data_nft_token3.contract.caller.name() == "72120Bundle"
-    assert data_nft_token3.symbol() == "72Bundle"
-
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    # Verify if the ERC20 token was created.
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address3 = registered_token_event[0].args.newTokenAddress
-    datatoken3 = Datatoken(web3, datatoken_address3)
-    assert datatoken3.contract.caller.name() == "DTWithPool"
-    assert datatoken3.symbol() == "DTP"
-
-    registered_pool_event = datatoken3.get_event_log(
-        DataNFTFactoryContract.EVENT_NEW_POOL,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    # Verify if the pool was created.
-    assert registered_pool_event, "Cannot find NewPool event."
-    pool_address = registered_pool_event[0].args.poolAddress
-    pool_token = Datatoken(web3, pool_address)
-
-    assert pool_token.balanceOf(publisher_wallet.address) > 0, "Invalid pool share."
-
     # Tests creating NFT with ERC20 and with Fixed Rate Exchange successfully.
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
@@ -819,40 +737,6 @@ def test_datatoken_cap(
             datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
             datatoken_publish_market_order_fee_amount=0,
             datatoken_bytess=[b""],
-            from_wallet=publisher_wallet,
-        )
-
-    # create NFT with ERC20 and pool
-    initial_pool_liquidity = to_wei("0.02")
-
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft_factory.create_nft_erc20_with_pool(
-            nft_name="72120Bundle",
-            nft_symbol="72Bundle",
-            nft_template=1,
-            nft_token_uri="https://oceanprotocol.com/nft/",
-            nft_transferable=True,
-            nft_owner=publisher_wallet.address,
-            datatoken_template=2,
-            datatoken_name="DatatokenEnterpriseWithPool",
-            datatoken_symbol="DTEP",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publish_market_order_fee_address=publisher_wallet.address,
-            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-            datatoken_publish_market_order_fee_amount=0,
-            datatoken_bytess=[b""],
-            pool_rate=to_wei("1"),
-            pool_base_token_decimals=10,
-            pool_base_token_amount=initial_pool_liquidity,
-            pool_lp_swap_fee_amount=to_wei("0.001"),
-            pool_publish_market_swap_fee_amount=to_wei("0.001"),
-            pool_side_staking=ZERO_ADDRESS,
-            pool_base_token=ZERO_ADDRESS,
-            pool_base_token_sender=data_nft_factory_address,
-            pool_publisher=publisher_wallet.address,
-            pool_publish_market_swap_fee_collector=consumer_wallet.address,
-            pool_template_address=ZERO_ADDRESS,
             from_wallet=publisher_wallet,
         )
 
