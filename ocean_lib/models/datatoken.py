@@ -84,47 +84,6 @@ class Datatoken(ContractBase):
         return self.contract.caller.router()
 
     @enforce_types
-    def deploy_pool(
-        self,
-        rate: int,
-        base_token_decimals: int,
-        base_token_amount: int,
-        lp_swap_fee_amount: int,
-        publish_market_swap_fee_amount: int,
-        ss_contract: str,
-        base_token_address: str,
-        base_token_sender: str,
-        publisher_address: str,
-        publish_market_swap_fee_collector: str,
-        pool_template_address: str,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "deployPool",
-            (
-                [
-                    rate,
-                    base_token_decimals,
-                    base_token_amount
-                    // 100
-                    * 9,  # max 10% vesting amount of the total cap
-                    2500000,
-                    base_token_amount,
-                ],
-                [lp_swap_fee_amount, publish_market_swap_fee_amount],
-                [
-                    ss_contract,
-                    base_token_address,
-                    base_token_sender,
-                    publisher_address,
-                    publish_market_swap_fee_collector,
-                    pool_template_address,
-                ],
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
     def create_fixed_rate(
         self,
         fixed_price_address: str,
