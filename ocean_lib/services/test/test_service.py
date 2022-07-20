@@ -230,7 +230,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
-                "checksum": "002da04eb18978c38ec586b5a0584440efa0b6310518fdb64566c1152c14d5ba"
+                "checksum": "56be783ba2c10ec061b673fbf232b20ed4f7d59e9d78e7a2cf5dd5e16df2db49"
             }
         ]
         mock.return_value = the_response
@@ -248,7 +248,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
-                "checksum": "002da04eb18978c38ec586b5a0584440efa0b6310518fdb64566c1152c14d5ba"
+                "checksum": "56be783ba2c10ec061b673fbf232b20ed4f7d59e9d78e7a2cf5dd5e16df2db49"
             }
         ]
         mock.return_value = the_response
@@ -267,7 +267,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
-                "checksum": "002da04eb18978c38ec586b5a0584440efa0b6310518fdb64566c1152c14d5ba"
+                "checksum": "56be783ba2c10ec061b673fbf232b20ed4f7d59e9d78e7a2cf5dd5e16df2db49"
             }
         ]
         mock.return_value = the_response
