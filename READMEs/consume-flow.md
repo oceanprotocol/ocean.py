@@ -13,7 +13,8 @@ Here are the steps:
 
 1.  Setup
 2.  Alice publishes data asset
-3.  Bob downloads it
+3.  Alice gives Bob access
+4.  Bob downloads it
 
 Let's go through each step.
 
@@ -37,36 +38,34 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
 - [x] 2. Publish Dataset
 
-## 3. Bob downloads the dataset
-Now, you're Bob the data consumer.
-In usual cases, Bob buys the dataset but here, let's have Alice send him some tokens directly.
+## 3. Alice gives Bob access
 
-Needed to mint fake OCEAN for testing with ganache:
+Now, you're Bob. You want to consume the dataset that Alice just published. The first step is to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet. This README uses (d) - minting.
 
-`export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58`
-
-Then, in the same console:
+In the same Python console as before:
 
 ```python
-# Bob's wallet
+# Initialize Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
-# Verify that Bob has ganache OCEAN
-OCEAN_token = ocean.OCEAN_token
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
-
-# Mint 1 datatoken in consumer wallet from publisher
+# Alice mints a datatoken into Bob's wallet
 datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
 datatoken.mint(
     account_address=bob_wallet.address,
     value=ocean.to_wei("1"),
     from_wallet=alice_wallet,
 )
+```
+
+## 4. Bob downloads the dataset
+
+In the same Python console:
+
+```python
+# Verify that Bob has ganache ETH
+assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -105,7 +104,28 @@ ls branin.arff
 
 Congrats to Bob for buying and consuming a data asset!
 
-_Note_. The file is in ARFF format, used by some AI/ML tools. In this case there are two input variables (x0, x1) and one output.
+## 5. Tips and Tricks
+
+**On encrypting or compressing assets**
+
+In some cases, you may want to encrypt the asset, e.g. for a private market or metadata cache.
+
+Ocean supports this, as follows. When you create an asset, use the `encrypt_flag` keyword:
+
+`asset = ocean.assets.create(..., encrypt_flag=True)`
+
+In some cases, you may want to compress the asset. To do so, use the `compress_flag` keyword:
+
+`asset = ocean.assets.create(..., compress_flag=True)`
+
+
+You can encrypt _and_ compress at once:
+
+`asset = ocean.assets.create(..., encrypt_flag=True, compress_flag=True)`
+
+**On the format of the downloaded file**
+
+The file is in ARFF format, used by some AI/ML tools. In our example, it has two input variables (x0, x1) and one output.
 
 ```console
 % 1. Title: Branin Function
@@ -124,6 +144,3 @@ _Note_. The file is in ARFF format, used by some AI/ML tools. In this case there
 ...
 ```
 
-Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
-Same for compression and you can use a combination of the two. E.g:
-`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
