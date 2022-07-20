@@ -111,19 +111,17 @@ Congrats to Bob for buying and consuming a data asset!
 In some cases, you may want to encrypt the asset, e.g. for a private market or metadata cache.
 
 Ocean supports this, as follows. When you create an asset, use the `encrypt_flag` keyword:
-```python
-asset = ocean.assets.create(..., encrypt_flag=True)
-```
+
+`asset = ocean.assets.create(..., encrypt_flag=True)`
 
 In some cases, you may want to compress the asset. To do so, use the `compress_flag` keyword:
-```python
-asset = ocean.assets.create(..., compress_flag=True)
-```
+
+`asset = ocean.assets.create(..., compress_flag=True)`
+
 
 You can encrypt _and_ compress at once:
-```python
-asset = ocean.assets.create(..., encrypt_flag=True, compress_flag=True)
-```
+
+`asset = ocean.assets.create(..., encrypt_flag=True, compress_flag=True)`
 
 **On the format of the downloaded file**
 
