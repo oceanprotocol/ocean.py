@@ -45,13 +45,19 @@ def get_contracts_addresses(
     network_alias = {"ganache": "development"}
 
     if not address_file or not os.path.exists(address_file):
-        return None
+        raise Exception("Address file not found.")
     with open(address_file) as f:
         addresses = json.load(f)
 
     network_addresses = addresses.get(network, None)
     if network_addresses is None and network in network_alias:
         network_addresses = addresses.get(network_alias[network], None)
+
+    if network_addresses is None:
+        msg = f" (alias {network_alias[network]})" if network in network_alias else ""
+        raise Exception(
+            f"Address not found for {network}{msg}. Please check your address file."
+        )
 
     return _checksum_contract_addresses(network_addresses=network_addresses)
 
