@@ -47,7 +47,7 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 In the same python console:
 ```python
 # Mint the datatokens
-datatoken.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
+datatoken.mint(alice_wallet.address, ocean.to_wei(3000), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate datatokens
@@ -66,7 +66,7 @@ OCEAN_token = ocean.OCEAN_token
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN_token,
-    amount=ocean.to_wei(100),
+    amount=ocean.to_wei(2500),
     from_wallet=alice_wallet,
 )
 ```
@@ -77,12 +77,12 @@ Use the `exchange_id` for buying at fixed rate.
 # Approve tokens for Bob
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fixed_price_address = ocean.fixed_rate_exchange.address
-datatoken.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
+datatoken.approve(fixed_price_address, ocean.to_wei(2500), bob_wallet)
 OCEAN_token.approve(fixed_price_address, ocean.to_wei(2500), bob_wallet)
 
 tx_result = ocean.fixed_rate_exchange.buy_dt(
     exchange_id=exchange_id,
-    datatoken_amount=ocean.to_wei(20),
+    datatoken_amount=ocean.to_wei(200),
     max_base_token_amount=ocean.to_wei(2500),
     consume_market_swap_fee_address=ZERO_ADDRESS,
     consume_market_swap_fee_amount=0,
