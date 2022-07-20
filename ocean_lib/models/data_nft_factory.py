@@ -149,6 +149,19 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         - r, bytes
         - s, bytes
         """
+        for order in orders:
+            order._replace(
+                token_address=ContractBase.to_checksum_address(order.token_address)
+            )
+            order._replace(consumer=ContractBase.to_checksum_address(order.consumer))
+            provider_fees = list(order.provider_fees)
+            provider_fees[0] = ContractBase.to_checksum_address(order.provider_fees[0])
+            provider_fees[1] = ContractBase.to_checksum_address(order.provider_fees[1])
+            order._replace(provider_fees=tuple(provider_fees))
+            consume_fees = list(order.consume_fees)
+            consume_fees[0] = ContractBase.to_checksum_address(order.consume_fees[0])
+            consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
+            order._replace(consume_fees=tuple(consume_fees))
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     @enforce_types

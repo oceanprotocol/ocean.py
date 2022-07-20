@@ -63,6 +63,8 @@ def get_contracts_addresses(
 
 
 @enforce_types
+# Check singnet/snet-cli#142 (comment). You need to provide a lowercase address then call web3.toChecksumAddress()
+# for software safety.
 def _checksum_contract_addresses(
     network_addresses: Dict[str, str]
 ) -> Optional[Dict[str, str]]:

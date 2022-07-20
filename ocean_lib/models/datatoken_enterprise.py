@@ -7,6 +7,7 @@ from typing import Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -40,11 +41,11 @@ class DatatokenEnterprise(Datatoken):
             "buyFromFreAndOrder",
             (
                 (
-                    Datatoken.to_checksum_address(consumer),
+                    ContractBase.to_checksum_address(consumer),
                     service_index,
                     (
-                        Datatoken.to_checksum_address(provider_fee_address),
-                        Datatoken.to_checksum_address(provider_fee_token),
+                        ContractBase.to_checksum_address(provider_fee_address),
+                        ContractBase.to_checksum_address(provider_fee_token),
                         int(provider_fee_amount),
                         v,
                         r,
@@ -53,17 +54,21 @@ class DatatokenEnterprise(Datatoken):
                         provider_data,
                     ),
                     (
-                        Datatoken.to_checksum_address(consume_market_order_fee_address),
-                        Datatoken.to_checksum_address(consume_market_order_fee_token),
+                        ContractBase.to_checksum_address(
+                            consume_market_order_fee_address
+                        ),
+                        ContractBase.to_checksum_address(
+                            consume_market_order_fee_token
+                        ),
                         consume_market_order_fee_amount,
                     ),
                 ),
                 (
-                    Datatoken.to_checksum_address(exchange_contract),
+                    ContractBase.to_checksum_address(exchange_contract),
                     exchange_id,
                     max_base_token_amount,
                     consume_market_swap_fee_amount,
-                    Datatoken.to_checksum_address(consume_market_swap_fee_address),
+                    ContractBase.to_checksum_address(consume_market_swap_fee_address),
                 ),
             ),
             from_wallet,
@@ -92,11 +97,11 @@ class DatatokenEnterprise(Datatoken):
             "buyFromDispenserAndOrder",
             (
                 (
-                    Datatoken.to_checksum_address(consumer),
+                    ContractBase.to_checksum_address(consumer),
                     service_index,
                     (
-                        Datatoken.to_checksum_address(provider_fee_address),
-                        Datatoken.to_checksum_address(provider_fee_token),
+                        ContractBase.to_checksum_address(provider_fee_address),
+                        ContractBase.to_checksum_address(provider_fee_token),
                         int(provider_fee_amount),
                         v,
                         r,
@@ -105,12 +110,16 @@ class DatatokenEnterprise(Datatoken):
                         provider_data,
                     ),
                     (
-                        Datatoken.to_checksum_address(consume_market_order_fee_address),
-                        Datatoken.to_checksum_address(consume_market_order_fee_token),
+                        ContractBase.to_checksum_address(
+                            consume_market_order_fee_address
+                        ),
+                        ContractBase.to_checksum_address(
+                            consume_market_order_fee_token
+                        ),
                         consume_market_order_fee_amount,
                     ),
                 ),
-                Datatoken.to_checksum_address(dispenser_address),
+                ContractBase.to_checksum_address(dispenser_address),
             ),
             from_wallet,
         )

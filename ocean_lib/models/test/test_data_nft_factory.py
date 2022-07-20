@@ -637,8 +637,8 @@ def test_start_multiple_order(
         consumer_wallet.address,
         1,
         (
-            web3.toChecksumAddress(provider_fee_address.lower()),
-            web3.toChecksumAddress(provider_fee_token.lower()),
+            provider_fee_address,
+            provider_fee_token,
             provider_fee_amount,
             signature.v,
             signature.r,
@@ -647,8 +647,8 @@ def test_start_multiple_order(
             provider_data,
         ),
         (
-            web3.toChecksumAddress(consumer_wallet.address.lower()),
-            web3.toChecksumAddress(mock_dai_contract_address.lower()),
+            consumer_wallet.address,
+            mock_dai_contract_address,
             0,
         ),
     )
