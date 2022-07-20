@@ -119,7 +119,7 @@ class DataNFT(ContractBase):
                 (
                     metadata_state,
                     metadata_decryptor_url,
-                    metadata_decryptor_address,
+                    ContractBase.to_checksum_address(metadata_decryptor_address),
                     flags,
                     data,
                     data_hash,
@@ -159,10 +159,10 @@ class DataNFT(ContractBase):
                 template_index,
                 [name, symbol],
                 [
-                    minter,
-                    fee_manager,
-                    publish_market_order_fee_address,
-                    publish_market_order_fee_token,
+                    ContractBase.to_checksum_address(minter),
+                    ContractBase.to_checksum_address(fee_manager),
+                    ContractBase.to_checksum_address(publish_market_order_fee_address),
+                    ContractBase.to_checksum_address(publish_market_order_fee_token),
                 ],
                 [datatoken_cap, publish_market_order_fee_amount],
                 bytess,
@@ -175,7 +175,9 @@ class DataNFT(ContractBase):
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "addToCreateERC20List", (allowed_address,), from_wallet
+            "addToCreateERC20List",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
@@ -183,13 +185,17 @@ class DataNFT(ContractBase):
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "removeFromCreateERC20List", (allowed_address,), from_wallet
+            "removeFromCreateERC20List",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
     def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
-            "addTo725StoreList", (allowed_address,), from_wallet
+            "addTo725StoreList",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
@@ -197,13 +203,17 @@ class DataNFT(ContractBase):
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "removeFrom725StoreList", (allowed_address,), from_wallet
+            "removeFrom725StoreList",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
     def add_to_metadata_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
-            "addToMetadataList", (allowed_address,), from_wallet
+            "addToMetadataList",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
@@ -211,16 +221,26 @@ class DataNFT(ContractBase):
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "removeFromMetadataList", (allowed_address,), from_wallet
+            "removeFromMetadataList",
+            (ContractBase.to_checksum_address(allowed_address),),
+            from_wallet,
         )
 
     @enforce_types
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addManager", (manager_address,), from_wallet)
+        return self.send_transaction(
+            "addManager",
+            (ContractBase.to_checksum_address(manager_address),),
+            from_wallet,
+        )
 
     @enforce_types
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeManager", (manager_address,), from_wallet)
+        return self.send_transaction(
+            "removeManager",
+            (ContractBase.to_checksum_address(manager_address),),
+            from_wallet,
+        )
 
     @enforce_types
     def add_multiple_users_to_roles(
@@ -229,7 +249,7 @@ class DataNFT(ContractBase):
         return self.send_transaction(
             "addMultipleUsersToRoles",
             (
-                addresses,
+                [ContractBase.to_checksum_address(address) for address in addresses],
                 roles,
             ),
             from_wallet,
@@ -240,7 +260,9 @@ class DataNFT(ContractBase):
         self, operation: int, to: str, value: int, data: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "executeCall", (operation, to, value, data), from_wallet
+            "executeCall",
+            (operation, ContractBase.to_checksum_address(to), value, data),
+            from_wallet,
         )
 
     @enforce_types
@@ -264,7 +286,13 @@ class DataNFT(ContractBase):
         self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (from_address, to_address, token_id), from_wallet
+            "transferFrom",
+            (
+                ContractBase.to_checksum_address(from_address),
+                ContractBase.to_checksum_address(to_address),
+                token_id,
+            ),
+            from_wallet,
         )
 
     @enforce_types
@@ -272,7 +300,13 @@ class DataNFT(ContractBase):
         self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "safeTransferFrom", (from_address, to_address, token_id), from_wallet
+            "safeTransferFrom",
+            (
+                ContractBase.to_checksum_address(from_address),
+                ContractBase.to_checksum_address(to_address),
+                token_id,
+            ),
+            from_wallet,
         )
 
     @enforce_types
@@ -305,11 +339,13 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def get_permissions(self, user: str) -> list:
-        return self.contract.caller.getPermissions(user)
+        return self.contract.caller.getPermissions(
+            ContractBase.to_checksum_address(user)
+        )
 
     @enforce_types
     def balance_of(self, account: str) -> int:
-        return self.contract.caller.balanceOf(account)
+        return self.contract.caller.balanceOf(ContractBase.to_checksum_address(account))
 
     @enforce_types
     def owner_of(self, token_id: int) -> str:
@@ -321,11 +357,15 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def is_deployed(self, datatoken: str) -> bool:
-        return self.contract.caller.isDeployed(datatoken)
+        return self.contract.caller.isDeployed(
+            ContractBase.to_checksum_address(datatoken)
+        )
 
     @enforce_types
     def is_erc20_deployer(self, account: str) -> bool:
-        return self.contract.caller.isERC20Deployer(account)
+        return self.contract.caller.isERC20Deployer(
+            ContractBase.to_checksum_address(account)
+        )
 
     @enforce_types
     def set_token_uri(
