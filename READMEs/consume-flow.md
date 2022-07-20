@@ -42,7 +42,7 @@ Then, please refer to [publish-flow](publish-flow.md) and complete the following
 
 Now, you're Bob. You want to consume the dataset that Alice just published. The first step is to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet. This README uses (d) - minting.
 
-Then, in the same console:
+In the same Python console as before:
 
 ```python
 # Initialize Bob's wallet
@@ -57,9 +57,13 @@ datatoken.mint(
     value=ocean.to_wei("1"),
     from_wallet=alice_wallet,
 )
+```
 
 ## 4. Bob downloads the dataset
 
+In the same Python console:
+
+```python
 # Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
