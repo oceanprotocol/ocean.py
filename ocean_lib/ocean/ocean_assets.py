@@ -814,4 +814,3 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
-

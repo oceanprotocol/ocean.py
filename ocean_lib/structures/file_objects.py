@@ -60,7 +60,12 @@ class IpfsFile(FilesType):
 
     @enforce_types
     def to_dict(self) -> dict:
-        return {"type": self.type, "hash": self.hash, "url": self.url, "gateway": self.gateway}
+        return {
+            "type": self.type,
+            "hash": self.hash,
+            "url": self.url,
+            "gateway": self.gateway,
+        }
 
     def get_download_url(self):
         if not self.gateway:
@@ -68,12 +73,16 @@ class IpfsFile(FilesType):
 
         if self.gateway == "https://api.web3.storage/upload":
             url = f"https://{self.hash}.ipfs.dweb.link"
-        elif self.gateway in ["https://api.estuary.tech/content/add", "https://shuttle-5.estuary.tech/content/add"]:
-            url = f'https://dweb.link/ipfs/{cid}'
+        elif self.gateway in [
+            "https://api.estuary.tech/content/add",
+            "https://shuttle-5.estuary.tech/content/add",
+        ]:
+            url = f"https://dweb.link/ipfs/{cid}"
         else:
             url = urljoin(os.getenv("IPFS_GATEWAY"), urljoin("ipfs/", self.hash))
 
         return url
+
 
 @enforce_types
 def FilesTypeFactory(file_obj: dict) -> FilesType:
