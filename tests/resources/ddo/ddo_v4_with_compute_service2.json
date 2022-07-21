@@ -47,7 +47,7 @@
           {
             "did": "did:op:123",
             "filesChecksum":"5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61",
-            "containerSectionChecksum": "56be783ba2c10ec061b673fbf232b20ed4f7d59e9d78e7a2cf5dd5e16df2db49"
+            "containerSectionChecksum": "77ac49b8c4ad209694f7143cec62d67ee4c6d2d5edf1f3f4e09ca4173b22610f"
           }
         ]
       }
