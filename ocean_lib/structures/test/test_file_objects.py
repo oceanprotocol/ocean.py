@@ -30,18 +30,12 @@ def test_url_file():
 @pytest.mark.unit
 def test_ipfs_file():
     ipfs_file = IpfsFile(hash="abc")
-    assert ipfs_file.to_dict() == {"type": "ipfs", "hash": "abc"}
-
-
-@pytest.mark.unit
-def test_filecoin_file():
-    filecoin_file = FilecoinFile(
-        hash="bafybeigsvqhocrg45mm4ffdqkq24yigwonjlndsjk3xujrawhxhfsglooe"
-    )
-    assert filecoin.to_dict() == {
-        "type": "filecoin",
-        "hash": "bafybeigsvqhocrg45mm4ffdqkq24yigwonjlndsjk3xujrawhxhfsglooe",
-    }
+    assert ipfs_file.to_dict() == {
+        "type": "ipfs", 
+        "hash": "abc",
+        "url": "https://abc.ipfs.dweb.link/",
+        "gateway": "https://api.web3.storage/upload",
+        }
 
 
 @pytest.mark.unit
