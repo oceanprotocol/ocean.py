@@ -31,11 +31,11 @@ def test_url_file():
 def test_ipfs_file():
     ipfs_file = IpfsFile(hash="abc")
     assert ipfs_file.to_dict() == {
-        "type": "ipfs", 
+        "type": "ipfs",
         "hash": "abc",
         "url": "https://abc.ipfs.dweb.link/",
         "gateway": "https://api.web3.storage/upload",
-        }
+    }
 
 
 @pytest.mark.unit
