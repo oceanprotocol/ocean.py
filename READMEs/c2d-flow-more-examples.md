@@ -146,7 +146,7 @@ ALGO_metadata = {
             "entrypoint": "python $ALGO",
             "image": "oceanprotocol/algo_dockers",
             "tag": "python-panda", # This image provides all the dependencies of the logistic_regression.py algorithm
-            "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+            "checksum": "sha256:7fc268f502935d11ff50c54e3776dda76477648d5d83c2e3c4fdab744390ecf2",
         },
     }
 }

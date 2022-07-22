@@ -23,7 +23,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
-    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
+    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag,docker_digest",
     [
         (
             "lena",
@@ -31,6 +31,7 @@ from ocean_lib.web3_internal.wallet import Wallet
             "grayscale",
             "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/grayscale.py",
             "python-branin",
+            "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
         ),
         (
             "iris",
@@ -38,22 +39,38 @@ from ocean_lib.web3_internal.wallet import Wallet
             "logistic-regression",
             "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/logistic_regression.py",
             "python-panda",
+            "sha256:7fc268f502935d11ff50c54e3776dda76477648d5d83c2e3c4fdab744390ecf2",
         ),
     ],
 )
 def test_c2d_flow_more_examples_readme(
-    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    dataset_name,
+    dataset_url,
+    algorithm_name,
+    algorithm_url,
+    algorithm_docker_tag,
+    docker_digest,
 ):
     """This test mirrors the c2d-flow-more-examples.md README.
     As such, it does not use the typical pytest fixtures.
     """
     c2d_flow_readme(
-        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+        dataset_name,
+        dataset_url,
+        algorithm_name,
+        algorithm_url,
+        algorithm_docker_tag,
+        docker_digest,
     )
 
 
 def c2d_flow_readme(
-    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    dataset_name,
+    dataset_url,
+    algorithm_name,
+    algorithm_url,
+    algorithm_docker_tag,
+    docker_digest,
 ):
     """This is a helper method that mirrors the c2d-flow.md README."""
 
@@ -170,7 +187,7 @@ def c2d_flow_readme(
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
                 "tag": algorithm_docker_tag,
-                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+                "checksum": docker_digest,
             },
         },
     }
