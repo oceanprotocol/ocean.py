@@ -39,17 +39,6 @@ class UrlFile(FilesType):
         return result
 
 
-class FilecoinFile(object):
-    @enforce_types
-    def __init__(self, hash: str) -> None:
-        self.hash = hash
-        self.type = "filecoin"
-
-    @enforce_types
-    def to_dict(self) -> dict:
-        return {"type": self.type, "hash": self.hash}
-
-
 class IpfsFile(FilesType):
     @enforce_types
     def __init__(self, hash: str) -> None:
@@ -71,13 +60,11 @@ class IpfsFile(FilesType):
         if not self.gateway:
             raise Exception("No IPFS_GATEWAY defined, can not resolve ipfs hash.")
 
-        if self.gateway == "https://api.web3.storage/upload":
-            url = f"https://{self.hash}.ipfs.dweb.link"
-        elif self.gateway in [
+        if self.gateway in [
+            "https://api.web3.storage/upload",
             "https://api.estuary.tech/content/add",
-            "https://shuttle-5.estuary.tech/content/add",
-        ]:
-            url = f"https://dweb.link/ipfs/{cid}"
+        ] + [f"https://shuttle-{i}.estuary.tech/content/add" for i in range(1, 6)]:
+            url = f"https://{self.hash}.ipfs.dweb.link/"
         else:
             url = urljoin(os.getenv("IPFS_GATEWAY"), urljoin("ipfs/", self.hash))
 
