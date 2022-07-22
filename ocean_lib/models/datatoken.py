@@ -32,7 +32,6 @@ class Datatoken(ContractBase):
     EVENT_PROVIDER_FEE = "ProviderFee"
     EVENT_MINTER_PROPOSED = "MinterProposed"
     EVENT_MINTER_APPROVED = "MinterApproved"
-    EVENT_NEW_POOL = "NewPool"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
     @property
@@ -70,10 +69,6 @@ class Datatoken(ContractBase):
     @property
     def event_MinterApproved(self):
         return self.events.MinterApproved()
-
-    @property
-    def event_NewPool(self):
-        return self.events.NewPool()
 
     @property
     def event_NewFixedRate(self):
@@ -469,10 +464,6 @@ class Datatoken(ContractBase):
     @enforce_types
     def get_payment_collector(self) -> str:
         return self.contract.caller.getPaymentCollector()
-
-    @enforce_types
-    def get_pools(self) -> List[str]:
-        return self.contract.caller.getPools()
 
     @enforce_types
     def get_fixed_rates(self) -> List[Tuple[str, bytes]]:

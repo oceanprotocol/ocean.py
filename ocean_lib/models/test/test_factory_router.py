@@ -18,37 +18,7 @@ OPC_CONSUME_FEE = to_wei("0.03")  # 0.03 DT
 OPC_PROVIDER_FEE = to_wei("0")  # 0%
 
 
-@pytest.mark.unit
-def test_properties(factory_router: FactoryRouter):
-    """Tests the events' properties."""
-    # Factory Router Events
-    assert factory_router.event_NewPool.abi["name"] == FactoryRouter.EVENT_NEW_POOL
-    # BFactory Events
-    assert (
-        factory_router.event_BPoolCreated.abi["name"]
-        == FactoryRouter.EVENT_BPOOL_CREATED
-    )
-    assert (
-        factory_router.event_PoolTemplateAdded.abi["name"]
-        == FactoryRouter.EVENT_POOL_TEMPLATE_ADDED
-    )
-    assert (
-        factory_router.event_PoolTemplateRemoved.abi["name"]
-        == FactoryRouter.EVENT_POOL_TEMPLATE_REMOVED
-    )
-
-
-# BFactory methods
-
-
-@pytest.mark.unit
-def test_is_pool_template(config: Config, factory_router: FactoryRouter):
-    assert factory_router.is_pool_template(get_address_of_type(config, "poolTemplate"))
-
-
 # FactoryRouter methods
-
-
 @pytest.mark.unit
 def test_router_owner(factory_router: FactoryRouter):
     assert Web3.isChecksumAddress(factory_router.router_owner())

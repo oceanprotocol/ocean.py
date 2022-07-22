@@ -6,12 +6,12 @@ from typing import List, Tuple, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.bfactory import BFactory
 from ocean_lib.structures.abi_tuples import Operations, Stakes
+from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class FactoryRouter(BFactory):
+class FactoryRouter(ContractBase):
     CONTRACT_NAME = "FactoryRouter"
     EVENT_NEW_POOL = "NewPool"
 
