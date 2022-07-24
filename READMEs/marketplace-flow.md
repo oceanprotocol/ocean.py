@@ -67,6 +67,13 @@ Then, please refer to [publish-flow](publish-flow.md) and complete the following
 
 In the following steps we will create a pool from the created token, in order to allow another user
 to order this access token.
+
+We need an envvar for minting fake OCEAN. In console:
+```console
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+```
+
+Then, in Python console:
 ```python
 
 # Mint OCEAN

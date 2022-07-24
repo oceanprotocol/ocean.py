@@ -2,7 +2,10 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from unittest.mock import Mock, patch
+
 import pytest
+from requests.models import Response
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
@@ -223,7 +226,16 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         get_sample_ddo_with_compute_service("ddo_v4_with_compute_service2.json")
     )
 
-    publisher_trusted_algorithms = [algorithm_ddo.generate_trusted_algorithms()]
+    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+        the_response = Mock(spec=Response)
+        the_response.json.return_value = [
+            {
+                "checksum": "5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61"
+            }
+        ]
+        mock.return_value = the_response
+        publisher_trusted_algorithms = [algorithm_ddo.generate_trusted_algorithms()]
+
     assert len(publisher_trusted_algorithms) == 1
     compute_service = ddo.services[1]
     assert compute_service.type == "compute"
@@ -232,18 +244,37 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         == publisher_trusted_algorithms
     )
 
-    new_publisher_trusted_algorithms = compute_service.add_publisher_trusted_algorithm(
-        algorithm_ddo_v2,
-    )
+    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+        the_response = Mock(spec=Response)
+        the_response.json.return_value = [
+            {
+                "checksum": "5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61"
+            }
+        ]
+        mock.return_value = the_response
+        new_publisher_trusted_algorithms = (
+            compute_service.add_publisher_trusted_algorithm(
+                algorithm_ddo_v2,
+            )
+        )
 
     assert (
         new_publisher_trusted_algorithms is not None
     ), "Added a new trusted algorithm failed. The list is empty."
     assert len(new_publisher_trusted_algorithms) == 2
 
-    new_publisher_trusted_algorithms = compute_service.add_publisher_trusted_algorithm(
-        algorithm_ddo
-    )
+    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+        the_response = Mock(spec=Response)
+        the_response.json.return_value = [
+            {
+                "checksum": "5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61"
+            }
+        ]
+        mock.return_value = the_response
+        new_publisher_trusted_algorithms = (
+            compute_service.add_publisher_trusted_algorithm(algorithm_ddo)
+        )
+
     assert new_publisher_trusted_algorithms is not None
     for trusted_algorithm in publisher_trusted_algorithms:
         assert (

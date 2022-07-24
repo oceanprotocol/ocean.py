@@ -45,12 +45,38 @@ def get_contracts_addresses(
     network_alias = {"ganache": "development"}
 
     if not address_file or not os.path.exists(address_file):
-        return None
+        raise Exception("Address file not found.")
     with open(address_file) as f:
         addresses = json.load(f)
 
     network_addresses = addresses.get(network, None)
     if network_addresses is None and network in network_alias:
         network_addresses = addresses.get(network_alias[network], None)
+
+    if network_addresses is None:
+        msg = f" (alias {network_alias[network]})" if network in network_alias else ""
+        raise Exception(
+            f"Address not found for {network}{msg}. Please check your address file."
+        )
+
+    return _checksum_contract_addresses(network_addresses=network_addresses)
+
+
+@enforce_types
+# Check singnet/snet-cli#142 (comment). You need to provide a lowercase address then call web3.toChecksumAddress()
+# for software safety.
+def _checksum_contract_addresses(
+    network_addresses: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    for key, value in network_addresses.items():
+        if key == "chainId":
+            continue
+        if isinstance(value, int):
+            continue
+        if isinstance(value, dict):
+            for k, v in value.items():
+                value.update({k: Web3.toChecksumAddress(v.lower())})
+        else:
+            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
 
     return network_addresses

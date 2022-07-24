@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Profile NFTs
 
-This is a flow showing how to do "login with Web3" with the help of Ocean data NFTs. In this flow, a dapp is not only connected to the user's wallet, but it can access profile data that the user has privately shared to it.
+This is a flow showing how to do "login with Web3" with the help of Ocean data NFTs. In this flow, a dapp is not only connected to the user's wallet, but it can access profile data that the user has privately shared to it. Interestingly, these NFTs are also essentially [Soulbound Tokens](https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID4105763_code1186331.pdf?abstractid=4105763&mirid=1) as well:)
 
 Here are the steps:
 

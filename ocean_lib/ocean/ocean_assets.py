@@ -479,7 +479,13 @@ class OceanAssets:
             asset.add_service(service)
 
         # Validation by Aquarius
-        self.validate(asset)
+        _, proof = self.validate(asset)
+        proof = (
+            proof["publicKey"],
+            proof["v"],
+            proof["r"][0],
+            proof["s"][0],
+        )
 
         document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
@@ -492,7 +498,7 @@ class OceanAssets:
             flags=flags,
             data=document,
             data_hash=ddo_hash,
-            metadata_proofs=[],
+            metadata_proofs=[proof],
             from_wallet=publisher_wallet,
         )
 
@@ -548,14 +554,21 @@ class OceanAssets:
             service.encrypt_files(asset.nft_address)
 
         # Validation by Aquarius
-        validation_result, validation_errors = self.validate(asset)
+        validation_result, errors_or_proof = self.validate(asset)
         if not validation_result:
-            msg = f"Asset has validation errors: {validation_errors}"
+            msg = f"Asset has validation errors: {errors_or_proof}"
             logger.error(msg)
             raise ValueError(msg)
 
         document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
+        )
+
+        proof = (
+            errors_or_proof["publicKey"],
+            errors_or_proof["v"],
+            errors_or_proof["r"][0],
+            errors_or_proof["s"][0],
         )
 
         tx_result = data_nft.set_metadata(
@@ -565,7 +578,7 @@ class OceanAssets:
             flags=flags,
             data=document,
             data_hash=ddo_hash,
-            metadata_proofs=[],
+            metadata_proofs=[proof],
             from_wallet=publisher_wallet,
         )
 

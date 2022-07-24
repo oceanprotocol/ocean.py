@@ -16,6 +16,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
+from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
@@ -23,10 +24,7 @@ from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
-from tests.resources.helper_functions import (
-    get_provider_fees,
-    get_publisher_ocean_instance,
-)
+from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     TEST_SERVICE_ENDPOINTS,
     HttpClientEmptyMock,
@@ -240,13 +238,16 @@ def test_fileinfo(
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
-    fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
+    fileinfo_result = FileInfoProvider.fileinfo(
+        ddo.did, access_service, with_checksum=True
+    )
     assert fileinfo_result.status_code == 200
     files_info = fileinfo_result.json()
 
     assert len(files_info) == 3
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
+        assert file["checksum"]
         assert file["valid"] is True
     assert files_info[0]["contentType"] == "text/plain"
     assert files_info[1]["contentType"] == "text/xml"
@@ -281,12 +282,9 @@ def test_initialize(
     assert initialize_result
     assert initialize_result.status_code == 200
     response_json = initialize_result.json()
-    assert response_json["providerFee"] == get_provider_fees(
-        web3,
-        provider_wallet,
-        get_ocean_token_address(config.address_file),
-        0,
-        0,
+    assert response_json["providerFee"]["providerFeeAmount"] == "0"
+    assert response_json["providerFee"]["providerFeeToken"] == get_ocean_token_address(
+        config.address_file
     )
 
 
@@ -493,13 +491,13 @@ def test_fileinfo_failure(config):
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.fileinfo("0xabc", service)
+        FileInfoProvider.fileinfo("0xabc", service)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.fileinfo("0xabc", service)
+        FileInfoProvider.fileinfo("0xabc", service)
 
     DataSP.set_http_client(get_requests_session())
 
