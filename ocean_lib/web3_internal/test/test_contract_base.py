@@ -126,15 +126,15 @@ def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
 def test_gas_scaling_factor(web3, monkeypatch):
     monkeypatch.setenv("GAS_SCALING_FACTOR", "5.0")
     gas_price1 = web3.eth.gas_price
+    gas_price_with_scaling = ContractBase.get_gas_price(web3)
+    assert gas_price_with_scaling == gas_price1 * 5
+
     web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
     gas_price2 = web3.eth.generate_gas_price()
-    assert gas_price1 == gas_price2
-    gas_price_with_scaling = ContractBase.get_gas_price(web3)
-    assert gas_price_with_scaling == gas_price2 * 5
 
     monkeypatch.delenv("GAS_SCALING_FACTOR")
     polygon_web3 = get_web3("https://polygon-rpc.com")
     polygon_web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     polygon_web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
     polygon_gas = polygon_web3.eth.generate_gas_price()
-    assert polygon_gas > gas_price1
+    assert polygon_gas > gas_price2
