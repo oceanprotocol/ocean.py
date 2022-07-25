@@ -102,6 +102,7 @@ asset = ocean.assets.create(
 )
 
 did = asset.did 
+```
 
 ## 4. Bob downloads datasets
 The next steps for downloading the dataset are the same as other tutorials. The data file is automatically decrypted by Provider on download.
@@ -109,4 +110,3 @@ The next steps for downloading the dataset are the same as other tutorials. The 
 - Alice creates a datatoken liquidity pool
 - Bob buys and downloads data asset 
 
-```
