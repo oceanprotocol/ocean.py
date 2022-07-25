@@ -53,10 +53,7 @@ class HuggingFaceHub:
             repo_id=object_name, repo_type=object_type, exist_ok=exist_ok
         )
 
-        filename = {
-            "dataset":"encrypted_dataset",
-            "model":"encrypted_pytorch_model"
-        }
+        filename = {"dataset": "encrypted_dataset", "model": "encrypted_pytorch_model"}
 
         repo_url = upload_file(
             path_or_fileobj=path_or_fileobj,
