@@ -109,7 +109,10 @@ class FixedRateExchange(ContractBase):
 
     @enforce_types
     def generate_exchange_id(self, base_token: str, datatoken: str) -> bytes:
-        return self.contract.caller.generateExchangeId(base_token, datatoken)
+        return self.contract.caller.generateExchangeId(
+            ContractBase.to_checksum_address(base_token),
+            ContractBase.to_checksum_address(datatoken),
+        )
 
     @enforce_types
     def get_base_token_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
@@ -153,7 +156,7 @@ class FixedRateExchange(ContractBase):
                 exchange_id,
                 datatoken_amount,
                 max_base_token_amount,
-                consume_market_swap_fee_address,
+                ContractBase.to_checksum_address(consume_market_swap_fee_address),
                 consume_market_swap_fee_amount,
             ),
             from_wallet,
@@ -175,7 +178,7 @@ class FixedRateExchange(ContractBase):
                 exchange_id,
                 datatoken_amount,
                 min_base_token_amount,
-                consume_market_swap_fee_address,
+                ContractBase.to_checksum_address(consume_market_swap_fee_address),
                 consume_market_swap_fee_amount,
             ),
             from_wallet,
@@ -220,7 +223,10 @@ class FixedRateExchange(ContractBase):
     ) -> str:
         return self.send_transaction(
             "updateMarketFeeCollector",
-            (exchange_id, publish_market_swap_fee_collector),
+            (
+                exchange_id,
+                ContractBase.to_checksum_address(publish_market_swap_fee_collector),
+            ),
             from_wallet,
         )
 
@@ -261,7 +267,9 @@ class FixedRateExchange(ContractBase):
         self, exchange_id: bytes, new_allowed_swapper: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setAllowedSwapper", (exchange_id, new_allowed_swapper), from_wallet
+            "setAllowedSwapper",
+            (exchange_id, ContractBase.to_checksum_address(new_allowed_swapper)),
+            from_wallet,
         )
 
     @enforce_types
@@ -312,9 +320,13 @@ class MockExchange(ContractBase):
         from_wallet: Wallet,
     ):
         return self.send_transaction(
-            "depositWithPermit", (token, amount, deadline, v, r, s), from_wallet
+            "depositWithPermit",
+            (ContractBase.to_checksum_address(token), amount, deadline, v, r, s),
+            from_wallet,
         )
 
     @enforce_types
     def deposit(self, token: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("deposit", (token, amount), from_wallet)
+        return self.send_transaction(
+            "deposit", (ContractBase.to_checksum_address(token), amount), from_wallet
+        )

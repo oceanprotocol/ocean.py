@@ -59,4 +59,24 @@ def get_contracts_addresses(
             f"Address not found for {network}{msg}. Please check your address file."
         )
 
+    return _checksum_contract_addresses(network_addresses=network_addresses)
+
+
+@enforce_types
+# Check singnet/snet-cli#142 (comment). You need to provide a lowercase address then call web3.toChecksumAddress()
+# for software safety.
+def _checksum_contract_addresses(
+    network_addresses: Dict[str, Any]
+) -> Optional[Dict[str, Any]]:
+    for key, value in network_addresses.items():
+        if key == "chainId":
+            continue
+        if isinstance(value, int):
+            continue
+        if isinstance(value, dict):
+            for k, v in value.items():
+                value.update({k: Web3.toChecksumAddress(v.lower())})
+        else:
+            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
+
     return network_addresses
