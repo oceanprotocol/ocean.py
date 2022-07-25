@@ -26,7 +26,7 @@ class HuggingFaceHub:
     """HuggingFace class."""
 
     def __init__(self) -> None:
-        token = os.environ["HF_TOKEN"]
+        token = os.environ["HF_KEY"]
 
         if token is None:
             raise ValueError(

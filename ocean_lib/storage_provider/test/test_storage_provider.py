@@ -28,7 +28,7 @@ def test_upload_fails():
 
     gateway = "https://api.web3.storage/upload"
     os.environ["IPFS_GATEWAY"] = gateway
-    os.environ["STORAGE_TOKEN"] = "thisIsNotAnAPIKey"
+    os.environ["IPFS_KEY"] = "thisIsNotAnAPIKey"
     sp = SP()
 
     http_client = HttpClientNiceMock()
@@ -55,7 +55,7 @@ def test_download_fails():
 
     gateway = "https://api.web3.storage/upload"
     os.environ["IPFS_GATEWAY"] = gateway
-    os.environ["STORAGE_TOKEN"] = "thisIsNotAnAPIKey"
+    os.environ["IPFS_KEY"] = "thisIsNotAnAPIKey"
     sp = SP()
 
     cid = "32df345ds65432w934009df4qpx12gh83wd5"

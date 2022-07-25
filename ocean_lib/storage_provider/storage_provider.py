@@ -52,7 +52,7 @@ class StorageProvider:
         response = self.requests_session.post(
             self.gateway_uri,
             files={payload_key[self.gateway_type]: object_to_upload},
-            headers={"Authorization": "Bearer " + os.environ["STORAGE_TOKEN"]},
+            headers={"Authorization": "Bearer " + os.environ["IPFS_KEY"]},
         )
 
         if not hasattr(response, "status_code"):
