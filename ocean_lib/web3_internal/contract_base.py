@@ -176,8 +176,7 @@ class ContractBase(object):
     def get_gas_price(web3) -> int:
         if os.getenv("GAS_SCALING_FACTOR"):
             return int(web3.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
-        # For POA chain support
-        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
         web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
         return web3.eth.generate_gas_price()
 
