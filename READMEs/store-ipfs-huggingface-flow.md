@@ -42,7 +42,7 @@ export HF_KEY=<ADD HUGGINGFACE KEY HERE>
 Then in the same python console:
 ```python
 
-object_path = "./hello.txt"
+object_path = "ocean_lib/storage_provider/test/hello.txt"
 with open(object_path, "rb") as f:
     files = f.read()
 
