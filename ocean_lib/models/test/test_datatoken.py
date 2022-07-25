@@ -20,7 +20,6 @@ from tests.resources.helper_functions import get_address_of_type
 @pytest.mark.unit
 def test_properties(datatoken):
     """Tests the events' properties."""
-    assert datatoken.event_NewPool.abi["name"] == Datatoken.EVENT_NEW_POOL
     assert datatoken.event_NewFixedRate.abi["name"] == Datatoken.EVENT_NEW_FIXED_RATE
     assert datatoken.event_MinterProposed.abi["name"] == Datatoken.EVENT_MINTER_PROPOSED
     assert datatoken.event_OrderStarted.abi["name"] == Datatoken.EVENT_ORDER_STARTED
