@@ -32,7 +32,6 @@ class Datatoken(ContractBase):
     EVENT_PROVIDER_FEE = "ProviderFee"
     EVENT_MINTER_PROPOSED = "MinterProposed"
     EVENT_MINTER_APPROVED = "MinterApproved"
-    EVENT_NEW_POOL = "NewPool"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
     @property
@@ -72,57 +71,12 @@ class Datatoken(ContractBase):
         return self.events.MinterApproved()
 
     @property
-    def event_NewPool(self):
-        return self.events.NewPool()
-
-    @property
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
 
     @enforce_types
     def router(self) -> str:
         return self.contract.caller.router()
-
-    @enforce_types
-    def deploy_pool(
-        self,
-        rate: int,
-        base_token_decimals: int,
-        base_token_amount: int,
-        lp_swap_fee_amount: int,
-        publish_market_swap_fee_amount: int,
-        ss_contract: str,
-        base_token_address: str,
-        base_token_sender: str,
-        publisher_address: str,
-        publish_market_swap_fee_collector: str,
-        pool_template_address: str,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "deployPool",
-            (
-                [
-                    rate,
-                    base_token_decimals,
-                    base_token_amount
-                    // 100
-                    * 9,  # max 10% vesting amount of the total cap
-                    2500000,
-                    base_token_amount,
-                ],
-                [lp_swap_fee_amount, publish_market_swap_fee_amount],
-                [
-                    ContractBase.to_checksum_address(ss_contract),
-                    ContractBase.to_checksum_address(base_token_address),
-                    ContractBase.to_checksum_address(base_token_sender),
-                    ContractBase.to_checksum_address(publisher_address),
-                    ContractBase.to_checksum_address(publish_market_swap_fee_collector),
-                    ContractBase.to_checksum_address(pool_template_address),
-                ],
-            ),
-            from_wallet,
-        )
 
     @enforce_types
     def create_fixed_rate(
@@ -510,10 +464,6 @@ class Datatoken(ContractBase):
     @enforce_types
     def get_payment_collector(self) -> str:
         return self.contract.caller.getPaymentCollector()
-
-    @enforce_types
-    def get_pools(self) -> List[str]:
-        return self.contract.caller.getPools()
 
     @enforce_types
     def get_fixed_rates(self) -> List[Tuple[str, bytes]]:
