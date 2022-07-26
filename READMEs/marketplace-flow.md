@@ -67,6 +67,7 @@ exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN_token,
     amount=ocean.to_wei(100),
+    fixed_rate=ocean.to_wei(1),
     from_wallet=alice_wallet,
 )
 ```
