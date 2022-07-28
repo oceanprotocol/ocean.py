@@ -6,7 +6,6 @@ import pytest
 from web3 import Web3, exceptions
 
 from ocean_lib.config import Config
-from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -14,7 +13,6 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
 )
-from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -890,146 +888,6 @@ def test_transfer_nft(
     assert publish_fees[2] == to_wei(1)
 
 
-def test_nft_transfer_with_pool(
-    web3,
-    config,
-    ocean_token,
-    publisher_wallet,
-    consumer_wallet,
-    factory_router,
-    data_nft,
-    datatoken,
-    publisher_addr,
-    consumer_addr,
-):
-    """Tests transferring the NFT before deploying an ERC20, a pool."""
-
-    tx = data_nft.safe_transfer_from(
-        publisher_wallet.address,
-        consumer_wallet.address,
-        token_id=1,
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    transfer_event = data_nft.get_event_log(
-        DataNFTFactoryContract.EVENT_TRANSFER,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert transfer_event[0].event == "Transfer"
-    assert transfer_event[0].args["from"] == publisher_wallet.address
-    assert transfer_event[0].args.to == consumer_wallet.address
-    assert data_nft.balance_of(consumer_wallet.address) == 1
-    assert data_nft.balance_of(publisher_wallet.address) == 0
-    assert data_nft.is_erc20_deployer(consumer_wallet.address) is True
-    assert data_nft.owner_of(1) == consumer_wallet.address
-
-    ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
-
-    tx = datatoken.deploy_pool(
-        rate=to_wei(1),
-        base_token_decimals=ocean_token.decimals(),
-        base_token_amount=to_wei(100),
-        lp_swap_fee_amount=to_wei("0.003"),
-        publish_market_swap_fee_amount=to_wei("0.001"),
-        ss_contract=get_address_of_type(config, "Staking"),
-        base_token_address=ocean_token.address,
-        base_token_sender=consumer_addr,
-        publisher_address=consumer_addr,
-        publish_market_swap_fee_collector=publisher_addr,
-        pool_template_address=get_address_of_type(config, "poolTemplate"),
-        from_wallet=consumer_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    pool_event = factory_router.get_event_log(
-        DataNFTFactoryContract.EVENT_NEW_POOL,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert pool_event[0].event == "NewPool"
-    bpool_address = pool_event[0].args.poolAddress
-    bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized()
-    assert bpool.get_opc_fee() == OPC_SWAP_FEE_APPROVED
-    assert bpool.get_swap_fee() == to_wei("0.003")
-    assert bpool.community_fee(ocean_token.address) == 0
-    assert bpool.community_fee(datatoken.address) == 0
-    assert bpool.publish_market_fee(ocean_token.address) == 0
-    assert bpool.publish_market_fee(datatoken.address) == 0
-
-    ocean_token.approve(bpool_address, to_wei(1000000), consumer_wallet)
-    tx = bpool.join_swap_extern_amount_in(
-        token_amount_in=to_wei(10),
-        min_pool_amount_out=to_wei(1),
-        from_wallet=consumer_wallet,
-    )
-
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    join_event = bpool.get_event_log(
-        BPool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert join_event[0].args.caller == consumer_addr
-    assert join_event[0].args.tokenIn == ocean_token.address
-    assert join_event[0].args.tokenAmountIn == to_wei(10)
-
-    bpt_event = bpool.get_event_log(
-        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-    assert bpt_event[0].args.bptAmount  # amount in pool shares
-    assert bpool.get_balance(ocean_token.address) == to_wei(100) + to_wei(10)
-
-    amount_out = bpool.get_amount_out_exact_in(
-        ocean_token.address, datatoken.address, to_wei(20), to_wei("0.01")
-    )[0]
-    tx = bpool.swap_exact_amount_in(
-        token_in=ocean_token.address,
-        token_out=datatoken.address,
-        consume_market_swap_fee_address=consumer_addr,
-        token_amount_in=to_wei(20),
-        min_amount_out=to_wei(5),
-        max_price=to_wei(1000000),
-        consume_market_swap_fee_amount=to_wei("0.01"),
-        from_wallet=consumer_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    swap_event = bpool.get_event_log(
-        BPool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    assert swap_event[0].args.caller == consumer_addr
-    assert swap_event[0].args.tokenIn == ocean_token.address
-    assert swap_event[0].args.tokenAmountIn == to_wei(20)
-    assert swap_event[0].args.tokenAmountOut == amount_out
-
-    tx = bpool.exit_swap_pool_amount_in(
-        pool_amount_in=bpt_event[0].args.bptAmount,
-        min_amount_out=to_wei(10),
-        from_wallet=consumer_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    exit_event = bpool.get_event_log(
-        BPool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert exit_event[0].args.caller == consumer_addr
-    assert exit_event[0].args.tokenOut == ocean_token.address
-
-    bpt_event = bpool.get_event_log(
-        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-    assert bpt_event[0].args.bptAmount  # amount in pool shares
-
-
 def test_nft_transfer_with_fre(
     web3,
     config,
@@ -1214,64 +1072,6 @@ def test_transfer_nft_with_erc20_pool_fre(
 
     ocean_token = publisher_ocean_instance.OCEAN_token
 
-    # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a pool
-    ocean_token.approve(factory_router.address, to_wei(10000), publisher_wallet)
-    tx = datatoken.deploy_pool(
-        rate=to_wei(1),
-        base_token_decimals=ocean_token.decimals(),
-        base_token_amount=to_wei(100),
-        lp_swap_fee_amount=to_wei("0.003"),
-        publish_market_swap_fee_amount=to_wei("0.001"),
-        ss_contract=get_address_of_type(config, "Staking"),
-        base_token_address=ocean_token.address,
-        base_token_sender=publisher_addr,
-        publisher_address=publisher_addr,
-        publish_market_swap_fee_collector=publisher_addr,
-        pool_template_address=get_address_of_type(config, "poolTemplate"),
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    pool_event = factory_router.get_event_log(
-        DataNFTFactoryContract.EVENT_NEW_POOL,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert pool_event[0].event == "NewPool"
-    bpool_address = pool_event[0].args.poolAddress
-    bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized()
-    assert bpool.get_opc_fee() == OPC_SWAP_FEE_APPROVED
-    assert bpool.get_swap_fee() == to_wei("0.003")
-    assert bpool.community_fee(ocean_token.address) == 0
-    assert bpool.community_fee(datatoken.address) == 0
-    assert bpool.publish_market_fee(ocean_token.address) == 0
-    assert bpool.publish_market_fee(datatoken.address) == 0
-
-    ocean_token.approve(bpool_address, to_wei(1000000), publisher_wallet)
-    tx = bpool.join_swap_extern_amount_in(
-        token_amount_in=to_wei(10),
-        min_pool_amount_out=to_wei(1),
-        from_wallet=publisher_wallet,
-    )
-
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    join_event = bpool.get_event_log(
-        BPool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert join_event[0].args.caller == publisher_addr
-    assert join_event[0].args.tokenIn == ocean_token.address
-    assert join_event[0].args.tokenAmountIn == to_wei(10)
-
-    bpt_event = bpool.get_event_log(
-        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-    assert bpt_event[0].args.bptAmount  # amount in pool shares
-    assert bpool.get_balance(ocean_token.address) == to_wei(100) + to_wei(10)
-
     # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a FRE
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
@@ -1345,14 +1145,6 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert not permissions[0]  # the newest owner is not the minter
     datatoken.add_minter(consumer_addr, consumer_wallet)
     assert datatoken.permissions(consumer_addr)[0]
-
-    # Consumer wallet is not the publish market fee collector
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        bpool.update_publish_market_fee(consumer_addr, to_wei("0.1"), consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ONLY MARKET COLLECTOR"
-    )
 
     # Consumer wallet has not become the owner of the publisher's exchange
     exchange_details = fixed_exchange.get_exchange(exchange_id)

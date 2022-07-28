@@ -13,7 +13,6 @@ import requests
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -340,12 +339,6 @@ def wait_for_ddo(ocean, did, timeout=30):
 def get_first_service_by_type(asset, service_type: str) -> Service:
     """Return the first Service with the given service type."""
     return next((service for service in asset.services if service.type == service_type))
-
-
-def get_opc_collector_address_from_pool(pool: BPool) -> str:
-    return FactoryRouter(
-        pool.web3, Datatoken(pool.web3, pool.get_datatoken_address()).router()
-    ).get_opc_collector()
 
 
 def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
