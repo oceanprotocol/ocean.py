@@ -32,6 +32,7 @@ def test_script_execution(script, monkeypatch):
         monkeypatch.setenv("PROVIDER_URL", "http://172.15.0.4:8030")
 
     runs_with_prerequisites = [
+        "store-ipfs-huggingface-flow",
         "c2d-flow",
         "dispenser-flow",
         "datatoken-enterprise",

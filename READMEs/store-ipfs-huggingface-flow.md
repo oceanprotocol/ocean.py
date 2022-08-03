@@ -6,13 +6,13 @@ SPDX-License-Identifier: Apache-2.0
 # Quickstart: Store and Discover Flow
 
 This quickstart describes how to encrypt an asset, store on IPFS and upload to HuggingFace for discoverability. 
-Coming soon: Publish asset on chain
-Coming soon: Download and decrypt (using Provider)
 
 Here are the steps:
 
-1.  Setup
-2.  Alice encrypts and uploads to decentralized storage and HuggingFace
+1. Setup
+2. Alice encrypts a dataset and uploads to Filecoin and HuggingFace
+3. Alice publishes an asset
+4. Bob downloads datasets
 
 Let's go through each step.
 
@@ -24,7 +24,6 @@ To get started with this guide, please refer to [data-nfts-and-datatokens-flow](
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
-- [x] Setup : Set envvars
 
 ### Set envvars
 
@@ -67,9 +66,11 @@ ipfs_file = [IpfsFile(hash=cid)]
 from ocean_lib.storage_provider.huggingface_hub import HuggingFaceHub
 huggingface = HuggingFaceHub()
 repo_url = huggingface.upload(encrypted_files.encode("utf-8"), object_name='hello', object_type='dataset')
+```
 
 ## 3. Alice publishes an asset
 
+```python
 # Specify metadata and services, using the Branin test dataset
 metadata = {
     "created": "2021-12-28T10:55:11Z",
