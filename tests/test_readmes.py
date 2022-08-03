@@ -20,10 +20,12 @@ def test_script_execution(script, monkeypatch):
         or "publish-flow" in script.name
         or "data-nfts-and-datatokens-flow" in script.name
         or "c2d-flow-more-examples" in script.name
+        or "store-ipfs-huggingface-flow" in script.name
     ):
         # developers.md skipped because it does not have end-to-end Python snippets, just console
         # data-nfts-and-datatokens-flow.md and publish-flow skipped because it they run as prerequisites for the others, so they are tested implicitly
         # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
+        # store-ipfs-huggingface-flow skipped because we do not want to make real API keys publicly available
         return
 
     if "parameters" in script.name:
@@ -32,7 +34,6 @@ def test_script_execution(script, monkeypatch):
         monkeypatch.setenv("PROVIDER_URL", "http://172.15.0.4:8030")
 
     runs_with_prerequisites = [
-        "store-ipfs-huggingface-flow",
         "c2d-flow",
         "dispenser-flow",
         "datatoken-enterprise",
