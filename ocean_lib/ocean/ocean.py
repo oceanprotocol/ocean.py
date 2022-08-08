@@ -14,7 +14,6 @@ from web3.datastructures import AttributeDict
 from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.bpool import BPool
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -265,6 +264,7 @@ class Ocean:
         datatoken: Datatoken,
         base_token: Datatoken,
         amount: int,
+        fixed_rate: int,
         from_wallet: Wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
@@ -278,7 +278,7 @@ class Ocean:
             allowed_swapper=ZERO_ADDRESS,
             base_token_decimals=base_token.decimals(),
             datatoken_decimals=datatoken.decimals(),
-            fixed_rate=self.to_wei(1),
+            fixed_rate=fixed_rate,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
             from_wallet=from_wallet,
@@ -298,54 +298,6 @@ class Ocean:
     @enforce_types
     def factory_router(self) -> FactoryRouter:
         return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
-
-    @property
-    @enforce_types
-    def pool_template_address(self) -> str:
-        return get_address_of_type(self.config, "poolTemplate")
-
-    @enforce_types
-    def create_pool(
-        self,
-        datatoken: Datatoken,
-        base_token: Datatoken,
-        rate: int,
-        base_token_amount: int,
-        lp_swap_fee_amount: int,
-        publish_market_swap_fee_amount: int,
-        publish_market_swap_fee_collector: str,
-        from_wallet: Wallet,
-    ) -> BPool:
-        base_token.approve(
-            get_address_of_type(self.config, "Router"), self.to_wei("2000"), from_wallet
-        )
-
-        tx = datatoken.deploy_pool(
-            rate=rate,
-            base_token_decimals=base_token.decimals(),
-            base_token_amount=base_token_amount,
-            lp_swap_fee_amount=lp_swap_fee_amount,
-            publish_market_swap_fee_amount=publish_market_swap_fee_amount,
-            ss_contract=get_address_of_type(self.config, "Staking"),
-            base_token_address=base_token.address,
-            base_token_sender=from_wallet.address,
-            publisher_address=from_wallet.address,
-            publish_market_swap_fee_collector=publish_market_swap_fee_collector,
-            pool_template_address=get_address_of_type(self.config, "poolTemplate"),
-            from_wallet=from_wallet,
-        )
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        pool_event = self.factory_router.get_event_log(
-            DataNFTFactoryContract.EVENT_NEW_POOL,
-            tx_receipt.blockNumber,
-            self.web3.eth.block_number,
-            None,
-        )
-
-        bpool_address = pool_event[0].args.poolAddress
-        bpool = BPool(self.web3, bpool_address)
-
-        return bpool
 
     @enforce_types
     def retrieve_provider_fees(

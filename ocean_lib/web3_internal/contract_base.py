@@ -6,6 +6,7 @@
 """All contracts inherit from `ContractBase` class."""
 import logging
 import os
+from decimal import Decimal
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
@@ -18,6 +19,8 @@ from web3._utils.filters import construct_event_filter_params
 from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
+from web3.gas_strategies.time_based import fast_gas_price_strategy
+from web3.middleware import geth_poa_middleware
 
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -172,7 +175,11 @@ class ContractBase(object):
     @staticmethod
     @enforce_types
     def get_gas_price(web3) -> int:
-        return int(web3.eth.gas_price * 1.1)
+        if os.getenv("GAS_SCALING_FACTOR"):
+            return int(web3.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
+
+        web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
+        return web3.eth.generate_gas_price()
 
     @enforce_types
     def send_transaction(
