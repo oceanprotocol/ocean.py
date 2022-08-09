@@ -6,10 +6,10 @@
 """All contracts inherit from `ContractBase` class."""
 import logging
 import os
-from decimal import Decimal
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
+import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -19,9 +19,6 @@ from web3._utils.filters import construct_event_filter_params
 from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
-from web3.gas_strategies.time_based import fast_gas_price_strategy
-from web3.middleware import geth_poa_middleware
-
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
@@ -174,12 +171,11 @@ class ContractBase(object):
 
     @staticmethod
     @enforce_types
-    def get_gas_price(web3) -> int:
+    def get_gas_price(w3: Web3) -> int:
         if os.getenv("GAS_SCALING_FACTOR"):
-            return int(web3.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
+            return int(w3.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
 
-        web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
-        return web3.eth.generate_gas_price()
+        return web3.gas_strategies.rpc.rpc_gas_price_strategy(w3)
 
     @enforce_types
     def send_transaction(
@@ -199,16 +195,32 @@ class ContractBase(object):
         """
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
-        _transact = {
-            "from": ContractBase.to_checksum_address(from_wallet.address),
-            "account_key": from_wallet.key,
-            "chainId": self.web3.eth.chain_id,
-            "gasPrice": self.get_gas_price(self.web3),
-        }
 
-        gas_price = os.environ.get(ENV_GAS_PRICE, None)
-        if gas_price:
-            _transact["gasPrice"] = gas_price
+        try:
+            history = self.web3.eth.fee_history(block_count=1, newest_block="latest")
+            _transact = {
+                "from": ContractBase.to_checksum_address(from_wallet.address),
+                "account_key": from_wallet.key,
+                "chainId": self.web3.eth.chain_id,
+            }
+            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
+            _transact["maxPriorityFeePerGas"] = self.web3.eth.max_priority_fee
+            _transact["maxFeePerGas"] = (
+                self.web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+            )
+        except ValueError as e:
+            assert e.args[0]["message"] == "Method eth_feeHistory not supported."
+
+            _transact = {
+                "from": ContractBase.to_checksum_address(from_wallet.address),
+                "account_key": from_wallet.key,
+                "chainId": self.web3.eth.chain_id,
+                "gasPrice": self.get_gas_price(self.web3),
+            }
+
+            gas_price = os.environ.get(ENV_GAS_PRICE, None)
+            if gas_price:
+                _transact["gasPrice"] = gas_price
 
         if transact:
             _transact.update(transact)
