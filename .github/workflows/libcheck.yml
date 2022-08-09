@@ -51,9 +51,9 @@ jobs:
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           py.test tests/test_readmes.py
-      - name: Slack notify via webhook
-        uses: up9cloud/action-notify@master
-        if: cancelled() == false
-        env:
-          GITHUB_JOB_STATUS: ${{ job.status }}
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      # - name: Slack notify via webhook
+      #   uses: up9cloud/action-notify@master
+      #   if: cancelled() == false
+      #   env:
+      #     GITHUB_JOB_STATUS: ${{ job.status }}
+      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
