@@ -7,9 +7,9 @@ from ocean_lib.data_provider.base import DataServiceProviderBase
 
 def test_sanitize_content_disposition():
     header = "./../../my/relative/path"
-    res = DataServiceProviderBase._sanitize_content(header)
-    assert res is False
+    res = DataServiceProviderBase._validate_content_disposition(header)
+    assert not res
 
     header = "somehtml.html"
-    res = DataServiceProviderBase._sanitize_content(header)
-    assert res is True
+    res = DataServiceProviderBase._validate_content_disposition(header)
+    assert res
