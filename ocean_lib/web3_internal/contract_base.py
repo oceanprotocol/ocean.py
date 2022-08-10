@@ -208,7 +208,9 @@ class ContractBase(object):
             history = self.web3.eth.fee_history(block_count=1, newest_block="latest")
 
             _transact["gas"] = self.web3.eth.estimate_gas(_transact)
-            fee_tx = ContractBase.get_max_fee_per_gas(tx=_transact, history=history)
+            fee_tx = ContractBase.get_max_fee_per_gas(
+                web3=self.web3, tx=_transact, history=history
+            )
             _transact.update(fee_tx)
         except ValueError as e:
             assert (
@@ -230,13 +232,11 @@ class ContractBase(object):
             from_wallet.transaction_timeout.value,
         ).hex()
 
-    @enforce_types
     @staticmethod
-    def get_max_fee_per_gas(self, tx: dict, history: dict) -> dict:
-        tx["maxPriorityFeePerGas"] = self.web3.eth.max_priority_fee
-        tx["maxFeePerGas"] = (
-            self.web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
-        )
+    @enforce_types
+    def get_max_fee_per_gas(web3: Web3, tx: dict, history: dict) -> dict:
+        tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
+        tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
         return tx
 
     @enforce_types

@@ -131,7 +131,9 @@ class Wallet:
                         block_count=1, newest_block="latest"
                     )
                     tx["type"] = "0x2"
-                    fee_tx = ContractBase.get_max_fee_per_gas(tx=tx, history=history)
+                    fee_tx = ContractBase.get_max_fee_per_gas(
+                        web3=self.web3, tx=tx, history=history
+                    )
                     tx.update(fee_tx)
                     tx["gas"] = GAS_LIMIT_DEFAULT
                 except ValueError as e:
