@@ -171,11 +171,13 @@ class ContractBase(object):
 
     @staticmethod
     @enforce_types
-    def get_gas_price(w3: Web3) -> int:
+    def get_gas_price(web3_object: Web3) -> int:
         if os.getenv("GAS_SCALING_FACTOR"):
-            return int(w3.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
+            return int(
+                web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR"))
+            )
 
-        return web3.gas_strategies.rpc.rpc_gas_price_strategy(w3)
+        return web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)
 
     @enforce_types
     def send_transaction(
@@ -196,31 +198,28 @@ class ContractBase(object):
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
 
+        _transact = {
+            "from": ContractBase.to_checksum_address(from_wallet.address),
+            "account_key": from_wallet.key,
+            "chainId": self.web3.eth.chain_id,
+        }
+
         try:
             history = self.web3.eth.fee_history(block_count=1, newest_block="latest")
-            _transact = {
-                "from": ContractBase.to_checksum_address(from_wallet.address),
-                "account_key": from_wallet.key,
-                "chainId": self.web3.eth.chain_id,
-            }
-            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
-            _transact["maxPriorityFeePerGas"] = self.web3.eth.max_priority_fee
-            _transact["maxFeePerGas"] = (
-                self.web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
-            )
-        except ValueError as e:
-            assert e.args[0]["message"] == "Method eth_feeHistory not supported."
 
-            _transact = {
-                "from": ContractBase.to_checksum_address(from_wallet.address),
-                "account_key": from_wallet.key,
-                "chainId": self.web3.eth.chain_id,
-                "gasPrice": self.get_gas_price(self.web3),
-            }
+            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
+            fee_tx = ContractBase.get_max_fee_per_gas(tx=_transact, history=history)
+            _transact.update(fee_tx)
+        except ValueError as e:
+            assert (
+                e.args[0]["message"] == "Method eth_feeHistory not supported."
+            ), f"Another error occurred: {e.args[0]}"
+
+            _transact["gasPrice"] = self.get_gas_price(self.web3)
 
             gas_price = os.environ.get(ENV_GAS_PRICE, None)
             if gas_price:
-                _transact["gasPrice"] = gas_price
+                _transact["gasPrice"] = int(gas_price)
 
         if transact:
             _transact.update(transact)
@@ -230,6 +229,15 @@ class ContractBase(object):
             from_wallet.block_confirmations.value,
             from_wallet.transaction_timeout.value,
         ).hex()
+
+    @enforce_types
+    @staticmethod
+    def get_max_fee_per_gas(self, tx: dict, history: dict) -> dict:
+        tx["maxPriorityFeePerGas"] = self.web3.eth.max_priority_fee
+        tx["maxFeePerGas"] = (
+            self.web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+        )
+        return tx
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:

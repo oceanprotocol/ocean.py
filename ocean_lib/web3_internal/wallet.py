@@ -123,28 +123,26 @@ class Wallet:
             )
         else:
             nonce = Wallet._get_nonce(self.web3, account.address)
+            from ocean_lib.web3_internal.contract_base import ContractBase
+
             if not gas_price:
                 try:
                     history = self.web3.eth.fee_history(
                         block_count=1, newest_block="latest"
                     )
                     tx["type"] = "0x2"
-                    tx["maxPriorityFeePerGas"] = self.web3.eth.max_priority_fee
-                    tx["maxFeePerGas"] = (
-                        self.web3.eth.max_priority_fee + history["baseFeePerGas"][0] * 2
-                    )
+                    fee_tx = ContractBase.get_max_fee_per_gas(tx=tx, history=history)
+                    tx.update(fee_tx)
                     tx["gas"] = GAS_LIMIT_DEFAULT
                 except ValueError as e:
                     assert (
                         e.args[0]["message"] == "Method eth_feeHistory not supported."
-                    )
-
-                    from ocean_lib.web3_internal.contract_base import ContractBase
+                    ), f"Another error occurred: {e.args[0]}"
 
                     gas_price = ContractBase.get_gas_price(self.web3)
                     max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
                     if gas_price and max_gas_price:
-                        gas_price = min(gas_price, max_gas_price)
+                        gas_price = min(gas_price, int(max_gas_price))
 
                     logger.debug(
                         f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
