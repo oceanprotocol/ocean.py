@@ -204,19 +204,11 @@ class ContractBase(object):
             "chainId": self.web3.eth.chain_id,
         }
 
-        try:
-            history = self.web3.eth.fee_history(block_count=1, newest_block="latest")
-
-            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
-            fee_tx = ContractBase.get_max_fee_per_gas(
-                web3=self.web3, tx=_transact, history=history
-            )
+        fee_tx = ContractBase.get_max_fee_per_gas(web3=self.web3, tx=_transact)
+        if fee_tx:
             _transact.update(fee_tx)
-        except ValueError as e:
-            assert (
-                e.args[0]["message"] == "Method eth_feeHistory not supported."
-            ), f"Another error occurred: {e.args[0]}"
-
+            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
+        else:
             _transact["gasPrice"] = self.get_gas_price(self.web3)
 
             gas_price = os.environ.get(ENV_GAS_PRICE, None)
@@ -234,7 +226,11 @@ class ContractBase(object):
 
     @staticmethod
     @enforce_types
-    def get_max_fee_per_gas(web3: Web3, tx: dict, history: dict) -> dict:
+    def get_max_fee_per_gas(web3: Web3, tx: dict) -> Optional[dict]:
+        try:
+            history = web3.eth.fee_history(block_count=1, newest_block="latest")
+        except ValueError:
+            return None
         tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
         tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
         return tx

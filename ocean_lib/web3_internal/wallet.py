@@ -126,21 +126,12 @@ class Wallet:
             from ocean_lib.web3_internal.contract_base import ContractBase
 
             if not gas_price:
-                try:
-                    history = self.web3.eth.fee_history(
-                        block_count=1, newest_block="latest"
-                    )
-                    tx["type"] = "0x2"
-                    fee_tx = ContractBase.get_max_fee_per_gas(
-                        web3=self.web3, tx=tx, history=history
-                    )
+                fee_tx = ContractBase.get_max_fee_per_gas(web3=self.web3, tx=tx)
+                if fee_tx:
                     tx.update(fee_tx)
                     tx["gas"] = GAS_LIMIT_DEFAULT
-                except ValueError as e:
-                    assert (
-                        e.args[0]["message"] == "Method eth_feeHistory not supported."
-                    ), f"Another error occurred: {e.args[0]}"
-
+                    tx["type"] = "0x2"
+                else:
                     gas_price = ContractBase.get_gas_price(self.web3)
                     max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
                     if gas_price and max_gas_price:
