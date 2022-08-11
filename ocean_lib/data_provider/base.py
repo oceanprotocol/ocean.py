@@ -250,10 +250,24 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
+    def _validate_content_disposition(header: str) -> bool:
+        pattern = re.compile(r"\\|\.\.|/")
+        return not bool(pattern.findall(header))
+
+    @staticmethod
+    @enforce_types
     def _get_file_name(response: Response) -> Optional[str]:
         try:
+            if not DataServiceProviderBase._validate_content_disposition(
+                response.headers.get("content-disposition")
+            ):
+                logger.error(
+                    "Invalid content disposition format. It was not possible to get the file name."
+                )
+                return None
             return re.match(
-                r"attachment;filename=(.+)", response.headers.get("content-disposition")
+                r"attachment;filename=(.+)",
+                response.headers.get("content-disposition"),
             )[1]
         except Exception as e:
             logger.warning(f"It was not possible to get the file name. {e}")
