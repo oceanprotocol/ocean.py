@@ -13,11 +13,9 @@ from hexbytes.main import HexBytes
 from web3.main import Web3
 
 from ocean_lib.integer import Integer
-from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
     private_key_to_public_key,
-    get_max_fee_per_gas,
     get_gas_price,
 )
 
@@ -127,26 +125,18 @@ class Wallet:
             nonce = Wallet._get_nonce(self.web3, account.address)
 
             if not gas_price:
-                fee_tx = get_max_fee_per_gas(web3=self.web3, tx=tx)
-                if fee_tx:
-                    tx.update(fee_tx)
-                    tx["gas"] = GAS_LIMIT_DEFAULT
-                    tx["type"] = "0x2"
-                else:
-                    gas_price = get_gas_price(self.web3)
-                    max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
-                    if gas_price and max_gas_price:
-                        gas_price = min(gas_price, int(max_gas_price))
-
-                    logger.debug(
-                        f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
-                        f"eth.gasPrice: {self.web3.eth.gas_price}"
-                    )
-                    tx["gasPrice"] = gas_price
+                gas_updated_tx = get_gas_price(web3_object=self.web3, tx=tx)
+                tx.update(gas_updated_tx)
 
         tx["nonce"] = nonce
         signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
-        logger.debug(f"Using gasPrice: {gas_price}")
+        if tx.get("gasPrice"):
+            logger.debug(
+                f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
+                f"eth.gasPrice: {self.web3.eth.gas_price}"
+            )
+            logger.debug(f"Using gasPrice: {gas_price}")
+
         logger.debug(f"`Wallet` signed tx is {signed_tx}")
         return signed_tx.rawTransaction
 

@@ -5,7 +5,6 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
-import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
@@ -18,13 +17,12 @@ from web3._utils.filters import construct_event_filter_params
 from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
-from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     get_contracts_addresses,
     load_contract,
 )
-from ocean_lib.web3_internal.utils import get_max_fee_per_gas, get_gas_price
+from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
@@ -194,16 +192,8 @@ class ContractBase(object):
             "chainId": self.web3.eth.chain_id,
         }
 
-        fee_tx = get_max_fee_per_gas(web3=self.web3, tx=_transact)
-        if fee_tx:
-            _transact.update(fee_tx)
-            _transact["gas"] = self.web3.eth.estimate_gas(_transact)
-        else:
-            _transact["gasPrice"] = get_gas_price(self.web3)
-
-            gas_price = os.environ.get(ENV_GAS_PRICE, None)
-            if gas_price:
-                _transact["gasPrice"] = int(gas_price)
+        gas_tx = get_gas_price(web3_object=self.web3, tx=_transact)
+        _transact.update(gas_tx)
 
         if transact:
             _transact.update(transact)
@@ -241,16 +231,15 @@ class ContractBase(object):
 
         _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
-            {
-                "from": ContractBase.to_checksum_address(deployer_wallet.address),
-                "gasPrice": get_gas_price(web3),
-            }
+            {"from": ContractBase.to_checksum_address(deployer_wallet.address)}
         )
+
         if "chainId" not in built_tx:
             built_tx["chainId"] = web3.eth.chain_id
 
-        if "gas" not in built_tx:
-            built_tx["gas"] = web3.eth.estimate_gas(built_tx)
+        if "gas" not in built_tx or "gasPrice" not in built_tx:
+            gas_tx = get_gas_price(web3_object=web3, tx=built_tx)
+            built_tx.update(gas_tx)
 
         raw_tx = deployer_wallet.sign_tx(built_tx)
         logging.debug(

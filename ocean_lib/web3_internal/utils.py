@@ -15,7 +15,13 @@ from eth_utils import decode_hex
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
-from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
+from ocean_lib.web3_internal.constants import (
+    DEFAULT_NETWORK_NAME,
+    NETWORK_NAME_MAP,
+    GAS_LIMIT_DEFAULT,
+    ENV_MAX_GAS_PRICE,
+    ENV_GAS_PRICE,
+)
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -134,20 +140,33 @@ def get_ether_balance(web3: Web3, address: str) -> int:
 
 
 @enforce_types
-def get_max_fee_per_gas(web3: Web3, tx: dict) -> Optional[dict]:
+def get_gas_price(web3_object: Web3, tx: dict) -> dict:
     try:
-        history = web3.eth.fee_history(block_count=1, newest_block="latest")
+        history = web3_object.eth.fee_history(block_count=1, newest_block="latest")
     except ValueError:
-        return None
-    tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
-    tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+        # environment variable gas price evaluation
+        if os.getenv("GAS_SCALING_FACTOR"):
+            gas_price = int(
+                web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR"))
+            )
+        elif os.getenv(ENV_GAS_PRICE):
+            gas_price = int(os.getenv(ENV_GAS_PRICE))
+        else:
+            gas_price = web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)
+
+        max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
+        if gas_price and max_gas_price:
+            gas_price = min(gas_price, int(max_gas_price))
+        tx["gasPrice"] = gas_price
+
+        return tx
+
+    # EIP 1559 gas fees calculation
+    tx["maxPriorityFeePerGas"] = web3_object.eth.max_priority_fee
+    tx["maxFeePerGas"] = (
+        web3_object.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+    )
+    tx["type"] = "0x2"
+    tx["gas"] = GAS_LIMIT_DEFAULT
 
     return tx
-
-
-@enforce_types
-def get_gas_price(web3_object: Web3) -> int:
-    if os.getenv("GAS_SCALING_FACTOR"):
-        return int(web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
-
-    return web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)
