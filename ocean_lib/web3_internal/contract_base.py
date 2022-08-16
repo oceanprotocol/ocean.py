@@ -233,6 +233,7 @@ class ContractBase(object):
             return None
         tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
         tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+
         return tx
 
     @enforce_types

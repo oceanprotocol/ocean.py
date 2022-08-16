@@ -11,6 +11,9 @@ from ocean_lib.config import (
     SECTION_ETH_NETWORK,
 )
 from ocean_lib.example_config import NETWORK_NAME, ExampleConfig, get_config_dict
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.ocean.util import get_contracts_addresses
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
@@ -86,3 +89,14 @@ def test_noconfig(monkeypatch):
     monkeypatch.setenv("OCEAN_NETWORK_URL", "https://bad.network")
     with pytest.raises(ValueError, match="could not be fetched!"):
         get_config_dict(0)
+
+
+@pytest.mark.unit
+def test_get_address_of_type(monkeypatch):
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://polygon-rpc.com")
+    config = ExampleConfig.get_config()
+
+    assert config.network_name == "polygon"
+    data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)
+    addresses = get_contracts_addresses(config.address_file, config.network_name)
+    assert addresses[DataNFTFactoryContract.CONTRACT_NAME] == data_nft_factory
