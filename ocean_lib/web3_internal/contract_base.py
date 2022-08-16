@@ -9,7 +9,6 @@ import os
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
-import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -25,6 +24,7 @@ from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses,
     load_contract,
 )
+from ocean_lib.web3_internal.utils import get_max_fee_per_gas, get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
@@ -169,16 +169,6 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
-    @staticmethod
-    @enforce_types
-    def get_gas_price(web3_object: Web3) -> int:
-        if os.getenv("GAS_SCALING_FACTOR"):
-            return int(
-                web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR"))
-            )
-
-        return web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)
-
     @enforce_types
     def send_transaction(
         self,
@@ -204,12 +194,12 @@ class ContractBase(object):
             "chainId": self.web3.eth.chain_id,
         }
 
-        fee_tx = ContractBase.get_max_fee_per_gas(web3=self.web3, tx=_transact)
+        fee_tx = get_max_fee_per_gas(web3=self.web3, tx=_transact)
         if fee_tx:
             _transact.update(fee_tx)
             _transact["gas"] = self.web3.eth.estimate_gas(_transact)
         else:
-            _transact["gasPrice"] = self.get_gas_price(self.web3)
+            _transact["gasPrice"] = get_gas_price(self.web3)
 
             gas_price = os.environ.get(ENV_GAS_PRICE, None)
             if gas_price:
@@ -223,18 +213,6 @@ class ContractBase(object):
             from_wallet.block_confirmations.value,
             from_wallet.transaction_timeout.value,
         ).hex()
-
-    @staticmethod
-    @enforce_types
-    def get_max_fee_per_gas(web3: Web3, tx: dict) -> Optional[dict]:
-        try:
-            history = web3.eth.fee_history(block_count=1, newest_block="latest")
-        except ValueError:
-            return None
-        tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
-        tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
-
-        return tx
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:
@@ -265,7 +243,7 @@ class ContractBase(object):
         built_tx = _contract.constructor(*args).buildTransaction(
             {
                 "from": ContractBase.to_checksum_address(deployer_wallet.address),
-                "gasPrice": cls.get_gas_price(web3),
+                "gasPrice": get_gas_price(web3),
             }
         )
         if "chainId" not in built_tx:

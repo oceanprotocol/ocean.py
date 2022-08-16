@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+import os
 from collections import namedtuple
 from typing import Any, List, Optional
 
+import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_keys import keys
@@ -13,7 +15,6 @@ from eth_utils import decode_hex
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
-import artifacts
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
@@ -130,3 +131,23 @@ def get_ether_balance(web3: Web3, address: str) -> int:
     :return: balance, int
     """
     return web3.eth.get_balance(address, block_identifier="latest")
+
+
+@enforce_types
+def get_max_fee_per_gas(web3: Web3, tx: dict) -> Optional[dict]:
+    try:
+        history = web3.eth.fee_history(block_count=1, newest_block="latest")
+    except ValueError:
+        return None
+    tx["maxPriorityFeePerGas"] = web3.eth.max_priority_fee
+    tx["maxFeePerGas"] = web3.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
+
+    return tx
+
+
+@enforce_types
+def get_gas_price(web3_object: Web3) -> int:
+    if os.getenv("GAS_SCALING_FACTOR"):
+        return int(web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR")))
+
+    return web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)

@@ -17,6 +17,8 @@ from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, GAS_LIMIT_DEFAU
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
     private_key_to_public_key,
+    get_max_fee_per_gas,
+    get_gas_price,
 )
 
 logger = logging.getLogger(__name__)
@@ -123,16 +125,15 @@ class Wallet:
             )
         else:
             nonce = Wallet._get_nonce(self.web3, account.address)
-            from ocean_lib.web3_internal.contract_base import ContractBase
 
             if not gas_price:
-                fee_tx = ContractBase.get_max_fee_per_gas(web3=self.web3, tx=tx)
+                fee_tx = get_max_fee_per_gas(web3=self.web3, tx=tx)
                 if fee_tx:
                     tx.update(fee_tx)
                     tx["gas"] = GAS_LIMIT_DEFAULT
                     tx["type"] = "0x2"
                 else:
-                    gas_price = ContractBase.get_gas_price(self.web3)
+                    gas_price = get_gas_price(self.web3)
                     max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
                     if gas_price and max_gas_price:
                         gas_price = min(gas_price, int(max_gas_price))
