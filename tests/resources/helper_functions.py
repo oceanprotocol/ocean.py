@@ -48,7 +48,7 @@ def get_example_config():
 def get_address_of_type(
     config: Config, address_type: str, key: Optional[str] = None
 ) -> str:
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    addresses = get_contracts_addresses(config.address_file, config.network_name)
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")
     address = (
