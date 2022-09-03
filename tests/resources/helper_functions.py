@@ -27,6 +27,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.structures.file_objects import FilesTypeFactory
+from ocean_lib.structures.test.test_file_objects import ARWEAVE_TRANSACTION_ID
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -467,7 +468,7 @@ def get_file3():
 def get_arweave_file():
     arweave_file_dict = {
         "type": "arweave",
-        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+        "transactionId": ARWEAVE_TRANSACTION_ID,
     }
 
     return FilesTypeFactory(arweave_file_dict)

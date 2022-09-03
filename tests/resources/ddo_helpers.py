@@ -27,6 +27,7 @@ from ocean_lib.structures.file_objects import (
     FilesTypeFactory,
     UrlFile,
 )
+from ocean_lib.structures.test.test_file_objects import ARWEAVE_TRANSACTION_ID
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
@@ -206,7 +207,7 @@ def get_registered_asset_with_compute_service(
         )
     elif file_type == "arweave":
         arff_file = ArweaveFile(
-            transactionId="a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
+            transactionId=ARWEAVE_TRANSACTION_ID
         )
     else:
         raise ValueError(f"Unsupported file_type {file_type}")

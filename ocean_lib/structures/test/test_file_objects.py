@@ -12,6 +12,10 @@ from ocean_lib.structures.file_objects import (
 )
 
 
+"""branin.arff dataset, permanently stored in Arweave"""
+ARWEAVE_TRANSACTION_ID = "a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
+
+
 @pytest.mark.unit
 def test_url_file():
     url_file = UrlFile(url="https://url.com")
@@ -41,11 +45,11 @@ def test_ipfs_file():
 @pytest.mark.unit
 def test_arweave_file():
     arweave_file = ArweaveFile(
-        transactionId="cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
+        transactionId=ARWEAVE_TRANSACTION_ID
     )
     assert arweave_file.to_dict() == {
         "type": "arweave",
-        "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+        "transactionId": ARWEAVE_TRANSACTION_ID,
     }
 
 
@@ -73,11 +77,11 @@ def test_filetype_factory():
     factory_file = FilesTypeFactory(
         {
             "type": "arweave",
-            "transactionId": "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w",
+            "transactionId": ARWEAVE_TRANSACTION_ID,
         }
     )
 
-    assert factory_file.transactionId == "cZ6j5PmPVXCq5Az6YGcGqzffYjx2JnsnlSajaHNr20w"
+    assert factory_file.transactionId == ARWEAVE_TRANSACTION_ID
 
     with pytest.raises(Exception):
         factory_file = FilesTypeFactory({"type": "somethingelse"})
