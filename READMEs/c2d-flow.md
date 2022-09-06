@@ -9,6 +9,7 @@ This quickstart describes a C2D flow.
 
 Here are the steps:
 
+
 1. Setup
 2. Alice publishes data asset
 3. Alice publishes algorithm
