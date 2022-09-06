@@ -6,6 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 # Quickstart: Publish Data NFT & Datatoken
 
 ## 1. Setup
+
 ## Prerequisites
 
 -   Linux/MacOS
