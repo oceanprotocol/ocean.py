@@ -18,16 +18,12 @@ Let's go through each step.
 
 ### First steps
 
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
 - [x] Setup : Set envvars
-
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
-
-Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create a data NFT
+- [x] Setup : Setup in Python
 
 ## 2. Publish Dataset
 
@@ -54,8 +50,7 @@ url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
-# Publish asset with services on-chain.
-# The download (access service) is automatically created, but you can explore other options as well
+# Publish dataset. It creates the data NFT, datatoken, and fills in metadata.
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
@@ -75,9 +70,11 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 ```
 
+In this case, we used the "download" service type. There are other options too.
+
 The asset metadata stored on-chain is encrypted and compressed by default.
-It is encouraged that publishers encrypt asset metadata so that the asset can
-be "forgotten" and therefore be GDPR compliant.
+It is encouraged that publishers encrypt asset metadata so that the asset supports GDPR "right-to-be-forgotten" compliance rules.
+
 To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)`.
 To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
 It is possible to disable both encryption and compression, if desired.
