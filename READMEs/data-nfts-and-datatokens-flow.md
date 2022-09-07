@@ -96,7 +96,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 
-# Publish an NFT token
+# Publish an NFT
 data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
@@ -131,7 +131,7 @@ print(f"config.provider_url = '{config.provider_url}'")
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 # data NFT
-print(f"data NFT token name: {data_nft.token_name()}")
+print(f"data NFT name: {data_nft.token_name()}")
 print(f"data NFT symbol: {data_nft.symbol()}")
 
 # datatoken
