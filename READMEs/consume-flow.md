@@ -12,7 +12,7 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a consu
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes data asset
+2.  Alice publishes dataset
 3.  Alice gives Bob access
 4.  Bob downloads it
 
@@ -20,37 +20,31 @@ Let's go through each step.
 
 ## 1. Setup
 
-### First steps
-
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
 - [x] Setup : Set envvars
+- [x] Setup : Setup in Python
 
-## 2. Publish Data NFT & Datatoken
-
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
-
-Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create a data NFT
-
-Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
-- [x] 2. Publish Dataset
-
-## 3. Alice gives Bob access
-
-Now, you're Bob. You want to consume the dataset that Alice just published. The first step is to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet. This README uses (d) - minting.
-
-In the same Python console as before:
-
+"Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
 ```python
-# Initialize Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
+```
 
-# Alice mints a datatoken into Bob's wallet
+## 2. Alice publishes dataset
+
+Now, you're Alice. From [publish-flow](publish-flow.md), do:
+- [x] 2. Publish Dataset. (This includes publishing a data NFT & datatoken)
+
+## 3. Alice gives Bob access
+
+Bob wants to consume the dataset that Alice just published. The first step is for Bob to get 1.0 datatokens. Similar to any ERC20 token, options include (a) buy a datatoken in a data market, (b) buying it over-the-counter (OTC), (c) having Alice transfer a datatoken to you (`datatoken.transfer()`), or (d) having Alice mint one into your wallet.
+
+This README uses (d) - minting. Specifically, Alice mints a datatoken into Bob's wallet. In the same Python console:
+```python
 datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
 datatoken.mint(
     account_address=bob_wallet.address,
@@ -62,17 +56,16 @@ datatoken.mint(
 ## 4. Bob downloads the dataset
 
 In the same Python console:
-
 ```python
 # Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-# Bob points to the service object
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-fee_receiver = ZERO_ADDRESS  # could also be market address
+# Bob retrieves the reference to the service object
 service = asset.services[0]
 
-# Bob sends his datatoken to the service
+# Bob sends 1.0 datatokens to the service, to get access
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+fee_receiver = ZERO_ADDRESS  # could also be market address
 order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     service,
@@ -83,7 +76,8 @@ order_tx_id = ocean.assets.pay_for_access_service(
 )
 print(f"order_tx_id = '{order_tx_id}'")
 
-# Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+# Bob now has access! He downloads the asset.
+# If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
     service=service,
@@ -94,10 +88,9 @@ file_path = ocean.assets.download_asset(
 print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
 ```
 
-In console:
+Bob can verify that the file is downloaded. In a new console:
 
 ```console
-# verify that the file is downloaded
 cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
