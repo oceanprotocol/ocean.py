@@ -79,7 +79,4 @@ To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)
 To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
 It is possible to disable both encryption and compression, if desired.
 
-`ocean.assets.create(...)` automatically deploys a data NFT token using the ERC20Template. 
-If you want to use a different template or reuse a previously deployed data NFT token, 
-you can create the data NFT token separately, then use the `data_nft_address=<data NFT address>` 
-parameter when calling the create function.
+`ocean.assets.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.
