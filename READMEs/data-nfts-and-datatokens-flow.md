@@ -32,15 +32,6 @@ docker system prune -a --volumes
 ./start_ocean.sh --no-ipfs --no-dashboard --skip-subgraph-deploy
 ```
 
-Wait until the `artifacts` directory and `address.json` file are created. In the console:
-
-```console
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
-    done
-```
-
 ## Install the library
 
 In a new console:
