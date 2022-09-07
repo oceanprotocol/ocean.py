@@ -97,7 +97,7 @@ alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 
 # Publish an NFT
-data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet)
+data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 

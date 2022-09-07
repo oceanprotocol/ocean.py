@@ -93,7 +93,7 @@ def c2d_flow_readme(
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish the data NFT token
-    data_nft = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    data_nft = ocean.create_data_nft("NFT1", "NFT1", alice_wallet)
     assert data_nft.address
     assert data_nft.token_name()
     assert data_nft.symbol()
@@ -157,7 +157,7 @@ def c2d_flow_readme(
     # 3. Alice publishes algorithm
 
     # Publish the algorithm NFT token
-    ALGO_nft_token = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    ALGO_nft_token = ocean.create_data_nft("NFT1", "NFT1", alice_wallet)
     assert ALGO_nft_token.address
 
     # Publish the datatoken

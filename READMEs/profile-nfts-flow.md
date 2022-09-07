@@ -50,7 +50,7 @@ alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 
 # Publish an NFT token. Note "transferable=False"
-data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet, transferable=False)
+data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet, transferable=False)
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
