@@ -64,8 +64,6 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 service = asset.services[0]
 
 # Bob sends 1.0 datatokens to the service, to get access
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-fee_receiver = ZERO_ADDRESS  # could also be market address
 order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     service,
