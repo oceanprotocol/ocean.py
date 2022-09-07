@@ -62,6 +62,8 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 OCEAN_token = ocean.OCEAN_token
+
+assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
 # Create exchange_id for a new exchange
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
