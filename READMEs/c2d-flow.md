@@ -10,11 +10,11 @@ This quickstart describes a C2D flow.
 Here are the steps:
 
 1. Setup
-2. Alice publishes data asset
+2. Alice publishes dataset
 3. Alice publishes algorithm
 4. Alice allows the algorithm for C2D for that data asset
 5. Bob acquires datatokens for data and algorithm
-6. Bob starts a compute job using a free C2d environment (no provider fees)
+6. Bob starts a compute job using a free C2D environment (no provider fees)
 7. Bob monitors logs / algorithm output
 8. Tips and tricks
 
@@ -22,47 +22,74 @@ Let's go through each step.
 
 ## 1. Setup
 
-### First steps
+### Prerequisites
+
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+- [x] Setup : Prerequisites
+
+
+### Download barge and run services
+
+Here, we use barge's "Compute-to-Data" backend of barge via its `--with-c2d` option. The steps below detail how.
+
+If you have a console with barge running, turn off barge by pressing `Ctrl-C` and waiting for it to shut down.
+
+Then, in the barge console:
+```console
+# Grab repo (if needed)
+git clone https://github.com/oceanprotocol/barge
+cd barge
+
+# Clean up old containers (to be sure)
+docker system prune -a --volumes
+
+# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# (For speed, we turn off components we don't need for quickstarts, like IPFS)
+./start_ocean.sh --with-c2d-option --no-ipfs --no-dashboard --skip-subgraph-deploy
+```
+
 Use the `--with-c2d` option when running barge in order to include the Compute-to-Data backend
 ```console
 ./start_ocean.sh --with-c2d
 ```
-When running barge with c2d enabled, use the following bash script to wait until
-c2d is fully deployed:
-```console
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
-    done
-```
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
+
+### Install the library
+
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Install the library from v4 sources
 
 ### Install extra libraries
 
-This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies.
-
-In your project folder, in this case my_project from `Setup : Install the library` in First Steps, run the following command:
-
+This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it. So, in the same console:
 ```console
 pip install numpy matplotlib
 ```
 
 ### Set envvars
 
-Set the required enviroment variables as described in [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md):
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Set envvars
 
-## 2. Alice publishes a Data NFT
+### Wait for barge C2D to be ready.
 
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
+It can take >10 min for barge with C2D to be ready. We can tell it's ready when the file `$HOME/.ocean/ocean-c2d/ready` exists. Here's a convenient way to wait until it's ready. In the console:
 
-Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create a data NFT
+```console
+#loop until target file exists
+for i in $(seq 1 50); do
+    sleep 5
+    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
+    done
+```
 
-## 3. Alice publishes a dataset
+When it's done, we can proceed to the next step.
+
+### Setup in Python
+
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+- [x] Setup : Setup in Python
+
+## 2. Alice publishes dataset
 
 In the same python console:
 
@@ -71,7 +98,7 @@ In the same python console:
 DATA_datatoken = data_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
-# Specify metadata and services, using the Branin test dataset
+# Specify metadata and services for the Branin test dataset
 DATA_date_created = "2021-12-28T10:55:11Z"
 DATA_metadata = {
     "created": DATA_date_created,
@@ -83,7 +110,7 @@ DATA_metadata = {
     "license": "CC0: PublicDomain",
 }
 
-# ocean.py offers multiple file types, but a simple url file should be enough for this example
+# ocean.py offers multiple file object types. A simple url file is be enough for here
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
@@ -111,7 +138,7 @@ DATA_compute_service = Service(
     compute_values=DATA_compute_values,
 )
 
-# Publish asset with compute service on-chain.
+# Publish asset with compute service on-chain
 DATA_asset = ocean.assets.create(
     metadata=DATA_metadata,
     publisher_wallet=alice_wallet,
@@ -124,7 +151,7 @@ DATA_asset = ocean.assets.create(
 print(f"DATA_asset did = '{DATA_asset.did}'")
 ```
 
-## 4. Alice publishes an algorithm
+## 3. Alice publishes an algorithm
 
 In the same Python console:
 
@@ -182,7 +209,7 @@ ALGO_asset = ocean.assets.create(
 print(f"ALGO_asset did = '{ALGO_asset.did}'")
 ```
 
-## 5. Alice allows the algorithm for C2D for that data asset
+## 4. Alice allows the algorithm for C2D for that data asset
 
 In the same Python console:
 ```python
@@ -191,7 +218,7 @@ compute_service.add_publisher_trusted_algorithm(ALGO_asset)
 DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
-## 6. Bob acquires datatokens for data and algorithm
+## 5. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
@@ -209,7 +236,7 @@ DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
-## 7. Bob starts a compute job using a free C2D environment
+## 6. Bob starts a compute job using a free C2D environment
 
 Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
 For demo purposes, we will use the free C2D environment, which requires no provider fees.
@@ -257,7 +284,7 @@ job_id = ocean.compute.start(
 print(f"Started compute job with id: {job_id}")
 ```
 
-## 8. Bob monitors logs / algorithm output
+## 7. Bob monitors logs / algorithm output
 
 In the same Python console, you can check the job status as many times as needed:
 
@@ -315,9 +342,9 @@ You should see something like this:
 
 ![test](https://user-images.githubusercontent.com/4101015/134895548-82e8ede8-d0db-433a-b37e-694de390bca3.png)
 
-## 9. Tips and tricks
-This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases.
-For examples using different datasets and algorithms, please see [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md)
+## Appendix. Tips & tricks
+
+This README has a simple ML algorithm. However, Ocean C2D is not limited to usage in ML. The file [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md) has examples from vision and other fields.
 
 In the "publish algorithm" step, to replace the sample algorithm with another one:
 
@@ -334,6 +361,6 @@ It modifies the contents of the given ComputeInput as follows:
 
 This means you can reuse the same ComputeInput and you don't need to regenerate it everytime it is sent to `pay_for_compute_service`. This step makes sure you are not paying unnecessary or duplicated fees.
 
-If you wish to upgrade the compute resources, you can use any (paid) C2d environment.
+If you wish to upgrade the compute resources, you can use any (paid) C2D environment.
 Inspect the results of `ocean.ocean_compute.get_c2d_environments(service.service_endpoint)` and `ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)` for a preview of what you will pay.
 Don't forget to handle any minting, allowance or approvals on the desired token to ensure transactions pass.
