@@ -7,13 +7,13 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 1. Setup
 
-## Prerequisites
+### Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
-## Download barge and run services
+### Download barge and run services
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
@@ -32,7 +32,7 @@ docker system prune -a --volumes
 ./start_ocean.sh --no-ipfs --no-dashboard --skip-subgraph-deploy
 ```
 
-## Install the library
+### Install the library
 
 In a new console:
 
@@ -52,7 +52,7 @@ pip3 install wheel
 pip3 install --pre ocean-lib
 ```
 
-## Set envvars
+### Set envvars
 ```console
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
@@ -111,7 +111,7 @@ print(f"Created datatoken. Its address is {datatoken.address}")
 
 Congrats, you've created your first Ocean datatoken! 🐋
 
-## 3. Tips and tricks
+## Appendix. Tips & Tricks
 
 You can combine creating a data NFT and datatoken into a single call: `ocean.create_nft_with_erc20()`.
 
