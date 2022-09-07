@@ -63,22 +63,16 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 # Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 2. Publish Data NFT & Datatoken
+### Setup in Python
 
-### 2.1 Create a data NFT
-
-Open a new console and run python console with the command:
+Open a new console and run Python console:
 ```console
 python
 ```
 
 In the Python console:
-
 ```python
 # Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
@@ -86,17 +80,19 @@ from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
-# Mint OCEAN tokens only for ganache
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
+```
 
-# Publish an NFT
+## 2. Publish Data NFT & Datatoken
+
+### 2.1 Create a data NFT
+
+In the same Python console:
+```
 data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
@@ -105,7 +101,7 @@ Congrats, you've created your first Ocean data NFT!
 
 ### 2.2 Create a datatoken from the data NFT
 
-In the same python console:
+In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
 
