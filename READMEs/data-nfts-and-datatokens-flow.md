@@ -71,6 +71,9 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 # Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
+
+#needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
 ## 2. Publish Data NFT & Datatoken
@@ -90,6 +93,10 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
+
+# Mint OCEAN tokens only for ganache
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
 
 # Create Alice's wallet
 import os
