@@ -28,7 +28,8 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
+# (For speed, we turn off components we don't need for quickstarts, like IPFS)
+./start_ocean.sh --no-ipfs --no-dashboard --skip-subgraph-deploy
 ```
 
 Wait until the `artifacts` directory and `address.json` file are created. In the console:
