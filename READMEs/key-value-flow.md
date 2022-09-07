@@ -19,16 +19,13 @@ Here are the steps:
 ## 1. Setup
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 1. Setup : Prerequisites
-- [x] 1. Setup : Download barge and run services
-- [x] 1. Setup : Install the library from v4 sources
-
-And:
-- [x] 1. Setup : Set envvars
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
+- [x] Setup : Set envvars
+- [x] Setup : Setup in Python
 
 ## 2. Publish data NFT
-
-In the console where you set envvars, do the following.
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] 2.1 Create a data NFT
