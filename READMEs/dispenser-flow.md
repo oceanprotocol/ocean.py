@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Dispenser Flow
 
-This quickstart describes the dispenser flow.
+This quickstart describes the dispenser flow, a "faucet" to give out free datatokens.
 
 It focuses on Alice's experience as a publisher.
 
@@ -19,37 +19,31 @@ Let's go through each step.
 
 ## 1. Setup
 
-### First steps
-
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
-
-
-### Set envvars
-
-Set the required enviroment variables as described in [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md):
 - [x] Setup : Set envvars
+- [x] Setup : Setup in Python
 
 ## 2. Publish Data NFT & Datatoken
 
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
-
-Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] 2.1 Create a data NFT
 - [x] 2.2 Create a datatoken from the data NFT
 
 ### 3. Dispenser creation & activation
 
-In the same python console:
+In the same Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-# Get the dispenser
+# Key parameter
+max_amount = ocean.to_wei(50)
+
+# Retrieve the dispenser
 dispenser = ocean.dispenser
 
-max_amount = ocean.to_wei(50)
 # Create dispenser
 datatoken.create_dispenser(
     dispenser_address=dispenser.address,
@@ -73,6 +67,9 @@ dispenser.dispense_tokens(
 assert datatoken.balanceOf(alice_wallet.address) == max_amount
 ```
 
-As an alternative for publishing a NFT, a datatoken and a dispenser at once, you can use `create_nft_erc20_with_dispenser`.
+
+## Appendix. Tips & Tricks
+
+You can combine the transactions to (a) publish data NFT, (b) publish datatoken, and (c) publish dispenser into a _single_ transaction, via the method `create_nft_erc20_with_dispenser`.
 
 
