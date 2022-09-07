@@ -20,7 +20,7 @@ Let's go through each step.
 
 ## 1. Setup
 
-Refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and do:
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
@@ -38,11 +38,13 @@ os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c1
 # Mint fake OCEAN. Alice & Bob automatically get some.
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
+
+OCEAN_token = ocean.OCEAN_token
 ```
 
 ## 2. Alice publishes Data NFT & Datatoken
 
-Refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and do:
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] 2.1 Create a data NFT
 - [x] 2.2 Create a datatoken from the data NFT
 
@@ -55,7 +57,6 @@ datatoken.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 
 In the same Python console:
 ```python
-OCEAN_token = ocean.OCEAN_token
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN_token,
@@ -101,7 +102,7 @@ tx_result = ocean.fixed_rate_exchange.buy_dt(
 assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```
 
-## Appendix. Tips and tricks
+## Appendix. Tips & Tricks
 
 You can combine the transactions to (a) publish data NFT, (b) publish datatoken, and (c) publish exchange into a _single_ transaction, via the method `create_nft_erc20_with_fixed_rate()`.
 
