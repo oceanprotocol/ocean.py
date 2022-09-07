@@ -97,26 +97,7 @@ ls branin.arff
 
 Congrats to Bob for buying and consuming a data asset!
 
-## 5. Tips and Tricks
-
-**On encrypting or compressing assets**
-
-In some cases, you may want to encrypt the asset, e.g. for a private market or metadata cache.
-
-Ocean supports this, as follows. When you create an asset, use the `encrypt_flag` keyword:
-
-`asset = ocean.assets.create(..., encrypt_flag=True)`
-
-In some cases, you may want to compress the asset. To do so, use the `compress_flag` keyword:
-
-`asset = ocean.assets.create(..., compress_flag=True)`
-
-
-You can encrypt _and_ compress at once:
-
-`asset = ocean.assets.create(..., encrypt_flag=True, compress_flag=True)`
-
-**On the format of the downloaded file**
+## Appendix. Tips & Tricks
 
 The file is in ARFF format, used by some AI/ML tools. In our example, it has two input variables (x0, x1) and one output.
 
