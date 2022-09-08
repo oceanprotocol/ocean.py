@@ -92,7 +92,7 @@ alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations,
 ### 2.1 Create a data NFT
 
 In the same Python console:
-```
+```python
 data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
