@@ -17,8 +17,6 @@ Let's go through each step.
 
 ## 1. Setup
 
-### First steps
-
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
@@ -48,7 +46,7 @@ metadata = {
 
 # we use just a simple graphql query
 from ocean_lib.structures.file_objects import GraphqlQuery
-url_file = GraphqlQuery(
+graphql_query = GraphqlQuery(
     url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
     query="""
                     query{
@@ -65,7 +63,7 @@ url_file = GraphqlQuery(
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
-    [url_file],
+    [graphql_query],
     datatoken_templates=[1],
     datatoken_names=["Datatoken 1"],
     datatoken_symbols=["DT1"],
@@ -82,6 +80,7 @@ print(f"did = '{did}'")
 ```
 
 
-3.  Bob consumes the data asset with a GraphQL-shaped query
+## 3.  Bob consumes the dataset
 
-FIXME
+(Consume here is just like in [consume-flow](READMEs/consume-flow.md]. The file downloaded is a .json. From that, use the python `json` library to parse it as desired.)
+
