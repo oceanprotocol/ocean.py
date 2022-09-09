@@ -28,21 +28,19 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 
 
-### Download run services
+### Run services
 
 Here, we use remote services for everything:
-- remote chain - rinkeby testnet
+- remote chain - [Rinkeby](https://docs.oceanprotocol.com/core-concepts/networks#rinkeby) testnet
 - remote Provider, including for C2D compute
 - remote Aquarius
 
-FIXME
+Since these are already services running in the Ocean ecosystem, there's nothing for you to do here!
 
-### Install the library
+### Install libraries
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Install the library from v4 sources
-
-### Install extra libraries
+- [x] Setup : Install the library
 
 This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it. So, in the same console:
 ```console
@@ -51,22 +49,19 @@ pip install numpy matplotlib
 
 ### Set envvars
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Set envvars
-
-### Wait for barge C2D to be ready.
-
-It can take >10 min for barge with C2D to be ready. We can tell it's ready when the file `$HOME/.ocean/ocean-c2d/ready` exists. Here's a convenient way to wait until it's ready. In the console:
+This is like other READMEs, except the network URL now points to a remote network (Rinkeby). It came from [rpc.info](https://rpc.info); uou can use a different RPC URL too, of course.
 
 ```console
-#loop until target file exists
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
-    done
-```
+# Set envvars
+export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
+export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
-When it's done, we can proceed to the next step.
+# Set the address file
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+
+# Set network URL - rinkeby
+export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161
+```
 
 ### Setup in Python
 
