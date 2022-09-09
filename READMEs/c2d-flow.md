@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D flow.
+This quickstart describes a C2D flow, using [remote services and Rinkeby testnet](https://docs.oceanprotocol.com/core-concepts/networks#rinkeby).
 
 Here are the steps:
 
@@ -27,16 +27,6 @@ Let's go through each step.
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 
-
-### Run services
-
-Here, we use remote services for everything:
-- remote chain - [Rinkeby](https://docs.oceanprotocol.com/core-concepts/networks#rinkeby) testnet
-- remote Provider, including for C2D compute
-- remote Aquarius
-
-Since these are already services running in the Ocean ecosystem, there's nothing for you to do here!
-
 ### Install libraries
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
@@ -47,26 +37,64 @@ This example uses C2D to create a regression model. We'll use the library `matpl
 pip install numpy matplotlib
 ```
 
-### Set envvars
+### Set config values for the services
 
-This is like other READMEs, except the network URL now points to a remote network (Rinkeby). It came from [rpc.info](https://rpc.info); uou can use a different RPC URL too, of course.
+In your working directory, in the console:
+```console
+
+# Create and fill config.ini file:
+echo "
+[eth-network]
+network = https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa445616
+
+[resources]
+metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
+provider.url = https://v4.provider.rinkeby.oceanprotocol.com
+" > config.ini
+
+# Point to this as config file
+export OCEAN_CONFIG_FILE=config.ini
+
+# Ensure that envvars don't override config file values:
+unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
+```
+
+### Set up accounts
+
+Since we're using Rinkeby, you need an account that holds Rinkeby ETH.
+
+FIXME
+
+In the console:
 
 ```console
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
-
-# Set the address file
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-
-# Set network URL - rinkeby
-export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161
 ```
 
 ### Setup in Python
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Open a new console and run Python console:
+```console
+python
+```
+
+In the Python console:
+```python
+
+# Import and configure the components / services:
+import os
+from ocean_lib.config import Config
+config = Config(os.getenv('OCEAN_CONFIG_FILE'))
+ocean = Ocean(config)
+
+# Create Alice's wallet
+import os
+from ocean_lib.web3_internal.wallet import Wallet
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
+```
 
 ## 2. Alice publishes dataset
 
