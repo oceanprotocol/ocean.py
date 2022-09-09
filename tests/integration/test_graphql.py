@@ -150,7 +150,7 @@ def test_consume_simple_graphql_query(
 
 
 @pytest.mark.integration
-def test_consume_simple_graphql_query(
+def test_consume_parametrized_graphql_query(
     web3: Web3,
     config: Config,
     publisher_wallet: Wallet,
@@ -192,6 +192,7 @@ def test_consume_simple_graphql_query(
             "label": "nftAddress",
             "required": True,
             "description": "Nft to search for",
+            "default": "0x0000000000000000000000000000000000000000"
         }
     ]
 
@@ -283,7 +284,7 @@ def test_consume_simple_graphql_query(
         destination=destination,
         order_tx_id=tx_id,
         userdata={
-            "nftAddress": asset.nftAddress.lower()
+            "nftAddress": asset.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters
     )
 
