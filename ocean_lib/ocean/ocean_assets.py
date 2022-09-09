@@ -8,7 +8,8 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union, Dict, Any
+
 
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -78,7 +79,12 @@ class OceanAssets:
 
     @enforce_types
     def _add_defaults(
-        self, services: list, datatoken: str, files: List[FilesType], provider_uri: str
+        self,
+        services: list,
+        datatoken: str,
+        files: List[FilesType],
+        provider_uri: str,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> list:
         has_access_service = any(
             map(
@@ -94,6 +100,7 @@ class OceanAssets:
                 service_endpoint=self._config.provider_url,
                 datatoken=datatoken,
                 files=files,
+                consumer_parameters=consumer_parameters,
             )
 
             services.append(access_service)
@@ -108,6 +115,7 @@ class OceanAssets:
         datatoken: str,
         files: List[FilesType],
         timeout: Optional[int] = 3600,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> Service:
         return Service(
             service_id=service_id,
@@ -116,6 +124,7 @@ class OceanAssets:
             datatoken=datatoken,
             files=files,
             timeout=timeout,
+            consumer_parameters=consumer_parameters,
         )
 
     @enforce_types
@@ -281,6 +290,7 @@ class OceanAssets:
         deployed_datatokens: Optional[List[Datatoken]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -453,7 +463,11 @@ class OceanAssets:
             if not services:
                 for i, datatoken_address in enumerate(datatoken_addresses):
                     services = self._add_defaults(
-                        services, datatoken_address, files[i], provider_uri
+                        services,
+                        datatoken_address,
+                        files[i],
+                        provider_uri,
+                        consumer_parameters=consumer_parameters,
                     )
             for i, datatoken_address in enumerate(datatoken_addresses):
                 deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
@@ -465,7 +479,11 @@ class OceanAssets:
             if not services:
                 for i, datatoken in enumerate(deployed_datatokens):
                     services = self._add_defaults(
-                        services, datatoken.address, files[i], provider_uri
+                        services,
+                        datatoken.address,
+                        files[i],
+                        provider_uri,
+                        consumer_parameters=consumer_parameters,
                     )
 
             datatokens = self.build_datatokens_list(
