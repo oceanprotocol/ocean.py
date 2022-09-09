@@ -30,7 +30,7 @@ def c2d_flow_readme(
 ):
     consumer_wallet = publisher_wallet = generate_wallet()
     # Publish the data NFT token
-    data_nft = ocean.create_data_nft("NFTToken1", "NFT1", publisher_wallet)
+    data_nft = ocean.create_data_nft("NFT1", "NFT1", publisher_wallet)
     assert data_nft.address
     assert data_nft.token_name()
     assert data_nft.symbol()
@@ -92,7 +92,7 @@ def c2d_flow_readme(
     assert DATA_asset.did, "create dataset with compute service unsuccessful"
 
     # Publish the algorithm NFT token
-    ALGO_nft_token = ocean.create_data_nft("NFTToken1", "NFT1", publisher_wallet)
+    ALGO_nft_token = ocean.create_data_nft("NFT1", "NFT1", publisher_wallet)
     assert ALGO_nft_token.address
 
     # Publish the datatoken

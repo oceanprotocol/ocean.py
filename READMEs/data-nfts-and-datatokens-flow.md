@@ -6,13 +6,14 @@ SPDX-License-Identifier: Apache-2.0
 # Quickstart: Publish Data NFT & Datatoken
 
 ## 1. Setup
-## Prerequisites
+
+### Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
-## Download barge and run services
+### Download barge and run services
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
@@ -27,19 +28,11 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
+# (For speed, we turn off components we don't need for quickstarts, like IPFS)
+./start_ocean.sh --no-ipfs --no-dashboard --skip-subgraph-deploy
 ```
 
-Wait until the `artifacts` directory and `address.json` file are created. In the console:
-
-```console
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
-    done
-```
-
-## Install the library
+### Install the library
 
 In a new console:
 
@@ -59,7 +52,7 @@ pip3 install wheel
 pip3 install --pre ocean-lib
 ```
 
-## Set envvars
+### Set envvars
 ```console
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
@@ -70,22 +63,16 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 # Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 2. Publish Data NFT & Datatoken
+### Setup in Python
 
-### 2.1 Create a data NFT
-
-Open a new console and run python console with the command:
+Open a new console and run Python console:
 ```console
 python
 ```
 
 In the Python console:
-
 ```python
 # Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
@@ -93,18 +80,20 @@ from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
-# Mint OCEAN tokens only for ganache
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
+```
 
-# Publish an NFT token
-data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet)
+## 2. Publish Data NFT & Datatoken
+
+### 2.1 Create a data NFT
+
+In the same Python console:
+```python
+data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 
@@ -112,7 +101,7 @@ Congrats, you've created your first Ocean data NFT!
 
 ### 2.2 Create a datatoken from the data NFT
 
-In the same python console:
+In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
 
@@ -122,7 +111,7 @@ print(f"Created datatoken. Its address is {datatoken.address}")
 
 Congrats, you've created your first Ocean datatoken! 🐋
 
-## 3. Tips and tricks
+## Appendix. Tips & Tricks
 
 You can combine creating a data NFT and datatoken into a single call: `ocean.create_nft_with_erc20()`.
 
@@ -138,7 +127,7 @@ print(f"config.provider_url = '{config.provider_url}'")
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 # data NFT
-print(f"data NFT token name: {data_nft.token_name()}")
+print(f"data NFT name: {data_nft.token_name()}")
 print(f"data NFT symbol: {data_nft.symbol()}")
 
 # datatoken
