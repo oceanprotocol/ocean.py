@@ -36,7 +36,7 @@ class Service:
         name: Optional[str] = None,
         description: Optional[str] = None,
         additional_information: Optional[Dict[str, Any]] = None,
-        consumer_parameters = None,
+        consumer_parameters=None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id

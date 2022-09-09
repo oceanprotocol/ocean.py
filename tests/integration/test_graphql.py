@@ -192,7 +192,7 @@ def test_consume_parametrized_graphql_query(
             "label": "nftAddress",
             "required": True,
             "description": "Nft to search for",
-            "default": "0x0000000000000000000000000000000000000000"
+            "default": "0x0000000000000000000000000000000000000000",
         }
     ]
 

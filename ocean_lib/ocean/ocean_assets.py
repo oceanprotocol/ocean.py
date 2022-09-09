@@ -84,7 +84,7 @@ class OceanAssets:
         datatoken: str,
         files: List[FilesType],
         provider_uri: str = None,
-        consumer_parameters = None,
+        consumer_parameters=None,
     ) -> list:
         has_access_service = any(
             map(
@@ -115,7 +115,7 @@ class OceanAssets:
         datatoken: str,
         files: List[FilesType],
         timeout: Optional[int] = 3600,
-        consumer_parameters = None,
+        consumer_parameters=None,
     ) -> Service:
         return Service(
             service_id=service_id,
