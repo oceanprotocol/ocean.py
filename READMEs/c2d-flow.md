@@ -28,30 +28,14 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 
 
-### Download barge and run services
+### Download run services
 
-Here, we use barge's "Compute-to-Data" backend of barge via its `--with-c2d` option. The steps below detail how.
+Here, we use remote services for everything:
+- remote chain - rinkeby testnet
+- remote Provider, including for C2D compute
+- remote Aquarius
 
-If you have a console with barge running, turn off barge by pressing `Ctrl-C` and waiting for it to shut down.
-
-Then, in the barge console:
-```console
-# Grab repo (if needed)
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-# Clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-# (For speed, we turn off components we don't need for quickstarts, like IPFS)
-./start_ocean.sh --with-c2d-option --no-ipfs --no-dashboard --skip-subgraph-deploy
-```
-
-Use the `--with-c2d` option when running barge in order to include the Compute-to-Data backend
-```console
-./start_ocean.sh --with-c2d
-```
+FIXME
 
 ### Install the library
 
