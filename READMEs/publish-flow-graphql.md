@@ -3,14 +3,15 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Publish Flow for Graphql data type
+# Quickstart: Publish & Consume Flow for GraphQL data type
 
-This quickstart describes how data is published, including metadata.
+This quickstart describes a flow to publish & consume GraphQL-style URIs.
 
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes data asset
+2.  Alice publishes GraphQL-style dataset
+3.  Bob consumes the data asset with a GraphQL-shaped query
 
 Let's go through each step.
 
@@ -22,11 +23,11 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 *NOTE: before starting barge, please type " export PROVIDER_VERSION=graphql"  (will remove this when PR is merged in main provider)
-- [x] Setup : Install the library from v4 sources
+- [x] Setup : Install the library
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
 
-## 2. Publish Dataset
+## 2. Alice Publishes GraphQL-style Dataset
 
 Then in the same python console:
 ```python
@@ -80,13 +81,7 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 ```
 
-In this case, we used the "download" service type. There are other options too.
 
-The asset metadata stored on-chain is encrypted and compressed by default.
-It is encouraged that publishers encrypt asset metadata so that the asset supports GDPR "right-to-be-forgotten" compliance rules.
+3.  Bob consumes the data asset with a GraphQL-shaped query
 
-To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)`.
-To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
-It is possible to disable both encryption and compression, if desired.
-
-`ocean.assets.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.
+FIXME
