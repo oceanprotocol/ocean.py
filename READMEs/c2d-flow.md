@@ -22,87 +22,31 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & basic install
+### Setup in Bash Console
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Install the library
+From [simple-remote](simple-remote.md), do:
+- [x] Setup: Prerequisites & installation
+- [x] Setup: Set Config Values for Services
+- [x] Setup: Create Rinkeby Accounts
 
 ### Install matplotlib
 
-This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it. So, in the same console:
+This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it.
+
+In the same console:
 ```console
+#ensure you're in the Python virtualenv
+source venv/bin/activate
+
+#install matplotlib
 pip install numpy matplotlib
 ```
-
-### Set config values for the services
-
-In your working directory, in the console:
-```console
-
-# Create and fill config.ini file:
-echo "
-[eth-network]
-network = https://rinkeby.infura.io/v3/9aa3d95b3bc440fa88ea12eaa445616
-
-[resources]
-metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
-provider.url = https://v4.provider.rinkeby.oceanprotocol.com
-" > config.ini
-
-# Point to this as config file
-export OCEAN_CONFIG_FILE=config.ini
-
-# Ensure that envvars don't override config file values:
-unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
-```
-
-### Set up Rinkeby accounts
-
-Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH.
-
-Here's one way.
-
-1. [Install Metamask](https://metamask.io/download/) in your browser (if needed)
-2. [Add Rinkeby to Metamask](https://motivationgrid.com/how-to-add-rinkeby-to-metamask-guide-with-images-updated-2022/).
-3. [Create a new account](https://metamask.zendesk.com/hc/en-us/articles/360015289452-How-to-create-an-additional-account-in-your-wallet), call it "TEST1"
-4. [Copy your account's address](https://metamask.zendesk.com/hc/en-us/articles/360015488791-How-to-view-your-account-details-public-address). Save it to a local text file or somewhere else safe.
-5. [Get some free Rinkeby ETH via a faucet](https://rinkebyfaucet.com/). You'll need to enter your account's address. 
-6. [Export your account's private key](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-export-an-account-s-private-key). Save it to a local text file or somewhere else safe.
-7. Repeat steps 3-6, for a new account called "TEST2".
-
-### Set envvars based on Rinkeby accounts
-
-In the console:
-
-```console
-# Set envvars
-export TEST_PRIVATE_KEY1=<private key for TEST1>
-export TEST_PRIVATE_KEY2=<private key for TEST2>
 ```
 
 ### Setup in Python
 
-Open a new console and run Python console:
-```console
-python
-```
-
-In the Python console:
-```python
-
-# Import and configure the components / services:
-import os
-from ocean_lib.config import Config
-config = Config(os.getenv('OCEAN_CONFIG_FILE'))
-ocean = Ocean(config)
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-```
+From [simple-remote](simple-remote.md), do:
+- [x] Setup in Python
 
 ## 2. Alice publishes dataset
 
