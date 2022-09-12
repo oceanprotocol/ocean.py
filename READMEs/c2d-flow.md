@@ -22,15 +22,13 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### Prerequisites & basic install
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
-
-### Install libraries
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Install the library
+
+### Install matplotlib
 
 This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it. So, in the same console:
 ```console
@@ -59,18 +57,28 @@ export OCEAN_CONFIG_FILE=config.ini
 unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 ```
 
-### Set up accounts
+### Set up Rinkeby accounts
 
-Since we're using Rinkeby, you need an account that holds Rinkeby ETH.
+Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH.
 
-FIXME
+Here's one way.
+
+1. [Install Metamask](https://metamask.io/download/) in your browser (if needed)
+2. [Add Rinkeby to Metamask](https://motivationgrid.com/how-to-add-rinkeby-to-metamask-guide-with-images-updated-2022/).
+3. [Create a new account](https://metamask.zendesk.com/hc/en-us/articles/360015289452-How-to-create-an-additional-account-in-your-wallet), call it "TEST1"
+4. [Copy your account's address](https://metamask.zendesk.com/hc/en-us/articles/360015488791-How-to-view-your-account-details-public-address). Save it to a local text file or somewhere else safe.
+5. [Get some free Rinkeby ETH via a faucet](https://rinkebyfaucet.com/). You'll need to enter your account's address. 
+6. [Export your account's private key](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-export-an-account-s-private-key). Save it to a local text file or somewhere else safe.
+7. Repeat steps 3-6, for a new account called "TEST2".
+
+### Set envvars based on Rinkeby accounts
 
 In the console:
 
 ```console
 # Set envvars
-export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
-export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+export TEST_PRIVATE_KEY1=<private key for TEST1>
+export TEST_PRIVATE_KEY2=<private key for TEST2>
 ```
 
 ### Setup in Python
