@@ -25,6 +25,7 @@ TEST_SERVICE_ENDPOINTS = {
     "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
     "create_auth_token": ["GET", "/api/services/createAuthToken"],
     "delete_auth_token": ["DELETE", "/api/services/deleteAuthToken"],
+    "validateContainer": ["POST", "/api/services/validateContainer"],
 }
 
 
