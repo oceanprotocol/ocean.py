@@ -109,6 +109,13 @@ def test_start_order_fees(
 
     opc_collector_address = get_opc_collector_address_from_datatoken(dt)
 
+    if base_token_name == "Ocean" and publish_market_order_fee_in_unit == "500":
+        bt.mint(
+            consumer_wallet.address,
+            parse_units("2000", bt.decimals()),
+            factory_deployer_wallet,
+        )
+
     # Get balances
     publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
     publisher_dt_balance_before = dt.balanceOf(publisher_wallet.address)
