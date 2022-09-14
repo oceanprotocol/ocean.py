@@ -18,39 +18,21 @@ Here are the steps:
 
 ## 1. Setup
 
-From the [Simple Flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 1. Setup : Prerequisites
-- [x] 1. Setup : Download barge and run services
-- [x] 1. Setup : Install the library from v4 sources
-
-And:
-- [x] 1. Setup : Set envvars
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
+- [x] Setup : Set envvars
+- [x] Setup : Setup in Python
 
 ## 2. Alice publishes data NFT
 
-We create a data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
-
-In the terminal where you set envvars:
-
-```console
-python
-```
+We'll create a data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
 
 In the Python console:
 ```python
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-
 # Publish an NFT token. Note "transferable=False"
-data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet, transferable=False)
+data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet, transferable=False)
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'

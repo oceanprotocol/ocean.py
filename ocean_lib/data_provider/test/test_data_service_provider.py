@@ -339,7 +339,7 @@ def test_provider_address_with_url():
 @pytest.mark.integration
 def test_get_root_uri():
     """Tests extraction of base URLs from various inputs."""
-    uri = "https://provider.mainnet.oceanprotocol.com"
+    uri = "https://v4.provider.mainnet.oceanprotocol.com"
     assert DataSP.is_valid_provider(uri)
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://localhost:8030") == "http://localhost:8030"

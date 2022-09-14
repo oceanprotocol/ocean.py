@@ -102,6 +102,13 @@ def test_reuse_order_fees(
     # Grant datatoken infinite approval to spend consumer's base tokens
     bt.approve(dt.address, MAX_WEI, consumer_wallet)
 
+    if base_token_name == "Ocean" and provider_fee_in_unit == "700":
+        bt.mint(
+            consumer_wallet.address,
+            parse_units("2000", bt.decimals()),
+            factory_deployer_wallet,
+        )
+
     # Start order: pay order fees and provider fees
     start_order_tx_id = dt.start_order(
         consumer=consumer_wallet.address,
