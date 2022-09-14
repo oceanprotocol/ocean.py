@@ -251,7 +251,7 @@ def test_fileinfo(
         assert file["valid"] is True
     assert files_info[0]["contentType"] == "text/plain"
     assert files_info[1]["contentType"] == "text/xml"
-    assert files_info[2]["contentType"] == "application/json"
+    assert files_info[2]["contentType"] == "application/octet-stream"
 
 
 @pytest.mark.integration
