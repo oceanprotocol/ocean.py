@@ -379,9 +379,7 @@ def test_compute_raw_algo(
         algorithm_meta=raw_algorithm,
     )
 
-    with pytest.raises(
-        DataProviderException, match="cannot run raw algorithm on this did"
-    ):
+    with pytest.raises(DataProviderException, match="no_raw_algo_allowed"):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
@@ -473,7 +471,7 @@ def test_compute_trusted_algorithm(
     # Expect to fail when non-trusted algorithm is used
     with pytest.raises(
         DataProviderException,
-        match=f"this algorithm did {algorithm_with_different_publisher.did} is not trusted",
+        match="not_trusted_algo",
     ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
@@ -526,7 +524,7 @@ def test_compute_update_trusted_algorithm(
     # Expect to fail when non-trusted algorithm is used
     with pytest.raises(
         DataProviderException,
-        match=f"this algorithm did {algorithm_with_different_publisher.did} is not trusted",
+        match="not_trusted_algo",
     ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
@@ -561,9 +559,7 @@ def test_compute_trusted_publisher(
     )
 
     # Expect to fail when algorithm with non-trusted publisher is used
-    with pytest.raises(
-        DataProviderException, match="this algorithm is not from a trusted publisher"
-    ):
+    with pytest.raises(DataProviderException, match="not_trusted_algo_publisher"):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
