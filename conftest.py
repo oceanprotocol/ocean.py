@@ -64,12 +64,13 @@ def setup_all(request, config, web3, ocean_token):
 
     amt_distribute = to_wei("1000")
     ocean_token.mint(wallet.address, to_wei("20000"), from_wallet=wallet)
+
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if get_ether_balance(web3, w.address) < to_wei("2"):
             send_ether(wallet, w.address, to_wei("4"))
 
         if ocean_token.balanceOf(w.address) < to_wei("100"):
-            ocean_token.transfer(w.address, amt_distribute, from_wallet=wallet)
+            ocean_token.mint(w.address, amt_distribute, from_wallet=wallet)
 
 
 @pytest.fixture
