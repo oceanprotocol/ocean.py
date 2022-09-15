@@ -18,7 +18,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Install the library
 
 
-### Create Rinkeby Accounts
+### Create Rinkeby Accounts (One time)
 
 Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH. We'll do it via Python.
 
@@ -54,20 +54,13 @@ Now, get Rinkeby ETH for each account, via a faucet:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
-### Setup Account envvars
-
-From your working bash console:
-```console
-export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
-export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
-```
-
-### Create Infura account
+### Create Infura account (One time)
 
 You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore, if you haven't already:
 - In your browser, [Go to Infura](https://infura.io), and sign up to get an Infura project id.
 
-### Set Config Values for Services
+
+### Create Config File for Services
 
 In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
 
@@ -81,18 +74,24 @@ metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
 provider.url = https://v4.provider.rinkeby.oceanprotocol.com
 ```
 
-Set envvars accordingly. In the console:
+### Set envvars
+
+In the console:
 ```console
-# Point to this as config file
+# For services: point to config file
 export OCEAN_CONFIG_FILE=config.ini
 
-# Ensure that envvars don't override config file values:
+# For services: ensure no other envvars that override config file values
 unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
+
+# For accounts: set private keys
+export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
+export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
 ```
 
 ### Setup in Python
 
-In previous steps, you specified services info in the config file, and private keys as envvars. Here, we'll load those into Python as a `Config` object and `Wallet` respectively.
+Let's load services info and account info into Python `Config` and `Wallet` objects respectively.
 
 In your working console, run Python:
 ```console
