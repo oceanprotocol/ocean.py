@@ -18,7 +18,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Install the library
 
 
-### Create Rinkeby Accounts (One time)
+### Create Rinkeby Accounts (One-Time)
 
 Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH. We'll do it via Python.
 
@@ -54,7 +54,7 @@ Now, get Rinkeby ETH for each account, via a faucet:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
-### Create Infura account (One time)
+### Create Infura account (One-Time)
 
 You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore, if you haven't already:
 - In your browser, [Go to Infura](https://infura.io), and sign up to get an Infura project id.
