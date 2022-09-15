@@ -200,7 +200,7 @@ def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
     monkeypatch.delenv(ENV_AQUARIUS_URL, raising=False)
     config = Config()
     metadata_cache_uri = config.metadata_cache_uri
-    assert metadata_cache_uri == "https://v4.aquarius.oceanprotocol.com"
+    assert metadata_cache_uri == "http://172.15.0.5:5000"
 
     monkeypatch.setenv(ENV_METADATA_CACHE_URI, "https://custom-aqua.uri")
     config = Config()
