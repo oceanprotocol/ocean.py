@@ -47,7 +47,9 @@ unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 
 Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH. We'll do it via Python.
 
-Open a new bash console and run Python:
+Open a new bash console; this will be your working console.
+
+In your working console, run Python:
 ```console
 python
 
@@ -62,13 +64,15 @@ TEST_PRIVATE_KEY1 = "0x" + secrets.token_hex(32)
 TEST_PRIVATE_KEY2 = "0x" + secrets.token_hex(32)
 
 #print out
-print(f"ADDRESS1={Account.from_key(TEST_PRIVATE_KEY1).address}, TEST_PRIVATE_KEY1={TEST_PRIVATE_KEY1}")
-print(f"ADDRESS2={Account.from_key(TEST_PRIVATE_KEY2).address}, TEST_PRIVATE_KEY2={TEST_PRIVATE_KEY2}")
-
-#set envvars
-os.environ["TEST_PRIVATE_KEY1"] = TEST_PRIVATE_KEY1
-os.environ["TEST_PRIVATE_KEY2"] = TEST_PRIVATE_KEY2
+print(f"ADDRESS1={Account.from_key(TEST_PRIVATE_KEY1).address}")
+print(f"TEST_PRIVATE_KEY1={TEST_PRIVATE_KEY1}")
+print(f"ADDRESS2={Account.from_key(TEST_PRIVATE_KEY2).address}")
+print(f"TEST_PRIVATE_KEY2={TEST_PRIVATE_KEY2}")
 ```
+
+Then, hit Ctrl-C to exit the Python console.
+
+Now, you have two new rinkeby accounts (address & private key). Same them somewhere safe, like a local file or a password manager. You can use them in other Ocean quickstarts, or other Ethereum testing.
 
 Now, get Rinkeby ETH for each account, via a faucet:
 1. Go to https://rinkebyfaucet.com/
@@ -76,14 +80,21 @@ Now, get Rinkeby ETH for each account, via a faucet:
 3. Request funds for ADDRESS2
 
 
+### Setup Account envvars
+
+From your working bash console:
+```console
+export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
+export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
+```
+
 ### Setup in Python
 
-Below, we load the set `Config` by loading `config.ini`, instead of importing `ExampleConfig`.
+In previous steps, you specified services info in the config file, and private keys as envvars. Here, we'll load those into Python as a `Config` object and `Wallet` respectively.
 
-From the bash console:
+In your working console, run Python:
 ```console
 python
-```
 
 In the Python console:
 ```python
@@ -102,11 +113,10 @@ alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations,
 ```
 
 
-### The Rest
+## 2. Publish Data NFT & Datatoken
 
-From here on, everything is the same as local.
+From here on, the code's is the same as local.
 
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup in Python: Create Alice's wallet
 - [x] Publish Data NFT & Datatoken: Create a data NFT
 - [x] Publish Data NFT & Datatoken: Create a datatoken from the data NFT
