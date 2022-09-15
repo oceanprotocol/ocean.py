@@ -54,12 +54,6 @@ Now, get Mumbai ETH for each account, via a faucet:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
-### Create Infura account (One-Time)
-
-You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore, if you haven't already:
-- [Go to Infura webpage](https://infura.io), and sign up to get an Infura project id.
-
-
 ### Create Config File for Services
 
 In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
