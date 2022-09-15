@@ -17,31 +17,6 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 
-### Set Config Values for Services
-
-You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore:
-- [Sign up to Infura](https://infura.io), and get an Infura project id. (If you haven't yet already.)
-
-
-In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
-
-```text
-[eth-network]
-network = https://rinkeby.infura.io/v3/<your Infura project id>
-
-[resources]
-metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
-provider.url = https://v4.provider.rinkeby.oceanprotocol.com
-```
-
-Set envvars accordingly. In the console:
-```console
-# Point to this as config file
-export OCEAN_CONFIG_FILE=config.ini
-
-# Ensure that envvars don't override config file values:
-unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
-```
 
 ### Create Rinkeby Accounts
 
@@ -79,13 +54,40 @@ Now, get Rinkeby ETH for each account, via a faucet:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
-
 ### Setup Account envvars
 
 From your working bash console:
 ```console
 export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
 export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
+```
+
+### Create Infura account
+
+You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore, if you haven't already:
+- In your browser, [Go to Infura](https://infura.io), and sign up to get an Infura project id.
+
+### Set Config Values for Services
+
+In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
+
+```text
+[eth-network]
+network = https://rinkeby.infura.io/v3/<your Infura project id>
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+
+[resources]
+metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
+provider.url = https://v4.provider.rinkeby.oceanprotocol.com
+```
+
+Set envvars accordingly. In the console:
+```console
+# Point to this as config file
+export OCEAN_CONFIG_FILE=config.ini
+
+# Ensure that envvars don't override config file values:
+unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 ```
 
 ### Setup in Python
