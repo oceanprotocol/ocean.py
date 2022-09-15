@@ -57,7 +57,7 @@ Now, get Rinkeby ETH for each account, via a faucet:
 ### Create Infura account (One-Time)
 
 You'll need to point to a remote blockchain node to send txs to. Infura is convenient. Therefore, if you haven't already:
-- In your browser, [Go to Infura](https://infura.io), and sign up to get an Infura project id.
+- [Go to Infura webpage](https://infura.io), and sign up to get an Infura project id.
 
 
 ### Create Config File for Services
