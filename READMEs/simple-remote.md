@@ -54,6 +54,7 @@ Now, get Mumbai ETH for each account, via a faucet:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
+
 ### Create Config File for Services
 
 In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
@@ -115,3 +116,13 @@ From here on, the code's is the same as local.
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Publish Data NFT & Datatoken: Create a data NFT
 - [x] Publish Data NFT & Datatoken: Create a datatoken from the data NFT
+
+
+### Appendix. Create Private RPC account (One-Time)
+
+Above, the config file set `network` as to a public RPC from maticvigil.com. When you run more transactions, you'll need your own private endpoint. [Alchemy](https://www.alchemy.com) is a good choice; it handles Mumbai. [Infura](https://infura.io) is also popular.
+
+Example endpoints (fake ones):
+
+- Alchemy for Mumbai: https://polygon-mumbai.g.alchemy.com/v2/hFYoNzNTnbqbpi__0LS-dPTnNn
+- Infura for Rinkeby: https://rinkeby.infura.io/v3/8239a2e4b8441b96aa4ae2e94aSDJFAD
