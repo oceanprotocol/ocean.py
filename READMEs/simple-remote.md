@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: _Remotely_ Publish Data NFT & Datatoken
 
-This quickstart is like the [simple-flow](READMEs/data-nfts-and-datatokens-flow.md), but uses [remote services and Rinkeby testnet](https://docs.oceanprotocol.com/core-concepts/networks#rinkeby).
+This quickstart is like the [simple-flow](READMEs/data-nfts-and-datatokens-flow.md), but uses [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#mumbai).
 
 Let's go through each step.
 
@@ -18,9 +18,9 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Install the library
 
 
-### Create Rinkeby Accounts (One-Time)
+### Create Mumbai Accounts (One-Time)
 
-Since we're using Rinkeby, you need two Rinkeby accounts TEST1 and TEST2, each with Rinkeby ETH. We'll do it via Python.
+Since we're using Mumbai, you need two Mumbai accounts TEST1 and TEST2, each with Mumbai ETH. We'll do it via Python.
 
 Open a new bash console; this will be your working console.
 
@@ -47,10 +47,10 @@ print(f"TEST_PRIVATE_KEY2={TEST_PRIVATE_KEY2}")
 
 Then, hit Ctrl-C to exit the Python console.
 
-Now, you have two new rinkeby accounts (address & private key). Same them somewhere safe, like a local file or a password manager. You can use them in other Ocean quickstarts, or other Ethereum testing.
+Now, you have two new mumbai accounts (address & private key). Same them somewhere safe, like a local file or a password manager. You can use them in other Ocean quickstarts, or other Ethereum testing.
 
-Now, get Rinkeby ETH for each account, via a faucet:
-1. Go to https://rinkebyfaucet.com/
+Now, get Mumbai ETH for each account, via a faucet:
+1. Go to https://faucet.polygon.technology/. Ensure you've selected "Mumbai" network and "MATIC" token.
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
@@ -62,16 +62,16 @@ You'll need to point to a remote blockchain node to send txs to. Infura is conve
 
 ### Create Config File for Services
 
-In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
+In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
 
 ```text
 [eth-network]
-network = https://rinkeby.infura.io/v3/<your Infura project id>
+network = https://rpc-mumbai.maticvigil.com
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
 metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
-provider.url = https://v4.provider.rinkeby.oceanprotocol.com
+provider.url = https://v4.provider.mumbai.oceanprotocol.com
 ```
 
 ### Set envvars
