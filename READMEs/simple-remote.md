@@ -102,7 +102,7 @@ In the Python console:
 import os
 from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
-config = Config(os.getenv('OCEAN_CONFIG_FILE')) # Load config file, versus import (
+config = Config(os.getenv('OCEAN_CONFIG_FILE'))
 ocean = Ocean(config)
 
 # Create Alice's wallet
