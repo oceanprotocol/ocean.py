@@ -23,19 +23,19 @@ GANACHE_URL = "http://127.0.0.1:8545"
 def get_web3(network_url: str) -> Web3:
     """
     Return a web3 instance connected via the given network_url.
-
-    Adds POA middleware when connecting to the Rinkeby Testnet.
-
-    A note about using the `rinkeby` testnet:
-    Web3 py has an issue when making some requests to `rinkeby`
-    - the issue is described here: https://github.com/ethereum/web3.py/issues/549
-    - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    Adds POA middleware if needed.
     """
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
 
-    if web3.eth.chain_id == 4:
+    # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
+    # - Issue: https://github.com/ethereum/web3.py/issues/549
+    # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    RINKEBY = 4
+    MUMBAI = 80001
+    if web3.eth.chain_id in [RINKEBY, MUMBAI]:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+        
     return web3
 
 
