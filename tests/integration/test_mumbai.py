@@ -4,7 +4,6 @@ import requests
 
 from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import networkToChainId
 from ocean_lib.web3_internal.wallet import Wallet
 
 def test_nonocean_tx(tmp_path):
@@ -25,7 +24,7 @@ def test_nonocean_tx(tmp_path):
     tx = {'nonce': nonce,
           'gasPrice': web3.toWei(gas_price, 'gwei'),
           'gas': 21000, #a standard ETH transfer needs 21K gas
-          'chainId': networkToChainId("mumbai"),
+          'chainId': web3.eth.chain_id,
           'to': bob_wallet.address,
           'from' : alice_wallet.address,
           'value': web3.toWei(0.001, 'ether'),
