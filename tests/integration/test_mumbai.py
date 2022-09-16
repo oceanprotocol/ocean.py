@@ -32,6 +32,7 @@ def test1(tmp_path):
 [eth-network]
 network = https://rpc-mumbai.maticvigil.com
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+block_confirmations = 0
 
 [resources]
 metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
@@ -51,6 +52,7 @@ provider.url = https://v4.provider.mumbai.oceanprotocol.com
 
     print(f"config.network_url = '{config.network_url}'")
     print(f"config.address_file = '{config.address_file}'")
+    print(f"config.block_confirmations = {config.block_confirmations.value}")
     print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
     print(f"config.provider_url = '{config.provider_url}'")
 
