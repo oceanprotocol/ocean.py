@@ -44,6 +44,10 @@ jobs:
           coverage run --source ocean_lib -m py.test -m "not slow"
           coverage report
           coverage xml
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+          REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
+          REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
       - name:  docker logs
         run: docker logs ocean_aquarius_1 && docker logs ocean_provider_1 && docker logs ocean_provider2_1 && docker logs ocean_computetodata_1
         if: ${{ failure() }}
