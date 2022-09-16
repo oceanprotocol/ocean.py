@@ -6,16 +6,6 @@ from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
-def test_remote_keys():
-    """
-    These are keys that hold fake MATIC for Mumbai, as needed for tests
-     - For CI tests, the values are hold in Github Actions Secrets
-     - For any local tests, you can create your own accounts, and then request funds
-       from the Mumbai faucet
-    """
-    alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
-    bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
-    assert len(bob_private_key) > 5
     
 #this decorator skips ../../conftest.py. Why: we don't want it to turn on on ganache
 @pytest.mark.nosetup_all
@@ -58,13 +48,32 @@ provider.url = https://v4.provider.mumbai.oceanprotocol.com
 
     # Create Ocean instance
     ocean = Ocean(config)
+    web3 = ocean.web3
 
     # Create Alice's wallet
     alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
-    alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
+    alice_wallet = Wallet(web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
     print(f"alice_wallet.address = '{alice_wallet.address}'")
+
+    # Create Bob's wallet
+    bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
+    bob_wallet = Wallet(web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
+    print(f"bob_wallet.address = '{bob_wallet.address}'")
+
+    # Simplest possible tx: Alice send Bob some fake MATIC
+    bob_eth_before = web3.eth.get_balance(bob_wallet.address)
+    nonce = web3.eth.getTransactionCount(alice_wallet.address)
+    tx_dict = {'nonce': nonce,
+               'to': bob_wallet.address,
+               'from' : alice_wallet.address,
+               'value': web3.toWei(0.001, 'ether'),
+               }
+    web3.eth.send_transaction(tx_dict)
+    bob_eth_after = web3.eth.get_balance(bob_wallet.address)
+    assert bob_eth_after > bob_eth_before
     
-    # Do an an arbitrary simple tx (here, publish data NFT), and test success
+    # Super-simple Ocean tx: Alice publish data NFT
+    import pdb; pdb.set_trace()
     print("Initiating a tx on mumbai...")
     data_nft = ocean.create_data_nft('My NFT1', 'NFT1', alice_wallet)
     assert data_nft.symbol() == 'NFT1'
