@@ -10,6 +10,22 @@ from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 
 
+@enforce_types
+def test_chainIdToNetwork():
+    assert networkutil.chainIdToNetwork(8996) == "development"
+    assert networkutil.chainIdToNetwork(1) == "mainnet"
+    assert networkutil.chainIdToNetwork(137) == "polygon"
+    assert networkutil.chainIdToNetwork(80001) == "mumbai"
+
+
+@enforce_types
+def test_networkToChainId():
+    assert networkutil.networkToChainId("development") == 8996
+    assert networkutil.networkToChainId("mainnet") == 1
+    assert networkutil.networkToChainId("polygon") == 137
+    assert networkutil.networkToChainId("mumbai") == 80001
+
+
 @pytest.mark.unit
 def test_get_web3_connection_provider(monkeypatch):
     # GANACHE_URL
