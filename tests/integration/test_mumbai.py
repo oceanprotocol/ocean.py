@@ -4,6 +4,7 @@ import requests
 
 from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import networkToChainId
 from ocean_lib.web3_internal.wallet import Wallet
 
     
@@ -69,20 +70,22 @@ provider.url = https://v4.provider.mumbai.oceanprotocol.com
     tx = {'nonce': nonce,
           'gasPrice': web3.toWei(gas_price, 'gwei'),
           'gas': 21000, #a standard ETH transfer needs 21K gas
+          'chainId': networkToChainId("mumbai"),
           'to': bob_wallet.address,
           'from' : alice_wallet.address,
           'value': web3.toWei(0.001, 'ether'),
           }
-    import pdb; pdb.set_trace()
     signed_tx = web3.eth.account.sign_transaction(tx, alice_wallet.private_key)
+    print("Do a send-Ether tx...")
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    print("Wait for send-Ether tx to complete...")
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     bob_eth_after = web3.eth.get_balance(bob_wallet.address)
     assert bob_eth_after > bob_eth_before
     
     # Super-simple Ocean tx: Alice publish data NFT
     import pdb; pdb.set_trace()
-    print("Initiating a tx on mumbai...")
+    print("Do an Ocean tx, and wait for it to complete...")
     data_nft = ocean.create_data_nft('My NFT1', 'NFT1', alice_wallet)
     assert data_nft.symbol() == 'NFT1'
 
