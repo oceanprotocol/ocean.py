@@ -6,6 +6,7 @@ from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
+
 def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
     
