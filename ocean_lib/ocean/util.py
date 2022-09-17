@@ -18,34 +18,6 @@ from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvi
 
 GANACHE_URL = "http://127.0.0.1:8545"
 
-# Development chainid is from brownie, rest are from chainlist.org
-# Chain values to fit Ocean subgraph urls as given in
-# https://docs.oceanprotocol.com/core-concepts/networks
-_CHAINID_TO_NETWORK = {
-    8996: "development",  # ganache
-    1: "mainnet",
-    3: "ropsten",
-    4: "rinkeby",
-    56: "bsc",
-    137: "polygon",
-    246: "energyweb",
-    1287: "moonbase",
-    1285: "moonriver",
-    80001: "mumbai",
-}
-_NETWORK_TO_CHAINID = {
-    network: chainID for chainID, network in _CHAINID_TO_NETWORK.items()
-}
-
-@enforce_types
-def chainIdToNetwork(chainID: int) -> str:
-    """Returns the network name for a given chainID"""
-    return _CHAINID_TO_NETWORK[chainID]
-
-@enforce_types
-def networkToChainId(network: str) -> int:
-    """Returns the chainID for a given network name"""
-    return _NETWORK_TO_CHAINID[network]
 
 @enforce_types
 def get_web3(network_url: str) -> Web3:
