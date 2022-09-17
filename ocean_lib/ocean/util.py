@@ -10,6 +10,7 @@ from web3.main import Web3
 from web3.middleware import geth_poa_middleware
 
 from ocean_lib.config import Config
+from ocean_lib.ocean.networkutil import chainIdToNetwork
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )

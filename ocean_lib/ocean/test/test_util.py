@@ -7,6 +7,7 @@ from enforce_typing import enforce_types
 import pytest
 from web3 import Web3
 
+from conftest_ganache import *
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 
