@@ -17,7 +17,12 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 ## Create a new address / key
 
-In a Python console:
+In your console, run Python.
+```console
+python
+```
+
+In the Python console:
 
 ```python
 from eth_account.account import Account
