@@ -6,6 +6,7 @@ import os
 
 import pytest
 
+from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_ocean_token_address
