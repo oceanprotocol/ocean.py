@@ -7,6 +7,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.ocean import networkutil
 
+
 @enforce_types
 def test_chainIdToNetwork():
     assert networkutil.chainIdToNetwork(8996) == "development"

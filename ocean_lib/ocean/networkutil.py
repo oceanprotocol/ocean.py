@@ -22,10 +22,12 @@ _NETWORK_TO_CHAINID = {
     network: chainID for chainID, network in _CHAINID_TO_NETWORK.items()
 }
 
+
 @enforce_types
 def chainIdToNetwork(chainID: int) -> str:
     """Returns the network name for a given chainID"""
     return _CHAINID_TO_NETWORK[chainID]
+
 
 @enforce_types
 def networkToChainId(network: str) -> int:

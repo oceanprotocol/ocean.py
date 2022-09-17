@@ -32,10 +32,13 @@ def get_web3(network_url: str) -> Web3:
     # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
     # - Issue: https://github.com/ethereum/web3.py/issues/549
     # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
-    problem_networks = ["rinkeby", "mumbai"] #add to this if we find issues in other networks
+    problem_networks = [
+        "rinkeby",
+        "mumbai",
+    ]  # add to this if we find issues in other networks
     if chainIdToNetwork(web3.eth.chain_id).lower() in problem_networks:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-        
+
     return web3
 
 

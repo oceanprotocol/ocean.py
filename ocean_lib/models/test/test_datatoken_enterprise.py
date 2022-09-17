@@ -234,7 +234,7 @@ def test_buy_from_fre_and_order(
     )
     mock_usdc_contract.approve(
         spender=datatoken_enterprise_token.address,
-        amount=2**256 - 1,
+        amount=2 ** 256 - 1,
         from_wallet=publisher_wallet,
     )
     mock_dai_contract.transfer(
