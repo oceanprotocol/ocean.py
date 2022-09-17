@@ -35,5 +35,5 @@ Now, you have two new accounts (address & private key). Same them somewhere safe
 Now, get Mumbai ETH for each account, via a faucet:
 
 1. Go to https://faucet.polygon.technology/. Ensure you've selected "Mumbai" network and "MATIC" token.
-2. Request funds for ADDRESS1
-3. Request funds for ADDRESS2
+2. Request funds
+
