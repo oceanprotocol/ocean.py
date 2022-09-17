@@ -9,9 +9,9 @@ As you develop on Ocean, you'll often need to use the OCEAN token. It's an ERC20
 
 Here, let's get some OCEAN for the Rinkeby testnet, and verify in Python that we have it.
 
-### First steps
+### Setup
 
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library from v4 sources
 
