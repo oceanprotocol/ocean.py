@@ -61,6 +61,10 @@ def _get_wallets(ocean):
     alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
     bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 
+    instrs = "You must set it. It must hold Mumbai MATIC."
+    assert alice_private_key is not None, f"Need envvar REMOTE_TEST_PRIVATE_KEY1. {instrs}"
+    assert bob_private_key is not None, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
+
     # wallets
     alice_wallet = Wallet(web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
     bob_wallet = Wallet(web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
