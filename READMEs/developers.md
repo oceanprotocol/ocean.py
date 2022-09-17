@@ -85,7 +85,7 @@ export REMOTE_TEST_PRIVATE_KEY1=<your remote private key 1>
 export REMOTE_TEST_PRIVATE_KEY2=<your remote private key 2>
 ```
 
-These keys aren't public because bots could eat the fake MATIC. You need to generate your own, and fill them with a faucet.  (Or, if you're an OPF developer, [here are some convenient keys](https://github.com/oceanprotocol/private-keys/blob/main/README.md).
+These keys aren't public because bots could eat the fake MATIC. You need to generate your own, and fill them with a faucet; [here's how](get-test-MATIC.md). (Or, [access-protected OPF keys](https://github.com/oceanprotocol/private-keys/blob/main/README.md)).
 
 ## 4. Test
 
