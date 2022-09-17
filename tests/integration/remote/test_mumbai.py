@@ -45,7 +45,7 @@ def test_nonocean_tx(tmp_path):
     assert bob_eth_after > bob_eth_before
 
 
-@pytest.mark.skip(reason="no way of currently testing this")
+@pytest.mark.skip(reason="Remove this when fixed #921")
 def test_ocean_tx(tmp_path):
     """Do a (simple) Ocean tx on Mumbai"""
 
