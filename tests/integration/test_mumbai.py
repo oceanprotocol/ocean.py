@@ -39,7 +39,8 @@ def test_nonocean_tx(tmp_path):
     
     bob_eth_after = web3.eth.get_balance(bob_wallet.address)
     assert bob_eth_after > bob_eth_before
-    
+
+@pytest.mark.skip(reason="no way of currently testing this")
 def test_ocean_tx(tmp_path):
     """Do a (simple) Ocean tx on Mumbai"""
     
