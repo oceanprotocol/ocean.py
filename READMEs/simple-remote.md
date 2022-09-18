@@ -20,40 +20,9 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 
 ### Create Mumbai Accounts (One-Time)
 
-Since we're using Mumbai, you need two Mumbai accounts TEST1 and TEST2, each with Mumbai ETH. We'll do it via Python.
-
-Open a new bash console; this will be your working console.
-
-In your working console, run Python:
-```console
-python
-
-In the Python console:
-```python
-import os
-from eth_account import Account
-import secrets
-
-#generate private keys. Each key is an account.
-TEST_PRIVATE_KEY1 = "0x" + secrets.token_hex(32)
-TEST_PRIVATE_KEY2 = "0x" + secrets.token_hex(32)
-
-#print out
-print(f"ADDRESS1={Account.from_key(TEST_PRIVATE_KEY1).address}")
-print(f"TEST_PRIVATE_KEY1={TEST_PRIVATE_KEY1}")
-print(f"ADDRESS2={Account.from_key(TEST_PRIVATE_KEY2).address}")
-print(f"TEST_PRIVATE_KEY2={TEST_PRIVATE_KEY2}")
-```
-
-Then, hit Ctrl-C to exit the Python console.
-
-Now, you have two new mumbai accounts (address & private key). Same them somewhere safe, like a local file or a password manager. You can use them in other Ocean quickstarts, or other Ethereum testing.
-
-Now, get Mumbai ETH for each account, via a faucet:
-1. Go to https://faucet.polygon.technology/. Ensure you've selected "Mumbai" network and "MATIC" token.
-2. Request funds for ADDRESS1
-3. Request funds for ADDRESS2
-
+From [get-test-MATIC](get-test-MATIC.md), do:
+- [x] Create two new accounts
+- [x] Get (fake) MATIC
 
 ### Create Config File for Services
 
