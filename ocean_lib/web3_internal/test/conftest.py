@@ -11,6 +11,7 @@
 
 import pytest
 
+from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.test.conftest import *  # noqa: F401 F403
 

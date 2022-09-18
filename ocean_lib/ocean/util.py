@@ -10,6 +10,7 @@ from web3.main import Web3
 from web3.middleware import geth_poa_middleware
 
 from ocean_lib.config import Config
+from ocean_lib.ocean.networkutil import chainIdToNetwork
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
@@ -23,19 +24,21 @@ GANACHE_URL = "http://127.0.0.1:8545"
 def get_web3(network_url: str) -> Web3:
     """
     Return a web3 instance connected via the given network_url.
-
-    Adds POA middleware when connecting to the Rinkeby Testnet.
-
-    A note about using the `rinkeby` testnet:
-    Web3 py has an issue when making some requests to `rinkeby`
-    - the issue is described here: https://github.com/ethereum/web3.py/issues/549
-    - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    Adds POA middleware if needed.
     """
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
 
-    if web3.eth.chain_id == 4:
+    # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
+    # - Issue: https://github.com/ethereum/web3.py/issues/549
+    # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    problem_networks = [
+        "rinkeby",
+        "mumbai",
+    ]  # add to this if we find issues in other networks
+    if chainIdToNetwork(web3.eth.chain_id).lower() in problem_networks:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
     return web3
 
 

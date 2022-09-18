@@ -70,13 +70,22 @@ In work console:
 #specify config file as an envvar
 export OCEAN_CONFIG_FILE=config.ini
 
-#set private keys of two accounts
+#set private keys of two local (ganache) accounts
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
 #needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
+
+Some tests run on Mumbai (e.g. test_mumbai.py), which need fake MATIC. So you also need:
+```console
+#set private keys of two remote accounts
+export REMOTE_TEST_PRIVATE_KEY1=<your remote private key 1>
+export REMOTE_TEST_PRIVATE_KEY2=<your remote private key 2>
+```
+
+These keys aren't public because bots could eat the fake MATIC. You need to generate your own, and fill them with a faucet; [here's how](get-test-MATIC.md). (Or, [access-protected OPF keys](https://github.com/oceanprotocol/private-keys/blob/main/README.md)).
 
 ## 4. Test
 

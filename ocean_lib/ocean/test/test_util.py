@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from enforce_typing import enforce_types
 import pytest
 from web3 import Web3
 
