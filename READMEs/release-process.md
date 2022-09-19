@@ -7,10 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Step 0: Update documentation
 
-- Go to https://github.com/oceanprotocol/readthedocs, and follow the steps
-- This will update what's shown in https://docs.oceanprotocol.com/references/read-the-docs/ocean-py/.
-
-This doesn't actually affect the pip release of the following steps. And if you've just updated READMEs, you can stop after this step if you like.
+- If your changes affect what docs.oceanprotocol.com shows, then make changes in the docs repo https://github.com/oceanprotocol/docs and change
 
 ## Step 1: Bump version and push changes
 
