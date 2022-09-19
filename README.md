@@ -63,6 +63,7 @@ Here are flows to try out, from simple to specific detailed variants.
 
 - **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
+- **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
 - **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain.
 - **[Profile NFTs](READMEs/profile-nfts-flow.md)** - enable "login with Web3" where Dapp can access private user profile data.
 
