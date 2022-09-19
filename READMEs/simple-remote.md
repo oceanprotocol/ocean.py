@@ -92,7 +92,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Publish Data NFT & Datatoken: Create a datatoken from the data NFT
 
 
-### Appendix. Create Private RPC account (One-Time)
+## Appendix. Create Private RPC account (One-Time)
 
 Above, the config file set `network` as to a public RPC from maticvigil.com. When you run more transactions, you'll need your own private endpoint. [Alchemy](https://www.alchemy.com) is a good choice; it handles Mumbai. [Infura](https://infura.io) is also popular.
 
