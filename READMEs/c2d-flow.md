@@ -189,6 +189,7 @@ In the same Python console:
 bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
 
 # Alice mints DATASET datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
