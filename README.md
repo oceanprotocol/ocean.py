@@ -54,13 +54,17 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
 - **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
-- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 
-
-### Remote networks
-
+### Remote flows
 - **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai
 - **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
+
+### Advanced flows
+
+- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
+- **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
+- **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain.
+- **[Profile NFTs](READMEs/profile-nfts-flow.md)** - enable "login with Web3" where Dapp can access private user profile data.
 
 ### Learn more
 
