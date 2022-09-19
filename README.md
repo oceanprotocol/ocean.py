@@ -63,11 +63,11 @@ Advanced flows:
 
 ### Learn more
 
-- [Get test OCEAN](READMEs/get-test-OCEAN.md) - from rinkeby
+- [Get test OCEAN](READMEs/get-test-OCEAN.md) - from Rinkeby
+- [Get test MATIC](READMEs/get-test-MATIC.md) - from Mumbai
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
-- [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
 ## 🦑 Development
 
