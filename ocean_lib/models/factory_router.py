@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 class FactoryRouter(ContractBase):
-    CONTRACT_NAME = "FactoryRouter"
+    CONTRACT_NAME = "Router"
     EVENT_NEW_POOL = "NewPool"
 
     @property
