@@ -186,7 +186,7 @@ DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
 In the same Python console:
 ```python
 # Create Bob's wallet
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
