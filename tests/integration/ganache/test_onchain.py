@@ -50,7 +50,7 @@ def test_consume_simple_onchain_data(
         "stateMutability": "view",
         "type": "function",
     }
-    router_address = get_address_of_type(config, FactoryRouter.CONTRACT_NAME)
+    router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
         address=router_address, chainId=web3.eth.chain_id, abi=abi
     )
@@ -177,7 +177,7 @@ def test_consume_parametrized_onchain_data(
         "stateMutability": "view",
         "type": "function",
     }
-    router_address = get_address_of_type(config, FactoryRouter.CONTRACT_NAME)
+    router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
         address=router_address, chainId=web3.eth.chain_id, abi=abi
     )
