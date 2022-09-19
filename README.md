@@ -56,14 +56,20 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
 
 ### Remote flows
-- **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai
+
+- **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
 - **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
 
-### Advanced flows
+### Flows beyond "dataset" assets
 
 - **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
+
+### Key-value flows
+
+- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
+- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
 
 ### Learn more
 
@@ -71,12 +77,6 @@ Here are flows to try out, from simple to specific detailed variants.
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
-
-### Specialty flows
-
-- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
-- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
-
 
 ## 🦑 Development
 
