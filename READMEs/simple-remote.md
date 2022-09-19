@@ -51,8 +51,8 @@ export OCEAN_CONFIG_FILE=myconfig.ini
 unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 
 # For accounts: set private keys
-export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
-export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
+export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
+export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 ```
 
 ### Setup in Python
@@ -76,7 +76,7 @@ ocean = Ocean(config)
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 ```
 
