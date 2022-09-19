@@ -26,7 +26,7 @@ From [get-test-MATIC](get-test-MATIC.md), do:
 
 ### Create Config File for Services
 
-In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
+In your working directory, create a file `myconfig.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
 
 ```text
 [eth-network]
@@ -45,14 +45,14 @@ provider.url = https://v4.provider.mumbai.oceanprotocol.com
 In the console:
 ```console
 # For services: point to config file
-export OCEAN_CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=myconfig.ini
 
 # For services: ensure no other envvars that override config file values
 unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 
 # For accounts: set private keys
-export TEST_PRIVATE_KEY1=<your TEST_PRIVATE_KEY1>
-export TEST_PRIVATE_KEY2=<your TEST_PRIVATE_KEY2>
+export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
+export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 ```
 
 ### Setup in Python
@@ -76,7 +76,7 @@ ocean = Ocean(config)
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 ```
 
