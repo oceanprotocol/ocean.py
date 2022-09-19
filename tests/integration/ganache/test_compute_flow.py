@@ -487,6 +487,7 @@ def test_compute_trusted_algorithm(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip once fixed #905")
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
