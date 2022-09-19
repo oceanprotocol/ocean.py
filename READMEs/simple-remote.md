@@ -26,7 +26,7 @@ From [get-test-MATIC](get-test-MATIC.md), do:
 
 ### Create Config File for Services
 
-In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
+In your working directory, create a file `myconfig.ini` and fill it with the following. It will use pre-existing services running for mumbai testnet.
 
 ```text
 [eth-network]
@@ -45,7 +45,7 @@ provider.url = https://v4.provider.mumbai.oceanprotocol.com
 In the console:
 ```console
 # For services: point to config file
-export OCEAN_CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=myconfig.ini
 
 # For services: ensure no other envvars that override config file values
 unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
