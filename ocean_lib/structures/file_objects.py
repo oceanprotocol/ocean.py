@@ -49,6 +49,24 @@ class IpfsFile(FilesType):
         return {"type": self.type, "hash": self.hash}
 
 
+class GraphqlQuery(FilesType):
+    @enforce_types
+    def __init__(self, url: str, query: str, headers: Optional[dict] = None) -> None:
+        self.url = url
+        self.query = query
+        self.headers = headers
+        self.type = "graphql"
+
+    @enforce_types
+    def to_dict(self) -> dict:
+        result = {"type": self.type, "url": self.url, "query": self.query}
+
+        if self.headers:
+            result["headers"] = self.headers
+
+        return result
+
+
 @enforce_types
 def FilesTypeFactory(file_obj: dict) -> FilesType:
     """Factory Method"""
