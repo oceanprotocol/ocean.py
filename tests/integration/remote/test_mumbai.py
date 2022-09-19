@@ -45,7 +45,6 @@ def test_nonocean_tx(tmp_path):
     assert bob_eth_after > bob_eth_before
 
 
-@pytest.mark.skip(reason="Don't skip once fixed #921")
 def test_ocean_tx(tmp_path):
     """Do a (simple) Ocean tx on Mumbai"""
 
@@ -100,6 +99,7 @@ def _remote_config(tmp_path):
         """
 [eth-network]
 network = https://rpc-mumbai.maticvigil.com
+network_name = mumbai
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 block_confirmations = 0
 
