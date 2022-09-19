@@ -50,11 +50,10 @@ def test_consume_simple_onchain_data(
         "stateMutability": "view",
         "type": "function",
     }
-    router_address = get_address_of_type(
-                config, FactoryRouter.CONTRACT_NAME
-            )
-    onchain_data = SmartContractCall(address=router_address, chainId=web3.eth.chain_id, abi=abi)
-    
+    router_address = get_address_of_type(config, FactoryRouter.CONTRACT_NAME)
+    onchain_data = SmartContractCall(
+        address=router_address, chainId=web3.eth.chain_id, abi=abi
+    )
 
     files = [onchain_data]
 
@@ -178,23 +177,23 @@ def test_consume_parametrized_onchain_data(
         "stateMutability": "view",
         "type": "function",
     }
-    router_address = get_address_of_type(
-                config, FactoryRouter.CONTRACT_NAME
-            )
-    onchain_data = SmartContractCall(address=router_address, chainId=web3.eth.chain_id, abi=abi)
+    router_address = get_address_of_type(config, FactoryRouter.CONTRACT_NAME)
+    onchain_data = SmartContractCall(
+        address=router_address, chainId=web3.eth.chain_id, abi=abi
+    )
 
     files = [onchain_data]
 
     # to consume dataset, consumer needs to send a value for nftAddress
     consumer_parameters = [
         {
-                "name": "baseToken",
-                "type": "text",
-                "label": "baseToken",
-                "required": True,
-                "description": "baseToken to check for fee",
-                "default": "0x0000000000000000000000000000000000000000"
-            }
+            "name": "baseToken",
+            "type": "text",
+            "label": "baseToken",
+            "required": True,
+            "description": "baseToken to check for fee",
+            "default": "0x0000000000000000000000000000000000000000",
+        }
     ]
 
     # Publish a plain asset with one data token on chain

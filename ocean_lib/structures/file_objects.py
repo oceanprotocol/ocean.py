@@ -66,6 +66,7 @@ class GraphqlQuery(FilesType):
 
         return result
 
+
 class SmartContractCall(FilesType):
     @enforce_types
     def __init__(self, address: str, chainId: int, abi: dict) -> None:
@@ -76,7 +77,12 @@ class SmartContractCall(FilesType):
 
     @enforce_types
     def to_dict(self) -> dict:
-        return {"type": self.type, "address": self.address, "abi": self.abi, "chainId": self.chainId}
+        return {
+            "type": self.type,
+            "address": self.address,
+            "abi": self.abi,
+            "chainId": self.chainId,
+        }
 
 
 @enforce_types
@@ -91,8 +97,12 @@ def FilesTypeFactory(file_obj: dict) -> FilesType:
     elif file_obj["type"] == "ipfs":
         return IpfsFile(file_obj["hash"])
     elif file_obj["type"] == "graphql":
-        return GraphqlQuery(file_obj["url"],query=file_obj.get("query"))
+        return GraphqlQuery(file_obj["url"], query=file_obj.get("query"))
     elif file_obj["type"] == "smartcontract":
-        return SmartContractCall(address=file_obj.get("address"),chainId=file_obj.get("chainId"),abi=file_obj.get("abi"))
+        return SmartContractCall(
+            address=file_obj.get("address"),
+            chainId=file_obj.get("chainId"),
+            abi=file_obj.get("abi"),
+        )
     else:
         raise Exception("Unrecognized file type")
