@@ -121,10 +121,10 @@ In the same Python console:
 
 ```python
 # Publish data NFT & datatoken for algorithm
-ALGO_datanft = ocean.create_data_nft("ALGO_DN1", "ALGO_DN1", alice_wallet)
-print(f"ALGO_datanft address = '{ALGO_datanft.address}'")
+ALGO_data_nft = ocean.create_data_nft("ALGO_DN1", "ALGO_DN1", alice_wallet)
+print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 
-ALGO_datatoken = ALGO_datanft.create_datatoken("ALGO_DT1", "ALGO_DT1", from_wallet=alice_wallet)
+ALGO_datatoken = ALGO_data_nft.create_datatoken("ALGO_DT1", "ALGO_DT1", from_wallet=alice_wallet)
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -165,7 +165,7 @@ ALGO_asset = ocean.assets.create(
     metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
     files=ALGO_files,
-    data_nft_address=ALGO_datanft.address,
+    data_nft_address=ALGO_data_nft.address,
     deployed_datatokens=[ALGO_datatoken],
 )
 
