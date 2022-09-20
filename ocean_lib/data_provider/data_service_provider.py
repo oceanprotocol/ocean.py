@@ -416,7 +416,9 @@ class DataServiceProvider(DataServiceProviderBase):
             result = DataServiceProvider.compute_job_result(
                 job_id, i, dataset_compute_service, consumer
             )
-            assert result, "result retrieval unsuccessful"
+
+            if result_type != "publishLog":
+                assert result, f"result retrieval unsuccessful. i={i}"
 
             # Extract algorithm output
             if result_type == log_type:
