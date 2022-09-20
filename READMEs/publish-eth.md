@@ -3,9 +3,9 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Publish Historical ETH Price
+# Quickstart: Publish API of Historical ETH Price
 
-This quickstart describes a flow to publish Binance API's historical ETH price as a free Ocean data asset.
+This quickstart describes a flow to publish Binance API of historical ETH price as a free Ocean data asset.
 
 Here are the steps:
 
@@ -96,16 +96,4 @@ datatoken.create_dispenser(
 dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:2] == (True, alice_wallet.address, True)
 
-### 4. Alice gets an access token from dispenser
 
-(Note: we'll move this to the predict-eth README shortly)
-
-In the same Python console:
-```python
-amt_dispense = 1
-ocean.dispenser.dispense_tokens(
-    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=alice_wallet
-)
-bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
-print(f"Alice just got a token dispensed to her. She now holds {bal} tokens")
-```

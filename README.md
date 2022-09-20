@@ -59,8 +59,8 @@ Here are flows to try out, from simple to specific detailed variants.
 
 ### Data bounties flows
 
-- **[Publish historical ETH price](READMEs/publish-eth.md)** - publish Binance API's historical ETH price as a free Ocean data asset.
-- **[Predict future ETH price](READMEs/predict-eth.md)** - predict future ETH price, with the help of a local AI model.
+- **[Publish API of historical ETH price](READMEs/publish-eth.md)** - publish Binance API of historical ETH price as a free Ocean data asset
+- **[Predict future ETH price](READMEs/predict-eth.md)** - predict future ETH price via a local AI model
 
 ### Key-value flows
 
