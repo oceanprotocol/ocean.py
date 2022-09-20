@@ -76,8 +76,13 @@ asset = ocean.assets.create(
     datatoken_bytess=[[b""]],
 )
 
-did = asset.did  # did contains the datatoken address
-print(f"did = '{did}'")
+data_nft = asset.nft
+datatoken = asset.datatokens[0]
+
+print(f"Asset created, with name: {data_nft.token_name()}")
+print(f"  did: {asset.did}")
+print(f"  data_NFT.address: {data_nft.address}")
+print(f"  datatoken.address: {datatoken.address}")
 ```
 
 ### 3. Alice creates the dispenser
