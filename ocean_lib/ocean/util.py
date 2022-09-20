@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import os
 from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
@@ -9,7 +10,6 @@ from web3 import WebsocketProvider
 from web3.main import Web3
 from web3.middleware import geth_poa_middleware
 
-from ocean_lib.config import Config
 from ocean_lib.ocean.networkutil import chainIdToNetwork
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
@@ -78,9 +78,12 @@ def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
 
 @enforce_types
 def get_address_of_type(
-    config: Config, address_type: str, key: Optional[str] = None
+    config_dict: dict, address_type: str, key: Optional[str] = None
 ) -> str:
-    addresses = get_contracts_addresses(config.address_file, config.network_name)
+    address_file = config_dict.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
+    network_name = config_dict.get("NETWORK_NAME", os.getenv("NETWORK_NAME"))
+
+    addresses = get_contracts_addresses(address_file, network_name)
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")
     address = (
@@ -93,11 +96,13 @@ def get_address_of_type(
 
 @enforce_types
 def get_ocean_token_address(
-    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
+    config_dict: dict, network: Optional[str] = None, web3: Optional[Web3] = None
 ) -> str:
     """Returns the Ocean token address for given network or web3 instance
     Requires either network name or web3 instance.
     """
+    address_file = config_dict.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
+
     addresses = get_contracts_addresses(
         address_file, network or get_network_name(web3=web3)
     )

@@ -20,14 +20,22 @@ from ocean_lib.config import (
     NAME_PROVIDER_URL,
     NAME_TRANSACTION_TIMEOUT,
     NETWORK_NAME,
-    SECTION_ETH_NETWORK,
-    SECTION_RESOURCES,
-    Config,
-    config_defaults,
 )
 from ocean_lib.ocean.util import get_web3
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 logging.basicConfig(level=logging.INFO)
+
+config_defaults = {
+    "OCEAN_NETWORK_URL": "http://localhost:8545",
+    "NETWORK_NAME": "ganache",
+    "GAS_LIMIT": GAS_LIMIT_DEFAULT,
+    "BLOCK_CONFIRMATIONS": 0,
+    "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
+    "METADATA_CACHE_URI": "http://172.15.0.5:5000",
+    "PROVIDER_URL": "http://172.15.0.4:8030",
+    "DOWNLOADS_PATH": "consume-downloads",
+}
 
 CONFIG_NETWORK_HELPER = {
     1: {
@@ -104,30 +112,27 @@ def get_config_dict(chain_id: int) -> dict:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
 
     config_helper = copy.deepcopy(config_defaults)
-    config_helper[SECTION_ETH_NETWORK].update(
+    config_helper.update(
         {
             NAME_CHAIN_ID: chain_id,
             NETWORK_NAME: CONFIG_NETWORK_HELPER[chain_id][NETWORK_NAME],
             NAME_BLOCK_CONFIRMATIONS: CONFIG_NETWORK_HELPER[chain_id][
                 NAME_BLOCK_CONFIRMATIONS
             ],
-        }
-    )
-    config_helper[SECTION_RESOURCES].update(
-        {
             NAME_PROVIDER_URL: CONFIG_NETWORK_HELPER[chain_id][NAME_PROVIDER_URL],
             NAME_METADATA_CACHE_URI: METADATA_CACHE_URI
             if chain_id != 8996
             else DEFAULT_METADATA_CACHE_URI,
         }
     )
+
     return config_helper
 
 
 class ExampleConfig:
     @staticmethod
     @enforce_types
-    def get_config() -> Config:
+    def get_config() -> dict:
         """Return `Config` containing default values for a given network.
         Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.
         """
@@ -140,6 +145,7 @@ class ExampleConfig:
         w3 = get_web3(network_url)
         chain_id = w3.eth.chain_id
 
-        config = get_config_dict(chain_id)
-        config[SECTION_ETH_NETWORK][NAME_NETWORK_URL] = network_url
-        return Config(options_dict=config)
+        config_dict = get_config_dict(chain_id)
+        config_dict[NAME_NETWORK_URL] = network_url
+
+        return config_dict

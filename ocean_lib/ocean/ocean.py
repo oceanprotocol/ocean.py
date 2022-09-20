@@ -12,7 +12,6 @@ from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
@@ -42,9 +41,7 @@ class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
 
     @enforce_types
-    def __init__(
-        self, config: Union[Dict, Config], data_provider: Optional[Type] = None
-    ) -> None:
+    def __init__(self, config_dict: Dict, data_provider: Optional[Type] = None) -> None:
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
@@ -67,42 +64,24 @@ class Ocean:
 
         An instance of Ocean is parameterized by a `Config` instance.
 
-        :param config: `Config` instance
+        :param config_dict: variable definitions
         :param data_provider: `DataServiceProvider` instance
         """
-        if isinstance(config, dict):
-            # fallback to metadataStoreUri
-            cache_key = (
-                "metadataCacheUri"
-                if ("metadataCacheUri" in config)
-                else "metadataStoreUri"
-            )
-            metadata_cache_uri = config.get(
-                cache_key, config.get("metadata_cache_uri", "http://172.15.0.5:5000")
-            )
-            config_dict = {
-                "eth-network": {"network": config.get("network", "")},
-                "resources": {
-                    "metadata_cache_uri": metadata_cache_uri,
-                    "provider.url": config.get("providerUri", "http://172.15.0.4:8030"),
-                },
-            }
-            config = Config(options_dict=config_dict)
-        self.config = config
-        self.web3 = get_web3(self.config.network_url)
+        self.config_dict = config_dict
+        self.web3 = get_web3(self.config_dict.get("OCEAN_NETWORK_URL"))
 
         if not data_provider:
             data_provider = DataServiceProvider
 
-        self.assets = OceanAssets(self.config, self.web3, data_provider)
-        self.compute = OceanCompute(self.config, data_provider)
+        self.assets = OceanAssets(self.config_dict, self.web3, data_provider)
+        self.compute = OceanCompute(self.config_dict, data_provider)
 
         logger.debug("Ocean instance initialized: ")
 
     @property
     @enforce_types
     def OCEAN_address(self) -> str:
-        return get_ocean_token_address(self.config.address_file, web3=self.web3)
+        return get_ocean_token_address(self.config_dict, web3=self.web3)
 
     @property
     @enforce_types
@@ -297,7 +276,7 @@ class Ocean:
     @property
     @enforce_types
     def factory_router(self) -> FactoryRouter:
-        return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
+        return FactoryRouter(self.web3, get_address_of_type(self.config_dict, "Router"))
 
     @enforce_types
     def retrieve_provider_fees(

@@ -8,8 +8,7 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type, Union, Dict, Any
-
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -19,7 +18,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
@@ -44,20 +42,16 @@ class OceanAssets:
 
     @enforce_types
     def __init__(
-        self, config: Config, web3: Web3, data_provider: Type[DataServiceProvider]
+        self, config_dict, web3: Web3, data_provider: Type[DataServiceProvider]
     ) -> None:
         """Initialises OceanAssets object."""
-        self._config = config
+        self._config_dict = config_dict
         self._web3 = web3
-        self._metadata_cache_uri = config.metadata_cache_uri
+        self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider
 
         downloads_path = os.path.join(os.getcwd(), "downloads")
-        if self._config.has_option("resources", "downloads.path"):
-            downloads_path = (
-                self._config.get("resources", "downloads.path") or downloads_path
-            )
-        self._downloads_path = downloads_path
+        self._downloads_path = config_dict.get("DOWNLOADS_PATH", downloads_path)
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
     @enforce_types
@@ -97,7 +91,7 @@ class OceanAssets:
         if not has_access_service:
             access_service = self.build_access_service(
                 service_id="0",
-                service_endpoint=self._config.provider_url,
+                service_endpoint=self._config_dict.get("PROVIDER_URL"),
                 datatoken=datatoken,
                 files=files,
                 consumer_parameters=consumer_parameters,
@@ -328,10 +322,10 @@ class OceanAssets:
         self._assert_ddo_metadata(metadata)
 
         if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(self._config)
+            provider_uri = DataServiceProvider.get_url(self._config_dict)
 
         address = get_address_of_type(
-            self._config, DataNFTFactoryContract.CONTRACT_NAME
+            self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
         )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
 
@@ -547,10 +541,10 @@ class OceanAssets:
         self._assert_ddo_metadata(asset.metadata)
 
         if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(self._config)
+            provider_uri = DataServiceProvider.get_url(self._config_dict)
 
         address = get_address_of_type(
-            self._config, DataNFTFactoryContract.CONTRACT_NAME
+            self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
         )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
         data_nft_address = asset.nft_address

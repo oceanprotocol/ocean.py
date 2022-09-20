@@ -52,8 +52,10 @@ def setup_all(request, config, web3, ocean_token):
     if not wallet:
         return
 
-    addresses_file = config.address_file
-    if not os.path.exists(addresses_file):
+    address_file = config.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
+    address_file = os.path.expanduser(address_file)
+
+    if not os.path.exists(address_file):
         return
 
     print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
@@ -95,7 +97,7 @@ def web3():
 
 @pytest.fixture
 def aquarius_instance(config):
-    return Aquarius.get_instance(config.metadata_cache_uri)
+    return Aquarius.get_instance(config.get("METADATA_CACHE_URI"))
 
 
 @pytest.fixture

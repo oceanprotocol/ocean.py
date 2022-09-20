@@ -44,6 +44,7 @@ def get_contracts_addresses(
     """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}
 
+    address_file = os.path.expanduser(address_file)
     if not address_file or not os.path.exists(address_file):
         raise Exception("Address file not found.")
     with open(address_file) as f:
