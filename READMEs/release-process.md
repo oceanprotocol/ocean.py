@@ -11,15 +11,16 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Step 1: Bump version and push changes
 
-- Identify the current version. It's listed at [pypi.org/project/ocean-lib](https://pypi.org/project/ocean-lib/), in this repo in [.bumpversion.cfg](../.bumpversion.cfg), and more.
+- Identify the current version. It's listed at [pypi.org/project/ocean-lib](https://pypi.org/project/ocean-lib/), in this repo in [.bumpversion.cfg](../.bumpversion.cfg), and elsewhere.
 
 - Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v1.2.5`
 
-- Use the `bumpversion.sh` script to bump the project version. You can execute the script using {major|minor|patch} as first argument to bump the version accordingly. Ocean.py is [SEMVER](https://semver.org/) compatible.
+- Run `./bumpversion.sh` to bump the project version, as follows:
 
-  - To bump the patch version: `./bumpversion.sh patch`
-  - To bump the minor version: `./bumpversion.sh minor`
-  - To bump the major version: `./bumpversion.sh major`
+  - To bump the major version (v**X**.Y.Z): `./bumpversion.sh major`
+  - To bump the minor version (vX.**Y**.Z): `./bumpversion.sh minor`
+  - To bump the patch version (vX.Y.**Z**): `./bumpversion.sh patch`
+  - (Ocean.py follows [semantic versioning](https://semver.org/).)
 
 - Commit the changes to the feature branch.
 
