@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish & Consume Flow for GraphQL data type
 
-This quickstart describes a flow to publish & consume GraphQL-style URIs.
+This quickstart describes a flow to publish & consume GraphQL-style URIs. In our example, the data asset is a query to find data NFTs via ocean-subgraph.
 
 Here are the steps:
 
@@ -29,22 +29,19 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 Then in the same python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
-# Specify metadata and services, using the Branin test dataset
+# Specify metadata and services
 date_created = "2021-12-28T10:55:11Z"
-
 metadata = {
     "created": date_created,
     "updated": date_created,
-    "description": "Branin dataset",
-    "name": "Branin dataset",
+    "description": "ocean-subgraph data NFTs",
+    "name": "ocean-subgraph data NFTs ",
     "type": "dataset",
-    "author": "Trent",
+    "author": "Alex",
     "license": "CC0: PublicDomain",
 }
 
-# we use just a simple graphql query
+# construct the graphql query itself 
 from ocean_lib.structures.file_objects import GraphqlQuery
 graphql_query = GraphqlQuery(
     url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
@@ -59,7 +56,8 @@ graphql_query = GraphqlQuery(
                     """
 )
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata.
+# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
