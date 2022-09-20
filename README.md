@@ -50,10 +50,10 @@ Here are flows to try out, from simple to specific detailed variants.
 
 - **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
 - **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
+- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model.
 
-### Flows beyond "dataset" assets
+### More types of data assets
 
-- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
 
