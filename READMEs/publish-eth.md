@@ -3,9 +3,9 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Publish Historical ETH Price, from Binance API
+# Quickstart: Publish Historical ETH Price
 
-This quickstart describes a flow to publish historical ETH price as a data asset, using Binance API.
+This quickstart describes a flow to publish Binance API's historical ETH price as a free Ocean data asset.
 
 Here are the steps:
 
@@ -16,52 +16,54 @@ Let's go through each step.
 
 ## 1. Setup
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+### Prerequisites & installation
+
+From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
 - [x] Setup : Install the library
-- [x] Setup : Set envvars
-- [x] Setup : Setup in Python
+
+### Setup for remote
+
+From [simple-remote](simple-remote.md), do:
+- [x] Create Mumbai Accounts (One-Time)
+- [x] Create Config File for Services
+- [x] Set envvars
+- [x] Setup in Python
 
 ## 2. Alice Publishes API data asset
 
 Then in the same python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
-# Specify metadata and services, using the Branin test dataset
-date_created = "2021-12-28T10:55:11Z"
-
+# Specify metadata
+date_created = "2022-09-20T10:55:11Z"
 metadata = {
     "created": date_created,
     "updated": date_created,
-    "description": "Branin dataset",
-    "name": "Branin dataset",
+    "description": "Binance API v3 klines",
+    "name": "Branin API v3 klines",
     "type": "dataset",
     "author": "Trent",
     "license": "CC0: PublicDomain",
 }
 
-# we use just a simple graphql query
-from ocean_lib.structures.file_objects import GraphqlQuery
-graphql_query = GraphqlQuery(
-    url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
-    query="""
-                    query{
-                        nfts(orderBy: createdTimestamp,orderDirection:desc){
-                            id
-                            symbol
-                            createdTimestamp
-                        }
-                    }
-                    """
-)
+# Specify start/end times for prices of the previous week
+from datetime import datetime, timedelta
+end_datetime = datetime.now() 
+start_datetime = end_datetime - timedelta(days=7) 
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata.
+# Set the url
+url="https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
+
+# Create the UrlFile object 
+from ocean_lib.structures.file_objects import UrlFile
+url_file = UrlFile(url)
+
+# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
-    [graphql_query],
+    [url_file],
     datatoken_templates=[1],
     datatoken_names=["Datatoken 1"],
     datatoken_symbols=["DT1"],
@@ -77,3 +79,6 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 ```
 
+----
+
+FIXME: once the above is done, then add in dispenser support. Simplest way: move `ocean.assets.create()` --> `ocean.assets.create_nft_erc20_with_dispenser()`. Ref: dispenser-flow.md
