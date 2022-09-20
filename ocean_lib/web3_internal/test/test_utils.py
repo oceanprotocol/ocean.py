@@ -57,6 +57,7 @@ def test_prepare_fixed_hash():
 
 
 @pytest.mark.unit
+@pytest.mark.skip(reason="Don't skip once fixed #942")
 def test_gas_scaling_factor(web3, monkeypatch):
     monkeypatch.setenv("GAS_SCALING_FACTOR", "5.0")
     gas_price1 = web3.eth.gas_price
