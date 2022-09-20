@@ -105,19 +105,50 @@ Congrats to Bob for buying and consuming a data asset!
 
 ###  2.2  Bob gets older historical data from a CSV file
 
+(FILLME later. Or skip)
+
 ## 3.  Bob makes predictions
 
 ### 3.1  Bob builds a simple AI model
 
-He does this locally (client-side) in this flow. (Alternative: use C2D.)
+(FILLME later. Use e.g. leverage gpr.py here: https://github.com/oceanprotocol/c2d-examples/blob/4182e8cfec043a5e7c946d18304dcae244581a6c/branin_and_gpr/gpr.py#L69)
 
 ### 3.2  Bob runs the AI model to make future ETH price predictions
 
-Predictions are for a near-future 24h period, one prediction every hour on the hour.
+Predictions must be one prediction every hour on the hour, for a 24h period: from Oct 3, 2022 at 1:00am UTC, to Oct 4, 2022 at 1:00am UTC.
+
+In the same Python console:
+```python
+from datetime import datetime, timedelta
+start_datetime = datetime(st, 2022, 10, 03, 01, 00)
+datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
+predictions = [1500.0 + 100.0 * random.random() for i in range(len(datetimes))] #example predictions
+```
 
 ## 4.  Bob publishes the predictions as an Ocean asset
 
 Put into csv form, and publish.
+
+The csv has two columns: date/time, and predicted ETH value (in terms of USDT). The date/time values must fit the format below. Bob needs to make a prediction for each date/time.
+
+| Datetime          | predicted-ETH-value |
+| ----------------- | ------------------- |
+| 2022-10-03::01:00 | 1503.134            |
+| 2022-10-03::02:00 | 1512.490            |
+| 2022-10-03::03:00 | 1498.982            |
+| ...               | ...                 |
+| 2022-10-03::11:00 | 1578.301            |
+| 2022-10-04::00:00 | 1582.429            |
+| 2022-10-04::01:00 | 1590.673            |
+| ----------------- | ------------------- |
+
+In the same Python console:
+```python
+np_array = numpy.array([datetimes, predictions])
+
+import pandas as pd 
+pd.DataFrame(np_array).to_csv("path/to/file.csv")
+```
 
 
 ## 5.  Bob gives competition organizers access to the predictions
