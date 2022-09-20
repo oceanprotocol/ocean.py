@@ -57,6 +57,11 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
 
+### Data bounties flows
+
+- **[Publish historical ETH price](READMEs/publish-eth.md)** - publish historical ETH price as a data asset, using Binance API
+- **[Predict future ETH price](READMEs/predict-eth.md)** - predict future ETH price, with the help of a local AI model.
+
 ### Key-value flows
 
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
