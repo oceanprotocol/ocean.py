@@ -52,10 +52,9 @@ from datetime import datetime, timedelta
 end_datetime = datetime.now() 
 start_datetime = end_datetime - timedelta(days=7) 
 
-# Set the url
+# Set the url, create UrlFile object
 url="https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
-# Create the UrlFile object 
 from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(url)
 

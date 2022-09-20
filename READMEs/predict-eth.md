@@ -5,21 +5,24 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Predict Future ETH Price
 
-This quickstart describes a flow to predict future ETH price via a local AI model. It runs on Mumbai.
+This quickstart describes a flow to predict future ETH price via a local AI model. It used for Ocean Data Bounties competition. It runs on Polygon.
 
 Here are the steps:
 
-1.  Setup
-2.  Bob gets data locally from assets on Ocean
-  2.1  Bob gets recent historical data from Binance ETH API
-  2.2  Bob gets older historical data from a CSV file
-3.  Bob makes predictions :
-  3.1  Bob builds a simple AI model
-  3.2  Bob runs the AI model to make future ETH price predictions
-4.  Bob publishes the predictions as an Ocean asset
-5.  Bob gives competition organizers access to the predictions
+1.  Setup, for Mumbai
+2.  Get data locally from assets on Ocean
+  2.1  Get recent historical data from Binance ETH API
+  2.2  Get older historical data from a CSV file
+3.  Make predictions :
+  3.1  Build a simple AI model
+  3.2  Run the AI model to make future ETH price predictions
+4.  Publish the predictions as an Ocean asset
+  4.1 Save the predictions as a csv file
+  4.2 Put the csv online
+  4.3 Publish as an Ocean asset
+5.  Share csv access to the competition organizers
 
-## 1. Setup
+## 1. Setup, for Mumbai
 
 ### Prerequisites & installation
 
@@ -35,14 +38,14 @@ From [simple-remote](simple-remote.md), do:
 - [x] Set envvars
 - [x] Setup in Python: Create Ocean instance
 
-We're Bob this flow. So we don't need to set up Alice's wallet.
+In this flow, Bob is the competitor. (And, we don't need to set up Alice's wallet.)
 
 From [c2d-flow](c2d-flow.md), do:
 - [x] Setup Bob's Wallet
 
-## 2.  Bob gets data locally from assets on Ocean
+## 2.  Get data locally from assets on Ocean
 
-### 2.1  Bob gets recent historical data from Binance ETH APIs
+### 2.1  Get recent historical data from Binance ETH APIs
 
 In the same Python console:
 ```python
@@ -103,17 +106,17 @@ ls branin.arff
 Congrats to Bob for buying and consuming a data asset!
 
 
-###  2.2  Bob gets older historical data from a CSV file
+###  2.2  Get older historical data from a CSV file
 
 (FILLME later. Or skip)
 
-## 3.  Bob makes predictions
+## 3.  Make predictions
 
-### 3.1  Bob builds a simple AI model
+### 3.1  Build a simple AI model
 
 (FILLME later. Use e.g. leverage gpr.py here: https://github.com/oceanprotocol/c2d-examples/blob/4182e8cfec043a5e7c946d18304dcae244581a6c/branin_and_gpr/gpr.py#L69)
 
-### 3.2  Bob runs the AI model to make future ETH price predictions
+### 3.2  Run the AI model to make future ETH price predictions
 
 Predictions must be one prediction every hour on the hour, for a 24h period: from Oct 3, 2022 at 1:00am UTC, to Oct 4, 2022 at 1:00am UTC.
 
@@ -125,9 +128,9 @@ datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
 predictions = [1500.0 + 100.0 * random.random() for i in range(len(datetimes))] #example predictions
 ```
 
-## 4.  Bob publishes the predictions as an Ocean asset
+## 4.  Publish the predictions as an Ocean asset
 
-Put into csv form, and publish.
+### 4.1 Save the predictions as a csv file
 
 The csv has two columns: date/time, and predicted ETH value (in terms of USDT). The date/time values must fit the format below. Bob needs to make a prediction for each date/time.
 
@@ -151,7 +154,9 @@ filename = "/tmp/predictions.csv"
 numpy.savetxt(filename, X, delimiter=",", header="Datetime,predicted-ETH-value")
 ```
 
-Now, publish the file to a remote location. Here's one way, using github CLI. (Use whatever you wish:)
+### 4.2 Put the csv online
+
+Here's one way, using github CLI. (Use whatever you wish:)
 
 Open a new console, and do the following. Fill in <username> with your github username, and chooose a name of your new github repo with <reponame>.
 ```console
@@ -164,14 +169,74 @@ git remote add origin git@github.com:<username>/<reponame>.git
 git push -u origin master
 ```
 
-Now, your file is accessible from anywhere, at this url:
+Your csv can be found at this url:
 ```text
 https://raw.githubusercontent.com/<username>/<reponame>/main/predictions.csv
 ```
 
-The next step is to publish this as an Ocean asset.
+### 4.3 Publish (the csv) as an Ocean asset
+
+In the same python console:
+```python
+# Specify metadata
+date_created = "2022-09-20T10:55:11Z"
+metadata = {
+    "created": date_created,
+    "updated": date_created,
+    "description": "ETH predictions",
+    "name": "ETH predictions",
+    "type": "dataset",
+    "author": "<your name>",
+    "license": "CC0: PublicDomain",
+}
 
 
-## 5.  Bob gives competition organizers access to the predictions
+# Set the url, create UrlFile object
+url=<your csv url>
 
-How: Send 1.0 datatokens to the competition organizers’ address
+from ocean_lib.structures.file_objects import UrlFile
+url_file = UrlFile(url)
+
+# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+asset = ocean.assets.create(
+    metadata,
+    bob_wallet,
+    [url_file],
+    datatoken_templates=[1],
+    datatoken_names=["Datatoken 1"],
+    datatoken_symbols=["DT1"],
+    datatoken_minters=[bob_wallet.address],
+    datatoken_fee_managers=[bob_wallet.address],
+    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
+    datatoken_publish_market_order_fee_amounts=[0],
+    datatoken_bytess=[[b""]],
+)
+
+data_nft = asset.nft
+datatoken = asset.datatokens[0]
+
+print(f"Asset created, with name: {data_nft.token_name()}")
+print(f"  did: {asset.did}")
+print(f"  data_NFT.address: {data_nft.address}")
+print(f"  datatoken.address: {datatoken.address}")
+```
+
+Take note of the did; you'll need to include it when you enter the competition via Questbook.
+
+
+## 5.  Share csv access to the competition organizers
+
+In the same Python console:
+```python
+#this is the official organizer address
+organizer_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E"
+
+#mint tokens into the account. >1 to make it organizers to share amongst each other.
+datatoken.mint(
+    account_address=organizer_address,
+    value=ocean.to_wei(10),
+    from_wallet=bob_wallet,
+)
+```
