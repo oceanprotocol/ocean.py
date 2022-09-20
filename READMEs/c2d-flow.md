@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D flow.
+This quickstart describes a C2D flow, using [remote services and Rinkeby testnet](https://docs.oceanprotocol.com/core-concepts/networks#rinkeby).
 
 Here are the steps:
 
@@ -22,87 +22,51 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### Prerequisites & installation
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
+- [x] Setup : Install the library
 
+### Install matplotlib
 
-### Download barge and run services
+This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it.
 
-Here, we use barge's "Compute-to-Data" backend of barge via its `--with-c2d` option. The steps below detail how.
-
-If you have a console with barge running, turn off barge by pressing `Ctrl-C` and waiting for it to shut down.
-
-Then, in the barge console:
+In the same console:
 ```console
-# Grab repo (if needed)
-git clone https://github.com/oceanprotocol/barge
-cd barge
+#ensure you're in the Python virtualenv
+source venv/bin/activate
 
-# Clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-# (For speed, we turn off components we don't need for quickstarts, like IPFS)
-./start_ocean.sh --with-c2d-option --no-ipfs --no-dashboard --skip-subgraph-deploy
-```
-
-Use the `--with-c2d` option when running barge in order to include the Compute-to-Data backend
-```console
-./start_ocean.sh --with-c2d
-```
-
-### Install the library
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Install the library from v4 sources
-
-### Install extra libraries
-
-This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it. So, in the same console:
-```console
+#install matplotlib
 pip install numpy matplotlib
 ```
 
-### Set envvars
+### Setup for remote
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Set envvars
+From [simple-remote](simple-remote.md), do:
+- [x] Create Mumbai Accounts (One-Time)
+- [x] Create Config File for Services
+- [x] Set envvars
+- [x] Setup in Python
 
-### Wait for barge C2D to be ready.
-
-It can take >10 min for barge with C2D to be ready. We can tell it's ready when the file `$HOME/.ocean/ocean-c2d/ready` exists. Here's a convenient way to wait until it's ready. In the console:
-
-```console
-#loop until target file exists
-for i in $(seq 1 50); do
-    sleep 5
-    [ -f "$HOME/.ocean/ocean-c2d/ready" ] && break
-    done
-```
-
-When it's done, we can proceed to the next step.
-
-### Setup in Python
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
 
 ## 2. Alice publishes dataset
 
 In the same python console:
 
 ```python
-# Publish the datatoken
-DATA_datatoken = data_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
-print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
+# Publish data NFT & datatoken for dataset
+DATASET_data_nft = ocean.create_data_nft('DATASET_DN1', 'DATASET_DN1', alice_wallet)
+print(f"Created data NFT. Its address is {DATASET_data_nft.address}")
+
+DATASET_datatoken = DATASET_data_nft.create_datatoken("DATASET_DT1", "DATASET_DT1", from_wallet=alice_wallet)
+print(f"DATASET_datatoken address = '{DATASET_datatoken.address}'")
 
 # Specify metadata and services for the Branin test dataset
-DATA_date_created = "2021-12-28T10:55:11Z"
-DATA_metadata = {
-    "created": DATA_date_created,
-    "updated": DATA_date_created,
+DATASET_date_created = "2022-09-19T10:55:11Z"
+DATASET_metadata = {
+    "created": DATASET_date_created,
+    "updated": DATASET_date_created,
     "description": "Branin dataset",
     "name": "Branin dataset",
     "type": "dataset",
@@ -110,16 +74,16 @@ DATA_metadata = {
     "license": "CC0: PublicDomain",
 }
 
-# ocean.py offers multiple file object types. A simple url file is be enough for here
+# ocean.py offers multiple file object types. A simple url file is enough for here
 from ocean_lib.structures.file_objects import UrlFile
-DATA_url_file = UrlFile(
+DATASET_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
-DATA_files = [DATA_url_file]
+DATASET_files = [DATASET_url_file]
 
 # Set the compute values for compute service
-DATA_compute_values = {
+DATASET_compute_values = {
     "allowRawAlgorithm": False,
     "allowNetworkAccess": True,
     "publisherTrustedAlgorithms": [],
@@ -128,27 +92,27 @@ DATA_compute_values = {
 
 # Create the Service
 from ocean_lib.services.service import Service
-DATA_compute_service = Service(
+DATASET_compute_service = Service(
     service_id="2",
     service_type="compute",
     service_endpoint=ocean.config.provider_url,
-    datatoken=DATA_datatoken.address,
-    files=DATA_files,
+    datatoken=DATASET_datatoken.address,
+    files=DATASET_files,
     timeout=3600,
-    compute_values=DATA_compute_values,
+    compute_values=DATASET_compute_values,
 )
 
 # Publish asset with compute service on-chain
-DATA_asset = ocean.assets.create(
-    metadata=DATA_metadata,
+DATASET_asset = ocean.assets.create(
+    metadata=DATASET_metadata,
     publisher_wallet=alice_wallet,
-    files=DATA_files,
-    services=[DATA_compute_service],
-    data_nft_address=data_nft.address,
-    deployed_datatokens=[DATA_datatoken],
+    files=DATASET_files,
+    services=[DATASET_compute_service],
+    data_nft_address=DATASET_data_nft.address,
+    deployed_datatokens=[DATASET_datatoken],
 )
 
-print(f"DATA_asset did = '{DATA_asset.did}'")
+print(f"DATASET_asset did = '{DATASET_asset.did}'")
 ```
 
 ## 3. Alice publishes an algorithm
@@ -156,12 +120,11 @@ print(f"DATA_asset did = '{DATA_asset.did}'")
 In the same Python console:
 
 ```python
-# Publish the algorithm NFT token
-ALGO_nft_token = ocean.create_data_nft("NFT1", "NFT1", alice_wallet)
-print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
+# Publish data NFT & datatoken for algorithm
+ALGO_data_nft = ocean.create_data_nft("ALGO_DN1", "ALGO_DN1", alice_wallet)
+print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 
-# Publish the datatoken
-ALGO_datatoken = ALGO_nft_token.create_datatoken("ALGO 1", "A1", from_wallet=alice_wallet)
+ALGO_datatoken = ALGO_data_nft.create_datatoken("ALGO_DT1", "ALGO_DT1", from_wallet=alice_wallet)
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -202,7 +165,7 @@ ALGO_asset = ocean.assets.create(
     metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
     files=ALGO_files,
-    data_nft_address=ALGO_nft_token.address,
+    data_nft_address=ALGO_data_nft.address,
     deployed_datatokens=[ALGO_datatoken],
 )
 
@@ -213,57 +176,55 @@ print(f"ALGO_asset did = '{ALGO_asset.did}'")
 
 In the same Python console:
 ```python
-compute_service = DATA_asset.services[0]
+compute_service = DATASET_asset.services[0]
 compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
+DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
-bob_wallet = Wallet(
-    ocean.web3,
-    os.getenv("TEST_PRIVATE_KEY2"),
-    config.block_confirmations,
-    config.transaction_timeout,
-)
+# Create Bob's wallet
+bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
 
-# Alice mints DATA datatokens and ALGO datatokens to Bob.
+# Alice mints DATASET datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
-DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+DATASET_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
 ## 6. Bob starts a compute job using a free C2D environment
 
-Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
+Only inputs needed: DATASET_did, ALGO_did. Everything else can get computed as needed.
 For demo purposes, we will use the free C2D environment, which requires no provider fees.
 
 In the same Python console:
 ```python
 # Convenience variables
-DATA_did = DATA_asset.did
+DATASET_did = DATASET_asset.did
 ALGO_did = ALGO_asset.did
 
 # Operate on updated and indexed assets
-DATA_asset = ocean.assets.resolve(DATA_did)
+DATASET_asset = ocean.assets.resolve(DATASET_did)
 ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-compute_service = DATA_asset.services[0]
+compute_service = DATASET_asset.services[0]
 algo_service = ALGO_asset.services[0]
 free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
 from ocean_lib.models.compute_input import ComputeInput
 
-DATA_compute_input = ComputeInput(DATA_asset, compute_service)
+DATASET_compute_input = ComputeInput(DATASET_asset, compute_service)
 ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
 
 # Pay for dataset and algo for 1 day
 datasets, algorithm = ocean.assets.pay_for_compute_service(
-    datasets=[DATA_compute_input],
+    datasets=[DATASET_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,
     wallet=bob_wallet,
@@ -294,7 +255,7 @@ import time
 from decimal import Decimal
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
+    status = ocean.compute.status(DATASET_asset, compute_service, job_id, bob_wallet)
     if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -305,12 +266,12 @@ This will output the status of the current job.
 Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
 
 Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results using ocean.compute.result or, more specifically, just the output if the job was successful.
-For the purpose of this tutorial, let us choose the second option.
+For the purpose of this tutorial, let's choose the second option.
 
 ```python
 # Retrieve algorithm output and log files
 output = ocean.compute.compute_job_result_logs(
-    DATA_asset, compute_service, job_id, bob_wallet
+    DATASET_asset, compute_service, job_id, bob_wallet
 )[0]
 
 import pickle
