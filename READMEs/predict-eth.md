@@ -142,13 +142,34 @@ The csv has two columns: date/time, and predicted ETH value (in terms of USDT). 
 | 2022-10-04::01:00 | 1590.673            |
 | ----------------- | ------------------- |
 
+
 In the same Python console:
 ```python
-np_array = numpy.array([datetimes, predictions])
-
-import pandas as pd 
-pd.DataFrame(np_array).to_csv("path/to/file.csv")
+import numpy
+X = numpy.asarray([datetimes, predictions])
+filename = "/tmp/predictions.csv"
+numpy.savetxt(filename, X, delimiter=",", header="Datetime,predicted-ETH-value")
 ```
+
+Now, publish the file to a remote location. Here's one way, using github CLI. (Use whatever you wish:)
+
+Open a new console, and do the following. Fill in <username> with your github username, and chooose a name of your new github repo with <reponame>.
+```console
+#Create a new repository, with predictions.csv as the initial file
+git init
+mv /tmp/predictions.csv .
+git add predictions.csv
+git commit -m "first commit"
+git remote add origin git@github.com:<username>/<reponame>.git
+git push -u origin master
+```
+
+Now, your file is accessible from anywhere, at this url:
+```text
+https://raw.githubusercontent.com/<username>/<reponame>/main/predictions.csv
+```
+
+The next step is to publish this as an Ocean asset.
 
 
 ## 5.  Bob gives competition organizers access to the predictions
