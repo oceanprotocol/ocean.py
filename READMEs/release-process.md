@@ -22,9 +22,9 @@ SPDX-License-Identifier: Apache-2.0
   - To bump the patch version (vX.Y.**Z**): `./bumpversion.sh patch`
   - (Ocean.py follows [semantic versioning](https://semver.org/).)
 
-- Commit the changes to the feature branch.
+- Commit the changes to the feature branch. For example:
 
-  `git commit -m "Bump version <old_version> -> <new_version>"`
+  `git commit -m "Bump version v1.2.4 -> v1.2.5"`
 
 - Push the feature branch to GitHub.
 
