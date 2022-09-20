@@ -10,7 +10,8 @@ This quickstart describes a flow to publish Binance API's historical ETH price a
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes API data asset
+2.  Alice publishes the data asset
+3.  Alice creates the dispenser
 
 Let's go through each step.
 
@@ -30,7 +31,7 @@ From [simple-remote](simple-remote.md), do:
 - [x] Set envvars
 - [x] Setup in Python
 
-## 2. Alice Publishes API data asset
+## 2. Alice publishes the data asset
 
 Then in the same python console:
 ```python
@@ -79,6 +80,32 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 ```
 
-----
+### 3. Alice creates the dispenser
 
-FIXME: once the above is done, then add in dispenser support. Simplest way: move `ocean.assets.create()` --> `ocean.assets.create_nft_erc20_with_dispenser()`. Ref: dispenser-flow.md
+In the same Python console:
+```python
+datatoken.create_dispenser(
+    dispenser_address=ocean.dispenser.address,
+    max_balance=ocean.to_wei(10000),
+    max_tokens=ocean.to_wei(10000),
+    with_mint=True,
+    allowed_swapper=ZERO_ADDRESS,
+    from_wallet=alice_wallet,
+)
+
+dispenser_status = ocean.dispenser.status(datatoken.address)
+assert dispenser_status[0:2] == (True, alice_wallet.address, True)
+
+### 4. Alice gets an access token from dispenser
+
+(Note: we'll move this to the predict-eth README shortly)
+
+In the same Python console:
+```python
+amt_dispense = 1
+ocean.dispenser.dispense_tokens(
+    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=alice_wallet
+)
+bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
+print(f"Alice just got a token dispensed to her. She now holds {bal} tokens")
+```
