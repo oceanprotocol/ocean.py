@@ -28,7 +28,7 @@ SPDX-License-Identifier: Apache-2.0
 
 - Push the feature branch to GitHub.
 
-  `git push origin feature/bumpversion-to-v1.2.5"`
+  `git push origin feature/bumpversion-to-v1.2.5`
 
 ## Step 2: Merge changes to v4main branch
 
