@@ -20,7 +20,6 @@ Let's go through each step.
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
-*NOTE: before starting barge, please type " export PROVIDER_VERSION=graphql"  (will remove this when PR is merged in main provider)
 - [x] Setup : Install the library
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
