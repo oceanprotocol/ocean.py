@@ -30,13 +30,13 @@ SPDX-License-Identifier: Apache-2.0
 
   `git push origin feature/bumpversion-to-v1.2.5`
 
-## Step 2: Merge changes to v4main branch
+## Step 2: Merge changes to main branch
 
 - Make a pull request from the just-pushed branch.
 
 - Wait for all the tests to pass!
 
-- Merge the pull request into the `v4main` branch.
+- Merge the pull request into the `main` branch.
 
 ## Step 3: Release
 
@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0
   - Click "Draft a new release".
   - For tag version, put something like `v1.2.5`
   - For release title, put the same value (like `v1.2.5`).
-  - For the target, select the `v4main` branch, or the just-merged commit.
+  - For the target, select the `main` branch, or the just-merged commit.
   - Describe the main changes. (In the future, these will come from the changelog.)
   - Click "Publish release".
 
