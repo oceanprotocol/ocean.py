@@ -35,6 +35,7 @@ config_defaults = {
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
     "PROVIDER_URL": "http://172.15.0.4:8030",
     "DOWNLOADS_PATH": "consume-downloads",
+    "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
 }
 
 CONFIG_NETWORK_HELPER = {
