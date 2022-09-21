@@ -68,9 +68,9 @@ In the Python console:
 ```python
 # Create Ocean instance
 import os
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = Config(os.getenv('OCEAN_CONFIG_FILE'))
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 # Create Alice's wallet

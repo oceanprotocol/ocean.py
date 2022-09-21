@@ -6,7 +6,6 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -16,14 +15,14 @@ from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import deploy_erc721_erc20, generate_wallet
 
 
-def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
+def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: dict):
     data_nft, datatoken = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, ocean.web3, data_provider)
     return data_nft, datatoken, metadata, files
 
 
-def publish_flow(ocean: Ocean, config: Config):
+def publish_flow(ocean: Ocean, config: dict):
     publisher_wallet = generate_wallet()
     (
         data_nft,

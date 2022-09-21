@@ -21,11 +21,14 @@ GANACHE_URL = "http://127.0.0.1:8545"
 
 
 @enforce_types
-def get_web3(network_url: str) -> Web3:
+def get_web3(network_url: Optional[str] = None) -> Web3:
     """
     Return a web3 instance connected via the given network_url.
     Adds POA middleware if needed.
     """
+    if not network_url:
+        network_url = GANACHE_URL
+
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
 

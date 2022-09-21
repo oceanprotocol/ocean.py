@@ -35,9 +35,7 @@ from tests.resources.mocks.data_provider_mock import DataProviderMock
 _NETWORK = "ganache"
 
 
-def get_web3():
-    config_dict = get_example_config()
-    network_url = config_dict.get("OCEAN_NETWORK_URL", os.getenv("OCEAN_NETWORK_URL"))
+def get_web3(network_url: Optional[str] = None):
     return util_get_web3(network_url)
 
 

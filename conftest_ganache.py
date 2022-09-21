@@ -92,7 +92,7 @@ def consumer_ocean_instance():
 
 @pytest.fixture
 def web3():
-    return get_web3()
+    return get_web3("http://127.0.0.1:8545")
 
 
 @pytest.fixture
