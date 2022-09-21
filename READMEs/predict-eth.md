@@ -82,7 +82,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
 )
 print(f"order_tx_id = '{order_tx_id}'")
 
-# Bob now has access! He downloads the asset.
+# Bob now has access. He downloads the asset.
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
@@ -102,8 +102,6 @@ Bob can verify that the file is downloaded. In a new console:
 cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
-
-Congrats to Bob for buying and consuming a data asset!
 
 
 ###  2.2  Get older historical data from a CSV file
