@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
 import threading
 import time
 from unittest.mock import patch
@@ -11,7 +10,7 @@ import pytest
 import requests
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
+from ocean_lib.config import DEFAULT_PROVIDER_URL
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean import Ocean
@@ -38,16 +37,14 @@ def test_with_wrong_provider(config, caplog):
         assert exception_flag == 1
 
 
-def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch):
+def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
     """Tests DDO creation with a good config.ini and then switch to a bad one."""
-    monkeypatch.setenv("METADATA_CACHE_URI", "http:://not-valid-aqua.com")
-    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
+    config["METADATA_CACHE_URI"] = "http:://not-valid-aqua.com"
 
     with pytest.raises(Exception, match="Invalid or unresponsive aquarius url"):
         ocean = Ocean(config, DataServiceProvider)
 
-    monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
-    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
+    config["METADATA_CACHE_URI"] = "http://172.15.0.5:5000"
     ocean = Ocean(config, DataServiceProvider)
 
     # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully

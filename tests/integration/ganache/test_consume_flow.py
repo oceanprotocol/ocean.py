@@ -107,7 +107,7 @@ def test_consume_flow(
     )
 
     # Download file
-    destination = config.downloads_path
+    destination = config["DOWNLOADS_PATH"]
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 

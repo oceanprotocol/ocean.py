@@ -231,7 +231,7 @@ def setup_logging(
 @enforce_types
 def deploy_erc721_erc20(
     web3: Web3,
-    config: Config,
+    config_dict: dict,
     data_nft_publisher: Wallet,
     datatoken_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
@@ -243,7 +243,7 @@ def deploy_erc721_erc20(
     """
 
     data_nft_factory = DataNFTFactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
+        web3, get_address_of_type(config_dict, "ERC721Factory")
     )
     tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
