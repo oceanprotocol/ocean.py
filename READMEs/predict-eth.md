@@ -13,7 +13,7 @@ During the competition, as we get feedback, we expect to continually evolve this
 
 Here are the steps:
 
-1.  Setup, for Mumbai
+1.  Setup
 2.  Get data locally from assets on Ocean
   2.1  Get recent historical data from Binance ETH API
   2.2  Get other data
@@ -26,7 +26,7 @@ Here are the steps:
   4.3 Publish as an Ocean asset
 5.  Share csv access to the competition organizers
 
-## 1. Setup, for Mumbai
+## 1. Setup
 
 ### Prerequisites & installation
 
