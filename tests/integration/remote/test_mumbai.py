@@ -1,8 +1,12 @@
+#
+# Copyright 2022 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import os
+
 import pytest
 import requests
 
-from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -39,7 +43,7 @@ def test_nonocean_tx(tmp_path):
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
     print("Wait for send-Ether tx to complete...")
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    _ = web3.eth.wait_for_transaction_receipt(tx_hash)
 
     bob_eth_after = web3.eth.get_balance(bob_wallet.address)
     assert bob_eth_after > bob_eth_before
@@ -61,7 +65,7 @@ def test_ocean_tx(tmp_path):
 
 
 def _get_wallets(ocean):
-    config, web3 = ocean.config, ocean.web3
+    config, web3 = ocean.config_dict, ocean.web3
 
     alice_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY1")
     bob_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY2")
@@ -76,10 +80,16 @@ def _get_wallets(ocean):
 
     # wallets
     alice_wallet = Wallet(
-        web3, alice_private_key, config.block_confirmations, config.transaction_timeout
+        web3,
+        alice_private_key,
+        config["BLOCK_CONFIRMATIONS"],
+        config["TRANSACTION_TIMEOUT"],
     )
     bob_wallet = Wallet(
-        web3, bob_private_key, config.block_confirmations, config.transaction_timeout
+        web3,
+        bob_private_key,
+        config["BLOCK_CONFIRMATIONS"],
+        config["TRANSACTION_TIMEOUT"],
     )
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")
@@ -94,37 +104,18 @@ def _remote_config(tmp_path):
     os.environ.pop("AQUARIUS_URL", None)
     os.environ.pop("PROVIDER_URL", None)
 
-    # Create conf file
-    conf_file = tmp_path / "config.ini"
-    conf_file.write_text(
-        """
-[eth-network]
-network = https://rpc-mumbai.maticvigil.com
-network_name = mumbai
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-block_confirmations = 0
-
-[resources]
-metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
-provider.url = https://v4.provider.mumbai.oceanprotocol.com
-"""
-    )
-    conf_filename = str(conf_file)
-    assert "/tmp/" in conf_filename
-    print(f"config filename = {conf_filename}")
-
-    # Create Config instance
-    config = Config(conf_filename)
+    config = {
+        "OCEAN_NETWORK_URL": "https://rpc-mumbai.maticvigil.com",
+        "NETWORK_NAME": "mumbai",
+        "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
+        "BLOCK_CONFIRMATIONS": 0,
+        "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
+        "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
+    }
 
     # -ensure config is truly remote
-    assert "mumbai" in config.network_url
-    assert "oceanprotocol.com" in config.metadata_cache_uri
-    assert "oceanprotocol.com" in config.provider_url
-
-    print(f"config.network_url = '{config.network_url}'")
-    print(f"config.address_file = '{config.address_file}'")
-    print(f"config.block_confirmations = {config.block_confirmations.value}")
-    print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-    print(f"config.provider_url = '{config.provider_url}'")
+    assert "mumbai" in config["OCEAN_NETWORK_URL"]
+    assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
+    assert "oceanprotocol.com" in config["PROVIDER_URL"]
 
     return config

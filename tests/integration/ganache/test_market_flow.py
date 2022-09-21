@@ -58,7 +58,7 @@ def test_market_flow(
             asset,
             service,
             consumer_wallet,
-            consumer_ocean.config.downloads_path,
+            consumer_ocean.config_dict["DOWNLOADS_PATH"],
             order_tx_id,
         )
     else:
@@ -75,7 +75,7 @@ def test_market_flow(
             asset,
             service,
             another_consumer_wallet,
-            another_consumer_ocean.config.downloads_path,
+            another_consumer_ocean.config_dict["DOWNLOADS_PATH"],
             order_tx_id,
         )
 

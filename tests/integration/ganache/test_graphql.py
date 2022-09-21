@@ -119,7 +119,7 @@ def test_consume_simple_graphql_query(
     )
 
     # Download file
-    destination = config.downloads_path
+    destination = config["DOWNLOADS_PATH"]
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 
@@ -260,7 +260,7 @@ def test_consume_parametrized_graphql_query(
     )
 
     # Download file
-    destination = config.downloads_path
+    destination = config["DOWNLOADS_PATH"]
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 
