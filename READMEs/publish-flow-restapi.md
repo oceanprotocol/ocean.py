@@ -12,7 +12,7 @@ Here are the steps:
 1.  Setup
 2.  Alice publishes the API asset
 3.  Alice makes the API asset available for free, via a dispenser
-4.  Bob consumes the API sset
+4.  Bob consumes the API asset
 
 Let's go through each step.
 
@@ -162,7 +162,7 @@ ls branin.arff
 
 ### Appendix. Details of Binance API data
 
-[Here is the Binance Kline/Candlestick Data API](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data).
+Docs for Binance Kline/Candlestick Data API are [here](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data).
 
 Here's an example of grabbing the data given a url. The url specifies 7 days.
 
