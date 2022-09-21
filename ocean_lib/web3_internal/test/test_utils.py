@@ -57,7 +57,6 @@ def test_prepare_fixed_hash():
 
 
 @pytest.mark.unit
-@pytest.mark.skip(reason="Don't skip once fixed #942")
 def test_gas_scaling_factor(web3, monkeypatch):
     monkeypatch.setenv("GAS_SCALING_FACTOR", "5.0")
     gas_price1 = web3.eth.gas_price
@@ -69,9 +68,7 @@ def test_gas_scaling_factor(web3, monkeypatch):
 
     monkeypatch.delenv("GAS_SCALING_FACTOR")
     polygon_web3 = get_web3("https://polygon-rpc.com")
-    polygon_web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    polygon_web3.eth.set_gas_price_strategy(fast_gas_price_strategy)
-    polygon_gas = polygon_web3.eth.generate_gas_price()
+    polygon_gas = polygon_web3.eth.gas_price
     assert polygon_gas > gas_price2
 
     monkeypatch.setenv(ENV_GAS_PRICE, "30000")
