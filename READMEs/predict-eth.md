@@ -36,12 +36,9 @@ From [simple-remote](simple-remote.md), do:
 - [x] Create Mumbai Accounts (One-Time)
 - [x] Create Config File for Services
 - [x] Set envvars
-- [x] Setup in Python
+- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
 
 In this flow, Bob is a participant in the competition
-
-From [c2d-flow](c2d-flow.md), do:
-- [x] Setup Bob's Wallet
 
 ## 2.  Get data locally from assets on Ocean
 

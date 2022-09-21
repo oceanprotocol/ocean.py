@@ -29,10 +29,7 @@ From [simple-remote](simple-remote.md), do:
 - [x] Create Mumbai Accounts (One-Time)
 - [x] Create Config File for Services
 - [x] Set envvars
-- [x] Setup in Python (Create Ocean instance, setup Alice's wallet)
-
-From [c2d-flow](c2d-flow.md), do:
-- [x] Setup Bob's Wallet
+- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
 
 ## 2. Alice publishes the data asset
 
@@ -40,26 +37,19 @@ Then in the same python console:
 ```python
 # Specify metadata
 date_created = "2022-09-20T10:55:11Z"
+name = "Binance API v3 klines"
 metadata = {
-    "created": date_created,
-    "updated": date_created,
-    "description": "Binance API v3 klines",
-    "name": "Binance API v3 klines",
-    "type": "dataset",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
+  "name": name, "description": name, "author": "Trent", "type": "dataset",
+  "created": date_created,  "updated": date_created, "license": "CC0: PublicDomain"
 }
 
-# Specify start/end times for prices of the previous week
+# Set the url
 from datetime import datetime, timedelta
 end_datetime = datetime.now() 
-start_datetime = end_datetime - timedelta(days=7) 
+start_datetime = end_datetime - timedelta(days=7) #the previous week
 
-# Set the url
-url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
-
-# Create UrlFile object
 from ocean_lib.structures.file_objects import UrlFile
+url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 url_file = UrlFile(url)
 
 # Publish dataset. It creates the data NFT, datatoken, and fills in metadata
