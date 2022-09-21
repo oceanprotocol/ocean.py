@@ -13,10 +13,9 @@ Here are the steps:
 2. Alice publishes dataset
 3. Alice publishes algorithm
 4. Alice allows the algorithm for C2D for that data asset
-5. Setup Bob's Wallet
-6. Bob acquires datatokens for data and algorithm
-7. Bob starts a compute job using a free C2D environment (no provider fees)
-8. Bob monitors logs / algorithm output
+5. Bob acquires datatokens for data and algorithm
+6. Bob starts a compute job using a free C2D environment (no provider fees)
+7. Bob monitors logs / algorithm output
 
 Let's go through each step.
 
@@ -47,7 +46,7 @@ From [simple-remote](simple-remote.md), do:
 - [x] Create Mumbai Accounts (One-Time)
 - [x] Create Config File for Services
 - [x] Set envvars
-- [x] Setup in Python
+- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
 
 
 ## 2. Alice publishes dataset
@@ -181,18 +180,7 @@ compute_service.add_publisher_trusted_algorithm(ALGO_asset)
 DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
 ```
 
-## 5. Setup Bob's Wallet
-
-In the same Python console:
-```python
-# Create Bob's wallet
-bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"bob_wallet.address = '{bob_wallet.address}'")
-assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
-```
-
-## 6. Bob acquires datatokens for data and algorithm
+## 5. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
@@ -202,7 +190,7 @@ DATASET_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
-## 7. Bob starts a compute job using a free C2D environment
+## 6. Bob starts a compute job using a free C2D environment
 
 Only inputs needed: DATASET_did, ALGO_did. Everything else can get computed as needed.
 For demo purposes, we will use the free C2D environment, which requires no provider fees.
@@ -250,7 +238,7 @@ job_id = ocean.compute.start(
 print(f"Started compute job with id: {job_id}")
 ```
 
-## 8. Bob monitors logs / algorithm output
+## 7. Bob monitors logs / algorithm output
 
 In the same Python console, you can check the job status as many times as needed:
 
