@@ -162,14 +162,9 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-
-data_nft = asset.nft
 datatoken = asset.datatokens[0]
 
-print(f"Asset created, with name: {data_nft.token_name()}")
-print(f"  did: {asset.did}")
-print(f"  data_NFT.address: {data_nft.address}")
-print(f"  datatoken.address: {datatoken.address}")
+print(f"Asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
 ```
 
 Take note of the did; you'll need to include it when you enter the competition via Questbook.

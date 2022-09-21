@@ -3,9 +3,9 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Publish API of Historical ETH Price
+# Quickstart: Publish & Consume Flow for REST API-style URIs
 
-This quickstart describes a flow to publish Binance API of historical ETH price, to make it available as free data asset on Ocean, and to consume it.
+This quickstart describes a flow to publish Binance REST API of ETH price feed, to make it available as free data asset on Ocean, and to consume it.
 
 Here are the steps:
 
@@ -69,14 +69,8 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-
-data_nft = asset.nft
 datatoken = asset.datatokens[0]
-
-print(f"Asset created, with name: {data_nft.token_name()}")
-print(f"  did: {asset.did}")
-print(f"  data_NFT.address: {data_nft.address}")
-print(f"  datatoken.address: {datatoken.address}")
+print(f"New asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
 ```
 
 ### 3. Alice makes the API asset available for free, via a dispenser
@@ -94,6 +88,7 @@ datatoken.create_dispenser(
 
 dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:2] == (True, alice_wallet.address, True)
+```
 
 For an example of consuming this data, see the [predict-eth flow][READMEs/predict-eth.md].
 
@@ -108,15 +103,10 @@ In the same Python console:
 # In this flow, you can get it from the printout of the steps above.
 asset_did = asset.did
 
-# Retrieve the Asset, data_nft, and datatoken objects
+# Retrieve the Asset and datatoken objects
 asset = ocean.assets.resolve(asset_did)
-data_nft = asset.nft
 datatoken = asset.datatokens[0]
-
-print(f"Asset retrieved, with name: {data_nft.token_name()}")
-print(f"  did: {asset.did}")
-print(f"  data_NFT.address: {data_nft.address}")
-print(f"  datatoken.address: {datatoken.address}")
+print(f"Asset retrieved, with did=asset.did, and datatoken.address={datatoken.address}")
 
 # Bob gets an access token from the dispenser
 amt_dispense = 1
