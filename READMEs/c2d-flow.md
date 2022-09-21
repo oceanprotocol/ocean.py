@@ -16,7 +16,6 @@ Here are the steps:
 5. Bob acquires datatokens for data and algorithm
 6. Bob starts a compute job using a free C2D environment (no provider fees)
 7. Bob monitors logs / algorithm output
-8. Tips and tricks
 
 Let's go through each step.
 
@@ -47,7 +46,7 @@ From [simple-remote](simple-remote.md), do:
 - [x] Create Mumbai Accounts (One-Time)
 - [x] Create Config File for Services
 - [x] Set envvars
-- [x] Setup in Python
+- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
 
 
 ## 2. Alice publishes dataset
@@ -185,12 +184,6 @@ DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
 
 In the same Python console:
 ```python
-# Create Bob's wallet
-bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"bob_wallet.address = '{bob_wallet.address}'")
-assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
-
 # Alice mints DATASET datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
 DATASET_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
