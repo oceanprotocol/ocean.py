@@ -5,13 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish API of Historical ETH Price
 
-This quickstart describes a flow to publish Binance API of historical ETH price as a free Ocean data asset. 
+This quickstart describes a flow to publish Binance API of historical ETH price, to make it available as free data asset on Ocean, and to consume it.
 
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes the data asset
-3.  Alice creates the dispenser
+2.  Alice publishes the API asset
+3.  Alice makes the API asset available for free, via a dispenser
+4.  Bob consumes the API sset
 
 Let's go through each step.
 
@@ -31,7 +32,7 @@ From [simple-remote](simple-remote.md), do:
 - [x] Set envvars
 - [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
 
-## 2. Alice publishes the data asset
+## 2. Alice publishes the API asset
 
 Then in the same python console:
 ```python
@@ -78,7 +79,7 @@ print(f"  data_NFT.address: {data_nft.address}")
 print(f"  datatoken.address: {datatoken.address}")
 ```
 
-### 3. Alice creates the dispenser
+### 3. Alice makes the API asset available for free, via a dispenser
 
 In the same Python console:
 ```python
@@ -95,6 +96,69 @@ dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:2] == (True, alice_wallet.address, True)
 
 For an example of consuming this data, see the [predict-eth flow][READMEs/predict-eth.md].
+
+
+### 4.  Bob consumes the API asset
+
+Now, you're Bob. All you have is the did of the data asset; you compute the rest.
+
+In the same Python console:
+```python
+# Set asset did. Practically, you'd get this from Ocean Market.
+# In this flow, you can get it from the printout of the steps above.
+asset_did = asset.did
+
+# Retrieve the Asset, data_nft, and datatoken objects
+asset = ocean.assets.resolve(asset_did)
+data_nft = asset.nft
+datatoken = asset.datatokens[0]
+
+print(f"Asset retrieved, with name: {data_nft.token_name()}")
+print(f"  did: {asset.did}")
+print(f"  data_NFT.address: {data_nft.address}")
+print(f"  datatoken.address: {datatoken.address}")
+
+# Bob gets an access token from the dispenser
+amt_dispense = 1
+ocean.dispenser.dispense_tokens(
+    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
+)
+bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
+print(f"Bob now holds {bal} access tokens for the data asset.")
+
+# Bob sends 1.0 datatokens to the service, to get access
+service = asset.services[0] #retrieve service object
+order_tx_id = ocean.assets.pay_for_access_service(
+    asset,
+    service,
+    consume_market_order_fee_address=bob_wallet.address,
+    consume_market_order_fee_token=datatoken.address,
+    consume_market_order_fee_amount=0,
+    wallet=bob_wallet,
+)
+print(f"order_tx_id = '{order_tx_id}'")
+
+# Bob now has access. He downloads the asset.
+# If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    service=service,
+    consumer_wallet=bob_wallet,
+    destination='./',
+    order_tx_id=order_tx_id
+)
+print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
+```
+
+The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
+
+Bob can verify that the file is downloaded. In a new console:
+
+```console
+cd my_project/datafile.did:op:0xAf07...
+ls branin.arff
+```
+
 
 ### Appendix. Details of Binance API data
 

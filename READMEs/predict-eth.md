@@ -44,62 +44,8 @@ In this flow, Bob is a participant in the competition
 
 ### 2.1  Get recent historical data from Binance ETH APIs
 
-In the same Python console:
-```python
-# With did of Binance API asset, Bob retrieves the Asset, data_nft, and datatoken objects
-asset_did = <copy and paste from where you have it. E.g. from Ocean Market or publish-asset.md>
-
-asset = ocean.assets.resolve(asset_did)
-data_nft = asset.nft
-datatoken = asset.datatokens[0]
-
-print(f"Asset retrieved, with name: {data_nft.token_name()}")
-print(f"  did: {asset.did}")
-print(f"  data_NFT.address: {data_nft.address}")
-print(f"  datatoken.address: {datatoken.address}")
-
-# Bob gets an access token from the dispenser
-amt_dispense = 1
-ocean.dispenser.dispense_tokens(
-    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
-)
-bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
-print(f"Bob now holds {bal} access tokens for the data asset.")
-
-
-# Bob sends 1.0 datatokens to the service, to get access
-service = asset.services[0] #retrieve service object
-order_tx_id = ocean.assets.pay_for_access_service(
-    asset,
-    service,
-    consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=datatoken.address,
-    consume_market_order_fee_amount=0,
-    wallet=bob_wallet,
-)
-print(f"order_tx_id = '{order_tx_id}'")
-
-# Bob now has access. He downloads the asset.
-# If the connection breaks, Bob can request again by showing order_tx_id.
-file_path = ocean.assets.download_asset(
-    asset=asset,
-    service=service,
-    consumer_wallet=bob_wallet,
-    destination='./',
-    order_tx_id=order_tx_id
-)
-print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
-```
-
-The file downloaded is a .json. From that, use the python `json` library to parse it as desired.)
-
-Bob can verify that the file is downloaded. In a new console:
-
-```console
-cd my_project/datafile.did:op:0xAf07...
-ls branin.arff
-```
-
+From [publish-eth](publish-eth.md), do:
+- [x] Bob consumes the API asset
 
 ###  2.2  Get older historical data from a CSV file
 
@@ -120,7 +66,7 @@ In the same Python console:
 from datetime import datetime, timedelta
 start_datetime = datetime(st, 2022, 10, 03, 01, 00)
 datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
-predictions = [1500.0 + 100.0 * random.random() for i in range(len(datetimes))] #example predictions
+predictions = [1500.0 - 100.0 + 200.0 * random.random() for i in range(len(datetimes))] #example predictions
 ```
 
 ## 4.  Publish the predictions as an Ocean asset
