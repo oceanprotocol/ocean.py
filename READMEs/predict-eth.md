@@ -162,9 +162,8 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-datatoken = asset.datatokens[0]
-
-print(f"Asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
+datatoken_address = asset.datatokens[0]["address"]
+print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
 
 Take note of the did; you'll need to include it when you enter the competition via Questbook.
@@ -178,6 +177,10 @@ In the same Python console:
 ```python
 #this is the official organizer address
 organizer_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E"
+
+#retrieve Datatoken object
+from ocean_lib.models.datatoken import Datatoken
+datatoken = Datatoken(ocean.web3, datatoken_address)
 
 #mint tokens into the account. >1 to make it organizers to share amongst each other.
 datatoken.mint(

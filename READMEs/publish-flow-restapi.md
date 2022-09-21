@@ -69,14 +69,16 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-datatoken = asset.datatokens[0]
-print(f"New asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
+datatoken_address = asset.datatokens[0]["address"]
+print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
 
 ### 3. Alice makes the API asset available for free, via a dispenser
 
 In the same Python console:
 ```python
+from ocean_lib.models.datatoken import Datatoken
+datatoken = Datatoken(ocean.web3, datatoken_address)
 datatoken.create_dispenser(
     dispenser_address=ocean.dispenser.address,
     max_balance=ocean.to_wei(10000),
@@ -85,12 +87,9 @@ datatoken.create_dispenser(
     allowed_swapper=ZERO_ADDRESS,
     from_wallet=alice_wallet,
 )
-
 dispenser_status = ocean.dispenser.status(datatoken.address)
-assert dispenser_status[0:2] == (True, alice_wallet.address, True)
+assert dispenser_status[0:3] == [True, alice_wallet.address, True]
 ```
-
-For an example of consuming this data, see the [predict-eth flow][READMEs/predict-eth.md].
 
 
 ### 4.  Bob consumes the API asset
@@ -99,17 +98,17 @@ Now, you're Bob. All you have is the did of the data asset; you compute the rest
 
 In the same Python console:
 ```python
-# Set asset did. Practically, you'd get this from Ocean Market.
-# In this flow, you can get it from the printout of the steps above.
+# Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
 asset_did = asset.did
 
 # Retrieve the Asset and datatoken objects
 asset = ocean.assets.resolve(asset_did)
-datatoken = asset.datatokens[0]
-print(f"Asset retrieved, with did=asset.did, and datatoken.address={datatoken.address}")
+datatoken_address = asset.datatokens[0]["address"]
+print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
 
 # Bob gets an access token from the dispenser
 amt_dispense = 1
+datatoken = Datatoken(ocean.web3, datatoken_address)
 ocean.dispenser.dispense_tokens(
     datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
 )
