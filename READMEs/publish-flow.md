@@ -10,7 +10,7 @@ This quickstart describes how data is published, including metadata.
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes data asset
+2.  Publish Dataset
 
 Let's go through each step.
 
@@ -27,13 +27,27 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 ## 2. Publish Dataset
 
-Then in the same python console:
+In the same Python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+#data info
+name = "Branin dataset"
+url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
+#create asset
+asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+print(f"Just published asset, with did={asset.did}")
+```
+
+That's it! You've created a data asset of "UrlFile" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
+
+## Appendix: Further Flexibility
+
+Here's an example similar to above, but exposes more fine-grained control.
+
+In the same python console:
+```python
 # Specify metadata and services, using the Branin test dataset
 date_created = "2021-12-28T10:55:11Z"
-
 metadata = {
     "created": date_created,
     "updated": date_created,
@@ -44,13 +58,14 @@ metadata = {
     "license": "CC0: PublicDomain",
 }
 
-# ocean.py offers multiple file types, but a simple url file should be enough for this example
+# Use "UrlFile" asset type. (There are other options)
 from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata.
+# Publish data asset
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 asset = ocean.assets.create(
     metadata,
     alice_wallet,
@@ -65,18 +80,18 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-
-did = asset.did  # did contains the datatoken address
-print(f"did = '{did}'")
+print(f"Just published asset, with did={asset.did}")
 ```
 
-In this case, we used the "download" service type. There are other options too.
+### Appendix: Metadata Encryption
 
-The asset metadata stored on-chain is encrypted and compressed by default.
-It is encouraged that publishers encrypt asset metadata so that the asset supports GDPR "right-to-be-forgotten" compliance rules.
+The asset metadata is stored on-chain. It's encrypted and compressed by default. Therefore it supports GDPR "right-to-be-forgotten" compliance rules by default.
 
-To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)`.
-To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
-It is possible to disable both encryption and compression, if desired.
+You can control this:
+- To disable encryption, use `ocean.assets.create(..., encrypt_flag=False)`.
+- To disable compression, use `ocean.assets.create(..., compress_flag=False)`.
+- To disable both, use `ocean.assets.create(..., encrypt_flag=False, compress_flag=False)`.
+
+### Appendix: Different Templates
 
 `ocean.assets.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.

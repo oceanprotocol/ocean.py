@@ -34,43 +34,19 @@ From [simple-remote](simple-remote.md), do:
 
 ## 2. Alice publishes the API asset
 
-Then in the same python console:
+In the same Python console:
 ```python
-# Specify metadata
-date_created = "2022-09-20T10:55:11Z"
+#data info
 name = "Binance API v3 klines"
-metadata = {
-  "name": name, "description": name, "author": "Trent", "type": "dataset",
-  "created": date_created,  "updated": date_created, "license": "CC0: PublicDomain"
-}
 
-# Set the url
 from datetime import datetime, timedelta
 end_datetime = datetime.now() 
 start_datetime = end_datetime - timedelta(days=7) #the previous week
-
-from ocean_lib.structures.file_objects import UrlFile
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
-url_file = UrlFile(url)
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-asset = ocean.assets.create(
-    metadata,
-    alice_wallet,
-    [url_file],
-    datatoken_templates=[1],
-    datatoken_names=["Datatoken 1"],
-    datatoken_symbols=["DT1"],
-    datatoken_minters=[alice_wallet.address],
-    datatoken_fee_managers=[alice_wallet.address],
-    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-    datatoken_publish_market_order_fee_amounts=[0],
-    datatoken_bytess=[[b""]],
-)
-datatoken_address = asset.datatokens[0]["address"]
-print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
+#create asset
+asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+print(f"Just published asset, with did={asset.did}")
 ```
 
 ### 3. Alice makes the API asset available for free, via a dispenser
@@ -90,7 +66,6 @@ datatoken.create_dispenser(
 dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:3] == [True, alice_wallet.address, True]
 ```
-
 
 ### 4.  Bob consumes the API asset
 
