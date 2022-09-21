@@ -79,5 +79,5 @@ print(f"did = '{did}'")
 
 ## 3.  Bob consumes the dataset
 
-(Consume here is just like in [consume-flow](READMEs/consume-flow.md]. The file downloaded is a .json. From that, use the python `json` library to parse it as desired.)
+Consume here is just like in [consume-flow](READMEs/consume-flow.md). The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
 
