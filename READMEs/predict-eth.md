@@ -17,7 +17,7 @@ Here are the steps:
 2.  Get data locally from assets on Ocean
   2.1  Get recent historical data from Binance ETH API
   2.2  Get other data
-3.  Make predictions :
+3.  Make predictions
   3.1  Build a simple AI model
   3.2  Run the AI model to make future ETH price predictions
 4.  Publish the predictions as an Ocean asset
