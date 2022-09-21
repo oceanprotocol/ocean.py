@@ -121,7 +121,7 @@ class Ocean:
         This method deploys a ERC721 token contract on the blockchain.
         Usage:
         ```python
-            config = Config('config.ini')
+            config = { ... }
             ocean = Ocean(config)
             wallet = Wallet(
                 ocean.web3,

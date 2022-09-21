@@ -13,7 +13,6 @@ from enforce_typing import enforce_types
 
 import artifacts
 from ocean_lib.integer import Integer
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 DEFAULT_NETWORK_HOST = "localhost"
@@ -146,9 +145,9 @@ class Config(configparser.ConfigParser):
             self._logger.debug(f"Config: loading from dict {options_dict}")
             self.read_dict(options_dict)
         else:
-            filename = os.getenv(ENV_CONFIG_FILE)
+            filename = "TOREMOVE"
             if filename is None:
-                raise ValueError(f'Config file envvar "{ENV_CONFIG_FILE}" is empty')
+                raise ValueError("Config file envvar TOREMOVE is empty")
             self._logger.debug(f"Config: loading config file {filename}")
             with open(filename) as fp:
                 text = fp.read()

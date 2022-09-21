@@ -5,7 +5,6 @@
 import pytest
 from web3 import Web3, exceptions
 
-from ocean_lib.config import Config
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -485,7 +484,7 @@ def test_create_erc20(
 
 def test_create_datatoken_with_usdc_order_fee(
     web3: Web3,
-    config: Config,
+    config: dict,
     publisher_wallet: Wallet,
     data_nft: DataNFT,
     data_nft_factory: DataNFTFactoryContract,
