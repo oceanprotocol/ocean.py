@@ -78,7 +78,7 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert factory.subscribe_to_event("NFTCreated", 30, None) is None
     assert factory.get_event_argument_names("NFTCreated") == ()
     block = web3.eth.block_number
-    block_confirmations = alice_ocean.config.block_confirmations.value
+    block_confirmations = alice_ocean.config_dict["BLOCK_CONFIRMATIONS"]
     assert (
         len(
             factory.get_event_logs(
