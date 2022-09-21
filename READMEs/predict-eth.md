@@ -13,17 +13,17 @@ During the competition, as we get feedback, we expect to continually evolve this
 
 Here are the steps:
 
-1.  Setup
-2.  Get data locally from assets on Ocean
-  2.1  Get recent historical data from Binance ETH API
-  2.2  Get other data
-3.  Make predictions
-  3.1  Build a simple AI model
-  3.2  Run the AI model to make future ETH price predictions
-4.  Publish the predictions as an Ocean asset
-  4.1 Save the predictions as a csv file
-  4.2 Put the csv online
-  4.3 Publish as an Ocean asset
+1. Setup
+2. Get data locally from assets on Ocean
+   - Get recent historical data from Binance ETH API
+   - Get other data
+3. Make predictions
+   - Build a simple AI model
+   - Run the AI model to make future ETH price predictions
+4. Publish the predictions as an Ocean asset
+   - Save the predictions as a csv file
+   - Put the csv online
+   - Publish as an Ocean asset
 5.  Share csv access to the competition organizers
 
 ## 1. Setup
@@ -63,6 +63,8 @@ Ocean Protocol Foundation (OPF) may make more data available as the competition 
 
 Here's where you build whatever AI/ML model you want, leveraging the data from the previous step.
 
+This demo flow skips building a model because the next step will simply generate random predictions.
+
 ### 3.2  Run the AI model to make future ETH price predictions
 
 Predictions must be one prediction every hour on the hour, for a 24h period: from Oct 3, 2022 at 1:00am UTC, to Oct 4, 2022 at 1:00am UTC.
@@ -70,10 +72,11 @@ Predictions must be one prediction every hour on the hour, for a 24h period: fro
 In the same Python console:
 ```python
 from datetime import datetime, timedelta
-start_datetime = datetime(st, 2022, 10, 03, 01, 00)
+start_datetime = datetime(2022, 10, 3, 1, 00) #Oct 3, 2022 at 1:00am
 datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
 
-#make predictions. Typically you'd use the AI model. For simplicity for now, we make random predictions.
+#make predictions. Typically you'd use the AI model. For simplicity for now, we make random predictions
+import random
 predictions = [1500.0 - 100.0 + 200.0 * random.random() for i in range(len(datetimes))] 
 ```
 
@@ -83,10 +86,11 @@ predictions = [1500.0 - 100.0 + 200.0 * random.random() for i in range(len(datet
 
 In the same Python console:
 ```python
-import numpy
-X = numpy.asarray([datetimes, predictions])
 filename = "/tmp/predictions.csv"
-numpy.savetxt(filename, X, delimiter=",", header="Datetime,predicted-ETH-value")
+with open(filename, "w") as file:
+    file.write("Datetime, predicted-ETH-value\n")
+    for datetime_, prediction in zip(datetimes, predictions):
+        file.write(f"{datetime_.strftime('%Y-%m-%d::%H:%M')}, {prediction:.3f}\n")
 ```
 
 The csv will look something like this:
@@ -102,30 +106,13 @@ Datetime, predicted-ETH-value
 2022-10-04::01:00, 1590.673
 ```
 
-
 ### 4.2 Put the csv online
 
-You can put it online however you wish. Here's one way, which uses the GitHub CLI.
+You can put it online however you wish. Here are two possible ways:
 
-In a new console, do the following. Fill in <username> with your github username, and chooose a name of your new github repo with <reponame>.
-```console
-#Create a new repository, with predictions.csv as the initial file
-mkdir my_project
-cd my_project
-cp /tmp/predictions.csv .
+- **GDrive.** First, navigate to the GFolder in GDrive you wish to upload the file to. Then, right click anywhere and select "File Upload". Once the csv is uploaded, right click on the file, and select "Share". In the popup, ensure that "General Access" is set to "Anyone with the link". Also in the popup, click "Copy link". That's your csv url. It should look something like `https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing`
+- **GitHub.** First, create a new GitHub repo. Then, click on "add file", upload the file. Once uploaded, click on the file itself, then on "raw" button. The browser url is your csv url. It should look something like `https://raw.githubusercontent.com/<username>/<reponame>/main/predictions.csv`.
 
-git init
-git add predictions.csv
-git commit -m "first commit"
-git remote add origin git@github.com:<username>/<reponame>.git
-git push -u origin master
-```
-
-Your csv is now online:
-```text
-#this is <your csv url>:
-https://raw.githubusercontent.com/<username>/<reponame>/main/predictions.csv
-```
 
 ### 4.3 Publish (the csv) as an Ocean asset
 
@@ -135,14 +122,12 @@ In the same Python console:
 date_created = "2022-09-20T10:55:11Z"
 name = "ETH predictions"
 metadata = {
-    "author": "<your name>",
-    "name": name, "description": name,  "type": "dataset",
+    "author": "<your name>", "name": name, "description": name,  "type": "dataset",
     "created": date_created, "updated": date_created, "license": "CC0: PublicDomain",
 }
 
-
 # Set the url, create UrlFile object
-url=<your csv url>
+url="<your csv url>" #e.g. https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing
 from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(url)
 
