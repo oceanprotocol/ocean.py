@@ -80,6 +80,12 @@ alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs MATIC"
+
+# Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
+bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
+
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
 ```
 
 
