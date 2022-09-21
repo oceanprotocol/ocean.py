@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from enforce_typing import enforce_types
 import pytest
 from web3 import Web3
 
@@ -36,19 +35,19 @@ def test_get_web3_connection_provider(monkeypatch):
 
 @pytest.mark.unit
 def test_get_ocean_token_address(config):
-    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+    addresses = util.get_contracts_addresses(config["ADDRESS_FILE"], "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "Ocean" in addresses
 
-    address = get_ocean_token_address(config.address_file, "ganache")
+    address = get_ocean_token_address(config, "ganache")
     assert Web3.isChecksumAddress(address), "It is not a checksum token address."
     assert address == Web3.toChecksumAddress(addresses["Ocean"])
 
 
 @pytest.mark.unit
 def test_get_address_by_type(config):
-    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+    addresses = util.get_contracts_addresses(config["ADDRESS_FILE"], "ganache")
 
     address = get_address_of_type(config, "Ocean")
     assert Web3.isChecksumAddress(address), "It is not a checksum token address."

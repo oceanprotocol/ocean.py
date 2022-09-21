@@ -23,7 +23,7 @@ from tests.resources.helper_functions import get_address_of_type
 def test_properties(web3, config):
     """Tests the events' properties."""
     data_nft_token_address = get_address_of_type(
-        config=config, address_type=DataNFT.CONTRACT_NAME
+        config_dict=config, address_type=DataNFT.CONTRACT_NAME
     )
     data_nft = DataNFT(web3=web3, address=data_nft_token_address)
 

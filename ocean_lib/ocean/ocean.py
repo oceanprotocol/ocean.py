@@ -126,8 +126,8 @@ class Ocean:
             wallet = Wallet(
                 ocean.web3,
                 private_key=private_key,
-                block_confirmations=config.block_confirmations,
-                transaction_timeout=config.transaction_timeout,
+                block_confirmations=config_dict["BLOCK_CONFIRMATIONS"],
+                transaction_timeout=config_dict["TRANSACTION_TIMEOUT"],
             )
             data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
@@ -193,7 +193,7 @@ class Ocean:
         """
         if not nft_factory_address:
             nft_factory_address = get_address_of_type(
-                self.config, DataNFTFactoryContract.CONTRACT_NAME
+                self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
             )
 
         return DataNFTFactoryContract(self.web3, nft_factory_address)
@@ -223,19 +223,19 @@ class Ocean:
     @property
     @enforce_types
     def dispenser(self):
-        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
+        return Dispenser(self.web3, get_address_of_type(self.config_dict, "Dispenser"))
 
     @property
     @enforce_types
     def fixed_rate_exchange(self):
         return FixedRateExchange(
-            self.web3, get_address_of_type(self.config, "FixedPrice")
+            self.web3, get_address_of_type(self.config_dict, "FixedPrice")
         )
 
     @property
     @enforce_types
     def side_staking(self):
-        return SideStaking(self.web3, get_address_of_type(self.config, "Staking"))
+        return SideStaking(self.web3, get_address_of_type(self.config_dict, "Staking"))
 
     @enforce_types
     def create_fixed_rate(
@@ -246,7 +246,7 @@ class Ocean:
         fixed_rate: int,
         from_wallet: Wallet,
     ) -> bytes:
-        fixed_price_address = get_address_of_type(self.config, "FixedPrice")
+        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
         datatoken.approve(fixed_price_address, amount, from_wallet)
 
         tx = datatoken.create_fixed_rate(
