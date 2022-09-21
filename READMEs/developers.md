@@ -70,13 +70,22 @@ In work console:
 #specify config file as an envvar
 export OCEAN_CONFIG_FILE=config.ini
 
-#set private keys of two accounts
+#set private keys of two local (ganache) accounts
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
 #needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
+
+Some tests run on Mumbai (e.g. test_mumbai.py), which need fake MATIC. So you also need:
+```console
+#set private keys of two remote accounts
+export REMOTE_TEST_PRIVATE_KEY1=<your remote private key 1>
+export REMOTE_TEST_PRIVATE_KEY2=<your remote private key 2>
+```
+
+These keys aren't public because bots could eat the fake MATIC. You need to generate your own, and fill them with a faucet; [here's how](get-test-MATIC.md). (Or, [access-protected OPF keys](https://github.com/oceanprotocol/private-keys/blob/main/README.md)).
 
 ## 4. Test
 
@@ -120,46 +129,6 @@ pre-commit install
 ```
 
 Now, this will auto-apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
-
-### 7.2 Code quality tests
-
-Use [codacy-analysis-cli](https://github.com/codacy/codacy-analysis-cli).
-
-First, install once. In a new console:
-
-```console
-curl -L https://github.com/codacy/codacy-analysis-cli/archive/master.tar.gz | tar xvz
-cd codacy-analysis-cli-* && sudo make install
-```
-
-In main console (with venv on):
-
-```console
-#run all tools, plus Metrics and Clones data.
-codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean
-
-#run tools individually
-codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Pylint
-codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Prospector
-codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Bandit
-```
-
-You'll get a report that looks like this.
-
-```console
-Found [Info] `First line should end with a period (D415)` in ocean_compute.py:50 (Prospector_pep257)
-Found [Info] `Missing docstring in __init__ (D107)` in ocean_assets.py:42 (Prospector_pep257)
-Found [Info] `Method could be a function` in ocean_pool.py:473 (PyLint_R0201)
-Found [Warning] `Possible hardcoded password: ''` in ocean_exchange.py:23 (Bandit_B107)
-Found [Metrics] in ocean_exchange.py:
-  LOC - 68
-  CLOC - 4
-  #methods - 6
-```
-
-(C)LOC = (Commented) Lines Of Code.
-
-Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard) to see results of remotely-run tests. (You may need special permissions.)
 
 ## 8. Appendix: Contributing to docs
 

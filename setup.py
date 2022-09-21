@@ -63,7 +63,7 @@ dev_requirements = [
     "watchdog",
     "flake8==3.9.2",
     "isort==5.10.1",
-    "black==22.1.0",
+    "black==22.3.0",
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
@@ -102,7 +102,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='1.2.0',
+    version='1.3.0',
     # fmt: on
     zip_safe=False,
 )

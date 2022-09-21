@@ -313,7 +313,7 @@ def run_compute_test(
         log_file = ocean_instance.compute.compute_job_result_logs(
             dataset_and_userdata.asset, service, job_id, consumer_wallet, "algorithmLog"
         )
-        assert "Applying Gaussian processing." in str(log_file[0])
+        assert "Building Gaussian Process Regressor (GPR) model" in str(log_file[0])
         print(f"got algo log file: {str(log_file)}")
 
         result = ocean_instance.compute.result(
@@ -520,6 +520,7 @@ def test_compute_trusted_algorithm(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip once fixed #905")
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,

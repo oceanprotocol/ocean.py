@@ -35,7 +35,9 @@ def mint_fake_OCEAN(config: Config) -> None:
 
     OCEAN_token = Datatoken(web3, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei("2000")
-
+    OCEAN_token.mint(
+        deployer_wallet.address, to_wei("20000"), from_wallet=deployer_wallet
+    )
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2", "TEST_PRIVATE_KEY3"]:
         key = os.environ.get(key_label)
         if not key:

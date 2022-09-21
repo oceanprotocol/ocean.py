@@ -9,17 +9,8 @@ SPDX-License-Identifier: Apache-2.0
 
 > Python library to privately & securely publish, exchange, and consume data.
 
-<center>
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
-
-</center>
-
-<center>
-
+[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability) 
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
-
-</center>
 
 With ocean.py, you can:
 
@@ -54,17 +45,34 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
 - **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
-- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
-- **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain.
-- **[Profile NFTs](READMEs/profile-nfts-flow.md)** - enable "login with Web3" where Dapp can access private user profile data.
+
+### Remote flows
+
+- **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
+- **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
+- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model.
+
+### More types of data assets
+
+- **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
+- **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
+- **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API-style URIs, showing Binance ETH price feed
+
+### Data Bounties flows
+
+- [Predict future ETH price](READMEs/predict-eth.md) - predict future ETH price via a local AI model
+
+### Key-value flows
+
+- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
+- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
 
 ### Learn more
 
-- [Get test OCEAN](READMEs/get-test-OCEAN.md) - from rinkeby
+- [Get test OCEAN](READMEs/get-test-OCEAN.md) - from Rinkeby
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
-- [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
 ## 🦑 Development
 

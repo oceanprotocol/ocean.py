@@ -7,36 +7,36 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Step 0: Update documentation
 
-- Go to https://github.com/oceanprotocol/readthedocs, and follow the steps
-- This will update what's shown in https://docs.oceanprotocol.com/references/read-the-docs/ocean-py/.
-
-This doesn't actually affect the pip release of the following steps. And if you've just updated READMEs, you can stop after this step if you like.
+- If your changes affect what docs.oceanprotocol.com shows, then make changes in the docs repo https://github.com/oceanprotocol/docs and change
 
 ## Step 1: Bump version and push changes
 
+- Identify the current version. It's listed at [pypi.org/project/ocean-lib](https://pypi.org/project/ocean-lib/), in this repo in [.bumpversion.cfg](../.bumpversion.cfg), and elsewhere.
+
 - Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v1.2.5`
 
-- Use the `bumpversion.sh` script to bump the project version. You can execute the script using {major|minor|patch} as first argument to bump the version accordingly. Ocean.py is [SEMVER](https://semver.org/) compatible.
+- Run `./bumpversion.sh` to bump the project version, as follows:
 
-  - To bump the patch version: `./bumpversion.sh patch`
-  - To bump the minor version: `./bumpversion.sh minor`
-  - To bump the major version: `./bumpversion.sh major`
+  - To bump the major version (v**X**.Y.Z): `./bumpversion.sh major`
+  - To bump the minor version (vX.**Y**.Z): `./bumpversion.sh minor`
+  - To bump the patch version (vX.Y.**Z**): `./bumpversion.sh patch`
+  - (Ocean.py follows [semantic versioning](https://semver.org/).)
 
-- Commit the changes to the feature branch.
+- Commit the changes to the feature branch. For example:
 
-  `git commit -m "Bump version <old_version> -> <new_version>"`
+  `git commit -m "Bump version v1.2.4 -> v1.2.5"`
 
 - Push the feature branch to GitHub.
 
-  `git push origin feature/bumpversion-to-v1.2.5"`
+  `git push origin feature/bumpversion-to-v1.2.5`
 
-## Step 2: Merge changes to v4main branch
+## Step 2: Merge changes to main branch
 
 - Make a pull request from the just-pushed branch.
 
 - Wait for all the tests to pass!
 
-- Merge the pull request into the `v4main` branch.
+- Merge the pull request into the `main` branch.
 
 ## Step 3: Release
 
@@ -46,7 +46,7 @@ This doesn't actually affect the pip release of the following steps. And if you'
   - Click "Draft a new release".
   - For tag version, put something like `v1.2.5`
   - For release title, put the same value (like `v1.2.5`).
-  - For the target, select the `v4main` branch, or the just-merged commit.
+  - For the target, select the `main` branch, or the just-merged commit.
   - Describe the main changes. (In the future, these will come from the changelog.)
   - Click "Publish release".
 
