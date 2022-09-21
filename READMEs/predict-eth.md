@@ -48,7 +48,7 @@ In this flow, Bob is a participant in the competition
 
 ### 2.1  Get recent historical data from Binance ETH APIs
 
-From [publish-flow-restapi](READMEs/publish-flow-restapi.md), do:
+From [publish-flow-restapi](publish-flow-restapi.md), do:
 - [x] Bob consumes the API asset
 
 ###  2.2  Get other data
