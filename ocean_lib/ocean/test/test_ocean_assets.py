@@ -356,8 +356,8 @@ def test_pay_for_access_service_insufficient_balance(
     empty_wallet = Wallet(
         publisher_ocean_instance.web3,
         str(pk),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config["BLOCK_CONFIRMATIONS"],
+        transaction_timeout=config["TRANSACTION_TIMEOUT"],
     )
 
     with pytest.raises(InsufficientBalance):

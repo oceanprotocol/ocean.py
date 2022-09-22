@@ -22,7 +22,6 @@ from requests.models import Response
 from requests.sessions import Session
 from web3.main import Web3
 
-from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.web3_internal.transactions import sign_hash
@@ -72,14 +71,13 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def get_url(config: Config) -> str:
+    def get_url(config_dict: dict) -> str:
         """
         Return the DataProvider component url.
 
-        :param config: Config
         :return: Url, str
         """
-        return DataServiceProviderBase._remove_slash(config.provider_url)
+        return DataServiceProviderBase._remove_slash(config_dict.get("PROVIDER_URL"))
 
     @staticmethod
     @enforce_types

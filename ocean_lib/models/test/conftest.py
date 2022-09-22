@@ -29,7 +29,7 @@ def network():
 
 @pytest.fixture
 def nft_factory_address(config):
-    return DataNFTFactoryContract.configured_address(_NETWORK, config.address_file)
+    return DataNFTFactoryContract.configured_address(_NETWORK, config["ADDRESS_FILE"])
 
 
 @pytest.fixture
@@ -116,8 +116,8 @@ def make_info(name, private_key_name):
     info.wallet = Wallet(
         web3,
         private_key=info.private_key,
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config["BLOCK_CONFIRMATIONS"],
+        transaction_timeout=config["TRANSACTION_TIMEOUT"],
     )
     info.address = info.wallet.address
     wallet = get_ganache_wallet()

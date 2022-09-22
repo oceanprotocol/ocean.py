@@ -9,13 +9,11 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType, SmartContractCall
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -26,7 +24,7 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 @pytest.mark.integration
 def test_consume_simple_onchain_data(
     web3: Web3,
-    config: Config,
+    config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
@@ -120,7 +118,7 @@ def test_consume_simple_onchain_data(
     )
 
     # Download file
-    destination = config.downloads_path
+    destination = config["DOWNLOADS_PATH"]
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 
@@ -153,7 +151,7 @@ def test_consume_simple_onchain_data(
 @pytest.mark.integration
 def test_consume_parametrized_onchain_data(
     web3: Web3,
-    config: Config,
+    config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
@@ -260,7 +258,7 @@ def test_consume_parametrized_onchain_data(
     )
 
     # Download file
-    destination = config.downloads_path
+    destination = config["DOWNLOADS_PATH"]
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 

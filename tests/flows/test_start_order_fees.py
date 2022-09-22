@@ -10,7 +10,6 @@ from web3 import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -57,7 +56,7 @@ from tests.resources.helper_functions import (
 )
 def test_start_order_fees(
     web3: Web3,
-    config: Config,
+    config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     provider_wallet: Wallet,
@@ -221,7 +220,7 @@ def test_start_order_fees(
 
 def create_asset_with_order_fee_and_timeout(
     web3: Web3,
-    config: Config,
+    config: dict,
     file: FilesType,
     data_nft: DataNFT,
     publisher_wallet: Wallet,

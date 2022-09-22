@@ -58,13 +58,6 @@ pip3 install --pre ocean-lib
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
-# Set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-
-# Set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-```
-
 ### Setup in Python
 
 Open a new console and run Python console:
@@ -77,7 +70,7 @@ In the Python console:
 # Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
+config = ExampleConfig.get_config("http://127.0.0.1:8545")
 ocean = Ocean(config)
 
 # Create Alice's wallet

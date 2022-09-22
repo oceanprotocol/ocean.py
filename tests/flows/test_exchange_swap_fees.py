@@ -7,7 +7,6 @@ from decimal import Decimal
 import pytest
 from web3 import Web3
 
-from ocean_lib.config import Config
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import (
@@ -57,7 +56,7 @@ from tests.resources.helper_functions import (
 )
 def test_exchange_swap_fees(
     web3: Web3,
-    config: Config,
+    config: dict,
     factory_deployer_wallet: Wallet,
     consumer_wallet: Wallet,
     another_consumer_wallet: Wallet,
@@ -94,7 +93,7 @@ def test_exchange_swap_fees(
 
 def exchange_swap_fees(
     web3: Web3,
-    config: Config,
+    config: dict,
     base_token_deployer_wallet: Wallet,
     consumer_wallet: Wallet,
     consume_market_swap_fee_collector: Wallet,

@@ -83,7 +83,7 @@ def get_access_service(
     ocean_instance, address, date_created, provider_uri=None, timeout=3600
 ):
     if not provider_uri:
-        provider_uri = DataServiceProvider.get_url(ocean_instance.config)
+        provider_uri = DataServiceProvider.get_url(ocean_instance.config_dict)
 
     return ocean_instance.assets.build_access_service(
         DataServiceProvider.build_download_endpoint(provider_uri)[1],
@@ -182,11 +182,14 @@ def get_registered_asset_with_compute_service(
     trusted_algorithm_publishers: List[str] = [],
 ):
     data_nft, datatoken = deploy_erc721_erc20(
-        ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
+        ocean_instance.web3,
+        ocean_instance.config_dict,
+        publisher_wallet,
+        publisher_wallet,
     )
 
     web3 = ocean_instance.web3
-    config = ocean_instance.config
+    config = ocean_instance.config_dict
     data_provider = DataServiceProvider
 
     arff_file = UrlFile(
@@ -232,7 +235,7 @@ def get_registered_algorithm_with_access_service(
     ocean_instance: Ocean, publisher_wallet: Wallet
 ):
     web3 = ocean_instance.web3
-    config = ocean_instance.config
+    config = ocean_instance.config_dict
     data_provider = DataServiceProvider
     _, metadata, _ = create_basics(config, web3, data_provider, asset_type="algorithm")
 
