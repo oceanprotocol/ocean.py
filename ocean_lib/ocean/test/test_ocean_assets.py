@@ -29,6 +29,7 @@ from tests.resources.ddo_helpers import (
     get_sample_ddo,
 )
 
+
 @pytest.mark.integration
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
     """Test various paths for asset registration.
@@ -369,26 +370,27 @@ def test_pay_for_access_service_insufficient_balance(
             consume_market_order_fee_amount=0,
             wallet=empty_wallet,
         )
-        
+
+
 @pytest.mark.integration
 def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
     ocean = publisher_ocean_instance
-    
+
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     asset = ocean.assets.create_url_asset(name, url, publisher_wallet)
 
-    assert asset.nft["name"] == name #thorough testing is below, on create() directly
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(asset.datatokens) == 1
-        
+
+
 @pytest.mark.integration
 def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
     ocean = publisher_ocean_instance
 
-
     name = "Data NFTs in Ocean"
-    url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
-    query="""query{
+    url = "https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
+    query = """query{
                    nfts(orderBy: createdTimestamp,orderDirection:desc){
                         id
                         symbol
@@ -398,9 +400,10 @@ def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
     """
     asset = ocean.assets.create_graphql_asset(name, url, query, publisher_wallet)
 
-    assert asset.nft["name"] == name #thorough testing is below, on create() directly
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(asset.datatokens) == 1
-        
+
+
 @pytest.mark.integration
 def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config):
     ocean = publisher_ocean_instance
@@ -416,11 +419,13 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
     }
 
     asset = ocean.assets.create_onchain_asset(
-        name, contract_address, contract_abi, publisher_wallet)
+        name, contract_address, contract_abi, publisher_wallet
+    )
 
-    assert asset.nft["name"] == name #thorough testing is below, on create() directly
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(asset.datatokens) == 1
-        
+
+
 @pytest.mark.integration
 def test_plain_asset_with_one_datatoken(
     publisher_ocean_instance, publisher_wallet, config
