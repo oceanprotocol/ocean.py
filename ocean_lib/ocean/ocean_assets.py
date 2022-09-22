@@ -259,25 +259,34 @@ class OceanAssets:
         ), f"Invalid/unsupported asset type {asset_type}"
 
         assert "name" in metadata, "Must have name in metadata."
-        
+
     @enforce_types
     def create_url_asset(self, name: str, url: str, publisher_wallet: Wallet) -> Asset:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
         return self._create1(name, files, publisher_wallet)
-        
+
     @enforce_types
-    def create_graphql_asset(self, name: str, url: str, query: str, publisher_wallet: Wallet) -> Asset:
+    def create_graphql_asset(
+        self, name: str, url: str, query: str, publisher_wallet: Wallet
+    ) -> Asset:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
         return self._create1(name, files, publisher_wallet)
-        
+
     @enforce_types
-    def create_onchain_asset(self, name: str, contract_address: str, contract_abi: dict,
-                             publisher_wallet: Wallet) -> Asset:
+    def create_onchain_asset(
+        self,
+        name: str,
+        contract_address: str,
+        contract_abi: dict,
+        publisher_wallet: Wallet,
+    ) -> Asset:
         """Create an asset of type "SmartContractCall", with good defaults"""
         # internally, it uses Ocean's FactoryRouter contract and call the "swapOceanFee" function
-        onchain_data = SmartContractCall(address=contract_address, chainId=web3.eth.chain_id, abi=contract_abi)
+        onchain_data = SmartContractCall(
+            address=contract_address, chainId=web3.eth.chain_id, abi=contract_abi
+        )
         files = [onchain_data]
         return self._create1(name, files, publisher_wallet)
 
@@ -291,11 +300,15 @@ class OceanAssets:
             "description": name,
             "name": name,
             "type": "dataset",
-            "author": str(publisher_wallet.address)[:7], #simply a truncated address. This is web3:)
+            "author": str(publisher_wallet.address)[
+                :7
+            ],  # simply a truncated address. This is web3:)
             "license": "CC0: PublicDomain",
         }
 
-        OCEAN_address = get_ocean_token_address(self._config.address_file, web3=self._web3)
+        OCEAN_address = get_ocean_token_address(
+            self._config.address_file, web3=self._web3
+        )
         asset = self.create(
             metadata,
             publisher_wallet,
