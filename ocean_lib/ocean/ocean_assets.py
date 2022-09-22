@@ -29,7 +29,12 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesType, GraphqlQuery, UrlFile
+from ocean_lib.structures.file_objects import (
+    FilesType,
+    GraphqlQuery,
+    SmartContractCall,
+    UrlFile,
+)
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -277,10 +282,8 @@ class OceanAssets:
         publisher_wallet: Wallet,
     ) -> Asset:
         """Create an asset of type "SmartContractCall", with good defaults"""
-        # internally, it uses Ocean's FactoryRouter contract and call the "swapOceanFee" function
-        onchain_data = SmartContractCall(
-            address=contract_address, chainId=web3.eth.chain_id, abi=contract_abi
-        )
+        chain_id = self._web3.eth.chain_id
+        onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         return self._create1(name, files, publisher_wallet)
 
