@@ -29,7 +29,10 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 In the same Python console:
 ```python
 #data info
+from ocean_lib.ocean.util import get_address_of_type
+
 name = "swapOceanFee function call"
+contract_address = get_address_of_type(config, "Router")
 contract_abi = {
                 "inputs": [],
                 "name": "swapOceanFee",
@@ -37,9 +40,6 @@ contract_abi = {
                 "stateMutability": "view",
                 "type": "function",
 		}
-		
-from ocean_lib.ocean.util import get_address_of_type
-contract_address = get_address_of_type(config, "Router")
 
 #create asset
 asset = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, alice_wallet)

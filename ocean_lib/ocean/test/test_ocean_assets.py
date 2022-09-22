@@ -17,6 +17,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -369,6 +370,60 @@ def test_pay_for_access_service_insufficient_balance(
             consume_market_order_fee_amount=0,
             wallet=empty_wallet,
         )
+
+
+@pytest.mark.integration
+def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
+    ocean = publisher_ocean_instance
+
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    asset = ocean.assets.create_url_asset(name, url, publisher_wallet)
+
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(asset.datatokens) == 1
+
+
+@pytest.mark.integration
+def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
+    ocean = publisher_ocean_instance
+
+    name = "Data NFTs in Ocean"
+    url = "https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
+    query = """query{
+                   nfts(orderBy: createdTimestamp,orderDirection:desc){
+                        id
+                        symbol
+                        createdTimestamp
+                        }
+                   }
+    """
+    asset = ocean.assets.create_graphql_asset(name, url, query, publisher_wallet)
+
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(asset.datatokens) == 1
+
+
+@pytest.mark.integration
+def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config):
+    ocean = publisher_ocean_instance
+
+    name = "swapOceanFee function call"
+    contract_address = get_address_of_type(config, "Router")
+    contract_abi = {
+        "inputs": [],
+        "name": "swapOceanFee",
+        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+        "stateMutability": "view",
+        "type": "function",
+    }
+
+    asset = ocean.assets.create_onchain_asset(
+        name, contract_address, contract_abi, publisher_wallet
+    )
+
+    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(asset.datatokens) == 1
 
 
 @pytest.mark.integration
