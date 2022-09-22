@@ -4,12 +4,13 @@
 #
 import pytest
 
-from ocean_lib.config import (
+from ocean_lib.example_config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
     METADATA_CACHE_URI,
+    ExampleConfig,
+    get_config_dict,
 )
-from ocean_lib.example_config import ExampleConfig, get_config_dict
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from tests.resources.helper_functions import get_address_of_type

@@ -8,11 +8,14 @@ import logging
 
 from enforce_typing import enforce_types
 
-from ocean_lib.config import DEFAULT_PROVIDER_URL, METADATA_CACHE_URI
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 logging.basicConfig(level=logging.INFO)
+
+DEFAULT_METADATA_CACHE_URI = "http://172.15.0.5:5000"
+METADATA_CACHE_URI = "https://v4.aquarius.oceanprotocol.com"
+DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "OCEAN_NETWORK_URL": "http://127.0.0.1:8545",
@@ -92,6 +95,7 @@ CONFIG_NETWORK_HELPER = {
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
         "NETWORK_NAME": "mumbai",
         "BLOCK_CONFIRMATIONS": 1,
+        "TRANSACTION_TIMEOUT": 60,
     },
 }
 

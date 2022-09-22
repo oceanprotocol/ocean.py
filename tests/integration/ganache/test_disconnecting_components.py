@@ -10,9 +10,9 @@ import pytest
 import requests
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.config import DEFAULT_PROVIDER_URL
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
