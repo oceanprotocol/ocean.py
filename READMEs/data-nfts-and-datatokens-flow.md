@@ -53,10 +53,12 @@ pip3 install --pre ocean-lib
 ```
 
 ### Set envvars
+
 ```console
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+```
 
 ### Setup in Python
 
@@ -77,7 +79,7 @@ ocean = Ocean(config)
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
+alice_wallet = Wallet(ocean.web3, alice_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
 ```
 
 ## 2. Publish Data NFT & Datatoken
@@ -111,10 +113,10 @@ You can combine creating a data NFT and datatoken into a single call: `ocean.cre
 To learn more about some of the objects you created, here are some examples.
 ```python
 # config
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
+print(f"config.network_url = {config['OCEAN_NETWORK_URL']}")
+print(f"config.block_confirmations = {config['BLOCK_CONFIRMATIONS']}")
+print(f"config.metadata_cache_uri = {config['METADATA_CACHE_URI']}")
+print(f"config.provider_url = {config['PROVIDER_URL']}")
 
 # wallet
 print(f"alice_wallet.address = '{alice_wallet.address}'")

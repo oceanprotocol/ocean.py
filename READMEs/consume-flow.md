@@ -30,7 +30,7 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 "Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
 ```python
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 ```
 
