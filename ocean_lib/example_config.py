@@ -35,31 +35,26 @@ CONFIG_NETWORK_HELPER = {
         "PROVIDER_URL": "https://v4.provider.mainnet.oceanprotocol.com",
         "NETWORK_NAME": "mainnet",
         "BLOCK_CONFIRMATIONS": 1,
-        "TRANSACTION_TIMEOUT": 10 * 60,
     },
     3: {
         "PROVIDER_URL": "https://v4.provider.ropsten.oceanprotocol.com",
         "NETWORK_NAME": "ropsten",
         "BLOCK_CONFIRMATIONS": 1,
-        "TRANSACTION_TIMEOUT": 10 * 60,
     },
     4: {
         "PROVIDER_URL": "https://v4.provider.rinkeby.oceanprotocol.com",
         "NETWORK_NAME": "rinkeby",
         "BLOCK_CONFIRMATIONS": 1,
-        "TRANSACTION_TIMEOUT": 10 * 60,
     },
     56: {
         "PROVIDER_URL": "https://v4.provider.bsc.oceanprotocol.com",
         "NETWORK_NAME": "bsc",
         "BLOCK_CONFIRMATIONS": 1,
-        "TRANSACTION_TIMEOUT": 10 * 60,
     },
     137: {
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "NETWORK_NAME": "polygon",
         "BLOCK_CONFIRMATIONS": 15,
-        "TRANSACTION_TIMEOUT": 10 * 60,
     },
     246: {
         "PROVIDER_URL": "https://v4.provider.energyweb.oceanprotocol.com",

@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+import json
 import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
@@ -13,6 +14,7 @@ from web3.datastructures import AttributeDict
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.example_config import config_defaults
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -67,6 +69,18 @@ class Ocean:
         :param config_dict: variable definitions
         :param data_provider: `DataServiceProvider` instance
         """
+        config_errors = {}
+        for key, value in config_defaults.items():
+            if key not in config_dict:
+                config_errors[key] = "required"
+                continue
+
+            if not isinstance(config_dict[key], type(value)):
+                config_errors[key] = f"must be {type(value).__name__}"
+
+        if config_errors:
+            raise Exception(json.dumps(config_errors))
+
         self.config_dict = config_dict
         self.web3 = get_web3(self.config_dict.get("OCEAN_NETWORK_URL"))
 
