@@ -8,6 +8,7 @@ import pytest
 import requests
 
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -106,6 +107,9 @@ def _remote_config(tmp_path):
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
+        "GAS_LIMIT": GAS_LIMIT_DEFAULT,
+        "CHAIN_ID": 80001,
+        "DOWNLOADS_PATH": "consume-downloads",
     }
 
     # -ensure config is truly remote
