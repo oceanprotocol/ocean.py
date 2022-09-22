@@ -307,7 +307,7 @@ class OceanAssets:
             publisher_wallet,
             files,
             datatoken_templates=[1],
-            datatoken_names=["Datatoken 1"],
+            datatoken_names=[name + ": DT1"],
             datatoken_symbols=["DT1"],
             datatoken_minters=[publisher_wallet.address],
             datatoken_fee_managers=[publisher_wallet.address],
