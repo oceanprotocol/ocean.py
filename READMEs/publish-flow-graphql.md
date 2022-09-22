@@ -10,8 +10,8 @@ This quickstart describes a flow to publish & consume GraphQL-style URIs. In our
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes GraphQL-style dataset
-3.  Bob consumes the data asset with a GraphQL-shaped query
+2.  Publish dataset
+3.  Consume dataset
 
 Let's go through each step.
 
@@ -24,60 +24,30 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
 
-## 2. Alice Publishes GraphQL-style Dataset
+## 2. Publish dataset
 
-Then in the same python console:
+In the same Python console:
 ```python
-# Specify metadata and services
-date_created = "2021-12-28T10:55:11Z"
-metadata = {
-    "created": date_created,
-    "updated": date_created,
-    "description": "ocean-subgraph data NFTs",
-    "name": "ocean-subgraph data NFTs ",
-    "type": "dataset",
-    "author": "Alex",
-    "license": "CC0: PublicDomain",
-}
-
-# construct the graphql query itself 
-from ocean_lib.structures.file_objects import GraphqlQuery
-graphql_query = GraphqlQuery(
-    url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
-    query="""
-                    query{
-                        nfts(orderBy: createdTimestamp,orderDirection:desc){
-                            id
-                            symbol
-                            createdTimestamp
-                        }
+#data info
+name = "Data NFTs in Ocean"
+url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
+query="""query{
+               nfts(orderBy: createdTimestamp,orderDirection:desc){
+                    id
+                    symbol
+                    createdTimestamp
                     }
-                    """
-)
+               }
+"""
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-asset = ocean.assets.create(
-    metadata,
-    alice_wallet,
-    [graphql_query],
-    datatoken_templates=[1],
-    datatoken_names=["Datatoken 1"],
-    datatoken_symbols=["DT1"],
-    datatoken_minters=[alice_wallet.address],
-    datatoken_fee_managers=[alice_wallet.address],
-    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-    datatoken_publish_market_order_fee_amounts=[0],
-    datatoken_bytess=[[b""]],
-)
-
-did = asset.did  # did contains the datatoken address
-print(f"did = '{did}'")
+#create asset
+asset = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
+print(f"Just published asset, with did={asset.did}")
 ```
 
+That's it! You've created a data asset of "GraphqlQuery" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
 
-## 3.  Bob consumes the dataset
+## 3.  Consume dataset
 
 Consume here is just like in [consume-flow](READMEs/consume-flow.md). The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
 

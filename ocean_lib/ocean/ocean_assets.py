@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+from datetime import datetime
 import json
 import logging
 import lzma
@@ -27,10 +28,10 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.structures.file_objects import FilesType, GraphqlQuery, UrlFile
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -258,6 +259,71 @@ class OceanAssets:
         ), f"Invalid/unsupported asset type {asset_type}"
 
         assert "name" in metadata, "Must have name in metadata."
+
+    @enforce_types
+    def create_url_asset(self, name: str, url: str, publisher_wallet: Wallet) -> Asset:
+        """Create an asset of type "UrlFile", with good defaults"""
+        files = [UrlFile(url)]
+        return self._create1(name, files, publisher_wallet)
+
+    @enforce_types
+    def create_graphql_asset(
+        self, name: str, url: str, query: str, publisher_wallet: Wallet
+    ) -> Asset:
+        """Create an asset of type "GraphqlQuery", with good defaults"""
+        files = [GraphqlQuery(url, query)]
+        return self._create1(name, files, publisher_wallet)
+
+    @enforce_types
+    def create_onchain_asset(
+        self,
+        name: str,
+        contract_address: str,
+        contract_abi: dict,
+        publisher_wallet: Wallet,
+    ) -> Asset:
+        """Create an asset of type "SmartContractCall", with good defaults"""
+        # internally, it uses Ocean's FactoryRouter contract and call the "swapOceanFee" function
+        onchain_data = SmartContractCall(
+            address=contract_address, chainId=web3.eth.chain_id, abi=contract_abi
+        )
+        files = [onchain_data]
+        return self._create1(name, files, publisher_wallet)
+
+    @enforce_types
+    def _create1(self, name: str, files: list, publisher_wallet: Wallet) -> Asset:
+        """Thin wrapper for create(). Creates 1 datatoken, with good defaults for many parameters."""
+        date_created = datetime.now().isoformat()
+        metadata = {
+            "created": date_created,
+            "updated": date_created,
+            "description": name,
+            "name": name,
+            "type": "dataset",
+            "author": str(publisher_wallet.address)[
+                :7
+            ],  # simply a truncated address. This is web3:)
+            "license": "CC0: PublicDomain",
+        }
+
+        OCEAN_address = get_ocean_token_address(
+            self._config.address_file, web3=self._web3
+        )
+        asset = self.create(
+            metadata,
+            publisher_wallet,
+            files,
+            datatoken_templates=[1],
+            datatoken_names=["Datatoken 1"],
+            datatoken_symbols=["DT1"],
+            datatoken_minters=[publisher_wallet.address],
+            datatoken_fee_managers=[publisher_wallet.address],
+            datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            datatoken_publish_market_order_fee_tokens=[OCEAN_address],
+            datatoken_publish_market_order_fee_amounts=[0],
+            datatoken_bytess=[[b""]],
+        )
+        return asset
 
     # Don't enforce types due to error:
     # TypeError: Subscripted generics cannot be used with class and instance checks
