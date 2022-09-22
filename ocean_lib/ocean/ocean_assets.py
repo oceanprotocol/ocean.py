@@ -707,7 +707,7 @@ class OceanAssets:
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
-        service = service or asset.services[0] #fill in good default
+        service = service or asset.services[0]  # fill in good default
 
         if index is not None:
             assert isinstance(index, int), logger.error("index has to be an integer.")
@@ -738,16 +738,18 @@ class OceanAssets:
         consume_market_order_fee_amount: Optional[int] = None,
         consumer_address: Optional[str] = None,
     ):
-        #fill in good defaults as needed
+        # fill in good defaults as needed
         service = service or asset.services[0]
-        consume_market_order_fee_address = consume_market_order_fee_address or wallet.address
+        consume_market_order_fee_address = (
+            consume_market_order_fee_address or wallet.address
+        )
         consume_market_order_fee_amount = consume_market_order_fee_amount or 0
         if consume_market_order_fee_token is None:
             OCEAN_address = get_ocean_token_address(self._config_dict, web3=self._web3)
             consume_market_order_fee_token = OCEAN_address
         consumer_address = consumer_address or wallet.address
 
-        #main work...
+        # main work...
         dt = Datatoken(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 

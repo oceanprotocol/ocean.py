@@ -128,5 +128,5 @@ def test_pay_for_access_service_good_default(
         service,
     )
 
-    #basic check. Leave thorough checks to other tests here
+    # basic check. Leave thorough checks to other tests here
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
