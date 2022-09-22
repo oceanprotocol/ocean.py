@@ -40,7 +40,7 @@ contract_abi = {
 		
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.models.factory_router import FactoryRouter
-contract_address = get_address_of_type(ocean.config, FactoryRouter.CONTRACT_NAME)
+contract_address = get_address_of_type(config, FactoryRouter.CONTRACT_NAME)
 
 #create asset
 asset = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, xalice_wallet)
