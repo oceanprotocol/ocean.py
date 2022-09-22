@@ -291,16 +291,13 @@ class OceanAssets:
     def _create1(self, name: str, files: list, publisher_wallet: Wallet) -> Asset:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults for many parameters."""
         date_created = datetime.now().isoformat()
-        author = str(publisher_wallet.address)[
-            :7
-        ]  # a truncated address. This is web3:)
         metadata = {
             "created": date_created,
             "updated": date_created,
             "description": name,
             "name": name,
             "type": "dataset",
-            "author": author,
+            "author": str(publisher_wallet.address)[:7],
             "license": "CC0: PublicDomain",
         }
 
