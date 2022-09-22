@@ -19,12 +19,12 @@ def mint_fake_OCEAN(config: dict) -> None:
     1. Mints tokens
     2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
-    addresses_file = config["ADDRESS_FILE"]
+    addresses_file = os.path.expanduser(config["ADDRESS_FILE"])
 
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
-    web3 = get_web3(config.network_url)
+    web3 = get_web3(config["OCEAN_NETWORK_URL"])
     deployer_wallet = Wallet(
         web3,
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),

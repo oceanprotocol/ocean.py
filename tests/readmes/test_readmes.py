@@ -27,6 +27,15 @@ def test_script_execution(script, monkeypatch):
         # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
         return
 
+    if (
+        "predict-eth" in script.name
+        or "simple-remote" in script.name
+        or "c2d-flow" in script.name
+    ):
+        # TODO: implement remote flows readme tests
+        # C2D FLOW IS NOW REMOTE. Can we have a local one?
+        return
+
     runs_with_prerequisites = [
         "c2d-flow",
         "dispenser-flow",
