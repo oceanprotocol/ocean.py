@@ -94,7 +94,7 @@ from ocean_lib.services.service import Service
 DATASET_compute_service = Service(
     service_id="2",
     service_type="compute",
-    service_endpoint=ocean.config.provider_url,
+    service_endpoint=ocean.config_dict["PROVIDER_URL"],
     datatoken=DATASET_datatoken.address,
     files=DATASET_files,
     timeout=3600,

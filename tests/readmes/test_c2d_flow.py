@@ -83,8 +83,8 @@ def c2d_flow_readme(
     alice_wallet = Wallet(
         ocean.web3,
         alice_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
+        config["BLOCK_CONFIRMATIONS"],
+        config["TRANSACTION_TIMEOUT"],
     )
     assert alice_wallet.address
 
@@ -217,8 +217,8 @@ def c2d_flow_readme(
     bob_wallet = Wallet(
         ocean.web3,
         os.getenv("TEST_PRIVATE_KEY2"),
-        config.block_confirmations,
-        config.transaction_timeout,
+        config["BLOCK_CONFIRMATIONS"],
+        config["TRANSACTION_TIMEOUT"],
     )
     assert bob_wallet.address
 

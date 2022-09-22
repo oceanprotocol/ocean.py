@@ -77,8 +77,8 @@ bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
     ocean.web3,
     bob_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
+    config["BLOCK_CONFIRMATIONS"],
+    config["TRANSACTION_TIMEOUT"],
 )
 
 # Verify that Bob has ganache ETH
@@ -186,8 +186,8 @@ bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
     ocean.web3,
     bob_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
+    config["BLOCK_CONFIRMATIONS"],
+    config["TRANSACTION_TIMEOUT"],
 )
 
 # Verify that Bob has ganache ETH

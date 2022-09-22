@@ -4,11 +4,11 @@
 #
 
 """Ocean module."""
-from datetime import datetime
 import json
 import logging
 import lzma
 import os
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
@@ -300,9 +300,7 @@ class OceanAssets:
             "license": "CC0: PublicDomain",
         }
 
-        OCEAN_address = get_ocean_token_address(
-            self._config.address_file, web3=self._web3
-        )
+        OCEAN_address = get_ocean_token_address(self._config_dict, web3=self._web3)
         asset = self.create(
             metadata,
             publisher_wallet,
