@@ -297,7 +297,7 @@ class OceanAssets:
             "description": name,
             "name": name,
             "type": "dataset",
-            "author": str(publisher_wallet.address)[:7],
+            "author": publisher_wallet.address[:7],
             "license": "CC0: PublicDomain",
         }
 
