@@ -4,7 +4,6 @@
 #
 import threading
 import time
-from unittest.mock import patch
 
 import pytest
 import requests
@@ -23,18 +22,17 @@ exception_flag = 0
 def test_with_wrong_provider(config, caplog):
     """Tests encrypt with a good provider URL and then switch to a bad one."""
 
-    with patch("ocean_lib.config.Config.provider_url") as mock:
-        mock.return_value = DEFAULT_PROVIDER_URL
-        updating_thread = threading.Thread(
-            target=_update_with_wrong_component,
-            args=(mock,),
-        )
-        updating_thread.start()
-        _iterative_encrypt(mock)
-        updating_thread.join()
+    config["PROVIDER_URL"] = DEFAULT_PROVIDER_URL
+    updating_thread = threading.Thread(
+        target=_update_with_wrong_component,
+        args=(config,),
+    )
+    updating_thread.start()
+    _iterative_encrypt(config)
+    updating_thread.join()
 
-        assert "Asset urls encrypted successfully" in caplog.text
-        assert exception_flag == 1
+    assert "Asset urls encrypted successfully" in caplog.text
+    assert exception_flag == 1
 
 
 def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
@@ -106,7 +104,7 @@ def _iterative_encrypt(mock):
     global exception_flag
     for _ in range(5):
         try:
-            DataEncryptor.encrypt({}, mock.return_value)
+            DataEncryptor.encrypt({}, mock["PROVIDER_URL"])
         except requests.exceptions.InvalidURL as err:
             exception_flag = 1
             assert err.args[0] == "InvalidURL http://foourl.com."
@@ -115,4 +113,4 @@ def _iterative_encrypt(mock):
 
 def _update_with_wrong_component(mock):
     time.sleep(2)
-    mock.return_value = "http://foourl.com"
+    mock["PROVIDER_URL"] = "http://foourl.com"
