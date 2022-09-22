@@ -137,10 +137,10 @@ def test_consume_simple_onchain_data(
 
     ocean_assets.download_asset(
         asset=asset,
-        service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
+        service=service,
     )
 
     assert len(
@@ -277,10 +277,10 @@ def test_consume_parametrized_onchain_data(
 
     ocean_assets.download_asset(
         asset=asset,
-        service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
+        service=service,
         userdata={
             "baseToken": asset.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters

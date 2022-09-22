@@ -125,10 +125,10 @@ def test_consume_flow(
 
     ocean_assets.download_asset(
         asset=asset,
-        service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
+        service=service,
     )
 
     assert len(

@@ -700,13 +700,14 @@ class OceanAssets:
     def download_asset(
         self,
         asset: Asset,
-        service: Service,
         consumer_wallet: Wallet,
         destination: str,
         order_tx_id: Union[str, bytes],
+        service: Optional[Service] = None,
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
+        service = service or asset.services[0] #fill in good default
 
         if index is not None:
             assert isinstance(index, int), logger.error("index has to be an integer.")
@@ -730,18 +731,25 @@ class OceanAssets:
     def pay_for_access_service(
         self,
         asset: Asset,
-        service: Service,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         wallet: Wallet,
+        service: Optional[Service] = None,
+        consume_market_order_fee_address: Optional[str] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = None,
         consumer_address: Optional[str] = None,
     ):
+        #fill in good defaults as needed
+        service = service or asset.services[0]
+        consume_market_order_fee_address = consume_market_order_fee_address or wallet.address
+        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
+        if consume_market_order_fee_token is None:
+            OCEAN_address = get_ocean_token_address(self._config_dict, web3=self._web3)
+            consume_market_order_fee_token = OCEAN_address
+        consumer_address = consumer_address or wallet.address
+
+        #main work...
         dt = Datatoken(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
-
-        if not consumer_address:
-            consumer_address = wallet.address
 
         if balance < to_wei(1):
             raise InsufficientBalance(

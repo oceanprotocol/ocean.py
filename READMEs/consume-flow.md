@@ -60,25 +60,14 @@ In the same Python console:
 # Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-# Bob retrieves the reference to the service object
-service = asset.services[0]
-
 # Bob sends 1.0 datatokens to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(
-    asset,
-    service,
-    consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=datatoken.address,
-    consume_market_order_fee_amount=0,
-    wallet=bob_wallet,
-)
+order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
-# Bob now has access! He downloads the asset.
+# Bob now has access! He downloads the asset. 
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
-    service=service,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
@@ -95,7 +84,42 @@ ls branin.arff
 
 Congrats to Bob for buying and consuming a data asset!
 
-## Appendix. Tips & Tricks
+## Appendix: Further Flexibility
+
+`pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees. Here's how it looks if we filled them explicitly.
+
+And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
+
+In the same python console:
+```python
+# Let's get more datatokens to Bob first
+datatoken.mint(bob_wallet.address, ocean.to_wei("1"), alice_wallet)
+
+# Bob retrieves the reference to the service object
+service = asset.services[0]
+
+# Bob sends 1.0 datatokens to the service, to get access
+order_tx_id = ocean.assets.pay_for_access_service(
+    asset,
+    bob_wallet,
+    service,
+    consume_market_order_fee_address=bob_wallet.address,
+    consume_market_order_fee_token=datatoken.address,
+    consume_market_order_fee_amount=0,
+)
+
+# Bob now has access! He downloads the asset. 
+# If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    consumer_wallet=bob_wallet,
+    destination='./',
+    order_tx_id=order_tx_id,
+    service=service
+)
+```
+
+## Appendix: About ARFF
 
 The file is in ARFF format, used by some AI/ML tools. In our example, it has two input variables (x0, x1) and one output.
 
