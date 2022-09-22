@@ -11,7 +11,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.wallet import Wallet
 
-
+@pytest.mark.skip(reason="REMOTE_TEST_PRIVATE_KEY1 == empty string '' in PRs by external contributors")
 def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
 
