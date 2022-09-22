@@ -5,7 +5,6 @@
 import pytest
 from web3 import Web3
 
-from ocean_lib.config import Config
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -25,7 +24,7 @@ def test_router_owner(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_factory(config: Config, factory_router: FactoryRouter):
+def test_factory(config: dict, factory_router: FactoryRouter):
     assert factory_router.factory() == get_address_of_type(config, "ERC721Factory")
 
 
@@ -41,7 +40,7 @@ def test_swap_non_ocean_fee(factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_is_approved_token(
-    config: Config, factory_router: FactoryRouter, ocean_address: str
+    config: dict, factory_router: FactoryRouter, ocean_address: str
 ):
     """Tests that Ocean token has been added to the mapping"""
     assert factory_router.is_approved_token(ocean_address)
@@ -49,13 +48,13 @@ def test_is_approved_token(
 
 
 @pytest.mark.unit
-def test_is_ss_contract(config: Config, factory_router: FactoryRouter):
+def test_is_ss_contract(config: dict, factory_router: FactoryRouter):
     """Tests if ssContract address has been added to the mapping"""
     assert factory_router.is_ss_contract(get_address_of_type(config, "Staking"))
 
 
 @pytest.mark.unit
-def test_is_fixed_rate_contract(config: Config, factory_router: FactoryRouter):
+def test_is_fixed_rate_contract(config: dict, factory_router: FactoryRouter):
     """Tests that fixedRateExchange address is added to the mapping"""
     assert factory_router.is_fixed_rate_contract(
         get_address_of_type(config, "FixedPrice")
@@ -63,14 +62,14 @@ def test_is_fixed_rate_contract(config: Config, factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_is_dispenser_contract(config: Config, factory_router: FactoryRouter):
+def test_is_dispenser_contract(config: dict, factory_router: FactoryRouter):
     assert factory_router.is_dispenser_contract(
         get_address_of_type(config, "Dispenser")
     )
 
 
 @pytest.mark.unit
-def test_get_opc_fee(config: Config, factory_router: FactoryRouter, ocean_address: str):
+def test_get_opc_fee(config: dict, factory_router: FactoryRouter, ocean_address: str):
     assert factory_router.get_opc_fee(ocean_address) == OPC_SWAP_FEE_APPROVED
     assert factory_router.get_opc_fee(ZERO_ADDRESS) == OPC_SWAP_FEE_NOT_APPROVED
 
@@ -94,7 +93,7 @@ def test_get_opc_provider_fee(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_opc_collector(config: Config, factory_router: FactoryRouter):
+def test_opc_collector(config: dict, factory_router: FactoryRouter):
     assert factory_router.get_opc_collector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )

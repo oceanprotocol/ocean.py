@@ -18,7 +18,6 @@ from eth_keys.backends import NativeECCBackend
 from pytest import approx
 from web3 import Web3
 
-from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -37,8 +36,8 @@ from tests.resources.mocks.data_provider_mock import DataProviderMock
 _NETWORK = "ganache"
 
 
-def get_web3():
-    return util_get_web3(get_example_config().network_url)
+def get_web3(network_url: Optional[str] = None):
+    return util_get_web3(network_url)
 
 
 def get_example_config():
@@ -47,9 +46,12 @@ def get_example_config():
 
 @enforce_types
 def get_address_of_type(
-    config: Config, address_type: str, key: Optional[str] = None
+    config_dict: dict, address_type: str, key: Optional[str] = None
 ) -> str:
-    addresses = get_contracts_addresses(config.address_file, config.network_name)
+    address_file = config_dict.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
+    network_name = config_dict.get("NETWORK_NAME", os.getenv("NETWORK_NAME"))
+    addresses = get_contracts_addresses(address_file, network_name)
+
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")
     address = (
@@ -66,8 +68,8 @@ def get_wallet(index: int) -> Wallet:
     return Wallet(
         get_web3(),
         private_key=os.getenv(f"TEST_PRIVATE_KEY{index}"),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config.get("BLOCK_CONFIRMATIONS"),
+        transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
     )
 
 
@@ -92,8 +94,8 @@ def get_provider_wallet() -> Wallet:
     return Wallet(
         get_web3(),
         private_key=os.environ.get("PROVIDER_PRIVATE_KEY"),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config.get("BLOCK_CONFIRMATIONS"),
+        transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
     )
 
 
@@ -109,8 +111,8 @@ def get_factory_deployer_wallet(network):
     return Wallet(
         get_web3(),
         private_key=private_key,
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config.get("BLOCK_CONFIRMATIONS"),
+        transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
     )
 
 
@@ -125,8 +127,8 @@ def get_ganache_wallet():
         return Wallet(
             web3,
             private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58",
-            block_confirmations=config.block_confirmations,
-            transaction_timeout=config.transaction_timeout,
+            block_confirmations=config.get("BLOCK_CONFIRMATIONS"),
+            transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
         )
 
     return None
@@ -143,8 +145,8 @@ def generate_wallet() -> Wallet:
     generated_wallet = Wallet(
         web3,
         private_key=private_key,
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config.get("BLOCK_CONFIRMATIONS"),
+        transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
     )
     assert generated_wallet.private_key == private_key
     deployer_wallet = get_factory_deployer_wallet("ganache")
@@ -160,9 +162,9 @@ def generate_wallet() -> Wallet:
 
 @enforce_types
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
-    config = ExampleConfig.get_config()
+    config_dict = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config, data_provider=data_provider)
+    ocn = Ocean(config_dict, data_provider=data_provider)
     account = get_publisher_wallet()
     ocn.main_account = account
     return ocn
@@ -227,7 +229,7 @@ def setup_logging(
 @enforce_types
 def deploy_erc721_erc20(
     web3: Web3,
-    config: Config,
+    config_dict: dict,
     data_nft_publisher: Wallet,
     datatoken_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
@@ -239,7 +241,7 @@ def deploy_erc721_erc20(
     """
 
     data_nft_factory = DataNFTFactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
+        web3, get_address_of_type(config_dict, "ERC721Factory")
     )
     tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
@@ -302,12 +304,12 @@ def get_non_existent_nft_template(
 
 @enforce_types
 def send_mock_usdc_to_address(
-    web3: Web3, config: Config, recipient: str, amount: int
+    web3: Web3, config: dict, recipient: str, amount: int
 ) -> int:
     """Helper function to send mock usdc to an arbitrary recipient address if factory_deployer has enough balance
     to send. Returns the transferred balance.
     """
-    factory_deployer = get_factory_deployer_wallet(config.network_name)
+    factory_deployer = get_factory_deployer_wallet(config["NETWORK_NAME"])
 
     mock_usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)

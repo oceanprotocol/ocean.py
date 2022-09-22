@@ -5,7 +5,6 @@
 import pytest
 from web3 import Web3, exceptions
 
-from ocean_lib.config import Config
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -23,7 +22,7 @@ from tests.resources.helper_functions import get_address_of_type
 def test_properties(web3, config):
     """Tests the events' properties."""
     data_nft_token_address = get_address_of_type(
-        config=config, address_type=DataNFT.CONTRACT_NAME
+        config_dict=config, address_type=DataNFT.CONTRACT_NAME
     )
     data_nft = DataNFT(web3=web3, address=data_nft_token_address)
 
@@ -485,7 +484,7 @@ def test_create_erc20(
 
 def test_create_datatoken_with_usdc_order_fee(
     web3: Web3,
-    config: Config,
+    config: dict,
     publisher_wallet: Wallet,
     data_nft: DataNFT,
     data_nft_factory: DataNFTFactoryContract,

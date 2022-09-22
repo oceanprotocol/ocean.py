@@ -10,7 +10,6 @@ from concurrent.futures import ThreadPoolExecutor
 import pytest
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -23,7 +22,7 @@ from tests.resources.ddo_helpers import (
 from tests.resources.helper_functions import deploy_erc721_erc20, generate_wallet
 
 
-def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
+def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     consumer_wallet = publisher_wallet = generate_wallet()
     metadata = {
         "created": "2020-11-15T12:27:48Z",

@@ -83,7 +83,7 @@ def test_initialize_fails(config):
             userdata={"test_dict_key": "test_dict_value"},
         )
 
-    mock_service.service_endpoint = f"{config.provider_url}"
+    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
     with pytest.raises(
         DataProviderException,
         match=f"Failed to get a response for request: initializeEndpoint={DataSP.build_initialize_endpoint(mock_service.service_endpoint)[1]}",
@@ -123,7 +123,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
             compute_environment="some_env",
             algorithm=ComputeInput(Asset(), mock_service, "tx_id"),
         )
-    mock_service.service_endpoint = f"{config.provider_url}"
+    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
     with pytest.raises(
         DataProviderException, match="The dataset.documentId field is required."
     ):
@@ -186,7 +186,7 @@ def test_delete_job_result(provider_wallet, config):
         )
 
     # Success of compute job deletion.
-    mock_service.service_endpoint = f"{config.provider_url}"
+    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
     DataSP.delete_compute_job("some_did", "some_job_id", mock_service, provider_wallet)
 
 
@@ -196,7 +196,7 @@ def test_encrypt(web3, config, provider_wallet, file1, file2, arweave_file):
     key = provider_wallet.private_key
     # Encrypt file objects
     res = {"files": [file1.to_dict(), file2.to_dict(), arweave_file.to_dict()]}
-    result = DataEncryptor.encrypt(res, config.provider_url)
+    result = DataEncryptor.encrypt(res, config["PROVIDER_URL"])
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -210,7 +210,7 @@ def test_encrypt(web3, config, provider_wallet, file1, file2, arweave_file):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataEncryptor.encrypt(test_string, config.provider_url)
+    encrypt_result = DataEncryptor.encrypt(test_string, config["PROVIDER_URL"])
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -284,7 +284,7 @@ def test_initialize(
     response_json = initialize_result.json()
     assert response_json["providerFee"]["providerFeeAmount"] == "0"
     assert response_json["providerFee"]["providerFeeToken"] == get_ocean_token_address(
-        config.address_file
+        config
     )
 
 
@@ -330,7 +330,7 @@ def test_provider_address_with_url():
     """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
     provider_address = DataSP.get_provider_address(
-        DataSP.get_url(p_ocean_instance.config)
+        DataSP.get_url(p_ocean_instance.config_dict)
     )
     assert provider_address, "Failed to get provider address."
     assert DataSP.get_provider_address("not a url") is None
@@ -418,7 +418,7 @@ def test_build_specific_endpoints(config):
     DataSP.get_service_endpoints = get_service_endpoints
 
     provider_uri = DataSP.get_url(config)
-    base_uri = DataSP.get_root_uri(config.provider_url)
+    base_uri = DataSP.get_root_uri(config["PROVIDER_URL"])
     assert DataSP.build_download_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["download"][1]
     )
@@ -469,13 +469,13 @@ def test_encrypt_failure(config):
     DataEncryptor.set_http_client(http_client)
 
     with pytest.raises(OceanEncryptAssetUrlsError):
-        DataEncryptor.encrypt({}, config.provider_url)
+        DataEncryptor.encrypt({}, config["PROVIDER_URL"])
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataEncryptor.encrypt({}, config.provider_url)
+        DataEncryptor.encrypt({}, config["PROVIDER_URL"])
 
     DataSP.set_http_client(get_requests_session())
 
@@ -595,16 +595,16 @@ def test_job_result_failure(config):
 @pytest.mark.unit
 def test_check_asset_failure(config):
     """Tests check_asset_file_info failures."""
-    assert DataSP.check_asset_file_info("", "", config.provider_url) is False
+    assert DataSP.check_asset_file_info("", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
 
     DataSP.set_http_client(get_requests_session())

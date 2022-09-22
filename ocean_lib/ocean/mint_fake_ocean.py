@@ -5,7 +5,6 @@
 import json
 import os
 
-from ocean_lib.config import Config
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.currency import to_wei
@@ -14,23 +13,23 @@ from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def mint_fake_OCEAN(config: Config) -> None:
+def mint_fake_OCEAN(config: dict) -> None:
     """
     Does the following:
     1. Mints tokens
     2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
-    addresses_file = config.address_file
+    addresses_file = os.path.expanduser(config["ADDRESS_FILE"])
 
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
-    web3 = get_web3(config.network_url)
+    web3 = get_web3(config["OCEAN_NETWORK_URL"])
     deployer_wallet = Wallet(
         web3,
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
+        block_confirmations=config["BLOCK_CONFIRMATIONS"],
+        transaction_timeout=config["TRANSACTION_TIMEOUT"],
     )
 
     OCEAN_token = Datatoken(web3, address=network_addresses["development"]["Ocean"])
@@ -46,8 +45,8 @@ def mint_fake_OCEAN(config: Config) -> None:
         w = Wallet(
             web3,
             private_key=key,
-            block_confirmations=config.block_confirmations,
-            transaction_timeout=config.transaction_timeout,
+            block_confirmations=config["BLOCK_CONFIRMATIONS"],
+            transaction_timeout=config["TRANSACTION_TIMEOUT"],
         )
 
         if OCEAN_token.balanceOf(w.address) < amt_distribute:

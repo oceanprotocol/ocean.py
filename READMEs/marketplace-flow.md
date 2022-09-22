@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Marketplace Flow
 
-This quickstart describes where Bob buys datatokens for OCEAN using the fixed-rate exchange flow. 
+This quickstart describes where Bob buys datatokens for OCEAN using the fixed-rate exchange flow.
 
 It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
 
@@ -13,7 +13,7 @@ Here are the steps:
 
 1.  Setup
 2.  Alice publishes Data NFT & Datatoken
-3.  Alice creates an OCEAN-datatoken exchange 
+3.  Alice creates an OCEAN-datatoken exchange
 4.  Bob buys datatokens with OCEAN
 
 Let's go through each step.
@@ -74,7 +74,7 @@ Now, you're Bob. In the same Python console:
 ```python
 # Bob sets up wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 # Bob verifies having enough funds

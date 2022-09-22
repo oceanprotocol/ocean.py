@@ -16,39 +16,14 @@ We now describe how to use these.
 
 ## 1. Set config values for services
 
-Here we use a file to set config values.
-
-In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
-
-    [eth-network]
-    network = https://rinkeby.infura.io/v3/<your Infura project id>
-
-    [resources]
-    metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
-    provider.url = https://v4.provider.rinkeby.oceanprotocol.com
-
-Ensure that envvars don't override the config file values:
-
-```console
-unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
-```
-
-Create an envvar to point to the new config file. In the console:
-
-```console
-export OCEAN_CONFIG_FILE=config.ini
-```
-
-## 2. Use the services within Python
-
-In Python, import and configure the components / services:
+Here we set the config  dict. You can use boilerplate from ExampleConfig.
 
 ```python
 import os
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 
 # configure the components
-config = Config(os.getenv('OCEAN_CONFIG_FILE'))
+config = ExampleConfig.get_config()
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.
@@ -77,7 +52,7 @@ Open another new console, and get aquarius running:
 docker run oceanprotocol/aquarius:latest
 ```
 
-Here are the urls for the local services, for use in `config.ini` etc.
+Here are the urls for the local services, for use in the config dict.
 
 -   Provider url: `http://127.0.0.1:8030`
 -   Aquarius url: `http://127.0.0.1:5000`

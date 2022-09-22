@@ -7,7 +7,7 @@ import runpy
 
 import pytest
 
-scripts = pathlib.Path(__file__, "..", "generated-readmes").resolve().glob("*.py")
+scripts = pathlib.Path(__file__, "..", "..", "generated-readmes").resolve().glob("*.py")
 
 
 @pytest.mark.parametrize("script", scripts)
@@ -20,16 +20,21 @@ def test_script_execution(script, monkeypatch):
         or "publish-flow" in script.name
         or "data-nfts-and-datatokens-flow" in script.name
         or "c2d-flow-more-examples" in script.name
+        or "parameters" in script.name
     ):
         # developers.md skipped because it does not have end-to-end Python snippets, just console
         # data-nfts-and-datatokens-flow.md and publish-flow skipped because it they run as prerequisites for the others, so they are tested implicitly
         # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
         return
 
-    if "parameters" in script.name:
-        # needs some env vars set to run
-        monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
-        monkeypatch.setenv("PROVIDER_URL", "http://172.15.0.4:8030")
+    if (
+        "predict-eth" in script.name
+        or "simple-remote" in script.name
+        or "c2d-flow" in script.name
+    ):
+        # TODO: implement remote flows readme tests
+        # C2D FLOW IS NOW REMOTE. Can we have a local one?
+        return
 
     runs_with_prerequisites = [
         "c2d-flow",
@@ -46,6 +51,7 @@ def test_script_execution(script, monkeypatch):
         if item in script.name:
             prerequisite = pathlib.Path(
                 __file__,
+                "..",
                 "..",
                 "generated-readmes/test_data-nfts-and-datatokens-flow.py",
             )
@@ -70,6 +76,7 @@ def test_script_execution(script, monkeypatch):
             prerequisite = pathlib.Path(
                 __file__,
                 "..",
+                "..",
                 "generated-readmes/test_publish-flow.py",
             )
             result = runpy.run_path(
@@ -78,7 +85,7 @@ def test_script_execution(script, monkeypatch):
             for key in [
                 "asset",
                 "ZERO_ADDRESS",
-                "did",
+                # "did",
                 "metadata",
                 "url_file",
             ]:

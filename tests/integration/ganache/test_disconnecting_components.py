@@ -2,18 +2,16 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
 import threading
 import time
-from unittest.mock import patch
 
 import pytest
 import requests
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.config import DEFAULT_PROVIDER_URL, Config
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -24,30 +22,27 @@ exception_flag = 0
 def test_with_wrong_provider(config, caplog):
     """Tests encrypt with a good provider URL and then switch to a bad one."""
 
-    with patch("ocean_lib.config.Config.provider_url") as mock:
-        mock.return_value = DEFAULT_PROVIDER_URL
-        updating_thread = threading.Thread(
-            target=_update_with_wrong_component,
-            args=(mock,),
-        )
-        updating_thread.start()
-        _iterative_encrypt(mock)
-        updating_thread.join()
+    config["PROVIDER_URL"] = DEFAULT_PROVIDER_URL
+    updating_thread = threading.Thread(
+        target=_update_with_wrong_component,
+        args=(config,),
+    )
+    updating_thread.start()
+    _iterative_encrypt(config)
+    updating_thread.join()
 
-        assert "Asset urls encrypted successfully" in caplog.text
-        assert exception_flag == 1
+    assert "Asset urls encrypted successfully" in caplog.text
+    assert exception_flag == 1
 
 
-def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch):
+def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
     """Tests DDO creation with a good config.ini and then switch to a bad one."""
-    monkeypatch.setenv("METADATA_CACHE_URI", "http:://not-valid-aqua.com")
-    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
+    config["METADATA_CACHE_URI"] = "http:://not-valid-aqua.com"
 
     with pytest.raises(Exception, match="Invalid or unresponsive aquarius url"):
         ocean = Ocean(config, DataServiceProvider)
 
-    monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
-    config = Config(os.getenv("OCEAN_CONFIG_FILE"))
+    config["METADATA_CACHE_URI"] = "http://172.15.0.5:5000"
     ocean = Ocean(config, DataServiceProvider)
 
     # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
@@ -109,7 +104,7 @@ def _iterative_encrypt(mock):
     global exception_flag
     for _ in range(5):
         try:
-            DataEncryptor.encrypt({}, mock.return_value)
+            DataEncryptor.encrypt({}, mock["PROVIDER_URL"])
         except requests.exceptions.InvalidURL as err:
             exception_flag = 1
             assert err.args[0] == "InvalidURL http://foourl.com."
@@ -118,4 +113,4 @@ def _iterative_encrypt(mock):
 
 def _update_with_wrong_component(mock):
     time.sleep(2)
-    mock.return_value = "http://foourl.com"
+    mock["PROVIDER_URL"] = "http://foourl.com"
