@@ -98,17 +98,12 @@ def _get_wallets(ocean):
 
 
 def _remote_config(tmp_path):
-    # Ensure no unwanted envvars
-    os.environ.pop("OCEAN_NETWORK_URL", None)
-    os.environ.pop("METADATA_CACHE_URI", None)
-    os.environ.pop("AQUARIUS_URL", None)
-    os.environ.pop("PROVIDER_URL", None)
-
     config = {
         "OCEAN_NETWORK_URL": "https://rpc-mumbai.maticvigil.com",
         "NETWORK_NAME": "mumbai",
         "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
         "BLOCK_CONFIRMATIONS": 0,
+        "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
     }

@@ -120,8 +120,8 @@ class ExampleConfig:
     @staticmethod
     @enforce_types
     def get_config(network_url=None) -> dict:
-        """Return `Config` containing default values for a given network.
-        Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.
+        """Return config dict containing default values for a given network.
+        Chain ID is determined by querying the RPC specified by network_url.
         """
 
         if not network_url:

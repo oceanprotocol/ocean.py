@@ -62,7 +62,6 @@ Now, let's confirm that we hold the OCEAN, from Python.
 
 In a bash console:
 
-`export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>`
 `export TEST_PRIVATE_KEY1=<your private key>`
 
 In a Python console:
@@ -70,7 +69,7 @@ In a Python console:
 ```python
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
+config = ExampleConfig.get_config("https://rinkeby.infura.io/v3/<your Infura project id>")
 ocean = Ocean(config)
 
 # create an ERC20 object of OCEAN token

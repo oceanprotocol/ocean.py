@@ -28,8 +28,10 @@ def test_script_execution(script, monkeypatch):
 
     if "parameters" in script.name:
         # needs some env vars set to run
-        monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
-        monkeypatch.setenv("PROVIDER_URL", "http://172.15.0.4:8030")
+        # TODO reimplement without env vars
+        pass
+        # monkeypatch.setenv("METADATA_CACHE_URI", "http://172.15.0.5:5000")
+        # monkeypatch.setenv("PROVIDER_URL", "http://172.15.0.4:8030")
 
     runs_with_prerequisites = [
         "c2d-flow",

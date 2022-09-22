@@ -83,8 +83,8 @@ def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
 def get_address_of_type(
     config_dict: dict, address_type: str, key: Optional[str] = None
 ) -> str:
-    address_file = config_dict.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
-    network_name = config_dict.get("NETWORK_NAME", os.getenv("NETWORK_NAME"))
+    address_file = config_dict.get("ADDRESS_FILE")
+    network_name = config_dict.get("NETWORK_NAME")
 
     addresses = get_contracts_addresses(address_file, network_name)
     if address_type not in addresses.keys():
