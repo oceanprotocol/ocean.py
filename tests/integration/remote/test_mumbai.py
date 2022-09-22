@@ -73,10 +73,10 @@ def _get_wallets(ocean):
 
     instrs = "You must set it. It must hold Mumbai MATIC."
     assert (
-        alice_private_key is not None
+        alice_private_key
     ), f"Need envvar REMOTE_TEST_PRIVATE_KEY1. {instrs}"
     assert (
-        bob_private_key is not None
+        bob_private_key
     ), f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
