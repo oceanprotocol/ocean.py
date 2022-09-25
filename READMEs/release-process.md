@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0
   - Describe the main changes. (In the future, these will come from the changelog.)
   - Click "Publish release".
 
-## Step 4: Verifiy
+## Step 4: Verify
 
 - GitHub Actions will detect the release (a new tag) and run the deployment and publishing to PyPi.
 
