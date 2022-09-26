@@ -45,7 +45,7 @@ def test_ipfs_file():
 @pytest.mark.unit
 def test_arweave_file():
     arweave_file = ArweaveFile(
-        transactionId=ARWEAVE_TRANSACTION_ID
+        transaction_id=ARWEAVE_TRANSACTION_ID
     )
     assert arweave_file.to_dict() == {
         "type": "arweave",
@@ -81,7 +81,7 @@ def test_filetype_factory():
         }
     )
 
-    assert factory_file.transactionId == ARWEAVE_TRANSACTION_ID
+    assert factory_file.transaction_id == ARWEAVE_TRANSACTION_ID
 
     with pytest.raises(Exception):
         factory_file = FilesTypeFactory({"type": "somethingelse"})

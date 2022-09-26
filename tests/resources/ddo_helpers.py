@@ -210,7 +210,7 @@ def get_registered_asset_with_compute_service(
         )
     elif file_type == "arweave":
         arff_file = ArweaveFile(
-            transactionId=ARWEAVE_TRANSACTION_ID
+            transaction_id=ARWEAVE_TRANSACTION_ID
         )
     else:
         raise ValueError(f"Unsupported file_type {file_type}")

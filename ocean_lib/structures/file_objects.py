@@ -51,13 +51,13 @@ class IpfsFile(FilesType):
 
 class ArweaveFile(FilesType):
     @enforce_types
-    def __init__(self, transactionId: str) -> None:
-        self.transactionId = transactionId
+    def __init__(self, transaction_id: str) -> None:
+        self.transaction_id = transaction_id
         self.type = "arweave"
 
     @enforce_types
     def to_dict(self) -> dict:
-        return {"type": self.type, "transactionId": self.transactionId}
+        return {"type": self.type, "transactionId": self.transaction_id}
 
 
 class GraphqlQuery(FilesType):
