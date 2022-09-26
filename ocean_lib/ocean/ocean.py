@@ -95,7 +95,7 @@ class Ocean:
     @property
     @enforce_types
     def OCEAN_address(self) -> str:
-        return get_ocean_token_address(self.config_dict, web3=self.web3)
+        return get_ocean_token_address(self.config_dict)
 
     @property
     @enforce_types

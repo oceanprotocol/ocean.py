@@ -86,5 +86,5 @@ def test_get_address_of_type(monkeypatch):
 
     assert config["NETWORK_NAME"] == "polygon"
     data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)
-    addresses = get_contracts_addresses(config["ADDRESS_FILE"], config["NETWORK_NAME"])
+    addresses = get_contracts_addresses(config)
     assert addresses[DataNFTFactoryContract.CONTRACT_NAME] == data_nft_factory

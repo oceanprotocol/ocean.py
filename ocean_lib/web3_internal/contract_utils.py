@@ -38,29 +38,25 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
 
 
 @enforce_types
-def get_contracts_addresses(
-    network: str, address_file: str
-) -> Optional[Dict[str, str]]:
+def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
-    network_alias = {"ganache": "development"}
-
+    address_file, chain_id = config["ADDRESS_FILE"], config["CHAIN_ID"]
     address_file = os.path.expanduser(address_file)
     if not address_file or not os.path.exists(address_file):
         raise Exception("Address file not found.")
     with open(address_file) as f:
         addresses = json.load(f)
 
-    network_addresses = addresses.get(network, None)
-    if network_addresses is None and network in network_alias:
-        network_addresses = addresses.get(network_alias[network], None)
+    network_addresses = [
+        val for key, val in addresses.items() if val["chainId"] == chain_id
+    ]
 
     if network_addresses is None:
-        msg = f" (alias {network_alias[network]})" if network in network_alias else ""
         raise Exception(
-            f"Address not found for {network}{msg}. Please check your address file."
+            f"Address not found for {chain_id}. Please check your address file."
         )
 
-    return _checksum_contract_addresses(network_addresses=network_addresses)
+    return _checksum_contract_addresses(network_addresses=network_addresses[0])
 
 
 @enforce_types
