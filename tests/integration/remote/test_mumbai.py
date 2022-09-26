@@ -100,7 +100,7 @@ def _get_wallets(ocean):
 
 def _remote_config(tmp_path):
     config = {
-        "OCEAN_NETWORK_URL": "https://rpc-mumbai.maticvigil.com",
+        "RPC_URL": "https://rpc-mumbai.maticvigil.com",
         "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 60,
@@ -112,7 +112,7 @@ def _remote_config(tmp_path):
     }
 
     # -ensure config is truly remote
-    assert "mumbai" in config["OCEAN_NETWORK_URL"]
+    assert "mumbai" in config["RPC_URL"]
     assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
     assert "oceanprotocol.com" in config["PROVIDER_URL"]
 

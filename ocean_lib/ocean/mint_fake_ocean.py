@@ -24,7 +24,7 @@ def mint_fake_OCEAN(config: dict) -> None:
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
-    web3 = get_web3(config["OCEAN_NETWORK_URL"])
+    web3 = get_web3(config["RPC_URL"])
     deployer_wallet = Wallet(
         web3,
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),

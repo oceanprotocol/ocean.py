@@ -82,7 +82,7 @@ class Ocean:
             raise Exception(json.dumps(config_errors))
 
         self.config_dict = config_dict
-        self.web3 = get_web3(self.config_dict.get("OCEAN_NETWORK_URL"))
+        self.web3 = get_web3(self.config_dict.get("RPC_URL"))
 
         if not data_provider:
             data_provider = DataServiceProvider
