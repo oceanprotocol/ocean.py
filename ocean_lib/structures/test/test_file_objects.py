@@ -44,9 +44,7 @@ def test_ipfs_file():
 
 @pytest.mark.unit
 def test_arweave_file():
-    arweave_file = ArweaveFile(
-        transaction_id=ARWEAVE_TRANSACTION_ID
-    )
+    arweave_file = ArweaveFile(transaction_id=ARWEAVE_TRANSACTION_ID)
     assert arweave_file.to_dict() == {
         "type": "arweave",
         "transactionId": ARWEAVE_TRANSACTION_ID,

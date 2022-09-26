@@ -209,9 +209,7 @@ def get_registered_asset_with_compute_service(
             url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
         )
     elif file_type == "arweave":
-        arff_file = ArweaveFile(
-            transaction_id=ARWEAVE_TRANSACTION_ID
-        )
+        arff_file = ArweaveFile(transaction_id=ARWEAVE_TRANSACTION_ID)
     else:
         raise ValueError(f"Unsupported file_type {file_type}")
 
