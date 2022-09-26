@@ -5,7 +5,7 @@
 import logging
 import os
 from collections import namedtuple
-from typing import Any, List, Optional
+from typing import Any, List
 
 import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
@@ -16,11 +16,9 @@ from hexbytes.main import HexBytes
 from web3.main import Web3
 
 from ocean_lib.web3_internal.constants import (
-    DEFAULT_NETWORK_NAME,
-    NETWORK_NAME_MAP,
-    GAS_LIMIT_DEFAULT,
-    ENV_MAX_GAS_PRICE,
     ENV_GAS_PRICE,
+    ENV_MAX_GAS_PRICE,
+    GAS_LIMIT_DEFAULT,
 )
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
@@ -95,26 +93,6 @@ def private_key_to_public_key(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
-
-
-@enforce_types
-def get_network_name(
-    chain_id: Optional[int] = None, web3: Optional[Web3] = None
-) -> str:
-    """
-    Return the network name based on the current ethereum chain id.
-
-    Return `ganache` for every chain id that is not mapped.
-
-    :param chain_id: Chain id, int
-    :param web3: Web3 instance
-    """
-    if not chain_id:
-        if not web3:
-            return DEFAULT_NETWORK_NAME.lower()
-        else:
-            chain_id = get_chain_id(web3)
-    return NETWORK_NAME_MAP.get(chain_id, DEFAULT_NETWORK_NAME).lower()
 
 
 @enforce_types

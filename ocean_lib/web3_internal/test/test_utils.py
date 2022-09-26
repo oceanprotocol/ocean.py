@@ -6,29 +6,15 @@ import os
 
 import pytest
 from web3.gas_strategies.time_based import fast_gas_price_strategy
-from web3.middleware import geth_poa_middleware
 
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE, ENV_MAX_GAS_PRICE
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     get_chain_id,
-    get_network_name,
-    prepare_prefixed_hash,
     get_gas_price,
+    prepare_prefixed_hash,
 )
-
-
-@pytest.mark.unit
-def test_get_network_name(web3):
-    assert get_network_name(1) == "mainnet"
-    assert get_network_name(4) == "rinkeby"
-    assert get_network_name(3) == "ropsten"
-    assert get_network_name(137) == "polygon"
-    assert get_network_name(8996) == "ganache"
-    assert get_network_name(web3=web3) == "ganache"
-    assert get_network_name(-1) == "ganache"
-    assert get_network_name() == "ganache"
 
 
 @pytest.mark.unit

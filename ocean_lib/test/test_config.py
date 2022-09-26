@@ -18,7 +18,6 @@ def test_metadataCacheUri_config_key():
     config_dict = {
         "METADATA_CACHE_URI": "http://ItWorked.com",
         "OCEAN_NETWORK_URL": GANACHE_URL,
-        "NETWORK_NAME": "ganache",
         "CHAIN_ID": 8996,
         "GAS_LIMIT": GAS_LIMIT_DEFAULT,
         "BLOCK_CONFIRMATIONS": 0,

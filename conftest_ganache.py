@@ -126,8 +126,8 @@ def consume_market_wallet():
 
 
 @pytest.fixture
-def factory_deployer_wallet():
-    return get_factory_deployer_wallet(_NETWORK)
+def factory_deployer_wallet(config):
+    return get_factory_deployer_wallet(config)
 
 
 @pytest.fixture

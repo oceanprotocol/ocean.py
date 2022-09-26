@@ -96,8 +96,8 @@ def get_provider_wallet() -> Wallet:
     )
 
 
-def get_factory_deployer_wallet(network):
-    if network == "ganache":
+def get_factory_deployer_wallet(config):
+    if config["CHAIN_ID"] == 8996:
         return get_ganache_wallet()
 
     private_key = os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY")
@@ -146,7 +146,7 @@ def generate_wallet() -> Wallet:
         transaction_timeout=config.get("TRANSACTION_TIMEOUT"),
     )
     assert generated_wallet.private_key == private_key
-    deployer_wallet = get_factory_deployer_wallet("ganache")
+    deployer_wallet = get_factory_deployer_wallet(config)
     send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
 
     ocn = Ocean(config)
@@ -306,7 +306,7 @@ def send_mock_usdc_to_address(
     """Helper function to send mock usdc to an arbitrary recipient address if factory_deployer has enough balance
     to send. Returns the transferred balance.
     """
-    factory_deployer = get_factory_deployer_wallet(config["NETWORK_NAME"])
+    factory_deployer = get_factory_deployer_wallet(config)
 
     mock_usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
