@@ -21,9 +21,8 @@ def test_nonocean_tx(tmp_path):
     (alice_wallet, bob_wallet) = _get_wallets(ocean)
 
     # Get gas price (in Gwei) from Polygon gas station
-    gas_price = requests.get("https://gasstation-mumbai.matic.today/v2").json()["fast"][
-        "maxFee"
-    ]
+    gas_station_url = "https://gasstation-mumbai.matic.today/v2"
+    gas_price = requests.get(gas_station_url).json()["fast"]["maxFee"]
 
     # Simplest possible tx: Alice send Bob some fake MATIC
     web3 = ocean.web3
