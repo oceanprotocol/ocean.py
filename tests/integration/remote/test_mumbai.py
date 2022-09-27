@@ -76,18 +76,10 @@ def _get_wallets(ocean):
     assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
-    alice_wallet = Wallet(
-        web3,
-        alice_private_key,
-        config["BLOCK_CONFIRMATIONS"],
-        config["TRANSACTION_TIMEOUT"],
-    )
-    bob_wallet = Wallet(
-        web3,
-        bob_private_key,
-        config["BLOCK_CONFIRMATIONS"],
-        config["TRANSACTION_TIMEOUT"],
-    )
+    n_confirm, timeout = config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"]
+    alice_wallet = Wallet(web3, alice_private_key, n_confirm, timeout)
+    alice_wallet = Wallet(web3, bob_private_key, n_confirm, timeout)
+
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")
 
