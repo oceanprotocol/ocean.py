@@ -34,6 +34,15 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 
+### Installation 2: Specific for this README
+
+The [ccxt](https://github.com/ccxt/ccxt) library has a unified interface to many crypto exchanges. We'll be using it. 
+
+In console:
+```
+pip install ccxt
+```
+
 ### Setup for remote
 
 From [simple-remote](simple-remote.md), do:
@@ -44,18 +53,24 @@ From [simple-remote](simple-remote.md), do:
 
 In this flow, Bob is a participant in the competition
 
-## 2.  Get data locally from assets on Ocean
+## 2.  Get data locally
 
-### 2.1  Get recent historical data from Binance ETH APIs
+ccxt offers public APIs, so we use those directly. (No need for having Ocean in the loop, for this case.)
 
-From [publish-flow-restapi](publish-flow-restapi.md), do:
-- [x] Bob consumes the API asset
+In Python console:
 
-###  2.2  Get other data
+```python
+import ccxt
+import numpy as np
 
-You can retrieve other data as you wish for the competition. However a key rule is that all data used in the competition must be published as assets on Ocean. If the data you're using isn't on Ocean yet, simply publish it there, then use it here.
+#get the most recent week of ETH data: Open, High, Low, Close, Volume (OHLCV)
+x = ccxt.binance().fetch_ohlcv(ETH/USDT', '1w')
 
-Ocean Protocol Foundation (OPF) may make more data available as the competition proceeds.
+print(x)
+# gives a list of lists. Outer list has 268 entries. Inner list has 6 entries: unix timestamp, O, H, L, C, V
+# [[1502668800000, 301.13, 312.18, 278.0, 299.1, 21224.89324], [1503273600000, 299.1, 348.13, 144.21, 348.13, 45233.88589], [1503878400000, 348.11, 394.39, 320.08, 341.77, 33886.41427], ...]
+```
+
 
 ## 3.  Make predictions
 
@@ -108,10 +123,15 @@ Datetime, predicted-ETH-value
 
 ### 4.2 Put the csv online
 
-You can put it online however you wish. Here are two possible ways:
+You can put it online however you wish. Here's one way, with Google Drive.
 
-- **GDrive.** First, navigate to the GFolder in GDrive you wish to upload the file to. Then, right click anywhere and select "File Upload". Once the csv is uploaded, right click on the file, and select "Share". In the popup, ensure that "General Access" is set to "Anyone with the link". Also in the popup, click "Copy link". That's your csv url. It should look something like `https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing`
-- **GitHub.** First, create a new GitHub repo. Then, click on "add file", upload the file. Once uploaded, click on the file itself, then on "raw" button. The browser url is your csv url. It should look something like `https://raw.githubusercontent.com/<username>/<reponame>/main/predictions.csv`.
+1. First, navigate to the GFolder in GDrive you wish to upload the file to.
+2. Then, right click anywhere and select "File Upload".
+3. Once the csv is uploaded, right click on the file, and select "Share".
+4. In the popup, ensure that "General Access" is set to "Anyone with the link".
+5. Also in the popup, click "Copy link". That's your csv url. It should look something like `https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing`
+
+Now you have a publicly accessible url, that is nonetheless hard for others to discover. Let's publish it as an Ocean asset.
 
 
 ### 4.3 Publish (the csv) as an Ocean asset
@@ -120,33 +140,12 @@ In the same Python console:
 ```python
 # Specify metadata
 date_created = "2022-09-20T10:55:11Z"
-name = "ETH predictions"
-metadata = {
-    "author": "<your name>", "name": name, "description": name,  "type": "dataset",
-    "created": date_created, "updated": date_created, "license": "CC0: PublicDomain",
-}
-
-# Set the url, create UrlFile object
+name = "ETH predictions by <your name>"
 url="<your csv url>" #e.g. https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing
-from ocean_lib.structures.file_objects import UrlFile
-url_file = UrlFile(url)
 
-# Publish dataset. It creates the data NFT, datatoken, and fills in metadata
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-asset = ocean.assets.create(
-    metadata,
-    bob_wallet,
-    [url_file],
-    datatoken_templates=[1],
-    datatoken_names=["Datatoken 1"],
-    datatoken_symbols=["DT1"],
-    datatoken_minters=[bob_wallet.address],
-    datatoken_fee_managers=[bob_wallet.address],
-    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-    datatoken_publish_market_order_fee_amounts=[0],
-    datatoken_bytess=[[b""]],
-)
+# Create asset
+asset = ocean.assets.create_url_asset(name, url, bob_wallet)
+
 datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
