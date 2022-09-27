@@ -14,9 +14,9 @@ Here are the steps:
 1. Basic Setup
 2. Get data locally. E.g. Binance ETH price feed
 3. Make predictions
-4. Put predictions online, to private url
-5. Share predictions: test on Ganache
-6. Share predictions: actual on Mumbai, to organizers
+4. Publish predictions online, to private url
+5. Share predictions test, via Ganache
+6. Share predictions actual, to organizers via Mumbai
 
 ## 1. Basic Setup
 
@@ -110,7 +110,7 @@ You can put it online however you wish. Here's one way, with Google Drive.
 Your csv url is only open to those who know it. So we only share to selected parties (the organizers).
 
 
-## 5. Share predictions: test on Ganache
+## 5. Share predictions test, via Ganache
 
 In this section, we'll do a dry run of sharing the predictions with local Ganache testnet, and also show how the predictions are evaluated.
 
@@ -153,7 +153,7 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 
 ### 5.4 Analyze results: retrieve predictions
 
-This step and the next simulate what organizers ("Bob" here) will do with the predictions you shared: retrieve them, then calculate MSE. You can use it to see how your predictions will be scored.
+This step and the next simulate what organizers ("Bob" here) will do with the predictions you shared: retrieve them, then calculate NMSE. You can use it to see how your predictions will be scored.
 
 ```python
 # Bob sends 1.0 datatokens to the service, to get access
@@ -182,7 +182,7 @@ pred_vals = np.asarray([float(p) for p in pred_vals])
 print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
 ```
 
-### 5.5 Analyze results: calculate MSE
+### 5.5 Analyze results: calculate NMSE
 
 
 ```python
@@ -218,7 +218,7 @@ nmse = mse_xy / mse_x
 print(f"NMSE = {nmse}")
 ```
 
-## 6. Share predictions: actual, to organizers
+## 6. Share predictions actual, to organizers via Mumbai
 
 Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Mumbai) rather than the previous local one (Ganache).
 
