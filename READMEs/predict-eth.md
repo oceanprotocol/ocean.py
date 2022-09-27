@@ -220,11 +220,11 @@ print(f"NMSE = {nmse}")
 
 ## 6. Share predictions: actual, to organizers
 
-Only do these steps once you're satisfied enough to submit the results.
+Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Mumbai) rather than the previous local one (Ganache).
 
-### 6.1 Setup on Mumbai network
+First, to ensure they don't cross wires: ctrl-c out of (a) Python console and (b) barge running in a different console.
 
-First, just to be sure you don't sure your local and remote don't cross wires: ctrl-c out of (a) Python console and (b) barge running in a different console.
+### 6.1 Setup on Mumbai
 
 From [simple-remote](simple-remote.md), do:
 - [x] Create Mumbai Accounts
@@ -247,6 +247,8 @@ datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
 
+Write this down, as you will want to share this
+
 ### 6.2 Share predictions to organizers, in Polygon
 
 In the same Python console:
@@ -257,5 +259,5 @@ datatoken = Datatoken(ocean.web3, datatoken_address)
 
 #send tokens to organizer
 to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official organizer address
-datatoken.mint(organizer_address, ocean.to_wei(10), alice_wallet)
+datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
