@@ -101,7 +101,6 @@ def _get_wallets(ocean):
 def _remote_config(tmp_path):
     config = {
         "RPC_URL": "https://rpc-mumbai.maticvigil.com",
-        "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
