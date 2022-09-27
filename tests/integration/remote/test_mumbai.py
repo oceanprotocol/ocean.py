@@ -36,7 +36,7 @@ def test_nonocean_tx(tmp_path):
         "chainId": web3.eth.chain_id,
         "to": bob_wallet.address,
         "from": alice_wallet.address,
-        "value": web3.toWei(0.001, "ether"),
+        "value": web3.toWei(1e-8, "ether"),
     }
     signed_tx = web3.eth.account.sign_transaction(tx, alice_wallet.private_key)
 
