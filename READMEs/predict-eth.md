@@ -247,7 +247,7 @@ datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
 
-Write this down, as you will want to share this
+Write down the did and datatoken address. You'll be needing to share it in the Questbook entry.
 
 ### 6.2 Share predictions to organizers, in Polygon
 
