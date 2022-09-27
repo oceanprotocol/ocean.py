@@ -14,9 +14,7 @@ During the competition, as we get feedback, we expect to continually evolve this
 Here are the steps:
 
 1. Setup
-2. Get data locally from assets on Ocean
-   - Get recent historical data from Binance ETH API
-   - Get other data
+2. Get data locally. E.g. Binance ETH price feed
 3. Make predictions
    - Build a simple AI model
    - Run the AI model to make future ETH price predictions
@@ -53,7 +51,7 @@ From [simple-remote](simple-remote.md), do:
 
 In this flow, Bob is a participant in the competition
 
-## 2.  Get data locally
+## 2.  Get data locally. E.g. Binance ETH price feed
 
 ccxt offers public APIs, so we use those directly. (No need for having Ocean in the loop, for this case.)
 
