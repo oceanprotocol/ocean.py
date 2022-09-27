@@ -78,7 +78,7 @@ def _get_wallets(ocean):
     # wallets
     n_confirm, timeout = config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"]
     alice_wallet = Wallet(web3, alice_private_key, n_confirm, timeout)
-    alice_wallet = Wallet(web3, bob_private_key, n_confirm, timeout)
+    bob_wallet = Wallet(web3, bob_private_key, n_confirm, timeout)
 
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")
