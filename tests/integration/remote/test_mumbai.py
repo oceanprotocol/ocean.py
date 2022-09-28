@@ -65,26 +65,24 @@ def test_ocean_tx(tmp_path):
 
 
 def _get_wallets(ocean):
-    """Returns (alice_wallet, bob_wallet)"""
+    config, web3 = ocean.config_dict, ocean.web3
 
-    names = ["alice", "bob"]
-    envvars = ["REMOTE_TEST_PRIVATE_KEY1", "REMOTE_TEST_PRIVATE_KEY2"]
-    wallets = [] #fill this
-    for (name, envvar) in zip(names, envvars):
-        private_key = os.getenv(envvar)
+    alice_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY1")
+    bob_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY2")
 
-        instrs = "You must set it. It must hold Mumbai MATIC."
-        assert private_key, f"Need envvar {envvar}. {instrs}"
+    instrs = "You must set it. It must hold Mumbai MATIC."
+    assert alice_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY1. {instrs}"
+    assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
-        # wallets
-        config, web3 = ocean.config_dict, ocean.web3
-        n_confirm, timeout = config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"]
-        wallet = Wallet(web3, private_key, n_confirm, timeout)
+    # wallets
+    n_confirm, timeout = config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"]
+    alice_wallet = Wallet(web3, alice_private_key, n_confirm, timeout)
+    bob_wallet = Wallet(web3, bob_private_key, n_confirm, timeout)
 
-        print(f"{name}_wallet.address = '{wallet.address}'")
-        wallets.append(wallet)
+    print(f"alice_wallet.address = '{alice_wallet.address}'")
+    print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-    return tuple(wallets)
+    return (alice_wallet, bob_wallet)
 
 
 def _remote_config(tmp_path):
