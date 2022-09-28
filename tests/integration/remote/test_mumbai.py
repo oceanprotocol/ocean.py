@@ -73,7 +73,7 @@ def test_ocean_tx(tmp_path):
     # Alice publish data NFT
     # avoid "replacement transaction underpriced" error: make each tx diff't
     cand_chars = string.ascii_uppercase + string.digits
-    symbol = ''.join(random.choices(cand_chars, k=8))
+    symbol = "".join(random.choices(cand_chars, k=8))
     try:  # it can get away with "insufficient funds" errors, but not others
         print("Do an Ocean tx, and wait for it to complete...")
         data_nft = ocean.create_data_nft(symbol, symbol, alice_wallet)
