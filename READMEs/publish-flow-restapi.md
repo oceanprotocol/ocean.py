@@ -103,6 +103,8 @@ file_path = ocean.assets.download_asset(
     destination='./',
     order_tx_id=order_tx_id
 )
+
+import glob
 file_name = glob.glob(file_path + "/*")[0]
 print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
 print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
