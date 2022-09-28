@@ -2,11 +2,11 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import os
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_web3
+from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -19,12 +19,9 @@ def mint_fake_OCEAN(config: dict) -> None:
     1. Mints tokens
     2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
-    addresses_file = os.path.expanduser(config["ADDRESS_FILE"])
+    network_addresses = get_addresses_with_fallback(config)
 
-    with open(addresses_file) as f:
-        network_addresses = json.load(f)
-
-    web3 = get_web3(config["OCEAN_NETWORK_URL"])
+    web3 = get_web3(config["RPC_URL"])
     deployer_wallet = Wallet(
         web3,
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),

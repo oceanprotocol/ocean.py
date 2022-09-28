@@ -113,7 +113,7 @@ You can combine creating a data NFT and datatoken into a single call: `ocean.cre
 To learn more about some of the objects you created, here are some examples.
 ```python
 # config
-print(f"config.network_url = {config['OCEAN_NETWORK_URL']}")
+print(f"config.network_url = {config['RPC_URL']}")
 print(f"config.block_confirmations = {config['BLOCK_CONFIRMATIONS']}")
 print(f"config.metadata_cache_uri = {config['METADATA_CACHE_URI']}")
 print(f"config.provider_url = {config['PROVIDER_URL']}")

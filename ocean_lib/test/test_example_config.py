@@ -23,11 +23,10 @@ def test_ganache_example_config():
     config = ExampleConfig.get_config()
 
     assert config["CHAIN_ID"] == 8996
-    assert config["OCEAN_NETWORK_URL"] == "http://127.0.0.1:8545"
+    assert config["RPC_URL"] == "http://127.0.0.1:8545"
     assert config["METADATA_CACHE_URI"] == DEFAULT_METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == DEFAULT_PROVIDER_URL
     assert config["BLOCK_CONFIRMATIONS"] == 0
-    assert config["NETWORK_NAME"] == "ganache"
 
 
 @pytest.mark.unit
@@ -37,11 +36,10 @@ def test_polygon_example_config():
     config = ExampleConfig.get_config("https://polygon-rpc.com")
 
     assert config["CHAIN_ID"] == 137
-    assert config["OCEAN_NETWORK_URL"] == "https://polygon-rpc.com"
+    assert config["RPC_URL"] == "https://polygon-rpc.com"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.polygon.oceanprotocol.com"
     assert config["BLOCK_CONFIRMATIONS"] == 15
-    assert config["NETWORK_NAME"] == "polygon"
 
 
 @pytest.mark.unit
@@ -51,11 +49,10 @@ def test_bsc_example_config():
     config = ExampleConfig.get_config("https://bsc-dataseed.binance.org")
 
     assert config["CHAIN_ID"] == 56
-    assert config["OCEAN_NETWORK_URL"] == "https://bsc-dataseed.binance.org"
+    assert config["RPC_URL"] == "https://bsc-dataseed.binance.org"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.bsc.oceanprotocol.com"
     assert config["BLOCK_CONFIRMATIONS"] == 1
-    assert config["NETWORK_NAME"] == "bsc"
 
 
 @pytest.mark.unit
@@ -65,12 +62,10 @@ def test_moonbeam_alpha_example_config(monkeypatch):
     config = ExampleConfig.get_config("https://rpc.testnet.moonbeam.network")
 
     assert config["CHAIN_ID"] == 1287
-    assert config["OCEAN_NETWORK_URL"] == "https://rpc.testnet.moonbeam.network"
+    assert config["RPC_URL"] == "https://rpc.testnet.moonbeam.network"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.moonbase.oceanprotocol.com"
     assert config["BLOCK_CONFIRMATIONS"] == 3
-
-    assert config["NETWORK_NAME"] == "moonbeamalpha"
 
 
 @pytest.mark.unit
@@ -84,7 +79,6 @@ def test_noconfig(monkeypatch):
 def test_get_address_of_type(monkeypatch):
     config = ExampleConfig.get_config("https://polygon-rpc.com")
 
-    assert config["NETWORK_NAME"] == "polygon"
     data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)
-    addresses = get_contracts_addresses(config["ADDRESS_FILE"], config["NETWORK_NAME"])
+    addresses = get_contracts_addresses(config)
     assert addresses[DataNFTFactoryContract.CONTRACT_NAME] == data_nft_factory
