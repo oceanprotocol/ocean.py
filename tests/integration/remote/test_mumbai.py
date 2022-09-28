@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+from random import random
 import warnings
 
 import pytest
@@ -23,16 +24,13 @@ def test_nonocean_tx(tmp_path):
 
     # Get gas price (in Gwei) from Polygon gas station
     gas_station_url = "https://gasstation-mumbai.matic.today/v2"
-    base_gas_price = requests.get(gas_station_url).json()["fast"]["maxFee"]
+    gas_price = requests.get(gas_station_url).json()["fast"]["maxFee"]
 
     # Simplest possible tx: Alice send Bob some fake MATIC
     web3 = ocean.web3
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
     nonce = web3.eth.getTransactionCount(alice_wallet.address)
-
-    # avoid 'replacement transaction underpriced' error: each try, pay more gas
-    gas_price = base_gas_price * (1.0 + nonce / 10.0)
-
+    amt_send = 1e-8 * random()  # fix "replacement tx underpriced": make tx difft
     tx = {
         "nonce": nonce,
         "gasPrice": web3.toWei(gas_price, "gwei"),
@@ -40,7 +38,7 @@ def test_nonocean_tx(tmp_path):
         "chainId": web3.eth.chain_id,
         "to": bob_wallet.address,
         "from": alice_wallet.address,
-        "value": web3.toWei(1e-8, "ether"),
+        "value": web3.toWei(amt_send, "ether"),
     }
     signed_tx = web3.eth.account.sign_transaction(tx, alice_wallet.private_key)
 
