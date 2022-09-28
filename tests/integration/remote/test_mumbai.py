@@ -41,13 +41,13 @@ def test_nonocean_tx(tmp_path):
     signed_tx = web3.eth.account.sign_transaction(tx, alice_wallet.private_key)
 
     print("Do a send-Ether tx...")
-    try: #it can get away with "insufficient funds" errors, but not others
+    try:  # it can get away with "insufficient funds" errors, but not others
         tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     except ValueError as error:
         if "insufficient funds" in str(error):
-            warnings.warn(UserWarning("Warning: Insufficient funds (MATIC) in Mumbai testnet"))
+            warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
             return
-        raise(error)
+        raise (error)
 
     print("Wait for send-Ether tx to complete...")
     _ = web3.eth.wait_for_transaction_receipt(tx_hash)
@@ -56,7 +56,7 @@ def test_nonocean_tx(tmp_path):
     assert bob_eth_after > bob_eth_before
 
 
-#@pytest.mark.skip(reason="Don't skip, once fixed #943")
+# @pytest.mark.skip(reason="Don't skip, once fixed #943")
 def test_ocean_tx(tmp_path):
     """Do a (simple) Ocean tx on Mumbai"""
 
@@ -67,14 +67,14 @@ def test_ocean_tx(tmp_path):
 
     # Alice publish data NFT
     print("Do an Ocean tx, and wait for it to complete...")
-    try:  #it can get away with "insufficient funds" errors, but not others
+    try:  # it can get away with "insufficient funds" errors, but not others
         data_nft = ocean.create_data_nft("My NFT1", "NFT1", alice_wallet)
     except ValueError as error:
         if "insufficient funds" in str(error):
-            warnings.warn(UserWarning("Warning: Insufficient funds (MATIC) in Mumbai testnet"))
+            warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
             return
-        raise(error)
-        
+        raise (error)
+
     assert data_nft.symbol() == "NFT1"
 
 
