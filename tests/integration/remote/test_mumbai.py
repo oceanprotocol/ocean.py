@@ -23,12 +23,16 @@ def test_nonocean_tx(tmp_path):
 
     # Get gas price (in Gwei) from Polygon gas station
     gas_station_url = "https://gasstation-mumbai.matic.today/v2"
-    gas_price = requests.get(gas_station_url).json()["fast"]["maxFee"]
+    base_gas_price = requests.get(gas_station_url).json()["fast"]["maxFee"]
 
     # Simplest possible tx: Alice send Bob some fake MATIC
     web3 = ocean.web3
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
     nonce = web3.eth.getTransactionCount(alice_wallet.address)
+
+    # avoid 'replacement transaction underpriced' error: each try, pay more gas
+    gas_price = base_gas_price * (1.0 + nonce / 10.0)
+
     tx = {
         "nonce": nonce,
         "gasPrice": web3.toWei(gas_price, "gwei"),
