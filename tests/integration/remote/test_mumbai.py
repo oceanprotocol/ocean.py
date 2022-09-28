@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
-from random import random
+import random
+import string
 import warnings
 
 import pytest
@@ -30,7 +31,9 @@ def test_nonocean_tx(tmp_path):
     web3 = ocean.web3
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
     nonce = web3.eth.getTransactionCount(alice_wallet.address)
-    amt_send = 1e-8 * random()  # fix "replacement tx underpriced": make tx difft
+
+    # avoid "replacement transaction underpriced" error: make each tx diff't
+    amt_send = 1e-8 * random.random()
     tx = {
         "nonce": nonce,
         "gasPrice": web3.toWei(gas_price, "gwei"),
@@ -68,16 +71,19 @@ def test_ocean_tx(tmp_path):
     (alice_wallet, _) = _get_wallets(ocean)
 
     # Alice publish data NFT
-    print("Do an Ocean tx, and wait for it to complete...")
+    # avoid "replacement transaction underpriced" error: make each tx diff't
+    cand_chars = string.ascii_uppercase + string.digits
+    symbol = ''.join(random.choices(cand_chars, k=8))
     try:  # it can get away with "insufficient funds" errors, but not others
-        data_nft = ocean.create_data_nft("My NFT1", "NFT1", alice_wallet)
+        print("Do an Ocean tx, and wait for it to complete...")
+        data_nft = ocean.create_data_nft(symbol, symbol, alice_wallet)
     except ValueError as error:
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
             return
         raise (error)
 
-    assert data_nft.symbol() == "NFT1"
+    assert data_nft.symbol() == symbol
 
 
 def _get_wallets(ocean):
