@@ -65,17 +65,12 @@ This demo flow skips building a model because the next step will simply generate
 
 ### 3.2  Run the AI model to make future ETH price predictions
 
-Predictions must be one prediction every hour on the hour, for a 24h period: from Oct 3, 2022 at 1:00am UTC, to Oct 4, 2022 at 1:00am UTC.
+Predictions must be one prediction every hour on the hour, for a 24h period: Oct 3 at 1:00am UTC, at 2:00am, at 3:00am, ..., 11.00pm, 12.00am. Therefore there are 24 predictions total.
 
 In the same Python console:
 ```python
-from datetime import datetime, timedelta
-start_datetime = datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
-datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
-
-#make predictions. Typically you'd use the AI model. For simplicity for now, we make random predictions
 import random
-pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(len(datetimes))] 
+pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(24)] 
 ```
 
 
@@ -91,7 +86,7 @@ with open("/tmp/pred_vals.csv", "w") as f:
     writer.writerow(pred_vals)
 ```
 
-The csv will look something like this:
+The csv will look something like:
 
 ```text
 1503.134,1512.490,1498.982,...,1590.673
