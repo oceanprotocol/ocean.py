@@ -11,6 +11,7 @@ _CHAINID_TO_NETWORK = {
     1: "mainnet",
     3: "ropsten",
     4: "rinkeby",
+    5: "goerli",
     56: "bsc",
     137: "polygon",
     246: "energyweb",

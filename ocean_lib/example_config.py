@@ -41,6 +41,10 @@ CONFIG_NETWORK_HELPER = {
         "PROVIDER_URL": "https://v4.provider.rinkeby.oceanprotocol.com",
         "BLOCK_CONFIRMATIONS": 1,
     },
+    5: {
+        "PROVIDER_URL": "https://v4.provider.goerli.oceanprotocol.com",
+        "BLOCK_CONFIRMATIONS": 1,
+    },
     56: {
         "PROVIDER_URL": "https://v4.provider.bsc.oceanprotocol.com",
         "BLOCK_CONFIRMATIONS": 1,
