@@ -83,9 +83,9 @@ CONFIG_NETWORK_HELPER = {
 
 
 @enforce_types
-def get_config_dict(chain_id: int, network_url: str) -> dict:
-    if chain_id not in CONFIG_NETWORK_HELPER:
-        raise ValueError("The chain id for the specific RPC could not be fetched!")
+def get_config_dict(network_url: str) -> dict:
+    w3 = get_web3(network_url)
+    chain_id = w3.eth.chain_id
 
     config_helper = copy.deepcopy(config_defaults)
     config_helper.update(CONFIG_NETWORK_HELPER[chain_id])
@@ -112,12 +112,8 @@ class ExampleConfig:
 
         if not network_url:
             network_url = "http://127.0.0.1:8545"
-            chain_id = 8996
-        else:
-            w3 = get_web3(network_url)
-            chain_id = w3.eth.chain_id
 
-        config_dict = get_config_dict(chain_id, network_url)
+        config_dict = get_config_dict(network_url)
         config_dict["RPC_URL"] = network_url
 
         return config_dict

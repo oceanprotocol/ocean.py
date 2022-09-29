@@ -69,13 +69,6 @@ def test_moonbeam_alpha_example_config(monkeypatch):
 
 
 @pytest.mark.unit
-def test_noconfig(monkeypatch):
-    """Tests the config fails with wrong chain id."""
-    with pytest.raises(ValueError, match="could not be fetched!"):
-        get_config_dict(0, "")
-
-
-@pytest.mark.unit
 def test_get_address_of_type(monkeypatch):
     config = ExampleConfig.get_config("https://polygon-rpc.com")
 
