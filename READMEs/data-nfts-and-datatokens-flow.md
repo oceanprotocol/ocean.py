@@ -54,7 +54,7 @@ pip3 install --pre ocean-lib
 
 ### Set envvars
 
-Open a new console, and:
+In the same console, or a new one:
 ```console
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
