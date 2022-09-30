@@ -17,7 +17,7 @@ from web3.main import Web3
 
 import artifacts  # noqa
 
-from ocean_lib.ocean.util import get_web3
+from tests.resources.helper_functions import get_web3
 
 logger = logging.getLogger(__name__)
 
