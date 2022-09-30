@@ -97,7 +97,8 @@ def get_provider_wallet() -> Wallet:
 
 
 def get_factory_deployer_wallet(config):
-    if config["CHAIN_ID"] == 8996:
+    web3 = get_web3(config["RPC_URL"])
+    if web3.eth.chain_id == 8996:
         return get_ganache_wallet()
 
     private_key = os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY")

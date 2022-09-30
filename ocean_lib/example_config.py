@@ -83,8 +83,8 @@ CONFIG_NETWORK_HELPER = {
 
 @enforce_types
 def get_config_dict(network_url: str) -> dict:
-    w3 = get_web3(network_url)
-    chain_id = w3.eth.chain_id
+    web3 = get_web3(network_url)
+    chain_id = web3.eth.chain_id
 
     config_helper = copy.deepcopy(config_defaults)
     config_helper.update(CONFIG_NETWORK_HELPER[chain_id])
