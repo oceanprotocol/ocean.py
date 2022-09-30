@@ -9,8 +9,6 @@ from enforce_typing import enforce_types
 _CHAINID_TO_NETWORK = {
     8996: "development",  # ganache
     1: "mainnet",
-    3: "ropsten",
-    4: "rinkeby",
     5: "goerli",
     56: "bsc",
     137: "polygon",

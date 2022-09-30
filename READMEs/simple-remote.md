@@ -83,4 +83,3 @@ Above, the config file set `network` as to a public RPC from maticvigil.com. Whe
 Example endpoints (fake ones):
 
 - Alchemy for Mumbai: `https://polygon-mumbai.g.alchemy.com/v2/hFYoNzNTnbqbpi__0LS-dPTnNn`
-- Infura for Rinkeby: `https://rinkeby.infura.io/v3/8239a2e4b8441b96aa4ae2e94aSDJFAD`
