@@ -12,6 +12,8 @@ from eth_typing import HexStr
 from eth_typing.encoding import Primitives
 from web3.main import Web3
 
+from tests.resources.helper_functions import get_web3
+
 
 @enforce_types
 def to_lpad_32byte(val: Primitives) -> bytes:
@@ -87,3 +89,11 @@ def create_checksum(text: str) -> str:
     :return: str
     """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+@enforce_types
+def get_chain_id_from_url(network_url: str) -> int:
+    web3 = get_web3(network_url)
+    chain_id = web3.eth.chain_id
+
+    return chain_id

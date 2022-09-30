@@ -149,10 +149,3 @@ def get_gas_price(web3_object: Web3, tx: dict) -> dict:
     tx["gas"] = GAS_LIMIT_DEFAULT
 
     return tx
-
-
-def get_chain_id_from_url(network_url: str) -> int:
-    web3 = get_web3(network_url)
-    chain_id = web3.eth.chain_id
-
-    return chain_id

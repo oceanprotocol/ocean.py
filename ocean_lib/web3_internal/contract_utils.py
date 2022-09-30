@@ -17,7 +17,7 @@ from web3.main import Web3
 
 import artifacts  # noqa
 
-from ocean_lib.web3_internal.utils import get_chain_id_from_url
+from ocean_lib.utils.utilities import get_chain_id_from_url
 
 logger = logging.getLogger(__name__)
 

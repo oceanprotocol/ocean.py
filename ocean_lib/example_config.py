@@ -8,9 +8,8 @@ import logging
 
 from enforce_typing import enforce_types
 
-from ocean_lib.ocean.util import get_web3
+from ocean_lib.utils.utilities import get_chain_id_from_url
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
-from ocean_lib.web3_internal.utils import get_chain_id_from_url
 
 logging.basicConfig(level=logging.INFO)
 
