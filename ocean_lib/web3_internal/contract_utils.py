@@ -17,7 +17,6 @@ from web3.main import Web3
 
 import artifacts  # noqa
 
-from tests.resources.helper_functions import get_web3
 
 logger = logging.getLogger(__name__)
 
@@ -61,6 +60,9 @@ def get_addresses_with_fallback(config):
 @enforce_types
 def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
+
+    from ocean_lib.ocean.util import get_web3
+
     web3 = get_web3(config["RPC_URL"])
     chain_id = web3.eth.chain_id
     addresses = get_addresses_with_fallback(config)
