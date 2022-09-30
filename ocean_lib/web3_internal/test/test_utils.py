@@ -14,6 +14,7 @@ from ocean_lib.web3_internal.utils import (
     get_chain_id,
     get_gas_price,
     prepare_prefixed_hash,
+    get_chain_id_from_url,
 )
 
 
@@ -65,3 +66,9 @@ def test_gas_scaling_factor(web3, monkeypatch):
     monkeypatch.setenv(ENV_MAX_GAS_PRICE, "80000")
     gas_price_with_scaling = get_gas_price(web3, tx=dict())
     assert gas_price_with_scaling["gasPrice"] == 30000
+
+
+def test_chain_id_from_url(config):
+    chain_id = get_chain_id_from_url(config["RPC_URL"])
+    assert isinstance(chain_id, int)
+    assert chain_id == 8996

@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
+from ocean_lib.web3_internal.utils import get_chain_id_from_url
 
 logging.basicConfig(level=logging.INFO)
 
@@ -83,8 +84,7 @@ CONFIG_NETWORK_HELPER = {
 
 @enforce_types
 def get_config_dict(network_url: str) -> dict:
-    web3 = get_web3(network_url)
-    chain_id = web3.eth.chain_id
+    chain_id = get_chain_id_from_url(network_url)
 
     config_helper = copy.deepcopy(config_defaults)
     config_helper.update(CONFIG_NETWORK_HELPER[chain_id])

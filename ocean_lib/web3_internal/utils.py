@@ -15,6 +15,7 @@ from eth_utils import decode_hex
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
+from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.constants import (
     ENV_GAS_PRICE,
     ENV_MAX_GAS_PRICE,
@@ -148,3 +149,10 @@ def get_gas_price(web3_object: Web3, tx: dict) -> dict:
     tx["gas"] = GAS_LIMIT_DEFAULT
 
     return tx
+
+
+def get_chain_id_from_url(network_url: str) -> int:
+    web3 = get_web3(network_url)
+    chain_id = web3.eth.chain_id
+
+    return chain_id
