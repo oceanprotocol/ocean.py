@@ -23,7 +23,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.ocean.util import get_contracts_addresses_web3
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -47,7 +47,7 @@ def get_example_config():
 def get_address_of_type(
     config_dict: dict, address_type: str, key: Optional[str] = None
 ) -> str:
-    addresses = get_contracts_addresses(config_dict)
+    addresses = get_contracts_addresses_web3(config_dict)
 
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")

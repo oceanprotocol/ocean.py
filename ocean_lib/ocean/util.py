@@ -10,9 +10,7 @@ from web3.main import Web3
 from web3.middleware import geth_poa_middleware
 
 from ocean_lib.ocean.networkutil import chainIdToNetwork
-from ocean_lib.web3_internal.contract_utils import (
-    get_contracts_addresses as get_contracts_addresses_web3,
-)
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_web3
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 GANACHE_URL = "http://127.0.0.1:8545"
@@ -73,15 +71,11 @@ def get_web3_connection_provider(
         raise AssertionError(msg)
 
 
-def get_contracts_addresses(config) -> Dict[str, str]:
-    return get_contracts_addresses_web3(config)
-
-
 @enforce_types
 def get_address_of_type(
     config_dict: dict, address_type: str, key: Optional[str] = None
 ) -> str:
-    addresses = get_contracts_addresses(config_dict)
+    addresses = get_contracts_addresses_web3(config_dict)
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")
     address = (
@@ -97,6 +91,6 @@ def get_ocean_token_address(config_dict: dict) -> str:
     """Returns the Ocean token address for given network or web3 instance
     Requires either network name or web3 instance.
     """
-    addresses = get_contracts_addresses(config_dict)
+    addresses = get_contracts_addresses_web3(config_dict)
 
     return Web3.toChecksumAddress(addresses.get("Ocean").lower()) if addresses else None

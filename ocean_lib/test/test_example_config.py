@@ -12,7 +12,7 @@ from ocean_lib.example_config import (
     get_config_dict,
 )
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.ocean.util import get_contracts_addresses_web3
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -80,5 +80,5 @@ def test_get_address_of_type(monkeypatch):
     config = ExampleConfig.get_config("https://polygon-rpc.com")
 
     data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)
-    addresses = get_contracts_addresses(config)
+    addresses = get_contracts_addresses_web3(config)
     assert addresses[DataNFTFactoryContract.CONTRACT_NAME] == data_nft_factory

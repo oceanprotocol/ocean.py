@@ -57,7 +57,7 @@ def get_addresses_with_fallback(config):
 
 
 @enforce_types
-def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
+def get_contracts_addresses_web3(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
     chain_id = config["CHAIN_ID"]
     addresses = get_addresses_with_fallback(config)

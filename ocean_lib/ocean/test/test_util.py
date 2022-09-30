@@ -35,7 +35,7 @@ def test_get_web3_connection_provider(monkeypatch):
 
 @pytest.mark.unit
 def test_get_ocean_token_address(config):
-    addresses = util.get_contracts_addresses(config)
+    addresses = util.get_contracts_addresses_web3(config)
     assert addresses
     assert isinstance(addresses, dict)
     assert "Ocean" in addresses
@@ -47,7 +47,7 @@ def test_get_ocean_token_address(config):
 
 @pytest.mark.unit
 def test_get_address_by_type(config):
-    addresses = util.get_contracts_addresses(config)
+    addresses = util.get_contracts_addresses_web3(config)
 
     address = get_address_of_type(config, "Ocean")
     assert Web3.isChecksumAddress(address), "It is not a checksum token address."
