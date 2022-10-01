@@ -55,6 +55,7 @@ In the same Python console:
 ```python
 from ocean_lib.models.datatoken import Datatoken
 datatoken = Datatoken(ocean.web3, datatoken_address)
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 datatoken.create_dispenser(
     dispenser_address=ocean.dispenser.address,
     max_balance=ocean.to_wei(10000),
@@ -91,26 +92,19 @@ bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
 print(f"Bob now holds {bal} access tokens for the data asset.")
 
 # Bob sends 1.0 datatokens to the service, to get access
-service = asset.services[0] #retrieve service object
-order_tx_id = ocean.assets.pay_for_access_service(
-    asset,
-    service,
-    consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=datatoken.address,
-    consume_market_order_fee_amount=0,
-    wallet=bob_wallet,
-)
+order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob now has access. He downloads the asset.
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
-    service=service,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
 )
+
+import glob
 file_name = glob.glob(file_path + "/*")[0]
 print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
 print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300

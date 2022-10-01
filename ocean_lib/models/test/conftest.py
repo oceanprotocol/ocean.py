@@ -8,8 +8,7 @@ import pytest
 
 from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.ocean.util import get_ocean_token_address
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -29,12 +28,12 @@ def network():
 
 @pytest.fixture
 def nft_factory_address(config):
-    return DataNFTFactoryContract.configured_address(_NETWORK, config["ADDRESS_FILE"])
+    return get_address_of_type(config, "ERC721Factory")
 
 
 @pytest.fixture
 def OCEAN_address(config):
-    return get_ocean_token_address(config.address_file, _NETWORK)
+    return get_ocean_token_address(config.address_file)
 
 
 @pytest.fixture

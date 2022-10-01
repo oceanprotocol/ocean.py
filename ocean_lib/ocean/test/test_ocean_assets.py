@@ -314,11 +314,21 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
         mock.return_value = asset
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
-                asset, asset.services[0], publisher_wallet, "", "", index=-4
+                asset,
+                publisher_wallet,
+                destination="",
+                order_tx_id="",
+                service=asset.services[0],
+                index=-4,
             )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download_asset(
-                asset, asset.services[0], publisher_wallet, "", "", index="string_index"
+                asset,
+                publisher_wallet,
+                destination="",
+                order_tx_id="",
+                service=asset.services[0],
+                index="string_index",
             )
 
 
@@ -364,11 +374,11 @@ def test_pay_for_access_service_insufficient_balance(
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_access_service(
             asset,
+            empty_wallet,
             get_first_service_by_type(asset, "access"),
             consume_market_order_fee_address=empty_wallet.address,
             consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
-            wallet=empty_wallet,
         )
 
 

@@ -17,9 +17,9 @@ from web3._utils.filters import construct_event_filter_params
 from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
+
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
-    get_contracts_addresses,
     load_contract,
 )
 from ocean_lib.web3_internal.utils import get_gas_price
@@ -55,14 +55,6 @@ class ContractBase(object):
     def __str__(self) -> str:
         """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
-
-    @classmethod
-    @enforce_types
-    def configured_address(cls, network: str, address_file: str) -> str:
-        """Returns the contract addresses"""
-        addresses = get_contracts_addresses(network, address_file)
-
-        return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
     @enforce_types

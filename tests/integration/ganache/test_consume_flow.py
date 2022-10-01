@@ -126,10 +126,10 @@ def test_consume_flow(
 
     ocean_assets.download_asset(
         asset=asset,
-        service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
+        service=service,
     )
 
     downloaded_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))

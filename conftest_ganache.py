@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
-
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
@@ -14,6 +12,7 @@ from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -53,10 +52,8 @@ def setup_all(request, config, web3, ocean_token):
     if not wallet:
         return
 
-    address_file = config.get("ADDRESS_FILE", os.getenv("ADDRESS_FILE"))
-    address_file = os.path.expanduser(address_file)
-
-    if not os.path.exists(address_file):
+    if not get_addresses_with_fallback(config):
+        print("Can not find adddresses.")
         return
 
     print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
@@ -127,8 +124,8 @@ def consume_market_wallet():
 
 
 @pytest.fixture
-def factory_deployer_wallet():
-    return get_factory_deployer_wallet(_NETWORK)
+def factory_deployer_wallet(config):
+    return get_factory_deployer_wallet(config)
 
 
 @pytest.fixture

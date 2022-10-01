@@ -17,8 +17,7 @@ def test_metadataCacheUri_config_key():
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "OCEAN_NETWORK_URL": GANACHE_URL,
-        "NETWORK_NAME": "ganache",
+        "RPC_URL": GANACHE_URL,
         "CHAIN_ID": 8996,
         "GAS_LIMIT": GAS_LIMIT_DEFAULT,
         "BLOCK_CONFIRMATIONS": 0,
@@ -37,7 +36,7 @@ def test_incomplete():
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "OCEAN_NETWORK_URL": GANACHE_URL,
+        "RPC_URL": GANACHE_URL,
         "TRANSACTION_TIMEOUT": "some string",
     }
 
