@@ -24,9 +24,9 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
-from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_utils import get_web3 as util_get_web3
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.wallet import Wallet
@@ -97,7 +97,7 @@ def get_provider_wallet() -> Wallet:
 
 
 def get_factory_deployer_wallet(config):
-    if config["CHAIN_ID"] == 8996:
+    if config["RPC_URL"] == "http://127.0.0.1:8545":
         return get_ganache_wallet()
 
     private_key = os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY")

@@ -7,8 +7,8 @@ import os
 import pytest
 from web3.gas_strategies.time_based import fast_gas_price_strategy
 
-from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE, ENV_MAX_GAS_PRICE
+from ocean_lib.web3_internal.contract_utils import get_web3
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     get_chain_id,

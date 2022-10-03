@@ -113,7 +113,6 @@ def _remote_config(tmp_path):
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-        "CHAIN_ID": 80001,
         "DOWNLOADS_PATH": "consume-downloads",
     }
 

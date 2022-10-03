@@ -5,8 +5,7 @@
 import os
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import get_web3
-from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
+from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback, get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
