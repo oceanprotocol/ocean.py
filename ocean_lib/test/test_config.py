@@ -8,7 +8,6 @@ import pytest
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import GANACHE_URL
-from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 
 @pytest.mark.unit
@@ -19,7 +18,6 @@ def test_metadataCacheUri_config_key():
         "METADATA_CACHE_URI": "http://ItWorked.com",
         "RPC_URL": GANACHE_URL,
         "CHAIN_ID": 8996,
-        "GAS_LIMIT": GAS_LIMIT_DEFAULT,
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
         "PROVIDER_URL": "http://172.15.0.4:8030",
