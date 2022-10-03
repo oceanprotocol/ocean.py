@@ -67,7 +67,6 @@ def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     if "CHAIN_ID" not in config:
         w3 = get_web3(config["RPC_URL"])
         # cache it to prevent further calls
-        # TODO: maybe we shouldn't?
         config["CHAIN_ID"] = w3.eth.chain_id
 
     chain_id = config["CHAIN_ID"]
