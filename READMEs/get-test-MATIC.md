@@ -39,7 +39,7 @@ export ADDRESS2={account2.address}
 
 Then, hit Ctrl-C to exit the Python console.
 
-Now, you have two mumbai accounts (address & private key). Same them somewhere safe, like a local file or a password manager. They actually work on any chain, not just Mumbai.
+Now, you have two mumbai accounts (address & private key). Save them somewhere safe, like a local file or a password manager. They actually work on any chain, not just Mumbai.
 
 The "export " is so that you can conveniently copy & paste them into a console, to set envvars for Ocean quickstarts or otherwise.
 
