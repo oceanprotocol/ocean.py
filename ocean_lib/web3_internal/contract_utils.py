@@ -9,11 +9,12 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from jsonsempai import magic  # noqa: F401
 from addresses import address as contract_addresses  # noqa: F401
 from enforce_typing import enforce_types
+from jsonsempai import magic  # noqa: F401
 from web3 import WebsocketProvider
 from web3.contract import Contract
+from web3.exceptions import ExtraDataLengthError
 from web3.main import Web3
 from web3.middleware import geth_poa_middleware
 
@@ -116,15 +117,9 @@ def get_web3(network_url: Optional[str] = None) -> Web3:
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
 
-    # TODO: fix this...
-
-    # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
-    # - Issue: https://github.com/ethereum/web3.py/issues/549
-    # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
-    problem_networks = [
-        80001,  # mumbai
-    ]  # add to this if we find issues in other networks
-    if web3.eth.chain_id in problem_networks:
+    try:
+        web3.eth.getBlock("latest")
+    except ExtraDataLengthError:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     return web3
