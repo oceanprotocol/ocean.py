@@ -8,7 +8,6 @@ import logging
 
 from enforce_typing import enforce_types
 
-from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.contract_utils import get_web3
 
 logging.basicConfig(level=logging.INFO)
@@ -19,7 +18,6 @@ DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "RPC_URL": "http://127.0.0.1:8545",
-    "GAS_LIMIT": GAS_LIMIT_DEFAULT,
     "BLOCK_CONFIRMATIONS": 0,
     "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
