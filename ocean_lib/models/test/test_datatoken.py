@@ -10,11 +10,11 @@ from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken, DatatokenRoles
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit

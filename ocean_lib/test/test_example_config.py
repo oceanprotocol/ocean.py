@@ -11,8 +11,8 @@ from ocean_lib.example_config import (
     ExampleConfig,
 )
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.ocean.util import get_contracts_addresses
-from tests.resources.helper_functions import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 
 
 @pytest.mark.unit
