@@ -7,6 +7,8 @@ SPDX-License-Identifier: Apache-2.0
 
 This quickstart describes a flow to predict future ETH price via a local AI model. It used for Ocean Data Bounties competition.
 
+The text below uses Mumbai. We recommend starting with this for testing. Then when you're ready to move to submit your result, switch to Polygon and go through the flow again.
+
 During the competition, as we get feedback, we expect to continually evolve this README to make usage smooth.
 
 Here are the steps:
@@ -18,41 +20,78 @@ Here are the steps:
 5. Share predictions test, via Ganache
 6. Share predictions actual, to organizers via Mumbai
 
-## 1. Basic Setup
+## 1. Setup
 
-### Prerequisites & installation
+### 1.1 Prerequisites & installation
 
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 
-### Installation 2: Specific for this README
+### Create Polygon Account (One-Time)
 
-The [ccxt](https://github.com/ccxt/ccxt) library has a unified interface to many crypto exchanges. We'll be using it. 
+We'll use Polygon to retrieve Ocean data assets, and publish your ETH predictions.
 
-In console:
+In your console, run Python.
+```console
+python
 ```
-pip install ccxt
-```
 
-
-## 2.  Get data locally. E.g. Binance ETH price feed
-
-ccxt offers public APIs, so we use those directly. (No need for using Ocean for this case.)
-
-In Python console:
-
+In the Python console:
 ```python
-import ccxt
-import numpy as np
-
-#get the most recent week of ETH price data: Open, High, Low, Close, Volume (OHLCV)
-x = ccxt.binance().fetch_ohlcv('ETH/USDT', '1w')
-
-print(x)
-# gives a list of lists. Outer list has 268 entries. Inner list has 6 entries: unix timestamp, O, H, L, C, V
-# [[1502668800000, 301.13, 312.18, 278.0, 299.1, 21224.89324], [1503273600000, 299.1, 348.13, 144.21, 348.13, 45233.88589], ...]
+from eth_account.account import Account
+account1 = Account.create()
+print(f"""
+export REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}
+export ADDRESS1={account1.address}
+""")
 ```
+
+Then, hit Ctrl-C to exit the Python console.
+
+Now, you have a Polygon account (address & private key). Save it somewhere safe, like a local file or a password manager. It actually works on any chain, not just Polygon.
+
+Then, acquire a few $ worth of MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for upcoming transactions. 
+
+### 1.2 Set envvars
+
+In the console:
+```console
+# For accounts: set private keys
+export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
+```
+
+### 1.3 Setup in Python, for Polygon
+
+Let's load services info and account info into Python `config` dict and `Wallet` objects respectively.
+
+In your working console, run Python:
+
+```console
+python
+```
+
+In the Python console:
+```python
+# Create Ocean instance
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.ocean import Ocean
+config = ExampleConfig.get_config("https://polygon-rpc.com")
+ocean = Ocean(config)
+
+# Create Alice's wallet (you're Alice)
+import os
+from ocean_lib.web3_internal.wallet import Wallet
+alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs MATIC"
+```
+
+## 2.  Get data locally
+
+Here, we grab Binance ETH price feed, which is published through Ocean.
+
+FIXME
 
 
 ## 3.  Make predictions
@@ -74,7 +113,7 @@ pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(24)]
 ```
 
 
-## 4. Put predictions online, to private url
+## 4.  Publish predictions online, to private url
 
 ### 4.1 Save the predictions as a csv file
 
@@ -91,6 +130,7 @@ The csv will look something like:
 ```text
 1503.134,1512.490,1498.982,...,1590.673
 ```
+
 
 ### 4.2 Put the csv online
 
@@ -213,23 +253,21 @@ nmse = mse_xy / mse_x
 print(f"NMSE = {nmse}")
 ```
 
-## 6. Share predictions actual, to organizers via Mumbai
+## 6. Share predictions actual, to organizers via Polygon
 
-Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Mumbai) rather than the previous local one (Ganache).
+Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Polygon) rather than the previous local one (Ganache).
 
 First, to ensure they don't cross wires: ctrl-c out of (a) Python console and (b) barge running in a different console.
 
-### 6.1 Setup on Mumbai
+### 6.1 Setup on Polygon
 
-From [simple-remote](simple-remote.md), do:
-- [x] Create Mumbai Accounts
-- [x] Create Config File for Services
-- [x] Set envvars
-- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
+From section 1 of this console, do:
+- [x] Setup: set envvars
+- [x] Setup in Python, for Polygon
 
-### 6.2 Publish the csv as an Ocean asset, in Mumbai
+### 6.2 Publish the csv as an Ocean asset, in Polygon
 
-(This is identical to before, except now it's on Mumbai not Ganache)
+(This is identical to section 5, except now it's on Polygon not Ganache)
 
 In the same Python console:
 ```python
@@ -256,3 +294,5 @@ datatoken = Datatoken(ocean.web3, datatoken_address)
 to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official organizer address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
+
+Finally, ensure you've filled in your Questbook entry. 
