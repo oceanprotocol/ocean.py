@@ -20,9 +20,9 @@ Here are examples.
 import os
 from ocean_lib.ocean.ocean import Ocean
 d = {
-   'RPC_URL': "https://rinkeby.infura.io/v3/<your Infura project id>"
+   'RPC_URL': "https://goerli.infura.io/v3/<your Infura project id>",
    'METADATA_CACHE_URI': "https://v4.aquarius.oceanprotocol.com",
-   'PROVIDER_URL' : "https://v4.provider.rinkeby.oceanprotocol.com",
+   'PROVIDER_URL' : "https://v4.provider.goerli.oceanprotocol.com",
 }
 ocean = Ocean(d)
 ```
