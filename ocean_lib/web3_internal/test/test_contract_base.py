@@ -62,7 +62,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert ContractBase.to_checksum_address(nft_factory_address) == nft_factory_address
 
     # test methods
-    assert "configured_address" in dir(factory)
     assert factory.contract_name == "ERC721Factory"
     assert factory.address == nft_factory_address
     assert factory.events

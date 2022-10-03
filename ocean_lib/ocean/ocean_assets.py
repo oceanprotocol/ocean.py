@@ -301,7 +301,7 @@ class OceanAssets:
             "license": "CC0: PublicDomain",
         }
 
-        OCEAN_address = get_ocean_token_address(self._config_dict, web3=self._web3)
+        OCEAN_address = get_ocean_token_address(self._config_dict)
         asset = self.create(
             metadata,
             publisher_wallet,
@@ -745,7 +745,7 @@ class OceanAssets:
         )
         consume_market_order_fee_amount = consume_market_order_fee_amount or 0
         if consume_market_order_fee_token is None:
-            OCEAN_address = get_ocean_token_address(self._config_dict, web3=self._web3)
+            OCEAN_address = get_ocean_token_address(self._config_dict)
             consume_market_order_fee_token = OCEAN_address
         consumer_address = consumer_address or wallet.address
 

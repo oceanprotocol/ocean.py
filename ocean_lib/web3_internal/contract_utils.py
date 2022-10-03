@@ -6,10 +6,12 @@ import importlib
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from enforce_typing import enforce_types
 from jsonsempai import magic  # noqa: F401
+from addresses import address as contract_addresses  # noqa: F401
 from web3.contract import Contract
 from web3.main import Web3
 
@@ -38,29 +40,38 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
 
 
 @enforce_types
-def get_contracts_addresses(
-    network: str, address_file: str
-) -> Optional[Dict[str, str]]:
-    """Get addresses for all contract names, per network and address_file given."""
-    network_alias = {"ganache": "development"}
+def get_addresses_with_fallback(config):
+    address_file = config.get("ADDRESS_FILE")
+    address_file = (
+        os.path.expanduser(address_file)
+        if address_file
+        else Path(contract_addresses.__file__).expanduser().resolve()
+    )
 
-    address_file = os.path.expanduser(address_file)
     if not address_file or not os.path.exists(address_file):
         raise Exception("Address file not found.")
     with open(address_file) as f:
         addresses = json.load(f)
 
-    network_addresses = addresses.get(network, None)
-    if network_addresses is None and network in network_alias:
-        network_addresses = addresses.get(network_alias[network], None)
+    return addresses
+
+
+@enforce_types
+def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
+    """Get addresses for all contract names, per network and address_file given."""
+    chain_id = config["CHAIN_ID"]
+    addresses = get_addresses_with_fallback(config)
+
+    network_addresses = [
+        val for key, val in addresses.items() if val["chainId"] == chain_id
+    ]
 
     if network_addresses is None:
-        msg = f" (alias {network_alias[network]})" if network in network_alias else ""
         raise Exception(
-            f"Address not found for {network}{msg}. Please check your address file."
+            f"Address not found for {chain_id}. Please check your address file."
         )
 
-    return _checksum_contract_addresses(network_addresses=network_addresses)
+    return _checksum_contract_addresses(network_addresses=network_addresses[0])
 
 
 @enforce_types
