@@ -110,6 +110,5 @@ class ExampleConfig:
 
         config_dict = get_config_dict(chain_id, network_url)
         config_dict["RPC_URL"] = network_url
-        # config_dict["CHAIN_ID"] = chain_id
 
         return config_dict
