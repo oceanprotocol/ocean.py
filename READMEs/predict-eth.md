@@ -91,7 +91,7 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs
 
 Here, we grab Binance ETH/USDT price feed, which is published through Ocean.
 
-You can see the asset on Ocean Market:
+You can see it on Ocean Market:
 https://market.oceanprotocol.com/asset/did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19
 
 In the same Python console:
@@ -105,24 +105,24 @@ asset = ocean.assets.resolve(asset_did)
 datatoken_address = asset.datatokens[0]["address"]
 print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
 
-# Bob gets an access token from the dispenser
+# Alice gets an access token from the dispenser
 amt_dispense = 1
 datatoken = Datatoken(ocean.web3, datatoken_address)
 ocean.dispenser.dispense_tokens(
-    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
+    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=alice_wallet
 )
-bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
-print(f"Bob now holds {bal} access tokens for the data asset.")
+bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
+print(f"Alice now holds {bal} access tokens for the data asset.")
 
-# Bob sends 1.0 datatokens to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+# Alice sends 1.0 datatokens to the service, to get access
+order_tx_id = ocean.assets.pay_for_access_service(asset, alice_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
-# Bob now has access. He downloads the asset.
-# If the connection breaks, Bob can request again by showing order_tx_id.
+# Alice now has access. He downloads the asset.
+# If the connection breaks, Alice can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
-    consumer_wallet=bob_wallet,
+    consumer_wallet=alice_wallet,
     destination='./',
     order_tx_id=order_tx_id
 )
@@ -230,10 +230,17 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
 - [x] Setup : Set envvars
-- [x] Setup : Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
+- [x] Setup : Setup in Python
 
 In this flow, Alice is you -- the participant in the competition.
 
+"Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
+
+```python
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
+print(f"bob_wallet.address = '{bob_wallet.address}'")
+```
 
 ### 5.2 Publish the csv as an Ocean asset
 
