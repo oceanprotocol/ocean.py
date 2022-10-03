@@ -5,9 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Predict Future ETH Price
 
-This quickstart describes a flow to predict future ETH price via a local AI model. It used for Ocean Data Bounties competition.
-
-The text below uses Mumbai. We recommend starting with this for testing. Then when you're ready to move to submit your result, switch to Polygon and go through the flow again.
+This quickstart describes a flow to predict future ETH price via a local AI model. It is used for Ocean Data Bounties competition.
 
 During the competition, as we get feedback, we expect to continually evolve this README to make usage smooth.
 
@@ -18,7 +16,7 @@ Here are the steps:
 3. Make predictions
 4. Publish predictions online, to private url
 5. Share predictions test, via Ganache
-6. Share predictions actual, to organizers via Mumbai
+6. Share predictions actual, to judges via Polygon
 
 ## 1. Setup
 
@@ -28,7 +26,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 
-### Create Polygon Account (One-Time)
+### 1.2 Create Polygon Account (One-Time)
 
 We'll use Polygon to retrieve Ocean data assets, and publish your ETH predictions.
 
@@ -49,11 +47,11 @@ export ADDRESS1={account1.address}
 
 Then, hit Ctrl-C to exit the Python console.
 
-Now, you have a Polygon account (address & private key). Save it somewhere safe, like a local file or a password manager. It actually works on any chain, not just Polygon.
+Now, you have a Polygon account: private key (with associated address). Save it somewhere safe, like a local file or a password manager. It actually works on any chain, not just Polygon.
 
-Then, acquire a few $ worth of MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for upcoming transactions. 
+Then, get some MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for transactions of this README.
 
-### 1.2 Set envvars
+### 1.3 Set envvars
 
 In the console:
 ```console
@@ -61,7 +59,7 @@ In the console:
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 ```
 
-### 1.3 Setup in Python, for Polygon
+### 1.4 Setup in Python, for Polygon
 
 Let's load services info and account info into Python `config` dict and `Wallet` objects respectively.
 
@@ -76,7 +74,7 @@ In the Python console:
 # Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("https://polygon-rpc.com")
+config = ExampleConfig.get_config("https://polygon-rpc.com") # points to Polygon mainnet
 ocean = Ocean(config)
 
 # Create Alice's wallet (you're Alice)
@@ -87,38 +85,32 @@ alice_wallet = Wallet(ocean.web3, alice_private_key, config["BLOCK_CONFIRMATIONS
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs MATIC"
 ```
 
-## 2.  Get data locally
+## 2. Get data locally
 
-Here, we grab Binance ETH/USDT price feed, which is published through Ocean.
-
-You can see it on Ocean Market:
-https://market.oceanprotocol.com/asset/did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19
+Here, we grab Binance ETH/USDT price feed, which is published through Ocean as a free asset. You can see it on Ocean Market [here](https://market.oceanprotocol.com/asset/did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19).
 
 In the same Python console:
 
 ```python
-# Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
-asset_did = 0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19
-
 # Retrieve the Asset and datatoken objects
+from ocean_lib.models.datatoken import Datatoken
+asset_did = "did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19"
 asset = ocean.assets.resolve(asset_did)
 datatoken_address = asset.datatokens[0]["address"]
+datatoken = Datatoken(ocean.web3, datatoken_address)
 print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
 
-# Alice gets an access token from the dispenser
-amt_dispense = 1
-datatoken = Datatoken(ocean.web3, datatoken_address)
-ocean.dispenser.dispense_tokens(
-    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=alice_wallet
-)
+# Alice gets a datatoken from the dispenser
+amt_dispense_wei = ocean.to_wei(1)
+ocean.dispenser.dispense_tokens(datatoken, amt_dispense_wei, consumer_wallet=alice_wallet)
 bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
 print(f"Alice now holds {bal} access tokens for the data asset.")
 
-# Alice sends 1.0 datatokens to the service, to get access
+# Alice sends datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(asset, alice_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
-# Alice now has access. He downloads the asset.
+# Alice now has access. She downloads the asset.
 # If the connection breaks, Alice can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
@@ -126,6 +118,8 @@ file_path = ocean.assets.download_asset(
     destination='./',
     order_tx_id=order_tx_id
 )
+
+# If you encounter issues with getting the data, see the Appendix for a workaround.
 
 import glob
 file_name = glob.glob(file_path + "/*")[0]
@@ -136,36 +130,19 @@ print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=
 import os
 assert os.path.exists(file_name), "couldn't find file"
 
-# The file's data follows the Binance docs specs for Kline/Candlestick Data
-# https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data
-
 #load from file into memory
 with open(file_name, "r") as file:
     #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
     data_str = file.read().rstrip().replace('"', '')
+data = eval(data_str)
 
 #data is a list of lists
-# -Outer list has one 7 entries; one entry per day.
-# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
-data = eval(data_str) 
+# -Outer list has one 6 entries; one entry per day.
+# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price,  ..
+# -It looks like: [[1662998400000,1706.38,1717.87,1693,1713.56],[1663002000000,1713.56,1729.84,1703.21,1729.08],[1663005600000,1729.08,1733.76,1718.09,1728.83],...
 
-#get close prices. These can serve as an approximation to spot price
+#Example: get close prices. These can serve as an approximation to spot price
 close_prices = [float(data_at_day[4]) for data_at_day in data]
-
-#or, we can put all data into a 2D array, to ease numerical processing
-import numpy
-D = numpy.asarray(data)
-print(D.shape)
-# returns:
-# (7,12) #7 days, 12 entries per day
-```
-
-
-
-
-Data is shaped like:
-```text
-[[1662998400000,1706.38,1717.87,1693,1713.56,51519.3687],[1663002000000,1713.56,1729.84,1703.21,1729.08,31663.9998],[1663005600000,1729.08,1733.76,1718.09,1728.83,20121.3055],[1663009200000,1728.83,1730.75,1719.94,1726.28,12912.3148],
 ```
 
 
@@ -215,9 +192,13 @@ You can put it online however you wish. Here's one way, with Google Drive.
 2. Then, right click anywhere and select "File Upload".
 3. Once the csv is uploaded, right click on the file, and select "Share".
 4. In the popup, ensure that "General Access" is set to "Anyone with the link".
-5. Also in the popup, click "Copy link". That's your csv url. It should look something like `https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing`
+5. Also in the popup, click "Copy link". It should look something like `https://drive.google.com/file/d/1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy/view?usp=sharing`. Then, in the popup, click "Done".
+6. If you paste the copied link into the browser, it will load an HTML page. But we don't want an html url, we want a  _downloadable_ one. Here's how. 
+   - First, note the `<FILE-ID>` from the previous step (e.g. "1uZ..RRy").
+   - Then, create a URL according to: `https://drive.google.com/uc?export=download&id=<FILE-ID>`. **This is your url.** 
+   - In our running example, the url is `https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy`
 
-Your csv url is only open to those who know it. So we only share to selected parties (the organizers).
+Your csv url is only open to those who know it. So we only share to selected parties (the judges).
 
 
 ## 5. Share predictions test, via Ganache
@@ -247,7 +228,7 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 In the same Python console:
 ```python
 url="<your csv url>" 
-#e.g. url="https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing"
+#e.g. url="https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
 name = "ETH predictions"
 asset = ocean.assets.create_url_asset(name, url, alice_wallet)
 
@@ -270,7 +251,7 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 
 ### 5.4 Analyze results: retrieve predictions
 
-This step and the next simulate what organizers ("Bob" here) will do with the predictions you shared: retrieve them, then calculate NMSE. You can use it to see how your predictions will be scored.
+This step and the next simulate what the judges ("Bob" here) will do with the predictions you shared: retrieve them, then calculate NMSE. You can use it to see how your predictions will be scored.
 
 ```python
 # Bob sends 1.0 datatokens to the service, to get access
@@ -297,15 +278,17 @@ with open(file_name, "r") as f:
     	pred_vals = row; break
 pred_vals = np.asarray([float(p) for p in pred_vals])
 print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
+
+# If you encountered issues going through this, a workaround is to get pred_vals directly from your AI model.
 ```
 
 ### 5.5 Analyze results: calculate NMSE
 
-
 ```python
 #set target_unixtimes
-import time
 from datetime import datetime, timedelta
+import numpy as np
+import time
 start_datetime = datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
 target_datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
 assert len(pred_vals) == len(target_datetimes), "wrong # predictions"
@@ -315,7 +298,8 @@ def _unixtime(datetime):
     
 target_unixtimes = np.asarray([_unixtime(datetime) for datetime in target_datetimes])
 
-#get the most recent day of ETH price data
+#get the most recent day of *true* ETH price data
+# Warning: This assumes that your predictions are also the most recent day. If they don't line up, errors will be high.
 import ccxt
 allcex_x = ccxt.binance().fetch_ohlcv('ETH/USDT', '1d')
 allcex_unixtimes = np.asarray([inner[0] for inner in allcex_x])
@@ -335,7 +319,7 @@ nmse = mse_xy / mse_x
 print(f"NMSE = {nmse}")
 ```
 
-## 6. Share predictions actual, to organizers via Polygon
+## 6. Share predictions actual, to judges via Polygon
 
 Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Polygon) rather than the previous local one (Ganache).
 
@@ -354,17 +338,16 @@ From section 1 of this console, do:
 In the same Python console:
 ```python
 url="<your csv url>" 
-#e.g. url="https://drive.google.com/file/d/1XU2NSKnN_epN71nwm5iKrN1t6-qGFbBJ/view?usp=sharing"
+#e.g. url="https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
 name = "ETH predictions"
-asset = ocean.assets.create_url_asset(name, url, alice_wallet)
-
+asset = ocean.assets.create_url_asset(name, url, alice_wallet) #this will take 30-60 seconds, be patient
 datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
 
-Write down the did and datatoken address. You'll be needing to share it in the Questbook entry.
+Write down the `did` and `datatoken_address`. You'll be needing to share it in the Questbook entry.
 
-### 6.2 Share predictions to organizers, in Polygon
+### 6.2 Share predictions to judges, in Polygon
 
 In the same Python console:
 ```python
@@ -372,9 +355,26 @@ In the same Python console:
 from ocean_lib.models.datatoken import Datatoken
 datatoken = Datatoken(ocean.web3, datatoken_address)
 
-#send tokens to organizer
-to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official organizer address
+#send tokens to judges
+to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official judges address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
 
-Finally, ensure you've filled in your Questbook entry. 
+Finally, ensure you've filled in your Questbook entry.
+
+Now, you're complete! Thanks for being part of this competition.
+
+## Appendix: Workaround
+
+This is the first round of the predict-ETH competitions. It supplies just one Ocean data asset, a simple ETH/USDT price feed from Binance. Future rounds will have more assets, from more sources both on-chain and off.
+
+But since this is the first round with just one simple asset: if you encounter issues in accessing it, there's a workaround. You can proceed by using the URL directly: https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT
+
+Here's how to do it in Python:
+
+```python
+import requests
+import numpy as np
+result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT")
+data = result.json() #list with 500 entries. Each x[i] is a list with 6 entries
+```
