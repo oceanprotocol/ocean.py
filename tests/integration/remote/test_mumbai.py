@@ -115,7 +115,6 @@ def _remote_config(tmp_path):
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
         "GAS_LIMIT": GAS_LIMIT_DEFAULT,
-        "CHAIN_ID": 80001,
         "DOWNLOADS_PATH": "consume-downloads",
     }
 

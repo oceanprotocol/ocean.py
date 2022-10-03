@@ -7,17 +7,21 @@ import json
 import logging
 import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
-from enforce_typing import enforce_types
 from jsonsempai import magic  # noqa: F401
 from addresses import address as contract_addresses  # noqa: F401
+from enforce_typing import enforce_types
+from web3 import WebsocketProvider
 from web3.contract import Contract
 from web3.main import Web3
+from web3.middleware import geth_poa_middleware
 
 import artifacts  # noqa
+from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 logger = logging.getLogger(__name__)
+GANACHE_URL = "http://127.0.0.1:8545"
 
 
 @enforce_types
@@ -59,6 +63,12 @@ def get_addresses_with_fallback(config):
 @enforce_types
 def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
+    if "CHAIN_ID" not in config:
+        w3 = get_web3(config["RPC_URL"])
+        # cache it to prevent further calls
+        # TODO: maybe we shouldn't?
+        config["CHAIN_ID"] = w3.eth.chain_id
+
     chain_id = config["CHAIN_ID"]
     addresses = get_addresses_with_fallback(config)
 
@@ -92,3 +102,59 @@ def _checksum_contract_addresses(
             network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
 
     return network_addresses
+
+
+@enforce_types
+def get_web3(network_url: Optional[str] = None) -> Web3:
+    """
+    Return a web3 instance connected via the given network_url.
+    Adds POA middleware if needed.
+    """
+    if not network_url:
+        network_url = GANACHE_URL
+
+    provider = get_web3_connection_provider(network_url)
+    web3 = Web3(provider)
+
+    # TODO: fix this...
+
+    # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
+    # - Issue: https://github.com/ethereum/web3.py/issues/549
+    # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    problem_networks = [
+        80001,  # mumbai
+    ]  # add to this if we find issues in other networks
+    if web3.eth.chain_id in problem_networks:
+        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+    return web3
+
+
+@enforce_types
+def get_web3_connection_provider(
+    network_url: str,
+) -> Union[CustomHTTPProvider, WebsocketProvider]:
+    """Return the suitable web3 provider based on the network_url.
+
+    Requires going through some gateway such as `infura`.
+
+    Using infura has some issues if your code is relying on evm events.
+    To use events with an infura connection you have to use the websocket interface.
+
+    Make sure the `infura` url for websocket connection has the following format
+    wss://goerli.infura.io/ws/v3/357f2fe737db4304bd2f7285c5602d0d
+    Note the `/ws/` in the middle and the `wss` protocol in the beginning.
+
+    :param network_url: str
+    :return: provider : Union[CustomHTTPProvider, WebsocketProvider]
+    """
+    if network_url.startswith("http"):
+        return CustomHTTPProvider(network_url)
+    elif network_url.startswith("ws"):
+        return WebsocketProvider(network_url)
+    else:
+        msg = (
+            f"The given network_url *{network_url}* does not start with either"
+            f"`http` or `wss`. A correct network url is required."
+        )
+        raise AssertionError(msg)
