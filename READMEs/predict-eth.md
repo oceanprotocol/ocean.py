@@ -89,9 +89,84 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs
 
 ## 2.  Get data locally
 
-Here, we grab Binance ETH price feed, which is published through Ocean.
+Here, we grab Binance ETH/USDT price feed, which is published through Ocean.
 
-FIXME
+You can see the asset on Ocean Market:
+https://market.oceanprotocol.com/asset/did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19
+
+In the same Python console:
+
+```python
+# Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
+asset_did = 0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19
+
+# Retrieve the Asset and datatoken objects
+asset = ocean.assets.resolve(asset_did)
+datatoken_address = asset.datatokens[0]["address"]
+print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
+
+# Bob gets an access token from the dispenser
+amt_dispense = 1
+datatoken = Datatoken(ocean.web3, datatoken_address)
+ocean.dispenser.dispense_tokens(
+    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
+)
+bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
+print(f"Bob now holds {bal} access tokens for the data asset.")
+
+# Bob sends 1.0 datatokens to the service, to get access
+order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+print(f"order_tx_id = '{order_tx_id}'")
+
+# Bob now has access. He downloads the asset.
+# If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    consumer_wallet=bob_wallet,
+    destination='./',
+    order_tx_id=order_tx_id
+)
+
+import glob
+file_name = glob.glob(file_path + "/*")[0]
+print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
+print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
+
+#verify that file exists
+import os
+assert os.path.exists(file_name), "couldn't find file"
+
+# The file's data follows the Binance docs specs for Kline/Candlestick Data
+# https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data
+
+#load from file into memory
+with open(file_name, "r") as file:
+    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
+    data_str = file.read().rstrip().replace('"', '')
+
+#data is a list of lists
+# -Outer list has one 7 entries; one entry per day.
+# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
+data = eval(data_str) 
+
+#get close prices. These can serve as an approximation to spot price
+close_prices = [float(data_at_day[4]) for data_at_day in data]
+
+#or, we can put all data into a 2D array, to ease numerical processing
+import numpy
+D = numpy.asarray(data)
+print(D.shape)
+# returns:
+# (7,12) #7 days, 12 entries per day
+```
+
+
+
+
+Data is shaped like:
+```text
+[[1662998400000,1706.38,1717.87,1693,1713.56,51519.3687],[1663002000000,1713.56,1729.84,1703.21,1729.08,31663.9998],[1663005600000,1729.08,1733.76,1718.09,1728.83,20121.3055],[1663009200000,1728.83,1730.75,1719.94,1726.28,12912.3148],
+```
 
 
 ## 3.  Make predictions
