@@ -80,11 +80,6 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
-
-# Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
-print(f"bob_wallet.address = '{bob_wallet.address}'")
 ```
 
 ## 2. Publish Data NFT & Datatoken
