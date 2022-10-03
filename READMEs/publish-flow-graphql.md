@@ -30,7 +30,7 @@ In the same Python console:
 ```python
 #data info
 name = "Data NFTs in Ocean"
-url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
+url="https://v4.subgraph.goerli.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
 query="""query{
                nfts(orderBy: createdTimestamp,orderDirection:desc){
                     id

@@ -169,7 +169,7 @@ def test_consume_parametrized_graphql_query(
         "license": "https://market.oceanprotocol.com/terms",
     }
     graphql_query = GraphqlQuery(
-        url="https://v4.subgraph.rinkeby.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
+        url="https://v4.subgraph.goerli.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
         query="""
                     query nfts($nftAddress: String){
                         nfts(where: {id:$nftAddress},orderBy: createdTimestamp,orderDirection:desc){

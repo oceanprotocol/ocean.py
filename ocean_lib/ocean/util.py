@@ -32,7 +32,6 @@ def get_web3(network_url: Optional[str] = None) -> Web3:
     # - Issue: https://github.com/ethereum/web3.py/issues/549
     # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
     problem_networks = [
-        "rinkeby",
         "mumbai",
     ]  # add to this if we find issues in other networks
     if chainIdToNetwork(web3.eth.chain_id).lower() in problem_networks:
@@ -53,7 +52,7 @@ def get_web3_connection_provider(
     To use events with an infura connection you have to use the websocket interface.
 
     Make sure the `infura` url for websocket connection has the following format
-    wss://rinkeby.infura.io/ws/v3/357f2fe737db4304bd2f7285c5602d0d
+    wss://goerli.infura.io/ws/v3/357f2fe737db4304bd2f7285c5602d0d
     Note the `/ws/` in the middle and the `wss` protocol in the beginning.
 
     :param network_url: str
