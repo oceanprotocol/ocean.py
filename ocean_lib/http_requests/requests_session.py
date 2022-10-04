@@ -8,6 +8,21 @@ from requests.sessions import Session
 
 
 @enforce_types
+class TimeoutHTTPAdapter(HTTPAdapter):
+    def __init__(self, *args, **kwargs):
+        self.timeout = 30
+        if "timeout" in kwargs:
+            self.timeout = kwargs["timeout"]
+            del kwargs["timeout"]
+        super().__init__(*args, **kwargs)
+
+    def send(self, request, **kwargs):
+        # timeout = kwargs.get("timeout")
+        # if timeout is None:
+        kwargs["timeout"] = self.timeout
+        return super().send(request, **kwargs)
+
+
 def get_requests_session() -> Session:
     """
     Set connection pool maxsize and block value to avoid `connection pool full` warnings.
@@ -17,14 +32,22 @@ def get_requests_session() -> Session:
     session = Session()
     session.mount(
         "http://",
-        HTTPAdapter(
-            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1
+        TimeoutHTTPAdapter(
+            pool_connections=25,
+            pool_maxsize=25,
+            pool_block=True,
+            max_retries=1,
+            timeout=30,
         ),
     )
     session.mount(
         "https://",
-        HTTPAdapter(
-            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1
+        TimeoutHTTPAdapter(
+            pool_connections=25,
+            pool_maxsize=25,
+            pool_block=True,
+            max_retries=1,
+            timeout=30,
         ),
     )
     return session
