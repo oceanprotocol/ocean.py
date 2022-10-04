@@ -10,9 +10,12 @@ import shutil
 import pytest
 from web3 import Web3
 
+from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.integration
@@ -23,27 +26,28 @@ def test1(
     consumer_wallet: Wallet,
     tmp_path,
 ):
+    data_provider = DataServiceProvider
     ocean = Ocean(config)
 
+    # Publish
     url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
     name = "CEXA ETH-USDT"
     asset = ocean.assets.create_url_asset(name, url, publisher_wallet)
+
+    # Initialize service
+    service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
+    response = data_provider.initialize(
+        did=asset.did, service=service, consumer_address=consumer_wallet.address
+    )
+
+    # Share access
     datatoken_address = asset.datatokens[0]["address"]
     datatoken = Datatoken(ocean.web3, datatoken_address)
-
     to_address = consumer_wallet.address
     datatoken.mint(to_address, ocean.to_wei(10), publisher_wallet)
 
+    # Consume
     order_tx_id = ocean.assets.pay_for_access_service(asset, consumer_wallet)
-
-    # Commented out, we shouldn't need this
-    # Initialize service
-    # response = data_provider.initialize(
-    #    did=asset.did, service=service, consumer_address=consumer_wallet.address
-    # )
-
-    # consumer now has access. He downloads the asset.
-    # If the connection breaks, consumer can request again by showing order_tx_id.
     file_path = ocean.assets.download_asset(
         asset=asset,
         consumer_wallet=consumer_wallet,
