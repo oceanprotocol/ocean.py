@@ -20,7 +20,6 @@ class TimeoutHTTPAdapter(HTTPAdapter):
         # timeout = kwargs.get("timeout")
         # if timeout is None:
         kwargs["timeout"] = self.timeout
-        print(kwargs)
         return super().send(request, **kwargs)
 
 
