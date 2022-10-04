@@ -427,6 +427,7 @@ def test_compute_reuse_order(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
@@ -449,6 +450,7 @@ def test_compute_multi_inputs(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
