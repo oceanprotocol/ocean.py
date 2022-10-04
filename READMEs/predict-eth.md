@@ -210,7 +210,6 @@ In this section, we'll do a dry run of sharing the predictions with local Ganach
 
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Download barge and run services
-- [x] Setup : Install the library from v4 sources
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
 
