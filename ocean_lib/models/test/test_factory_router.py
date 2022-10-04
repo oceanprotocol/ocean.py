@@ -6,9 +6,9 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import get_address_of_type
 
 # Constants copied from FactoryRouter.sol, used for testing purposes
 OPC_SWAP_FEE_APPROVED = to_wei("0.001")  # 0.1%

@@ -15,6 +15,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
@@ -24,7 +25,6 @@ from tests.resources.ddo_helpers import (
     get_opc_collector_address_from_datatoken,
 )
 from tests.resources.helper_functions import (
-    get_address_of_type,
     get_provider_fees,
     transfer_base_token_if_balance_lte,
 )

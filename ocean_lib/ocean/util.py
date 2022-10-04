@@ -2,20 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Dict, Optional
+from typing import Optional
 
 from enforce_typing import enforce_types
 from web3.main import Web3
 
-from ocean_lib.web3_internal.contract_utils import (
-    get_contracts_addresses as get_contracts_addresses_web3,
-)
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 
 GANACHE_URL = "http://127.0.0.1:8545"
-
-
-def get_contracts_addresses(config) -> Dict[str, str]:
-    return get_contracts_addresses_web3(config)
 
 
 @enforce_types

@@ -6,9 +6,9 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
