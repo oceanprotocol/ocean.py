@@ -390,6 +390,7 @@ def test_compute_raw_algo(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_registered_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -408,6 +409,7 @@ def test_compute_registered_algo(
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_reuse_order(
     publisher_wallet,
     publisher_ocean_instance,
