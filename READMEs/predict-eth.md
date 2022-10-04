@@ -87,21 +87,64 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs
 
 ## 2. Get data locally
 
-Here, we grab Binance ETH/USDT price feed.
+Here, we grab Binance ETH/USDT price feed, which is published through Ocean as a free asset. You can see it on Ocean Market [here](https://market.oceanprotocol.com/asset/did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19).
 
 In the same Python console:
-```python
-import ccxt
-cex_x = ccxt.binance().fetch_ohlcv('ETH/USDT', '1d')
 
-#cex_x is a list of lists
-# -Outer list has one 500 entries; one entry per day.
-# -Inner lists have 6 entries each: Unix timestamp, Open price, High Price, Low Price, Close Price, Volume
-# -It looks like: [[1621728000000, 2295.45, 2381.57, 1728.74, 2096.39, 2914548.73125], [1621814400000, 2096.63, 2675.0, 2079.94, 2648.43, 2186632.92245]...]
+```python
+# Retrieve the Asset and datatoken objects
+from ocean_lib.models.datatoken import Datatoken
+asset_did = "did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19"
+asset = ocean.assets.resolve(asset_did)
+datatoken_address = asset.datatokens[0]["address"]
+datatoken = Datatoken(ocean.web3, datatoken_address)
+print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
+
+# Alice gets a datatoken from the dispenser
+amt_dispense_wei = ocean.to_wei(1)
+ocean.dispenser.dispense_tokens(datatoken, amt_dispense_wei, consumer_wallet=alice_wallet)
+bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
+print(f"Alice now holds {bal} access tokens for the data asset.")
+
+# Alice sends datatoken to the service, to get access
+order_tx_id = ocean.assets.pay_for_access_service(asset, alice_wallet)
+print(f"order_tx_id = '{order_tx_id}'")
+
+# Alice now has access. She downloads the asset.
+# If the connection breaks, Alice can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    consumer_wallet=alice_wallet,
+    destination='./',
+    order_tx_id=order_tx_id
+)
+
+# If you encounter issues with getting the data, see the Appendix for a workaround.
+
+import glob
+file_name = glob.glob(file_path + "/*")[0]
+print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
+print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
+
+#verify that file exists
+import os
+assert os.path.exists(file_name), "couldn't find file"
+
+#load from file into memory
+with open(file_name, "r") as file:
+    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
+    data_str = file.read().rstrip().replace('"', '')
+data = eval(data_str)
+
+#data is a list of lists
+# -Outer list has one 6 entries; one entry per day.
+# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price,  ..
+# -It looks like: [[1662998400000,1706.38,1717.87,1693,1713.56],[1663002000000,1713.56,1729.84,1703.21,1729.08],[1663005600000,1729.08,1733.76,1718.09,1728.83],...
 
 #Example: get close prices. These can serve as an approximation to spot price
-close_prices = [x[4] for x in cex_x]
+close_prices = [float(data_at_day[4]) for data_at_day in data]
 ```
+
 
 ## 3.  Make predictions
 
