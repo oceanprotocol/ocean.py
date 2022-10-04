@@ -28,7 +28,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 
 ### 1.2 Create Polygon Account (One-Time)
 
-We'll use Polygon to retrieve Ocean data assets, and publish your ETH predictions.
+You'll be using Polygon to retrieve Ocean data assets, and publish your ETH predictions. So, you will need a Polygon account with a small amount of MATIC to pay for gas. If you have an account already (and its private key), you can skip this section.
 
 In your console, run Python.
 ```console
@@ -47,7 +47,7 @@ export ADDRESS1={account1.address}
 
 Then, hit Ctrl-C to exit the Python console.
 
-Now, you have a Polygon account: private key (with associated address). Save it somewhere safe, like a local file or a password manager. It actually works on any chain, not just Polygon.
+Now, you have a Polygon account: a private key with associated address. It actually works on any chain, not just Polygon. Save the private key somewhere safe, like a local file or a password manager. 
 
 Then, get some MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for transactions of this README.
 
@@ -105,7 +105,7 @@ print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_
 amt_dispense_wei = ocean.to_wei(1)
 ocean.dispenser.dispense_tokens(datatoken, amt_dispense_wei, consumer_wallet=alice_wallet)
 bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
-print(f"Alice now holds {bal} access tokens for the data asset.")
+print(f"Alice now holds {bal} datatokens to access the data asset.")
 
 # Alice sends datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(asset, alice_wallet)
@@ -113,33 +113,24 @@ print(f"order_tx_id = '{order_tx_id}'")
 
 # Alice now has access. She downloads the asset.
 # If the connection breaks, Alice can request again by showing order_tx_id.
+# If you still encounter issues, the Appendix has a workaround.
 file_path = ocean.assets.download_asset(
-    asset=asset,
-    consumer_wallet=alice_wallet,
-    destination='./',
-    order_tx_id=order_tx_id
-)
+    asset, consumer_wallet=alice_wallet, destination='./', order_tx_id=order_tx_id)
 
-# If you encounter issues with getting the data, see the Appendix for a workaround.
-
+# Get file_name
 import glob
 file_name = glob.glob(file_path + "/*")[0]
-print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
 print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
 
-#verify that file exists
-import os
-assert os.path.exists(file_name), "couldn't find file"
-
-#load from file into memory
+# Load file
 with open(file_name, "r") as file:
-    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
     data_str = file.read().rstrip().replace('"', '')
+
 data = eval(data_str)
 
 #data is a list of lists
-# -Outer list has one 6 entries; one entry per day.
-# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price,  ..
+# -Outer list has entries at different times. 
+# -Each inner list has 5 entries: timestamp, Open price, High price, Low price, Close price
 # -It looks like: [[1662998400000,1706.38,1717.87,1693,1713.56],[1663002000000,1713.56,1729.84,1703.21,1729.08],[1663005600000,1729.08,1733.76,1718.09,1728.83],...
 
 #Example: get close prices. These can serve as an approximation to spot price
@@ -261,7 +252,7 @@ print(f"order_tx_id = '{order_tx_id}'")
 # Bob now has access. He downloads the asset.
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    asset=asset, consumer_wallet=bob_wallet, destination='./', order_tx_id=order_tx_id)
+    asset, consumer_wallet=bob_wallet, destination='./', order_tx_id=order_tx_id)
 import glob
 file_name = glob.glob(file_path + "/*")[0]
 print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
