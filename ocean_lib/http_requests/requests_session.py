@@ -8,11 +8,11 @@ from requests.sessions import Session
 
 
 @enforce_types
-DEFAULT_TIMEOUT = 30
+
 
 class TimeoutHTTPAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
-        self.timeout = DEFAULT_TIMEOUT
+        self.timeout = 30
         if "timeout" in kwargs:
             self.timeout = kwargs["timeout"]
             del kwargs["timeout"]
