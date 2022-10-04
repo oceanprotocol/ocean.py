@@ -8,7 +8,7 @@ from requests.sessions import Session
 
 
 @enforce_types
-
+DEFAULT_TIMEOUT = 30
 
 class TimeoutHTTPAdapter(HTTPAdapter):
     def __init__(self, *args, **kwargs):
@@ -35,13 +35,13 @@ def get_requests_session() -> Session:
     session.mount(
         "http://",
         TimeoutHTTPAdapter(
-            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1, timeout=30
+            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1
         ),
     )
     session.mount(
         "https://",
         TimeoutHTTPAdapter(
-            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1, timeout=30
+            pool_connections=25, pool_maxsize=25, pool_block=True, max_retries=1
         ),
     )
     return session
