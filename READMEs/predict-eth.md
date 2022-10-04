@@ -45,13 +45,13 @@ export ADDRESS1={account1.address}
 """)
 ```
 
-Then, hit Ctrl-C to exit the Python console.
+Then, exit the Python console.
 
 Now, you have a Polygon account: a private key with associated address. It actually works on any chain, not just Polygon. Save the private key somewhere safe, like a local file or a password manager. 
 
 Then, get some MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for transactions of this README.
 
-### 1.3 Set envvars
+### 1.3 Set envvars, for Polygon address
 
 In the console:
 ```console
@@ -113,16 +113,13 @@ print(f"order_tx_id = '{order_tx_id}'")
 
 # Alice now has access. She downloads the asset.
 # If the connection breaks, Alice can request again by showing order_tx_id.
-# If you still encounter issues, the Appendix has a workaround.
 file_path = ocean.assets.download_asset(
     asset, consumer_wallet=alice_wallet, destination='./', order_tx_id=order_tx_id)
 
-# Get file_name
+# Load file
 import glob
 file_name = glob.glob(file_path + "/*")[0]
-print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
-
-# Load file
+print(f"file_name: '{file_name}'")
 with open(file_name, "r") as file:
     data_str = file.read().rstrip().replace('"', '')
 
@@ -197,11 +194,13 @@ Your csv url is only open to those who know it. So we only share to selected par
 
 In this section, we'll do a dry run of sharing the predictions with local Ganache testnet, and also show how the predictions are evaluated.
 
+First, to minimize chance of crossed wires: exit your Python console.
+
 ### 5.1 Setup on Ganache
 
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Download barge and run services
-- [x] Setup : Set envvars
+- [x] Setup : Set envvars (for Ganache addresses)
 - [x] Setup : Setup in Python
 
 In this flow, Alice is you -- the participant in the competition.
@@ -218,11 +217,10 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 In the same Python console:
 ```python
-url="<your csv url>" 
-#e.g. url="https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
+url = "<your csv url>" 
+#e.g. url = "https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
 name = "ETH predictions"
 asset = ocean.assets.create_url_asset(name, url, alice_wallet)
-
 datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
@@ -231,12 +229,9 @@ print(f"New asset created, with did={asset.did}, and datatoken_address={datatoke
 
 In the same Python console:
 ```python
-#retrieve Datatoken object
 from ocean_lib.models.datatoken import Datatoken
 datatoken = Datatoken(ocean.web3, datatoken_address)
-
-#send tokens to Bob
-to_address=bob_wallet.address
+to_address = bob_wallet.address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
 
@@ -245,28 +240,24 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 This step and the next simulate what the judges ("Bob" here) will do with the predictions you shared: retrieve them, then calculate NMSE. You can use it to see how your predictions will be scored.
 
 ```python
-# Bob sends 1.0 datatokens to the service, to get access
+# Bob sends datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob now has access. He downloads the asset.
-# If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset, consumer_wallet=bob_wallet, destination='./', order_tx_id=order_tx_id)
+
+# Load file
 import glob
 file_name = glob.glob(file_path + "/*")[0]
-print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
-print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
-
-#verify that file exists
-import os
-assert os.path.exists(file_name), "couldn't find file"
-
+print(f"file_name: '{file_name}'")
 import csv
 import numpy as np
 with open(file_name, "r") as f:
     for row in csv.reader(f):
     	pred_vals = row; break
+
 pred_vals = np.asarray([float(p) for p in pred_vals])
 print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
 
@@ -275,10 +266,11 @@ print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
 
 ### 5.5 Analyze results: calculate NMSE
 
+In the same Python console:
+
 ```python
 #set target_unixtimes
 from datetime import datetime, timedelta
-import numpy as np
 import time
 start_datetime = datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
 target_datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
@@ -287,12 +279,15 @@ assert len(pred_vals) == len(target_datetimes), "wrong # predictions"
 def _unixtime(datetime):
     return time.mktime(datetime.timetuple())
     
+
 target_unixtimes = np.asarray([_unixtime(datetime) for datetime in target_datetimes])
 
 #get the most recent day of *true* ETH price data
 # Warning: This assumes that your predictions are also the most recent day. If they don't line up, errors will be high.
-import ccxt
-allcex_x = ccxt.binance().fetch_ohlcv('ETH/USDT', '1d')
+
+import requests
+result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT")
+allcex_x = result.json() #list with 500 entries. Each data[i] is a list with 6 entries
 allcex_unixtimes = np.asarray([inner[0] for inner in allcex_x])
 allcex_vals = np.asarray([inner[4] for inner in allcex_x])
 
@@ -314,12 +309,12 @@ print(f"NMSE = {nmse}")
 
 Only do these steps once you're satisfied enough to submit the results. You'll be operating on a remote network (Polygon) rather than the previous local one (Ganache).
 
-First, to ensure they don't cross wires: ctrl-c out of (a) Python console and (b) barge running in a different console.
+First, to minimize chance of crossed wires: exit your Python console, and ctrl-c barge running in its console.
 
 ### 6.1 Setup on Polygon
 
 From section 1 of this console, do:
-- [x] Setup: set envvars
+- [x] Setup: set envvars, for Polygon address
 - [x] Setup in Python, for Polygon
 
 ### 6.2 Publish the csv as an Ocean asset, in Polygon
@@ -328,10 +323,10 @@ From section 1 of this console, do:
 
 In the same Python console:
 ```python
-url="<your csv url>" 
-#e.g. url="https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
+url = "<your csv url>" 
+#e.g. url = "https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
 name = "ETH predictions"
-asset = ocean.assets.create_url_asset(name, url, alice_wallet) #this will take 30-60 seconds, be patient
+asset = ocean.assets.create_url_asset(name, url, alice_wallet) #this will may take 30+ seconds, be patient
 datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
@@ -354,18 +349,3 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 Finally, ensure you've filled in your Questbook entry.
 
 Now, you're complete! Thanks for being part of this competition.
-
-## Appendix: Workaround
-
-This is the first round of the predict-ETH competitions. It supplies just one Ocean data asset, a simple ETH/USDT price feed from Binance. Future rounds will have more assets, from more sources both on-chain and off.
-
-But since this is the first round with just one simple asset: if you encounter issues in accessing it, there's a workaround. You can proceed by using the URL directly: https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT
-
-Here's how to do it in Python:
-
-```python
-import requests
-import numpy as np
-result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT")
-data = result.json() #list with 500 entries. Each x[i] is a list with 6 entries
-```
