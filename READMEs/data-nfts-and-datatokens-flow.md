@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
+-   Python 3.8.5 - Python 3.10.4
 
 ### Download barge and run services
 
@@ -51,6 +51,19 @@ pip3 install wheel
 # Install Ocean library. Allow pre-releases to get the latest v4 version.
 pip3 install --pre ocean-lib
 ```
+
+For M1 processors, if the installation of ocean lib fails due to `coincurve` or
+`cryptography` dependencies, please install those individually in the virtual environment
+as temporary fix with the following commands:
+
+```console
+pip3 install coincurve
+pip3 install cryptography
+```
+
+
+
+Those packages are not compiled properly on M1 processors.
 
 ### Set envvars
 
