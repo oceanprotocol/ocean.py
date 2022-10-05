@@ -8,7 +8,7 @@ import logging
 
 from enforce_typing import enforce_types
 
-from ocean_lib.ocean.util import get_web3
+from ocean_lib.web3_internal.contract_utils import get_web3
 
 logging.basicConfig(level=logging.INFO)
 
@@ -18,7 +18,6 @@ DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "RPC_URL": "http://127.0.0.1:8545",
-    "CHAIN_ID": 8996,
     "BLOCK_CONFIRMATIONS": 0,
     "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
@@ -83,7 +82,6 @@ def get_config_dict(chain_id: int, network_url: str) -> dict:
 
     config_helper = copy.deepcopy(config_defaults)
     config_helper.update(CONFIG_NETWORK_HELPER[chain_id])
-    config_helper["CHAIN_ID"] = chain_id
     config_helper["RPC_URL"] = network_url
 
     if chain_id != 8996:
@@ -106,10 +104,9 @@ class ExampleConfig:
 
         if not network_url:
             network_url = "http://127.0.0.1:8545"
-            chain_id = 8996
-        else:
-            w3 = get_web3(network_url)
-            chain_id = w3.eth.chain_id
+
+        w3 = get_web3(network_url)
+        chain_id = w3.eth.chain_id
 
         config_dict = get_config_dict(chain_id, network_url)
         config_dict["RPC_URL"] = network_url

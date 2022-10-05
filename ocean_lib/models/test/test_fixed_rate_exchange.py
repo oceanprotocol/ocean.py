@@ -13,10 +13,10 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeFeesInfo,
 )
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
-from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit

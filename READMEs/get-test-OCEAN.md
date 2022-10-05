@@ -13,7 +13,7 @@ Here, let's get some OCEAN for the Goerli testnet, and verify in Python that we 
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
-- [x] Setup : Install the library from v4 sources
+- [x] Setup : Install the library
 
 ## Create a new address / key
 

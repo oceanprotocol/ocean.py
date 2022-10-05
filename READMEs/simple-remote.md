@@ -50,6 +50,7 @@ import os
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config("https://rpc-mumbai.maticvigil.com")
+config["BLOCK_CONFIRMATIONS"] = 1 #faster
 ocean = Ocean(config)
 
 # Create Alice's wallet

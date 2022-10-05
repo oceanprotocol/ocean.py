@@ -2,78 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Dict, Optional, Union
+from typing import Optional
 
 from enforce_typing import enforce_types
-from web3 import WebsocketProvider
 from web3.main import Web3
-from web3.middleware import geth_poa_middleware
 
-from ocean_lib.ocean.networkutil import chainIdToNetwork
-from ocean_lib.web3_internal.contract_utils import (
-    get_contracts_addresses as get_contracts_addresses_web3,
-)
-from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 
 GANACHE_URL = "http://127.0.0.1:8545"
-
-
-@enforce_types
-def get_web3(network_url: Optional[str] = None) -> Web3:
-    """
-    Return a web3 instance connected via the given network_url.
-    Adds POA middleware if needed.
-    """
-    if not network_url:
-        network_url = GANACHE_URL
-
-    provider = get_web3_connection_provider(network_url)
-    web3 = Web3(provider)
-
-    # Some chains get an ExtraDataLengthError. To fix, inject some POA middleware
-    # - Issue: https://github.com/ethereum/web3.py/issues/549
-    # - Fix: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
-    problem_networks = [
-        "mumbai",
-    ]  # add to this if we find issues in other networks
-    if chainIdToNetwork(web3.eth.chain_id).lower() in problem_networks:
-        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-
-    return web3
-
-
-@enforce_types
-def get_web3_connection_provider(
-    network_url: str,
-) -> Union[CustomHTTPProvider, WebsocketProvider]:
-    """Return the suitable web3 provider based on the network_url.
-
-    Requires going through some gateway such as `infura`.
-
-    Using infura has some issues if your code is relying on evm events.
-    To use events with an infura connection you have to use the websocket interface.
-
-    Make sure the `infura` url for websocket connection has the following format
-    wss://goerli.infura.io/ws/v3/357f2fe737db4304bd2f7285c5602d0d
-    Note the `/ws/` in the middle and the `wss` protocol in the beginning.
-
-    :param network_url: str
-    :return: provider : Union[CustomHTTPProvider, WebsocketProvider]
-    """
-    if network_url.startswith("http"):
-        return CustomHTTPProvider(network_url)
-    elif network_url.startswith("ws"):
-        return WebsocketProvider(network_url)
-    else:
-        msg = (
-            f"The given network_url *{network_url}* does not start with either"
-            f"`http` or `wss`. A correct network url is required."
-        )
-        raise AssertionError(msg)
-
-
-def get_contracts_addresses(config) -> Dict[str, str]:
-    return get_contracts_addresses_web3(config)
 
 
 @enforce_types

@@ -9,11 +9,10 @@ from ocean_lib.example_config import (
     DEFAULT_PROVIDER_URL,
     METADATA_CACHE_URI,
     ExampleConfig,
-    get_config_dict,
 )
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.ocean.util import get_contracts_addresses
-from tests.resources.helper_functions import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 
 
 @pytest.mark.unit
@@ -22,7 +21,6 @@ def test_ganache_example_config():
 
     config = ExampleConfig.get_config()
 
-    assert config["CHAIN_ID"] == 8996
     assert config["RPC_URL"] == "http://127.0.0.1:8545"
     assert config["METADATA_CACHE_URI"] == DEFAULT_METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == DEFAULT_PROVIDER_URL
@@ -35,7 +33,6 @@ def test_polygon_example_config():
 
     config = ExampleConfig.get_config("https://polygon-rpc.com")
 
-    assert config["CHAIN_ID"] == 137
     assert config["RPC_URL"] == "https://polygon-rpc.com"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.polygon.oceanprotocol.com"
@@ -48,7 +45,6 @@ def test_bsc_example_config():
 
     config = ExampleConfig.get_config("https://bsc-dataseed.binance.org")
 
-    assert config["CHAIN_ID"] == 56
     assert config["RPC_URL"] == "https://bsc-dataseed.binance.org"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.bsc.oceanprotocol.com"
@@ -61,18 +57,10 @@ def test_moonbeam_alpha_example_config(monkeypatch):
 
     config = ExampleConfig.get_config("https://rpc.testnet.moonbeam.network")
 
-    assert config["CHAIN_ID"] == 1287
     assert config["RPC_URL"] == "https://rpc.testnet.moonbeam.network"
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.moonbase.oceanprotocol.com"
     assert config["BLOCK_CONFIRMATIONS"] == 3
-
-
-@pytest.mark.unit
-def test_noconfig(monkeypatch):
-    """Tests the config fails with wrong chain id."""
-    with pytest.raises(ValueError, match="could not be fetched!"):
-        get_config_dict(0, "")
 
 
 @pytest.mark.unit

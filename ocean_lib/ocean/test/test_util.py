@@ -11,29 +11,6 @@ from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 
 
 @pytest.mark.unit
-def test_get_web3_connection_provider(monkeypatch):
-    # GANACHE_URL
-    provider = util.get_web3_connection_provider(util.GANACHE_URL)
-    assert provider.endpoint_uri == util.GANACHE_URL
-
-    # typical http uri "http://foo.com"
-    provider = util.get_web3_connection_provider("http://foo.com")
-    assert provider.endpoint_uri == "http://foo.com"
-
-    # typical https uri "https://bar.com"
-    provider = util.get_web3_connection_provider("https://bar.com")
-    assert provider.endpoint_uri == "https://bar.com"
-
-    # non-supported name
-    with pytest.raises(AssertionError):
-        util.get_web3_connection_provider("not_network_name")
-
-    # typical websockets uri "wss://foo.com"
-    provider = util.get_web3_connection_provider("wss://bah.com")
-    assert provider.endpoint_uri == "wss://bah.com"
-
-
-@pytest.mark.unit
 def test_get_ocean_token_address(config):
     addresses = util.get_contracts_addresses(config)
     assert addresses
