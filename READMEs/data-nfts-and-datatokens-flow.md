@@ -28,8 +28,7 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-# (For speed, we turn off components we don't need for quickstarts, like IPFS)
-./start_ocean.sh --no-ipfs --no-dashboard --skip-subgraph-deploy
+./start_ocean.sh
 ```
 
 ### Install the library
