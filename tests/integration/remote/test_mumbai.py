@@ -7,7 +7,6 @@ import random
 import string
 import warnings
 
-import pytest
 import requests
 
 from ocean_lib.ocean.ocean import Ocean
@@ -60,7 +59,6 @@ def test_nonocean_tx(tmp_path):
     assert bob_eth_after > bob_eth_before
 
 
-@pytest.mark.skip(reason="Don't skip, once fixed #943")
 def test_ocean_tx(tmp_path):
     """Do a (simple) Ocean tx on Mumbai"""
 
