@@ -93,33 +93,11 @@ Here, we grab Binance ETH/USDT price feed, which is published through Ocean as a
 In the same Python console:
 
 ```python
-# Retrieve the Asset and datatoken objects
-from ocean_lib.models.datatoken import Datatoken
+# Download file
 asset_did = "did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19"
-asset = ocean.assets.resolve(asset_did)
-datatoken_address = asset.datatokens[0]["address"]
-datatoken = Datatoken(ocean.web3, datatoken_address)
-print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
-
-# Alice gets a datatoken from the dispenser
-amt_dispense_wei = ocean.to_wei(1)
-ocean.dispenser.dispense_tokens(datatoken, amt_dispense_wei, consumer_wallet=alice_wallet)
-bal = ocean.from_wei(datatoken.balanceOf(alice_wallet.address))
-print(f"Alice now holds {bal} datatokens to access the data asset.")
-
-# Alice sends datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, alice_wallet)
-print(f"order_tx_id = '{order_tx_id}'")
-
-# Alice now has access. She downloads the asset.
-# If the connection breaks, Alice can request again by showing order_tx_id.
-file_path = ocean.assets.download_asset(
-    asset, consumer_wallet=alice_wallet, destination='./', order_tx_id=order_tx_id)
+file_name = ocean.assets.download_file(asset_did, alice_wallet)
 
 # Load file
-import glob
-file_name = glob.glob(file_path + "/*")[0]
-print(f"file_name: '{file_name}'")
 with open(file_name, "r") as file:
     data_str = file.read().rstrip().replace('"', '')
 
@@ -240,18 +218,10 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 This step and the next simulate what the judges ("Bob" here) will do with the predictions you shared: retrieve them, then calculate NMSE. You can use it to see how your predictions will be scored.
 
 ```python
-# Bob sends datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
-print(f"order_tx_id = '{order_tx_id}'")
-
-# Bob now has access. He downloads the asset.
-file_path = ocean.assets.download_asset(
-    asset, consumer_wallet=bob_wallet, destination='./', order_tx_id=order_tx_id)
+# Download file
+file_name = ocean.assets.download_file(asset.did, bob_wallet)
 
 # Load file
-import glob
-file_name = glob.glob(file_path + "/*")[0]
-print(f"file_name: '{file_name}'")
 import csv
 import numpy as np
 with open(file_name, "r") as f:
