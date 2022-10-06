@@ -49,21 +49,12 @@ source venv/bin/activate
 pip3 install wheel
 
 # Install Ocean library. Allow pre-releases to get the latest v4 version.
-pip3 install --pre ocean-lib
+pip3 install ocean-lib
 ```
 
-For M1 processors, if the installation of ocean lib fails due to `coincurve` or
-`cryptography` dependencies, please install those individually in the virtual environment
-as temporary fix with the following commands:
+#### Known issues
 
-```console
-pip3 install coincurve
-pip3 install cryptography
-```
-
-
-
-Those packages are not compiled properly on M1 processors.
+- for M1 processors, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues. It is recommended to install them individually, e.g. `pip3 install coincurve && pip3 install cryptography`
 
 ### Set envvars
 
