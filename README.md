@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 
 > Python library to privately & securely publish, exchange, and consume data.
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability) 
+[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
 
 With ocean.py, you can:
@@ -22,19 +22,10 @@ ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
 This is in beta state. If you run into problems, please open up a [new issue](/issues).
 
-- [🏗 Installation](#-installation)
+- [🏗 Installation](READMEs/installation.md)
 - [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
-
-## 🏗 Installation
-
-```console
-#Install the ocean.py library. Allow pre-releases for the latest v4 version. Install wheel first to avoid errors.
-pip install wheel
-pip install --pre ocean-lib
-```
-⚠️ Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
 ## 🏄 Quickstart
 
