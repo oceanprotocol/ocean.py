@@ -699,7 +699,7 @@ class OceanAssets:
         ]
 
     @enforce_types
-    def download_file(self, asset_did:str, wallet:Wallet) -> str:
+    def download_file(self, asset_did: str, wallet: Wallet) -> str:
         """Helper method. Given a did, download file to "./". Returns filename.
 
         Assumes that:
@@ -707,7 +707,7 @@ class OceanAssets:
         - 0th datatoken of this did
         - 0th service of the datatoken
         - the service *is* a download service
-        """         
+        """
         # Retrieve the Asset and datatoken objects
         print("Resolve did...")
         asset = self.resolve(asset_did)
@@ -716,9 +716,9 @@ class OceanAssets:
 
         # Ensure access token
         bal = from_wei(datatoken.balanceOf(wallet.address))
-        if bal >= 1.0: #we're good
+        if bal >= 1.0:  # we're good
             pass
-        else: #try to get freely-dispensed asset. If not free, it'll complain
+        else:  # try to get freely-dispensed asset. If not free, it'll complain
             print("Dispense access token...")
             amt_dispense_wei = to_wei(1)
             dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
@@ -731,10 +731,10 @@ class OceanAssets:
 
         # download the asset
         print("Download file...")
-        file_path = self.download_asset(asset, wallet, './', order_tx_id)
+        file_path = self.download_asset(asset, wallet, "./", order_tx_id)
         file_name = glob.glob(file_path + "/*")[0]
         print(f"Done. File: {file_name}")
-        
+
         return file_name
 
     @enforce_types
