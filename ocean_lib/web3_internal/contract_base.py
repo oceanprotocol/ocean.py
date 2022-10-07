@@ -24,7 +24,8 @@ from ocean_lib.web3_internal.contract_utils import (
 )
 from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
+
+# from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +50,6 @@ class ContractBase(object):
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
         )
-        assert self.contract.caller is not None
 
     @enforce_types
     def __str__(self) -> str:
@@ -175,9 +175,6 @@ class ContractBase(object):
         :param transact: dict arguments for the transaction such as from, gas, etc.
         :return: hex str transaction hash
         """
-        contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
-        contract_function = CustomContractFunction(contract_fn)
-
         _transact = {
             "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
@@ -190,11 +187,15 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        return contract_function.transact(
-            _transact,
-            from_wallet.block_confirmations.value,
-            from_wallet.transaction_timeout.value,
-        ).hex()
+        # TODO: transfer rest of custom contract function, waiting etc.
+        return getattr(self.contract, fn_name)(*fn_args, _transact).txid
+
+        #
+        # return contract_function.transact(
+        #    _transact,
+        #    from_wallet.block_confirmations.value,
+        #    from_wallet.transaction_timeout.value,
+        # ).hex()
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:

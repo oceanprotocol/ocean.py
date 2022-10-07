@@ -76,7 +76,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def router(self) -> str:
-        return self.contract.caller.router()
+        return self.contract.router()
 
     @enforce_types
     def create_fixed_rate(
@@ -278,7 +278,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
-        return self.contract.caller.allowance(
+        return self.contract.allowance(
             ContractBase.to_checksum_address(owner_address),
             ContractBase.to_checksum_address(spender_address),
         )
@@ -317,7 +317,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def is_minter(self, account: str) -> bool:
-        return self.contract.caller.isMinter(ContractBase.to_checksum_address(account))
+        return self.contract.isMinter(ContractBase.to_checksum_address(account))
 
     @enforce_types
     def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
@@ -375,7 +375,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def get_publishing_market_fee(self) -> tuple:
-        return self.contract.caller.getPublishingMarketFee()
+        return self.contract.getPublishingMarketFee()
 
     @enforce_types
     def set_publishing_market_fee(
@@ -397,31 +397,31 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def get_id(self) -> int:
-        return self.contract.caller.getId()
+        return self.contract.getId()
 
     @enforce_types
     def token_name(self) -> str:
-        return self.contract.caller.name()
+        return self.contract.name()
 
     @enforce_types
     def symbol(self) -> str:
-        return self.contract.caller.symbol()
+        return self.contract.symbol()
 
     @enforce_types
     def get_erc721_address(self) -> str:
-        return self.contract.caller.getERC721Address()
+        return self.contract.getERC721Address()
 
     @enforce_types
     def decimals(self) -> int:
-        return self.contract.caller.decimals()
+        return self.contract.decimals()
 
     @enforce_types
     def cap(self) -> int:
-        return self.contract.caller.cap()
+        return self.contract.cap()
 
     @enforce_types
     def is_initialized(self) -> bool:
-        return self.contract.caller.isInitialized()
+        return self.contract.isInitialized()
 
     @enforce_types
     def permit(
@@ -451,31 +451,31 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def get_address_length(self, array: List[str]) -> int:
-        return self.contract.caller.getAddressLength(array)
+        return self.contract.getAddressLength(array)
 
     @enforce_types
     def get_uint_length(self, array: List[int]) -> int:
-        return self.contract.caller.getUintLength(array)
+        return self.contract.getUintLength(array)
 
     @enforce_types
     def get_bytes_length(self, array: List[bytes]) -> int:
-        return self.contract.caller.getBytesLength(array)
+        return self.contract.getBytesLength(array)
 
     @enforce_types
     def get_payment_collector(self) -> str:
-        return self.contract.caller.getPaymentCollector()
+        return self.contract.getPaymentCollector()
 
     @enforce_types
     def get_fixed_rates(self) -> List[Tuple[str, bytes]]:
-        return self.contract.caller.getFixedRates()
+        return self.contract.getFixedRates()
 
     @enforce_types
     def get_dispensers(self) -> List[str]:
-        return self.contract.caller.getDispensers()
+        return self.contract.getDispensers()
 
     @enforce_types
     def balanceOf(self, account: str) -> int:
-        return self.contract.caller.balanceOf(account)
+        return self.contract.balanceOf(account)
 
     @enforce_types
     def withdraw(self, from_wallet: Wallet):
@@ -483,17 +483,15 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def get_permissions(self, user: str) -> list:
-        return self.contract.caller.getPermissions(
-            ContractBase.to_checksum_address(user)
-        )
+        return self.contract.getPermissions(ContractBase.to_checksum_address(user))
 
     @enforce_types
     def permissions(self, user: str) -> list:
-        return self.contract.caller.permissions(ContractBase.to_checksum_address(user))
+        return self.contract.permissions(ContractBase.to_checksum_address(user))
 
     @enforce_types
     def get_total_supply(self) -> int:
-        return self.contract.caller.totalSupply()
+        return self.contract.totalSupply()
 
     @enforce_types
     def get_start_order_logs(
