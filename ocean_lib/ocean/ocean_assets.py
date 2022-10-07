@@ -560,8 +560,8 @@ class OceanAssets:
         proof = (
             proof["publicKey"],
             proof["v"],
-            proof["r"][0].encode("utf-8"),
-            proof["s"][0].encode("utf-8"),
+            proof["r"][0],
+            proof["s"][0],
         )
 
         document, flags, ddo_hash = self._encrypt_ddo(
@@ -573,8 +573,8 @@ class OceanAssets:
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
             flags=flags,
-            data=document.encode("utf-8"),
-            data_hash=ddo_hash.encode("utf-8"),
+            data=document,
+            data_hash=ddo_hash,
             metadata_proofs=[proof],
             from_wallet=publisher_wallet,
         )
