@@ -5,7 +5,7 @@
 import json
 
 import pytest
-from web3 import exceptions
+from brownie import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -216,7 +216,9 @@ def test_start_order(
 
     # Tests exceptions for order_executed
     consumer_signed = web3.eth.sign(provider_fee_address, data=message)
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Consumer signature check failed"
+    ):
         datatoken.order_executed(
             tx_receipt.transactionHash,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
@@ -226,10 +228,6 @@ def test_start_order(
             consumer=consumer_wallet.address,
             from_wallet=publisher_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Consumer signature check failed"
-    )
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -237,7 +235,9 @@ def test_start_order(
     )
     consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Provider signature check failed"
+    ):
         datatoken.order_executed(
             tx_receipt.transactionHash,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
@@ -247,10 +247,6 @@ def test_start_order(
             consumer=consumer_wallet.address,
             from_wallet=publisher_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Provider signature check failed"
-    )
 
     # Tests reuses order
     datatoken.reuse_order(
@@ -350,90 +346,56 @@ def test_exceptions(web3, consumer_wallet, datatoken):
     """Tests revert statements in contracts functions"""
 
     # Should fail to mint if wallet is not a minter
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT MINTER"):
         datatoken.mint(
             account_address=consumer_wallet.address,
             value=to_wei("1"),
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
-    )
 
     #  Should fail to set new FeeCollector if not NFTOwner
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="NOT PAYMENT MANAGER or OWNER"
+    ):
         datatoken.set_payment_collector(
             publish_market_order_fee_address=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT PAYMENT MANAGER or OWNER"
-    )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT DEPLOYER ROLE"):
         datatoken.add_minter(
             minter_address=consumer_wallet.address, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
 
     #  Should fail to removeMinter even if it's minter
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT DEPLOYER ROLE"):
         datatoken.remove_minter(
             minter_address=consumer_wallet.address, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT DEPLOYER ROLE"):
         datatoken.add_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT DEPLOYER ROLE"):
         datatoken.remove_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
 
     # Should fail to setData if NOT erc20Deployer
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT DEPLOYER ROLE"):
         datatoken.set_data(
             data=web3.toHex(text="SomeData"), from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         datatoken.clean_permissions(from_wallet=consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: not NFTOwner"
-    )
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT 721 Contract"):
         datatoken.clean_from_721(from_wallet=consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
-    )
