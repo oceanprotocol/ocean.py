@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+import glob
 import json
 import logging
 import lzma
@@ -26,6 +27,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -37,7 +39,7 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei, from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -695,6 +697,45 @@ class OceanAssets:
             for ddo_dict in self._aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
+
+    @enforce_types
+    def download_file(self, asset_did: str, wallet: Wallet) -> str:
+        """Helper method. Given a did, download file to "./". Returns filename.
+
+        Assumes that:
+        - wallet holds datatoken, or datatoken will freely dispense
+        - 0th datatoken of this did
+        - 0th service of the datatoken
+        - the service *is* a download service
+        """
+        # Retrieve the Asset and datatoken objects
+        print("Resolve did...")
+        asset = self.resolve(asset_did)
+        datatoken_address = asset.datatokens[0]["address"]
+        datatoken = Datatoken(self._web3, datatoken_address)
+
+        # Ensure access token
+        bal = from_wei(datatoken.balanceOf(wallet.address))
+        if bal >= 1.0:  # we're good
+            pass
+        else:  # try to get freely-dispensed asset. If not free, it'll complain
+            print("Dispense access token...")
+            amt_dispense_wei = to_wei(1)
+            dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
+            dispenser = Dispenser(self._web3, dispenser_addr)
+            dispenser.dispense_tokens(datatoken, amt_dispense_wei, wallet)
+
+        # send datatoken to the service, to get access
+        print("Order access...")
+        order_tx_id = self.pay_for_access_service(asset, wallet)
+
+        # download the asset
+        print("Download file...")
+        file_path = self.download_asset(asset, wallet, "./", order_tx_id)
+        file_name = glob.glob(file_path + "/*")[0]
+        print(f"Done. File: {file_name}")
+
+        return file_name
 
     @enforce_types
     def download_asset(

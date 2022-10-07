@@ -62,6 +62,7 @@ def test_script_execution(script, monkeypatch):
                 "config",
                 "ocean",
                 "alice_wallet",
+                "bob_wallet",
                 "data_nft",
                 "datatoken",
             ]:
