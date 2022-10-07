@@ -145,7 +145,7 @@ def test_compact_publish_and_consume(
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
-    
+
     # publish
     name = "CEXA"
     url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
