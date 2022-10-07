@@ -9,6 +9,7 @@ import warnings
 
 import pytest
 import requests
+import time
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
@@ -32,7 +33,8 @@ def test_nonocean_tx(tmp_path):
     nonce = web3.eth.getTransactionCount(alice_wallet.address)
 
     # avoid "replacement transaction underpriced" error: make each tx diff't
-    amt_send = 1e-8 * random.random()
+    normalized_unixtime = time.time() / 1e9
+    amt_send = 1e-8 * (random.random() + normalized_unixtime)
     tx = {
         "nonce": nonce,
         "gasPrice": web3.toWei(gas_price, "gwei"),
