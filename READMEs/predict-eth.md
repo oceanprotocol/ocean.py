@@ -28,6 +28,7 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 
 ### 1.2 Create Polygon Account (One-Time)
 
+
 You'll be using Polygon to retrieve Ocean data assets, and publish your ETH predictions. So, you will need a Polygon account with a small amount of MATIC to pay for gas. If you have an account already (and its private key), you can skip this section.
 
 In your console, run Python.
@@ -182,14 +183,6 @@ From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
 In this flow, Alice is you -- the participant in the competition.
-
-"Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
-
-```python
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
-print(f"bob_wallet.address = '{bob_wallet.address}'")
-```
 
 ### 5.2 Publish the csv as an Ocean asset
 

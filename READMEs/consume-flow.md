@@ -27,13 +27,6 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
 
-"Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
-```python
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
-print(f"bob_wallet.address = '{bob_wallet.address}'")
-```
-
 ## 2. Alice publishes dataset
 
 Now, you're Alice. From [publish-flow](publish-flow.md), do:
@@ -56,6 +49,7 @@ datatoken.mint(to_address, amt_tokens, alice_wallet)
 
 In the same Python console:
 ```python
+# Bob sends a datatoken to the service to get access; then downloads
 file_name = ocean.assets.download_file(asset.did, bob_wallet)
 ```
 
@@ -71,7 +65,13 @@ Congrats to Bob for buying and consuming a data asset!
 
 ## Appendix. Further Flexibility
 
-We can un-bundle step 4's `download_file()` into two pieces, as follows.
+Step 4's `download_file()` did three things:
+
+- Checked if Bob has access tokens. Bob did, so nothing else needed
+- Sent a datatoken to the service to get access
+- Downloaded the file
+
+Here are the last two steps, un-bundled.
 
 In the same Python console:
 ```python
