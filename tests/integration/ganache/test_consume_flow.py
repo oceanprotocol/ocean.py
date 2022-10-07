@@ -133,24 +133,23 @@ def test_consume_flow(
         os.listdir(os.path.join(destination, os.listdir(destination)[0]))
     ) == len(files), "The asset folder is empty."
 
-    
+
 @pytest.mark.integration
 def test_compact_publish_and_consume(
     web3: Web3,
     ocean_assets,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-):    
-    #publish
+):
+    # publish
     name = "CEXA"
     url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
     asset = ocean_assets.create_url_asset(name, url, publisher_wallet)
 
-    #share access
+    # share access
     datatoken_address = asset.datatokens[0]["address"]
     datatoken = Datatoken(web3, datatoken_address)
     datatoken.mint(consumer_wallet.address, to_wei(1), publisher_wallet)
 
-    #consume
+    # consume
     file_name = ocean_assets.download_file(asset.did, consumer_wallet)
-    
