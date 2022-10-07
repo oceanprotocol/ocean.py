@@ -5,12 +5,14 @@
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
@@ -73,8 +75,26 @@ def setup_all(request, config, web3, ocean_token):
 
 
 @pytest.fixture
+def ocean_assets():
+    return OceanAssets(_config(), _web3(), DataServiceProvider)
+
+
+@pytest.fixture
 def config():
+    return _config()
+
+
+def _config():
     return get_example_config()
+
+
+@pytest.fixture
+def web3():
+    return _web3()
+
+
+def _web3():
+    return get_web3("http://127.0.0.1:8545")
 
 
 @pytest.fixture
@@ -85,11 +105,6 @@ def publisher_ocean_instance():
 @pytest.fixture
 def consumer_ocean_instance():
     return get_consumer_ocean_instance()
-
-
-@pytest.fixture
-def web3():
-    return get_web3("http://127.0.0.1:8545")
 
 
 @pytest.fixture

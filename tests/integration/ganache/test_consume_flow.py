@@ -12,7 +12,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -22,6 +21,7 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 @pytest.mark.integration
 def test_consume_flow(
+    ocean_assets,
     web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
@@ -29,8 +29,6 @@ def test_consume_flow(
     data_nft: DataNFT,
     file1: FilesType,
 ):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -79,7 +77,7 @@ def test_consume_flow(
     )
 
     # Initialize service
-    response = data_provider.initialize(
+    response = DataServiceProvider.initialize(
         did=asset.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
@@ -134,3 +132,25 @@ def test_consume_flow(
     assert len(
         os.listdir(os.path.join(destination, os.listdir(destination)[0]))
     ) == len(files), "The asset folder is empty."
+
+    
+@pytest.mark.integration
+def test_compact_publish_and_consume(
+    web3: Web3,
+    ocean_assets,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+):    
+    #publish
+    name = "CEXA"
+    url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
+    asset = ocean_assets.create_url_asset(name, url, publisher_wallet)
+
+    #share access
+    datatoken_address = asset.datatokens[0]["address"]
+    datatoken = Datatoken(web3, datatoken_address)
+    datatoken.mint(consumer_wallet.address, to_wei(1), publisher_wallet)
+
+    #consume
+    file_name = ocean_assets.download_file(asset.did, consumer_wallet)
+    
