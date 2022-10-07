@@ -3,7 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import Web3, exceptions
+from brownie import exceptions
+from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -61,12 +62,8 @@ def test_permissions(
     assert data_nft.token_uri(1) == "https://oceanprotocol.com/nft/"
 
     # Tests failing clearing permissions
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
-    )
 
     # Tests clearing permissions
     data_nft.add_to_create_erc20_list(
@@ -82,12 +79,8 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
-    )
 
     data_nft.clean_permissions(from_wallet=publisher_wallet)
 
@@ -111,14 +104,10 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         data_nft.add_manager(
             manager_address=another_consumer_addr, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
-    )
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.MANAGER]
     )
@@ -134,14 +123,10 @@ def test_permissions(
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.add_manager(manager_address=consumer_addr, from_wallet=publisher_wallet)
     assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         data_nft.remove_manager(
             manager_address=publisher_addr, from_wallet=consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
-    )
     assert data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -158,7 +143,7 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT MANAGER"):
         data_nft.execute_call(
             operation=0,
             to=consumer_addr,
@@ -166,10 +151,6 @@ def test_permissions(
             data=web3.toHex(text="SomeData"),
             from_wallet=another_consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721RolesAddress: NOT MANAGER"
-    )
 
     # Tests calling execute_call with a manager role
     assert data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.MANAGER]
@@ -188,40 +169,31 @@ def test_permissions(
     )
     assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.STORE]
     data_nft.set_new_data(
-        key=web3.keccak(text="ARBITRARY_KEY"),
-        value=web3.toHex(text="SomeData"),
+        key=b"ARBITRARY_KEY",
+        value=b"SomeData",
         from_wallet=consumer_wallet,
     )
-    assert data_nft.get_data(key=web3.keccak(text="ARBITRARY_KEY")) == b"SomeData"
+    assert data_nft.get_data(key=b"ARBITRARY_KEY").hex() == b"SomeData".hex()
 
     # Tests failing setting new data if user has not STORE UPDATER role.
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.STORE]
     )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT STORE UPDATER"):
         data_nft.set_new_data(
-            key=web3.keccak(text="ARBITRARY_KEY"),
-            value=web3.toHex(text="SomeData"),
+            key=b"ARBITRARY_KEY",
+            value=b"SomeData",
             from_wallet=another_consumer_wallet,
         )
 
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT STORE UPDATER"
-    )
-
     # Tests failing setting ERC20 data
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT ERC20 Contract"):
         data_nft.set_data_erc20(
-            key=web3.keccak(text="FOO_KEY"),
-            value=web3.toHex(text="SomeData"),
+            key=b"FOO_KEY",
+            value=b"SomeData",
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT ERC20 Contract"
-    )
-    assert data_nft.get_data(key=web3.keccak(text="FOO_KEY")) == b""
+    assert data_nft.get_data(key=b"FOO_KEY").hex() == b"".hex()
 
 
 def test_add_and_remove_permissions(
@@ -380,22 +352,17 @@ def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.UPDATE_METADATA]
     )
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT METADATA_ROLE"):
         data_nft.set_metadata(
             metadata_state=1,
             metadata_decryptor_url="http://myprovider:8030",
             metadata_decryptor_address="0x123",
-            flags=web3.toBytes(hexstr=BLOB),
-            data=web3.toBytes(hexstr=BLOB),
-            data_hash=web3.toBytes(hexstr=BLOB),
+            flags=BLOB.encode("utf-8"),
+            data=BLOB,
+            data_hash=BLOB,
             metadata_proofs=[],
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT METADATA_ROLE"
-    )
 
 
 @pytest.mark.unit
@@ -585,7 +552,7 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
     assert not (
         data_nft.get_permissions(consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -598,11 +565,6 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
-        "ERC20DEPLOYER_ROLE"
-    )
 
 
 @pytest.mark.unit
@@ -641,16 +603,12 @@ def test_erc721_datatoken_functions(
     assert data_nft.token_uri(token_id=1) == registered_event[0].args.tokenURI
 
     # Tests failing setting token URI by another user
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not NFTOwner"):
         data_nft.set_token_uri(
             token_id=1,
             new_token_uri="https://foourl.com/nft/",
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
-    )
 
     # Tests transfer functions
     datatoken.mint(
@@ -684,16 +642,12 @@ def test_erc721_datatoken_functions(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT MINTER"):
         datatoken.mint(
             account_address=consumer_addr,
             value=to_wei("1"),
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
-    )
 
     datatoken.add_minter(minter_address=consumer_addr, from_wallet=consumer_wallet)
     datatoken.mint(
@@ -709,32 +663,28 @@ def test_fail_transfer_function(
     consumer_wallet, publisher_addr, consumer_addr, data_nft
 ):
     """Tests failure of using the transfer functions."""
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError,
+        match="transfer caller is not owner nor approved",
+    ):
         data_nft.transfer_from(
             from_address=publisher_addr,
             to_address=consumer_addr,
             token_id=1,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer caller is not "
-        "owner nor approved"
-    )
 
     # Tests for safe transfer as well
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError,
+        match="transfer caller is not owner nor approved",
+    ):
         data_nft.safe_transfer_from(
             from_address=publisher_addr,
             to_address=consumer_addr,
             token_id=1,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer caller is not "
-        "owner nor approved"
-    )
 
 
 def test_transfer_nft(
