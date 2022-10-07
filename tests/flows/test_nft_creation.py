@@ -189,7 +189,7 @@ def test_successful_data_nft_creation(web3, config, publisher_wallet):
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
     owner_balance = data_nft.balance_of(publisher_wallet.address)
-    assert data_nft.contract.caller.name() == "NFT"
+    assert data_nft.contract.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert owner_balance == 1
 

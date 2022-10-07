@@ -53,7 +53,7 @@ def test_main(
 
     # Check datatoken params
     assert datatoken.get_id() == 1
-    assert datatoken.contract.caller.name() == "DT1"
+    assert datatoken.contract.name() == "DT1"
     assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256

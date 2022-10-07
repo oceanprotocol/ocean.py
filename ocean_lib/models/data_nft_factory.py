@@ -100,37 +100,37 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
     @enforce_types
     def get_current_nft_count(self) -> int:
-        return self.contract.caller.getCurrentNFTCount()
+        return self.contract.getCurrentNFTCount()
 
     @enforce_types
     def get_nft_template(self, template_index: int) -> list:
-        return self.contract.caller.getNFTTemplate(template_index)
+        return self.contract.getNFTTemplate(template_index)
 
     @enforce_types
     def get_current_nft_template_count(self) -> int:
-        return self.contract.caller.getCurrentNFTTemplateCount()
+        return self.contract.getCurrentNFTTemplateCount()
 
     @enforce_types
     def is_contract(self, account_address: str) -> bool:
-        return self.contract.caller.isContract(
+        return self.contract.isContract(
             ContractBase.to_checksum_address(account_address)
         )
 
     @enforce_types
     def get_current_token_count(self) -> int:
-        return self.contract.caller.getCurrentTokenCount()
+        return self.contract.getCurrentTokenCount()
 
     @enforce_types
     def get_token_template(self, index: int) -> list:
-        return self.contract.caller.getTokenTemplate(index)
+        return self.contract.getTokenTemplate(index)
 
     @enforce_types
     def get_current_template_count(self) -> int:
-        return self.contract.caller.getCurrentTemplateCount()
+        return self.contract.getCurrentTemplateCount()
 
     @enforce_types
     def template_count(self) -> int:
-        return self.contract.caller.templateCount()
+        return self.contract.templateCount()
 
     @enforce_types
     def start_multiple_token_order(
@@ -445,8 +445,8 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
     @enforce_types
     def check_datatoken(self, datatoken_address: str) -> bool:
-        return self.contract.caller.erc20List(datatoken_address)
+        return self.contract.erc20List(datatoken_address)
 
     @enforce_types
     def check_nft(self, nft_address: str) -> bool:
-        return self.contract.caller.erc721List(nft_address) == nft_address
+        return self.contract.erc721List(nft_address) == nft_address

@@ -47,7 +47,7 @@ def test_permissions(
     data_nft,
 ):
     """Tests permissions' functions."""
-    assert data_nft.contract.caller.name() == "NFT"
+    assert data_nft.contract.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert data_nft.balance_of(account=publisher_addr) == 1
 
@@ -771,7 +771,7 @@ def test_transfer_nft(
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.caller.name() == "NFT to TRANSFER"
+    assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
     tx = data_nft.safe_transfer_from(
@@ -1039,7 +1039,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert registered_event[0].args.admin == publisher_addr
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.caller.name() == "NFT to TRANSFER"
+    assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
     # Creates an ERC20

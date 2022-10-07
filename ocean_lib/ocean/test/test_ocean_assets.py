@@ -119,7 +119,7 @@ def test_update_datatokens(
     ddo.datatokens.append(
         {
             "address": datatoken.address,
-            "name": datatoken.contract.caller.name(),
+            "name": datatoken.contract.name(),
             "symbol": datatoken.symbol(),
             "serviceId": access_service.id,
         }

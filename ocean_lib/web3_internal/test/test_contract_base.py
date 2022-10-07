@@ -5,7 +5,6 @@
 
 import pytest
 from enforce_typing import enforce_types
-from web3.contract import ContractCaller
 
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -56,7 +55,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
 
     # test attributes
     assert factory.name == "ERC721Factory"
-    assert isinstance(factory.contract.caller, ContractCaller)
     assert factory.contract is not None
     assert factory.contract.address == nft_factory_address
     assert ContractBase.to_checksum_address(nft_factory_address) == nft_factory_address

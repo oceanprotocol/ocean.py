@@ -97,7 +97,7 @@ def test_main(
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.caller.name() == "DT1"
+    assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
@@ -196,7 +196,7 @@ def test_main(
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     data_nft_address2 = registered_nft_event[0].args.newTokenAddress
     data_nft_token2 = DataNFT(web3, data_nft_address2)
-    assert data_nft_token2.contract.caller.name() == "72120Bundle"
+    assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
 
     registered_token_event = data_nft_factory.get_event_log(
@@ -210,7 +210,7 @@ def test_main(
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address2 = registered_token_event[0].args.newTokenAddress
     datatoken2 = Datatoken(web3, datatoken_address2)
-    assert datatoken2.contract.caller.name() == "DTB1"
+    assert datatoken2.contract.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
 
     # Tests creating NFT with ERC20 and with Fixed Rate Exchange successfully.
@@ -281,7 +281,7 @@ def test_main(
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     data_nft_address4 = registered_nft_event[0].args.newTokenAddress
     data_nft_token4 = DataNFT(web3, data_nft_address4)
-    assert data_nft_token4.contract.caller.name() == "72120Bundle"
+    assert data_nft_token4.contract.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
 
     registered_token_event = data_nft_factory.get_event_log(
@@ -295,7 +295,7 @@ def test_main(
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address4 = registered_token_event[0].args.newTokenAddress
     datatoken4 = Datatoken(web3, datatoken_address4)
-    assert datatoken4.contract.caller.name() == "DTWithPool"
+    assert datatoken4.contract.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
 
     registered_fixed_rate_event = datatoken4.get_event_log(
@@ -348,7 +348,7 @@ def test_main(
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     data_nft_address5 = registered_nft_event[0].args.newTokenAddress
     data_nft_token5 = DataNFT(web3, data_nft_address5)
-    assert data_nft_token5.contract.caller.name() == "72120Bundle"
+    assert data_nft_token5.contract.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
 
     registered_token_event = data_nft_factory.get_event_log(
@@ -362,7 +362,7 @@ def test_main(
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address5 = registered_token_event[0].args.newTokenAddress
     datatoken5 = Datatoken(web3, datatoken_address5)
-    assert datatoken5.contract.caller.name() == "DTWithPool"
+    assert datatoken5.contract.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
     dispenser = Dispenser(web3, dispenser_address)
@@ -450,7 +450,7 @@ def test_start_multiple_order(
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.caller.name() == "DT1"
+    assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
     assert data_nft_factory.check_nft(token_address)
 
