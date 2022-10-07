@@ -140,7 +140,8 @@ pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(24)]
 In the same Python console:
 ```python
 import csv
-with open("/tmp/pred_vals.csv", "w") as f:
+file_name = "/tmp/pred_vals.csv"
+with open(file_name, "w") as f:
     writer = csv.writer(f)
     writer.writerow(pred_vals)
 ```
@@ -154,19 +155,14 @@ The csv will look something like:
 
 ### 4.2 Put the csv online
 
-You can put it online however you wish. Here's one way, with Google Drive.
+You can put it online however you wish. Ocean makes it convenient to upload to permanent decentralized file storage, via Bundlr / Arweave.
 
-1. First, navigate to the GFolder in GDrive you wish to upload the file to.
-2. Then, right click anywhere and select "File Upload".
-3. Once the csv is uploaded, right click on the file, and select "Share".
-4. In the popup, ensure that "General Access" is set to "Anyone with the link".
-5. Also in the popup, click "Copy link". It should look something like `https://drive.google.com/file/d/1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy/view?usp=sharing`. Then, in the popup, click "Done".
-6. If you paste the copied link into the browser, it will load an HTML page. But we don't want an html url, we want a  _downloadable_ one. Here's how. 
-   - First, note the `<FILE-ID>` from the previous step (e.g. "1uZ..RRy").
-   - Then, create a URL according to: `https://drive.google.com/uc?export=download&id=<FILE-ID>`. **This is your url.** 
-   - In our running example, the url is `https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy`
+In the same Python console:
+```python
+url = ocean.upload_file(file_name, alice_wallet.private_key
+```
 
-Your csv url is only open to those who know it. So we only share to selected parties (the judges).
+Your url is only open to those who know it. So we only share to selected parties (the judges).
 
 
 ## 5. Share predictions test, via Ganache
