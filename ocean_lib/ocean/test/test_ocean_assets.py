@@ -8,13 +8,14 @@ import uuid
 from datetime import datetime
 from unittest.mock import patch
 
+import brownie
 import eth_keys
 import pytest
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
@@ -58,7 +59,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
         "ocean_lib.ocean.ocean_assets.DataNFTFactoryContract.verify_nft"
     ) as mock:
         mock.return_value = False
-        with pytest.raises(ContractNotFound):
+        with pytest.raises(brownie.exceptions.ContractNotFound):
             _asset = publisher_ocean_instance.assets.update(
                 asset=ddo, publisher_wallet=publisher_wallet
             )
@@ -709,7 +710,7 @@ def test_asset_creation_errors(
     _, metadata, files = create_basics(config, web3, data_provider)
 
     some_random_address = ZERO_ADDRESS
-    with pytest.raises(ContractNotFound):
+    with pytest.raises(brownie.exceptions.ContractNotFound):
         publisher_ocean_instance.assets.create(
             metadata=metadata,
             publisher_wallet=publisher_wallet,

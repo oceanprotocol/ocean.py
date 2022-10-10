@@ -21,7 +21,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -433,12 +433,6 @@ class OceanAssets:
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
-        else:
-            # verify nft address
-            if not data_nft_factory.verify_nft(data_nft_address):
-                raise ContractNotFound(
-                    f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
-                )
 
         assert (
             data_nft_address
@@ -608,17 +602,7 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config_dict)
 
-        address = get_address_of_type(
-            self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
-        )
-        data_nft_factory = DataNFTFactoryContract(self._web3, address)
         data_nft_address = asset.nft_address
-
-        # Verify nft address
-        if not data_nft_factory.verify_nft(data_nft_address):
-            raise ContractNotFound(
-                f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
-            )
 
         assert (
             data_nft_address
