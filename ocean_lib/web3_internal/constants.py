@@ -26,8 +26,7 @@ MIN_INT256 = 2**255 * -1
 block_number poll interval = 1/2 average block time for a given chain"""
 BLOCK_NUMBER_POLL_INTERVAL = {
     1: 6.5,
-    3: 6.0,
-    4: 7.5,
+    5: 7.5,
     56: 1.5,
     137: 1.0,
     246: 2.6,
