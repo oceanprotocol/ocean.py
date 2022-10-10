@@ -14,7 +14,7 @@ The READMEs use one or two remote accounts, with keys `REMOTE_TEST_PRIVATE_KEY1`
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
 
-## 2. Create two new accounts
+## 2. Create two new accounts (one-time)
 
 In your console, run Python.
 ```console

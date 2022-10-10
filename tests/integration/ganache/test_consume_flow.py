@@ -80,7 +80,7 @@ def test_consume_flow(
     )
 
     # Initialize service
-    response = data_provider.initialize(
+    response = DataServiceProvider.initialize(
         did=asset.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
@@ -135,3 +135,27 @@ def test_consume_flow(
     downloaded_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
     assert len(downloaded_files) == len(files), "Wrong number of files downloaded."
     assert "shs_dataset_test.txt" in downloaded_files
+
+
+@pytest.mark.integration
+def test_compact_publish_and_consume(
+    web3: Web3,
+    config: dict,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+):
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, web3, data_provider)
+
+    # publish
+    name = "CEXA"
+    url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
+    asset = ocean_assets.create_url_asset(name, url, publisher_wallet)
+
+    # share access
+    datatoken_address = asset.datatokens[0]["address"]
+    datatoken = Datatoken(web3, datatoken_address)
+    datatoken.mint(consumer_wallet.address, to_wei(1), publisher_wallet)
+
+    # consume
+    file_name = ocean_assets.download_file(asset.did, consumer_wallet)
