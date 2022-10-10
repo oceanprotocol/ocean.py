@@ -390,7 +390,7 @@ def test_compute_raw_algo(
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip, once fixed #988")
+# @pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_registered_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -409,7 +409,7 @@ def test_compute_registered_algo(
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip, once fixed #988")
+# @pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_reuse_order(
     publisher_wallet,
     publisher_ocean_instance,
@@ -429,7 +429,7 @@ def test_compute_reuse_order(
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip, once fixed #988")
+# @pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
@@ -452,7 +452,7 @@ def test_compute_multi_inputs(
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip, once fixed #988")
+# @pytest.mark.skip(reason="Don't skip, once fixed #988")
 def test_compute_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -491,7 +491,7 @@ def test_compute_trusted_algorithm(
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip once fixed #905")
+# @pytest.mark.skip(reason="Don't skip once fixed #905")
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
