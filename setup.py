@@ -61,9 +61,9 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8==3.9.2",
+    "flake8==5.0.4",
     "isort==5.10.1",
-    "black==22.3.0",
+    "black==22.6.0",  # need to keep this up to date to brownie
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",

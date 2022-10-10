@@ -8,11 +8,11 @@ repos:
     hooks:
     - id: isort
 -   repo: https://github.com/psf/black
-    rev: 22.3.0
+    rev: 'refs/tags/22.6.0:refs/tags/22.6.0'
     hooks:
     -   id: black
 -   repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+    rev: 5.0.4
     hooks:
     - id: flake8
 -   repo: https://github.com/johann-petrak/licenseheaders.git

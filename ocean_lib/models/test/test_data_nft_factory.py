@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
+from brownie import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -602,22 +602,16 @@ def test_fail_get_templates(web3, config):
     data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
 
     # Should fail to get the Datatoken template if index = 0
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Template index doesnt exist"
+    ):
         data_nft_factory.get_token_template(0)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: "
-        "Template index doesnt exist"
-    )
 
     # Should fail to get the Datatoken template if index > templateCount
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Template index doesnt exist"
+    ):
         data_nft_factory.get_token_template(3)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: "
-        "Template index doesnt exist"
-    )
 
 
 @pytest.mark.unit
@@ -656,7 +650,9 @@ def test_fail_create_erc20(
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Template index doesnt exist"
+    ):
         data_nft.create_erc20(
             template_index=0,
             name="DT1",
@@ -669,14 +665,11 @@ def test_fail_create_erc20(
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
-        "doesnt exist"
-    )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="Template index doesnt exist"
+    ):
         data_nft.create_erc20(
             template_index=3,
             name="DT1",
@@ -689,15 +682,10 @@ def test_fail_create_erc20(
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
-        "doesnt exist"
-    )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.get_permissions(another_consumer_wallet.address)[1] is False
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -710,11 +698,6 @@ def test_fail_create_erc20(
             bytess=[b""],
             from_wallet=another_consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
-        "ERC20DEPLOYER_ROLE"
-    )
 
 
 @pytest.mark.unit
