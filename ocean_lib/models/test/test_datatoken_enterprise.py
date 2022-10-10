@@ -5,7 +5,7 @@
 import json
 
 import pytest
-from web3 import exceptions
+from brownie import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -48,18 +48,16 @@ def test_buy_from_dispenser_and_order(
     assert status[1] == publisher_wallet.address
     assert status[2] is True
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError,
+        match="This address is not allowed to request DT",
+    ):
         dispenser.dispense(
             datatoken=datatoken_enterprise_token.address,
             amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert This address is not allowed to request DT"
-    )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
@@ -196,13 +194,15 @@ def test_buy_from_fre_and_order(
         filters=None,
     )
 
-    exchange_id = new_fixed_rate_event[0].args.exchangeId
+    exchange_id = "0x" + new_fixed_rate_event[0].args.exchangeId.hex()
     status = fixed_rate_exchange.get_exchange(exchange_id)
 
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        exceptions.VirtualMachineError, match="This address is not allowed to swap"
+    ):
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
             datatoken_amount=to_wei("1"),
@@ -211,11 +211,6 @@ def test_buy_from_fre_and_order(
             consume_market_swap_fee_amount=0,
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: This address is not allowed to swap"
-    )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address

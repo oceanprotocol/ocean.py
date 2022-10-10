@@ -31,7 +31,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         exchange_contract: str,
-        exchange_id: bytes,
+        exchange_id: str,
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,

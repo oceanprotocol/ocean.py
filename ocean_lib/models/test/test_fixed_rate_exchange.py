@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
+from brownie import exceptions
 
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
@@ -121,7 +121,7 @@ def test_exchange_rate_creation(
     assert registered_event[0].args.owner == consumer_addr
     assert len(fixed_exchange.get_exchanges()) == (number_of_exchanges_before + 1)
 
-    exchange_id = registered_event[0].args.exchangeId
+    exchange_id = "0x" + registered_event[0].args.exchangeId.hex()
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
@@ -180,14 +180,10 @@ def test_exchange_rate_creation(
     assert rate == exchange_rate
 
     # Buy should fail if price is too high
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="Too many base tokens"):
         fixed_exchange.buy_dt(
             exchange_id, amount_dt_to_sell, 1, ZERO_ADDRESS, 0, another_consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: Too many base tokens"
-    )
 
     ocean_token.transfer(
         another_consumer_addr,
@@ -350,14 +346,10 @@ def test_exchange_rate_creation(
 
     # Market fee collector update
     # Only market fee collector should be able to update market_fee_collector
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(exceptions.VirtualMachineError, match="not marketFeeCollector"):
         fixed_exchange.update_market_fee_collector(
             exchange_id, consumer_addr, consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert not marketFeeCollector"
-    )
 
     fixed_exchange.update_market_fee_collector(
         exchange_id, consumer_addr, another_consumer_wallet

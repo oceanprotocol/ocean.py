@@ -899,7 +899,7 @@ def test_nft_transfer_with_fre(
     assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
     assert fre_event[0].args.owner == consumer_addr
 
-    exchange_id = fre_event[0].args.exchangeId
+    exchange_id = "0x" + fre_event[0].args.exchangeId.hex()
 
     # Exchange should have supply and fees setup
     exchange_details = fixed_exchange.get_exchange(exchange_id)
@@ -1050,7 +1050,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
     assert fre_event[0].args.owner == publisher_addr
 
-    exchange_id = fre_event[0].args.exchangeId
+    exchange_id = "0x" + fre_event[0].args.exchangeId.hex()
 
     exchange_details = fixed_exchange.get_exchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == publisher_addr
