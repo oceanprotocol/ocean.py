@@ -244,14 +244,12 @@ def test_fileinfo(
     assert fileinfo_result.status_code == 200
     files_info = fileinfo_result.json()
 
-    assert len(files_info) == 3
+    expected_content = ["text/plain", "text/xml", "application/octet-stream"]
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
         assert file["checksum"]
         assert file["valid"] is True
-    assert files_info[0]["contentType"] == "text/plain"
-    assert files_info[1]["contentType"] == "text/xml"
-    assert files_info[2]["contentType"] == "application/octet-stream"
+        assert file["contentType"] == expected_content[file_index]
 
 
 @pytest.mark.integration
