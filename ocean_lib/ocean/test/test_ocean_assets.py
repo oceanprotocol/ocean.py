@@ -55,15 +55,6 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
-    with patch(
-        "ocean_lib.ocean.ocean_assets.DataNFTFactoryContract.verify_nft"
-    ) as mock:
-        mock.return_value = False
-        with pytest.raises(brownie.exceptions.ContractNotFound):
-            _asset = publisher_ocean_instance.assets.update(
-                asset=ddo, publisher_wallet=publisher_wallet
-            )
-
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo, publisher_wallet=publisher_wallet
     )
