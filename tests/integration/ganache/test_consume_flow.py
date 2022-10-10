@@ -21,14 +21,14 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("file1", ["url", "arweave"], indirect=["file1"])
+@pytest.mark.parametrize("file4", ["url", "arweave"], indirect=["file4"])
 def test_consume_flow(
     web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
-    file1: FilesType
+    file4: FilesType
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
@@ -42,7 +42,7 @@ def test_consume_flow(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    files = [file1]
+    files = [file4]
 
     # Publish a plain asset with one data token on chain
     asset = ocean_assets.create(
