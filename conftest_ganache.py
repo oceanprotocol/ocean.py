@@ -248,8 +248,11 @@ def another_consumer_addr():
 
 
 @pytest.fixture
-def file1():
-    return get_file1()
+def file1(request):
+    if request.param == "url":
+        return get_file1()
+    else:
+        return get_arweave_file()
 
 
 @pytest.fixture

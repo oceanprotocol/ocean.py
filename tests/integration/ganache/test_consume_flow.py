@@ -13,7 +13,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.structures.file_objects import ArweaveFile, FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -21,14 +21,14 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.integration
+@pytest.mark.parametrize("file1", ["url", "arweave"], indirect=["file1"])
 def test_consume_flow(
     web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
-    file1: FilesType,
-    arweave_file: FilesType,
+    file1: FilesType
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
@@ -42,7 +42,7 @@ def test_consume_flow(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    files = [file1, arweave_file]
+    files = [file1]
 
     # Publish a plain asset with one data token on chain
     asset = ocean_assets.create(
@@ -132,9 +132,14 @@ def test_consume_flow(
         service=service,
     )
 
-    downloaded_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
+    downloaded_directory = os.path.join(destination, os.listdir(destination)[0])
+    downloaded_files = os.listdir(downloaded_directory)
     assert len(downloaded_files) == len(files), "Wrong number of files downloaded."
-    assert "shs_dataset_test.txt" in downloaded_files
+    if isinstance(file1, ArweaveFile):
+        with open(os.path.join(downloaded_directory, downloaded_files[0])) as f:
+            assert f.readline() == "% 1. Title: Branin Function\n"
+    else:
+        assert "shs_dataset_test.txt" in downloaded_files
 
 
 @pytest.mark.integration
