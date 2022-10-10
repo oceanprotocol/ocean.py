@@ -255,7 +255,7 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
-        metadata_decryptor_address="0x123",
+        metadata_decryptor_address=b"0x123",
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
@@ -279,7 +279,7 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address="0x123",
+        metadata_decryptor_address=b"0x123",
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
@@ -304,7 +304,7 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata_token_uri(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address=publisher_addr,
+        metadata_decryptor_address=b"0x123",
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
@@ -356,7 +356,7 @@ def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
         data_nft.set_metadata(
             metadata_state=1,
             metadata_decryptor_url="http://myprovider:8030",
-            metadata_decryptor_address="0x123",
+            metadata_decryptor_address=b"0x123",
             flags=BLOB.encode("utf-8"),
             data=BLOB,
             data_hash=BLOB,

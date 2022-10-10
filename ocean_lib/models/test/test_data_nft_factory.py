@@ -390,7 +390,7 @@ def test_main(
         nft_owner=publisher_wallet.address,
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
-        metadata_decryptor_address=provider_wallet.address,
+        metadata_decryptor_address=b"0x123",
         metadata_flags=bytes(0),
         metadata_data=Web3.toHex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),

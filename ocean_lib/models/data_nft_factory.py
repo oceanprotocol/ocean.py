@@ -380,7 +380,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         nft_owner: str,
         metadata_state: int,
         metadata_decryptor_url: str,
-        metadata_decryptor_address: str,
+        metadata_decryptor_address: bytes,
         metadata_flags: bytes,
         metadata_data: Union[str, bytes],
         metadata_data_hash: Union[str, bytes],
@@ -401,7 +401,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 (
                     metadata_state,
                     metadata_decryptor_url,
-                    ContractBase.to_checksum_address(metadata_decryptor_address),
+                    metadata_decryptor_address,
                     metadata_flags,
                     metadata_data,
                     metadata_data_hash,

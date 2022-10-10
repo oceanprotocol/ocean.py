@@ -565,7 +565,9 @@ class OceanAssets:
         data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=publisher_wallet.address,
+            metadata_decryptor_address=Web3.toChecksumAddress(
+                publisher_wallet.address.lower()
+            ).encode("utf-8"),
             flags=flags,
             data=document,
             data_hash=ddo_hash,
@@ -635,7 +637,9 @@ class OceanAssets:
         tx_result = data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=publisher_wallet.address,
+            metadata_decryptor_address=Web3.toChecksumAddress(
+                publisher_wallet.address.lower()
+            ).encode("utf-8"),
             flags=flags,
             data=document,
             data_hash=ddo_hash,
