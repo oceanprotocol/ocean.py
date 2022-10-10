@@ -284,7 +284,7 @@ class Ocean:
             self.web3.eth.block_number,
             None,
         )
-        exchange_id = fixed_rate_event[0].args.exchangeId
+        exchange_id = "0x" + fixed_rate_event[0].args.exchangeId.hex()
 
         return exchange_id
 
