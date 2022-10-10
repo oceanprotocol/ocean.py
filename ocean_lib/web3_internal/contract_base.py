@@ -8,6 +8,7 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
+from brownie import network
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -18,6 +19,7 @@ from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 
+from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     load_contract,
@@ -45,11 +47,31 @@ class ContractBase(object):
         ), "contract_name property needs to be implemented in subclasses."
 
         self.web3 = web3
+
+        self.network = NETWORK_IDS[web3.eth.chain_id]
+        self.connect_to_network()
+
         self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
         )
+
+    def connect_to_network(self):
+        if network.show_active() != self.network:
+            if network.is_connected():
+                network.disconnect()
+
+            network.connect(self.network)
+
+    def __getattribute__(self, attr):
+        method = object.__getattribute__(self, attr)
+        if not method:
+            raise Exception("Method %s not implemented" % attr)
+        if callable(method) and not method.__name__ == "connect_to_network":
+            self.connect_to_network()
+
+        return method
 
     @enforce_types
     def __str__(self) -> str:
