@@ -273,7 +273,6 @@ class DataNFT(ContractBase):
     def set_data_erc20(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
-    @enforce_types
     def get_data(self, key: bytes) -> bytes:
         return self.contract.getData(key)
 

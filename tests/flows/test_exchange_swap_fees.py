@@ -156,7 +156,7 @@ def exchange_swap_fees(
 
     exchange = FixedRateExchange(web3, fixed_price_address)
 
-    exchange_id = exchange_event[0].args.exchangeId
+    exchange_id = "0x" + exchange_event[0].args.exchangeId.hex()
     assert exchange_id == exchange.generate_exchange_id(bt.address, dt.address)
 
     assert exchange.is_active(exchange_id)

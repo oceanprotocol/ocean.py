@@ -351,7 +351,6 @@ class Datatoken(ContractBase):
             from_wallet,
         )
 
-    @enforce_types
     def set_data(self, data: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setData", (data,), from_wallet)
 
