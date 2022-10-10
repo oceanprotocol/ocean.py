@@ -336,7 +336,7 @@ def test_datatoken_set_data(web3, config, publisher_wallet, data_nft, datatoken)
     can be done only by who has deployERC20 rights(rights to create new erc20 token contract)
     the value is stored into the 725Y standard with a predefined key which is the erc20Token address"""
 
-    key = datatoken.address
+    key = web3.keccak(hexstr=datatoken.address)
     value = b"SomeData"
 
     assert data_nft.get_data(key) == "0x"
