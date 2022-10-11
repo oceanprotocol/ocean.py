@@ -135,7 +135,7 @@ def test_consume_flow(
     downloaded_directory = os.path.join(destination, os.listdir(destination)[0])
     downloaded_files = os.listdir(downloaded_directory)
     assert len(downloaded_files) == len(files), "Wrong number of files downloaded."
-    if isinstance(file1, ArweaveFile):
+    if isinstance(file4, ArweaveFile):
         with open(os.path.join(downloaded_directory, downloaded_files[0])) as f:
             assert f.readline() == "% 1. Title: Branin Function\n"
     else:
