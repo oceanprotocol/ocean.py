@@ -28,7 +28,7 @@ def test_consume_flow(
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
-    file4: FilesType
+    file4: FilesType,
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
