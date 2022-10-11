@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -602,15 +601,11 @@ def test_fail_get_templates(web3, config):
     data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
 
     # Should fail to get the Datatoken template if index = 0
-    with pytest.raises(
-        exceptions.VirtualMachineError, match="Template index doesnt exist"
-    ):
+    with pytest.raises(ValueError, match="Template index doesnt exist"):
         data_nft_factory.get_token_template(0)
 
     # Should fail to get the Datatoken template if index > templateCount
-    with pytest.raises(
-        exceptions.VirtualMachineError, match="Template index doesnt exist"
-    ):
+    with pytest.raises(ValueError, match="Template index doesnt exist"):
         data_nft_factory.get_token_template(3)
 
 
@@ -650,9 +645,7 @@ def test_fail_create_erc20(
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    with pytest.raises(
-        exceptions.VirtualMachineError, match="Template index doesnt exist"
-    ):
+    with pytest.raises(ValueError, match="Template index doesnt exist"):
         data_nft.create_erc20(
             template_index=0,
             name="DT1",
@@ -667,9 +660,7 @@ def test_fail_create_erc20(
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    with pytest.raises(
-        exceptions.VirtualMachineError, match="Template index doesnt exist"
-    ):
+    with pytest.raises(ValueError, match="Template index doesnt exist"):
         data_nft.create_erc20(
             template_index=3,
             name="DT1",
@@ -685,7 +676,7 @@ def test_fail_create_erc20(
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.get_permissions(another_consumer_wallet.address)[1] is False
-    with pytest.raises(exceptions.VirtualMachineError, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
