@@ -302,8 +302,13 @@ class DataServiceProviderBase:
 
                 raise DataProviderException(f"{endpoint_name} failed: {error}")
 
+            response_content = (
+                getattr(response, "content")
+                if hasattr(response, "content")
+                else "<none>"
+            )
             raise DataProviderException(
-                f"Failed to get a response for request: {endpoint_name}={endpoint}, payload={payload}, response is {getattr(response, 'content')}"
+                f"Failed to get a response for request: {endpoint_name}={endpoint}, payload={payload}, response is {response_content}"
             )
 
         if not success_codes:
