@@ -387,7 +387,6 @@ class ContractBase(object):
         fromBlock: Optional[int] = None,
         toBlock: Optional[int] = None,
         blockHash: Optional[HexBytes] = None,
-        from_all_addresses: Optional[bool] = False,
     ):
         """Get events for this contract instance using eth_getLogs API.
 
@@ -436,8 +435,6 @@ class ContractBase(object):
         :param toBlock: block number or "latest". Defaults to "latest"
         :param blockHash: block hash. blockHash cannot be set at the
           same time as fromBlock or toBlock
-        :param from_all_addresses: True = return logs from all addresses
-          False = return logs originating from event.address
         :yield: Tuple of :class:`AttributeDict` instances
         """
 
@@ -461,7 +458,7 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
-        address = event.address if not from_all_addresses else None
+        address = event.address
         _, event_filter_params = construct_event_filter_params(
             abi,
             event.web3.codec,

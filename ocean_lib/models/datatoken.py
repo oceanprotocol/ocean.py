@@ -498,7 +498,6 @@ class Datatoken(ContractBase):
         consumer_address: Optional[str] = None,
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
-        from_all_tokens: bool = False,
     ) -> Tuple:
         topic0 = self.get_event_signature(self.EVENT_ORDER_STARTED)
         topics = [topic0]
@@ -513,7 +512,6 @@ class Datatoken(ContractBase):
             argument_filters=argument_filters,
             fromBlock=from_block,
             toBlock=to_block,
-            from_all_addresses=from_all_tokens,
         )
         return logs
 

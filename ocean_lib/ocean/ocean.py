@@ -214,17 +214,13 @@ class Ocean:
         return DataNFTFactoryContract(self.web3, nft_factory_address)
 
     @enforce_types
-    def get_user_orders(
-        self, address: str, datatoken: Optional[str] = None
-    ) -> List[AttributeDict]:
+    def get_user_orders(self, address: str, datatoken: str) -> List[AttributeDict]:
         """
         :return: List of orders `[Order]`
         """
         dt = Datatoken(self.web3, datatoken)
         _orders = []
-        for log in dt.get_start_order_logs(
-            address, from_all_tokens=not bool(datatoken)
-        ):
+        for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
             a["address"] = log.address
