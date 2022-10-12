@@ -48,7 +48,7 @@ def test_buy_from_dispenser_and_order(
     assert status[2] is True
 
     with pytest.raises(
-        ValueError,
+        Exception,
         match="This address is not allowed to request DT",
     ):
         dispenser.dispense(
@@ -199,7 +199,7 @@ def test_buy_from_fre_and_order(
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
 
-    with pytest.raises(ValueError, match="This address is not allowed to swap"):
+    with pytest.raises(Exception, match="This address is not allowed to swap"):
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
             datatoken_amount=to_wei("1"),

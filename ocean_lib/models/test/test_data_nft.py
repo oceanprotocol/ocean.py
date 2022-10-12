@@ -61,7 +61,7 @@ def test_permissions(
     assert data_nft.token_uri(1) == "https://oceanprotocol.com/nft/"
 
     # Tests failing clearing permissions
-    with pytest.raises(ValueError, match="not NFTOwner"):
+    with pytest.raises(Exception, match="not NFTOwner"):
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
 
     # Tests clearing permissions
@@ -78,7 +78,7 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    with pytest.raises(ValueError, match="not NFTOwner"):
+    with pytest.raises(Exception, match="not NFTOwner"):
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
 
     data_nft.clean_permissions(from_wallet=publisher_wallet)
@@ -103,7 +103,7 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(ValueError, match="not NFTOwner"):
+    with pytest.raises(Exception, match="not NFTOwner"):
         data_nft.add_manager(
             manager_address=another_consumer_addr, from_wallet=consumer_wallet
         )
@@ -122,7 +122,7 @@ def test_permissions(
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.add_manager(manager_address=consumer_addr, from_wallet=publisher_wallet)
     assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
-    with pytest.raises(ValueError, match="not NFTOwner"):
+    with pytest.raises(Exception, match="not NFTOwner"):
         data_nft.remove_manager(
             manager_address=publisher_addr, from_wallet=consumer_wallet
         )
@@ -142,7 +142,7 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(ValueError, match="NOT MANAGER"):
+    with pytest.raises(Exception, match="NOT MANAGER"):
         data_nft.execute_call(
             operation=0,
             to=consumer_addr,
@@ -178,7 +178,7 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.STORE]
     )
-    with pytest.raises(ValueError, match="NOT STORE UPDATER"):
+    with pytest.raises(Exception, match="NOT STORE UPDATER"):
         data_nft.set_new_data(
             key=b"ARBITRARY_KEY",
             value=b"SomeData",
@@ -186,7 +186,7 @@ def test_permissions(
         )
 
     # Tests failing setting ERC20 data
-    with pytest.raises(ValueError, match="NOT ERC20 Contract"):
+    with pytest.raises(Exception, match="NOT ERC20 Contract"):
         data_nft.set_data_erc20(
             key=b"FOO_KEY",
             value=b"SomeData",
@@ -351,7 +351,7 @@ def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.UPDATE_METADATA]
     )
 
-    with pytest.raises(ValueError, match="NOT METADATA_ROLE"):
+    with pytest.raises(Exception, match="NOT METADATA_ROLE"):
         data_nft.set_metadata(
             metadata_state=1,
             metadata_decryptor_url="http://myprovider:8030",
@@ -551,7 +551,7 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
     assert not (
         data_nft.get_permissions(consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     )
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -602,7 +602,7 @@ def test_erc721_datatoken_functions(
     assert data_nft.token_uri(token_id=1) == registered_event[0].args.tokenURI
 
     # Tests failing setting token URI by another user
-    with pytest.raises(ValueError, match="not NFTOwner"):
+    with pytest.raises(Exception, match="not NFTOwner"):
         data_nft.set_token_uri(
             token_id=1,
             new_token_uri="https://foourl.com/nft/",
@@ -641,7 +641,7 @@ def test_erc721_datatoken_functions(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    with pytest.raises(ValueError, match="NOT MINTER"):
+    with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             account_address=consumer_addr,
             value=to_wei("1"),
@@ -663,7 +663,7 @@ def test_fail_transfer_function(
 ):
     """Tests failure of using the transfer functions."""
     with pytest.raises(
-        ValueError,
+        Exception,
         match="transfer caller is not owner nor approved",
     ):
         data_nft.transfer_from(
@@ -675,7 +675,7 @@ def test_fail_transfer_function(
 
     # Tests for safe transfer as well
     with pytest.raises(
-        ValueError,
+        Exception,
         match="transfer caller is not owner nor approved",
     ):
         data_nft.safe_transfer_from(

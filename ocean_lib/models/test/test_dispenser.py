@@ -74,7 +74,7 @@ def test_main(
     assert dispenser_status[2] is True
 
     # Tests consumer requests more datatokens then allowed transaction reverts
-    with pytest.raises(ValueError, match="Amount too high"):
+    with pytest.raises(Exception, match="Amount too high"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("20"),
@@ -93,7 +93,7 @@ def test_main(
     assert tx_receipt.status == 1
 
     # Tests consumer requests more datatokens then exceeds maxBalance
-    with pytest.raises(ValueError, match="Caller balance too high"):
+    with pytest.raises(Exception, match="Caller balance too high"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("1"),
@@ -107,7 +107,7 @@ def test_main(
     assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
-    with pytest.raises(ValueError, match="Dispenser not active"):
+    with pytest.raises(Exception, match="Dispenser not active"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("0.00001"),
@@ -116,7 +116,7 @@ def test_main(
         )
 
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
-    with pytest.raises(ValueError, match="Invalid owner"):
+    with pytest.raises(Exception, match="Invalid owner"):
         dispenser.activate(
             datatoken=datatoken.address,
             max_tokens=to_wei("1"),
@@ -143,7 +143,7 @@ def test_dispenser_creation_without_minter(
     )
 
     # Tests consumer requests data tokens but they are not minted
-    with pytest.raises(ValueError, match="Not enough reserves"):
+    with pytest.raises(Exception, match="Not enough reserves"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("1"),

@@ -139,7 +139,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(ValueError, match="Template index doesnt exist"):
+    with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft_factory.deploy_erc721_contract(
             name="DT1",
             symbol="DTSYMBOL",
@@ -283,7 +283,7 @@ def test_datatoken_creation(
     assert tx_result, "Error creating datatoken."
 
     # Tests failed creation of datatoken
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -310,7 +310,7 @@ def test_datatoken_mint_function(
     assert datatoken.balanceOf(consumer_wallet.address) == 20
 
     # Tests failed mint
-    with pytest.raises(ValueError, match="NOT MINTER"):
+    with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(publisher_wallet.address, 10, consumer_wallet)
 
     # Test with another minter
@@ -359,7 +359,7 @@ def test_nft_owner_transfer(
 
     assert data_nft.owner_of(1) == publisher_wallet.address
 
-    with pytest.raises(ValueError, match="transfer of token that is not own"):
+    with pytest.raises(Exception, match="transfer of token that is not own"):
         data_nft.transfer_from(
             consumer_wallet.address, publisher_wallet.address, 1, publisher_wallet
         )
@@ -370,7 +370,7 @@ def test_nft_owner_transfer(
     assert data_nft.balance_of(publisher_wallet.address) == 0
     assert data_nft.owner_of(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -384,7 +384,7 @@ def test_nft_owner_transfer(
             from_wallet=publisher_wallet,
         )
 
-    with pytest.raises(ValueError, match="NOT MINTER"):
+    with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles

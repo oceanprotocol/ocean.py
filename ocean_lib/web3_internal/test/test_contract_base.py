@@ -23,14 +23,8 @@ class MyFactory(ContractBase):
 
 @pytest.mark.unit
 def test_name_is_None(web3):
-    with pytest.raises(AssertionError):
+    with pytest.raises(Exception):
         # self.name will become None, triggering the error
-        ContractBase(web3, None)
-
-
-@pytest.mark.unit
-def test_nochild(web3):
-    with pytest.raises(AssertionError):
         ContractBase(web3, None)
 
 
@@ -64,11 +58,10 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert factory.address == nft_factory_address
     assert factory.events
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
-    assert (
-        "createToken" in factory.function_names
-    ), "The function createToken from the contract does not exist."
-    assert "getCurrentTokenCount" in factory.function_names
-    assert "getTokenTemplate" in factory.function_names
+    assert factory.contract.createToken
+    assert factory.contract.getCurrentTokenCount
+    assert factory.contract.getTokenTemplate
+
     with pytest.raises(ValueError):
         assert factory.get_event_signature("noevent")
 

@@ -179,7 +179,7 @@ def test_exchange_rate_creation(
     assert rate == exchange_rate
 
     # Buy should fail if price is too high
-    with pytest.raises(ValueError, match="Too many base tokens"):
+    with pytest.raises(Exception, match="Too many base tokens"):
         fixed_exchange.buy_dt(
             exchange_id, amount_dt_to_sell, 1, ZERO_ADDRESS, 0, another_consumer_wallet
         )
@@ -345,7 +345,7 @@ def test_exchange_rate_creation(
 
     # Market fee collector update
     # Only market fee collector should be able to update market_fee_collector
-    with pytest.raises(ValueError, match="not marketFeeCollector"):
+    with pytest.raises(Exception, match="not marketFeeCollector"):
         fixed_exchange.update_market_fee_collector(
             exchange_id, consumer_addr, consumer_wallet
         )
