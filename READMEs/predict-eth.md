@@ -22,53 +22,41 @@ Here are the steps:
 
 ### 1.1 Prerequisites & installation
 
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Install the library
+Prerequisites:
+- Linux/MacOS
+- Python 3.8.5+
+- [Arweave Bundlr](https://docs.bundlr.network/docs/about/introduction): `npm install -g @bundlr-network/client` (if issues, skip and use Google Drive)
+
+Now, let's install Python libraries. Open a terminal and:
+```console
+# Initialize virtual environment and activate it.
+python3 -m venv venv
+source venv/bin/activate
+
+# Avoid errors for the step that follows
+pip3 install wheel
+
+# Install Ocean library
+pip3 install ocean-lib
+
+# Install pybundlr library
+pip3 install pybundlr
+```
 
 ### 1.2 Create Polygon Account (One-Time)
 
-
-You'll be using Polygon to retrieve Ocean data assets, and publish your ETH predictions. So, you will need a Polygon account with a small amount of MATIC to pay for gas. If you have an account already (and its private key), you can skip this section.
-
-In your console, run Python.
-```console
-python
-```
-
-In the Python console:
-```python
-from eth_account.account import Account
-account1 = Account.create()
-print(f"""
-export REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}
-export ADDRESS1={account1.address}
-""")
-```
-
-Then, exit the Python console.
-
-Now, you have a Polygon account: a private key with associated address. It actually works on any chain, not just Polygon. Save the private key somewhere safe, like a local file or a password manager. 
-
-Then, get some MATIC into that account, on the Polygon network. [Here's](https://polygon.technology/matic-token/) a starting point. A few $ worth is more than enough to pay for transactions of this README.
+You'll be using Polygon network. So, please ensure that you have a Polygon account that holds some MATIC (at least a few $ worth). More info.](https://polygon.technology/matic-token/). 
 
 ### 1.3 Set envvars, for Polygon address
 
 In the console:
 ```console
-# For accounts: set private keys
-export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
+export REMOTE_TEST_PRIVATE_KEY1=<your Polygon private key>
 ```
 
 ### 1.4 Setup in Python, for Polygon
 
-Let's load services info and account info into Python `config` dict and `Wallet` objects respectively.
-
-In your working console, run Python:
-
-```console
-python
-```
+In the terminal, run Python: `python`
 
 In the Python console:
 ```python
@@ -139,10 +127,10 @@ pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(24)]
 
 In the same Python console:
 ```python
-import csv
-with open("/tmp/pred_vals.csv", "w") as f:
-    writer = csv.writer(f)
-    writer.writerow(pred_vals)
+from pathlib import Path
+file_name = "/tmp/pred_vals.csv"
+p = Path(file_name)
+p.write_text(str(pred_vals))
 ```
 
 The csv will look something like:
@@ -154,19 +142,19 @@ The csv will look something like:
 
 ### 4.2 Put the csv online
 
-You can put it online however you wish. Here's one way, with Google Drive.
+You can put it online however you wish. Here, we upload to Arweave permanent decentralized file storage, via Bundlr.
 
-1. First, navigate to the GFolder in GDrive you wish to upload the file to.
-2. Then, right click anywhere and select "File Upload".
-3. Once the csv is uploaded, right click on the file, and select "Share".
-4. In the popup, ensure that "General Access" is set to "Anyone with the link".
-5. Also in the popup, click "Copy link". It should look something like `https://drive.google.com/file/d/1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy/view?usp=sharing`. Then, in the popup, click "Done".
-6. If you paste the copied link into the browser, it will load an HTML page. But we don't want an html url, we want a  _downloadable_ one. Here's how. 
-   - First, note the `<FILE-ID>` from the previous step (e.g. "1uZ..RRy").
-   - Then, create a URL according to: `https://drive.google.com/uc?export=download&id=<FILE-ID>`. **This is your url.** 
-   - In our running example, the url is `https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy`
+In the same Python console:
+```python
+from pybundlr import pybundlr
+file_name = "/tmp/pred_vals.csv"
+url = pybundlr.fund_and_upload(file_name, "matic", alice_wallet.private_key)
+print(f"Your csv url: {url}")
+```
 
-Your csv url is only open to those who know it. So we only share to selected parties (the judges).
+(If you get issues, you can store elsewhere too. The Appendix has a Google Drive example.)
+
+Your url is only open to those who know it. Below, we'll only share to the judges.
 
 
 ## 5. Share predictions test, via Ganache
@@ -189,7 +177,7 @@ In this flow, Alice is you -- the participant in the competition.
 In the same Python console:
 ```python
 url = "<your csv url>" 
-#e.g. url = "https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
+#e.g. url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
 name = "ETH predictions"
 asset = ocean.assets.create_url_asset(name, url, alice_wallet)
 datatoken_address = asset.datatokens[0]["address"]
@@ -215,16 +203,11 @@ This step and the next simulate what the judges ("Bob" here) will do with the pr
 file_name = ocean.assets.download_file(asset.did, bob_wallet)
 
 # Load file
-import csv
-import numpy as np
-with open(file_name, "r") as f:
-    for row in csv.reader(f):
-    	pred_vals = row; break
-
-pred_vals = np.asarray([float(p) for p in pred_vals])
+from pathlib import Path
+p = Path(file_name)
+s = p.read_text()
+pred_vals = eval(s)
 print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
-
-# If you encountered issues going through this, a workaround is to get pred_vals directly from your AI model.
 ```
 
 ### 5.5 Analyze results: calculate NMSE
@@ -287,9 +270,9 @@ From section 1 of this console, do:
 In the same Python console:
 ```python
 url = "<your csv url>" 
-#e.g. url = "https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy"
+#e.g. url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
 name = "ETH predictions"
-asset = ocean.assets.create_url_asset(name, url, alice_wallet) #this will may take 30+ seconds, be patient
+asset = ocean.assets.create_url_asset(name, url, alice_wallet) #will take 30+ seconds
 datatoken_address = asset.datatokens[0]["address"]
 print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
 ```
@@ -312,3 +295,17 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 Finally, ensure you've filled in your Questbook entry.
 
 Now, you're complete! Thanks for being part of this competition.
+
+### Appendix. Put csv online via GDrive
+
+You can put your predictions csv online however you wish. Earlier, we showed how to use bundlr. Here's another way, using Google Drive.
+
+1. In your browser, open Google Drive. Navigate to the GFolder you wish to upload to.
+2. Right-click anywhere and select "File Upload".
+3. Once the csv is uploaded, right click on the file, and select "Share".
+4. In the popup, ensure that "General Access" is set to "Anyone with the link".
+5. Also in the popup, click "Copy link". It should look something like `https://drive.google.com/file/d/1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy/view?usp=sharing`. Then, in the popup, click "Done".
+6. If you paste the copied link into the browser, it will load an HTML page. But we don't want an html url, we want a  _downloadable_ one. Here's how. 
+   - First, note the `<FILE-ID>` from the previous step (e.g. "1uZ..RRy").
+   - Then, create a URL according to: `https://drive.google.com/uc?export=download&id=<FILE-ID>`. **This is your url.** 
+   - In our running example, the url is `https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy`
