@@ -45,7 +45,7 @@ pip3 install pybundlr
 
 ### 1.2 Create Polygon Account (One-Time)
 
-You'll be using Polygon network. So, please ensure that you have a Polygon account that holds some MATIC (at least a few $ worth). More info.](https://polygon.technology/matic-token/). 
+You'll be using Polygon network. So, please ensure that you have a Polygon account that holds some MATIC (at least a few $ worth). [More info](https://polygon.technology/matic-token/). 
 
 ### 1.3 Set envvars, for Polygon address
 
