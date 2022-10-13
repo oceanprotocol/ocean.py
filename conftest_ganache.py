@@ -170,7 +170,7 @@ def data_nft(web3, publisher_wallet, data_nft_factory):
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(tx, publisher_wallet)
     return DataNFT(web3, token_address)
 
 

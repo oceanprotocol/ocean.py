@@ -12,9 +12,12 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
-from ocean_lib.web3_internal.constants import MAX_UINT256
+from ocean_lib.web3_internal.constants import MAX_UINT256, BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 
 
 class DataNFTFactoryContract(ERC721TokenFactoryBase):
@@ -434,8 +437,15 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         )
 
     @enforce_types
-    def get_token_address(self, tx_id: Union[str, bytes]):
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
+    def get_token_address(self, tx_id: Union[str, bytes], wallet: Wallet):
+        tx_receipt = wait_for_transaction_receipt_and_block_confirmations(
+            web3=self.web3,
+            tx_hash=tx_id,
+            block_confirmations=wallet.block_confirmations.value,
+            block_number_poll_interval=BLOCK_NUMBER_POLL_INTERVAL[
+                self.web3.eth.chain_id
+            ],
+        )
         registered_event = self.get_event_log(
             event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
             from_block=tx_receipt.blockNumber,

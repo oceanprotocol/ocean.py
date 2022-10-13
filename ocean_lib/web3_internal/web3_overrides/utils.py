@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from typing import Union
 
 from enforce_typing import enforce_types
 from hexbytes import HexBytes
@@ -13,7 +14,7 @@ from web3.types import TxReceipt
 @enforce_types
 def wait_for_transaction_receipt_and_block_confirmations(
     web3: Web3,
-    tx_hash: HexBytes,
+    tx_hash: Union[HexBytes, str, bytes],
     block_confirmations: int,
     block_number_poll_interval: float,
     transaction_timeout: int = 120,

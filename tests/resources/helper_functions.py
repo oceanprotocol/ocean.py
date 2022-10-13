@@ -235,7 +235,7 @@ def deploy_erc721_erc20(
         owner=data_nft_publisher.address,
         from_wallet=data_nft_publisher,
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(tx, data_nft_publisher)
     data_nft = DataNFT(web3, token_address)
     if not datatoken_minter:
         return data_nft
