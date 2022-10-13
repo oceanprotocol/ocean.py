@@ -63,8 +63,8 @@ def test_nonocean_tx(tmp_path):
 
 
 @pytest.mark.skip(reason="Don't skip, once fixed #943")
-def test_ocean_tx(tmp_path):
-    """Do a (simple) Ocean tx on Mumbai"""
+def test_ocean_tx1(tmp_path):
+    """On Mumbai, do a simple Ocean tx: create_data_nft"""
 
     # setup
     config = _remote_config(tmp_path)
@@ -73,11 +73,11 @@ def test_ocean_tx(tmp_path):
 
     # Alice publish data NFT
     # avoid "replacement transaction underpriced" error: make each tx diff't
-    cand_chars = string.ascii_uppercase + string.digits
-    symbol = "".join(random.choices(cand_chars, k=8))
+    symbol = _randomChars()
     try:  # it can get away with "insufficient funds" errors, but not others
-        print("Do an Ocean tx, and wait for it to complete...")
+        print("Call create_data_nft(), and wait for it to complete...")
         data_nft = ocean.create_data_nft(symbol, symbol, alice_wallet)
+
     except ValueError as error:
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
@@ -85,6 +85,43 @@ def test_ocean_tx(tmp_path):
         raise (error)
 
     assert data_nft.symbol() == symbol
+    print("Success")
+
+@pytest.mark.integration
+def test_ocean_tx2(tmp_path):
+    """On Mumbai, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245
+    """
+
+    # setup
+    config = _remote_config(tmp_path)
+    ocean = Ocean(config)
+    (alice_wallet, _) = _get_wallets(ocean)
+
+    # Alice call create_url_asset
+    # avoid "replacement transaction underpriced" error: make each tx diff't
+    cand_chars = string.ascii_uppercase + string.digits
+    name = _randomChars()
+    url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
+    try:  # it can get away with "insufficient funds" errors, but not others
+        print("Call create_url_asset(), and wait for it to complete...")
+        asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+
+    except ValueError as error:
+        if "insufficient funds" in str(error):
+            warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
+            return
+        raise (error)
+
+    assert asset is not None
+    datatoken_address = asset.datatokens[0]["address"]
+    datatoken = ocean.get_datatoken(datatoken_address)
+    assert datatoken is not None
+    print("Success")
+
+
+def _randomChars() -> str:
+    cand_chars = string.ascii_uppercase + string.digits
+    return "".join(random.choices(cand_chars, k=8))
 
 
 def _get_wallets(ocean):
