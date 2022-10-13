@@ -19,7 +19,7 @@ def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
 
     # setup
-    config = _remote_config(tmp_path)
+    config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
     (alice_wallet, bob_wallet) = _get_wallets(ocean)
 
@@ -67,7 +67,7 @@ def test_ocean_tx1(tmp_path):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
 
     # setup
-    config = _remote_config(tmp_path)
+    config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
     (alice_wallet, _) = _get_wallets(ocean)
 
@@ -93,7 +93,7 @@ def test_ocean_tx2(tmp_path):
     """On Mumbai, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
 
     # setup
-    config = _remote_config(tmp_path)
+    config = _remote_config_polygon(tmp_path)
     ocean = Ocean(config)
     (alice_wallet, _) = _get_wallets(ocean)
 
@@ -145,7 +145,7 @@ def _get_wallets(ocean):
     return (alice_wallet, bob_wallet)
 
 
-def _remote_config(tmp_path):
+def _remote_config_mumbai(tmp_path):
     config = {
         "RPC_URL": "https://rpc-mumbai.maticvigil.com",
         "BLOCK_CONFIRMATIONS": 0,
@@ -157,6 +157,24 @@ def _remote_config(tmp_path):
 
     # -ensure config is truly remote
     assert "mumbai" in config["RPC_URL"]
+    assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
+    assert "oceanprotocol.com" in config["PROVIDER_URL"]
+
+    return config
+
+
+def _remote_config_polygon(tmp_path):
+    config = {
+        "RPC_URL": "https://polygon-rpc.com",
+        "BLOCK_CONFIRMATIONS": 0,
+        "TRANSACTION_TIMEOUT": 60,
+        "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
+        "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
+        "DOWNLOADS_PATH": "consume-downloads",
+    }
+
+    # -ensure config is truly remote
+    assert "polygon" in config["RPC_URL"]
     assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
     assert "oceanprotocol.com" in config["PROVIDER_URL"]
 
