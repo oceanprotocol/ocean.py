@@ -25,7 +25,7 @@ Here are the steps:
 Prerequisites:
 - Linux/MacOS
 - Python 3.8.5+
-- [Arweave Bundlr](https://docs.bundlr.network/docs/about/introduction): `npm install -g @bundlr-network/client` (if issues, skip and use Google Drive)
+- [Arweave Bundlr](https://docs.bundlr.network/docs/about/introduction): `npm install -g @bundlr-network/client` 
 
 Now, let's install Python libraries. Open a terminal and:
 ```console
@@ -120,7 +120,6 @@ import random
 pred_vals = [1500.0 - 100.0 + 200.0 * random.random() for i in range(24)] 
 ```
 
-
 ## 4.  Publish predictions online, to private url
 
 ### 4.1 Save the predictions as a csv file
@@ -139,10 +138,9 @@ The csv will look something like:
 1503.134,1512.490,1498.982,...,1590.673
 ```
 
-
 ### 4.2 Put the csv online
 
-You can put it online however you wish. Here, we upload to Arweave permanent decentralized file storage, via Bundlr.
+Here, we upload to Arweave permanent decentralized file storage, via Bundlr. This makes the predictions tamper-proof.
 
 In the same Python console:
 ```python
@@ -151,8 +149,6 @@ file_name = "/tmp/pred_vals.csv"
 url = pybundlr.fund_and_upload(file_name, "matic", alice_wallet.private_key)
 print(f"Your csv url: {url}")
 ```
-
-(If you get issues, you can store elsewhere too. The Appendix has a Google Drive example.)
 
 Your url is only open to those who know it. Below, we'll only share to the judges.
 
@@ -295,17 +291,3 @@ datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 Finally, ensure you've filled in your Questbook entry.
 
 Now, you're complete! Thanks for being part of this competition.
-
-### Appendix. Put csv online via GDrive
-
-You can put your predictions csv online however you wish. Earlier, we showed how to use bundlr. Here's another way, using Google Drive.
-
-1. In your browser, open Google Drive. Navigate to the GFolder you wish to upload to.
-2. Right-click anywhere and select "File Upload".
-3. Once the csv is uploaded, right click on the file, and select "Share".
-4. In the popup, ensure that "General Access" is set to "Anyone with the link".
-5. Also in the popup, click "Copy link". It should look something like `https://drive.google.com/file/d/1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy/view?usp=sharing`. Then, in the popup, click "Done".
-6. If you paste the copied link into the browser, it will load an HTML page. But we don't want an html url, we want a  _downloadable_ one. Here's how. 
-   - First, note the `<FILE-ID>` from the previous step (e.g. "1uZ..RRy").
-   - Then, create a URL according to: `https://drive.google.com/uc?export=download&id=<FILE-ID>`. **This is your url.** 
-   - In our running example, the url is `https://drive.google.com/uc?export=download&id=1uZakKrzkSYosD_wf-EFJusFhzlOGQRRy`
