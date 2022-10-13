@@ -43,9 +43,10 @@ jobs:
           mkdir ~/.brownie
           cp network-config.sample ~/.brownie/network-config.yaml 
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
-          coverage run --source ocean_lib -m py.test -m "not slow"
-          coverage report
-          coverage xml
+          pytest tests/integration/remote/test_mumbai.py::test_ocean_tx
+          #coverage run --source ocean_lib -m py.test -m "not slow"
+          #coverage report
+          #coverage xml
         env:
           REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
           REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
