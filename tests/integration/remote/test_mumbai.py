@@ -87,10 +87,10 @@ def test_ocean_tx1(tmp_path):
     assert data_nft.symbol() == symbol
     print("Success")
 
+
 @pytest.mark.integration
 def test_ocean_tx2(tmp_path):
-    """On Mumbai, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245
-    """
+    """On Mumbai, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
 
     # setup
     config = _remote_config(tmp_path)
