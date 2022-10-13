@@ -176,7 +176,7 @@ class Ocean:
             from_wallet=from_wallet,
         )
 
-        address = nft_factory.get_token_address(tx_id, from_wallet)
+        address = nft_factory.get_token_address(tx_id)
         assert address, "new NFT token has no address"
         token = DataNFT(self.web3, address)
         return token

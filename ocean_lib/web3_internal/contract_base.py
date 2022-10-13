@@ -9,6 +9,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from brownie import network
+from brownie.exceptions import TransactionError
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -20,12 +21,16 @@ from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 
 from ocean_lib.example_config import NETWORK_IDS
+from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     load_contract,
 )
 from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 
 # from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
@@ -210,7 +215,19 @@ class ContractBase(object):
             _transact.update(transact)
 
         # TODO: transfer rest of custom contract function, waiting etc.
-        return getattr(self.contract, fn_name)(*fn_args, _transact).txid
+        tx_id = getattr(self.contract, fn_name)(*fn_args, _transact).txid
+        tx_receipt = wait_for_transaction_receipt_and_block_confirmations(
+            web3=self.web3,
+            tx_hash=tx_id,
+            block_confirmations=from_wallet.block_confirmations.value,
+            block_number_poll_interval=BLOCK_NUMBER_POLL_INTERVAL[
+                self.web3.eth.chain_id
+            ],
+        )
+        if tx_receipt.status != 1:
+            raise TransactionError("Transaction not successfully settled!")
+
+        return tx_id
 
         #
         # return contract_function.transact(

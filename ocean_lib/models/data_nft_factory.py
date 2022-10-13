@@ -437,15 +437,8 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         )
 
     @enforce_types
-    def get_token_address(self, tx_id: Union[str, bytes], wallet: Wallet):
-        tx_receipt = wait_for_transaction_receipt_and_block_confirmations(
-            web3=self.web3,
-            tx_hash=tx_id,
-            block_confirmations=wallet.block_confirmations.value,
-            block_number_poll_interval=BLOCK_NUMBER_POLL_INTERVAL[
-                self.web3.eth.chain_id
-            ],
-        )
+    def get_token_address(self, tx_id: Union[str, bytes]):
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(transaction_hash=tx_id)
         registered_event = self.get_event_log(
             event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
             from_block=tx_receipt.blockNumber,
