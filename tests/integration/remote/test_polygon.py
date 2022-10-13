@@ -12,7 +12,7 @@ from ocean_lib.ocean.ocean import Ocean
 
 @pytest.mark.integration
 def test_ocean_tx__create_url_asset(tmp_path):
-    """On Mumbai, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
+    """On Polygon, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
 
     # setup
     config = _remote_config_polygon(tmp_path)
