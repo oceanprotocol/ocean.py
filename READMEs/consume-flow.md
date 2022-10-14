@@ -74,7 +74,6 @@ Here are the last two steps, un-bundled.
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service, to get access
-asset = ocean.assets.resolve(did)
 order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
