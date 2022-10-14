@@ -39,7 +39,7 @@ end_datetime = datetime.now()
 start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
-#create data NFT & datatoken & DDO asset
+#create asset
 (data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
