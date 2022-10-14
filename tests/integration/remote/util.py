@@ -1,6 +1,7 @@
 import os
 import random
 import string
+import time
 
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -27,5 +28,6 @@ def get_wallets(ocean):
 
 def random_chars() -> str:
     cand_chars = string.ascii_uppercase + string.digits
-    return "".join(random.choices(cand_chars, k=8))
+    s = "".join(random.choices(cand_chars, k=8)) + str(time.time())
+    return s
 
