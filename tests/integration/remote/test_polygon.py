@@ -29,7 +29,7 @@ def test_ocean_tx__create_url_asset(tmp_path):
 
     except ValueError as error:
         if "insufficient funds" in str(error):
-            warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
+            warnings.warn(UserWarning("Warning: Insufficient Polygon MATIC"))
             return
         raise (error)
 
