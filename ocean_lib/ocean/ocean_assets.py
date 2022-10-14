@@ -750,11 +750,22 @@ class OceanAssets:
         bal = from_wei(datatoken.balanceOf(wallet.address))
         if bal >= 1.0:  # we're good
             pass
-        else:  # try to get freely-dispensed asset. If not free, it'll complain
+        else:  # try to get freely-dispensed asset
             print("Dispense access token...")
             amt_dispense_wei = to_wei(1)
             dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
             dispenser = Dispenser(self._web3, dispenser_addr)
+
+            #catch key failure modes
+            st = dispenser.status(datatoken.address)
+            active, disp_bal, allowedSwapper = st[0], from_wei(st[5]), st[6]
+            if not active:
+                raise ValueError("No active dispenser for datatoken")
+            if disp_bal < 1.0: 
+                raise ValueError("Dispenser has <1 tokens left. ({disp_bal})")
+            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
+                raise ValueError("Not allowed. allowedSwapper={allowedSwapper}") 
+            # Try to dispense. If other issues, they'll pop out
             dispenser.dispense_tokens(datatoken, amt_dispense_wei, wallet)
 
         # send datatoken to the service, to get access
