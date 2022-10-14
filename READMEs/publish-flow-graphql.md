@@ -41,7 +41,7 @@ query="""query{
 """
 
 #create asset
-asset = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
+(data_nft, datatoken, asset) = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
 
