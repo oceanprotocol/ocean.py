@@ -5,6 +5,7 @@ import time
 
 from ocean_lib.web3_internal.wallet import Wallet
 
+
 def get_wallets(ocean):
     config, web3 = ocean.config_dict, ocean.web3
 
@@ -30,4 +31,3 @@ def random_chars() -> str:
     cand_chars = string.ascii_uppercase + string.digits
     s = "".join(random.choices(cand_chars, k=8)) + str(time.time())
     return s
-

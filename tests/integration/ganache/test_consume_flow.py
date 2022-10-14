@@ -149,8 +149,9 @@ def test_compact_publish_and_consume(
     # publish
     name = "CEXA"
     url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
-    (data_nft, datatoken, asset) = \
-        ocean_assets.create_url_asset(name, url, publisher_wallet)
+    (data_nft, datatoken, asset) = ocean_assets.create_url_asset(
+        name, url, publisher_wallet
+    )
 
     # share access
     datatoken.mint(consumer_wallet.address, to_wei(1), publisher_wallet)

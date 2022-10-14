@@ -389,17 +389,18 @@ def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
 
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, asset) = \
-        ocean.assets.create_url_asset(name, url, publisher_wallet)
+    (data_nft, datatoken, asset) = ocean.assets.create_url_asset(
+        name, url, publisher_wallet
+    )
 
     assert isinstance(data_nft, DataNFT)
     assert data_nft.token_name() == name
-    
+
     assert isinstance(datatoken, Datatoken)
-    
+
     assert isinstance(asset.did, str)
     assert asset.nft["name"] == name
-    
+
     # more thorough testing is below, on create() directly
 
 

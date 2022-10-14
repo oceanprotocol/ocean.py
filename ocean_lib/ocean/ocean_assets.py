@@ -262,13 +262,22 @@ class OceanAssets:
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
-    def create_url_asset(self, name: str, url: str, publisher_wallet: Wallet, wait_for_aqua:bool=True) -> tuple:
+    def create_url_asset(
+        self, name: str, url: str, publisher_wallet: Wallet, wait_for_aqua: bool = True
+    ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
         return self._create1(name, files, publisher_wallet)
 
     @enforce_types
-    def create_graphql_asset(self, name: str, url: str, query: str, publisher_wallet: Wallet, wait_for_aqua:bool=True) -> tuple:
+    def create_graphql_asset(
+        self,
+        name: str,
+        url: str,
+        query: str,
+        publisher_wallet: Wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
         return self._create1(name, files, publisher_wallet)
@@ -280,7 +289,7 @@ class OceanAssets:
         contract_address: str,
         contract_abi: dict,
         publisher_wallet: Wallet,
-        wait_for_aqua:bool=True,
+        wait_for_aqua: bool = True,
     ) -> tuple:
         """Create an asset of type "SmartContractCall", with good defaults"""
         chain_id = self._web3.eth.chain_id
@@ -289,7 +298,13 @@ class OceanAssets:
         return self._create1(name, files, publisher_wallet)
 
     @enforce_types
-    def _create1(self, name: str, files: list, publisher_wallet: Wallet, wait_for_aqua:bool=True) -> tuple:
+    def _create1(
+        self,
+        name: str,
+        files: list,
+        publisher_wallet: Wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
 
         If wait_for_aqua, then attempt to update aquarius within time constraints.
@@ -359,8 +374,8 @@ class OceanAssets:
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
-        wait_for_aqua:bool=True,
-        return_asset:bool = True,
+        wait_for_aqua: bool = True,
+        return_asset: bool = True,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -395,7 +410,7 @@ class OceanAssets:
         :param compress_flag: bool for compression of the DDO.
         :param wait_for_aqua: wait to ensure asset's updated in aquarius?
         :param return_asset: return asset, vs tuple?
-        :return: asset [if return_asset == True], otherwise tuple of (data_nft, datatokens, asset) 
+        :return: asset [if return_asset == True], otherwise tuple of (data_nft, datatokens, asset)
         """
         self._assert_ddo_metadata(metadata)
 
@@ -600,8 +615,7 @@ class OceanAssets:
         if return_asset:
             return asset
         else:
-            datatokens = [Datatoken(self._web3, d["address"])
-                          for d in datatokens]
+            datatokens = [Datatoken(self._web3, d["address"]) for d in datatokens]
             return (data_nft, datatokens, asset)
 
     @enforce_types

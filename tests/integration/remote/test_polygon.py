@@ -27,7 +27,8 @@ def test_ocean_tx__create_url_asset(tmp_path):
     try:  # it can get away with "insufficient funds" errors, but not others
         print("Call create_url_asset(), and wait for it to complete...")
         (_, datatoken, _) = ocean.assets.create_url_asset(
-            name, url, alice_wallet, wait_for_aqua=False)
+            name, url, alice_wallet, wait_for_aqua=False
+        )
         assert isinstance(datatoken, Datatoken)
 
     except ValueError as error:
