@@ -418,7 +418,8 @@ def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
                         }
                    }
     """
-    asset = ocean.assets.create_graphql_asset(name, url, query, publisher_wallet)
+    (data_nft, datatoken, asset) = \
+        ocean.assets.create_graphql_asset(name, url, query, publisher_wallet)
 
     assert asset.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(asset.datatokens) == 1
@@ -438,9 +439,9 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
         "type": "function",
     }
 
-    asset = ocean.assets.create_onchain_asset(
-        name, contract_address, contract_abi, publisher_wallet
-    )
+    (data_nft, datatoken, asset) = \
+        ocean.assets.create_onchain_asset(
+            name, contract_address, contract_abi, publisher_wallet)
 
     assert asset.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(asset.datatokens) == 1
