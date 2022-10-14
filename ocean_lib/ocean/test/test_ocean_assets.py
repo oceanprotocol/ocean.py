@@ -17,6 +17,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -388,10 +389,18 @@ def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
 
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    asset = ocean.assets.create_url_asset(name, url, publisher_wallet)
+    (data_nft, datatoken, asset) = \
+        ocean.assets.create_url_asset(name, url, publisher_wallet)
 
-    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(asset.datatokens) == 1
+    assert isinstance(data_nft, DataNFT)
+    assert data_nft.token_name() == name
+    
+    assert isinstance(datatoken, Datatoken)
+    
+    assert isinstance(asset.did, str)
+    assert asset.nft["name"] == name
+    
+    # more thorough testing is below, on create() directly
 
 
 @pytest.mark.integration

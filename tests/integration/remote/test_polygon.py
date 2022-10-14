@@ -7,6 +7,7 @@ import warnings
 import pytest
 
 from .util import get_wallets, random_chars
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 
 
@@ -25,7 +26,9 @@ def test_ocean_tx__create_url_asset(tmp_path):
     url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
     try:  # it can get away with "insufficient funds" errors, but not others
         print("Call create_url_asset(), and wait for it to complete...")
-        asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+        (_, datatoken, _) = ocean.assets.create_url_asset(
+            name, url, alice_wallet, wait_for_aqua=False)
+        assert isinstance(datatoken, Datatoken)
 
     except ValueError as error:
         if "insufficient funds" in str(error):
@@ -33,10 +36,6 @@ def test_ocean_tx__create_url_asset(tmp_path):
             return
         raise (error)
 
-    assert asset is not None
-    datatoken_address = asset.datatokens[0]["address"]
-    datatoken = ocean.get_datatoken(datatoken_address)
-    assert datatoken is not None
     print("Success")
 
 

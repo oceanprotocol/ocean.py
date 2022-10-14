@@ -38,8 +38,6 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 
 This README uses (d) - minting. Specifically, Alice mints a datatoken into Bob's wallet. In the same Python console:
 ```python
-datatoken_address = asset.datatokens[0]["address"]
-datatoken = ocean.get_datatoken(datatoken_address)
 to_address = bob_wallet.address
 amt_tokens = ocean.to_wei(10) #just need 1, send more for spare
 datatoken.mint(to_address, amt_tokens, alice_wallet)
@@ -76,6 +74,7 @@ Here are the last two steps, un-bundled.
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service, to get access
+asset = ocean.assets.resolve(did)
 order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 

@@ -175,9 +175,8 @@ In the same Python console:
 url = "<your csv url>" 
 #e.g. url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
 name = "ETH predictions"
-asset = ocean.assets.create_url_asset(name, url, alice_wallet)
-datatoken_address = asset.datatokens[0]["address"]
-print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
+(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
+print(f"New asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
 ```
 
 ### 5.3 Share predictions to Bob
@@ -268,9 +267,8 @@ In the same Python console:
 url = "<your csv url>" 
 #e.g. url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
 name = "ETH predictions"
-asset = ocean.assets.create_url_asset(name, url, alice_wallet) #will take 30+ seconds
-datatoken_address = asset.datatokens[0]["address"]
-print(f"New asset created, with did={asset.did}, and datatoken_address={datatoken_address}")
+(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False) #will take 30+ seconds
+print(f"New asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
 ```
 
 Write down the `did` and `datatoken_address`. You'll be needing to share it in the Questbook entry.
@@ -279,10 +277,6 @@ Write down the `did` and `datatoken_address`. You'll be needing to share it in t
 
 In the same Python console:
 ```python
-#retrieve Datatoken object
-from ocean_lib.models.datatoken import Datatoken
-datatoken = Datatoken(ocean.web3, datatoken_address)
-
 #send tokens to judges
 to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official judges address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
