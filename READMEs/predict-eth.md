@@ -183,8 +183,6 @@ print(f"New asset created, with did={asset.did}, and datatoken.address={datatoke
 
 In the same Python console:
 ```python
-from ocean_lib.models.datatoken import Datatoken
-datatoken = Datatoken(ocean.web3, datatoken_address)
 to_address = bob_wallet.address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
@@ -267,7 +265,7 @@ In the same Python console:
 url = "<your csv url>" 
 #e.g. url = "https://arweave.net/qctEbPb3CjvU8LmV3G_mynX74eCxo1domFQIlOBH1xU"
 name = "ETH predictions"
-(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False) #will take 30+ seconds
+(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
 print(f"New asset created, with did={asset.did}, and datatoken.address={datatoken.address}")
 ```
 
@@ -277,7 +275,6 @@ Write down the `did` and `datatoken_address`. You'll be needing to share it in t
 
 In the same Python console:
 ```python
-#send tokens to judges
 to_address="0xA54ABd42b11B7C97538CAD7C6A2820419ddF703E" #official judges address
 datatoken.mint(to_address, ocean.to_wei(10), alice_wallet)
 ```
