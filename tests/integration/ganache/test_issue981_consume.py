@@ -18,7 +18,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
-@pytest.mark.skip(reason="Don't skip, once fixed #1013")
 @pytest.mark.integration
 def test1(
     web3: Web3,
