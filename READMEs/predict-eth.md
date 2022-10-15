@@ -219,6 +219,7 @@ def _unixtime(datetime):
     return time.mktime(datetime.timetuple())
     
 
+import numpy as np
 target_unixtimes = np.asarray([_unixtime(datetime) for datetime in target_datetimes])
 
 #get the most recent day of *true* ETH price data
