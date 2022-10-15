@@ -208,39 +208,42 @@ print(f"Bob retrieved the file, it has {len(pred_vals)} predictions")
 In the same Python console:
 
 ```python
-#set target_unixtimes
-from datetime import datetime, timedelta
-import time
-start_datetime = datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
-target_datetimes = [start_datetime + timedelta(hours=hours) for hours in range(24)]
-assert len(pred_vals) == len(target_datetimes), "wrong # predictions"
-
-def _unixtime(datetime):
-    return time.mktime(datetime.timetuple())
-    
-
+#imports
+import datetime
 import numpy as np
-target_unixtimes = np.asarray([_unixtime(datetime) for datetime in target_datetimes])
+import requests
+import time
+
+#conversion functions
+def to_unixtime(dt: datetime.datetime):
+    return time.mktime(dt.timetuple())
+
+def to_datetime(unixtime) -> datetime.datetime:
+    return datetime.fromtimestamp(unixtime)
+
+#set target_uts. "ut" is unixtime
+start_dt = datetime.datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
+target_dts = [start_dt + datetime.timedelta(hours=h) for h in range(24)]
+assert len(pred_vals) == len(target_dts), "wrong # predictions"
+target_uts = [to_unixtime(dt) for dt in target_dts]
 
 #get the most recent day of *true* ETH price data
-# Warning: This assumes that your predictions are also the most recent day. If they don't line up, errors will be high.
-
-import requests
+# Warning: This assumes that your predictions are also the most recent day. If they don't line up, errors will be high
 result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT&period=1d")
 allcex_x = result.json() #list with 500 entries. Each data[i] is a list with 6 entries
-allcex_unixtimes = np.asarray([inner[0] for inner in allcex_x])
-allcex_vals = np.asarray([inner[4] for inner in allcex_x])
+allcex_uts = [inner[0] for inner in allcex_x]
+allcex_vals = [inner[4] for inner in allcex_x]
 
 #cex_vals = only at the timestamps that line up with those of predictions
-cex_vals = np.zeros(len(target_unixtimes))
-for i, target_unixtime in enumerate(target_unixtimes):
-    time_diffs = np.abs(allcex_unixtimes - target_unixtime)
+cex_vals = [None] * len(target_uts)
+for i, target_ut in enumerate(target_uts):
+    time_diffs = np.abs(np.asarray(allcex_uts) - target_ut)
     j = np.argmin(time_diffs)
     cex_vals[i] = allcex_vals[j]
 
 #calculate NMSE
-mse_xy = np.sum(np.square(cex_vals - pred_vals))
-mse_x = np.sum(np.square(cex_vals))
+mse_xy = np.sum(np.square(np.asarray(cex_vals) - np.asarray(pred_vals)))
+mse_x = np.sum(np.square(np.asarray(cex_vals)))
 nmse = mse_xy / mse_x
 print(f"NMSE = {nmse}")
 ```
