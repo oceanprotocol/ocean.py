@@ -226,7 +226,7 @@ target_unixtimes = np.asarray([_unixtime(datetime) for datetime in target_dateti
 # Warning: This assumes that your predictions are also the most recent day. If they don't line up, errors will be high.
 
 import requests
-result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT")
+result = requests.get("https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT&period=1d")
 allcex_x = result.json() #list with 500 entries. Each data[i] is a list with 6 entries
 allcex_unixtimes = np.asarray([inner[0] for inner in allcex_x])
 allcex_vals = np.asarray([inner[4] for inner in allcex_x])
