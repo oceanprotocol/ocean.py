@@ -17,7 +17,6 @@ Here are the steps:
 2. Get data locally. E.g. Binance ETH price feed
 3. Make predictions
 4. Publish & share predictions
-5. Share predictions
 
 ## 1. Setup
 
