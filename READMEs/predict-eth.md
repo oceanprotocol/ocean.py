@@ -80,7 +80,7 @@ In the same Python console:
 # Download file
 ETH_USDT_did = "did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19"
 file_name = ocean.assets.download_file(ETH_USDT_did, alice_wallet)
-allcex_uts, allcex_vals = load_ohlc_data(file_name)
+allcex_uts, allcex_vals = load_from_ohlc_data(file_name)
 print_datetime_info("CEX data info", allcex_uts)
 ```
 
@@ -134,7 +134,7 @@ Keep iterating in step 3 until you're satisfied with accuracy. Then...
 In the same Python console:
 ```python
 file_name = "/tmp/pred_vals.csv"
-save_pred_vals(pred_vals, file_name)
+save_list(pred_vals, file_name)
 ```
 
 The csv will look something like:
@@ -198,12 +198,12 @@ alice_wallet = create_alice_wallet(ocean) #you're Alice
 #get predicted ETH values
 did = <value shared by you>
 file_name = ocean.assets.download_file(did, alice_wallet)
-pred_vals = load_pred_vals(file_name)
+pred_vals = load_list(file_name)
 
 #get actual ETH values (final)
 ETH_USDT_did = "did:op:0dac5eb4965fb2b485181671adbf3a23b0133abf71d2775eda8043e8efc92d19"
 file_name = ocean.assets.download_file(ETH_USDT_did, alice_wallet)
-allcex_uts, allcex_vals = load_ohlc_data(file_name)
+allcex_uts, allcex_vals = load_from_ohlc_data(file_name)
 print_datetime_info("CEX data info", allcex_uts)
 
 start_dt = datetime.datetime(2022, 10, 17, 1, 00) #Oct 17, 2022 at 1:00am
@@ -234,11 +234,14 @@ import os
 import requests
 import time
 
+import matplotlib
+import matplotlib.pyplot as plt
+    
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
-#helper functions
+#helper functions: setup
 def create_ocean_instance() -> Ocean:
     config = ExampleConfig.get_config("https://polygon-rpc.com") # points to Polygon mainnet
     config["BLOCK_CONFIRMATIONS"] = 1 #faster
@@ -253,27 +256,19 @@ def create_alice_wallet(ocean: Ocean) -> Wallet:
     print(f"alice_wallet.address={alice_wallet.address}. bal={bal}")
     assert bal > 0, f"Alice needs MATIC"
     return alice_wallet
-
+    
+#helper functions: time
 def to_unixtime(dt: datetime.datetime):
     return time.mktime(dt.timetuple())
 
-def to_unixtimes(dts) -> list:
+def to_unixtimes(dts: list) -> list:
     return [to_unixtime(dt) for dt in dts]
 
 def to_datetime(ut) -> datetime.datetime:
     return datetime.datetime.utcfromtimestamp(ut)
 
-def to_datetimes(uts) -> list:
+def to_datetimes(uts: list) -> list:
     return [to_datetime(ut) for ut in uts]
-
-def load_ohlc_data(file_name: str) -> tuple:
-    """Returns (list_of_unixtimes, list_of_close_prices)"""
-    with open(file_name, "r") as file:
-        data_str = file.read().rstrip().replace('"', '')
-    x = eval(data_str) #list of lists
-    uts = [xi[0]/1000 for xi in x]
-    vals = [xi[4] for xi in x]
-    return (uts, vals)
 
 def print_datetime_info(descr:str, uts: list):
     dts = to_datetimes(uts)
@@ -286,7 +281,17 @@ def print_datetime_info(descr:str, uts: list):
 def target_24h_unixtimes(start_dt: datetime.datetime) -> list:
     target_dts = [start_dt + datetime.timedelta(hours=h) for h in range(24)]
     target_uts = to_unixtimes(target_dts)
-    return target_uts    
+    return target_uts
+
+#helper-functions: higher level
+def load_from_ohlc_data(file_name: str) -> tuple:
+    """Returns (list_of_unixtimes, list_of_close_prices)"""
+    with open(file_name, "r") as file:
+        data_str = file.read().rstrip().replace('"', '')
+    x = eval(data_str) #list of lists
+    uts = [xi[0]/1000 for xi in x]
+    vals = [xi[4] for xi in x]
+    return (uts, vals)
 
 def filter_to_target_uts(target_uts:list, unfiltered_uts:list, unfiltered_vals:list) -> list:
     """Return filtered_vals -- values at at the target timestamps"""
@@ -299,16 +304,20 @@ def filter_to_target_uts(target_uts:list, unfiltered_uts:list, unfiltered_vals:l
         filtered_vals[i] = unfiltered_vals[j]
     return filtered_vals
 
-def save_pred_vals(pred_vals: list, file_name: str):
+#helpers: save/load list
+def save_list(list_: list, file_name: str):
+    """Save a file shaped: [1.2, 3.4, 5.6, ..]"""
     p = Path(file_name)
-    p.write_text(str(pred_vals))
+    p.write_text(str(list_))
 
-def load_pred_vals(file_name: str) -> list:
+def load_list(file_name: str) -> list:
+    """Load from a file shaped: [1.2, 3.4, 5.6, ..]"""
     p = Path(file_name)
     s = p.read_text()
-    yhat = eval(s)
-    return yhat
+    list_ = eval(s)
+    return list_
 
+#helpers: prediction performance
 def calc_nmse(y, yhat) -> float:
     assert len(y) == len(yhat)
     mse_xy = np.sum(np.square(np.asarray(y) - np.asarray(yhat)))
@@ -317,9 +326,6 @@ def calc_nmse(y, yhat) -> float:
     return nmse
 
 def plot_prices(cex_vals, pred_vals):
-    import matplotlib
-    import matplotlib.pyplot as plt
-    
     matplotlib.rcParams.update({'font.size': 22})
     
     x = [h for h in range(0,24)]
