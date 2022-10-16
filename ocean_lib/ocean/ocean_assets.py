@@ -761,8 +761,6 @@ class OceanAssets:
             active, disp_bal, allowedSwapper = st[0], from_wei(st[5]), st[6]
             if not active:
                 raise ValueError("No active dispenser for datatoken")
-            if disp_bal < 1.0:
-                raise ValueError("Dispenser has <1 tokens left. ({disp_bal})")
             if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
                 raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
             # Try to dispense. If other issues, they'll pop out
