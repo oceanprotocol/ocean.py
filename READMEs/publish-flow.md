@@ -33,8 +33,8 @@ In the same Python console:
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-#create asset
-asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+#create data NFT & datatoken & DDO asset
+(data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
 

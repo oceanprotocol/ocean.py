@@ -27,17 +27,10 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Set envvars
 - [x] Setup : Setup in Python
 
-"Setup in Python" set up Alice's wallet. Let's set up Bob's wallet too. In the same Python console:
-```python
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"])
-print(f"bob_wallet.address = '{bob_wallet.address}'")
-```
-
 ## 2. Alice publishes dataset
 
 Now, you're Alice. From [publish-flow](publish-flow.md), do:
-- [x] 2. Publish Dataset. (This includes publishing a data NFT & datatoken)
+- [x] 2. Publish Dataset
 
 ## 3. Alice gives Bob access
 
@@ -45,34 +38,19 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 
 This README uses (d) - minting. Specifically, Alice mints a datatoken into Bob's wallet. In the same Python console:
 ```python
-datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
-datatoken.mint(
-    account_address=bob_wallet.address,
-    value=ocean.to_wei("1"),
-    from_wallet=alice_wallet,
-)
+datatoken_address = asset.datatokens[0]["address"]
+datatoken = ocean.get_datatoken(datatoken_address)
+to_address = bob_wallet.address
+amt_tokens = ocean.to_wei(10) #just need 1, send more for spare
+datatoken.mint(to_address, amt_tokens, alice_wallet)
 ```
 
 ## 4. Bob downloads the dataset
 
 In the same Python console:
 ```python
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
-# Bob sends 1.0 datatokens to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
-print(f"order_tx_id = '{order_tx_id}'")
-
-# Bob now has access! He downloads the asset. 
-# If the connection breaks, Bob can request again by showing order_tx_id.
-file_path = ocean.assets.download_asset(
-    asset=asset,
-    consumer_wallet=bob_wallet,
-    destination='./',
-    order_tx_id=order_tx_id
-)
-print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
+# Bob sends a datatoken to the service to get access; then downloads
+file_name = ocean.assets.download_file(asset.did, bob_wallet)
 ```
 
 Bob can verify that the file is downloaded. In a new console:
@@ -84,21 +62,48 @@ ls branin.arff
 
 Congrats to Bob for buying and consuming a data asset!
 
-## Appendix: Further Flexibility
 
-`pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees. Here's how it looks if we filled them explicitly.
+## Appendix. Further Flexibility
 
-And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
+Step 4's `download_file()` did three things:
+
+- Checked if Bob has access tokens. Bob did, so nothing else needed
+- Sent a datatoken to the service to get access
+- Downloaded the file
+
+Here are the last two steps, un-bundled.
+
+In the same Python console:
+```python
+# Bob sends a datatoken to the service, to get access
+order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+print(f"order_tx_id = '{order_tx_id}'")
+
+# Bob downloads the file
+# If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    consumer_wallet=bob_wallet,
+    destination='./',
+    order_tx_id=order_tx_id
+)
+```
+
+
+## Appendix: Further Flexibility Yet
+
+We can un-bundle even further:
+- `pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees. 
+- And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
+
+Here's how it looks, fully un-bundled.
 
 In the same python console:
 ```python
-# Let's get more datatokens to Bob first
-datatoken.mint(bob_wallet.address, ocean.to_wei("1"), alice_wallet)
-
 # Bob retrieves the reference to the service object
 service = asset.services[0]
 
-# Bob sends 1.0 datatokens to the service, to get access
+# Bob sends a datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     bob_wallet,
@@ -108,8 +113,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
     consume_market_order_fee_amount=0,
 )
 
-# Bob now has access! He downloads the asset. 
-# If the connection breaks, Bob can request again by showing order_tx_id.
+# Bob now has access! He downloads the asset.
 file_path = ocean.assets.download_asset(
     asset=asset,
     consumer_wallet=bob_wallet,

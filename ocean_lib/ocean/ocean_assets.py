@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+import glob
 import json
 import logging
 import lzma
@@ -26,6 +27,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -37,7 +39,7 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei, from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -260,15 +262,22 @@ class OceanAssets:
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
-    def create_url_asset(self, name: str, url: str, publisher_wallet: Wallet) -> Asset:
+    def create_url_asset(
+        self, name: str, url: str, publisher_wallet: Wallet, wait_for_aqua: bool = True
+    ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
         return self._create1(name, files, publisher_wallet)
 
     @enforce_types
     def create_graphql_asset(
-        self, name: str, url: str, query: str, publisher_wallet: Wallet
-    ) -> Asset:
+        self,
+        name: str,
+        url: str,
+        query: str,
+        publisher_wallet: Wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
         return self._create1(name, files, publisher_wallet)
@@ -280,7 +289,8 @@ class OceanAssets:
         contract_address: str,
         contract_abi: dict,
         publisher_wallet: Wallet,
-    ) -> Asset:
+        wait_for_aqua: bool = True,
+    ) -> tuple:
         """Create an asset of type "SmartContractCall", with good defaults"""
         chain_id = self._web3.eth.chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
@@ -288,8 +298,19 @@ class OceanAssets:
         return self._create1(name, files, publisher_wallet)
 
     @enforce_types
-    def _create1(self, name: str, files: list, publisher_wallet: Wallet) -> Asset:
-        """Thin wrapper for create(). Creates 1 datatoken, with good defaults for many parameters."""
+    def _create1(
+        self,
+        name: str,
+        files: list,
+        publisher_wallet: Wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
+
+        If wait_for_aqua, then attempt to update aquarius within time constraints.
+
+        Returns (data_nft, datatoken, asset)
+        """
         date_created = datetime.now().isoformat()
         metadata = {
             "created": date_created,
@@ -302,7 +323,7 @@ class OceanAssets:
         }
 
         OCEAN_address = get_ocean_token_address(self._config_dict)
-        asset = self.create(
+        (data_nft, datatokens, asset) = self.create(
             metadata,
             publisher_wallet,
             files,
@@ -315,8 +336,11 @@ class OceanAssets:
             datatoken_publish_market_order_fee_tokens=[OCEAN_address],
             datatoken_publish_market_order_fee_amounts=[0],
             datatoken_bytess=[[b""]],
+            wait_for_aqua=wait_for_aqua,
+            return_asset=False,
         )
-        return asset
+        datatoken = None if datatokens is None else datatokens[0]
+        return (data_nft, datatoken, asset)
 
     # Don't enforce types due to error:
     # TypeError: Subscripted generics cannot be used with class and instance checks
@@ -350,6 +374,8 @@ class OceanAssets:
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
+        wait_for_aqua: bool = True,
+        return_asset: bool = True,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -382,7 +408,9 @@ class OceanAssets:
         :param deployed_datatokens: list of datatokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
-        :return: DDO instance
+        :param wait_for_aqua: wait to ensure asset's updated in aquarius?
+        :param return_asset: return asset, vs tuple?
+        :return: asset [if return_asset == True], otherwise tuple of (data_nft, datatokens, asset)
         """
         self._assert_ddo_metadata(metadata)
 
@@ -429,7 +457,7 @@ class OceanAssets:
             data_nft = DataNFT(self._web3, data_nft_address)
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
-                return None
+                return None if return_asset else (None, None, None)
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
@@ -576,9 +604,15 @@ class OceanAssets:
         )
 
         # Fetch the asset on chain
-        asset = self._aquarius.wait_for_asset(did)
+        if wait_for_aqua:
+            asset = self._aquarius.wait_for_asset(did)
 
-        return asset
+        # Return
+        if return_asset:
+            return asset
+        else:
+            datatokens = [Datatoken(self._web3, d["address"]) for d in datatokens]
+            return (data_nft, datatokens, asset)
 
     @enforce_types
     def update(
@@ -683,6 +717,54 @@ class OceanAssets:
             for ddo_dict in self._aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
+
+    @enforce_types
+    def download_file(self, asset_did: str, wallet: Wallet) -> str:
+        """Helper method. Given a did, download file to "./". Returns filename.
+
+        Assumes that:
+        - wallet holds datatoken, or datatoken will freely dispense
+        - 0th datatoken of this did
+        - 0th service of the datatoken
+        - the service *is* a download service
+        """
+        # Retrieve the Asset and datatoken objects
+        print("Resolve did...")
+        asset = self.resolve(asset_did)
+        datatoken_address = asset.datatokens[0]["address"]
+        datatoken = Datatoken(self._web3, datatoken_address)
+
+        # Ensure access token
+        bal = from_wei(datatoken.balanceOf(wallet.address))
+        if bal >= 1.0:  # we're good
+            pass
+        else:  # try to get freely-dispensed asset
+            print("Dispense access token...")
+            amt_dispense_wei = to_wei(1)
+            dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
+            dispenser = Dispenser(self._web3, dispenser_addr)
+
+            # catch key failure modes
+            st = dispenser.status(datatoken.address)
+            active, disp_bal, allowedSwapper = st[0], from_wei(st[5]), st[6]
+            if not active:
+                raise ValueError("No active dispenser for datatoken")
+            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
+                raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
+            # Try to dispense. If other issues, they'll pop out
+            dispenser.dispense_tokens(datatoken, amt_dispense_wei, wallet)
+
+        # send datatoken to the service, to get access
+        print("Order access...")
+        order_tx_id = self.pay_for_access_service(asset, wallet)
+
+        # download the asset
+        print("Download file...")
+        file_path = self.download_asset(asset, wallet, "./", order_tx_id)
+        file_name = glob.glob(file_path + "/*")[0]
+        print(f"Done. File: {file_name}")
+
+        return file_name
 
     @enforce_types
     def download_asset(

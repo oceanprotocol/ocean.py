@@ -22,15 +22,10 @@ Let's go through each step.
 
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
 - [x] Setup : Install the library
-
-### Setup for remote
-
-From [simple-remote](simple-remote.md), do:
-- [x] Create Mumbai Accounts (One-Time)
-- [x] Create Config File for Services
-- [x] Set envvars
-- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
+- [x] Setup : Set envvars
+- [x] Setup : Setup in Python
 
 ## 2. Alice publishes the API asset
 
@@ -45,7 +40,7 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
 
@@ -53,8 +48,6 @@ print(f"Just published asset, with did={asset.did}")
 
 In the same Python console:
 ```python
-from ocean_lib.models.datatoken import Datatoken
-datatoken = Datatoken(ocean.web3, datatoken_address)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 datatoken.create_dispenser(
     dispenser_address=ocean.dispenser.address,
@@ -68,34 +61,65 @@ dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:3] == [True, alice_wallet.address, True]
 ```
 
-### 4.  Bob consumes the API asset
+### 4. Bob consumes the API asset
 
-Now, you're Bob. All you have is the did of the data asset; you compute the rest.
+Now, you're Bob. First, download the file.
 
 In the same Python console:
 ```python
 # Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
 asset_did = asset.did
 
-# Retrieve the Asset and datatoken objects
+# Bob gets a datatoken from the dispenser; sends it to the service; downloads
+file_name = ocean.assets.download_file(asset_did, bob_wallet)
+```
+
+Now, load the file and use its data.
+
+The data follows the Binance docs specs for Kline/Candlestick Data, [here](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data).
+
+In the same Python console:
+```python
+
+#load from file into memory
+with open(file_name, "r") as file:
+    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
+    data_str = file.read().rstrip().replace('"', '')
+
+
+data = eval(data_str) 
+
+#data is a list of lists
+# -Outer list has one 7 entries; one entry per day.
+# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
+
+#get close prices
+close_prices = [float(data_at_day[4]) for data_at_day in data]
+```
+
+## Appendix. Further Flexibility
+
+Step 4's `download_file()` did three things:
+
+- Checked if Bob has access tokens. He didn't, so the dispenser gave him some
+- Sent a datatoken to the service to get access
+- Downloaded the file
+
+Here are the three steps, un-bundled.
+
+In the same Python console:
+```python
+# Bob gets an access token from the dispenser
 asset = ocean.assets.resolve(asset_did)
 datatoken_address = asset.datatokens[0]["address"]
-print(f"Asset retrieved, with did={asset.did}, and datatoken_address={datatoken_address}")
+datatoken = ocean.get_datatoken(datatoken_address)
+amt_tokens = ocean.to_wei(1)
+ocean.dispenser.dispense_tokens(datatoken, amt_tokens, bob_wallet)
 
-# Bob gets an access token from the dispenser
-amt_dispense = 1
-datatoken = Datatoken(ocean.web3, datatoken_address)
-ocean.dispenser.dispense_tokens(
-    datatoken=datatoken, amount=ocean.to_wei(amt_dispense), consumer_wallet=bob_wallet
-)
-bal = ocean.from_wei(datatoken.balanceOf(bob_wallet.address))
-print(f"Bob now holds {bal} access tokens for the data asset.")
-
-# Bob sends 1.0 datatokens to the service, to get access
+# Bob sends a datatoken to the service to get access
 order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
-print(f"order_tx_id = '{order_tx_id}'")
 
-# Bob now has access. He downloads the asset.
+# Bob downloads the dataset
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
@@ -103,38 +127,9 @@ file_path = ocean.assets.download_asset(
     destination='./',
     order_tx_id=order_tx_id
 )
-
 import glob
 file_name = glob.glob(file_path + "/*")[0]
-print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
-print(f"file_name: '{file_name}'")  # e.g. datafile.0xAf07...48,0/klines?symbol=ETHUSDT?int..22300
-
-#verify that file exists
-import os
-assert os.path.exists(file_name), "couldn't find file"
-
-# The file's data follows the Binance docs specs for Kline/Candlestick Data
-# https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data
-
-#load from file into memory
-with open(file_name, "r") as file:
-    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
-    data_str = file.read().rstrip().replace('"', '')
-
-#data is a list of lists
-# -Outer list has one 7 entries; one entry per day.
-# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
-data = eval(data_str) 
-
-#get close prices. These can serve as an approximation to spot price
-close_prices = [float(data_at_day[4]) for data_at_day in data]
-
-#or, we can put all data into a 2D array, to ease numerical processing
-import numpy
-D = numpy.asarray(data)
-print(D.shape)
-# returns:
-# (7,12) #7 days, 12 entries per day
+print(f"file_name: '{file_name}'")
 ```
 
 

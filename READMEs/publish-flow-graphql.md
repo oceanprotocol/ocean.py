@@ -41,7 +41,7 @@ query="""query{
 """
 
 #create asset
-asset = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
+(data_nft, datatoken, asset) = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
 
@@ -49,5 +49,5 @@ That's it! You've created a data asset of "GraphqlQuery" asset type. It includes
 
 ## 3.  Consume dataset
 
-Consume here is just like in [consume-flow](READMEs/consume-flow.md). The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
+Consume here is just like in [consume-flow](consume-flow.md). The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
 

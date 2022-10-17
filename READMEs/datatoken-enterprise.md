@@ -73,17 +73,6 @@ asset = ocean.assets.create(
 )
 access_service = asset.services[0]
 
-bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-bob_wallet = Wallet(
-    ocean.web3,
-    bob_private_key,
-    config["BLOCK_CONFIRMATIONS"],
-    config["TRANSACTION_TIMEOUT"],
-)
-
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
 # Create & activate dispenser
 dispenser = ocean.dispenser
 tx = datatoken_enterprise_token.create_dispenser(
@@ -181,17 +170,6 @@ asset = ocean.assets.create(
     deployed_datatokens=[datatoken_enterprise_token]
 )
 access_service = asset.services[0]
-
-bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-bob_wallet = Wallet(
-    ocean.web3,
-    bob_private_key,
-    config["BLOCK_CONFIRMATIONS"],
-    config["TRANSACTION_TIMEOUT"],
-)
-
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Bob buys 1 DT from the FRE and then startsOrder, while burning that DT
 fixed_rate_exchange = ocean.fixed_rate_exchange
