@@ -3,13 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import random
+import time
 import warnings
 
 import requests
-import time
+
+from ocean_lib.ocean.ocean import Ocean
 
 from .util import get_wallets, random_chars
-from ocean_lib.ocean.ocean import Ocean
 
 
 def test_nonocean_tx(tmp_path):
@@ -65,7 +66,7 @@ def test_ocean_tx__create_data_nft(tmp_path):
     # setup
     config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
-    (alice_wallet, _) = _get_wallets(ocean)
+    (alice_wallet, _) = get_wallets(ocean)
 
     # Alice publish data NFT
     # avoid "replacement transaction underpriced" error: make each tx diff't
