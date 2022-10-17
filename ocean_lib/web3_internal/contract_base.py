@@ -5,10 +5,12 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from brownie import network
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -209,15 +211,28 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        # TODO: transfer rest of custom contract function, waiting etc.
-        return getattr(self.contract, fn_name)(*fn_args, _transact).txid
+        txid = getattr(self.contract, fn_name)(*fn_args, _transact).txid
 
-        #
-        # return contract_function.transact(
-        #    _transact,
-        #    from_wallet.block_confirmations.value,
-        #    from_wallet.transaction_timeout.value,
-        # ).hex()
+        return self.wait_for_transaction_status(from_wallet, txid)
+
+    @enforce_types
+    def wait_for_transaction_status(self, wallet: Wallet, txid: str):
+        if wallet.transaction_timeout.value == 0:
+            return txid
+
+        start = time.time()
+        receipt = TransactionReceipt(txid)
+        if receipt.status.value == 1:
+            return txid
+
+        while time.time() - start > wallet.transaction_timeout.value:
+            receipt = TransactionReceipt(txid)
+            if receipt.status.value == 1:
+                return txid
+
+            time.sleep(0.2)
+
+        raise Exception("Transaction Timeout reached without successful status.")
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:
