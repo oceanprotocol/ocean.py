@@ -4,6 +4,7 @@
 #
 from typing import List, Optional, Union
 
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
@@ -435,15 +436,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
     @enforce_types
     def get_token_address(self, tx_id: Union[str, bytes]):
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
-        registered_event = self.get_event_log(
-            event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-            from_block=tx_receipt.blockNumber,
-            to_block=self.web3.eth.block_number,
-            filters=None,
-        )
+        receipt = TransactionReceipt(tx_id)
 
-        return registered_event[0].args.newTokenAddress
+        return receipt.events["NFTCreated"]["newTokenAddress"]
 
     @enforce_types
     def check_datatoken(self, datatoken_address: str) -> bool:
