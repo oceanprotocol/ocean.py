@@ -58,14 +58,14 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
 
-### Data Bounties flows
-
-- [Predict future ETH price](READMEs/predict-eth.md) - predict future ETH price via a local AI model
-
 ### Key-value flows
 
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
+
+### Data Challenge flows
+
+- [Predict-eth repo](https://github.com/oceanprotocol/predict-eth) - data challanges with $ to predict future ETH price.
 
 ### Learn more
 
