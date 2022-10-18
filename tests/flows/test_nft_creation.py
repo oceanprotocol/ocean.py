@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -37,16 +38,12 @@ def test_data_nft_roles(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+
+    receipt = TransactionReceipt(tx)
+    assert "NFTCreated" in receipt.events
+    assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
+
+    token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
 
     # Publisher should be a manager
@@ -171,16 +168,12 @@ def test_successful_data_nft_creation(web3, config, publisher_wallet):
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+
+    receipt = TransactionReceipt(tx)
+    assert "NFTCreated" in receipt.events
+    assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
+
+    token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     owner_balance = data_nft.balance_of(publisher_wallet.address)
     assert data_nft.contract.name() == "NFT"
@@ -242,14 +235,8 @@ def test_datatoken_creation(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    token_address = registered_event[0].args.newTokenAddress
+
+    token_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
@@ -264,16 +251,7 @@ def test_datatoken_creation(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
-
-    registered_event2 = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        from_block=tx_receipt2.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    datatoken_address = registered_event2[0].args.newTokenAddress
+    datatoken_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
 
     datatoken = Datatoken(web3, datatoken_address)
 

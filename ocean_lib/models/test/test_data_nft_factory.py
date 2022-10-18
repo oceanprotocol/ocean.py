@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -85,16 +86,11 @@ def test_main(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+
+    assert registered_event["admin"] == publisher_wallet.address
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
@@ -135,15 +131,10 @@ def test_main(
         from_wallet=consumer_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx_result)
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event["newTokenAddress"]
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.template_count() == 2
@@ -181,33 +172,22 @@ def test_main(
         datatoken_bytess=[b""],
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_nft_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx)
+    registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     # Verify if the NFT was created.
     assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event[0].event == "NFTCreated"
-    assert registered_nft_event[0].args.admin == publisher_wallet.address
-    data_nft_address2 = registered_nft_event[0].args.newTokenAddress
+    assert registered_nft_event["admin"] == publisher_wallet.address
+    data_nft_address2 = registered_nft_event["newTokenAddress"]
     data_nft_token2 = DataNFT(web3, data_nft_address2)
     assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
 
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address2 = registered_token_event[0].args.newTokenAddress
+    datatoken_address2 = registered_token_event["newTokenAddress"]
     datatoken2 = Datatoken(web3, datatoken_address2)
     assert datatoken2.contract.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
@@ -229,15 +209,12 @@ def test_main(
         from_wallet=publisher_wallet,
     )
     assert tx, "Failed to create ERC20 token."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_fee_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx)
+    registered_fee_token_event = receipt.events[
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED
+    ]
     assert registered_fee_token_event, "Cannot find TokenCreated event."
-    fee_datatoken_address = registered_fee_token_event[0].args.newTokenAddress
+    fee_datatoken_address = registered_fee_token_event["newTokenAddress"]
 
     tx = data_nft_factory.create_nft_erc20_with_fixed_rate(
         nft_name="72120Bundle",
@@ -267,46 +244,33 @@ def test_main(
         fixed_price_with_mint=0,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_nft_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx)
+    registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+
     # Verify if the NFT was created.
     assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event[0].event == "NFTCreated"
-    assert registered_nft_event[0].args.admin == publisher_wallet.address
-    data_nft_address4 = registered_nft_event[0].args.newTokenAddress
+    assert registered_nft_event["admin"] == publisher_wallet.address
+    data_nft_address4 = registered_nft_event["newTokenAddress"]
     data_nft_token4 = DataNFT(web3, data_nft_address4)
     assert data_nft_token4.contract.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
 
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address4 = registered_token_event[0].args.newTokenAddress
+    datatoken_address4 = registered_token_event["newTokenAddress"]
     datatoken4 = Datatoken(web3, datatoken_address4)
     assert datatoken4.contract.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
 
-    registered_fixed_rate_event = datatoken4.get_event_log(
-        DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_fixed_rate_event = receipt.events[
+        DataNFTFactoryContract.EVENT_NEW_FIXED_RATE
+    ]
 
     # Verify if the Fixed Rate Exchange was created.
     assert registered_fixed_rate_event, "Cannot find NewFixedRate event."
-    assert registered_fixed_rate_event[0].args.exchangeId, "Invalid exchange id."
+    assert registered_fixed_rate_event["exchangeId"], "Invalid exchange id."
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
@@ -334,50 +298,37 @@ def test_main(
         dispenser_allowed_swapper=ZERO_ADDRESS,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_nft_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx)
+    registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+
     # Verify if the NFT was created.
     assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event[0].event == "NFTCreated"
-    assert registered_nft_event[0].args.admin == publisher_wallet.address
-    data_nft_address5 = registered_nft_event[0].args.newTokenAddress
+    assert registered_nft_event["admin"] == publisher_wallet.address
+    data_nft_address5 = registered_nft_event["newTokenAddress"]
     data_nft_token5 = DataNFT(web3, data_nft_address5)
     assert data_nft_token5.contract.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
 
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
 
     # Verify if the datatoken was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address5 = registered_token_event[0].args.newTokenAddress
+    datatoken_address5 = registered_token_event["newTokenAddress"]
     datatoken5 = Datatoken(web3, datatoken_address5)
     assert datatoken5.contract.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
-    dispenser = Dispenser(web3, dispenser_address)
+    _ = Dispenser(web3, dispenser_address)
 
-    registered_dispenser_event = dispenser.get_event_log(
-        DataNFTFactoryContract.EVENT_DISPENSER_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_dispenser_event = receipt.events[
+        DataNFTFactoryContract.EVENT_DISPENSER_CREATED
+    ]
 
     # Verify if the Dispenser data token was created.
     assert registered_dispenser_event, "Cannot find DispenserCreated event."
     assert registered_dispenser_event[
-        0
-    ].args.datatokenAddress, "Invalid data token address by dispenser."
+        "datatokenAddress"
+    ], "Invalid data token address by dispenser."
 
     # Create a new erc721 with metadata in one single call and get address
     tx = data_nft_factory.create_nft_with_metadata(
@@ -396,18 +347,13 @@ def test_main(
         metadata_proofs=[],
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_nft_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_nft_event[0].event == "NFTCreated", "Cannot find NFTCreated event"
+    receipt = TransactionReceipt(tx)
+    registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    assert registered_nft_event, "Cannot find NFTCreated event"
     assert (
-        registered_nft_event[0].args.admin == publisher_wallet.address
+        registered_nft_event["admin"] == publisher_wallet.address
     ), "Invalid NFT owner!"
-    data_nft_address = registered_nft_event[0].args.newTokenAddress
+    data_nft_address = registered_nft_event["newTokenAddress"]
     data_nft = DataNFT(web3, data_nft_address)
     assert (
         data_nft.token_name() == "72120Bundle"
@@ -438,16 +384,11 @@ def test_start_multiple_order(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+
+    assert registered_event["admin"] == publisher_wallet.address
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
@@ -489,15 +430,10 @@ def test_start_multiple_order(
         from_wallet=consumer_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx_result)
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event["newTokenAddress"]
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.template_count() == 2
@@ -573,20 +509,12 @@ def test_start_multiple_order(
     orders = [order_data, order_data]
 
     tx = data_nft_factory.start_multiple_token_order(orders, consumer_wallet)
+    receipt = TransactionReceipt(tx)
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    registered_erc20_start_order_event = datatoken.get_event_log(
-        Datatoken.EVENT_ORDER_STARTED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    registered_erc20_start_order_event = receipt.events[Datatoken.EVENT_ORDER_STARTED]
 
     assert tx, "Failed starting multiple token orders."
-    assert (
-        registered_erc20_start_order_event[0].args.consumer == consumer_wallet.address
-    )
+    assert registered_erc20_start_order_event["consumer"] == consumer_wallet.address
 
     assert datatoken.balanceOf(consumer_wallet.address) == 0
     assert datatoken.balanceOf(datatoken.get_payment_collector()) == (dt_amount * 0.97)
@@ -631,16 +559,10 @@ def test_fail_create_erc20(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    assert registered_event["admin"] == publisher_wallet.address
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 

@@ -29,8 +29,6 @@ from ocean_lib.web3_internal.contract_utils import (
 from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
 
-# from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
-
 logger = logging.getLogger(__name__)
 
 
@@ -202,7 +200,8 @@ class ContractBase(object):
         _transact = {
             "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
-            "chainId": self.web3.eth.chain_id,
+            # "nonce": self.web3.eth.getTransactionCount(from_wallet.address)
+            # 'nonce': Wallet._get_nonce(self.web3, from_wallet.address)
         }
 
         gas_tx = get_gas_price(web3_object=self.web3, tx=_transact)
@@ -211,12 +210,17 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        txid = getattr(self.contract, fn_name)(*fn_args, _transact).txid
+        receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
+        receipt.wait(from_wallet.block_confirmations.value)
+
+        txid = receipt.txid
 
         return self.wait_for_transaction_status(from_wallet, txid)
 
     @enforce_types
     def wait_for_transaction_status(self, wallet: Wallet, txid: str):
+        receipt = TransactionReceipt(txid)
+
         if wallet.transaction_timeout.value == 0:
             return txid
 

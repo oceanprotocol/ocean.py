@@ -11,6 +11,7 @@ from unittest.mock import patch
 import brownie
 import eth_keys
 import pytest
+from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -453,16 +454,10 @@ def test_plain_asset_with_one_datatoken(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    data_nft_address = registered_event[0].args.newTokenAddress
+    tx_receipt = TransactionReceipt(tx)
+    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    assert registered_event["admin"] == publisher_wallet.address
+    data_nft_address = registered_event["newTokenAddress"]
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -510,17 +505,11 @@ def test_plain_asset_multiple_datatokens(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    tx_receipt = TransactionReceipt(tx)
+    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    data_nft_address2 = registered_event[0].args.newTokenAddress
+    assert registered_event["admin"] == publisher_wallet.address
+    data_nft_address2 = registered_event["newTokenAddress"]
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
