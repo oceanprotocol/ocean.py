@@ -14,7 +14,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
-    @enforce_types
     def buy_from_fre_and_order(
         self,
         consumer: str,

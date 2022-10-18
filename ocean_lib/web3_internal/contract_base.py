@@ -200,7 +200,8 @@ class ContractBase(object):
         _transact = {
             "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
-            # 'nonce': self.web3.eth.getTransactionCount(from_wallet.address)
+            # "nonce": self.web3.eth.getTransactionCount(from_wallet.address)
+            # 'nonce': Wallet._get_nonce(self.web3, from_wallet.address)
         }
 
         gas_tx = get_gas_price(web3_object=self.web3, tx=_transact)

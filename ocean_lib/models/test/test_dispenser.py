@@ -55,7 +55,7 @@ def test_main(
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     # Tests publisher creates a dispenser with minter role
-    tx = datatoken.create_dispenser(
+    _ = datatoken.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=to_wei("1"),
         max_tokens=to_wei("1"),
@@ -63,8 +63,6 @@ def test_main(
         allowed_swapper=ZERO_ADDRESS,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     # Tests publisher gets the dispenser status
 
@@ -83,14 +81,12 @@ def test_main(
         )
 
     # Tests consumer requests data tokens
-    tx = dispenser.dispense(
+    _ = dispenser.dispense(
         datatoken=datatoken.address,
         amount=to_wei("1"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     # Tests consumer requests more datatokens then exceeds maxBalance
     with pytest.raises(Exception, match="Caller balance too high"):

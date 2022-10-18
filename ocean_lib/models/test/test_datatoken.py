@@ -5,6 +5,7 @@
 import json
 
 import pytest
+from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -175,7 +176,7 @@ def test_start_order(
         consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    receipt = TransactionReceipt(tx)
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei("9")
     assert datatoken.balanceOf(
@@ -184,7 +185,7 @@ def test_start_order(
 
     provider_message = Web3.solidityKeccak(
         ["bytes32", "bytes"],
-        [tx_receipt.transactionHash, Web3.toHex(Web3.toBytes(text=provider_data))],
+        [receipt.txid, Web3.toHex(Web3.toBytes(text=provider_data))],
     )
     provider_signed = web3.eth.sign(provider_fee_address, data=provider_message)
 
@@ -194,8 +195,8 @@ def test_start_order(
     )
     consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
 
-    datatoken.order_executed(
-        order_tx_id=tx_receipt.transactionHash,
+    tx = datatoken.order_executed(
+        order_tx_id=receipt.txid,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         provider_signature=provider_signed,
         consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -203,21 +204,16 @@ def test_start_order(
         consumer=consumer_wallet.address,
         from_wallet=publisher_wallet,
     )
-    executed_event = datatoken.get_event_log(
-        Datatoken.EVENT_ORDER_EXECUTED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert executed_event[0].event == "OrderExecuted", "Cannot find OrderExecuted event"
-    assert executed_event[0].args.orderTxId == tx_receipt.transactionHash
-    assert executed_event[0].args.providerAddress == provider_fee_address
+    receipt_interm = TransactionReceipt(tx)
+    executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
+    assert executed_event["orderTxId"] == receipt.txid
+    assert executed_event["providerAddress"] == provider_fee_address
 
     # Tests exceptions for order_executed
     consumer_signed = web3.eth.sign(provider_fee_address, data=message)
     with pytest.raises(Exception, match="Consumer signature check failed"):
         datatoken.order_executed(
-            tx_receipt.transactionHash,
+            receipt.txid,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_signature=provider_signed,
             consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -234,7 +230,7 @@ def test_start_order(
 
     with pytest.raises(Exception, match="Provider signature check failed"):
         datatoken.order_executed(
-            tx_receipt.transactionHash,
+            receipt.txid,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_signature=signed,
             consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -244,8 +240,8 @@ def test_start_order(
         )
 
     # Tests reuses order
-    datatoken.reuse_order(
-        tx_receipt.transactionHash,
+    tx = datatoken.reuse_order(
+        receipt.txid,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
         provider_fee_amount=provider_fee_amount,
@@ -257,23 +253,14 @@ def test_start_order(
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         from_wallet=publisher_wallet,
     )
-    reused_event = datatoken.get_event_log(
-        Datatoken.EVENT_ORDER_REUSED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert reused_event[0].event == "OrderReused", "Cannot find OrderReused event"
-    assert reused_event[0].args.orderTxId == tx_receipt.transactionHash
-    assert reused_event[0].args.caller == publisher_wallet.address
+    receipt_interm = TransactionReceipt(tx)
+    reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
+    assert reused_event, "Cannot find OrderReused event"
+    assert reused_event["orderTxId"] == receipt.txid
+    assert reused_event["caller"] == publisher_wallet.address
 
-    provider_fee_event = datatoken.get_event_log(
-        Datatoken.EVENT_PROVIDER_FEE,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert provider_fee_event[0].event == "ProviderFee", "Cannot find ProviderFee event"
+    provider_fee_event = receipt.events[Datatoken.EVENT_PROVIDER_FEE]
+    assert provider_fee_event, "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params
     datatoken.set_publishing_market_fee(

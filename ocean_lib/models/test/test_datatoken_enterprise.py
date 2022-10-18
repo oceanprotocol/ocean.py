@@ -5,6 +5,7 @@
 import json
 
 import pytest
+from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -30,7 +31,7 @@ def test_buy_from_dispenser_and_order(
     mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
-    tx = datatoken_enterprise_token.create_dispenser(
+    _ = datatoken_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
         max_balance=to_wei("1"),
@@ -38,8 +39,6 @@ def test_buy_from_dispenser_and_order(
         max_tokens=to_wei("1"),
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     status = dispenser.status(datatoken_enterprise_token.address)
 
@@ -116,7 +115,7 @@ def test_buy_from_dispenser_and_order(
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
 
-    tx = datatoken_enterprise_token.buy_from_dispenser_and_order(
+    _ = datatoken_enterprise_token.buy_from_dispenser_and_order(
         consumer=consume_fee_address,
         service_index=1,
         provider_fee_address=provider_fee_address,
@@ -134,8 +133,6 @@ def test_buy_from_dispenser_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
@@ -183,17 +180,11 @@ def test_buy_from_fre_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
+    tx_receipt = TransactionReceipt(tx)
 
-    new_fixed_rate_event = datatoken_enterprise_token.get_event_log(
-        "NewFixedRate",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
 
-    exchange_id = "0x" + new_fixed_rate_event[0].args.exchangeId.hex()
+    exchange_id = new_fixed_rate_event["exchangeId"]
     status = fixed_rate_exchange.get_exchange(exchange_id)
 
     assert status[6] is True  # is active
@@ -265,7 +256,7 @@ def test_buy_from_fre_and_order(
         another_consumer_wallet.address
     )
 
-    tx = datatoken_enterprise_token.buy_from_fre_and_order(
+    _ = datatoken_enterprise_token.buy_from_fre_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
         provider_fee_address=publisher_wallet.address,
@@ -287,8 +278,6 @@ def test_buy_from_fre_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(

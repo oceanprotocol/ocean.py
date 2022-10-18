@@ -356,7 +356,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
         consume_market_swap_fee,
         consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    receipt = TransactionReceipt(tx)
 
     # Get exchange info again
     exchange_info = exchange.get_exchange(exchange_id)
@@ -368,22 +368,19 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     exchange_dt_balance_after = exchange_info[FixedRateExchangeDetails.DT_BALANCE]
 
     # Get Swapped event
-    swapped_event = exchange.get_event_log(
-        exchange.EVENT_SWAPPED, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-    swapped_event_args = swapped_event[0].args
+    swapped_event = receipt.events[exchange.EVENT_SWAPPED]
 
     # Assign "in" token and "out" token
-    if swapped_event_args.tokenOutAddress == dt.address:
-        in_token_amount = swapped_event_args.baseTokenSwappedAmount
-        out_token_amount = swapped_event_args.datatokenSwappedAmount
+    if swapped_event["tokenOutAddress"] == dt.address:
+        in_token_amount = swapped_event["baseTokenSwappedAmount"]
+        out_token_amount = swapped_event["datatokenSwappedAmount"]
         consumer_in_token_balance_before = consumer_bt_balance_before
         consumer_out_token_balance_before = consumer_dt_balance_before
         consumer_in_token_balance_after = consumer_bt_balance_after
         consumer_out_token_balance_after = consumer_dt_balance_after
     else:
-        in_token_amount = swapped_event_args.datatokenSwappedAmount
-        out_token_amount = swapped_event_args.baseTokenSwappedAmount
+        in_token_amount = swapped_event["datatokenSwappedAmount"]
+        out_token_amount = swapped_event["baseTokenSwappedAmount"]
         consumer_in_token_balance_before = consumer_dt_balance_before
         consumer_out_token_balance_before = consumer_bt_balance_before
         consumer_in_token_balance_after = consumer_dt_balance_after
@@ -400,13 +397,13 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     )
 
     # Check exchange balances
-    if swapped_event_args.tokenOutAddress == dt.address:
+    if swapped_event["tokenOutAddress"] == dt.address:
         assert (
             exchange_bt_balance_before
-            + swapped_event_args.baseTokenSwappedAmount
-            - swapped_event_args.marketFeeAmount
-            - swapped_event_args.oceanFeeAmount
-            - swapped_event_args.consumeMarketFeeAmount
+            + swapped_event["baseTokenSwappedAmount"]
+            - swapped_event["marketFeeAmount"]
+            - swapped_event["oceanFeeAmount"]
+            - swapped_event["consumeMarketFeeAmount"]
             == exchange_bt_balance_after
         )
         # When buying DT, exchange DT balance doesn't change because exchange mints DT
@@ -414,14 +411,14 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     else:
         assert (
             exchange_bt_balance_before
-            - swapped_event_args.baseTokenSwappedAmount
-            - swapped_event_args.marketFeeAmount
-            - swapped_event_args.oceanFeeAmount
-            - swapped_event_args.consumeMarketFeeAmount
+            - swapped_event["baseTokenSwappedAmount"]
+            - swapped_event["marketFeeAmount"]
+            - swapped_event["oceanFeeAmount"]
+            - swapped_event["consumeMarketFeeAmount"]
             == exchange_bt_balance_after
         )
         assert (
-            exchange_dt_balance_before + swapped_event_args.datatokenSwappedAmount
+            exchange_dt_balance_before + swapped_event["datatokenSwappedAmount"]
             == exchange_dt_balance_after
         )
 
@@ -438,15 +435,15 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
 
     # Check fees
     assert (
-        publish_market_fee_bt_balance_before + swapped_event_args.marketFeeAmount
+        publish_market_fee_bt_balance_before + swapped_event["marketFeeAmount"]
         == publish_market_fee_bt_balance_after
     )
     assert (
-        opc_fee_bt_balance_before + swapped_event_args.oceanFeeAmount
+        opc_fee_bt_balance_before + swapped_event["oceanFeeAmount"]
         == opc_fee_bt_balance_after
     )
     assert (
-        consume_market_fee_bt_balance_before + swapped_event_args.consumeMarketFeeAmount
+        consume_market_fee_bt_balance_before + swapped_event["consumeMarketFeeAmount"]
         == consume_market_fee_bt_balance_after
     )
 
