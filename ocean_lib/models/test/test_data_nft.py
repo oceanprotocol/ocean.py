@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie.network.transaction import TransactionReceipt
 from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
@@ -261,15 +262,8 @@ def test_success_update_metadata(
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    create_metadata_event = data_nft.get_event_log(
-        event_name="MetadataCreated",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert create_metadata_event, "Cannot find MetadataCreated event."
-    assert create_metadata_event[0].args.decryptorUrl == "http://myprovider:8030"
+    receipt = TransactionReceipt(tx)
+    assert receipt.events["MetadataCreated"]["decryptorUrl"] == "http://myprovider:8030"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -285,15 +279,8 @@ def test_success_update_metadata(
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    update_metadata_event = data_nft.get_event_log(
-        event_name="MetadataUpdated",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert update_metadata_event, "Cannot find MetadataUpdated event."
-    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
+    receipt = TransactionReceipt(tx)
+    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -313,26 +300,13 @@ def test_success_update_metadata(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    update_token_uri_event = data_nft.get_event_log(
-        event_name="TokenURIUpdate",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
+    receipt = TransactionReceipt(tx)
+    assert (
+        receipt.events["TokenURIUpdate"]["tokenURI"] == "https://anothernewurl.com/nft/"
     )
-    assert update_token_uri_event, "Cannot find TokenURIUpdate event."
-    assert update_token_uri_event[0].args.tokenURI == "https://anothernewurl.com/nft/"
-    assert update_token_uri_event[0].args.updatedBy == publisher_addr
+    assert receipt.events["TokenURIUpdate"]["updatedBy"] == publisher_addr
 
-    update_metadata_event = data_nft.get_event_log(
-        event_name="MetadataUpdated",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    assert update_metadata_event, "Cannot find MetadataUpdated event."
-    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
+    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -392,14 +366,10 @@ def test_create_erc20(
     )
     assert tx, "Could not create ERC20."
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_token_event, "Cannot find TokenCreated event."
+    receipt = TransactionReceipt(tx)
+    assert receipt.events[
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED
+    ], "Cannot find TokenCreated event."
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft.create_erc20(
@@ -470,16 +440,11 @@ def test_create_datatoken_with_usdc_order_fee(
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    receipt = TransactionReceipt(tx)
+    dt_address = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED][
+        "newTokenAddress"
+    ]
 
-    event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    dt_address = event[0].args.newTokenAddress
     dt = Datatoken(web3, dt_address)
 
     # Check publish fee info
@@ -529,14 +494,10 @@ def test_create_datatoken_with_non_owner(
     )
     assert tx, "Failed to create ERC20 token."
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_token_event, "Cannot find TokenCreated event."
+    receipt = TransactionReceipt(tx)
+    assert receipt.events[
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED
+    ], "Cannot find TokenCreated event."
 
     # Consumer self-revokes permission to create ERC20
     data_nft.remove_from_create_erc20_list(consumer_wallet.address, consumer_wallet)
@@ -586,20 +547,15 @@ def test_erc721_datatoken_functions(
         new_token_uri="https://newurl.com/nft/",
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
-    registered_event = data_nft.get_event_log(
-        event_name=DataNFT.EVENT_TOKEN_URI_UPDATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFT.EVENT_TOKEN_URI_UPDATED]
+
     assert registered_event, "Cannot find TokenURIUpdate event."
-    assert registered_event[0].args.updatedBy == publisher_addr
-    assert registered_event[0].args.tokenID == 1
-    assert registered_event[0].args.blockNumber == tx_receipt.blockNumber
+    assert registered_event["updatedBy"] == publisher_addr
+    assert registered_event["tokenID"] == 1
+    assert registered_event["blockNumber"] == receipt.block_number
     assert data_nft.token_uri(token_id=1) == "https://newurl.com/nft/"
-    assert data_nft.token_uri(token_id=1) == registered_event[0].args.tokenURI
+    assert data_nft.token_uri(token_id=1) == registered_event["tokenURI"]
 
     # Tests failing setting token URI by another user
     with pytest.raises(Exception, match="not NFTOwner"):
@@ -709,16 +665,10 @@ def test_transfer_nft(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    assert registered_event["admin"] == publisher_wallet.address
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -729,16 +679,11 @@ def test_transfer_nft(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    transfer_event = data_nft.get_event_log(
-        DataNFTFactoryContract.EVENT_TRANSFER,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert transfer_event[0].event == "Transfer"
-    assert transfer_event[0].args["from"] == publisher_addr
-    assert transfer_event[0].args.to == consumer_addr
+    receipt = TransactionReceipt(tx)
+    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+
+    assert transfer_event["from"] == publisher_addr
+    assert transfer_event["to"] == consumer_addr
     assert data_nft.balance_of(consumer_addr) == 1
     assert data_nft.balance_of(publisher_addr) == 0
     assert data_nft.is_erc20_deployer(consumer_addr)
@@ -756,14 +701,10 @@ def test_transfer_nft(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     tx = data_nft.safe_transfer_from(
         publisher_addr,
@@ -771,16 +712,11 @@ def test_transfer_nft(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    transfer_event = data_nft.get_event_log(
-        DataNFTFactoryContract.EVENT_TRANSFER,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert transfer_event[0].event == "Transfer"
-    assert transfer_event[0].args["from"] == publisher_addr
-    assert transfer_event[0].args.to == consumer_addr
+    receipt = TransactionReceipt(tx)
+    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+
+    assert transfer_event["from"] == publisher_addr
+    assert transfer_event["to"] == consumer_addr
     assert data_nft.is_erc20_deployer(consumer_addr)
 
     # Creates an ERC20
@@ -797,15 +733,11 @@ def test_transfer_nft(
         from_wallet=consumer_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+
+    receipt = TransactionReceipt(tx_result)
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(web3, datatoken_address)
 
     assert not datatoken.is_minter(publisher_addr)
@@ -822,14 +754,12 @@ def test_transfer_nft(
     )
 
     assert tx_result, "Failed to set the publish fee."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    set_publishing_fee_event = datatoken.get_event_log(
-        Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx_result)
+    set_publishing_fee_event = receipt.events[
+        Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED
+    ]
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
+
     publish_fees = datatoken.get_publishing_market_fee()
     assert publish_fees[0] == consumer_addr
     assert publish_fees[1] == ocean_token.address
@@ -854,16 +784,11 @@ def test_nft_transfer_with_fre(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    transfer_event = data_nft.get_event_log(
-        DataNFTFactoryContract.EVENT_TRANSFER,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert transfer_event[0].event == "Transfer"
-    assert transfer_event[0].args["from"] == publisher_wallet.address
-    assert transfer_event[0].args.to == consumer_wallet.address
+    receipt = TransactionReceipt(tx)
+    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+
+    assert transfer_event["from"] == publisher_wallet.address
+    assert transfer_event["to"] == consumer_wallet.address
     assert data_nft.balance_of(consumer_wallet.address) == 1
     assert data_nft.balance_of(publisher_wallet.address) == 0
     assert data_nft.is_erc20_deployer(consumer_wallet.address) is True
@@ -886,19 +811,13 @@ def test_nft_transfer_with_fre(
         from_wallet=consumer_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    fre_event = datatoken.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    receipt = TransactionReceipt(tx)
+    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
 
     assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
-    assert fre_event[0].args.owner == consumer_addr
+    assert fre_event["owner"] == consumer_addr
 
-    exchange_id = "0x" + fre_event[0].args.exchangeId.hex()
+    exchange_id = fre_event["exchangeId"]
 
     # Exchange should have supply and fees setup
     exchange_details = fixed_exchange.get_exchange(exchange_id)
@@ -977,16 +896,10 @@ def test_transfer_nft_with_erc20_pool_fre(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_addr
-    token_address = registered_event[0].args.newTokenAddress
+    receipt = TransactionReceipt(tx)
+    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    assert registered_event["admin"] == publisher_addr
+    token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -1005,15 +918,10 @@ def test_transfer_nft_with_erc20_pool_fre(
         from_wallet=publisher_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = data_nft_factory.get_event_log(
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
+    receipt = TransactionReceipt(tx_result)
+    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(web3, datatoken_address)
 
     assert datatoken.is_minter(publisher_addr)
@@ -1037,19 +945,12 @@ def test_transfer_nft_with_erc20_pool_fre(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    fre_event = datatoken.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
+    receipt = TransactionReceipt(tx)
+    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
     assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
-    assert fre_event[0].args.owner == publisher_addr
+    assert fre_event["owner"] == publisher_addr
 
-    exchange_id = "0x" + fre_event[0].args.exchangeId.hex()
+    exchange_id = fre_event["exchangeId"]
 
     exchange_details = fixed_exchange.get_exchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == publisher_addr
@@ -1075,16 +976,11 @@ def test_transfer_nft_with_erc20_pool_fre(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    transfer_event = data_nft.get_event_log(
-        DataNFTFactoryContract.EVENT_TRANSFER,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert transfer_event[0].event == "Transfer"
-    assert transfer_event[0].args["from"] == publisher_addr
-    assert transfer_event[0].args.to == consumer_addr
+    receipt = TransactionReceipt(tx)
+    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+
+    assert transfer_event["from"] == publisher_addr
+    assert transfer_event["to"] == consumer_addr
     assert data_nft.balance_of(consumer_addr) == 1
     assert data_nft.balance_of(publisher_addr) == 0
     assert data_nft.is_erc20_deployer(consumer_addr)
