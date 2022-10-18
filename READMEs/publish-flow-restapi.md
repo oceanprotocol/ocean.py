@@ -40,7 +40,7 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-asset = ocean.assets.create_url_asset(name, url, alice_wallet)
+(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
 print(f"Just published asset, with did={asset.did}")
 ```
 
@@ -48,8 +48,6 @@ print(f"Just published asset, with did={asset.did}")
 
 In the same Python console:
 ```python
-datatoken_address = asset.datatokens[0]["address"]
-datatoken = ocean.get_datatoken(datatoken_address)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 datatoken.create_dispenser(
     dispenser_address=ocean.dispenser.address,
