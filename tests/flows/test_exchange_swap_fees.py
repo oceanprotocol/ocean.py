@@ -5,6 +5,7 @@
 from decimal import Decimal
 
 import pytest
+from brownie.network.transaction import TransactionReceipt
 from web3 import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -144,19 +145,15 @@ def exchange_swap_fees(
         with_mint=with_mint,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    exchange_event = dt.get_event_log(
-        dt.EVENT_NEW_FIXED_RATE,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+    receipt = TransactionReceipt(tx)
+    assert (
+        fixed_price_address
+        == receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeContract"]
     )
-    assert fixed_price_address == exchange_event[0].args.exchangeContract
 
     exchange = FixedRateExchange(web3, fixed_price_address)
 
-    exchange_id = "0x" + exchange_event[0].args.exchangeId.hex()
+    exchange_id = receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeId"]
     assert exchange_id == exchange.generate_exchange_id(bt.address, dt.address)
 
     assert exchange.is_active(exchange_id)
