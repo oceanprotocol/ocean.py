@@ -15,6 +15,8 @@ SPDX-License-Identifier: Apache-2.0
 
 - Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v1.2.5`
 
+- Ensure you're in virtual env: `source venv/bin/activate`
+
 - Run `./bumpversion.sh` to bump the project version, as follows:
 
   - To bump the major version (v**X**.Y.Z): `./bumpversion.sh major`
