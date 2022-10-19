@@ -45,7 +45,7 @@ class Dispenser(ContractBase):
 
     @enforce_types
     def status(self, datatoken: str) -> tuple:
-        return self.contract.caller.status(datatoken)
+        return self.contract.status(datatoken)
 
     @enforce_types
     def activate(

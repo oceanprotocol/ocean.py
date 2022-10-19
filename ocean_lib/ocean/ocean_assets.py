@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -22,7 +23,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -39,7 +40,7 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei, from_wei
+from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -159,16 +160,13 @@ class OceanAssets:
         )
         assert tx_result, "Failed to create ERC20 token."
 
-        tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_result)
-        registered_token_event = data_nft_factory.get_event_log(
-            DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-            tx_receipt.blockNumber,
-            self._web3.eth.block_number,
-            None,
-        )
+        receipt = TransactionReceipt(tx_result)
+        registered_token_event = receipt.events[
+            DataNFTFactoryContract.EVENT_TOKEN_CREATED
+        ]
         assert registered_token_event, "Cannot find TokenCreated event."
 
-        return registered_token_event[0].args.newTokenAddress
+        return registered_token_event["newTokenAddress"]
 
     @enforce_types
     def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
@@ -184,7 +182,7 @@ class OceanAssets:
             datatokens = datatokens + [
                 {
                     "address": datatoken.address,
-                    "name": datatoken.contract.caller.name(),
+                    "name": datatoken.contract.name(),
                     "symbol": datatoken.symbol(),
                     "serviceId": service.id,
                 }
@@ -446,14 +444,10 @@ class OceanAssets:
                 owner=owner,
                 from_wallet=publisher_wallet,
             )
-            tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
-            registered_event = data_nft_factory.get_event_log(
-                DataNFTFactoryContract.EVENT_NFT_CREATED,
-                tx_receipt.blockNumber,
-                self._web3.eth.block_number,
-                None,
-            )
-            data_nft_address = registered_event[0].args.newTokenAddress
+            receipt = TransactionReceipt(tx_id)
+
+            registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+            data_nft_address = registered_event["newTokenAddress"]
             data_nft = DataNFT(self._web3, data_nft_address)
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
@@ -461,12 +455,6 @@ class OceanAssets:
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
-        else:
-            # verify nft address
-            if not data_nft_factory.verify_nft(data_nft_address):
-                raise ContractNotFound(
-                    f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
-                )
 
         assert (
             data_nft_address
@@ -599,7 +587,9 @@ class OceanAssets:
         data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=publisher_wallet.address,
+            metadata_decryptor_address=Web3.toChecksumAddress(
+                publisher_wallet.address.lower()
+            ).encode("utf-8"),
             flags=flags,
             data=document,
             data_hash=ddo_hash,
@@ -642,17 +632,7 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config_dict)
 
-        address = get_address_of_type(
-            self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
-        )
-        data_nft_factory = DataNFTFactoryContract(self._web3, address)
         data_nft_address = asset.nft_address
-
-        # Verify nft address
-        if not data_nft_factory.verify_nft(data_nft_address):
-            raise ContractNotFound(
-                f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
-            )
 
         assert (
             data_nft_address
@@ -685,7 +665,9 @@ class OceanAssets:
         tx_result = data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=publisher_wallet.address,
+            metadata_decryptor_address=Web3.toChecksumAddress(
+                publisher_wallet.address.lower()
+            ).encode("utf-8"),
             flags=flags,
             data=document,
             data_hash=ddo_hash,
@@ -758,7 +740,7 @@ class OceanAssets:
 
             # catch key failure modes
             st = dispenser.status(datatoken.address)
-            active, disp_bal, allowedSwapper = st[0], from_wei(st[5]), st[6]
+            active, allowedSwapper = st[0], st[6]
             if not active:
                 raise ValueError("No active dispenser for datatoken")
             if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:

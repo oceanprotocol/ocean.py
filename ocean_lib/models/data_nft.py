@@ -78,7 +78,7 @@ class DataNFT(ContractBase):
         self,
         metadata_state: int,
         metadata_decryptor_url: str,
-        metadata_decryptor_address: str,
+        metadata_decryptor_address: bytes,
         flags: bytes,
         data: Union[str, bytes],
         data_hash: Union[str, bytes],
@@ -104,7 +104,7 @@ class DataNFT(ContractBase):
         self,
         metadata_state: int,
         metadata_decryptor_url: str,
-        metadata_decryptor_address: str,
+        metadata_decryptor_address: bytes,
         flags: bytes,
         data: Union[str, bytes],
         data_hash: Union[str, bytes],
@@ -119,7 +119,7 @@ class DataNFT(ContractBase):
                 (
                     metadata_state,
                     metadata_decryptor_url,
-                    ContractBase.to_checksum_address(metadata_decryptor_address),
+                    metadata_decryptor_address,
                     flags,
                     data,
                     data_hash,
@@ -133,7 +133,7 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def get_metadata(self) -> tuple:
-        return self.contract.caller.getMetaData()
+        return self.contract.getMetaData()
 
     @enforce_types
     def create_erc20(
@@ -265,21 +265,18 @@ class DataNFT(ContractBase):
             from_wallet,
         )
 
-    @enforce_types
-    def set_new_data(self, key: bytes, value: str, from_wallet: Wallet) -> str:
+    def set_new_data(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setNewData", (key, value), from_wallet)
 
-    @enforce_types
-    def set_data_erc20(self, key: bytes, value: str, from_wallet: Wallet) -> str:
+    def set_data_erc20(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
-    @enforce_types
     def get_data(self, key: bytes) -> bytes:
-        return self.contract.caller.getData(key)
+        return self.contract.getData(key)
 
     @enforce_types
     def token_uri(self, token_id: int) -> str:
-        return self.contract.caller.tokenURI(token_id)
+        return self.contract.tokenURI(token_id)
 
     @enforce_types
     def transfer_from(
@@ -315,15 +312,15 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def token_name(self) -> str:
-        return self.contract.caller.name()
+        return self.contract.name()
 
     @enforce_types
     def symbol(self) -> str:
-        return self.contract.caller.symbol()
+        return self.contract.symbol()
 
     @enforce_types
     def is_initialized(self) -> bool:
-        return self.contract.caller.isInitialized()
+        return self.contract.isInitialized()
 
     @enforce_types
     def clean_permissions(self, from_wallet: Wallet) -> str:
@@ -331,41 +328,35 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def get_address_length(self, array: List[str]) -> int:
-        return self.contract.caller.getAddressLength(array)
+        return self.contract.getAddressLength(array)
 
     @enforce_types
     def get_id(self) -> int:
-        return self.contract.caller.getId()
+        return self.contract.getId()
 
     @enforce_types
     def get_permissions(self, user: str) -> list:
-        return self.contract.caller.getPermissions(
-            ContractBase.to_checksum_address(user)
-        )
+        return self.contract.getPermissions(ContractBase.to_checksum_address(user))
 
     @enforce_types
     def balance_of(self, account: str) -> int:
-        return self.contract.caller.balanceOf(ContractBase.to_checksum_address(account))
+        return self.contract.balanceOf(ContractBase.to_checksum_address(account))
 
     @enforce_types
     def owner_of(self, token_id: int) -> str:
-        return self.contract.caller.ownerOf(token_id)
+        return self.contract.ownerOf(token_id)
 
     @enforce_types
     def get_tokens_list(self) -> list:
-        return self.contract.caller.getTokensList()
+        return self.contract.getTokensList()
 
     @enforce_types
     def is_deployed(self, datatoken: str) -> bool:
-        return self.contract.caller.isDeployed(
-            ContractBase.to_checksum_address(datatoken)
-        )
+        return self.contract.isDeployed(ContractBase.to_checksum_address(datatoken))
 
     @enforce_types
     def is_erc20_deployer(self, account: str) -> bool:
-        return self.contract.caller.isERC20Deployer(
-            ContractBase.to_checksum_address(account)
-        )
+        return self.contract.isERC20Deployer(ContractBase.to_checksum_address(account))
 
     @enforce_types
     def set_token_uri(

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
+from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
@@ -108,20 +108,15 @@ def test_exchange_rate_creation(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    tx_receipt = TransactionReceipt(tx)
 
-    registered_event = datatoken.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
 
     assert fixed_exchange.get_number_of_exchanges() == (number_of_exchanges_before + 1)
-    assert registered_event[0].args.owner == consumer_addr
+    assert registered_event["owner"] == consumer_addr
     assert len(fixed_exchange.get_exchanges()) == (number_of_exchanges_before + 1)
 
-    exchange_id = registered_event[0].args.exchangeId
+    exchange_id = registered_event["exchangeId"]
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
@@ -180,14 +175,10 @@ def test_exchange_rate_creation(
     assert rate == exchange_rate
 
     # Buy should fail if price is too high
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Too many base tokens"):
         fixed_exchange.buy_dt(
             exchange_id, amount_dt_to_sell, 1, ZERO_ADDRESS, 0, another_consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: Too many base tokens"
-    )
 
     ocean_token.transfer(
         another_consumer_addr,
@@ -212,22 +203,18 @@ def test_exchange_rate_creation(
         to_wei("0.1"),
         another_consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(receipt)
 
-    event_log = fixed_exchange.get_event_log(
-        event_name=FixedRateExchange.EVENT_SWAPPED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    tx_receipt = TransactionReceipt(receipt)
+
+    event_log = tx_receipt.events[FixedRateExchange.EVENT_SWAPPED]
 
     # Check fixed rate exchange outputs. Rate = 1
     assert (
-        event_log[0].args.baseTokenSwappedAmount
-        - event_log[0].args.marketFeeAmount
-        - event_log[0].args.oceanFeeAmount
-        - event_log[0].args.consumeMarketFeeAmount
-        == event_log[0].args.datatokenSwappedAmount
+        event_log["baseTokenSwappedAmount"]
+        - event_log["marketFeeAmount"]
+        - event_log["oceanFeeAmount"]
+        - event_log["consumeMarketFeeAmount"]
+        == event_log["datatokenSwappedAmount"]
     )
 
     assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell
@@ -282,16 +269,10 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.DT_BALANCE],
         consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    receipt = TransactionReceipt(tx)
 
-    logs = fixed_exchange.get_event_log(
-        event_name=FixedRateExchange.EVENT_TOKEN_COLLECTED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs[0].args.amount
+    logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
+    assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs["amount"]
 
     # Fixed Rate Exchange owner withdraws BT balance
     # Needs to buy because he sold all the DT amount and BT balance will be 0.
@@ -313,18 +294,11 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.BT_BALANCE],
         consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    receipt = TransactionReceipt(tx)
 
-    logs = fixed_exchange.get_event_log(
-        event_name=FixedRateExchange.EVENT_TOKEN_COLLECTED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
 
-    assert (
-        ocean_token.balanceOf(pmt_collector) == bt_balance_before + logs[0].args.amount
-    )
+    assert ocean_token.balanceOf(pmt_collector) == bt_balance_before + logs["amount"]
 
     # Exchange should have fees available and claimable
     # Market fee collector bt balance
@@ -350,14 +324,10 @@ def test_exchange_rate_creation(
 
     # Market fee collector update
     # Only market fee collector should be able to update market_fee_collector
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="not marketFeeCollector"):
         fixed_exchange.update_market_fee_collector(
             exchange_id, consumer_addr, consumer_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert not marketFeeCollector"
-    )
 
     fixed_exchange.update_market_fee_collector(
         exchange_id, consumer_addr, another_consumer_wallet

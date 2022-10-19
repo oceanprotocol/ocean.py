@@ -9,6 +9,7 @@ import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
@@ -214,17 +215,13 @@ class Ocean:
         return DataNFTFactoryContract(self.web3, nft_factory_address)
 
     @enforce_types
-    def get_user_orders(
-        self, address: str, datatoken: Optional[str] = None
-    ) -> List[AttributeDict]:
+    def get_user_orders(self, address: str, datatoken: str) -> List[AttributeDict]:
         """
         :return: List of orders `[Order]`
         """
         dt = Datatoken(self.web3, datatoken)
         _orders = []
-        for log in dt.get_start_order_logs(
-            address, from_all_tokens=not bool(datatoken)
-        ):
+        for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
             a["address"] = log.address
@@ -277,14 +274,13 @@ class Ocean:
             with_mint=0,
             from_wallet=from_wallet,
         )
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        fixed_rate_event = datatoken.get_event_log(
-            DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
-            tx_receipt.blockNumber,
-            self.web3.eth.block_number,
-            None,
-        )
-        exchange_id = fixed_rate_event[0].args.exchangeId
+
+        receipt = TransactionReceipt(tx)
+        fixed_price_address == receipt.events[datatoken.EVENT_NEW_FIXED_RATE][
+            "exchangeContract"
+        ]
+
+        exchange_id = receipt.events[datatoken.EVENT_NEW_FIXED_RATE]["exchangeId"]
 
         return exchange_id
 

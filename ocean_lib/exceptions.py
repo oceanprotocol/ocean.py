@@ -12,10 +12,6 @@ class InsufficientBalance(Exception):
     """The token balance is insufficient."""
 
 
-class ContractNotFound(Exception):
-    """Contract address is not found in the factory events."""
-
-
 class AquariusError(Exception):
     """Error invoking an Aquarius metadata service endpoint."""
 

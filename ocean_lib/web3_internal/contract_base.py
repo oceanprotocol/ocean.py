@@ -5,9 +5,12 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
+import time
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
+from brownie import network
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
@@ -18,13 +21,13 @@ from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 
+from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     load_contract,
 )
 from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
 logger = logging.getLogger(__name__)
 
@@ -44,12 +47,31 @@ class ContractBase(object):
         ), "contract_name property needs to be implemented in subclasses."
 
         self.web3 = web3
+
+        self.network = NETWORK_IDS[web3.eth.chain_id]
+        self.connect_to_network()
+
         self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
         )
-        assert self.contract.caller is not None
+
+    def connect_to_network(self):
+        if network.show_active() != self.network:
+            if network.is_connected():
+                network.disconnect()
+
+            network.connect(self.network)
+
+    def __getattribute__(self, attr):
+        method = object.__getattribute__(self, attr)
+        if not method:
+            raise Exception("Method %s not implemented" % attr)
+        if callable(method) and not method.__name__ == "connect_to_network":
+            self.connect_to_network()
+
+        return method
 
     @enforce_types
     def __str__(self) -> str:
@@ -175,13 +197,11 @@ class ContractBase(object):
         :param transact: dict arguments for the transaction such as from, gas, etc.
         :return: hex str transaction hash
         """
-        contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
-        contract_function = CustomContractFunction(contract_fn)
-
         _transact = {
             "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
-            "chainId": self.web3.eth.chain_id,
+            # "nonce": self.web3.eth.getTransactionCount(from_wallet.address)
+            # 'nonce': Wallet._get_nonce(self.web3, from_wallet.address)
         }
 
         gas_tx = get_gas_price(web3_object=self.web3, tx=_transact)
@@ -190,11 +210,33 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        return contract_function.transact(
-            _transact,
-            from_wallet.block_confirmations.value,
-            from_wallet.transaction_timeout.value,
-        ).hex()
+        receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
+        receipt.wait(from_wallet.block_confirmations.value)
+
+        txid = receipt.txid
+
+        return self.wait_for_transaction_status(from_wallet, txid)
+
+    @enforce_types
+    def wait_for_transaction_status(self, wallet: Wallet, txid: str):
+        receipt = TransactionReceipt(txid)
+
+        if wallet.transaction_timeout.value == 0:
+            return txid
+
+        start = time.time()
+        receipt = TransactionReceipt(txid)
+        if receipt.status.value == 1:
+            return txid
+
+        while time.time() - start > wallet.transaction_timeout.value:
+            receipt = TransactionReceipt(txid)
+            if receipt.status.value == 1:
+                return txid
+
+            time.sleep(0.2)
+
+        raise Exception("Transaction Timeout reached without successful status.")
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:
@@ -364,7 +406,6 @@ class ContractBase(object):
         fromBlock: Optional[int] = None,
         toBlock: Optional[int] = None,
         blockHash: Optional[HexBytes] = None,
-        from_all_addresses: Optional[bool] = False,
     ):
         """Get events for this contract instance using eth_getLogs API.
 
@@ -413,8 +454,6 @@ class ContractBase(object):
         :param toBlock: block number or "latest". Defaults to "latest"
         :param blockHash: block hash. blockHash cannot be set at the
           same time as fromBlock or toBlock
-        :param from_all_addresses: True = return logs from all addresses
-          False = return logs originating from event.address
         :yield: Tuple of :class:`AttributeDict` instances
         """
 
@@ -438,7 +477,7 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
-        address = event.address if not from_all_addresses else None
+        address = event.address
         _, event_filter_params = construct_event_filter_params(
             abi,
             event.web3.codec,

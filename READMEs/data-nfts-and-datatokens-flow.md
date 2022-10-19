@@ -7,13 +7,40 @@ SPDX-License-Identifier: Apache-2.0
 
 ## 1. Setup
 
-### Prerequisites
+### 🏗 Installation
+
+#### ⚙️i Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
+-   Python 3.8.5 - Python 3.10.4
 
-### Download barge and run services
+In a new console:
+
+```console
+# Create your working directory
+mkdir my_project
+cd my_project
+
+# Initialize virtual environment and activate it. Install artifacts.
+python3 -m venv venv
+source venv/bin/activate
+
+# Avoid errors for the step that follows
+pip3 install wheel
+
+# Install Ocean library. Allow pre-releases to get the latest v4 version.
+pip3 install ocean-lib
+```
+
+#### ⚠️ Known issues
+
+- for M1 processors, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues. It is recommended to install them individually, e.g. `pip3 install coincurve && pip3 install cryptography`
+
+- Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
+
+
+### ⬇️Download barge and run services
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
@@ -31,27 +58,8 @@ docker system prune -a --volumes
 ./start_ocean.sh
 ```
 
-### Install the library
 
-In a new console:
-
-```console
-# Create your working directory
-mkdir my_project
-cd my_project
-
-# Initialize virtual environment and activate it. Install artifacts.
-python3 -m venv venv
-source venv/bin/activate
-
-# Avoid errors for the step that follows
-pip3 install wheel
-
-# Install Ocean library. Allow pre-releases to get the latest v4 version.
-pip3 install --pre ocean-lib
-```
-
-### Set envvars
+### 🔧 Set envvars
 
 In the same console (or another one with venv activated):
 ```console
@@ -59,7 +67,7 @@ export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b6
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 ```
 
-### Setup in Python
+### 🐍 Setup in Python
 
 In the same console, run Python console:
 ```console
@@ -88,7 +96,7 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs ganache ET
 
 ## 2. Publish Data NFT & Datatoken
 
-### 2.1 Create a data NFT
+### 2.1 🪄 Create a data NFT
 
 In the same Python console:
 ```python
@@ -98,7 +106,7 @@ print(f"Created data NFT. Its address is {data_nft.address}")
 
 Congrats, you've created your first Ocean data NFT!
 
-### 2.2 Create a datatoken from the data NFT
+### 2.2 🎉 Create a datatoken from the data NFT
 
 In the same Python console:
 ```python
