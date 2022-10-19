@@ -5,14 +5,12 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 from brownie import network
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from web3 import Web3
-from web3.contract import ContractEvents
-from web3.exceptions import MismatchedABI
 
 from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import (
@@ -84,18 +82,6 @@ class ContractBase(object):
         """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
-    @property
-    @enforce_types
-    def events(self) -> ContractEvents:
-        """Expose the underlying contract's events."""
-        return self.contract.events
-
-    @property
-    @enforce_types
-    def function_names(self) -> List[str]:
-        """Returns the list of functions in the contract"""
-        return list(self.contract.functions)
-
     @staticmethod
     @enforce_types
     def to_checksum_address(address: str) -> ChecksumAddress:
@@ -106,32 +92,6 @@ class ContractBase(object):
         :return: address, hex str
         """
         return Web3.toChecksumAddress(address.lower())
-
-    @enforce_types
-    def get_event_signature(self, event_name: str) -> str:
-        """
-        Return signature of event definition to use in the call to eth_getLogs.
-
-        The event signature is used as topic0 (first topic) in the eth_getLogs arguments
-        The signature reflects the event name and argument types.
-
-        :param event_name:
-        :return:
-        """
-        try:
-            e = getattr(self.events, event_name)
-        except MismatchedABI:
-            e = None
-
-        if not e:
-            raise ValueError(
-                f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
-            )
-
-        abi = e().abi
-        types = [param["type"] for param in abi["inputs"]]
-        sig_str = f'{event_name}({",".join(types)})'
-        return Web3.keccak(text=sig_str).hex()
 
     @enforce_types
     def send_transaction(

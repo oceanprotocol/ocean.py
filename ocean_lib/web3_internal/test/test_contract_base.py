@@ -62,9 +62,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert factory.contract.getCurrentTokenCount
     assert factory.contract.getTokenTemplate
 
-    with pytest.raises(ValueError):
-        assert factory.get_event_signature("noevent")
-
 
 @pytest.mark.unit
 def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
