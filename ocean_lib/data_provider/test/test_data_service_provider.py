@@ -10,6 +10,7 @@ import ecies
 import pytest
 from requests.exceptions import InvalidURL
 from requests.models import Response
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -191,7 +192,7 @@ def test_delete_job_result(provider_wallet, config):
 
 
 @pytest.mark.integration
-def test_encrypt(web3, config, provider_wallet, file1, file2):
+def test_encrypt(config, provider_wallet, file1, file2):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
     # Encrypt file objects
@@ -203,7 +204,7 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
     assert encrypted_files.startswith("0x")
 
     if isinstance(encrypted_files, str):
-        encrypted_files = web3.toBytes(hexstr=encrypted_files)
+        encrypted_files = Web3.toBytes(hexstr=encrypted_files)
     decrypted_document = ecies.decrypt(key, encrypted_files)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == json.dumps(res, separators=(",", ":"))
@@ -217,7 +218,7 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
     assert result.content.decode("utf-8").startswith("0x")
 
     if isinstance(encrypted_document, str):
-        encrypted_document = web3.toBytes(hexstr=encrypted_document)
+        encrypted_document = Web3.toBytes(hexstr=encrypted_document)
     decrypted_document = ecies.decrypt(key, encrypted_document)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == test_string
@@ -225,9 +226,9 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
 
 @pytest.mark.integration
 def test_fileinfo(
-    web3, config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
+    config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
 ):
-    _, metadata, files = create_basics(config, web3, DataSP)
+    _, metadata, files = create_basics(config, DataSP)
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -254,7 +255,6 @@ def test_fileinfo(
 
 @pytest.mark.integration
 def test_initialize(
-    web3,
     config,
     publisher_wallet,
     publisher_ocean_instance,
@@ -262,7 +262,7 @@ def test_initialize(
     data_nft,
     datatoken,
 ):
-    _, metadata, files = create_basics(config, web3, DataSP)
+    _, metadata, files = create_basics(config, DataSP)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,

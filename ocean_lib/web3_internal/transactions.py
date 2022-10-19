@@ -35,13 +35,15 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
 
 
 @enforce_types
-def send_ether(from_wallet: Wallet, to_address: str, amount: str) -> AttributeDict:
+def send_ether(
+    config: dict, from_wallet: Wallet, to_address: str, amount: str
+) -> AttributeDict:
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)
 
     receipt = accounts.at(from_wallet.address).transfer(to_address, amount)
 
-    return wait_for_transaction_status(receipt.txid)
+    return wait_for_transaction_status(receipt.txid, config["TRANSACTION_TIMEOUT"])
 
 
 def wait_for_transaction_status(txid: str, timeout: int):

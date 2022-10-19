@@ -40,6 +40,7 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_utils import get_web3
 from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -50,12 +51,12 @@ class OceanAssets:
     """Ocean asset class for V4."""
 
     @enforce_types
-    def __init__(
-        self, config_dict, web3: Web3, data_provider: Type[DataServiceProvider]
-    ) -> None:
+    def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
         self._config_dict = config_dict
-        self._web3 = web3
+        # TODO: we can possibly remove this
+        self._web3 = get_web3(config_dict["RPC_URL"])
+
         self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider
 
@@ -418,7 +419,7 @@ class OceanAssets:
         address = get_address_of_type(
             self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
         )
-        data_nft_factory = DataNFTFactoryContract(self._web3, address)
+        data_nft_factory = DataNFTFactoryContract(self._config_dict, address)
 
         if not data_nft_address:
             name = data_nft_name or metadata["name"]
@@ -448,7 +449,7 @@ class OceanAssets:
 
             registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
             data_nft_address = registered_event["newTokenAddress"]
-            data_nft = DataNFT(self._web3, data_nft_address)
+            data_nft = DataNFT(self._config_dict, data_nft_address)
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None if return_asset else (None, None, None)
@@ -459,7 +460,7 @@ class OceanAssets:
         assert (
             data_nft_address
         ), "nft_address is required for publishing a dataset asset."
-        data_nft = DataNFT(self._web3, data_nft_address)
+        data_nft = DataNFT(self._config_dict, data_nft_address)
 
         # Create a DDO object
         asset = Asset()
@@ -545,7 +546,9 @@ class OceanAssets:
                         consumer_parameters=consumer_parameters,
                     )
             for i, datatoken_address in enumerate(datatoken_addresses):
-                deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
+                deployed_datatokens.append(
+                    Datatoken(self._config_dict, datatoken_address)
+                )
 
             datatokens = self.build_datatokens_list(
                 services=services, deployed_datatokens=deployed_datatokens
@@ -605,7 +608,9 @@ class OceanAssets:
         if return_asset:
             return asset
         else:
-            datatokens = [Datatoken(self._web3, d["address"]) for d in datatokens]
+            datatokens = [
+                Datatoken(self._config_dict, d["address"]) for d in datatokens
+            ]
             return (data_nft, datatokens, asset)
 
     @enforce_types
@@ -637,7 +642,7 @@ class OceanAssets:
         assert (
             data_nft_address
         ), "nft_address is required for publishing a dataset asset."
-        data_nft = DataNFT(self._web3, data_nft_address)
+        data_nft = DataNFT(self._config_dict, data_nft_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 
@@ -726,7 +731,7 @@ class OceanAssets:
         print("Resolve did...")
         asset = self.resolve(asset_did)
         datatoken_address = asset.datatokens[0]["address"]
-        datatoken = Datatoken(self._web3, datatoken_address)
+        datatoken = Datatoken(self._config_dict, datatoken_address)
 
         # Ensure access token
         bal = from_wei(datatoken.balanceOf(wallet.address))
@@ -736,7 +741,7 @@ class OceanAssets:
             print("Dispense access token...")
             amt_dispense_wei = to_wei(1)
             dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
-            dispenser = Dispenser(self._web3, dispenser_addr)
+            dispenser = Dispenser(self._config_dict, dispenser_addr)
 
             # catch key failure modes
             st = dispenser.status(datatoken.address)
@@ -814,7 +819,7 @@ class OceanAssets:
         consumer_address = consumer_address or wallet.address
 
         # main work...
-        dt = Datatoken(self._web3, service.datatoken)
+        dt = Datatoken(self._config_dict, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
         if balance < to_wei(1):
@@ -931,7 +936,7 @@ class OceanAssets:
             return
 
         service = asset_compute_input.service
-        dt = Datatoken(self._web3, service.datatoken)
+        dt = Datatoken(self._config_dict, service.datatoken)
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(

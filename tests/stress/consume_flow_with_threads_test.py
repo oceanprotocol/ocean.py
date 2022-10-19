@@ -36,7 +36,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     data_provider = DataServiceProvider
 
     data_nft, datatoken = deploy_erc721_erc20(
-        ocean.web3, config, publisher_wallet, publisher_wallet
+        config, publisher_wallet, publisher_wallet
     )
 
     files = [random.choice(files)]

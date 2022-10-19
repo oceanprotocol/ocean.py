@@ -143,7 +143,6 @@ def test_ocean_assets_download_indexes(
 
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
-    web3,
     config,
     tmpdir,
     publisher_wallet,
@@ -153,7 +152,6 @@ def test_ocean_assets_download_destination_file(
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
     ocean_assets_download_destination_file_helper(
-        web3,
         config,
         str(tmpdir),
         publisher_wallet,
@@ -164,7 +162,6 @@ def test_ocean_assets_download_destination_file(
 
 
 def ocean_assets_download_destination_file_helper(
-    web3,
     config,
     tmpdir,
     publisher_wallet,
@@ -175,7 +172,7 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
 
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,

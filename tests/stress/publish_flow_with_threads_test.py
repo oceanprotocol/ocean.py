@@ -16,9 +16,9 @@ from tests.resources.helper_functions import deploy_erc721_erc20, generate_walle
 
 
 def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: dict):
-    data_nft, datatoken = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
+    data_nft, datatoken = deploy_erc721_erc20(config, wallet, wallet)
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, ocean.web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
     return data_nft, datatoken, metadata, files
 
 

@@ -119,7 +119,7 @@ def generate_wallet() -> Wallet:
     )
     assert generated_wallet.private_key == private_key
     deployer_wallet = get_factory_deployer_wallet(config)
-    send_ether(deployer_wallet, generated_wallet.address, "3 ether")
+    send_ether(config, deployer_wallet, generated_wallet.address, "3 ether")
 
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
@@ -189,7 +189,6 @@ def setup_logging(
 
 @enforce_types
 def deploy_erc721_erc20(
-    web3: Web3,
     config_dict: dict,
     data_nft_publisher: Wallet,
     datatoken_minter: Optional[Wallet] = None,
@@ -202,7 +201,7 @@ def deploy_erc721_erc20(
     """
 
     data_nft_factory = DataNFTFactoryContract(
-        web3, get_address_of_type(config_dict, "ERC721Factory")
+        config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
     tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
@@ -216,7 +215,7 @@ def deploy_erc721_erc20(
         from_wallet=data_nft_publisher,
     )
     token_address = data_nft_factory.get_token_address(tx)
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config_dict, token_address)
     if not datatoken_minter:
         return data_nft
 
@@ -237,7 +236,7 @@ def deploy_erc721_erc20(
     registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     datatoken_address = registered_event2["newTokenAddress"]
 
-    datatoken = Datatoken(web3, datatoken_address)
+    datatoken = Datatoken(config_dict, datatoken_address)
 
     return data_nft, datatoken
 
@@ -277,7 +276,7 @@ def send_mock_usdc_to_address(
 
 @enforce_types
 def transfer_base_token_if_balance_lte(
-    web3: Web3,
+    config: dict,
     base_token_address: str,
     from_wallet: Wallet,
     recipient: str,
@@ -288,7 +287,7 @@ def transfer_base_token_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = Datatoken(web3, base_token_address)
+    base_token = Datatoken(config, base_token_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
