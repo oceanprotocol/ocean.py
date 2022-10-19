@@ -71,11 +71,11 @@ def test_start_order_fees(
     consume_market_order_fee_in_unit: str,
     provider_fee_in_unit: str,
 ):
-    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(config, get_address_of_type(config, base_token_name))
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(
-        web3=web3,
+        config=config,
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
@@ -88,7 +88,6 @@ def test_start_order_fees(
     )
 
     asset, service, dt = create_asset_with_order_fee_and_timeout(
-        web3=web3,
         config=config,
         file=file1,
         data_nft=data_nft,
@@ -219,7 +218,6 @@ def test_start_order_fees(
 
 
 def create_asset_with_order_fee_and_timeout(
-    web3: Web3,
     config: dict,
     file: FilesType,
     data_nft: DataNFT,
@@ -245,7 +243,7 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
+    ocean_assets = OceanAssets(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -278,6 +276,6 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(config, asset.datatokens[0]["address"])
 
     return asset, service, dt

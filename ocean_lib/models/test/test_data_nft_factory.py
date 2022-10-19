@@ -20,7 +20,6 @@ from ocean_lib.web3_internal.utils import split_signature
 
 @pytest.mark.unit
 def test_main(
-    web3,
     config,
     publisher_wallet,
     consumer_wallet,
@@ -31,7 +30,7 @@ def test_main(
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     tx = data_nft_factory.deploy_erc721_contract(
         name="DT1",
@@ -49,7 +48,7 @@ def test_main(
 
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
@@ -108,7 +107,7 @@ def test_main(
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.get_current_template_count() == 2
 
-    datatoken = Datatoken(web3, datatoken_address)
+    datatoken = Datatoken(config, datatoken_address)
     datatoken.add_minter(consumer_wallet.address, publisher_wallet)
 
     # Tests creating NFT with ERC20 successfully
@@ -137,7 +136,7 @@ def test_main(
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event["admin"] == publisher_wallet.address
     data_nft_address2 = registered_nft_event["newTokenAddress"]
-    data_nft_token2 = DataNFT(web3, data_nft_address2)
+    data_nft_token2 = DataNFT(config, data_nft_address2)
     assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
 
@@ -146,7 +145,7 @@ def test_main(
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address2 = registered_token_event["newTokenAddress"]
-    datatoken2 = Datatoken(web3, datatoken_address2)
+    datatoken2 = Datatoken(config, datatoken_address2)
     assert datatoken2.contract.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
 
@@ -209,7 +208,7 @@ def test_main(
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event["admin"] == publisher_wallet.address
     data_nft_address4 = registered_nft_event["newTokenAddress"]
-    data_nft_token4 = DataNFT(web3, data_nft_address4)
+    data_nft_token4 = DataNFT(config, data_nft_address4)
     assert data_nft_token4.contract.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
 
@@ -218,7 +217,7 @@ def test_main(
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address4 = registered_token_event["newTokenAddress"]
-    datatoken4 = Datatoken(web3, datatoken_address4)
+    datatoken4 = Datatoken(config, datatoken_address4)
     assert datatoken4.contract.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
 
@@ -263,7 +262,7 @@ def test_main(
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event["admin"] == publisher_wallet.address
     data_nft_address5 = registered_nft_event["newTokenAddress"]
-    data_nft_token5 = DataNFT(web3, data_nft_address5)
+    data_nft_token5 = DataNFT(config, data_nft_address5)
     assert data_nft_token5.contract.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
 
@@ -272,11 +271,11 @@ def test_main(
     # Verify if the datatoken was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address5 = registered_token_event["newTokenAddress"]
-    datatoken5 = Datatoken(web3, datatoken_address5)
+    datatoken5 = Datatoken(config, datatoken_address5)
     assert datatoken5.contract.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
-    _ = Dispenser(web3, dispenser_address)
+    _ = Dispenser(config, dispenser_address)
 
     registered_dispenser_event = receipt.events[
         DataNFTFactoryContract.EVENT_DISPENSER_CREATED
@@ -312,7 +311,7 @@ def test_main(
         registered_nft_event["admin"] == publisher_wallet.address
     ), "Invalid NFT owner!"
     data_nft_address = registered_nft_event["newTokenAddress"]
-    data_nft = DataNFT(web3, data_nft_address)
+    data_nft = DataNFT(config, data_nft_address)
     assert (
         data_nft.token_name() == "72120Bundle"
     ), "NFT name doesn't match with the expected one."
@@ -329,7 +328,7 @@ def test_start_multiple_order(
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     tx = data_nft_factory.deploy_erc721_contract(
         name="DT1",
@@ -347,7 +346,7 @@ def test_start_multiple_order(
 
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
     assert data_nft_factory.check_nft(token_address)
@@ -411,7 +410,7 @@ def test_start_multiple_order(
     assert data_nft_factory.check_datatoken(datatoken_address)
 
     # Tests starting multiple token orders successfully
-    datatoken = Datatoken(web3, datatoken_address)
+    datatoken = Datatoken(config, datatoken_address)
     dt_amount = to_wei("2")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
@@ -479,12 +478,12 @@ def test_start_multiple_order(
 
 
 @pytest.mark.unit
-def test_fail_get_templates(web3, config):
+def test_fail_get_templates(config):
     """Tests multiple failures for getting tokens' templates."""
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     # Should fail to get the Datatoken template if index = 0
     with pytest.raises(Exception, match="Template index doesnt exist"):
@@ -497,14 +496,14 @@ def test_fail_get_templates(web3, config):
 
 @pytest.mark.unit
 def test_fail_create_erc20(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Tests multiple failures for creating ERC20 token."""
 
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     tx = data_nft_factory.deploy_erc721_contract(
         name="DT1",
@@ -521,7 +520,7 @@ def test_fail_create_erc20(
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
@@ -573,12 +572,12 @@ def test_fail_create_erc20(
 
 @pytest.mark.unit
 def test_datatoken_cap(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     # create NFT with ERC20
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):

@@ -12,7 +12,6 @@ from ocean_lib.web3_internal.currency import to_wei
 
 @pytest.mark.unit
 def test_main(
-    web3,
     config,
     publisher_wallet,
     consumer_wallet,
@@ -22,7 +21,7 @@ def test_main(
     """Tests the main flow of the Dispenser."""
 
     # get the dispenser
-    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
+    dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     # Tests publisher creates a dispenser with minter role
     _ = datatoken.create_dispenser(
@@ -92,12 +91,12 @@ def test_main(
 
 
 def test_dispenser_creation_without_minter(
-    web3, config, publisher_wallet, consumer_wallet, datatoken
+    config, publisher_wallet, consumer_wallet, datatoken
 ):
     """Tests dispenser creation without a minter role."""
 
     # get the dispenser
-    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
+    dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     datatoken.create_dispenser(
         dispenser_address=dispenser.address,

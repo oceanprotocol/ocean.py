@@ -21,7 +21,6 @@ from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 
 @pytest.mark.unit
 def test_exchange_rate_creation(
-    web3,
     config,
     ocean_token,
     publisher_wallet,
@@ -39,7 +38,9 @@ def test_exchange_rate_creation(
     publish_market_swap_fee = int(1e15)  # 0.1%
     pmt_collector = datatoken.get_payment_collector()
 
-    fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
+    fixed_exchange = FixedRateExchange(
+        config, get_address_of_type(config, "FixedPrice")
+    )
 
     datatoken.mint(consumer_addr, amount, publisher_wallet)
     assert datatoken.balanceOf(consumer_addr) == amount

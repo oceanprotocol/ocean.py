@@ -8,7 +8,7 @@ from ocean_lib.web3_internal.transactions import send_ether
 
 
 @pytest.mark.unit
-def test_send_ether(alice_wallet, bob_address):
+def test_send_ether(alice_wallet, bob_address, config):
     assert send_ether(
-        alice_wallet, bob_address, "1 ether"
+        config, alice_wallet, bob_address, "1 ether"
     ), "Send ether was unsuccessful."

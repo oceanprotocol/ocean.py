@@ -27,9 +27,9 @@ def test_buy_from_dispenser_and_order(
     datatoken_enterprise_token,
 ):
     """Tests buy_from_dispenser_and_order function of the Datatoken Enterprise"""
-    mock_usdc_contract = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
-    mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
-    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
+    mock_usdc_contract = Datatoken(config, get_address_of_type(config, "MockUSDC"))
+    mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
+    dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     _ = datatoken_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
@@ -160,10 +160,10 @@ def test_buy_from_fre_and_order(
     datatoken_enterprise_token,
 ):
     """Tests buy_from_fre_and_order function of the Datatoken Enterprise"""
-    mock_usdc_contract = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
-    mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
+    mock_usdc_contract = Datatoken(config, get_address_of_type(config, "MockUSDC"))
+    mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
     fixed_rate_exchange = FixedRateExchange(
-        web3, get_address_of_type(config, "FixedPrice")
+        config, get_address_of_type(config, "FixedPrice")
     )
 
     tx = datatoken_enterprise_token.create_fixed_rate(
