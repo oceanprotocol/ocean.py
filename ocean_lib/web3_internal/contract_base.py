@@ -5,7 +5,7 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional
 
 import requests
 from brownie import network
@@ -16,7 +16,6 @@ from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
 from web3.contract import ContractEvent, ContractEvents
-from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 
 from ocean_lib.example_config import NETWORK_IDS
@@ -139,48 +138,6 @@ class ContractBase(object):
         return Web3.keccak(text=sig_str).hex()
 
     @enforce_types
-    def subscribe_to_event(
-        self,
-        event_name: str,
-        timeout: int,
-        event_filter: Optional[dict] = None,
-        callback: Optional[Callable] = None,
-        timeout_callback: Optional[Callable] = None,
-        args: Optional[list] = None,
-        wait: Optional[bool] = False,
-        from_block: Optional[Union[str, int]] = "latest",
-        to_block: Optional[Union[str, int]] = "latest",
-    ) -> None:
-        """
-        Create a listener for the event `event_name` on this contract.
-
-        :param event_name: name of the event to subscribe, str
-        :param timeout:
-        :param event_filter:
-        :param callback:
-        :param timeout_callback:
-        :param args:
-        :param wait: if true block the listener until get the event, bool
-        :param from_block: int or None
-        :param to_block: int or None
-        :return: event if blocking is True and an event is received, otherwise returns None
-        """
-        from ocean_lib.web3_internal.event_listener import EventListener
-
-        return EventListener(
-            self.web3,
-            self.CONTRACT_NAME,
-            self.address,
-            event_name,
-            args,
-            filters=event_filter,
-            from_block=from_block,
-            to_block=to_block,
-        ).listen_once(
-            callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
-        )
-
-    @enforce_types
     def send_transaction(
         self,
         fn_name: str,
@@ -215,17 +172,6 @@ class ContractBase(object):
         txid = receipt.txid
 
         return wait_for_transaction_status(from_wallet, txid)
-
-    @enforce_types
-    def get_event_argument_names(self, event_name: str) -> Tuple:
-        """Finds the event arguments by `event_name`.
-
-        :param event_name: str Name of the event to search in the `contract`.
-        :return: `event.argument_names` if event is found or None
-        """
-        event = getattr(self.contract.events, event_name, None)
-        if event:
-            return event().argument_names
 
     @classmethod
     @enforce_types
@@ -312,70 +258,7 @@ class ContractBase(object):
 
         return all_logs
 
-    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
-    def get_event_logs(
-        self,
-        event_name: str,
-        from_block: int,
-        to_block: int,
-        filters: Optional[Dict[str, str]] = None,
-        chunk_size: Optional[int] = 1000,
-    ) -> List[AttributeDict]:
-        """
-        Fetches the list of event logs between the given block numbers.
-        :param event_name: str
-        :param from_block: int
-        :param to_block: int
-        :param filters:
-        :param chunk_size: int
-        :return: List of event logs. List will have the structure as below.
-        ```Python
-            [AttributeDict({
-                'args': AttributeDict({}),
-                'event': 'LogNoArguments',
-                'logIndex': 0,
-                'transactionIndex': 0,
-                'transactionHash': HexBytes('...'),
-                'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
-                'blockHash': HexBytes('...'),
-                'blockNumber': 3
-                }),
-            AttributeDict(...),
-            ...
-            ]
-        ```
-        """
-        event = getattr(self.events, event_name)
-
-        chunk = chunk_size
-        _from = from_block
-        _to = _from + chunk - 1
-
-        all_logs = []
-        error_count = 0
-        _to = min(_to, to_block)
-        while _from <= to_block:
-            try:
-                logs = self.getLogs(
-                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
-                )
-                all_logs.extend(logs)
-                _from = _to + 1
-                _to = min(_from + chunk - 1, to_block)
-                error_count = 0
-                if (_from - from_block) % 1000 == 0:
-                    print(
-                        f"    Searched blocks {_from}-{_to}. {len(all_logs)} {event_name} events detected so far."
-                    )
-            except requests.exceptions.ReadTimeout as err:
-                print(f"ReadTimeout ({_from}, {_to}): {err}")
-                error_count += 1
-
-            if error_count > 1:
-                break
-
-        return all_logs
-
+    # TODO: remove if/when we remove get event log
     # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     @staticmethod
     def getLogs(
