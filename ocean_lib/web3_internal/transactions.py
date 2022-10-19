@@ -41,13 +41,13 @@ def send_ether(from_wallet: Wallet, to_address: str, amount: str) -> AttributeDi
 
     receipt = accounts.at(from_wallet.address).transfer(to_address, amount)
 
-    return wait_for_transaction_status(from_wallet, receipt.txid)
+    return wait_for_transaction_status(receipt.txid)
 
 
-def wait_for_transaction_status(wallet: Wallet, txid: str):
+def wait_for_transaction_status(txid: str, timeout: int):
     receipt = TransactionReceipt(txid)
 
-    if wallet.transaction_timeout == 0:
+    if timeout == 0:
         return txid
 
     start = time.time()
@@ -56,7 +56,7 @@ def wait_for_transaction_status(wallet: Wallet, txid: str):
     if receipt.status.value == 1:
         return txid
 
-    while time.time() - start > wallet.transaction_timeout:
+    while time.time() - start > timeout:
         receipt = TransactionReceipt(txid)
         if receipt.status.value == 1:
             return txid

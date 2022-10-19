@@ -15,6 +15,7 @@ from web3 import Web3
 from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
+    get_web3,
     load_contract,
 )
 from ocean_lib.web3_internal.transactions import wait_for_transaction_status
@@ -31,16 +32,18 @@ class ContractBase(object):
     CONTRACT_NAME = None
 
     @enforce_types
-    def __init__(self, web3: Web3, address: Optional[str]) -> None:
+    def __init__(self, config_dict: dict, address: Optional[str]) -> None:
         """Initialises Contract Base object."""
         self.name = self.contract_name
         assert (
             self.name
         ), "contract_name property needs to be implemented in subclasses."
 
-        self.web3 = web3
+        # TODO: we can possibly remove this
+        self.web3 = get_web3(config_dict["RPC_URL"])
+        self.config_dict = config_dict
 
-        self.network = NETWORK_IDS[web3.eth.chain_id]
+        self.network = NETWORK_IDS[self.web3.eth.chain_id]
         self.connect_to_network()
 
         self.contract = load_contract(self.web3, self.name, address)
@@ -123,11 +126,13 @@ class ContractBase(object):
             _transact.update(transact)
 
         receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
-        receipt.wait(from_wallet.block_confirmations)
+        receipt.wait(self.config_dict["BLOCK_CONFIRMATIONS"])
 
         txid = receipt.txid
 
-        return wait_for_transaction_status(from_wallet, txid)
+        return wait_for_transaction_status(
+            txid, self.config_dict["TRANSACTION_TIMEOUT"]
+        )
 
     @classmethod
     @enforce_types

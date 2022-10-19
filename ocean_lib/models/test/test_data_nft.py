@@ -21,7 +21,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @pytest.mark.unit
 def test_permissions(
-    web3,
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
@@ -131,7 +130,7 @@ def test_permissions(
             operation=0,
             to=consumer_addr,
             value=10,
-            data=web3.toHex(text="SomeData"),
+            data=Web3.toHex(text="SomeData"),
             from_wallet=another_consumer_wallet,
         )
 
@@ -141,7 +140,7 @@ def test_permissions(
         operation=0,
         to=consumer_addr,
         value=10,
-        data=web3.toHex(text="SomeData"),
+        data=Web3.toHex(text="SomeData"),
         from_wallet=consumer_wallet,
     )
     assert tx, "Could not execute call to consumer."
@@ -218,7 +217,6 @@ def test_add_and_remove_permissions(
 
 @pytest.mark.unit
 def test_success_update_metadata(
-    web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     publisher_addr: str,
@@ -239,9 +237,9 @@ def test_success_update_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
         metadata_decryptor_address=b"0x123",
-        flags=web3.toBytes(hexstr=BLOB),
-        data=web3.toBytes(hexstr=BLOB),
-        data_hash=web3.toBytes(hexstr=BLOB),
+        flags=Web3.toBytes(hexstr=BLOB),
+        data=Web3.toBytes(hexstr=BLOB),
+        data_hash=Web3.toBytes(hexstr=BLOB),
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
@@ -256,9 +254,9 @@ def test_success_update_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
         metadata_decryptor_address=b"0x123",
-        flags=web3.toBytes(hexstr=BLOB),
-        data=web3.toBytes(hexstr=BLOB),
-        data_hash=web3.toBytes(hexstr=BLOB),
+        flags=Web3.toBytes(hexstr=BLOB),
+        data=Web3.toBytes(hexstr=BLOB),
+        data_hash=Web3.toBytes(hexstr=BLOB),
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
@@ -274,9 +272,9 @@ def test_success_update_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
         metadata_decryptor_address=b"0x123",
-        flags=web3.toBytes(hexstr=BLOB),
-        data=web3.toBytes(hexstr=BLOB),
-        data_hash=web3.toBytes(hexstr=BLOB),
+        flags=Web3.toBytes(hexstr=BLOB),
+        data=Web3.toBytes(hexstr=BLOB),
+        data_hash=Web3.toBytes(hexstr=BLOB),
         token_id=1,
         token_uri="https://anothernewurl.com/nft/",
         metadata_proofs=[],
@@ -302,7 +300,7 @@ def test_success_update_metadata(
     ]
 
 
-def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
+def test_fails_update_metadata(consumer_wallet, consumer_addr, data_nft):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.UPDATE_METADATA]
@@ -323,7 +321,6 @@ def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
 
 @pytest.mark.unit
 def test_create_erc20(
-    web3: Web3,
     publisher_wallet: Wallet,
     publisher_addr,
     consumer_addr,
@@ -402,14 +399,13 @@ def test_create_erc20(
 
 
 def test_create_datatoken_with_usdc_order_fee(
-    web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
     data_nft: DataNFT,
     data_nft_factory: DataNFTFactoryContract,
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
-    usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
+    usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     publish_market_order_fee_amount_in_wei = to_wei(5)
     tx = data_nft.create_erc20(
         template_index=1,
@@ -428,7 +424,7 @@ def test_create_datatoken_with_usdc_order_fee(
         "newTokenAddress"
     ]
 
-    dt = Datatoken(web3, dt_address)
+    dt = Datatoken(config, dt_address)
 
     # Check publish fee info
     (
@@ -443,7 +439,6 @@ def test_create_datatoken_with_usdc_order_fee(
 
 @pytest.mark.unit
 def test_create_datatoken_with_non_owner(
-    web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
@@ -512,7 +507,6 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
 
 @pytest.mark.unit
 def test_erc721_datatoken_functions(
-    web3,
     publisher_wallet,
     consumer_wallet,
     publisher_addr,
@@ -626,7 +620,7 @@ def test_fail_transfer_function(
 
 
 def test_transfer_nft(
-    web3,
+    config,
     publisher_wallet,
     consumer_wallet,
     publisher_addr,
@@ -652,7 +646,7 @@ def test_transfer_nft(
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
@@ -688,7 +682,7 @@ def test_transfer_nft(
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     tx = data_nft.safe_transfer_from(
         publisher_addr,
         consumer_addr,
@@ -721,7 +715,7 @@ def test_transfer_nft(
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
-    datatoken = Datatoken(web3, datatoken_address)
+    datatoken = Datatoken(config, datatoken_address)
 
     assert not datatoken.is_minter(publisher_addr)
     assert datatoken.is_minter(consumer_addr)
@@ -750,7 +744,6 @@ def test_transfer_nft(
 
 
 def test_nft_transfer_with_fre(
-    web3,
     config,
     ocean_token,
     publisher_wallet,
@@ -778,7 +771,9 @@ def test_nft_transfer_with_fre(
     assert data_nft.owner_of(1) == consumer_wallet.address
 
     # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy a FRE
-    fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
+    fixed_exchange = FixedRateExchange(
+        config, get_address_of_type(config, "FixedPrice")
+    )
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = datatoken.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
@@ -856,7 +851,6 @@ def test_nft_transfer_with_fre(
 
 
 def test_transfer_nft_with_erc20_pool_fre(
-    web3,
     config,
     publisher_wallet,
     consumer_wallet,
@@ -883,7 +877,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_addr
     token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(web3, token_address)
+    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
@@ -905,14 +899,16 @@ def test_transfer_nft_with_erc20_pool_fre(
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
-    datatoken = Datatoken(web3, datatoken_address)
+    datatoken = Datatoken(config, datatoken_address)
 
     assert datatoken.is_minter(publisher_addr)
 
     ocean_token = publisher_ocean_instance.OCEAN_token
 
     # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a FRE
-    fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
+    fixed_exchange = FixedRateExchange(
+        config, get_address_of_type(config, "FixedPrice")
+    )
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = datatoken.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,

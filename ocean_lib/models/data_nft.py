@@ -408,7 +408,7 @@ class DataNFT(ContractBase):
         assert len(new_elements) == 1, "new data token has no address"
 
         return (
-            Datatoken(self.web3, new_elements[0])
+            Datatoken(self.config_dict, new_elements[0])
             if template_index == 1
-            else DatatokenEnterprise(self.web3, new_elements[0])
+            else DatatokenEnterprise(self.config_dict, new_elements[0])
         )

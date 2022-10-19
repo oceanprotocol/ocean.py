@@ -102,7 +102,7 @@ class Ocean:
     @property
     @enforce_types
     def OCEAN_token(self) -> Datatoken:
-        return Datatoken(self.web3, self.OCEAN_address)
+        return Datatoken(self.config_dict, self.OCEAN_address)
 
     @enforce_types
     def to_wei(self, amount_in_ether: Union[Decimal, str, int]):
@@ -142,8 +142,6 @@ class Ocean:
             wallet = Wallet(
                 ocean.web3,
                 private_key=private_key,
-                block_confirmations=config_dict["BLOCK_CONFIRMATIONS"],
-                transaction_timeout=config_dict["TRANSACTION_TIMEOUT"],
             )
             data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
@@ -179,7 +177,7 @@ class Ocean:
 
         address = nft_factory.get_token_address(tx_id)
         assert address, "new NFT token has no address"
-        token = DataNFT(self.web3, address)
+        token = DataNFT(self.config_dict, address)
         return token
 
     @enforce_types
@@ -189,7 +187,7 @@ class Ocean:
         :return: `DataNFT` instance
         """
 
-        return DataNFT(self.web3, token_address)
+        return DataNFT(self.config_dict, token_address)
 
     @enforce_types
     def get_datatoken(self, token_address: str) -> Datatoken:
@@ -198,7 +196,7 @@ class Ocean:
         :return: `Datatoken` instance
         """
 
-        return Datatoken(self.web3, token_address)
+        return Datatoken(self.config_dict, token_address)
 
     @enforce_types
     def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
@@ -212,14 +210,14 @@ class Ocean:
                 self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
             )
 
-        return DataNFTFactoryContract(self.web3, nft_factory_address)
+        return DataNFTFactoryContract(self.config_dict, nft_factory_address)
 
     @enforce_types
     def get_user_orders(self, address: str, datatoken: str) -> List[AttributeDict]:
         """
         :return: List of orders `[Order]`
         """
-        dt = Datatoken(self.web3, datatoken)
+        dt = Datatoken(self.config_dict, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
@@ -235,19 +233,23 @@ class Ocean:
     @property
     @enforce_types
     def dispenser(self):
-        return Dispenser(self.web3, get_address_of_type(self.config_dict, "Dispenser"))
+        return Dispenser(
+            self.config_dict, get_address_of_type(self.config_dict, "Dispenser")
+        )
 
     @property
     @enforce_types
     def fixed_rate_exchange(self):
         return FixedRateExchange(
-            self.web3, get_address_of_type(self.config_dict, "FixedPrice")
+            self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
         )
 
     @property
     @enforce_types
     def side_staking(self):
-        return SideStaking(self.web3, get_address_of_type(self.config_dict, "Staking"))
+        return SideStaking(
+            self.config_dict, get_address_of_type(self.config_dict, "Staking")
+        )
 
     @enforce_types
     def create_fixed_rate(
@@ -287,7 +289,9 @@ class Ocean:
     @property
     @enforce_types
     def factory_router(self) -> FactoryRouter:
-        return FactoryRouter(self.web3, get_address_of_type(self.config_dict, "Router"))
+        return FactoryRouter(
+            self.config_dict, get_address_of_type(self.config_dict, "Router")
+        )
 
     @enforce_types
     def retrieve_provider_fees(
