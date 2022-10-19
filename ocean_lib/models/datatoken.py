@@ -34,46 +34,6 @@ class Datatoken(ContractBase):
     EVENT_MINTER_APPROVED = "MinterApproved"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
-    @property
-    def event_OrderStarted(self):
-        return self.events.OrderStarted()
-
-    @property
-    def event_OrderReused(self):
-        return self.events.OrderReused()
-
-    @property
-    def event_OrderExecuted(self):
-        return self.events.OrderExecuted()
-
-    @property
-    def event_PublishMarketFeeChanged(self):
-        return self.events.PublishMarketFeeChanged()
-
-    @property
-    def event_PublishMarketFee(self):
-        return self.events.PublishMarketFee()
-
-    @property
-    def event_ConsumeMarketFee(self):
-        return self.events.ConsumeMarketFee()
-
-    @property
-    def event_ProviderFee(self):
-        return self.events.ProviderFee()
-
-    @property
-    def event_MinterProposed(self):
-        return self.events.MinterProposed()
-
-    @property
-    def event_MinterApproved(self):
-        return self.events.MinterApproved()
-
-    @property
-    def event_NewFixedRate(self):
-        return self.events.NewFixedRate()
-
     @enforce_types
     def router(self) -> str:
         return self.contract.router()

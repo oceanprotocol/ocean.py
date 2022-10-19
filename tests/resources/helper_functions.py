@@ -173,14 +173,6 @@ def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocea
 
 
 @enforce_types
-def log_event(event_name: str):
-    def _process_event(event):
-        print(f"Received event {event_name}: {event}")
-
-    return _process_event
-
-
-@enforce_types
 def setup_logging(
     default_path: str = "logging.yaml",
     default_level=logging.INFO,
