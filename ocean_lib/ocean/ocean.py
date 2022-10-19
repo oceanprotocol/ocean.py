@@ -89,7 +89,7 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        self.assets = OceanAssets(self.config_dict, self.web3, data_provider)
+        self.assets = OceanAssets(self.config_dict, data_provider)
         self.compute = OceanCompute(self.config_dict, data_provider)
 
         logger.debug("Ocean instance initialized: ")

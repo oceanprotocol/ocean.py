@@ -55,11 +55,11 @@ def test_reuse_order_fees(
     base_token_name: str,
     provider_fee_in_unit: str,
 ):
-    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(config, get_address_of_type(config, base_token_name))
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(
-        web3=web3,
+        config=config,
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
@@ -69,7 +69,6 @@ def test_reuse_order_fees(
 
     # Publish asset, service, and datatoken. Orders expire after 5 seconds
     asset, service, dt = create_asset_with_order_fee_and_timeout(
-        web3=web3,
         config=config,
         file=file1,
         data_nft=data_nft,

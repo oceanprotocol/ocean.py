@@ -6,7 +6,6 @@ import os
 import shutil
 
 import pytest
-from web3 import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -22,7 +21,6 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 @pytest.mark.integration
 def test_consume_simple_graphql_query(
-    web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
@@ -30,7 +28,7 @@ def test_consume_simple_graphql_query(
     file1: FilesType,
 ):
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
+    ocean_assets = OceanAssets(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -81,7 +79,7 @@ def test_consume_simple_graphql_query(
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(config, asset.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
@@ -150,7 +148,6 @@ def test_consume_simple_graphql_query(
 
 @pytest.mark.integration
 def test_consume_parametrized_graphql_query(
-    web3: Web3,
     config: dict,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
@@ -158,7 +155,7 @@ def test_consume_parametrized_graphql_query(
     file1: FilesType,
 ):
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
+    ocean_assets = OceanAssets(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -222,7 +219,7 @@ def test_consume_parametrized_graphql_query(
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(config, asset.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(

@@ -176,7 +176,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     # Test compress & update flags
-    data_nft = DataNFT(publisher_ocean_instance.web3, ddo.nft_address)
+    data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
 
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo,
@@ -433,10 +433,9 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
 def test_plain_asset_with_one_datatoken(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
 
-    data_nft_factory, metadata, files = create_basics(config, web3, data_provider)
+    data_nft_factory, metadata, files = create_basics(config, data_provider)
 
     # Publisher deploys NFT contract
     tx = data_nft_factory.deploy_erc721_contract(
@@ -486,9 +485,8 @@ def test_plain_asset_with_one_datatoken(
 def test_plain_asset_multiple_datatokens(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    data_nft_factory, metadata, files = create_basics(config, web3, data_provider)
+    data_nft_factory, metadata, files = create_basics(config, data_provider)
 
     tx = data_nft_factory.deploy_erc721_contract(
         name="NFT2",
@@ -549,9 +547,8 @@ def test_plain_asset_multiple_datatokens(
 def test_plain_asset_multiple_services(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
 
     access_service = Service(
         service_id="0",
@@ -607,9 +604,8 @@ def test_plain_asset_multiple_services(
 def test_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -633,9 +629,8 @@ def test_encrypted_asset(
 def test_compressed_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -659,9 +654,8 @@ def test_compressed_asset(
 def test_compressed_and_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -685,9 +679,8 @@ def test_compressed_and_encrypted_asset(
 def test_asset_creation_errors(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, web3, data_provider)
+    _, metadata, files = create_basics(config, data_provider)
 
     some_random_address = ZERO_ADDRESS
     with pytest.raises(brownie.exceptions.ContractNotFound):

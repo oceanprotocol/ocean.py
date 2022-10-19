@@ -26,7 +26,7 @@ def mint_fake_OCEAN(config: dict) -> None:
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),
     )
 
-    OCEAN_token = Datatoken(web3, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = Datatoken(config, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei("2000")
     OCEAN_token.mint(
         deployer_wallet.address, to_wei("20000"), from_wallet=deployer_wallet
@@ -45,4 +45,4 @@ def mint_fake_OCEAN(config: dict) -> None:
             OCEAN_token.mint(w.address, amt_distribute, from_wallet=deployer_wallet)
 
         if get_ether_balance(web3, w.address) < to_wei("2"):
-            send_ether(deployer_wallet, w.address, "4 ether")
+            send_ether(config, deployer_wallet, w.address, "4 ether")

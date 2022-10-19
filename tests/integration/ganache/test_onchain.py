@@ -31,7 +31,7 @@ def test_consume_simple_onchain_data(
     file1: FilesType,
 ):
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
+    ocean_assets = OceanAssets(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -81,7 +81,7 @@ def test_consume_simple_onchain_data(
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(config, asset.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
@@ -158,7 +158,7 @@ def test_consume_parametrized_onchain_data(
     file1: FilesType,
 ):
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, web3, data_provider)
+    ocean_assets = OceanAssets(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -221,7 +221,7 @@ def test_consume_parametrized_onchain_data(
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(config, asset.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(

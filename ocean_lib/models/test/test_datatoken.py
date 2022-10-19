@@ -19,7 +19,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @pytest.mark.unit
 def test_main(
-    web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
@@ -89,12 +88,12 @@ def test_main(
     ]
 
     # Should succeed to setData if erc20Deployer
-    value = web3.toHex(text="SomeData")
-    key = web3.keccak(hexstr=datatoken.address)
+    value = Web3.toHex(text="SomeData")
+    key = Web3.keccak(hexstr=datatoken.address)
 
     datatoken.set_data(data=value, from_wallet=publisher_wallet)
 
-    assert web3.toHex(data_nft.get_data(key)) == value
+    assert Web3.toHex(data_nft.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
     datatoken.clean_permissions(from_wallet=publisher_wallet)
@@ -300,7 +299,7 @@ def test_start_order(
 
 
 @pytest.mark.unit
-def test_exceptions(web3, consumer_wallet, datatoken):
+def test_exceptions(consumer_wallet, datatoken):
     """Tests revert statements in contracts functions"""
 
     # Should fail to mint if wallet is not a minter
@@ -345,7 +344,7 @@ def test_exceptions(web3, consumer_wallet, datatoken):
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
         datatoken.set_data(
-            data=web3.toHex(text="SomeData"), from_wallet=consumer_wallet
+            data=Web3.toHex(text="SomeData"), from_wallet=consumer_wallet
         )
 
     # Should fail to call cleanPermissions if NOT NFTOwner

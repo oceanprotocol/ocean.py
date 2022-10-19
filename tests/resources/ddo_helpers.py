@@ -138,7 +138,6 @@ def create_asset(ocean, publisher, metadata=None, files=None):
 
 def create_basics(
     config,
-    web3,
     data_provider,
     asset_type: str = "dataset",
     files: Optional[List[FilesType]] = None,
@@ -152,7 +151,7 @@ def create_basics(
     data_nft_factory_address = get_address_of_type(
         config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
+    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -182,20 +181,18 @@ def get_registered_asset_with_compute_service(
     trusted_algorithm_publishers: List[str] = [],
 ):
     data_nft, datatoken = deploy_erc721_erc20(
-        ocean_instance.web3,
         ocean_instance.config_dict,
         publisher_wallet,
         publisher_wallet,
     )
 
-    web3 = ocean_instance.web3
     config = ocean_instance.config_dict
     data_provider = DataServiceProvider
 
     arff_file = UrlFile(
         url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
     )
-    _, metadata, files = create_basics(config, web3, data_provider, files=[arff_file])
+    _, metadata, files = create_basics(config, data_provider, files=[arff_file])
 
     # Set the compute values for compute service
     compute_values = {
@@ -234,10 +231,9 @@ def get_registered_asset_with_compute_service(
 def get_registered_algorithm_with_access_service(
     ocean_instance: Ocean, publisher_wallet: Wallet
 ):
-    web3 = ocean_instance.web3
     config = ocean_instance.config_dict
     data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(config, web3, data_provider, asset_type="algorithm")
+    _, metadata, _ = create_basics(config, data_provider, asset_type="algorithm")
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -326,8 +322,8 @@ def get_first_service_by_type(asset, service_type: str) -> Service:
 
 
 def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
-    return FactoryRouter(exchange.web3, exchange.router()).get_opc_collector()
+    return FactoryRouter(exchange.config_dict, exchange.router()).get_opc_collector()
 
 
 def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:
-    return FactoryRouter(datatoken.web3, datatoken.router()).get_opc_collector()
+    return FactoryRouter(datatoken.config_dict, datatoken.router()).get_opc_collector()

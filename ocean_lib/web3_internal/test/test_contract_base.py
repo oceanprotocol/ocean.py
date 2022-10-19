@@ -22,17 +22,17 @@ class MyFactory(ContractBase):
 
 
 @pytest.mark.unit
-def test_name_is_None(web3):
+def test_name_is_None(config):
     with pytest.raises(Exception):
         # self.name will become None, triggering the error
-        ContractBase(web3, None)
+        ContractBase(config, None)
 
 
 @pytest.mark.unit
-def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
+def test_main(network, alice_wallet, alice_ocean, nft_factory_address, config):
 
     # test super-simple functionality of child
-    factory = MyFactory(web3, nft_factory_address)
+    factory = MyFactory(config, nft_factory_address)
     factory.deploy_erc721_contract(
         (
             "NFT",
@@ -63,9 +63,9 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
 
 
 @pytest.mark.unit
-def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
+def test_gas_price(config, alice_wallet, nft_factory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
-    factory = MyFactory(web3, nft_factory_address)
+    factory = MyFactory(config, nft_factory_address)
     assert factory.deploy_erc721_contract(
         (
             "NFT",
