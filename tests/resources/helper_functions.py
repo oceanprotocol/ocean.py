@@ -257,15 +257,13 @@ def get_non_existent_nft_template(
 
 
 @enforce_types
-def send_mock_usdc_to_address(
-    web3: Web3, config: dict, recipient: str, amount: int
-) -> int:
+def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     """Helper function to send mock usdc to an arbitrary recipient address if factory_deployer has enough balance
     to send. Returns the transferred balance.
     """
     factory_deployer = get_factory_deployer_wallet(config)
 
-    mock_usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
+    mock_usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
     if mock_usdc.balanceOf(factory_deployer.address) >= amount:
