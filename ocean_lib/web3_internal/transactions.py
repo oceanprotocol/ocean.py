@@ -47,15 +47,16 @@ def send_ether(from_wallet: Wallet, to_address: str, amount: str) -> AttributeDi
 def wait_for_transaction_status(wallet: Wallet, txid: str):
     receipt = TransactionReceipt(txid)
 
-    if wallet.transaction_timeout.value == 0:
+    if wallet.transaction_timeout == 0:
         return txid
 
     start = time.time()
     receipt = TransactionReceipt(txid)
+
     if receipt.status.value == 1:
         return txid
 
-    while time.time() - start > wallet.transaction_timeout.value:
+    while time.time() - start > wallet.transaction_timeout:
         receipt = TransactionReceipt(txid)
         if receipt.status.value == 1:
             return txid

@@ -123,7 +123,7 @@ class ContractBase(object):
             _transact.update(transact)
 
         receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
-        receipt.wait(from_wallet.block_confirmations.value)
+        receipt.wait(from_wallet.block_confirmations)
 
         txid = receipt.txid
 
