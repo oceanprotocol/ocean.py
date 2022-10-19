@@ -23,56 +23,56 @@ class FactoryRouter(ContractBase):
     @enforce_types
     def router_owner(self) -> str:
         """Gets a router owner address."""
-        return self.contract.caller.routerOwner()
+        return self.contract.routerOwner()
 
     @enforce_types
     def factory(self) -> str:
-        return self.contract.caller.factory()
+        return self.contract.factory()
 
     @enforce_types
     def swap_ocean_fee(self) -> int:
-        return self.contract.caller.swapOceanFee()
+        return self.contract.swapOceanFee()
 
     @enforce_types
     def swap_non_ocean_fee(self) -> int:
-        return self.contract.caller.swapNonOceanFee()
+        return self.contract.swapNonOceanFee()
 
     @enforce_types
     def is_approved_token(self, address: str) -> bool:
-        return self.contract.caller.isApprovedToken(address)
+        return self.contract.isApprovedToken(address)
 
     @enforce_types
     def is_ss_contract(self, address: str):
-        return self.contract.caller.isSSContract(address)
+        return self.contract.isSSContract(address)
 
     @enforce_types
     def is_fixed_rate_contract(self, address: str) -> bool:
-        return self.contract.caller.isFixedRateContract(address)
+        return self.contract.isFixedRateContract(address)
 
     @enforce_types
     def is_dispenser_contract(self, address: str) -> bool:
-        return self.contract.caller.isDispenserContract(address)
+        return self.contract.isDispenserContract(address)
 
     @enforce_types
     def get_opc_collector(self) -> str:
-        return self.contract.caller.getOPCCollector()
+        return self.contract.getOPCCollector()
 
     @enforce_types
     def get_opc_fee(self, base_token: str) -> int:
-        return self.contract.caller.getOPCFee(base_token)
+        return self.contract.getOPCFee(base_token)
 
     @enforce_types
     def get_opc_fees(self) -> Tuple[int, int]:
         """Gets OP Community Fees for approved tokens and non approved tokens"""
-        return self.contract.caller.getOPCFees()
+        return self.contract.getOPCFees()
 
     @enforce_types
     def get_opc_consume_fee(self) -> int:
-        return self.contract.caller.getOPCConsumeFee()
+        return self.contract.getOPCConsumeFee()
 
     @enforce_types
     def get_opc_provider_fee(self) -> int:
-        return self.contract.caller.getOPCProviderFee()
+        return self.contract.getOPCProviderFee()
 
     @enforce_types
     def stake_batch(

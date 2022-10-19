@@ -5,7 +5,7 @@
 import json
 
 import pytest
-from web3 import exceptions
+from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -31,7 +31,7 @@ def test_buy_from_dispenser_and_order(
     mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
-    tx = datatoken_enterprise_token.create_dispenser(
+    _ = datatoken_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
         max_balance=to_wei("1"),
@@ -39,8 +39,6 @@ def test_buy_from_dispenser_and_order(
         max_tokens=to_wei("1"),
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     status = dispenser.status(datatoken_enterprise_token.address)
 
@@ -48,18 +46,16 @@ def test_buy_from_dispenser_and_order(
     assert status[1] == publisher_wallet.address
     assert status[2] is True
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(
+        Exception,
+        match="This address is not allowed to request DT",
+    ):
         dispenser.dispense(
             datatoken=datatoken_enterprise_token.address,
             amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert This address is not allowed to request DT"
-    )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
@@ -119,7 +115,7 @@ def test_buy_from_dispenser_and_order(
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
 
-    tx = datatoken_enterprise_token.buy_from_dispenser_and_order(
+    _ = datatoken_enterprise_token.buy_from_dispenser_and_order(
         consumer=consume_fee_address,
         service_index=1,
         provider_fee_address=provider_fee_address,
@@ -137,8 +133,6 @@ def test_buy_from_dispenser_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
@@ -186,23 +180,17 @@ def test_buy_from_fre_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
+    tx_receipt = TransactionReceipt(tx)
 
-    new_fixed_rate_event = datatoken_enterprise_token.get_event_log(
-        "NewFixedRate",
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
+    new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
 
-    exchange_id = new_fixed_rate_event[0].args.exchangeId
+    exchange_id = new_fixed_rate_event["exchangeId"]
     status = fixed_rate_exchange.get_exchange(exchange_id)
 
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="This address is not allowed to swap"):
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
             datatoken_amount=to_wei("1"),
@@ -211,11 +199,6 @@ def test_buy_from_fre_and_order(
             consume_market_swap_fee_amount=0,
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: This address is not allowed to swap"
-    )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
@@ -273,7 +256,7 @@ def test_buy_from_fre_and_order(
         another_consumer_wallet.address
     )
 
-    tx = datatoken_enterprise_token.buy_from_fre_and_order(
+    _ = datatoken_enterprise_token.buy_from_fre_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
         provider_fee_address=publisher_wallet.address,
@@ -295,8 +278,6 @@ def test_buy_from_fre_and_order(
         from_wallet=publisher_wallet,
     )
 
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(

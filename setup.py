@@ -28,12 +28,12 @@ install_requirements = [
     "pycryptodomex",
     "tqdm",
     "pytz",
-    "web3==5.28.0",
     "cryptography==3.3.2",
     "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
     "eciespy",
+    "eth-brownie==1.19.1",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -61,9 +61,9 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8==3.9.2",
+    "flake8==5.0.4",
     "isort==5.10.1",
-    "black==22.3.0",
+    "black==22.6.0",  # need to keep this up to date to brownie
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",

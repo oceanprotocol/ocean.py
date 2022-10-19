@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import Web3, exceptions
+from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -38,16 +38,12 @@ def test_data_nft_roles(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+
+    receipt = TransactionReceipt(tx)
+    assert "NFTCreated" in receipt.events
+    assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
+
+    token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
 
     # Publisher should be a manager
@@ -140,7 +136,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft_factory.deploy_erc721_contract(
             name="DT1",
             symbol="DTSYMBOL",
@@ -152,11 +148,6 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
             owner=publisher_wallet.address,
             from_wallet=publisher_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721DTFactory: Template index "
-        "doesnt exist"
-    )
 
 
 @pytest.mark.unit
@@ -177,19 +168,15 @@ def test_successful_data_nft_creation(web3, config, publisher_wallet):
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
+
+    receipt = TransactionReceipt(tx)
+    assert "NFTCreated" in receipt.events
+    assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
+
+    token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     owner_balance = data_nft.balance_of(publisher_wallet.address)
-    assert data_nft.contract.caller.name() == "NFT"
+    assert data_nft.contract.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert owner_balance == 1
 
@@ -248,14 +235,8 @@ def test_datatoken_creation(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    token_address = registered_event[0].args.newTokenAddress
+
+    token_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(web3, token_address)
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
@@ -270,16 +251,7 @@ def test_datatoken_creation(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
-
-    registered_event2 = data_nft_factory.get_event_log(
-        event_name=DataNFTFactoryContract.EVENT_TOKEN_CREATED,
-        from_block=tx_receipt2.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    datatoken_address = registered_event2[0].args.newTokenAddress
+    datatoken_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
 
     datatoken = Datatoken(web3, datatoken_address)
 
@@ -289,7 +261,7 @@ def test_datatoken_creation(
     assert tx_result, "Error creating datatoken."
 
     # Tests failed creation of datatoken
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -302,11 +274,6 @@ def test_datatoken_creation(
             bytess=[b""],
             from_wallet=another_consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
-        "ERC20DEPLOYER_ROLE"
-    )
 
 
 @pytest.mark.unit
@@ -321,12 +288,8 @@ def test_datatoken_mint_function(
     assert datatoken.balanceOf(consumer_wallet.address) == 20
 
     # Tests failed mint
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(publisher_wallet.address, 10, consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
-    )
 
     # Test with another minter
     _, datatoken_2 = deploy_erc721_erc20(
@@ -348,23 +311,22 @@ def test_datatoken_set_data(web3, config, publisher_wallet, data_nft, datatoken)
     can be done only by who has deployERC20 rights(rights to create new erc20 token contract)
     the value is stored into the 725Y standard with a predefined key which is the erc20Token address"""
 
-    key = Web3.keccak(hexstr=datatoken.address)
+    key = web3.keccak(hexstr=datatoken.address)
+    value = b"SomeData"
 
-    value = Web3.toHex(text="SomeData")
-
-    assert Web3.toHex(data_nft.get_data(key)) == "0x"
+    assert data_nft.get_data(key) == "0x"
     datatoken.set_data(value, publisher_wallet)
 
-    assert Web3.toHex(data_nft.get_data(key)) == value
+    assert data_nft.get_data(key).hex() == value.hex()
     """This one is the generic version of updating data into the key-value story.
     Only users with 'store' permission can do that.
     NOTE: in this function the key is chosen by the caller."""
 
-    data_nft.set_new_data(Web3.keccak(text="arbitrary text"), value, publisher_wallet)
+    data_nft.set_new_data(b"arbitrary text", value, publisher_wallet)
 
-    res = data_nft.get_data(Web3.keccak(text="arbitrary text"))
+    res = data_nft.get_data(b"arbitrary text")
 
-    assert Web3.toHex(res) == value
+    assert res.hex() == value.hex()
 
 
 @pytest.mark.unit
@@ -375,14 +337,10 @@ def test_nft_owner_transfer(
 
     assert data_nft.owner_of(1) == publisher_wallet.address
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="transfer of token that is not own"):
         data_nft.transfer_from(
             consumer_wallet.address, publisher_wallet.address, 1, publisher_wallet
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer of token that is not own"
-    )
     data_nft.transfer_from(
         publisher_wallet.address, consumer_wallet.address, 1, publisher_wallet
     )
@@ -390,7 +348,7 @@ def test_nft_owner_transfer(
     assert data_nft.balance_of(publisher_wallet.address) == 0
     assert data_nft.owner_of(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -403,16 +361,9 @@ def test_nft_owner_transfer(
             bytess=[b""],
             from_wallet=publisher_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT ERC20DEPLOYER_ROLE"
-    )
-    with pytest.raises(exceptions.ContractLogicError) as err:
+
+    with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
-    )
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_erc20(

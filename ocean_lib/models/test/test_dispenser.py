@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
 
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import get_address_of_type
@@ -56,7 +55,7 @@ def test_main(
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     # Tests publisher creates a dispenser with minter role
-    tx = datatoken.create_dispenser(
+    _ = datatoken.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=to_wei("1"),
         max_tokens=to_wei("1"),
@@ -64,8 +63,6 @@ def test_main(
         allowed_swapper=ZERO_ADDRESS,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     # Tests publisher gets the dispenser status
 
@@ -75,40 +72,30 @@ def test_main(
     assert dispenser_status[2] is True
 
     # Tests consumer requests more datatokens then allowed transaction reverts
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Amount too high"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("20"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Amount too high"
-    )
 
     # Tests consumer requests data tokens
-    tx = dispenser.dispense(
+    _ = dispenser.dispense(
         datatoken=datatoken.address,
         amount=to_wei("1"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert tx_receipt.status == 1
 
     # Tests consumer requests more datatokens then exceeds maxBalance
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Caller balance too high"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Caller balance too high"
-    )
 
     # Tests publisher deactivates the dispenser
     dispenser.deactivate(from_wallet=publisher_wallet, datatoken=datatoken.address)
@@ -116,7 +103,7 @@ def test_main(
     assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Dispenser not active"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("0.00001"),
@@ -124,24 +111,14 @@ def test_main(
             from_wallet=factory_deployer_wallet,
         )
 
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Dispenser not active"
-    )
-
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Invalid owner"):
         dispenser.activate(
             datatoken=datatoken.address,
             max_tokens=to_wei("1"),
             max_balance=to_wei("1"),
             from_wallet=consumer_wallet,
         )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Invalid owner"
-    )
 
 
 def test_dispenser_creation_without_minter(
@@ -162,20 +139,15 @@ def test_dispenser_creation_without_minter(
     )
 
     # Tests consumer requests data tokens but they are not minted
-    with pytest.raises(exceptions.ContractLogicError) as err:
+    with pytest.raises(Exception, match="Not enough reserves"):
         dispenser.dispense(
             datatoken=datatoken.address,
             amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Not enough reserves"
-    )
 
     # Tests publisher mints tokens and transfer them to the dispenser.
-
     datatoken.mint(
         from_wallet=publisher_wallet,
         account_address=dispenser.address,
