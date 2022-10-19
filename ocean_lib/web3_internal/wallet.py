@@ -13,7 +13,6 @@ from hexbytes.main import HexBytes
 from web3.main import Web3
 
 from ocean_lib.example_config import NETWORK_IDS
-from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.utils import (
     get_gas_price,
     private_key_to_address,
@@ -53,23 +52,16 @@ class Wallet:
         self,
         web3: Web3,
         private_key: str,
-        block_confirmations: Union[Integer, int],
-        transaction_timeout: Union[Integer, int],
+        block_confirmations: int,
+        transaction_timeout: int,
     ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 
         self.web3 = web3
-        self.block_confirmations = (
-            block_confirmations
-            if isinstance(block_confirmations, Integer)
-            else Integer(block_confirmations)
-        )
-        self.transaction_timeout = (
-            transaction_timeout
-            if isinstance(transaction_timeout, Integer)
-            else Integer(transaction_timeout)
-        )
+        self.block_confirmations = block_confirmations
+        self.transaction_timeout = transaction_timeout
+
         self._last_tx_count.clear()
 
         self.private_key = private_key

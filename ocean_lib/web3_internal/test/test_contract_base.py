@@ -56,7 +56,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     # test methods
     assert factory.contract_name == "ERC721Factory"
     assert factory.address == nft_factory_address
-    assert factory.events
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
     assert factory.contract.createToken
     assert factory.contract.getCurrentTokenCount
