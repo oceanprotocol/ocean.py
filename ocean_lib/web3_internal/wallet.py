@@ -38,8 +38,6 @@ class Wallet:
     wallet = Wallet(
         ocean.web3,
         private_key=private_key,
-        block_confirmations=ocean.config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
     )
     ```
 
@@ -52,16 +50,11 @@ class Wallet:
         self,
         web3: Web3,
         private_key: str,
-        block_confirmations: int,
-        transaction_timeout: int,
     ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 
         self.web3 = web3
-        self.block_confirmations = block_confirmations
-        self.transaction_timeout = transaction_timeout
-
         self._last_tx_count.clear()
 
         self.private_key = private_key
