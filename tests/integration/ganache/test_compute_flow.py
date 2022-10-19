@@ -145,7 +145,7 @@ def _mint_and_build_compute_input(
     ocean_instance: Ocean,
 ) -> ComputeInput:
     service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
-    datatoken = Datatoken(ocean_instance.web3, service.datatoken)
+    datatoken = Datatoken(ocean_instance.config_dict, service.datatoken)
     minter = (
         consumer_wallet
         if datatoken.is_minter(consumer_wallet.address)

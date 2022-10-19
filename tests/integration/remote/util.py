@@ -1,3 +1,7 @@
+#
+# Copyright 2022 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import os
 import random
 import string
@@ -7,7 +11,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 def get_wallets(ocean):
-    config, web3 = ocean.config_dict, ocean.web3
+    web3 = ocean.web3
 
     alice_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY1")
     bob_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY2")
@@ -17,9 +21,8 @@ def get_wallets(ocean):
     assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
-    n_confirm, timeout = config["BLOCK_CONFIRMATIONS"], config["TRANSACTION_TIMEOUT"]
-    alice_wallet = Wallet(web3, alice_private_key, n_confirm, timeout)
-    bob_wallet = Wallet(web3, bob_private_key, n_confirm, timeout)
+    alice_wallet = Wallet(web3, alice_private_key)
+    bob_wallet = Wallet(web3, bob_private_key)
 
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")

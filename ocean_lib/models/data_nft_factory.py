@@ -387,7 +387,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        datatoken_contract = Datatoken(self.web3, datatoken)
+        datatoken_contract = Datatoken(self.config_dict, datatoken)
         exchange_addresses_and_ids = datatoken_contract.get_fixed_rates()
         return (
             exchange_addresses_and_ids
