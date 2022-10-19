@@ -71,5 +71,5 @@ Now we can create the wallet based on the private key defined in the previous st
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 private_key = os.getenv('TEST_PRIVATE_KEY1')
-wallet = Wallet(ocean.web3, private_key, 1, 600)
+wallet = Wallet(ocean.web3, private_key)
 ```
