@@ -134,23 +134,23 @@ def ocean_address(config) -> str:
 
 
 @pytest.fixture
-def ocean_token(web3, ocean_address) -> Datatoken:
-    return Datatoken(web3, ocean_address)
+def ocean_token(config, ocean_address) -> Datatoken:
+    return Datatoken(config, ocean_address)
 
 
 @pytest.fixture
-def factory_router(web3, config):
-    return FactoryRouter(web3, get_address_of_type(config, "Router"))
+def factory_router(config):
+    return FactoryRouter(config, get_address_of_type(config, "Router"))
 
 
 @pytest.fixture
-def side_staking(web3, config):
-    return SideStaking(web3=web3, address=get_address_of_type(config, "Staking"))
+def side_staking(config):
+    return SideStaking(config=config, address=get_address_of_type(config, "Staking"))
 
 
 @pytest.fixture
-def data_nft_factory(web3, config):
-    return DataNFTFactoryContract(web3, get_address_of_type(config, "ERC721Factory"))
+def data_nft_factory(config):
+    return DataNFTFactoryContract(config, get_address_of_type(config, "ERC721Factory"))
 
 
 @pytest.fixture
@@ -159,7 +159,7 @@ def provider_wallet():
 
 
 @pytest.fixture
-def data_nft(web3, publisher_wallet, data_nft_factory):
+def data_nft(config, publisher_wallet, data_nft_factory):
     tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
@@ -172,11 +172,11 @@ def data_nft(web3, publisher_wallet, data_nft_factory):
         from_wallet=publisher_wallet,
     )
     token_address = data_nft_factory.get_token_address(tx)
-    return DataNFT(web3, token_address)
+    return DataNFT(config, token_address)
 
 
 @pytest.fixture
-def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
+def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
     tx_id = data_nft.create_erc20(
         template_index=1,
         name="DT1",
@@ -193,11 +193,11 @@ def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
     receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
-    return Datatoken(web3, dt_address)
+    return Datatoken(config, dt_address)
 
 
 @pytest.fixture
-def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factory):
+def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
     tx_id = data_nft.create_erc20(
         template_index=2,
         name="DT1",
@@ -215,7 +215,7 @@ def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factor
     receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
-    return DatatokenEnterprise(web3, dt_address)
+    return DatatokenEnterprise(config, dt_address)
 
 
 @pytest.fixture
