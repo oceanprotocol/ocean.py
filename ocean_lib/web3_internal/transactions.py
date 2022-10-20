@@ -14,11 +14,6 @@ from web3.main import Web3
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
-def get_gas_price(web3) -> int:
-    return int(web3.eth.gas_price * 1.1)
-
-
 # TODO: look into signing, should we keep anything?
 @enforce_types
 def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
