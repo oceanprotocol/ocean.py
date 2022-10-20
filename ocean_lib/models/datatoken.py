@@ -5,6 +5,7 @@
 from enum import IntEnum
 from typing import List, Optional, Tuple, Union
 
+from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -459,8 +460,8 @@ class Datatoken(ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        if to_block == "latest":
-            to_block = self.web3.eth.getBlock("latest").number
+        chain = Chain()
+        to_block = to_block if to_block != "latest" else chain[-1].number
 
         return self.contract.events.get_sequence(
             from_block, to_block, self.EVENT_ORDER_STARTED
