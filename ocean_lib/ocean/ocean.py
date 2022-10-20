@@ -84,6 +84,10 @@ class Ocean:
             raise Exception(json.dumps(config_errors))
 
         self.config_dict = config_dict
+
+        # TODO: this can be removed eventually, we are now just using it in readmes
+        # for convenience, to create wallets. But we could probably switch to
+        # accounts instead, after we remove some raw web3 signs and transactions
         self.web3 = get_web3(self.config_dict.get("RPC_URL"))
 
         if not data_provider:

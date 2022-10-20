@@ -32,7 +32,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     @enforce_types
     def verify_nft(self, nft_address: str) -> bool:
         """Checks that a token was registered."""
-        data_nft_contract = DataNFT(self.web3, nft_address)
+        data_nft_contract = DataNFT(self.config_dict, nft_address)
         try:
             data_nft_contract.get_id()
             return True
