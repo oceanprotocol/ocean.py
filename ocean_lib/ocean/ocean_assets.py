@@ -53,9 +53,13 @@ class OceanAssets:
     @enforce_types
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
+        if "CHAIN_ID" not in config_dict:
+            w3 = get_web3(config_dict["RPC_URL"])
+            # cache it to prevent further calls
+            config_dict["CHAIN_ID"] = w3.eth.chain_id
+
         self._config_dict = config_dict
-        # TODO: we can possibly remove this
-        self._web3 = get_web3(config_dict["RPC_URL"])
+        self._chain_id = config_dict["CHAIN_ID"]
 
         self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider
@@ -291,7 +295,7 @@ class OceanAssets:
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create an asset of type "SmartContractCall", with good defaults"""
-        chain_id = self._web3.eth.chain_id
+        chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         return self._create1(name, files, publisher_wallet)
@@ -466,16 +470,14 @@ class OceanAssets:
         asset = Asset()
 
         # Generating the did and adding to the ddo.
-        did = (
-            f"did:op:{create_checksum(data_nft.address + str(self._web3.eth.chain_id))}"
-        )
+        did = f"did:op:{create_checksum(data_nft.address + str(self._chain_id))}"
         asset.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
-        asset.chain_id = self._web3.eth.chain_id
+        asset.chain_id = self._chain_id
         asset.metadata = metadata
 
         asset.credentials = credentials if credentials else {"allow": [], "deny": []}
@@ -644,7 +646,7 @@ class OceanAssets:
         ), "nft_address is required for publishing a dataset asset."
         data_nft = DataNFT(self._config_dict, data_nft_address)
 
-        assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
+        assert asset.chain_id == self._chain_id, "Chain id mismatch."
 
         for service in asset.services:
             service.encrypt_files(asset.nft_address)

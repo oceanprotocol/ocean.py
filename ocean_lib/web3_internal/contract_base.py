@@ -39,14 +39,17 @@ class ContractBase(object):
             self.name
         ), "contract_name property needs to be implemented in subclasses."
 
-        # TODO: we can possibly remove this
-        self.web3 = get_web3(config_dict["RPC_URL"])
+        if "CHAIN_ID" not in config_dict:
+            w3 = get_web3(config_dict["RPC_URL"])
+            # cache it to prevent further calls
+            config_dict["CHAIN_ID"] = w3.eth.chain_id
+
         self.config_dict = config_dict
 
-        self.network = NETWORK_IDS[self.web3.eth.chain_id]
+        self.network = NETWORK_IDS[config_dict["CHAIN_ID"]]
         self.connect_to_network()
 
-        self.contract = load_contract(self.web3, self.name, address)
+        self.contract = load_contract(self.name, address)
         assert not address or (
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
@@ -112,15 +115,15 @@ class ContractBase(object):
         :param transact: dict arguments for the transaction such as from, gas, etc.
         :return: hex str transaction hash
         """
+        # only for debugging local ganache
+        # w3 = get_web3(self.config_dict["RPC_URL"])
+
         _transact = {
             "from": ContractBase.to_checksum_address(from_wallet.address),
             "account_key": from_wallet.key,
-            # "nonce": self.web3.eth.getTransactionCount(from_wallet.address)
-            # 'nonce': Wallet._get_nonce(self.web3, from_wallet.address)
+            # only for debugging local ganache
+            # "nonce": w3.eth.getTransactionCount(from_wallet.address)
         }
-
-        gas_tx = get_gas_price(web3_object=self.web3, tx=_transact)
-        _transact.update(gas_tx)
 
         if transact:
             _transact.update(transact)
