@@ -49,4 +49,4 @@ def mint_fake_OCEAN(config: dict) -> None:
             OCEAN_token.mint(w.address, amt_distribute, from_wallet=deployer_wallet)
 
         if get_ether_balance(web3, w.address) < to_wei("2"):
-            send_ether(deployer_wallet, w.address, to_wei("4"))
+            send_ether(deployer_wallet, w.address, "4 ether")

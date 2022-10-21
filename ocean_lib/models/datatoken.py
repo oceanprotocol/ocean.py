@@ -34,46 +34,6 @@ class Datatoken(ContractBase):
     EVENT_MINTER_APPROVED = "MinterApproved"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
-    @property
-    def event_OrderStarted(self):
-        return self.events.OrderStarted()
-
-    @property
-    def event_OrderReused(self):
-        return self.events.OrderReused()
-
-    @property
-    def event_OrderExecuted(self):
-        return self.events.OrderExecuted()
-
-    @property
-    def event_PublishMarketFeeChanged(self):
-        return self.events.PublishMarketFeeChanged()
-
-    @property
-    def event_PublishMarketFee(self):
-        return self.events.PublishMarketFee()
-
-    @property
-    def event_ConsumeMarketFee(self):
-        return self.events.ConsumeMarketFee()
-
-    @property
-    def event_ProviderFee(self):
-        return self.events.ProviderFee()
-
-    @property
-    def event_MinterProposed(self):
-        return self.events.MinterProposed()
-
-    @property
-    def event_MinterApproved(self):
-        return self.events.MinterApproved()
-
-    @property
-    def event_NewFixedRate(self):
-        return self.events.NewFixedRate()
-
     @enforce_types
     def router(self) -> str:
         return self.contract.router()
@@ -499,21 +459,12 @@ class Datatoken(ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        topic0 = self.get_event_signature(self.EVENT_ORDER_STARTED)
-        topics = [topic0]
-        if consumer_address:
-            topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
-            topics = [topic0, None, topic1]
+        if to_block == "latest":
+            to_block = self.web3.eth.getBlock("latest").number
 
-        argument_filters = {"topics": topics}
-
-        logs = self.getLogs(
-            self.events.OrderStarted(),
-            argument_filters=argument_filters,
-            fromBlock=from_block,
-            toBlock=to_block,
+        return self.contract.events.get_sequence(
+            from_block, to_block, self.EVENT_ORDER_STARTED
         )
-        return logs
 
 
 class MockERC20(Datatoken):

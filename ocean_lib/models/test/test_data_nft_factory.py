@@ -19,48 +19,6 @@ from ocean_lib.web3_internal.utils import split_signature
 
 
 @pytest.mark.unit
-def test_properties(web3, config):
-    """Tests the events' properties."""
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
-
-    assert (
-        data_nft_factory.event_NFTCreated.abi["name"]
-        == DataNFTFactoryContract.EVENT_NFT_CREATED
-    )
-    assert (
-        data_nft_factory.event_TokenCreated.abi["name"]
-        == DataNFTFactoryContract.EVENT_TOKEN_CREATED
-    )
-    assert (
-        data_nft_factory.event_Template721Added.abi["name"]
-        == DataNFTFactoryContract.EVENT_TEMPLATE721_ADDED
-    )
-    assert (
-        data_nft_factory.event_Template20Added.abi["name"]
-        == DataNFTFactoryContract.EVENT_TEMPLATE20_ADDED
-    )
-    assert (
-        data_nft_factory.event_NewPool.abi["name"]
-        == DataNFTFactoryContract.EVENT_NEW_POOL
-    )
-    assert (
-        data_nft_factory.event_NewFixedRate.abi["name"]
-        == DataNFTFactoryContract.EVENT_NEW_FIXED_RATE
-    )
-    assert (
-        data_nft_factory.event_DispenserCreated.abi["name"]
-        == DataNFTFactoryContract.EVENT_DISPENSER_CREATED
-    )
-    assert (
-        data_nft_factory.event_Transfer.abi["name"]
-        == DataNFTFactoryContract.EVENT_TRANSFER
-    )
-
-
-@pytest.mark.unit
 def test_main(
     web3,
     config,
