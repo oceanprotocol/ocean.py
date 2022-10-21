@@ -15,11 +15,6 @@ class FactoryRouter(ContractBase):
     CONTRACT_NAME = "FactoryRouter"
     EVENT_NEW_POOL = "NewPool"
 
-    @property
-    @enforce_types
-    def event_NewPool(self):
-        return self.events.NewPool()
-
     @enforce_types
     def router_owner(self) -> str:
         """Gets a router owner address."""

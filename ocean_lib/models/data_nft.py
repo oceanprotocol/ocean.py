@@ -49,26 +49,6 @@ class DataNFT(ContractBase):
     EVENT_METADATA_VALIDATED = "MetadataValidated"
     EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
 
-    @property
-    def event_MetadataCreated(self):
-        return self.events.MetadataCreated()
-
-    @property
-    def event_MetadataUpdated(self):
-        return self.events.MetadataUpdated()
-
-    @property
-    def event_MetadataValidated(self):
-        return self.events.MetadataValidated()
-
-    @property
-    def event_TokenCreated(self):
-        return self.events.TokenCreated()
-
-    @property
-    def event_TokenURIUpdate(self):
-        return self.events.TokenURIUpdate()
-
     @enforce_types
     def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)

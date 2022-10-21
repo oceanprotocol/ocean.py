@@ -159,13 +159,12 @@ def test_update_datatokens(
 
     nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
     bn = publisher_ocean_instance.web3.eth.block_number
-    updated_event = nft_token.get_event_log(
-        event_name="MetadataUpdated", from_block=bn, to_block=bn, filters=None
-    )[0]
+
+    updated_event = nft_token.contract.events.get_sequence(bn, bn, "MetadataUpdated")[0]
     assert updated_event.args.updatedBy == publisher_wallet.address
 
-    validation_event = nft_token.get_event_log(
-        event_name="MetadataValidated", from_block=bn, to_block=bn, filters=None
+    validation_event = nft_token.contract.events.get_sequence(
+        bn, bn, "MetadataValidated"
     )[0]
     assert validation_event.args.validator.startswith("0x")
     assert updated_event.transactionHash == validation_event.transactionHash
@@ -186,11 +185,10 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
         encrypt_flag=True,
     )
 
-    registered_token_event = data_nft.get_event_log(
-        DataNFT.EVENT_METADATA_UPDATED,
+    registered_token_event = data_nft.contract.events.get_sequence(
         _asset.event.get("block"),
         publisher_ocean_instance.web3.eth.block_number,
-        None,
+        DataNFT.EVENT_METADATA_UPDATED,
     )
 
     assert registered_token_event[0].args.get("flags") == bytes([3])

@@ -132,7 +132,7 @@ def generate_wallet() -> Wallet:
     )
     assert generated_wallet.private_key == private_key
     deployer_wallet = get_factory_deployer_wallet(config)
-    send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
+    send_ether(deployer_wallet, generated_wallet.address, "3 ether")
 
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
@@ -170,14 +170,6 @@ def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocea
     account = get_another_consumer_wallet()
     ocn.main_account = account
     return ocn
-
-
-@enforce_types
-def log_event(event_name: str):
-    def _process_event(event):
-        print(f"Received event {event_name}: {event}")
-
-    return _process_event
 
 
 @enforce_types

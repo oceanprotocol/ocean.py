@@ -55,50 +55,6 @@ class FixedRateExchange(ContractBase):
     EVENT_LOG_SWAP_FEES = "SWAP_FEES"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
 
-    @property
-    def event_ExchangeCreated(self):
-        return self.events.ExchangeCreated()
-
-    @property
-    def event_ExchangeRateChanged(self):
-        return self.events.ExchangeRateChanged()
-
-    @property
-    def event_ExchangeActivated(self):
-        return self.events.ExchangeActivated()
-
-    @property
-    def event_ExchangeDeactivated(self):
-        return self.events.ExchangeDeactivated()
-
-    @property
-    def event_Swapped(self):
-        return self.events.Swapped()
-
-    @property
-    def event_TokenCollected(self):
-        return self.events.TokenCollected()
-
-    @property
-    def event_OceanFeeCollected(self):
-        return self.events.OceanFeeCollected()
-
-    @property
-    def event_ConsumeMarketFee(self):
-        return self.events.ConsumeMarketFee()
-
-    @property
-    def event_PublishMarketFeeChanged(self):
-        return self.events.PublishMarketFeeChanged()
-
-    @property
-    def event_SWAP_FEES(self):
-        return self.events.SWAP_FEES()
-
-    @property
-    def event_MarketFeeCollected(self):
-        return self.events.MarketFeeCollected()
-
     @enforce_types
     def router(self) -> str:
         return self.contract.router()
