@@ -9,10 +9,10 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
+from jsonsempai import magic  # noqa: F401
 from addresses import address as contract_addresses  # noqa: F401
 from brownie import Contract
 from enforce_typing import enforce_types
-from jsonsempai import magic  # noqa: F401
 from web3 import WebsocketProvider
 from web3.exceptions import ExtraDataLengthError
 from web3.main import Web3
