@@ -3,22 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-import os
 from collections import namedtuple
 from typing import Any
 
-import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_keys import keys
 from eth_utils import decode_hex
 from web3.main import Web3
-
-from ocean_lib.web3_internal.constants import (
-    ENV_GAS_PRICE,
-    ENV_MAX_GAS_PRICE,
-    GAS_LIMIT_DEFAULT,
-)
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -67,6 +59,7 @@ def private_key_to_public_key(private_key: str) -> str:
     return private_key_object.public_key
 
 
+# TODO: use account balance directly
 @enforce_types
 def get_ether_balance(web3: Web3, address: str) -> int:
     """
@@ -76,36 +69,3 @@ def get_ether_balance(web3: Web3, address: str) -> int:
     :return: balance, int
     """
     return web3.eth.get_balance(address, block_identifier="latest")
-
-
-@enforce_types
-def get_gas_price(web3_object: Web3, tx: dict) -> dict:
-    try:
-        history = web3_object.eth.fee_history(block_count=1, newest_block="latest")
-    except ValueError:
-        # environment variable gas price evaluation
-        if os.getenv("GAS_SCALING_FACTOR"):
-            gas_price = int(
-                web3_object.eth.gas_price * float(os.getenv("GAS_SCALING_FACTOR"))
-            )
-        elif os.getenv(ENV_GAS_PRICE):
-            gas_price = int(os.getenv(ENV_GAS_PRICE))
-        else:
-            gas_price = web3.gas_strategies.rpc.rpc_gas_price_strategy(web3_object)
-
-        max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
-        if gas_price and max_gas_price:
-            gas_price = min(gas_price, int(max_gas_price))
-        tx["gasPrice"] = gas_price
-
-        return tx
-
-    # EIP 1559 gas fees calculation
-    tx["maxPriorityFeePerGas"] = web3_object.eth.max_priority_fee
-    tx["maxFeePerGas"] = (
-        web3_object.eth.max_priority_fee + 2 * history["baseFeePerGas"][0]
-    )
-    tx["type"] = "0x2"
-    tx["gas"] = GAS_LIMIT_DEFAULT
-
-    return tx

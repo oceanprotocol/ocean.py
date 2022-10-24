@@ -3,18 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Dict, Optional, Union
 
 from brownie import network
 from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_account.messages import SignableMessage
-from hexbytes.main import HexBytes
 from web3.main import Web3
 
 from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.utils import (
-    get_gas_price,
     private_key_to_address,
     private_key_to_public_key,
 )
@@ -84,61 +81,10 @@ class Wallet:
     def key(self) -> str:
         return self.private_key
 
-    @staticmethod
-    @enforce_types
-    def reset_tx_count() -> None:
-        Wallet._last_tx_count = dict()
-
     @enforce_types
     def validate(self) -> bool:
         account = self.web3.eth.account.from_key(self.private_key)
         return account.address == self._address
-
-    @staticmethod
-    @enforce_types
-    def _get_nonce(web3: Web3, address: str) -> int:
-        # We cannot rely on `web3.eth.get_transaction_count` because when sending multiple
-        # transactions in a row without wait in between the network may not get the chance to
-        # update the transaction count for the account address in time.
-        # So we have to manage this internally per account address.
-        if address not in Wallet._last_tx_count:
-            Wallet._last_tx_count[address] = web3.eth.get_transaction_count(address)
-        else:
-            Wallet._last_tx_count[address] += 1
-
-        return Wallet._last_tx_count[address]
-
-    @enforce_types
-    def sign_tx(
-        self,
-        tx: Dict[str, Union[int, str, bytes]],
-        fixed_nonce: Optional[int] = None,
-        gas_price: Optional[int] = None,
-    ) -> HexBytes:
-        account = self.web3.eth.account.from_key(self.private_key)
-        if fixed_nonce is not None:
-            nonce = fixed_nonce
-            logger.debug(
-                f"Signing transaction using a fixed nonce {fixed_nonce}, tx params are: {tx}"
-            )
-        else:
-            nonce = Wallet._get_nonce(self.web3, account.address)
-
-            if not gas_price:
-                gas_updated_tx = get_gas_price(web3_object=self.web3, tx=tx)
-                tx.update(gas_updated_tx)
-
-        tx["nonce"] = nonce
-        signed_tx = self.web3.eth.account.sign_transaction(tx, self.private_key)
-        if tx.get("gasPrice"):
-            logger.debug(
-                f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
-                f"eth.gasPrice: {self.web3.eth.gas_price}"
-            )
-            logger.debug(f"Using gasPrice: {gas_price}")
-
-        logger.debug(f"`Wallet` signed tx is {signed_tx}")
-        return signed_tx.rawTransaction
 
     @enforce_types
     def sign(self, msg_hash: SignableMessage) -> SignedMessage:

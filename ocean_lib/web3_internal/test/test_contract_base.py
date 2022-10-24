@@ -60,22 +60,3 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, config):
     assert factory.contract.createToken
     assert factory.contract.getCurrentTokenCount
     assert factory.contract.getTokenTemplate
-
-
-@pytest.mark.unit
-def test_gas_price(config, alice_wallet, nft_factory_address, monkeypatch):
-    monkeypatch.setenv("GAS_PRICE", "1")
-    factory = MyFactory(config, nft_factory_address)
-    assert factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "NFTS",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-            True,
-            alice_wallet.address,
-        ),
-        alice_wallet,
-    ), "The token could not be created by configuring the gas price env var."

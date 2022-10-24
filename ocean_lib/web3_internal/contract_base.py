@@ -13,13 +13,8 @@ from eth_typing import ChecksumAddress
 from web3 import Web3
 
 from ocean_lib.example_config import NETWORK_IDS
-from ocean_lib.web3_internal.contract_utils import (
-    get_contract_definition,
-    get_web3,
-    load_contract,
-)
+from ocean_lib.web3_internal.contract_utils import get_web3, load_contract
 from ocean_lib.web3_internal.transactions import wait_for_transaction_status
-from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
@@ -136,37 +131,3 @@ class ContractBase(object):
         return wait_for_transaction_status(
             txid, self.config_dict["TRANSACTION_TIMEOUT"]
         )
-
-    @classmethod
-    @enforce_types
-    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
-        """
-        Deploy the ERCTokenTemplate contract to the current network.
-
-        :param web3:
-        :param deployer_wallet: Wallet instance
-
-        :return: smartcontract address of this contract
-        """
-
-        _json = get_contract_definition(cls.CONTRACT_NAME)
-
-        _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
-        built_tx = _contract.constructor(*args).buildTransaction(
-            {"from": ContractBase.to_checksum_address(deployer_wallet.address)}
-        )
-
-        if "chainId" not in built_tx:
-            built_tx["chainId"] = web3.eth.chain_id
-
-        if "gas" not in built_tx or "gasPrice" not in built_tx:
-            gas_tx = get_gas_price(web3_object=web3, tx=built_tx)
-            built_tx.update(gas_tx)
-
-        raw_tx = deployer_wallet.sign_tx(built_tx)
-        logging.debug(
-            f"Sending raw tx to deploy contract {cls.CONTRACT_NAME}, signed tx hash: {raw_tx.hex()}"
-        )
-        tx_hash = web3.eth.send_raw_transaction(raw_tx)
-
-        return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
