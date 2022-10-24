@@ -62,7 +62,6 @@ Here are flows to try out, from simple to specific detailed variants.
 - [Get test OCEAN](READMEs/get-test-OCEAN.md) - from Goerli
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
-- [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
 
 ## 🦑 Development
 

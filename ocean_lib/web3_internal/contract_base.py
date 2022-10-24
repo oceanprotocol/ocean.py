@@ -15,7 +15,6 @@ from web3 import Web3
 from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import get_web3, load_contract
 from ocean_lib.web3_internal.transactions import wait_for_transaction_status
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +98,7 @@ class ContractBase(object):
         self,
         fn_name: str,
         fn_args: Any,
-        from_wallet: Wallet,
+        from_wallet,
         transact: Optional[dict] = None,
     ) -> str:
         """Calls a smart contract function.
@@ -114,8 +113,7 @@ class ContractBase(object):
         # w3 = get_web3(self.config_dict["RPC_URL"])
 
         _transact = {
-            "from": ContractBase.to_checksum_address(from_wallet.address),
-            "account_key": from_wallet.key,
+            "from": from_wallet,
             # only for debugging local ganache
             # "nonce": w3.eth.getTransactionCount(from_wallet.address)
         }

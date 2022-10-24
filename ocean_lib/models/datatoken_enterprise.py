@@ -8,7 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DatatokenEnterprise(Datatoken):
@@ -34,7 +33,7 @@ class DatatokenEnterprise(Datatoken):
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "buyFromFreAndOrder",
@@ -90,7 +89,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         dispenser_address: str,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "buyFromDispenserAndOrder",

@@ -6,7 +6,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class Dispenser(ContractBase):
@@ -25,7 +24,7 @@ class Dispenser(ContractBase):
 
     @enforce_types
     def activate(
-        self, datatoken: str, max_tokens: int, max_balance: int, from_wallet: Wallet
+        self, datatoken: str, max_tokens: int, max_balance: int, from_wallet
     ) -> str:
         return self.send_transaction(
             "activate",
@@ -33,13 +32,13 @@ class Dispenser(ContractBase):
             from_wallet,
         )
 
-    def deactivate(self, datatoken: str, from_wallet: Wallet) -> str:
+    def deactivate(self, datatoken: str, from_wallet) -> str:
         return self.send_transaction(
             "deactivate", (ContractBase.to_checksum_address(datatoken),), from_wallet
         )
 
     def set_allowed_swapper(
-        self, datatoken: str, new_allowed_swapper: str, from_wallet: Wallet
+        self, datatoken: str, new_allowed_swapper: str, from_wallet
     ) -> str:
         return self.send_transaction(
             "setAllowedSwapper",
@@ -52,7 +51,7 @@ class Dispenser(ContractBase):
 
     @enforce_types
     def dispense(
-        self, datatoken: str, amount: int, destination: str, from_wallet: Wallet
+        self, datatoken: str, amount: int, destination: str, from_wallet
     ) -> str:
         return self.send_transaction(
             "dispense",
@@ -65,15 +64,13 @@ class Dispenser(ContractBase):
         )
 
     @enforce_types
-    def owner_withdraw(self, datatoken: str, from_wallet: Wallet) -> str:
+    def owner_withdraw(self, datatoken: str, from_wallet) -> str:
         return self.send_transaction(
             "ownerWithdraw", (ContractBase.to_checksum_address(datatoken),), from_wallet
         )
 
     @enforce_types
-    def dispense_tokens(
-        self, datatoken: Datatoken, amount: int, consumer_wallet: Wallet
-    ):
+    def dispense_tokens(self, datatoken: Datatoken, amount: int, consumer_wallet):
         self.dispense(
             datatoken=datatoken.address,
             amount=amount,

@@ -11,6 +11,7 @@ from unittest.mock import patch
 import brownie
 import eth_keys
 import pytest
+from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -22,7 +23,6 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     create_asset,
@@ -355,10 +355,7 @@ def test_pay_for_access_service_insufficient_balance(
 
     empty_account = publisher_ocean_instance.web3.eth.account.create()
     pk = eth_keys.KeyAPI.PrivateKey(empty_account.key)
-    empty_wallet = Wallet(
-        publisher_ocean_instance.web3,
-        str(pk),
-    )
+    empty_wallet = accounts.add(str(pk))
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_access_service(

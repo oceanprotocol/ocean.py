@@ -19,7 +19,6 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_opc_collector_address_from_datatoken,
@@ -57,12 +56,12 @@ from tests.resources.helper_functions import (
 def test_start_order_fees(
     web3: Web3,
     config: dict,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
-    provider_wallet: Wallet,
-    factory_deployer_wallet: Wallet,
-    publish_market_wallet: Wallet,
-    consume_market_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
+    provider_wallet,
+    factory_deployer_wallet,
+    publish_market_wallet,
+    consume_market_wallet,
     data_nft: DataNFT,
     file1: FilesType,
     factory_router: FactoryRouter,
@@ -221,7 +220,7 @@ def create_asset_with_order_fee_and_timeout(
     config: dict,
     file: FilesType,
     data_nft: DataNFT,
-    publisher_wallet: Wallet,
+    publisher_wallet,
     publish_market_order_fee_address: str,
     publish_market_order_fee_token: str,
     publish_market_order_fee_amount: int,

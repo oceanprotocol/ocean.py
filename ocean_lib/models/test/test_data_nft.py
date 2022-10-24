@@ -16,7 +16,6 @@ from ocean_lib.models.fixed_rate_exchange import (
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.unit
@@ -179,7 +178,7 @@ def test_permissions(
 
 
 def test_add_and_remove_permissions(
-    publisher_wallet: Wallet, consumer_wallet: Wallet, data_nft: DataNFT
+    publisher_wallet, consumer_wallet, data_nft: DataNFT
 ):
     # Assert consumer has no permissions
     permissions = data_nft.get_permissions(consumer_wallet.address)
@@ -217,8 +216,8 @@ def test_add_and_remove_permissions(
 
 @pytest.mark.unit
 def test_success_update_metadata(
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     publisher_addr: str,
     consumer_addr: str,
     data_nft: DataNFT,
@@ -321,7 +320,7 @@ def test_fails_update_metadata(consumer_wallet, consumer_addr, data_nft):
 
 @pytest.mark.unit
 def test_create_erc20(
-    publisher_wallet: Wallet,
+    publisher_wallet,
     publisher_addr,
     consumer_addr,
     data_nft: DataNFT,
@@ -400,7 +399,7 @@ def test_create_erc20(
 
 def test_create_datatoken_with_usdc_order_fee(
     config: dict,
-    publisher_wallet: Wallet,
+    publisher_wallet,
     data_nft: DataNFT,
     data_nft_factory: DataNFTFactoryContract,
 ):
@@ -439,8 +438,8 @@ def test_create_datatoken_with_usdc_order_fee(
 
 @pytest.mark.unit
 def test_create_datatoken_with_non_owner(
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     data_nft: DataNFT,
     data_nft_factory: DataNFTFactoryContract,
 ):

@@ -9,7 +9,6 @@ from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DatatokenRoles(IntEnum):
@@ -52,7 +51,7 @@ class Datatoken(ContractBase):
         fixed_rate: int,
         publish_market_swap_fee_amount: int,
         with_mint: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "createFixedRate",
@@ -83,7 +82,7 @@ class Datatoken(ContractBase):
         max_balance: int,
         with_mint: bool,
         allowed_swapper: str,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "createDispenser",
@@ -98,7 +97,7 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
+    def mint(self, account_address: str, value: int, from_wallet) -> str:
         return self.send_transaction(
             "mint",
             (ContractBase.to_checksum_address(account_address), value),
@@ -116,7 +115,7 @@ class Datatoken(ContractBase):
         s: Union[str, bytes],
         valid_until: int,
         provider_data: Union[str, bytes],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "checkProviderFee",
@@ -149,7 +148,7 @@ class Datatoken(ContractBase):
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "startOrder",
@@ -187,7 +186,7 @@ class Datatoken(ContractBase):
         s: Union[str, bytes],
         valid_until: int,
         provider_data: Union[str, bytes],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "reuseOrder",
@@ -216,7 +215,7 @@ class Datatoken(ContractBase):
         consumer_data: Union[str, bytes],
         consumer_signature: Union[str, bytes],
         consumer: str,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "orderExecuted",
@@ -232,7 +231,7 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
+    def transfer(self, to: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "transfer", (ContractBase.to_checksum_address(to), amount), from_wallet
         )
@@ -245,14 +244,14 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
+    def approve(self, spender: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "approve", (ContractBase.to_checksum_address(spender), amount), from_wallet
         )
 
     @enforce_types
     def transferFrom(
-        self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
+        self, from_address: str, to_address: str, amount: int, from_wallet
     ) -> str:
         return self.send_transaction(
             "transferFrom",
@@ -265,11 +264,11 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def burn(self, amount: int, from_wallet: Wallet) -> str:
+    def burn(self, amount: int, from_wallet) -> str:
         return self.send_transaction("burn", (amount,), from_wallet)
 
     @enforce_types
-    def burn_from(self, from_address: str, amount: int, from_wallet: Wallet) -> str:
+    def burn_from(self, from_address: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "burnFrom",
             (ContractBase.to_checksum_address(from_address), amount),
@@ -281,7 +280,7 @@ class Datatoken(ContractBase):
         return self.contract.isMinter(ContractBase.to_checksum_address(account))
 
     @enforce_types
-    def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
+    def add_minter(self, minter_address: str, from_wallet) -> str:
         return self.send_transaction(
             "addMinter",
             (ContractBase.to_checksum_address(minter_address),),
@@ -289,7 +288,7 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
+    def remove_minter(self, minter_address: str, from_wallet) -> str:
         return self.send_transaction(
             "removeMinter",
             (ContractBase.to_checksum_address(minter_address),),
@@ -297,7 +296,7 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def add_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+    def add_payment_manager(self, fee_manager: str, from_wallet) -> str:
         return self.send_transaction(
             "addPaymentManager",
             (ContractBase.to_checksum_address(fee_manager),),
@@ -305,27 +304,27 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def remove_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+    def remove_payment_manager(self, fee_manager: str, from_wallet) -> str:
         return self.send_transaction(
             "removePaymentManager",
             (ContractBase.to_checksum_address(fee_manager),),
             from_wallet,
         )
 
-    def set_data(self, data: str, from_wallet: Wallet) -> str:
+    def set_data(self, data: str, from_wallet) -> str:
         return self.send_transaction("setData", (data,), from_wallet)
 
     @enforce_types
-    def clean_permissions(self, from_wallet: Wallet) -> str:
+    def clean_permissions(self, from_wallet) -> str:
         return self.send_transaction("cleanPermissions", (), from_wallet)
 
     @enforce_types
-    def clean_from_721(self, from_wallet: Wallet) -> str:
+    def clean_from_721(self, from_wallet) -> str:
         return self.send_transaction("cleanFrom721", (), from_wallet)
 
     @enforce_types
     def set_payment_collector(
-        self, publish_market_order_fee_address: str, from_wallet: Wallet
+        self, publish_market_order_fee_address: str, from_wallet
     ) -> str:
         return self.send_transaction(
             "setPaymentCollector",
@@ -343,7 +342,7 @@ class Datatoken(ContractBase):
         publish_market_order_fee_address: str,
         publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "setPublishingMarketFee",
@@ -393,7 +392,7 @@ class Datatoken(ContractBase):
         v: int,
         r: Union[str, bytes],
         s: Union[str, bytes],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "permit",
@@ -438,7 +437,7 @@ class Datatoken(ContractBase):
         return self.contract.balanceOf(account)
 
     @enforce_types
-    def withdraw(self, from_wallet: Wallet):
+    def withdraw(self, from_wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
     @enforce_types

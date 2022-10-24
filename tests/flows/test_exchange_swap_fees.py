@@ -21,7 +21,6 @@ from ocean_lib.models.test.test_factory_router import (
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
@@ -56,10 +55,10 @@ from tests.resources.helper_functions import (
 )
 def test_exchange_swap_fees(
     config: dict,
-    factory_deployer_wallet: Wallet,
-    consumer_wallet: Wallet,
-    another_consumer_wallet: Wallet,
-    publisher_wallet: Wallet,
+    factory_deployer_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    publisher_wallet,
     base_token_name: str,
     datatoken: Datatoken,
     publish_market_swap_fee: str,
@@ -91,10 +90,10 @@ def test_exchange_swap_fees(
 
 def exchange_swap_fees(
     config: dict,
-    base_token_deployer_wallet: Wallet,
-    consumer_wallet: Wallet,
-    consume_market_swap_fee_collector: Wallet,
-    publisher_wallet: Wallet,
+    base_token_deployer_wallet,
+    consumer_wallet,
+    consume_market_swap_fee_collector,
+    publisher_wallet,
     base_token_name: str,
     datatoken: Datatoken,
     publish_market_swap_fee: str,
@@ -314,7 +313,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     exchange_id: bytes,
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
-    consumer_wallet: Wallet,
+    consumer_wallet,
 ):
     exchange_info = exchange.get_exchange(exchange_id)
     bt = Datatoken(config, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
@@ -449,7 +448,7 @@ def collect_bt_or_dt_and_verify_balances(
     config: dict,
     exchange: FixedRateExchange,
     exchange_id: bytes,
-    from_wallet: Wallet,
+    from_wallet,
 ):
     """Collet BT or Collect DT and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)
@@ -488,7 +487,7 @@ def collect_fee_and_verify_balances(
     config: dict,
     exchange: FixedRateExchange,
     exchange_id: bytes,
-    from_wallet: Wallet,
+    from_wallet,
 ):
     """Collet publish market swap fees or ocean community swap fees and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)

@@ -12,7 +12,6 @@ from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DataNFTPermissions(IntEnum):
@@ -50,7 +49,7 @@ class DataNFT(ContractBase):
     EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
 
     @enforce_types
-    def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
+    def set_metadata_state(self, metadata_state: int, from_wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
     @enforce_types
@@ -63,7 +62,7 @@ class DataNFT(ContractBase):
         data: Union[str, bytes],
         data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "setMetaData",
@@ -91,7 +90,7 @@ class DataNFT(ContractBase):
         token_id: int,
         token_uri: str,
         metadata_proofs: List[MetadataProof],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "setMetaDataAndTokenURI",
@@ -127,7 +126,7 @@ class DataNFT(ContractBase):
         publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
-        from_wallet: Wallet,
+        from_wallet,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if template_index == 2 and not datatoken_cap:
@@ -151,9 +150,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def add_to_create_erc20_list(
-        self, allowed_address: str, from_wallet: Wallet
-    ) -> str:
+    def add_to_create_erc20_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "addToCreateERC20List",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -161,9 +158,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def remove_from_create_erc20_list(
-        self, allowed_address: str, from_wallet: Wallet
-    ) -> str:
+    def remove_from_create_erc20_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "removeFromCreateERC20List",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -171,7 +166,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
+    def add_to_725_store_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "addTo725StoreList",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -179,9 +174,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def remove_from_725_store_list(
-        self, allowed_address: str, from_wallet: Wallet
-    ) -> str:
+    def remove_from_725_store_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "removeFrom725StoreList",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -189,7 +182,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def add_to_metadata_list(self, allowed_address: str, from_wallet: Wallet) -> str:
+    def add_to_metadata_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "addToMetadataList",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -197,9 +190,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def remove_from_metadata_list(
-        self, allowed_address: str, from_wallet: Wallet
-    ) -> str:
+    def remove_from_metadata_list(self, allowed_address: str, from_wallet) -> str:
         return self.send_transaction(
             "removeFromMetadataList",
             (ContractBase.to_checksum_address(allowed_address),),
@@ -207,7 +198,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
+    def add_manager(self, manager_address: str, from_wallet) -> str:
         return self.send_transaction(
             "addManager",
             (ContractBase.to_checksum_address(manager_address),),
@@ -215,7 +206,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
+    def remove_manager(self, manager_address: str, from_wallet) -> str:
         return self.send_transaction(
             "removeManager",
             (ContractBase.to_checksum_address(manager_address),),
@@ -224,7 +215,7 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def add_multiple_users_to_roles(
-        self, addresses: List[str], roles: List[DataNFTPermissions], from_wallet: Wallet
+        self, addresses: List[str], roles: List[DataNFTPermissions], from_wallet
     ) -> str:
         return self.send_transaction(
             "addMultipleUsersToRoles",
@@ -237,7 +228,7 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def execute_call(
-        self, operation: int, to: str, value: int, data: str, from_wallet: Wallet
+        self, operation: int, to: str, value: int, data: str, from_wallet
     ) -> str:
         return self.send_transaction(
             "executeCall",
@@ -245,10 +236,10 @@ class DataNFT(ContractBase):
             from_wallet,
         )
 
-    def set_new_data(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
+    def set_new_data(self, key: bytes, value: bytes, from_wallet) -> str:
         return self.send_transaction("setNewData", (key, value), from_wallet)
 
-    def set_data_erc20(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
+    def set_data_erc20(self, key: bytes, value: bytes, from_wallet) -> str:
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
     def get_data(self, key: bytes) -> bytes:
@@ -260,7 +251,7 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def transfer_from(
-        self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
+        self, from_address: str, to_address: str, token_id: int, from_wallet
     ) -> str:
         return self.send_transaction(
             "transferFrom",
@@ -274,7 +265,7 @@ class DataNFT(ContractBase):
 
     @enforce_types
     def safe_transfer_from(
-        self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
+        self, from_address: str, to_address: str, token_id: int, from_wallet
     ) -> str:
         return self.send_transaction(
             "safeTransferFrom",
@@ -287,7 +278,7 @@ class DataNFT(ContractBase):
         )
 
     @enforce_types
-    def withdraw(self, from_wallet: Wallet):
+    def withdraw(self, from_wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
     @enforce_types
@@ -303,7 +294,7 @@ class DataNFT(ContractBase):
         return self.contract.isInitialized()
 
     @enforce_types
-    def clean_permissions(self, from_wallet: Wallet) -> str:
+    def clean_permissions(self, from_wallet) -> str:
         return self.send_transaction("cleanPermissions", (), from_wallet)
 
     @enforce_types
@@ -339,9 +330,7 @@ class DataNFT(ContractBase):
         return self.contract.isERC20Deployer(ContractBase.to_checksum_address(account))
 
     @enforce_types
-    def set_token_uri(
-        self, token_id: int, new_token_uri: str, from_wallet: Wallet
-    ) -> str:
+    def set_token_uri(self, token_id: int, new_token_uri: str, from_wallet) -> str:
         return self.send_transaction(
             "setTokenURI", (token_id, new_token_uri), from_wallet
         )
@@ -350,7 +339,7 @@ class DataNFT(ContractBase):
         self,
         name: str,
         symbol: str,
-        from_wallet: Wallet,
+        from_wallet,
         template_index: Optional[int] = 1,
         minter: Optional[str] = None,
         fee_manager: Optional[str] = None,

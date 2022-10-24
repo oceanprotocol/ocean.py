@@ -15,15 +15,14 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import FilesType, GraphqlQuery
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.integration
 def test_consume_simple_graphql_query(
     config: dict,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     data_nft: DataNFT,
     file1: FilesType,
 ):
@@ -149,8 +148,8 @@ def test_consume_simple_graphql_query(
 @pytest.mark.integration
 def test_consume_parametrized_graphql_query(
     config: dict,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     data_nft: DataNFT,
     file1: FilesType,
 ):

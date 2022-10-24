@@ -15,7 +15,6 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DataNFTFactoryContract(ERC721TokenFactoryBase):
@@ -50,7 +49,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         token_uri: str,
         transferable: bool,
         owner: str,
-        from_wallet: Wallet,
+        from_wallet,
     ):
         return self.send_transaction(
             "deployERC721Contract",
@@ -102,9 +101,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         return self.contract.templateCount()
 
     @enforce_types
-    def start_multiple_token_order(
-        self, orders: List[OrderData], from_wallet: Wallet
-    ) -> str:
+    def start_multiple_token_order(self, orders: List[OrderData], from_wallet) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -151,7 +148,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_publish_market_order_fee_token: str,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
-        from_wallet: Wallet,
+        from_wallet,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -216,7 +213,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_rate: int,
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
-        from_wallet: Wallet,
+        from_wallet,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -294,7 +291,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         dispenser_max_balance: int,
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
-        from_wallet: Wallet,
+        from_wallet,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -354,7 +351,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         metadata_data: Union[str, bytes],
         metadata_data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithMetaData",
