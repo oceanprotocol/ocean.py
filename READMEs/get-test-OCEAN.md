@@ -79,8 +79,8 @@ OCEAN_token = ocean.OCEAN_token
 # set wallet
 import os
 private_key = os.getenv('TEST_PRIVATE_KEY1')
-from ocean_lib.web3_internal.wallet import Wallet
-wallet = Wallet(ocean.web3, private_key)
+from brownie.network import accounts
+wallet = accounts.add(private_key)
 print(f"Address of your account: {wallet.address}")
 
 # get balance

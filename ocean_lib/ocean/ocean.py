@@ -36,7 +36,6 @@ from ocean_lib.web3_internal.currency import format_units as _format_units
 from ocean_lib.web3_internal.currency import from_wei as _from_wei
 from ocean_lib.web3_internal.currency import parse_units as _parse_units
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
 
@@ -129,7 +128,7 @@ class Ocean:
         self,
         name: str,
         symbol: str,
-        from_wallet: Wallet,
+        from_wallet,
         token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
         template_index: Optional[int] = 1,
         additional_datatoken_deployer: Optional[str] = None,
@@ -143,15 +142,12 @@ class Ocean:
         ```python
             config = { ... }
             ocean = Ocean(config)
-            wallet = Wallet(
-                ocean.web3,
-                private_key=private_key,
-            )
+            wallet = accounts.add(...)
             data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: data NFT token name, str
         :param symbol: data NFT token symbol, str
-        :param from_wallet: wallet instance, wallet
+        :param from_wallet instance, wallet
         :param template_index: Template type of the token, int
         :param additional_datatoken_deployer: Address of another ERC20 deployer, str
         :param token_uri: URL for the data NFT token, str
@@ -262,7 +258,7 @@ class Ocean:
         base_token: Datatoken,
         amount: int,
         fixed_rate: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
         datatoken.approve(fixed_price_address, amount, from_wallet)
@@ -299,7 +295,7 @@ class Ocean:
 
     @enforce_types
     def retrieve_provider_fees(
-        self, asset: Asset, access_service: Service, publisher_wallet: Wallet
+        self, asset: Asset, access_service: Service, publisher_wallet
     ) -> tuple:
 
         initialize_response = DataServiceProvider.initialize(

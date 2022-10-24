@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
+from brownie.network import accounts
 from PIL import Image
 
 from ocean_lib.example_config import ExampleConfig
@@ -18,7 +19,6 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.slow
@@ -80,10 +80,7 @@ def c2d_flow_readme(
 
     # Create Alice's wallet
     alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice_wallet = Wallet(
-        ocean.web3,
-        alice_private_key,
-    )
+    alice_wallet = accounts.add(alice_private_key)
     assert alice_wallet.address
 
     # Mint OCEAN
@@ -212,10 +209,7 @@ def c2d_flow_readme(
     DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 
     # 5. Bob acquires datatokens for data and algorithm
-    bob_wallet = Wallet(
-        ocean.web3,
-        os.getenv("TEST_PRIVATE_KEY2"),
-    )
+    bob_wallet = accounts.add("TEST_PRIVATE_KEY2")
     assert bob_wallet.address
 
     # Alice mints DATA datatokens and ALGO datatokens to Bob.

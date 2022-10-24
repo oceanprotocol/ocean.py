@@ -17,7 +17,6 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_raw_algorithm,
@@ -140,8 +139,8 @@ class AssetAndUserdata:
 def _mint_and_build_compute_input(
     dataset_and_userdata: AssetAndUserdata,
     service_type: str,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     ocean_instance: Ocean,
 ) -> ComputeInput:
     service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
@@ -164,8 +163,8 @@ def _mint_and_build_compute_input(
 
 def run_compute_test(
     ocean_instance: Ocean,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     dataset_and_userdata: AssetAndUserdata,
     algorithm_and_userdata: Optional[AssetAndUserdata] = None,
     algorithm_meta: Optional[AlgorithmMetadata] = None,

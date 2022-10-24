@@ -8,7 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.structures.abi_tuples import Operations, Stakes
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class FactoryRouter(ContractBase):
@@ -70,13 +69,11 @@ class FactoryRouter(ContractBase):
         return self.contract.getOPCProviderFee()
 
     @enforce_types
-    def stake_batch(
-        self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
-    ) -> str:
+    def stake_batch(self, stakes: List[Union[dict, tuple, Stakes]], from_wallet) -> str:
         return self.send_transaction("stakeBatch", (stakes,), from_wallet)
 
     @enforce_types
     def buy_dt_batch(
-        self, operations: List[Union[dict, tuple, Operations]], from_wallet: Wallet
+        self, operations: List[Union[dict, tuple, Operations]], from_wallet
     ) -> str:
         return self.send_transaction("buyDTBatch", (operations,), from_wallet)

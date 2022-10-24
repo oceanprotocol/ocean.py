@@ -8,7 +8,6 @@ from typing import List, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class FixedRateExchangeDetails(IntEnum):
@@ -100,7 +99,7 @@ class FixedRateExchange(ContractBase):
         max_base_token_amount: int,
         consume_market_swap_fee_address: str,
         consume_market_swap_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "buyDT",
@@ -121,7 +120,7 @@ class FixedRateExchange(ContractBase):
         min_base_token_amount: int,
         consume_market_swap_fee_address: str,
         consume_market_swap_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "sellDT",
@@ -135,7 +134,7 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_bt(self, exchange_id: str, amount: int, from_wallet: Wallet) -> str:
+    def collect_bt(self, exchange_id: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "collectBT",
             (
@@ -145,7 +144,7 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_dt(self, exchange_id: str, amount: int, from_wallet: Wallet) -> str:
+    def collect_dt(self, exchange_id: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "collectDT",
             (
@@ -155,17 +154,17 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_market_fee(self, exchange_id: str, from_wallet: Wallet) -> str:
+    def collect_market_fee(self, exchange_id: str, from_wallet) -> str:
         return self.send_transaction("collectMarketFee", (exchange_id,), from_wallet)
 
-    def collect_ocean_fee(self, exchange_id: str, from_wallet: Wallet) -> str:
+    def collect_ocean_fee(self, exchange_id: str, from_wallet) -> str:
         return self.send_transaction("collectOceanFee", (exchange_id,), from_wallet)
 
     def update_market_fee_collector(
         self,
         exchange_id: str,
         publish_market_swap_fee_collector: str,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "updateMarketFeeCollector",
@@ -180,7 +179,7 @@ class FixedRateExchange(ContractBase):
         self,
         exchange_id: str,
         publish_market_swap_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "updateMarketFee",
@@ -201,11 +200,11 @@ class FixedRateExchange(ContractBase):
     def get_allowed_swapper(self, exchange_id: str) -> str:
         return self.contract.getAllowedSwapper(exchange_id)
 
-    def set_rate(self, exchange_id: str, new_rate: int, from_wallet: Wallet) -> str:
+    def set_rate(self, exchange_id: str, new_rate: int, from_wallet) -> str:
         return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
 
     def set_allowed_swapper(
-        self, exchange_id: str, new_allowed_swapper: str, from_wallet: Wallet
+        self, exchange_id: str, new_allowed_swapper: str, from_wallet
     ) -> str:
         return self.send_transaction(
             "setAllowedSwapper",
@@ -213,7 +212,7 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def toggle_exchange_state(self, exchange_id: str, from_wallet: Wallet) -> str:
+    def toggle_exchange_state(self, exchange_id: str, from_wallet) -> str:
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     def get_rate(self, exchange_id: str) -> int:
@@ -251,7 +250,7 @@ class MockExchange(ContractBase):
         v: int,
         r: Union[str, bytes],
         s: Union[str, bytes],
-        from_wallet: Wallet,
+        from_wallet,
     ):
         return self.send_transaction(
             "depositWithPermit",
@@ -260,7 +259,7 @@ class MockExchange(ContractBase):
         )
 
     @enforce_types
-    def deposit(self, token: str, amount: int, from_wallet: Wallet) -> str:
+    def deposit(self, token: str, amount: int, from_wallet) -> str:
         return self.send_transaction(
             "deposit", (ContractBase.to_checksum_address(token), amount), from_wallet
         )

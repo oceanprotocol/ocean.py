@@ -23,7 +23,6 @@ from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
 keys = KeyAPI(NativeECCBackend)
@@ -140,7 +139,7 @@ class DataServiceProvider(DataServiceProviderBase):
         did: str,
         service: Any,  # Can not add Service typing due to enforce_type errors.
         tx_id: Union[str, bytes],
-        consumer_wallet: Wallet,
+        consumer_wallet,
         destination_folder: Union[str, Path],
         index: Optional[int] = None,
         userdata: Optional[Dict] = None,
@@ -198,7 +197,7 @@ class DataServiceProvider(DataServiceProviderBase):
     # @enforce_types omitted due to subscripted generics error
     def start_compute_job(
         dataset_compute_service: Any,  # Can not add Service typing due to enforce_type errors.
-        consumer: Wallet,
+        consumer,
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
@@ -275,14 +274,14 @@ class DataServiceProvider(DataServiceProviderBase):
         did: str,
         job_id: str,
         dataset_compute_service: Any,
-        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
+        consumer,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
-        :param consumer: Wallet of the consumer's account
+        :param consumer of the consumer's account
 
         :return: bool whether the job was stopped successfully
         """
@@ -299,14 +298,14 @@ class DataServiceProvider(DataServiceProviderBase):
         did: str,
         job_id: str,
         dataset_compute_service: Any,
-        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
+        consumer,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, str]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
-        :param consumer: Wallet of the consumer's account
+        :param consumer of the consumer's account
 
         :return: bool whether the job was deleted successfully
         """
@@ -323,14 +322,14 @@ class DataServiceProvider(DataServiceProviderBase):
         did: str,
         job_id: str,
         dataset_compute_service: Any,
-        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
+        consumer,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
-        :param consumer: Wallet of the consumer's account
+        :param consumer of the consumer's account
 
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
@@ -345,14 +344,14 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def compute_job_result(
-        job_id: str, index: int, dataset_compute_service: Any, consumer: Wallet
+        job_id: str, index: int, dataset_compute_service: Any, consumer
     ) -> bytes:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param index: int compute result index
         :param dataset_compute_service:
-        :param consumer: Wallet of the consumer's account
+        :param consumer of the consumer's account
 
         :return: dict of job_id to result urls.
         """
@@ -395,14 +394,14 @@ class DataServiceProvider(DataServiceProviderBase):
         asset: Any,
         job_id: str,
         dataset_compute_service: Any,
-        consumer: Wallet,
+        consumer,
         log_type="output",
     ) -> List[Dict[str, Any]]:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
-        :param consumer: Wallet of the consumer's account
+        :param consumer of the consumer's account
 
         :return: dict of job_id to result urls.
         """
@@ -429,7 +428,7 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def _send_compute_request(
-        http_method: str, did: str, job_id: str, service_endpoint: str, consumer: Wallet
+        http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
         nonce, signature = DataServiceProvider.sign_message(
             consumer, f"{consumer.address}{job_id}{did}"
@@ -463,7 +462,7 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
     def _prepare_compute_payload(
-        consumer: Wallet,
+        consumer,
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,

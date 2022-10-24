@@ -42,7 +42,6 @@ from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_web3
 from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
 
@@ -149,7 +148,7 @@ class OceanAssets:
         publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         tx_result = data_nft.create_erc20(
             template_index=template_index,
@@ -266,7 +265,7 @@ class OceanAssets:
 
     @enforce_types
     def create_url_asset(
-        self, name: str, url: str, publisher_wallet: Wallet, wait_for_aqua: bool = True
+        self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
     ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
@@ -278,7 +277,7 @@ class OceanAssets:
         name: str,
         url: str,
         query: str,
-        publisher_wallet: Wallet,
+        publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
@@ -291,7 +290,7 @@ class OceanAssets:
         name: str,
         contract_address: str,
         contract_abi: dict,
-        publisher_wallet: Wallet,
+        publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create an asset of type "SmartContractCall", with good defaults"""
@@ -305,7 +304,7 @@ class OceanAssets:
         self,
         name: str,
         files: list,
-        publisher_wallet: Wallet,
+        publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
@@ -350,7 +349,7 @@ class OceanAssets:
     def create(
         self,
         metadata: dict,
-        publisher_wallet: Wallet,
+        publisher_wallet,
         files: Optional[List[FilesType]] = None,
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
@@ -385,7 +384,7 @@ class OceanAssets:
         Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :param publisher_wallet: Wallet of the publisher registering this asset.
+        :param publisher_wallet: account of the publisher registering this asset.
         :param files: list of files that need to be encrypted before publishing.
         :param services: list of Service objects.
         :param credentials: credentials dict necessary for the asset.
@@ -619,7 +618,7 @@ class OceanAssets:
     def update(
         self,
         asset: Asset,
-        publisher_wallet: Wallet,
+        publisher_wallet,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -627,7 +626,7 @@ class OceanAssets:
         """Update an asset on-chain.
 
         :param asset: The updated asset to update on-chain
-        :param publisher_wallet: Wallet of the publisher updating this asset.
+        :param publisher_wallet: account of the publisher updating this asset.
         :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
@@ -720,7 +719,7 @@ class OceanAssets:
         ]
 
     @enforce_types
-    def download_file(self, asset_did: str, wallet: Wallet) -> str:
+    def download_file(self, asset_did: str, wallet) -> str:
         """Helper method. Given a did, download file to "./". Returns filename.
 
         Assumes that:
@@ -771,7 +770,7 @@ class OceanAssets:
     def download_asset(
         self,
         asset: Asset,
-        consumer_wallet: Wallet,
+        consumer_wallet,
         destination: str,
         order_tx_id: Union[str, bytes],
         service: Optional[Service] = None,
@@ -802,7 +801,7 @@ class OceanAssets:
     def pay_for_access_service(
         self,
         asset: Asset,
-        wallet: Wallet,
+        wallet,
         service: Optional[Service] = None,
         consume_market_order_fee_address: Optional[str] = None,
         consume_market_order_fee_token: Optional[str] = None,
@@ -875,7 +874,7 @@ class OceanAssets:
         compute_environment: str,
         valid_until: int,
         consume_market_order_fee_address: str,
-        wallet: Wallet,
+        wallet,
         consumer_address: Optional[str] = None,
     ):
         data_provider = DataServiceProvider
@@ -927,7 +926,7 @@ class OceanAssets:
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
-        wallet: Wallet,
+        wallet,
         consumer_address: Optional[str] = None,
     ):
         provider_fees = item.get("providerFee")

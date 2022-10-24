@@ -4,12 +4,13 @@
 #
 import os
 
+from brownie.network import accounts
+
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback, get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 def mint_fake_OCEAN(config: dict) -> None:
@@ -21,10 +22,7 @@ def mint_fake_OCEAN(config: dict) -> None:
     network_addresses = get_addresses_with_fallback(config)
 
     web3 = get_web3(config["RPC_URL"])
-    deployer_wallet = Wallet(
-        web3,
-        private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),
-    )
+    deployer_wallet = accounts.add(os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"))
 
     OCEAN_token = Datatoken(config, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei("2000")
@@ -36,10 +34,7 @@ def mint_fake_OCEAN(config: dict) -> None:
         if not key:
             continue
 
-        w = Wallet(
-            web3,
-            private_key=key,
-        )
+        w = accounts.add(key)
 
         if OCEAN_token.balanceOf(w.address) < amt_distribute:
             OCEAN_token.mint(w.address, amt_distribute, from_wallet=deployer_wallet)

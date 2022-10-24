@@ -14,7 +14,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
@@ -23,8 +22,8 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 def test1(
     web3: Web3,
     config: dict,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     tmp_path,
 ):
     data_provider = DataServiceProvider

@@ -23,7 +23,6 @@ from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
@@ -572,7 +571,7 @@ def test_job_result_failure(config):
     service.service_endpoint = "http://172.15.0.4:8030"
     service.id = "abc"
 
-    wallet = Mock(spec=Wallet)
+    wallet = Mock()
     wallet.address = "none"
 
     http_client = HttpClientEvilMock()
