@@ -19,7 +19,6 @@ def test_nonocean_tx(tmp_path):
     (alice_wallet, bob_wallet) = get_wallets(ocean)
 
     # Simplest possible tx: Alice send Bob some fake MATIC
-    # TODO: replace with send_ether?
     web3 = ocean.web3
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
 

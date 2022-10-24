@@ -9,10 +9,10 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-from jsonsempai import magic  # noqa: F401
 from addresses import address as contract_addresses  # noqa: F401
 from brownie import Contract
 from enforce_typing import enforce_types
+from jsonsempai import magic  # noqa: F401
 from web3 import WebsocketProvider
 from web3.exceptions import ExtraDataLengthError
 from web3.main import Web3
@@ -60,6 +60,7 @@ def get_addresses_with_fallback(config):
     return addresses
 
 
+# TODO: look into whether these things really need to be done, now that config is a param for contracts
 @enforce_types
 def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
