@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
+from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
@@ -30,7 +31,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_web3 as util_get_web3
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
@@ -45,34 +45,28 @@ def get_example_config():
 
 
 @enforce_types
-def get_wallet(index: int) -> Wallet:
-    return Wallet(
-        get_web3(),
-        private_key=os.getenv(f"TEST_PRIVATE_KEY{index}"),
-    )
+def get_wallet(index: int):
+    return accounts.add(os.getenv(f"TEST_PRIVATE_KEY{index}"))
 
 
 @enforce_types
-def get_publisher_wallet() -> Wallet:
+def get_publisher_wallet():
     return get_wallet(1)
 
 
 @enforce_types
-def get_consumer_wallet() -> Wallet:
+def get_consumer_wallet():
     return get_wallet(2)
 
 
 @enforce_types
-def get_another_consumer_wallet() -> Wallet:
+def get_another_consumer_wallet():
     return get_wallet(3)
 
 
 @enforce_types
-def get_provider_wallet() -> Wallet:
-    return Wallet(
-        get_web3(),
-        private_key=os.environ.get("PROVIDER_PRIVATE_KEY"),
-    )
+def get_provider_wallet():
+    return accounts.add(os.getenv("PROVIDER_PRIVATE_KEY"))
 
 
 def get_factory_deployer_wallet(config):
@@ -84,10 +78,7 @@ def get_factory_deployer_wallet(config):
         return None
 
     config = get_example_config()
-    return Wallet(
-        get_web3(),
-        private_key=private_key,
-    )
+    return accounts.add(private_key)
 
 
 def get_ganache_wallet():
@@ -97,26 +88,21 @@ def get_ganache_wallet():
         and web3.eth.accounts[0].lower()
         == "0xe2DD09d719Da89e5a3D0F2549c7E24566e947260".lower()
     ):
-        return Wallet(
-            web3,
-            private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58",
+        return accounts.add(
+            "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
         )
 
     return None
 
 
 @enforce_types
-def generate_wallet() -> Wallet:
+def generate_wallet():
     """Generates wallets on the fly with funds."""
-    web3 = get_web3()
     config = get_example_config()
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
-    generated_wallet = Wallet(
-        web3,
-        private_key=private_key,
-    )
+    generated_wallet = accounts.add(private_key)
     assert generated_wallet.private_key == private_key
     deployer_wallet = get_factory_deployer_wallet(config)
     send_ether(config, deployer_wallet, generated_wallet.address, "3 ether")
@@ -190,8 +176,8 @@ def setup_logging(
 @enforce_types
 def deploy_erc721_erc20(
     config_dict: dict,
-    data_nft_publisher: Wallet,
-    datatoken_minter: Optional[Wallet] = None,
+    data_nft_publisher,
+    datatoken_minter: Optional = None,
     template_index: Optional[int] = 1,
 ) -> Union[DataNFT, Tuple[DataNFT, Datatoken]]:
     """Helper function to deploy an DataNFT using data_nft_publisher Wallet
@@ -276,7 +262,7 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
 def transfer_base_token_if_balance_lte(
     config: dict,
     base_token_address: str,
-    from_wallet: Wallet,
+    from_wallet,
     recipient: str,
     min_balance: int,
     amount_to_transfer: int,
@@ -299,7 +285,7 @@ def transfer_base_token_if_balance_lte(
 @enforce_types
 def get_provider_fees(
     web3: Web3,
-    provider_wallet: Wallet,
+    provider_wallet,
     provider_fee_token: str,
     provider_fee_amount: int,
     valid_until: int,

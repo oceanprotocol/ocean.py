@@ -5,7 +5,6 @@
 from enforce_typing import enforce_types
 
 from ocean_lib.models.bconst import BConst
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class BTokenBase(BConst):
@@ -28,23 +27,23 @@ class BTokenBase(BConst):
         return self.contract.balanceOf(address)
 
     @enforce_types
-    def increase_approval(self, dst: str, amt: int, from_wallet: Wallet) -> str:
+    def increase_approval(self, dst: str, amt: int, from_wallet) -> str:
         return self.send_transaction("increaseApproval", (dst, amt), from_wallet)
 
     @enforce_types
-    def decrease_approval(self, dst: str, amt: int, from_wallet: Wallet) -> str:
+    def decrease_approval(self, dst: str, amt: int, from_wallet) -> str:
         return self.send_transaction("decreaseApproval", (dst, amt), from_wallet)
 
     @enforce_types
-    def approve(self, spender_address: str, amt: int, from_wallet: Wallet) -> str:
+    def approve(self, spender_address: str, amt: int, from_wallet) -> str:
         return self.send_transaction("approve", (spender_address, amt), from_wallet)
 
     @enforce_types
-    def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+    def transfer(self, dst_address: str, amt: int, from_wallet) -> str:
         return self.send_transaction("transfer", (dst_address, amt), from_wallet)
 
     @enforce_types
-    def transfer_from(self, src: str, dst: str, amt: int, from_wallet: Wallet) -> str:
+    def transfer_from(self, src: str, dst: str, amt: int, from_wallet) -> str:
         return self.send_transaction("transferFrom", (src, dst, amt), from_wallet)
 
     @enforce_types

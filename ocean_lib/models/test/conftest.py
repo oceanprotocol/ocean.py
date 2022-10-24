@@ -5,6 +5,7 @@
 import os
 
 import pytest
+from brownie.network import accounts
 
 from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
@@ -12,7 +13,6 @@ from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_ganache_wallet, get_web3
 
 _NETWORK = "ganache"
@@ -112,10 +112,7 @@ def make_info(name, private_key_name):
     info.web3 = web3
 
     info.private_key = os.environ.get(private_key_name)
-    info.wallet = Wallet(
-        web3,
-        private_key=info.private_key,
-    )
+    info.wallet = accounts.add(info.private_key)
     info.address = info.wallet.address
     wallet = get_ganache_wallet()
     if wallet:

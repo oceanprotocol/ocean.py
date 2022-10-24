@@ -56,7 +56,8 @@ def setup_all(request, config, web3, ocean_token):
         print("Can not find adddresses.")
         return
 
-    print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
+    # TODO: reinstate
+    # print(f"sender: {wallet.public_key}, {wallet.address}, {wallet.private_key}")
     print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
     assert get_ether_balance(web3, wallet.address) >= to_wei(
         "10"

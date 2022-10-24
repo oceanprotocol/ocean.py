@@ -5,7 +5,6 @@
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class SideStaking(ContractBase):
@@ -40,9 +39,7 @@ class SideStaking(ContractBase):
         return self.contract.getDatatokenBalance(datatoken)
 
     @enforce_types
-    def notify_finalize(
-        self, datatoken: str, decimals: int, from_wallet: Wallet
-    ) -> str:
+    def notify_finalize(self, datatoken: str, decimals: int, from_wallet) -> str:
         return self.send_transaction(
             "notifyFinalize", (datatoken, decimals), from_wallet
         )
@@ -53,7 +50,7 @@ class SideStaking(ContractBase):
         datatoken: str,
         pool_address: str,
         lp_swap_fee_amount: int,
-        from_wallet: Wallet,
+        from_wallet,
     ) -> str:
         return self.send_transaction(
             "setPoolSwapFee", (datatoken, pool_address, lp_swap_fee_amount), from_wallet

@@ -7,12 +7,10 @@ import random
 import string
 import time
 
-from ocean_lib.web3_internal.wallet import Wallet
+from brownie.network import accounts
 
 
 def get_wallets(ocean):
-    web3 = ocean.web3
-
     alice_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY1")
     bob_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY2")
 
@@ -21,8 +19,8 @@ def get_wallets(ocean):
     assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
-    alice_wallet = Wallet(web3, alice_private_key)
-    bob_wallet = Wallet(web3, bob_private_key)
+    alice_wallet = accounts.add(alice_private_key)
+    bob_wallet = accounts.add(bob_private_key)
 
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")

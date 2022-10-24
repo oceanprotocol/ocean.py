@@ -16,7 +16,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
 
@@ -36,7 +35,7 @@ class OceanCompute:
     @enforce_types
     def start(
         self,
-        consumer_wallet: Wallet,
+        consumer_wallet,
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
@@ -76,7 +75,7 @@ class OceanCompute:
 
     @enforce_types
     def status(
-        self, asset: Asset, service: Service, job_id: str, wallet: Wallet
+        self, asset: Asset, service: Service, job_id: str, wallet
     ) -> Dict[str, Any]:
         """
         Gets job status.
@@ -96,7 +95,7 @@ class OceanCompute:
 
     @enforce_types
     def result(
-        self, asset: Asset, service: Service, job_id: str, index: int, wallet: Wallet
+        self, asset: Asset, service: Service, job_id: str, index: int, wallet
     ) -> Dict[str, Any]:
         """
         Gets job result.
@@ -118,7 +117,7 @@ class OceanCompute:
         asset: Asset,
         service: Service,
         job_id: str,
-        wallet: Wallet,
+        wallet,
         log_type="output",
     ) -> Dict[str, Any]:
         """
@@ -138,7 +137,7 @@ class OceanCompute:
 
     @enforce_types
     def stop(
-        self, asset: Asset, service: Service, job_id: str, wallet: Wallet
+        self, asset: Asset, service: Service, job_id: str, wallet
     ) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.

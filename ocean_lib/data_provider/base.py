@@ -25,7 +25,6 @@ from web3.main import Web3
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
 keys = KeyAPI(NativeECCBackend)
@@ -51,7 +50,7 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
+    def sign_message(wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         message_hash = Web3.solidityKeccak(

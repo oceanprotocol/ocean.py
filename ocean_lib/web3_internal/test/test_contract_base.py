@@ -8,7 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 class MyFactory(ContractBase):
@@ -17,7 +16,7 @@ class MyFactory(ContractBase):
     # super-simple functionality, because our main point here is to
     # test ContractBase itself, not a child class.
     @enforce_types
-    def deploy_erc721_contract(self, erc721_data, from_wallet: Wallet):
+    def deploy_erc721_contract(self, erc721_data, from_wallet):
         return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
 
 

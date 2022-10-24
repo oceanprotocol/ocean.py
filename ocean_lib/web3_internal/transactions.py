@@ -11,12 +11,10 @@ from eth_account.messages import SignableMessage
 from web3.datastructures import AttributeDict
 from web3.main import Web3
 
-from ocean_lib.web3_internal.wallet import Wallet
-
 
 # TODO: look into signing, should we keep anything?
 @enforce_types
-def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
+def sign_hash(msg_hash: SignableMessage, wallet) -> str:
     """
     This method use `personal_sign`for signing a message. This will always prepend the
     `\x19Ethereum Signed Message:\n32` prefix before signing.
@@ -25,13 +23,13 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
     :param wallet: Wallet instance
     :return: signature
     """
-    s = wallet.sign(msg_hash)
+    s = wallet.sign_message(msg_hash)
     return s.signature.hex()
 
 
 @enforce_types
 def send_ether(
-    config: dict, from_wallet: Wallet, to_address: str, amount: str
+    config: dict, from_wallet, to_address: str, amount: str
 ) -> AttributeDict:
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)

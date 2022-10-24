@@ -23,7 +23,6 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
 
 
@@ -175,7 +174,7 @@ def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
 
 def get_registered_asset_with_compute_service(
     ocean_instance: Ocean,
-    publisher_wallet: Wallet,
+    publisher_wallet,
     allow_raw_algorithms: bool = False,
     trusted_algorithms: List[Asset] = [],
     trusted_algorithm_publishers: List[str] = [],
@@ -229,7 +228,7 @@ def get_registered_asset_with_compute_service(
 
 
 def get_registered_algorithm_with_access_service(
-    ocean_instance: Ocean, publisher_wallet: Wallet
+    ocean_instance: Ocean, publisher_wallet
 ):
     config = ocean_instance.config_dict
     data_provider = DataServiceProvider

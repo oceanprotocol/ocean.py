@@ -14,13 +14,12 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
-from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.unit
 def test_main(
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
+    publisher_wallet,
+    consumer_wallet,
     data_nft: DataNFT,
     datatoken: Datatoken,
 ):
