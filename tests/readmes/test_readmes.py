@@ -58,7 +58,6 @@ def test_script_execution(script, monkeypatch):
             result = runpy.run_path(str(prerequisite), run_name="__main__")
             for key in [
                 "os",
-                "Wallet",
                 "config",
                 "ocean",
                 "alice_wallet",

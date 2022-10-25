@@ -85,7 +85,9 @@ ocean = Ocean(config)
 # Create Alice's wallet
 import os
 from brownie.network import accounts
-alice_private_key = accounts.add(alice_private_key)
+accounts.clear()
+alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+alice_wallet = accounts.add(alice_private_key)
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
