@@ -6,6 +6,9 @@ import random
 import time
 import warnings
 
+from brownie import network
+from brownie.network import accounts
+
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.transactions import send_ether
 
@@ -14,6 +17,11 @@ from .util import get_wallets, random_chars
 
 def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
+    if network.is_connected() and network.show_active() != "mumbai":
+        network.disconnect()
+
+    network.connect("mumbai")
+    accounts.clear()
 
     # setup
     config = _remote_config_mumbai(tmp_path)
@@ -42,6 +50,11 @@ def test_nonocean_tx(tmp_path):
 
 def test_ocean_tx__create_data_nft(tmp_path):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
+    if network.is_connected() and network.show_active() != "mumbai":
+        network.disconnect()
+        network.connect("mumbai")
+
+    accounts.clear()
 
     # setup
     config = _remote_config_mumbai(tmp_path)
