@@ -315,7 +315,7 @@ def get_provider_fees(
     )
 
     keys = KeyAPI(NativeECCBackend)
-    pk = keys.PrivateKey(Web3.toBytes(hexstr=provider_wallet.key))
+    pk = keys.PrivateKey(Web3.toBytes(hexstr=os.getenv("PROVIDER_PRIVATE_KEY")))
     prefix = "\x19Ethereum Signed Message:\n32"
     signable_hash = web3.solidityKeccak(
         ["bytes", "bytes"], [web3.toBytes(text=prefix), web3.toBytes(message_hash)]
