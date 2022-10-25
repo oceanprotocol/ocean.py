@@ -12,7 +12,6 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import get_ether_balance
 from tests.resources.helper_functions import get_ganache_wallet, get_web3
 
 _NETWORK = "ganache"
@@ -116,11 +115,11 @@ def make_info(name, private_key_name):
     info.address = info.wallet.address
     wallet = get_ganache_wallet()
     if wallet:
-        assert get_ether_balance(web3, wallet.address) >= to_wei(
+        assert accounts.at(wallet.address).balance() >= to_wei(
             "4"
         ), "Ether balance less than 4."
-        if get_ether_balance(web3, info.address) < to_wei("2"):
-            send_ether(wallet, info.address, "4 ether")
+        if accounts.at(info.address).balance() < to_wei("2"):
+            send_ether(config, wallet, info.address, "4 ether")
 
     from ocean_lib.ocean.ocean import Ocean
 

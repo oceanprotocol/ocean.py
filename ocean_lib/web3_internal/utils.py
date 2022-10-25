@@ -57,15 +57,3 @@ def private_key_to_public_key(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
-
-
-# TODO: use account balance directly
-@enforce_types
-def get_ether_balance(web3: Web3, address: str) -> int:
-    """
-    Get balance of an ethereum address.
-
-    :param address: address, bytes32
-    :return: balance, int
-    """
-    return web3.eth.get_balance(address, block_identifier="latest")

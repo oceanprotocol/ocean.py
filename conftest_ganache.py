@@ -16,9 +16,8 @@ from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import get_ether_balance
 from tests.resources.helper_functions import (
     get_another_consumer_wallet,
     get_consumer_ocean_instance,
@@ -59,10 +58,7 @@ def setup_all(request, config, web3, ocean_token):
         print("Can not find adddresses.")
         return
 
-    # TODO: reinstate
-    # print(f"sender: {wallet.public_key}, {wallet.address}, {wallet.private_key}")
-    print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
-    assert get_ether_balance(web3, wallet.address) >= to_wei(
+    assert accounts.at(wallet.address).balance() >= to_wei(
         "10"
     ), "Ether balance less than 10."
 
@@ -70,7 +66,7 @@ def setup_all(request, config, web3, ocean_token):
     ocean_token.mint(wallet.address, to_wei("20000"), from_wallet=wallet)
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if get_ether_balance(web3, w.address) < to_wei("2"):
+        if accounts.at(w.address).balance() < to_wei("2"):
             send_ether(config, wallet, w.address, "4 ether")
 
         if ocean_token.balanceOf(w.address) < to_wei("100"):
