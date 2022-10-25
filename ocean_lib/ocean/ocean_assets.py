@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
+from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -40,7 +41,6 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.contract_utils import get_web3
 from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 
 logger = logging.getLogger("ocean")
@@ -52,13 +52,16 @@ class OceanAssets:
     @enforce_types
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
-        if "CHAIN_ID" not in config_dict:
-            w3 = get_web3(config_dict["RPC_URL"])
-            # cache it to prevent further calls
-            config_dict["CHAIN_ID"] = w3.eth.chain_id
+        network_name = config_dict["NETWORK_NAME"]
+        if network.is_connected():
+            if network.show_active() != network_name:
+                network.disconnect()
+                network.connect(network_name)
+        else:
+            network.connect(network_name)
 
         self._config_dict = config_dict
-        self._chain_id = config_dict["CHAIN_ID"]
+        self._chain_id = network.chain.id
 
         self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider

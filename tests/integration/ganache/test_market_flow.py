@@ -6,6 +6,7 @@
 import os
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
@@ -88,7 +89,7 @@ def test_market_flow(
 
     orders = consumer_ocean.get_user_orders(
         consumer_wallet.address,
-        consumer_ocean.web3.toChecksumAddress(datatoken.address),
+        Web3.toChecksumAddress(datatoken.address),
     )
     assert (
         orders

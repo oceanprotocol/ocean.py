@@ -9,6 +9,7 @@ import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
+from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
@@ -30,7 +31,6 @@ from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.contract_utils import get_web3
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import format_units as _format_units
 from ocean_lib.web3_internal.currency import from_wei as _from_wei
@@ -84,10 +84,13 @@ class Ocean:
 
         self.config_dict = config_dict
 
-        # TODO: this can be removed eventually, we are now just using it in readmes
-        # for convenience, to create wallets. But we could probably switch to
-        # accounts instead, after we remove some raw web3 signs and transactions
-        self.web3 = get_web3(self.config_dict.get("RPC_URL"))
+        network_name = config_dict["NETWORK_NAME"]
+        if network.is_connected():
+            if network.show_active() != network_name:
+                network.disconnect()
+                network.connect(network_name)
+        else:
+            network.connect(network_name)
 
         if not data_provider:
             data_provider = DataServiceProvider

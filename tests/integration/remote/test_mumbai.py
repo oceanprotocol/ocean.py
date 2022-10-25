@@ -27,8 +27,7 @@ def test_nonocean_tx(tmp_path):
     (alice_wallet, bob_wallet) = get_wallets(ocean)
 
     # Simplest possible tx: Alice send Bob some fake MATIC
-    web3 = ocean.web3
-    bob_eth_before = web3.eth.get_balance(bob_wallet.address)
+    bob_eth_before = accounts.at(bob_wallet.address).balance()
 
     print("Do a send-Ether tx...")
     try:  # it can get away with "insufficient funds" errors, but not others
@@ -39,7 +38,7 @@ def test_nonocean_tx(tmp_path):
             return
         raise (error)
 
-    bob_eth_after = web3.eth.get_balance(bob_wallet.address)
+    bob_eth_after = accounts.at(bob_wallet.address).balance()
     assert bob_eth_after > bob_eth_before
 
 
@@ -75,7 +74,6 @@ def test_ocean_tx__create_data_nft(tmp_path):
 
 def _remote_config_mumbai(tmp_path):
     config = {
-        "RPC_URL": "https://rpc-mumbai.maticvigil.com",
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
@@ -84,7 +82,6 @@ def _remote_config_mumbai(tmp_path):
     }
 
     # -ensure config is truly remote
-    assert "mumbai" in config["RPC_URL"]
     assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
     assert "oceanprotocol.com" in config["PROVIDER_URL"]
 
