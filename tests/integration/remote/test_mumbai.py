@@ -24,7 +24,7 @@ def test_nonocean_tx(tmp_path):
 
     print("Do a send-Ether tx...")
     try:  # it can get away with "insufficient funds" errors, but not others
-        send_ether(config, alice_wallet, bob_wallet.address, "0.0001 ether")
+        send_ether(config, alice_wallet, bob_wallet.address, "0.0000001 ether")
     except ValueError as error:
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
