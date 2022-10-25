@@ -29,25 +29,20 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 In the same Python console:
 ```python
 #data info
-name = "Data ETH/USDC"
-url="https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2"
-query="""query{
-     pairDayDatas(first: 1000, orderBy: date, orderDirection: asc,
-     where: {
-          pairAddress: "0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc",
-          date_gt: 1592505859
-     }
-     ) {
-          date
-          reserve0
-          reserve1
-          dailyVolumeToken0
-          dailyVolumeToken1
-          dailyVolumeUSD
-          reserveUSD
-     }
+name = "Data ETH price Uniswap hourly"
+url = "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v3"
+query = """query{
+    tokenHourDatas(first: 1000, where: {token: "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599"}, orderBy: periodStartUnix, orderDirection: desc) {
+        periodStartUnix
+        priceUSD
+        open
+        high
+        low
+        close
+        volume
+        volumeUSD
+    }
 }
-
 """
 
 #create asset
@@ -59,5 +54,13 @@ That's it! You've created a data asset of "GraphqlQuery" asset type. It includes
 
 ## 3.  Consume dataset
 
-Consume here is just like in [consume-flow](consume-flow.md). The file downloaded is a .json. From that, use the python `json` library to parse it as desired.
+you can consume the asset as shown below. The file downloaded is a .json and stored locally. From that, use the python `json` library to parse it as desired.
 
+```python
+to_address = bob_wallet.address
+amt_tokens = ocean.to_wei(10)  # just need 1, send more for spare
+datatoken.mint(to_address, amt_tokens, alice_wallet)
+
+# Bob sends a datatoken to the service to get access; then downloads
+file_name = ocean.assets.download_file(asset.did, bob_wallet)
+```
