@@ -7,24 +7,8 @@ import time
 from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
-from eth_account.messages import SignableMessage
 from web3.datastructures import AttributeDict
 from web3.main import Web3
-
-
-# TODO: look into signing, should we keep anything?
-@enforce_types
-def sign_hash(msg_hash: SignableMessage, wallet) -> str:
-    """
-    This method use `personal_sign`for signing a message. This will always prepend the
-    `\x19Ethereum Signed Message:\n32` prefix before signing.
-
-    :param msg_hash:
-    :param wallet: Wallet instance
-    :return: signature
-    """
-    s = wallet.sign_message(msg_hash)
-    return s.signature.hex()
 
 
 @enforce_types
