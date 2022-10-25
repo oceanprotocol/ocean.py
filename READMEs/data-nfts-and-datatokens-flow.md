@@ -39,6 +39,17 @@ pip3 install ocean-lib
 
 - Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
+#### Create your network configuration file
+
+ocean.py uses brownie to connect to deployed smart contracts. To configure the RPC URLs, gas prices and other settings,
+create and fill in a network-config.yml in your `~/.brownie` folder, or copy our (very basic) sample from ocean.py:
+
+```console
+mkdir ~/.brownie
+cp network-config.sample ~/.brownie/network-config.yaml
+```
+
+Please check that you have configured all networks before proceeding. Here is a more complete sample from brownie itself: https://eth-brownie.readthedocs.io/en/v1.6.5/config.html.
 
 ### ⬇️Download barge and run services
 
