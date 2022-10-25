@@ -35,8 +35,6 @@ pip3 install ocean-lib
 
 #### ⚠️ Known issues
 
-- for M1 processors, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues. It is recommended to install them individually, e.g. `pip3 install coincurve && pip3 install cryptography`
-
 - Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
 
