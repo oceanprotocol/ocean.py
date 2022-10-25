@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+import os
 from datetime import datetime, timedelta
 from unittest.mock import Mock
 
@@ -573,6 +574,7 @@ def test_job_result_failure(config):
 
     wallet = Mock()
     wallet.address = "none"
+    wallet.private_key = os.getenv("TEST_PRIVATE_KEY1")
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
