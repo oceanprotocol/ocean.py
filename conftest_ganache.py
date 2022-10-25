@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.aquarius.aquarius import Aquarius
@@ -43,6 +44,8 @@ setup_logging()
 
 @pytest.fixture(autouse=True)
 def setup_all(request, config, web3, ocean_token):
+    accounts.clear()
+
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
