@@ -6,9 +6,10 @@ import warnings
 
 import pytest
 
-from .util import get_wallets, random_chars
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
+
+from .util import get_wallets, random_chars
 
 
 @pytest.mark.skip(reason="Don't skip, once fixed #1017")
@@ -43,7 +44,6 @@ def test_ocean_tx__create_url_asset(tmp_path):
 
 def _remote_config_polygon(tmp_path):
     config = {
-        "RPC_URL": "https://polygon-rpc.com",
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
@@ -52,7 +52,6 @@ def _remote_config_polygon(tmp_path):
     }
 
     # -ensure config is truly remote
-    assert "polygon" in config["RPC_URL"]
     assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
     assert "oceanprotocol.com" in config["PROVIDER_URL"]
 

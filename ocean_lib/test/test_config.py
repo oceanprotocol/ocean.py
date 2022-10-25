@@ -7,7 +7,6 @@ import json
 import pytest
 
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import GANACHE_URL
 
 
 @pytest.mark.unit
@@ -16,7 +15,6 @@ def test_metadataCacheUri_config_key():
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "RPC_URL": GANACHE_URL,
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
         "PROVIDER_URL": "http://172.15.0.4:8030",
@@ -40,5 +38,4 @@ def test_incomplete():
         Ocean(config_dict=config_dict)
 
     exception_response = json.loads(exception_info.value.args[0])
-    assert exception_response["RPC_URL"] == "required"
     assert exception_response["TRANSACTION_TIMEOUT"] == "must be int"

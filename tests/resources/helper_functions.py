@@ -70,7 +70,7 @@ def get_provider_wallet():
 
 
 def get_factory_deployer_wallet(config):
-    if config["RPC_URL"] == "http://127.0.0.1:8545":
+    if config["NETWORK_NAME"] == "development":
         return get_ganache_wallet()
 
     private_key = os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY")

@@ -43,7 +43,9 @@ from base64 import b64encode
 from cryptography.fernet import Fernet
 from eth_account.messages import encode_defunct
 from hashlib import sha256
-web3 = ocean.web3
+from eth_keys.backends import NativeECCBackend
+
+keys = KeyAPI(NativeECCBackend)
 
 # Key-value pair
 profiledata_name = "fav_color"
@@ -57,9 +59,14 @@ profiledata_name_hash = web3.keccak(text=profiledata_name)
 # - only Alice can compute it: make it a function of her private key
 # - is hardware wallet friendly: uses Alice's digital signature not private key
 preimage = data_nft.address + profiledata_name
-msg = encode_defunct(text=sha256(preimage.encode('utf-8')).hexdigest())
-signed_msg = web3.eth.account.sign_message(msg, private_key=alice_wallet.private_key)
-symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='  # bytes
+preimage = sha256(preimage.encode('utf-8')).hexdigest()
+prefix = "\x19Ethereum Signed Message:\n32"
+msg = Web3.solidityKeccak(
+    ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
+)
+pk = keys.PrivateKey(Web3.toBytes(hexstr=wallet.private_key))
+signed_msg = keys.ecdsa_sign(message_hash=msg, private_key=pk)
+symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter
 profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
