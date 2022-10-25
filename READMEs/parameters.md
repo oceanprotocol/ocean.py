@@ -9,7 +9,7 @@ We can set any config parameter using the config dictionary.
 
 An `Ocean` instance will hold a `config_dict` that holds various config parameters. These parameters need to get set. This is set based on what's input to `Ocean` constructor:
 
-1.  dict input: `Ocean({'RPC_URL':..})`
+1.  dict input: `Ocean({'METADATA_CACHE_URI':..})`
 2.  use boilerplate from ExampleConfig
 
 Here are examples.
@@ -20,7 +20,6 @@ Here are examples.
 import os
 from ocean_lib.ocean.ocean import Ocean
 d = {
-   'RPC_URL': "https://goerli.infura.io/v3/<your Infura project id>",
    'METADATA_CACHE_URI': "https://v4.aquarius.oceanprotocol.com",
    'PROVIDER_URL' : "https://v4.provider.goerli.oceanprotocol.com",
 }

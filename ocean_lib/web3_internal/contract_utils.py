@@ -64,21 +64,14 @@ def get_addresses_with_fallback(config):
 @enforce_types
 def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
-    if "CHAIN_ID" not in config:
-        w3 = get_web3(config["RPC_URL"])
-        # cache it to prevent further calls
-        config["CHAIN_ID"] = w3.eth.chain_id
-
-    chain_id = config["CHAIN_ID"]
+    network_name = config["NETWORK_NAME"]
     addresses = get_addresses_with_fallback(config)
 
-    network_addresses = [
-        val for key, val in addresses.items() if val["chainId"] == chain_id
-    ]
+    network_addresses = [val for key, val in addresses.items() if key == network_name]
 
     if network_addresses is None:
         raise Exception(
-            f"Address not found for {chain_id}. Please check your address file."
+            f"Address not found for {network_name}. Please check your address file."
         )
 
     return _checksum_contract_addresses(network_addresses=network_addresses[0])

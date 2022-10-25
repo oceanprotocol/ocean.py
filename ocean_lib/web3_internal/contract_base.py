@@ -12,8 +12,7 @@ from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from web3 import Web3
 
-from ocean_lib.example_config import NETWORK_IDS
-from ocean_lib.web3_internal.contract_utils import get_web3, load_contract
+from ocean_lib.web3_internal.contract_utils import load_contract
 from ocean_lib.web3_internal.transactions import wait_for_transaction_status
 
 logger = logging.getLogger(__name__)
@@ -33,14 +32,9 @@ class ContractBase(object):
             self.name
         ), "contract_name property needs to be implemented in subclasses."
 
-        if "CHAIN_ID" not in config_dict:
-            w3 = get_web3(config_dict["RPC_URL"])
-            # cache it to prevent further calls
-            config_dict["CHAIN_ID"] = w3.eth.chain_id
-
         self.config_dict = config_dict
 
-        self.network = NETWORK_IDS[config_dict["CHAIN_ID"]]
+        self.network = config_dict["NETWORK_NAME"]
         self.connect_to_network()
 
         self.contract = load_contract(self.name, address)
@@ -117,6 +111,10 @@ class ContractBase(object):
             # only for debugging local ganache
             # "nonce": w3.eth.getTransactionCount(from_wallet.address)
         }
+
+        # only for debugging local ganache
+        # import time
+        # time.sleep(3)
 
         if transact:
             _transact.update(transact)
