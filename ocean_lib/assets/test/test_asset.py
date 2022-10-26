@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie import network
 
 from ocean_lib.agreements.consumable import MalformedCredential
 from ocean_lib.assets.asset import Asset
@@ -16,7 +17,7 @@ from tests.resources.ddo_helpers import (
 
 
 @pytest.mark.unit
-def test_asset_utils(web3):
+def test_asset_utils():
     """Tests the structure of a JSON format of the V4 Asset."""
     ddo_dict = get_sample_ddo()
     assert isinstance(ddo_dict, dict)
@@ -30,7 +31,7 @@ def test_asset_utils(web3):
     )
     did = ddo_dict["id"]
     assert ddo_dict["version"] == "4.1.0"
-    assert ddo_dict["chainId"] == web3.eth.chain_id
+    assert ddo_dict["chainId"] == network.chain.id
     chain_id = ddo_dict["chainId"]
 
     assert ddo_dict["metadata"] == {
