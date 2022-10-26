@@ -7,8 +7,12 @@ import time
 from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from web3.datastructures import AttributeDict
 from web3.main import Web3
+
+keys = KeyAPI(NativeECCBackend)
 
 
 @enforce_types
@@ -43,3 +47,12 @@ def wait_for_transaction_status(txid: str, timeout: int):
         time.sleep(0.2)
 
     raise Exception("Transaction Timeout reached without successful status.")
+
+
+def sign_with_key(message_hash, key):
+    pk = keys.PrivateKey(Web3.toBytes(hexstr=key))
+    prefix = "\x19Ethereum Signed Message:\n32"
+    signable_hash = Web3.solidityKeccak(
+        ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
+    )
+    return keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)

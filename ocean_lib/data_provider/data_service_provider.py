@@ -12,8 +12,6 @@ from typing import Any, Dict, List, Optional, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_keys import KeyAPI
-from eth_keys.backends import NativeECCBackend
 from requests.models import PreparedRequest, Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -25,7 +23,6 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 
 logger = logging.getLogger(__name__)
-keys = KeyAPI(NativeECCBackend)
 
 
 class DataServiceProvider(DataServiceProviderBase):

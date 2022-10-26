@@ -15,7 +15,7 @@ from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.utils import split_signature
+from ocean_lib.web3_internal.transactions import sign_with_key
 
 
 @pytest.mark.unit
@@ -322,7 +322,7 @@ def test_main(
 
 @pytest.mark.unit
 def test_start_multiple_order(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Tests the utils functions."""
     data_nft_factory_address = get_address_of_type(
@@ -439,8 +439,7 @@ def test_start_multiple_order(
             0,
         ],
     )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+    signature = sign_with_key(message, provider_fee_address)
 
     order_data = OrderData(
         datatoken_address,

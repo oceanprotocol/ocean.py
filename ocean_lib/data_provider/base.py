@@ -14,8 +14,6 @@ from unittest.mock import Mock
 
 import requests
 from enforce_typing import enforce_types
-from eth_keys import KeyAPI
-from eth_keys.backends import NativeECCBackend
 from requests.exceptions import InvalidURL
 from requests.models import Response
 from requests.sessions import Session
@@ -23,9 +21,9 @@ from web3.main import Web3
 
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
+from ocean_lib.web3_internal.transactions import sign_with_key
 
 logger = logging.getLogger(__name__)
-keys = KeyAPI(NativeECCBackend)
 
 
 class DataServiceProviderBase:
@@ -55,12 +53,7 @@ class DataServiceProviderBase:
             ["bytes"],
             [Web3.toBytes(text=f"{msg}{nonce}")],
         )
-        pk = keys.PrivateKey(Web3.toBytes(hexstr=wallet.private_key))
-        prefix = "\x19Ethereum Signed Message:\n32"
-        signable_hash = Web3.solidityKeccak(
-            ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
-        )
-        signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
+        signed = sign_with_key(message_hash, wallet.private_key)
 
         return nonce, str(signed)
 
