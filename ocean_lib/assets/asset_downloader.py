@@ -88,6 +88,7 @@ def is_consumable(
     asset: Asset,
     service: Service,
     credential: Optional[dict] = None,
+    userdata: Optional[dict] = None,
     with_connectivity_check: bool = True,
 ) -> bool:
     """Checks whether an asset is consumable and returns a ConsumableCode."""
@@ -95,7 +96,7 @@ def is_consumable(
         return ConsumableCodes.ASSET_DISABLED
 
     if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-        asset.did, service.id, service.service_endpoint
+        asset.did, service.id, service.service_endpoint, userdata
     ):
         return ConsumableCodes.CONNECTIVITY_FAIL
 
