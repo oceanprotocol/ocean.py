@@ -32,7 +32,6 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_publisher_wallet,
     get_wallet,
-    get_web3,
     setup_logging,
 )
 
@@ -42,7 +41,7 @@ setup_logging()
 
 
 @pytest.fixture(autouse=True)
-def setup_all(request, config, web3, ocean_token):
+def setup_all(request, config, ocean_token):
     accounts.clear()
 
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
@@ -86,11 +85,6 @@ def publisher_ocean_instance():
 @pytest.fixture
 def consumer_ocean_instance():
     return get_consumer_ocean_instance()
-
-
-@pytest.fixture
-def web3():
-    return get_web3("http://127.0.0.1:8545")
 
 
 @pytest.fixture

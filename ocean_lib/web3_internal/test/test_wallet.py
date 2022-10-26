@@ -12,7 +12,7 @@ from tests.resources.helper_functions import generate_wallet
 
 
 @pytest.mark.unit
-def test_generating_wallets(web3, publisher_ocean_instance):
+def test_generating_wallets(publisher_ocean_instance):
     generated_wallet = generate_wallet()
     assert generated_wallet.address, "Wallet has not an address."
     assert accounts.at(generated_wallet.address).balance() == to_wei(3)
