@@ -9,8 +9,8 @@ from datetime import datetime
 from unittest.mock import patch
 
 import brownie
-import eth_keys
 import pytest
+from brownie import network
 from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 
@@ -158,7 +158,7 @@ def test_update_datatokens(
     assert _asset.services[0].datatoken == old_datatokens[0].get("address")
 
     nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
-    bn = publisher_ocean_instance.web3.eth.block_number
+    bn = network.chain[-1].number
 
     updated_event = nft_token.contract.events.get_sequence(bn, bn, "MetadataUpdated")[0]
     assert updated_event.args.updatedBy == publisher_wallet.address
@@ -187,7 +187,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
 
     registered_token_event = data_nft.contract.events.get_sequence(
         _asset.event.get("block"),
-        publisher_ocean_instance.web3.eth.block_number,
+        network.chain[-1].number,
         DataNFT.EVENT_METADATA_UPDATED,
     )
 
@@ -353,9 +353,7 @@ def test_pay_for_access_service_insufficient_balance(
     ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
     asset = Asset.from_dict(ddo_dict)
 
-    empty_account = publisher_ocean_instance.web3.eth.account.create()
-    pk = eth_keys.KeyAPI.PrivateKey(empty_account.key)
-    empty_wallet = accounts.add(str(pk))
+    empty_wallet = accounts.add()
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_access_service(
