@@ -38,7 +38,8 @@ key = "fav_color"
 value = b"blue"
 
 # prep key for setter
-key_hash = ocean.web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
+from web3.main import Web3
+key_hash = Web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
 
 # set
 data_nft.set_new_data(key_hash, value, alice_wallet)

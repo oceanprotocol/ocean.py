@@ -73,7 +73,8 @@ Instead of using OCEAN, Alice could have used H2O, the OCEAN-backed stable asset
 Now, you're Bob. In the same Python console:
 ```python
 # Bob verifies having enough funds
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
+from brownie.network import accounts
+assert accounts.at(bob_wallet.address).balance() > 0, "need ganache ETH"
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
 
 # Bob retrieves the address of the exchange to use.
