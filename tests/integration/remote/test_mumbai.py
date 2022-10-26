@@ -64,7 +64,6 @@ def test_ocean_tx__create_data_nft(tmp_path):
 def _remote_config_mumbai(tmp_path):
     config = {
         "NETWORK_NAME": "mumbai",
-        "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",

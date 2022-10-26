@@ -16,7 +16,6 @@ def test_metadataCacheUri_config_key():
     config_dict = {
         "NETWORK_NAME": "development",
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
         "PROVIDER_URL": "http://172.15.0.4:8030",
         "DOWNLOADS_PATH": "consume-downloads",
