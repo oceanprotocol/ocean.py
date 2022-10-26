@@ -5,6 +5,7 @@
 import json
 
 import pytest
+from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
@@ -14,7 +15,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import sign_with_key
+from ocean_lib.web3_internal.utils import split_signature
 
 
 @pytest.mark.unit
@@ -106,7 +107,8 @@ def test_buy_from_dispenser_and_order(
             valid_until,
         ],
     )
-    signature = sign_with_key(message, provider_fee_address)
+    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
@@ -244,7 +246,8 @@ def test_buy_from_fre_and_order(
             valid_until,
         ],
     )
-    signature = sign_with_key(message, provider_fee_address)
+    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)

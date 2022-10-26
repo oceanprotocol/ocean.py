@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
@@ -15,7 +16,7 @@ from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import sign_with_key
+from ocean_lib.web3_internal.utils import split_signature
 
 
 @pytest.mark.unit
@@ -439,7 +440,8 @@ def test_start_multiple_order(
             0,
         ],
     )
-    signature = sign_with_key(message, provider_fee_address)
+    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
 
     order_data = OrderData(
         datatoken_address,
