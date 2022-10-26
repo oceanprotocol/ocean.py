@@ -50,7 +50,6 @@ import os
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config("mumbai")
-config["BLOCK_CONFIRMATIONS"] = 1 #faster
 ocean = Ocean(config)
 
 # Create Alice's wallet
@@ -59,12 +58,12 @@ from brownie.network import accounts
 
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice_wallet = accounts.add(alice_private_key)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "Alice needs MATIC"
+assert accounts.at(alice_wallet.address).balance() > 0, "Alice needs MATIC"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 bob_wallet = accounts.add(bob_private_key)
-assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs MATIC"
+assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs MATIC"
 ```
 
 

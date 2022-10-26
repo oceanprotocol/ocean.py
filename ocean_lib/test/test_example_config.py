@@ -23,7 +23,6 @@ def test_ganache_example_config():
 
     assert config["METADATA_CACHE_URI"] == DEFAULT_METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == DEFAULT_PROVIDER_URL
-    assert config["BLOCK_CONFIRMATIONS"] == 0
 
 
 @pytest.mark.unit
@@ -34,7 +33,6 @@ def test_polygon_example_config():
 
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.polygon.oceanprotocol.com"
-    assert config["BLOCK_CONFIRMATIONS"] == 15
 
 
 @pytest.mark.unit
@@ -45,7 +43,6 @@ def test_bsc_example_config():
 
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.bsc.oceanprotocol.com"
-    assert config["BLOCK_CONFIRMATIONS"] == 1
 
 
 @pytest.mark.unit
@@ -56,7 +53,6 @@ def test_moonbeam_alpha_example_config(monkeypatch):
 
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.moonbase.oceanprotocol.com"
-    assert config["BLOCK_CONFIRMATIONS"] == 3
 
 
 @pytest.mark.unit
