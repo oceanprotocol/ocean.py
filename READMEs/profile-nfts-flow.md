@@ -43,11 +43,9 @@ from base64 import b64encode
 from cryptography.fernet import Fernet
 from eth_account.messages import encode_defunct
 from hashlib import sha256
-from eth_keys.backends import NativeECCBackend
-from eth_keys import KeyAPI
+from ocean_lib.web3_internal.transactions import sign_with_key
 from web3.main import Web3
 
-keys = KeyAPI(NativeECCBackend)
 
 # Key-value pair
 profiledata_name = "fav_color"
@@ -66,8 +64,7 @@ prefix = "\x19Ethereum Signed Message:\n32"
 msg = Web3.solidityKeccak(
     ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
 )
-pk = keys.PrivateKey(Web3.toBytes(hexstr=wallet.private_key))
-signed_msg = keys.ecdsa_sign(message_hash=msg, private_key=pk)
+signed = sign_with_key(msg, alice_wallet.private_key)
 symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter
