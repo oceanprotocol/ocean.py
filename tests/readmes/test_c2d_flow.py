@@ -85,7 +85,7 @@ def c2d_flow_readme(
 
     # Mint OCEAN
     mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+    assert accounts.at(alice_wallet.address).balance() > 0, "need ETH"
 
     # Publish the data NFT token
     data_nft = ocean.create_data_nft("NFT1", "NFT1", alice_wallet)

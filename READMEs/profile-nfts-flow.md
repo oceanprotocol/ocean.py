@@ -44,6 +44,7 @@ from cryptography.fernet import Fernet
 from eth_account.messages import encode_defunct
 from hashlib import sha256
 from eth_keys.backends import NativeECCBackend
+from eth_keys import KeyAPI
 
 keys = KeyAPI(NativeECCBackend)
 
@@ -95,9 +96,10 @@ There are various ways for Alice to share the encrypted symkey to the Dapp (see 
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
+from web3.main import Web3
 
 symkey_name = (profiledata_name + ':for:' + dapp_address[:10])  # str
-symkey_name_hash = web3.keccak(text=symkey_name)
+symkey_name_hash = Web3.keccak(text=symkey_name)
 
 symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)  # bytes
 
