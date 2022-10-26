@@ -6,7 +6,7 @@ import os
 import shutil
 
 import pytest
-from web3 import Web3
+from brownie import network
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -22,7 +22,6 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 @pytest.mark.integration
 def test_consume_simple_onchain_data(
-    web3: Web3,
     config: dict,
     publisher_wallet,
     consumer_wallet,
@@ -49,7 +48,7 @@ def test_consume_simple_onchain_data(
     }
     router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
-        address=router_address, chainId=web3.eth.chain_id, abi=abi
+        address=router_address, chainId=network.chain[-1].number, abi=abi
     )
 
     files = [onchain_data]
@@ -149,7 +148,6 @@ def test_consume_simple_onchain_data(
 
 @pytest.mark.integration
 def test_consume_parametrized_onchain_data(
-    web3: Web3,
     config: dict,
     publisher_wallet,
     consumer_wallet,
@@ -176,7 +174,7 @@ def test_consume_parametrized_onchain_data(
     }
     router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
-        address=router_address, chainId=web3.eth.chain_id, abi=abi
+        address=router_address, chainId=network.chain[-1].number, abi=abi
     )
 
     files = [onchain_data]
