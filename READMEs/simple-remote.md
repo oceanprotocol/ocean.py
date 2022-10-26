@@ -49,7 +49,7 @@ In the Python console:
 import os
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("https://rpc-mumbai.maticvigil.com")
+config = ExampleConfig.get_config("mumbai")
 config["BLOCK_CONFIRMATIONS"] = 1 #faster
 ocean = Ocean(config)
 
