@@ -15,8 +15,6 @@ import yaml
 from brownie.network import accounts
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
-from eth_keys import KeyAPI
-from eth_keys.backends import NativeECCBackend
 from pytest import approx
 from web3 import Web3
 
@@ -29,7 +27,7 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
-from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.transactions import send_ether, sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
@@ -300,13 +298,7 @@ def get_provider_fees(
         ],
     )
 
-    keys = KeyAPI(NativeECCBackend)
-    pk = keys.PrivateKey(Web3.toBytes(hexstr=os.getenv("PROVIDER_PRIVATE_KEY")))
-    prefix = "\x19Ethereum Signed Message:\n32"
-    signable_hash = Web3.solidityKeccak(
-        ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
-    )
-    signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
+    signed = sign_with_key(message_hash, os.getenv("PROVIDER_PRIVATE_KEY"))
 
     provider_fee = {
         "providerFeeAddress": provider_fee_address,

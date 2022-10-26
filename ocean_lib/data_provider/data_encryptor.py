@@ -9,15 +9,12 @@ import logging
 from typing import Union
 
 from enforce_typing import enforce_types
-from eth_keys import KeyAPI
-from eth_keys.backends import NativeECCBackend
 from requests.models import Response
 
 from ocean_lib.data_provider.base import DataServiceProviderBase
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 
 logger = logging.getLogger(__name__)
-keys = KeyAPI(NativeECCBackend)
 
 
 class DataEncryptor(DataServiceProviderBase):
