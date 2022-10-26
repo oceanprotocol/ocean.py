@@ -69,7 +69,7 @@ In a Python console:
 ```python
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("http://127.0.0.1:8545")  # or any RPC url, e.g. "https://goerli.infura.io/v3/<your Infura project id>"
+config = ExampleConfig.get_config("development")  # or any network id configured in your brownie network-config.yaml file
 ocean = Ocean(config)
 
 # create an ERC20 object of OCEAN token

@@ -104,12 +104,12 @@ class ContractBase(object):
         :return: hex str transaction hash
         """
         # only for debugging local ganache
-        # w3 = get_web3(self.config_dict["RPC_URL"])
+        # from brownie.network import accounts
 
         _transact = {
             "from": from_wallet,
             # only for debugging local ganache
-            # "nonce": w3.eth.getTransactionCount(from_wallet.address)
+            # "nonce": nonce
         }
 
         # only for debugging local ganache

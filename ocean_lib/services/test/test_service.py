@@ -5,6 +5,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+from brownie.network import accounts
 from requests.models import Response
 
 from ocean_lib.assets.asset import Asset
@@ -154,10 +155,10 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     compute_service = ddo.services[1]
     assert compute_service.type == "compute"
 
-    addr1 = publisher_ocean_instance.web3.eth.account.create().address
+    addr1 = accounts.add().address
     compute_service.compute_values["publisherTrustedAlgorithmPublishers"] = [addr1]
 
-    addr2 = publisher_ocean_instance.web3.eth.account.create().address
+    addr2 = accounts.add().address
     # add a new trusted algorithm to the publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = (
         compute_service.add_publisher_trusted_algorithm_publisher(addr2)
@@ -181,7 +182,7 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
 
     assert len(new_publisher_trusted_algo_publishers) == 1
 
-    addr3 = publisher_ocean_instance.web3.eth.account.create().address
+    addr3 = accounts.add().address
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = (
         compute_service.remove_publisher_trusted_algorithm_publisher(addr3)
