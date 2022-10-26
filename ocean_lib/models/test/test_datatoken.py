@@ -5,6 +5,7 @@
 import json
 
 import pytest
+from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
@@ -13,7 +14,7 @@ from ocean_lib.models.datatoken import Datatoken, DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import sign_with_key
+from ocean_lib.web3_internal.utils import split_signature
 
 
 @pytest.mark.unit
@@ -129,8 +130,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         ],
     )
 
-    signature = sign_with_key(message, provider_fee_address)
-    signed = str(signature)
+    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
 
     tx = datatoken.start_order(
         consumer=consumer_wallet.address,
@@ -160,13 +161,13 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         ["bytes32", "bytes"],
         [receipt.txid, Web3.toHex(Web3.toBytes(text=provider_data))],
     )
-    provider_signed = str(sign_with_key(provider_message, provider_fee_address))
+    provider_signed = network.web3.eth.sign(provider_fee_address, data=provider_message)
 
     message = Web3.solidityKeccak(
         ["bytes"],
         [Web3.toHex(Web3.toBytes(text="12345"))],
     )
-    consumer_signed = str(sign_with_key(message, consumer_wallet.address))
+    consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     tx = datatoken.order_executed(
         order_tx_id=receipt.txid,
@@ -183,7 +184,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     assert executed_event["providerAddress"] == provider_fee_address
 
     # Tests exceptions for order_executed
-    consumer_signed = str(sign_with_key(message, provider_fee_address))
+    consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     with pytest.raises(Exception, match="Consumer signature check failed"):
         datatoken.order_executed(
             receipt.txid,
@@ -199,7 +200,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         ["bytes"],
         [Web3.toHex(Web3.toBytes(text="12345"))],
     )
-    consumer_signed = str(sign_with_key(message, consumer_wallet.address))
+    consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     with pytest.raises(Exception, match="Provider signature check failed"):
         datatoken.order_executed(
