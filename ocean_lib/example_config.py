@@ -61,18 +61,6 @@ CONFIG_NETWORK_HELPER = {
     },
 }
 
-NETWORK_IDS = {
-    8996: "development",
-    1: "mainnet",
-    5: "goerli",
-    56: "bsc",
-    137: "polygon",
-    246: "energyweb",
-    1287: "moonbase",
-    1285: "moonriver",
-    80001: "mumbai",
-}
-
 
 @enforce_types
 def get_config_dict(network_name: str) -> dict:

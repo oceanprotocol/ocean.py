@@ -28,16 +28,11 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.contract_utils import get_web3 as util_get_web3
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
-
-
-def get_web3(network_url: Optional[str] = None):
-    return util_get_web3(network_url)
 
 
 def get_example_config():
@@ -82,17 +77,9 @@ def get_factory_deployer_wallet(config):
 
 
 def get_ganache_wallet():
-    web3 = get_web3()
-    if (
-        web3.eth.accounts
-        and web3.eth.accounts[0].lower()
-        == "0xe2DD09d719Da89e5a3D0F2549c7E24566e947260".lower()
-    ):
-        return accounts.add(
-            "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
-        )
-
-    return None
+    return accounts.add(
+        "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
+    )
 
 
 @enforce_types

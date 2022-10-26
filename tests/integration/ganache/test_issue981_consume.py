@@ -8,7 +8,7 @@ import os
 import shutil
 
 import pytest
-from web3 import Web3
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -20,7 +20,6 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 @pytest.mark.skip(reason="Don't skip, once fixed #1013")
 @pytest.mark.integration
 def test1(
-    web3: Web3,
     config: dict,
     publisher_wallet,
     consumer_wallet,
