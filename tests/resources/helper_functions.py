@@ -271,7 +271,6 @@ def transfer_base_token_if_balance_lte(
 
 @enforce_types
 def get_provider_fees(
-    web3: Web3,
     provider_wallet,
     provider_fee_token: str,
     provider_fee_amount: int,
@@ -290,10 +289,10 @@ def get_provider_fees(
         {"environment": compute_env, "timestamp": datetime.utcnow().timestamp()},
         separators=(",", ":"),
     )
-    message_hash = web3.solidityKeccak(
+    message_hash = Web3.solidityKeccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
-            web3.toHex(web3.toBytes(text=provider_data)),
+            Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
@@ -304,8 +303,8 @@ def get_provider_fees(
     keys = KeyAPI(NativeECCBackend)
     pk = keys.PrivateKey(Web3.toBytes(hexstr=os.getenv("PROVIDER_PRIVATE_KEY")))
     prefix = "\x19Ethereum Signed Message:\n32"
-    signable_hash = web3.solidityKeccak(
-        ["bytes", "bytes"], [web3.toBytes(text=prefix), web3.toBytes(message_hash)]
+    signable_hash = Web3.solidityKeccak(
+        ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
     )
     signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
@@ -313,11 +312,11 @@ def get_provider_fees(
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
         "providerFeeAmount": str(provider_fee_amount),
-        "providerData": web3.toHex(web3.toBytes(text=provider_data)),
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         "v": (signed.v + 27) if signed.v <= 1 else signed.v,
-        "r": web3.toHex(web3.toBytes(signed.r).rjust(32, b"\0")),
-        "s": web3.toHex(web3.toBytes(signed.s).rjust(32, b"\0")),
+        "r": Web3.toHex(Web3.toBytes(signed.r).rjust(32, b"\0")),
+        "s": Web3.toHex(Web3.toBytes(signed.s).rjust(32, b"\0")),
         "validUntil": valid_until,
     }
     return provider_fee

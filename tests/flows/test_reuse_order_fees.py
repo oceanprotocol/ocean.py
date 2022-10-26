@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from time import sleep
 
 import pytest
-from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -41,7 +40,6 @@ from tests.resources.helper_functions import (
     ],
 )
 def test_reuse_order_fees(
-    web3: Web3,
     config: dict,
     publisher_wallet,
     consumer_wallet,
@@ -89,7 +87,6 @@ def test_reuse_order_fees(
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
     valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
-        web3,
         provider_wallet,
         bt.address,
         provider_fee,
@@ -138,7 +135,6 @@ def test_reuse_order_fees(
         consume_market_wallet=consume_market_wallet,
         consumer_wallet=consumer_wallet,
         provider_wallet=provider_wallet,
-        web3=web3,
     )
 
     # Reuse order where:
@@ -155,7 +151,6 @@ def test_reuse_order_fees(
         consume_market_wallet=consume_market_wallet,
         consumer_wallet=consumer_wallet,
         provider_wallet=provider_wallet,
-        web3=web3,
     )
 
     # Sleep for 6 seconds, long enough for order to expire
@@ -175,7 +170,6 @@ def test_reuse_order_fees(
         consume_market_wallet=consume_market_wallet,
         consumer_wallet=consumer_wallet,
         provider_wallet=provider_wallet,
-        web3=web3,
     )
 
     # Reuse order where:
@@ -192,7 +186,6 @@ def test_reuse_order_fees(
         consume_market_wallet=consume_market_wallet,
         consumer_wallet=consumer_wallet,
         provider_wallet=provider_wallet,
-        web3=web3,
     )
 
 
@@ -206,7 +199,6 @@ def reuse_order_with_mock_provider_fees(
     consume_market_wallet,
     consumer_wallet,
     provider_wallet,
-    web3: Web3,
 ):
     """Call reuse_order, and verify the balances/fees are correct"""
 
@@ -230,7 +222,6 @@ def reuse_order_with_mock_provider_fees(
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
     valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
-        web3,
         provider_wallet,
         bt.address,
         provider_fee,
