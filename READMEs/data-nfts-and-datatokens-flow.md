@@ -103,7 +103,7 @@ alice_wallet = accounts.add(alice_private_key)
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = accounts.add(bob_private_key)
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "Bob needs ganache ETH"
+assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
 ```
 
 ## 2. Publish Data NFT & Datatoken

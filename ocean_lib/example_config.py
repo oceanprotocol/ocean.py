@@ -92,6 +92,7 @@ def get_config_dict(network_name: str) -> dict:
 
     config_helper = copy.deepcopy(config_defaults)
     config_helper.update(CONFIG_NETWORK_HELPER[network_name])
+    config_helper["NETWORK_NAME"] = network_name
 
     if network_name != "development":
         config_helper["METADATA_CACHE_URI"] = METADATA_CACHE_URI
