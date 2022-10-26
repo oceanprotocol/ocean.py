@@ -45,6 +45,7 @@ from eth_account.messages import encode_defunct
 from hashlib import sha256
 from eth_keys.backends import NativeECCBackend
 from eth_keys import KeyAPI
+from web3.main import Web3
 
 keys = KeyAPI(NativeECCBackend)
 
@@ -53,7 +54,7 @@ profiledata_name = "fav_color"
 profiledata_val = "blue"
 
 # Prep key for setter. Contract/ERC725 requires keccak256 hash
-profiledata_name_hash = web3.keccak(text=profiledata_name)
+profiledata_name_hash = Web3.keccak(text=profiledata_name)
 
 # Choose a symkey where:
 # - sharing it unlocks only this field: make unique to this data nft & field
@@ -96,7 +97,6 @@ There are various ways for Alice to share the encrypted symkey to the Dapp (see 
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
-from web3.main import Web3
 
 symkey_name = (profiledata_name + ':for:' + dapp_address[:10])  # str
 symkey_name_hash = Web3.keccak(text=symkey_name)

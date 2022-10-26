@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 import pytest
-from web3 import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -54,7 +53,6 @@ from tests.resources.helper_functions import (
     ],
 )
 def test_start_order_fees(
-    web3: Web3,
     config: dict,
     publisher_wallet,
     consumer_wallet,
@@ -131,7 +129,6 @@ def test_start_order_fees(
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
     valid_for_two_hours = int((datetime.utcnow() + timedelta(hours=2)).timestamp())
     provider_fees = get_provider_fees(
-        web3,
         provider_wallet,
         bt.address,
         provider_fee,
