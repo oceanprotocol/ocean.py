@@ -120,7 +120,6 @@ class ContractBase(object):
             _transact.update(transact)
 
         receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
-        receipt.wait(self.config_dict["BLOCK_CONFIRMATIONS"])
 
         txid = receipt.txid
 

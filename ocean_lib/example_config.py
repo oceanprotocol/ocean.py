@@ -16,7 +16,6 @@ DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "NETWORK_NAME": "development",
-    "BLOCK_CONFIRMATIONS": 0,
     "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
     "PROVIDER_URL": "http://172.15.0.4:8030",
@@ -26,48 +25,38 @@ config_defaults = {
 CONFIG_NETWORK_HELPER = {
     "mainnet": {
         "PROVIDER_URL": "https://v4.provider.mainnet.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 1,
     },
     "goerli": {
         "PROVIDER_URL": "https://v4.provider.goerli.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 1,
     },
     "bsc": {
         "PROVIDER_URL": "https://v4.provider.bsc.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 1,
     },
     "polygon": {
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 15,
     },
     "energyweb": {
         "PROVIDER_URL": "https://v4.provider.energyweb.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 3,
         "TRANSACTION_TIMEOUT": 60,
     },
     "moonriver": {
         "PROVIDER_URL": "https://v4.provider.moonriver.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 3,
         "TRANSACTION_TIMEOUT": 60,
     },
     "moonbase": {
         "PROVIDER_URL": "https://v4.provider.moonbase.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 3,
         "TRANSACTION_TIMEOUT": 60,
     },
     "development": {
         "PROVIDER_URL": DEFAULT_PROVIDER_URL,
-        "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 2,
     },
     "celoalfajores": {
         "PROVIDER_URL": "https://provider.celoalfajores.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 3,
         "TRANSACTION_TIMEOUT": 60,
     },
     "mumbai": {
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-        "BLOCK_CONFIRMATIONS": 1,
         "TRANSACTION_TIMEOUT": 60,
     },
 }
