@@ -52,7 +52,7 @@ def test_bsc_example_config():
 def test_moonbeam_alpha_example_config(monkeypatch):
     """Tests the config structure of Moonbeam Alpha network."""
 
-    config = ExampleConfig.get_config("moonbeam")
+    config = ExampleConfig.get_config("moonbase")
 
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.moonbase.oceanprotocol.com"
