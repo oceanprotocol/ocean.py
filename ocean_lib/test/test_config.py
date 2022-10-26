@@ -14,6 +14,7 @@ def test_metadataCacheUri_config_key():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
+        "NETWORK_NAME": "development",
         "METADATA_CACHE_URI": "http://ItWorked.com",
         "BLOCK_CONFIRMATIONS": 0,
         "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
@@ -38,4 +39,5 @@ def test_incomplete():
         Ocean(config_dict=config_dict)
 
     exception_response = json.loads(exception_info.value.args[0])
+    assert exception_response["NETWORK_NAME"] == "required"
     assert exception_response["TRANSACTION_TIMEOUT"] == "must be int"

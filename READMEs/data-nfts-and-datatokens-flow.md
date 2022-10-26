@@ -90,7 +90,7 @@ In the Python console:
 # Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("http://127.0.0.1:8545")
+config = ExampleConfig.get_config("development")
 ocean = Ocean(config)
 
 # Create Alice's wallet
