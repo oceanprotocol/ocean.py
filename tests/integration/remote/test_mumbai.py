@@ -8,6 +8,7 @@ from brownie.network import accounts
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import connect_to_network
 
 from .util import get_wallets, random_chars
 
@@ -15,6 +16,7 @@ from .util import get_wallets, random_chars
 def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
     # setup
+    connect_to_network("mumbai")
     config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
     accounts.clear()
@@ -39,6 +41,7 @@ def test_nonocean_tx(tmp_path):
 def test_ocean_tx__create_data_nft(tmp_path):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
     # setup
+    connect_to_network("mumbai")
     config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
     accounts.clear()

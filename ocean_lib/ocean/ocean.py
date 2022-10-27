@@ -9,7 +9,6 @@ import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
-from brownie import network
 from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
@@ -36,6 +35,7 @@ from ocean_lib.web3_internal.currency import format_units as _format_units
 from ocean_lib.web3_internal.currency import from_wei as _from_wei
 from ocean_lib.web3_internal.currency import parse_units as _parse_units
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
+from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -85,12 +85,7 @@ class Ocean:
         self.config_dict = config_dict
 
         network_name = config_dict["NETWORK_NAME"]
-        if network.is_connected():
-            if network.show_active() != network_name:
-                network.disconnect()
-                network.connect(network_name)
-        else:
-            network.connect(network_name)
+        check_network(network_name)
 
         if not data_provider:
             data_provider = DataServiceProvider
