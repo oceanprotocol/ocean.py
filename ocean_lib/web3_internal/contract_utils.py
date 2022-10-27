@@ -11,9 +11,9 @@ from typing import Any, Dict, Optional, Union
 
 from jsonsempai import magic  # noqa: F401
 from addresses import address as contract_addresses  # noqa: F401
-from brownie import Contract
 from enforce_typing import enforce_types
 from web3 import WebsocketProvider
+from web3.contract import Contract
 from web3.exceptions import ExtraDataLengthError
 from web3.main import Web3
 from web3.middleware import geth_poa_middleware
@@ -39,8 +39,9 @@ def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Con
     """Loads a contract using its name and address."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
-
-    return Contract.from_abi(contract_name, address, abi)
+    bytecode = contract_definition["bytecode"]
+    contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
+    return contract
 
 
 @enforce_types

@@ -8,15 +8,13 @@ import uuid
 from datetime import datetime
 from unittest.mock import patch
 
-import brownie
 import eth_keys
 import pytest
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import AquariusError, InsufficientBalance
+from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
@@ -55,6 +53,15 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     new_metadata["description"] = _description
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
+
+    with patch(
+        "ocean_lib.ocean.ocean_assets.DataNFTFactoryContract.verify_nft"
+    ) as mock:
+        mock.return_value = False
+        with pytest.raises(ContractNotFound):
+            _asset = publisher_ocean_instance.assets.update(
+                asset=ddo, publisher_wallet=publisher_wallet
+            )
 
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo, publisher_wallet=publisher_wallet
@@ -112,7 +119,7 @@ def test_update_datatokens(
     ddo.datatokens.append(
         {
             "address": datatoken.address,
-            "name": datatoken.contract.name(),
+            "name": datatoken.contract.caller.name(),
             "symbol": datatoken.symbol(),
             "serviceId": access_service.id,
         }
@@ -454,10 +461,16 @@ def test_plain_asset_with_one_datatoken(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = TransactionReceipt(tx)
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
-    assert registered_event["admin"] == publisher_wallet.address
-    data_nft_address = registered_event["newTokenAddress"]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    data_nft_address = registered_event[0].args.newTokenAddress
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -505,11 +518,17 @@ def test_plain_asset_multiple_datatokens(
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    tx_receipt = TransactionReceipt(tx)
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
 
-    assert registered_event["admin"] == publisher_wallet.address
-    data_nft_address2 = registered_event["newTokenAddress"]
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    data_nft_address2 = registered_event[0].args.newTokenAddress
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -694,7 +713,7 @@ def test_asset_creation_errors(
     _, metadata, files = create_basics(config, web3, data_provider)
 
     some_random_address = ZERO_ADDRESS
-    with pytest.raises(brownie.exceptions.ContractNotFound):
+    with pytest.raises(ContractNotFound):
         publisher_ocean_instance.assets.create(
             metadata=metadata,
             publisher_wallet=publisher_wallet,

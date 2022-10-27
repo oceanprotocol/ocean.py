@@ -13,19 +13,19 @@ class BTokenBase(BConst):
 
     @enforce_types
     def token_name(self) -> str:
-        return self.contract.name()
+        return self.contract.caller.name()
 
     @enforce_types
     def symbol(self) -> str:
-        return self.contract.symbol()
+        return self.contract.caller.symbol()
 
     @enforce_types
     def decimals(self) -> int:
-        return self.contract.decimals()
+        return self.contract.caller.decimals()
 
     @enforce_types
     def balanceOf(self, address: str) -> int:
-        return self.contract.balanceOf(address)
+        return self.contract.caller.balanceOf(address)
 
     @enforce_types
     def increase_approval(self, dst: str, amt: int, from_wallet: Wallet) -> str:
@@ -49,8 +49,8 @@ class BTokenBase(BConst):
 
     @enforce_types
     def allowance(self, src_address: str, dst_address: str) -> int:
-        return self.contract.allowance(src_address, dst_address)
+        return self.contract.caller.allowance(src_address, dst_address)
 
     @enforce_types
     def total_supply(self) -> int:
-        return self.contract.totalSupply()
+        return self.contract.caller.totalSupply()

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
@@ -177,7 +176,7 @@ def data_nft(web3, publisher_wallet, data_nft_factory):
 
 @pytest.fixture
 def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    tx_result = data_nft.create_erc20(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -189,16 +188,23 @@ def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
 
-    receipt = TransactionReceipt(tx_id)
-    dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    dt_address = registered_event[0].args.newTokenAddress
 
     return Datatoken(web3, dt_address)
 
 
 @pytest.fixture
 def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    tx_result = data_nft.create_erc20(
         template_index=2,
         name="DT1",
         symbol="DT1Symbol",
@@ -211,9 +217,16 @@ def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factor
         from_wallet=publisher_wallet,
         datatoken_cap=to_wei(100),
     )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
 
-    receipt = TransactionReceipt(tx_id)
-    dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    dt_address = registered_event[0].args.newTokenAddress
 
     return DatatokenEnterprise(web3, dt_address)
 

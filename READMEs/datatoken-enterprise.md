@@ -244,8 +244,6 @@ tx_id = datatoken_enterprise_token.buy_from_fre_and_order(
     consume_market_swap_fee_address=bob_wallet.address,
     from_wallet=alice_wallet,
 )
-
-from brownie.network.transaction import TransactionReceipt
-tx_receipt = TransactionReceipt(tx_id)
+tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
 assert tx_receipt.status == 1, "failed buying data tokens from FRE."
 ```

@@ -5,7 +5,7 @@
 import json
 
 import pytest
-from brownie.network.transaction import TransactionReceipt
+from web3 import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -53,7 +53,7 @@ def test_main(
 
     # Check datatoken params
     assert datatoken.get_id() == 1
-    assert datatoken.contract.name() == "DT1"
+    assert datatoken.contract.caller.name() == "DT1"
     assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256
@@ -176,7 +176,7 @@ def test_start_order(
         consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei("9")
     assert datatoken.balanceOf(
@@ -185,7 +185,7 @@ def test_start_order(
 
     provider_message = Web3.solidityKeccak(
         ["bytes32", "bytes"],
-        [receipt.txid, Web3.toHex(Web3.toBytes(text=provider_data))],
+        [tx_receipt.transactionHash, Web3.toHex(Web3.toBytes(text=provider_data))],
     )
     provider_signed = web3.eth.sign(provider_fee_address, data=provider_message)
 
@@ -195,8 +195,8 @@ def test_start_order(
     )
     consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
 
-    tx = datatoken.order_executed(
-        order_tx_id=receipt.txid,
+    datatoken.order_executed(
+        order_tx_id=tx_receipt.transactionHash,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         provider_signature=provider_signed,
         consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -204,16 +204,21 @@ def test_start_order(
         consumer=consumer_wallet.address,
         from_wallet=publisher_wallet,
     )
-    receipt_interm = TransactionReceipt(tx)
-    executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
-    assert executed_event["orderTxId"] == receipt.txid
-    assert executed_event["providerAddress"] == provider_fee_address
+    executed_event = datatoken.get_event_log(
+        Datatoken.EVENT_ORDER_EXECUTED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert executed_event[0].event == "OrderExecuted", "Cannot find OrderExecuted event"
+    assert executed_event[0].args.orderTxId == tx_receipt.transactionHash
+    assert executed_event[0].args.providerAddress == provider_fee_address
 
     # Tests exceptions for order_executed
     consumer_signed = web3.eth.sign(provider_fee_address, data=message)
-    with pytest.raises(Exception, match="Consumer signature check failed"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.order_executed(
-            receipt.txid,
+            tx_receipt.transactionHash,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_signature=provider_signed,
             consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -221,6 +226,10 @@ def test_start_order(
             consumer=consumer_wallet.address,
             from_wallet=publisher_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Consumer signature check failed"
+    )
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -228,9 +237,9 @@ def test_start_order(
     )
     consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
 
-    with pytest.raises(Exception, match="Provider signature check failed"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.order_executed(
-            receipt.txid,
+            tx_receipt.transactionHash,
             provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_signature=signed,
             consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
@@ -238,10 +247,14 @@ def test_start_order(
             consumer=consumer_wallet.address,
             from_wallet=publisher_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Provider signature check failed"
+    )
 
     # Tests reuses order
-    tx = datatoken.reuse_order(
-        receipt.txid,
+    datatoken.reuse_order(
+        tx_receipt.transactionHash,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
         provider_fee_amount=provider_fee_amount,
@@ -253,14 +266,23 @@ def test_start_order(
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         from_wallet=publisher_wallet,
     )
-    receipt_interm = TransactionReceipt(tx)
-    reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
-    assert reused_event, "Cannot find OrderReused event"
-    assert reused_event["orderTxId"] == receipt.txid
-    assert reused_event["caller"] == publisher_wallet.address
+    reused_event = datatoken.get_event_log(
+        Datatoken.EVENT_ORDER_REUSED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert reused_event[0].event == "OrderReused", "Cannot find OrderReused event"
+    assert reused_event[0].args.orderTxId == tx_receipt.transactionHash
+    assert reused_event[0].args.caller == publisher_wallet.address
 
-    provider_fee_event = receipt.events[Datatoken.EVENT_PROVIDER_FEE]
-    assert provider_fee_event, "Cannot find ProviderFee event"
+    provider_fee_event = datatoken.get_event_log(
+        Datatoken.EVENT_PROVIDER_FEE,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert provider_fee_event[0].event == "ProviderFee", "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params
     datatoken.set_publishing_market_fee(
@@ -328,54 +350,90 @@ def test_exceptions(web3, consumer_wallet, datatoken):
     """Tests revert statements in contracts functions"""
 
     # Should fail to mint if wallet is not a minter
-    with pytest.raises(Exception, match="NOT MINTER"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.mint(
             account_address=consumer_wallet.address,
             value=to_wei("1"),
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
+    )
 
     #  Should fail to set new FeeCollector if not NFTOwner
-    with pytest.raises(Exception, match="NOT PAYMENT MANAGER or OWNER"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.set_payment_collector(
             publish_market_order_fee_address=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT PAYMENT MANAGER or OWNER"
+    )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.add_minter(
             minter_address=consumer_wallet.address, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
 
     #  Should fail to removeMinter even if it's minter
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.remove_minter(
             minter_address=consumer_wallet.address, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.add_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.remove_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
 
     # Should fail to setData if NOT erc20Deployer
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.set_data(
             data=web3.toHex(text="SomeData"), from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.clean_permissions(from_wallet=consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: not NFTOwner"
+    )
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    with pytest.raises(Exception, match="NOT 721 Contract"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.clean_from_721(from_wallet=consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
+    )

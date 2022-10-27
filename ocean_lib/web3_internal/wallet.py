@@ -3,21 +3,20 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+import os
 from typing import Dict, Optional, Union
 
-from brownie import network
 from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_account.messages import SignableMessage
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
-from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.utils import (
-    get_gas_price,
     private_key_to_address,
     private_key_to_public_key,
+    get_gas_price,
 )
 
 logger = logging.getLogger(__name__)
@@ -74,20 +73,6 @@ class Wallet:
 
         self.private_key = private_key
         self._address = private_key_to_address(self.private_key)
-
-        self.network = NETWORK_IDS[web3.eth.chain_id]
-        self.add_to_network()
-
-    def add_to_network(self):
-        previously_active = network.show_active()
-        if previously_active != self.network:
-            if network.is_connected():
-                network.disconnect()
-
-            network.connect(self.network)
-            network.accounts.add(self.private_key)
-        else:
-            network.accounts.add(self.private_key)
 
     @property
     @enforce_types

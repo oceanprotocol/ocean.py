@@ -216,9 +216,7 @@ def ocean_assets_download_destination_file_helper(
         from_wallet=publisher_wallet,
     )
 
-    orders = publisher_ocean_instance.get_user_orders(
-        publisher_wallet.address, datatoken.address
-    )
+    orders = publisher_ocean_instance.get_user_orders(publisher_wallet.address)
     assert datatoken.address in [order.address for order in orders]
     assert tx_id in [order.transactionHash.hex() for order in orders]
 

@@ -197,7 +197,7 @@ def test_inexistent_removals():
     compute_service = ddo.services[1]
 
     with pytest.raises(
-        Exception, match="Algorithm notadid is not in trusted algorithms"
+        ValueError, match="Algorithm notadid is not in trusted algorithms"
     ):
         compute_service.remove_publisher_trusted_algorithm("notadid")
 
@@ -207,7 +207,7 @@ def test_inexistent_removals():
     compute_service = ddo.services[1]
 
     with pytest.raises(
-        Exception, match="Publisher notadid is not in trusted algorithm publishers"
+        ValueError, match="Publisher notadid is not in trusted algorithm publishers"
     ):
         compute_service.remove_publisher_trusted_algorithm_publisher("notadid")
 

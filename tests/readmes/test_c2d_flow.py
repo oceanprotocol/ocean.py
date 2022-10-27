@@ -135,7 +135,7 @@ def c2d_flow_readme(
     DATA_compute_service = Service(
         service_id="2",
         service_type="compute",
-        service_endpoint=ocean.config_dict["PROVIDER_URL"],
+        service_endpoint=ocean.config.provider_url,
         datatoken=DATA_datatoken.address,
         files=DATA_files,
         timeout=3600,

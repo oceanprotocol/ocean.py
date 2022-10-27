@@ -94,6 +94,11 @@ def test_market_flow(
         orders
     ), f"no orders found using the order history: datatoken {datatoken.address}, consumer {consumer_wallet.address}"
 
+    orders = consumer_ocean.get_user_orders(consumer_wallet.address)
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {datatoken.address}, consumer {consumer_wallet.address}"
+
 
 @pytest.mark.integration
 def test_pay_for_access_service_good_default(

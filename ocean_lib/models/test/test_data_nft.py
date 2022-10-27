@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie.network.transaction import TransactionReceipt
-from web3 import Web3
+from web3 import Web3, exceptions
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -48,7 +47,7 @@ def test_permissions(
     data_nft,
 ):
     """Tests permissions' functions."""
-    assert data_nft.contract.name() == "NFT"
+    assert data_nft.contract.caller.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert data_nft.balance_of(account=publisher_addr) == 1
 
@@ -62,8 +61,12 @@ def test_permissions(
     assert data_nft.token_uri(1) == "https://oceanprotocol.com/nft/"
 
     # Tests failing clearing permissions
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
+    )
 
     # Tests clearing permissions
     data_nft.add_to_create_erc20_list(
@@ -79,8 +82,12 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.clean_permissions(from_wallet=another_consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
+    )
 
     data_nft.clean_permissions(from_wallet=publisher_wallet)
 
@@ -104,10 +111,14 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.add_manager(
             manager_address=another_consumer_addr, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
+    )
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.MANAGER]
     )
@@ -123,10 +134,14 @@ def test_permissions(
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.add_manager(manager_address=consumer_addr, from_wallet=publisher_wallet)
     assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.remove_manager(
             manager_address=publisher_addr, from_wallet=consumer_wallet
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
+    )
     assert data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -143,7 +158,7 @@ def test_permissions(
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(Exception, match="NOT MANAGER"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.execute_call(
             operation=0,
             to=consumer_addr,
@@ -151,6 +166,10 @@ def test_permissions(
             data=web3.toHex(text="SomeData"),
             from_wallet=another_consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721RolesAddress: NOT MANAGER"
+    )
 
     # Tests calling execute_call with a manager role
     assert data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.MANAGER]
@@ -169,31 +188,40 @@ def test_permissions(
     )
     assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.STORE]
     data_nft.set_new_data(
-        key=b"ARBITRARY_KEY",
-        value=b"SomeData",
+        key=web3.keccak(text="ARBITRARY_KEY"),
+        value=web3.toHex(text="SomeData"),
         from_wallet=consumer_wallet,
     )
-    assert data_nft.get_data(key=b"ARBITRARY_KEY").hex() == b"SomeData".hex()
+    assert data_nft.get_data(key=web3.keccak(text="ARBITRARY_KEY")) == b"SomeData"
 
     # Tests failing setting new data if user has not STORE UPDATER role.
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[DataNFTPermissions.STORE]
     )
-    with pytest.raises(Exception, match="NOT STORE UPDATER"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.set_new_data(
-            key=b"ARBITRARY_KEY",
-            value=b"SomeData",
+            key=web3.keccak(text="ARBITRARY_KEY"),
+            value=web3.toHex(text="SomeData"),
             from_wallet=another_consumer_wallet,
         )
 
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT STORE UPDATER"
+    )
+
     # Tests failing setting ERC20 data
-    with pytest.raises(Exception, match="NOT ERC20 Contract"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.set_data_erc20(
-            key=b"FOO_KEY",
-            value=b"SomeData",
+            key=web3.keccak(text="FOO_KEY"),
+            value=web3.toHex(text="SomeData"),
             from_wallet=consumer_wallet,
         )
-    assert data_nft.get_data(key=b"FOO_KEY").hex() == b"".hex()
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT ERC20 Contract"
+    )
+    assert data_nft.get_data(key=web3.keccak(text="FOO_KEY")) == b""
 
 
 def test_add_and_remove_permissions(
@@ -255,15 +283,22 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
-        metadata_decryptor_address=b"0x123",
+        metadata_decryptor_address="0x123",
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    assert receipt.events["MetadataCreated"]["decryptorUrl"] == "http://myprovider:8030"
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    create_metadata_event = data_nft.get_event_log(
+        event_name="MetadataCreated",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    assert create_metadata_event, "Cannot find MetadataCreated event."
+    assert create_metadata_event[0].args.decryptorUrl == "http://myprovider:8030"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -272,15 +307,22 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address=b"0x123",
+        metadata_decryptor_address="0x123",
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
         metadata_proofs=[],
         from_wallet=consumer_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    update_metadata_event = data_nft.get_event_log(
+        event_name="MetadataUpdated",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    assert update_metadata_event, "Cannot find MetadataUpdated event."
+    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -290,7 +332,7 @@ def test_success_update_metadata(
     tx = data_nft.set_metadata_token_uri(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address=b"0x123",
+        metadata_decryptor_address=publisher_addr,
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
@@ -300,13 +342,26 @@ def test_success_update_metadata(
         from_wallet=publisher_wallet,
     )
 
-    receipt = TransactionReceipt(tx)
-    assert (
-        receipt.events["TokenURIUpdate"]["tokenURI"] == "https://anothernewurl.com/nft/"
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    update_token_uri_event = data_nft.get_event_log(
+        event_name="TokenURIUpdate",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
     )
-    assert receipt.events["TokenURIUpdate"]["updatedBy"] == publisher_addr
+    assert update_token_uri_event, "Cannot find TokenURIUpdate event."
+    assert update_token_uri_event[0].args.tokenURI == "https://anothernewurl.com/nft/"
+    assert update_token_uri_event[0].args.updatedBy == publisher_addr
 
-    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
+    update_metadata_event = data_nft.get_event_log(
+        event_name="MetadataUpdated",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+
+    assert update_metadata_event, "Cannot find MetadataUpdated event."
+    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.get_metadata()
     assert metadata_info[3]
@@ -325,17 +380,22 @@ def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, data_nft):
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.UPDATE_METADATA]
     )
 
-    with pytest.raises(Exception, match="NOT METADATA_ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.set_metadata(
             metadata_state=1,
             metadata_decryptor_url="http://myprovider:8030",
-            metadata_decryptor_address=b"0x123",
-            flags=BLOB.encode("utf-8"),
-            data=BLOB,
-            data_hash=BLOB,
+            metadata_decryptor_address="0x123",
+            flags=web3.toBytes(hexstr=BLOB),
+            data=web3.toBytes(hexstr=BLOB),
+            data_hash=web3.toBytes(hexstr=BLOB),
             metadata_proofs=[],
             from_wallet=consumer_wallet,
         )
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT METADATA_ROLE"
+    )
 
 
 @pytest.mark.unit
@@ -366,10 +426,14 @@ def test_create_erc20(
     )
     assert tx, "Could not create ERC20."
 
-    receipt = TransactionReceipt(tx)
-    assert receipt.events[
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED
-    ], "Cannot find TokenCreated event."
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft.create_erc20(
@@ -440,11 +504,16 @@ def test_create_datatoken_with_usdc_order_fee(
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    dt_address = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED][
-        "newTokenAddress"
-    ]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
+    event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    dt_address = event[0].args.newTokenAddress
     dt = Datatoken(web3, dt_address)
 
     # Check publish fee info
@@ -494,10 +563,14 @@ def test_create_datatoken_with_non_owner(
     )
     assert tx, "Failed to create ERC20 token."
 
-    receipt = TransactionReceipt(tx)
-    assert receipt.events[
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED
-    ], "Cannot find TokenCreated event."
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
 
     # Consumer self-revokes permission to create ERC20
     data_nft.remove_from_create_erc20_list(consumer_wallet.address, consumer_wallet)
@@ -512,7 +585,7 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
     assert not (
         data_nft.get_permissions(consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     )
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
             name="DT1",
@@ -525,6 +598,11 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
+        "ERC20DEPLOYER_ROLE"
+    )
 
 
 @pytest.mark.unit
@@ -547,23 +625,32 @@ def test_erc721_datatoken_functions(
         new_token_uri="https://newurl.com/nft/",
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    registered_event = receipt.events[DataNFT.EVENT_TOKEN_URI_UPDATED]
-
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    assert tx_receipt.status == 1
+    registered_event = data_nft.get_event_log(
+        event_name=DataNFT.EVENT_TOKEN_URI_UPDATED,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
     assert registered_event, "Cannot find TokenURIUpdate event."
-    assert registered_event["updatedBy"] == publisher_addr
-    assert registered_event["tokenID"] == 1
-    assert registered_event["blockNumber"] == receipt.block_number
+    assert registered_event[0].args.updatedBy == publisher_addr
+    assert registered_event[0].args.tokenID == 1
+    assert registered_event[0].args.blockNumber == tx_receipt.blockNumber
     assert data_nft.token_uri(token_id=1) == "https://newurl.com/nft/"
-    assert data_nft.token_uri(token_id=1) == registered_event["tokenURI"]
+    assert data_nft.token_uri(token_id=1) == registered_event[0].args.tokenURI
 
     # Tests failing setting token URI by another user
-    with pytest.raises(Exception, match="not NFTOwner"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.set_token_uri(
             token_id=1,
             new_token_uri="https://foourl.com/nft/",
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
+    )
 
     # Tests transfer functions
     datatoken.mint(
@@ -597,12 +684,16 @@ def test_erc721_datatoken_functions(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    with pytest.raises(Exception, match="NOT MINTER"):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         datatoken.mint(
             account_address=consumer_addr,
             value=to_wei("1"),
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
+    )
 
     datatoken.add_minter(minter_address=consumer_addr, from_wallet=consumer_wallet)
     datatoken.mint(
@@ -618,28 +709,32 @@ def test_fail_transfer_function(
     consumer_wallet, publisher_addr, consumer_addr, data_nft
 ):
     """Tests failure of using the transfer functions."""
-    with pytest.raises(
-        Exception,
-        match="transfer caller is not owner nor approved",
-    ):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.transfer_from(
             from_address=publisher_addr,
             to_address=consumer_addr,
             token_id=1,
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer caller is not "
+        "owner nor approved"
+    )
 
     # Tests for safe transfer as well
-    with pytest.raises(
-        Exception,
-        match="transfer caller is not owner nor approved",
-    ):
+    with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.safe_transfer_from(
             from_address=publisher_addr,
             to_address=consumer_addr,
             token_id=1,
             from_wallet=consumer_wallet,
         )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer caller is not "
+        "owner nor approved"
+    )
 
 
 def test_transfer_nft(
@@ -665,12 +760,18 @@ def test_transfer_nft(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.name() == "NFT to TRANSFER"
+    assert data_nft.contract.caller.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
     tx = data_nft.safe_transfer_from(
@@ -679,11 +780,16 @@ def test_transfer_nft(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
-
-    assert transfer_event["from"] == publisher_addr
-    assert transfer_event["to"] == consumer_addr
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = data_nft.get_event_log(
+        DataNFTFactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_addr
+    assert transfer_event[0].args.to == consumer_addr
     assert data_nft.balance_of(consumer_addr) == 1
     assert data_nft.balance_of(publisher_addr) == 0
     assert data_nft.is_erc20_deployer(consumer_addr)
@@ -701,10 +807,14 @@ def test_transfer_nft(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
-
-    token_address = registered_event["newTokenAddress"]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
     tx = data_nft.safe_transfer_from(
         publisher_addr,
@@ -712,11 +822,16 @@ def test_transfer_nft(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
-
-    assert transfer_event["from"] == publisher_addr
-    assert transfer_event["to"] == consumer_addr
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = data_nft.get_event_log(
+        DataNFTFactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_addr
+    assert transfer_event[0].args.to == consumer_addr
     assert data_nft.is_erc20_deployer(consumer_addr)
 
     # Creates an ERC20
@@ -733,11 +848,15 @@ def test_transfer_nft(
         from_wallet=consumer_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-
-    receipt = TransactionReceipt(tx_result)
-    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event["newTokenAddress"]
+    datatoken_address = registered_token_event[0].args.newTokenAddress
     datatoken = Datatoken(web3, datatoken_address)
 
     assert not datatoken.is_minter(publisher_addr)
@@ -754,12 +873,14 @@ def test_transfer_nft(
     )
 
     assert tx_result, "Failed to set the publish fee."
-    receipt = TransactionReceipt(tx_result)
-    set_publishing_fee_event = receipt.events[
-        Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED
-    ]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    set_publishing_fee_event = datatoken.get_event_log(
+        Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
-
     publish_fees = datatoken.get_publishing_market_fee()
     assert publish_fees[0] == consumer_addr
     assert publish_fees[1] == ocean_token.address
@@ -784,11 +905,16 @@ def test_nft_transfer_with_fre(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
-
-    assert transfer_event["from"] == publisher_wallet.address
-    assert transfer_event["to"] == consumer_wallet.address
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = data_nft.get_event_log(
+        DataNFTFactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_wallet.address
+    assert transfer_event[0].args.to == consumer_wallet.address
     assert data_nft.balance_of(consumer_wallet.address) == 1
     assert data_nft.balance_of(publisher_wallet.address) == 0
     assert data_nft.is_erc20_deployer(consumer_wallet.address) is True
@@ -811,13 +937,19 @@ def test_nft_transfer_with_fre(
         from_wallet=consumer_wallet,
     )
 
-    receipt = TransactionReceipt(tx)
-    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    fre_event = datatoken.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
 
     assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
-    assert fre_event["owner"] == consumer_addr
+    assert fre_event[0].args.owner == consumer_addr
 
-    exchange_id = fre_event["exchangeId"]
+    exchange_id = fre_event[0].args.exchangeId
 
     # Exchange should have supply and fees setup
     exchange_details = fixed_exchange.get_exchange(exchange_id)
@@ -896,12 +1028,18 @@ def test_transfer_nft_with_erc20_pool_fre(
         owner=publisher_addr,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
-    assert registered_event["admin"] == publisher_addr
-    token_address = registered_event["newTokenAddress"]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_addr
+    token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
-    assert data_nft.contract.name() == "NFT to TRANSFER"
+    assert data_nft.contract.caller.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
     # Creates an ERC20
@@ -918,10 +1056,15 @@ def test_transfer_nft_with_erc20_pool_fre(
         from_wallet=publisher_wallet,
     )
     assert tx_result, "Failed to create ERC20 token."
-    receipt = TransactionReceipt(tx_result)
-    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
     assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event["newTokenAddress"]
+    datatoken_address = registered_token_event[0].args.newTokenAddress
     datatoken = Datatoken(web3, datatoken_address)
 
     assert datatoken.is_minter(publisher_addr)
@@ -945,12 +1088,19 @@ def test_transfer_nft_with_erc20_pool_fre(
         from_wallet=publisher_wallet,
     )
 
-    receipt = TransactionReceipt(tx)
-    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
-    assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
-    assert fre_event["owner"] == publisher_addr
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    exchange_id = fre_event["exchangeId"]
+    fre_event = datatoken.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+
+    assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
+    assert fre_event[0].args.owner == publisher_addr
+
+    exchange_id = fre_event[0].args.exchangeId
 
     exchange_details = fixed_exchange.get_exchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == publisher_addr
@@ -976,11 +1126,16 @@ def test_transfer_nft_with_erc20_pool_fre(
         token_id=1,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
-
-    assert transfer_event["from"] == publisher_addr
-    assert transfer_event["to"] == consumer_addr
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = data_nft.get_event_log(
+        DataNFTFactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_addr
+    assert transfer_event[0].args.to == consumer_addr
     assert data_nft.balance_of(consumer_addr) == 1
     assert data_nft.balance_of(publisher_addr) == 0
     assert data_nft.is_erc20_deployer(consumer_addr)

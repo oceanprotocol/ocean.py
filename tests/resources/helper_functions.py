@@ -12,7 +12,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -253,10 +252,16 @@ def deploy_erc721_erc20(
         bytess=[b""],
         from_wallet=data_nft_publisher,
     )
-    tx_receipt2 = TransactionReceipt(tx_result)
+    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 
-    registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
-    datatoken_address = registered_event2["newTokenAddress"]
+    registered_event2 = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt2.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    datatoken_address = registered_event2[0].args.newTokenAddress
 
     datatoken = Datatoken(web3, datatoken_address)
 

@@ -101,45 +101,49 @@ class FixedRateExchange(ContractBase):
 
     @enforce_types
     def router(self) -> str:
-        return self.contract.router()
+        return self.contract.caller.router()
 
     @enforce_types
     def get_opc_fee(self, base_token: str) -> int:
-        return self.contract.getOPCFee(base_token)
+        return self.contract.caller.getOPCFee(base_token)
 
     @enforce_types
-    def generate_exchange_id(self, base_token: str, datatoken: str) -> str:
-        return self.contract.generateExchangeId(
+    def generate_exchange_id(self, base_token: str, datatoken: str) -> bytes:
+        return self.contract.caller.generateExchangeId(
             ContractBase.to_checksum_address(base_token),
             ContractBase.to_checksum_address(datatoken),
         )
 
-    def get_base_token_out_price(self, exchange_id: str, dt_amount: int) -> int:
-        return self.contract.getBaseTokenOutPrice(exchange_id, dt_amount)
+    @enforce_types
+    def get_base_token_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
+        return self.contract.caller.getBaseTokenOutPrice(exchange_id, dt_amount)
 
+    @enforce_types
     def calc_base_in_given_out_dt(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         datatoken_amount: int,
         consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.calcBaseInGivenOutDT(
+        return self.contract.caller.calcBaseInGivenOutDT(
             exchange_id, datatoken_amount, consume_market_swap_fee_amount
         )
 
+    @enforce_types
     def calc_base_out_given_in_dt(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         datatoken_amount: int,
         consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.calcBaseOutGivenInDT(
+        return self.contract.caller.calcBaseOutGivenInDT(
             exchange_id, datatoken_amount, consume_market_swap_fee_amount
         )
 
+    @enforce_types
     def buy_dt(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         datatoken_amount: int,
         max_base_token_amount: int,
         consume_market_swap_fee_address: str,
@@ -158,9 +162,10 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def sell_dt(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         datatoken_amount: int,
         min_base_token_amount: int,
         consume_market_swap_fee_address: str,
@@ -179,7 +184,8 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_bt(self, exchange_id: str, amount: int, from_wallet: Wallet) -> str:
+    @enforce_types
+    def collect_bt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "collectBT",
             (
@@ -189,7 +195,8 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_dt(self, exchange_id: str, amount: int, from_wallet: Wallet) -> str:
+    @enforce_types
+    def collect_dt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "collectDT",
             (
@@ -199,15 +206,18 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_market_fee(self, exchange_id: str, from_wallet: Wallet) -> str:
+    @enforce_types
+    def collect_market_fee(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("collectMarketFee", (exchange_id,), from_wallet)
 
-    def collect_ocean_fee(self, exchange_id: str, from_wallet: Wallet) -> str:
+    @enforce_types
+    def collect_ocean_fee(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("collectOceanFee", (exchange_id,), from_wallet)
 
+    @enforce_types
     def update_market_fee_collector(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         publish_market_swap_fee_collector: str,
         from_wallet: Wallet,
     ) -> str:
@@ -220,9 +230,10 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def update_market_fee(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
         publish_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
@@ -232,24 +243,28 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def get_market_fee(
         self,
-        exchange_id: str,
+        exchange_id: bytes,
     ) -> int:
-        return self.contract.getMarketFee(exchange_id)
+        return self.contract.caller.getMarketFee(exchange_id)
 
     @enforce_types
     def get_number_of_exchanges(self) -> int:
-        return self.contract.getNumberOfExchanges()
+        return self.contract.caller.getNumberOfExchanges()
 
-    def get_allowed_swapper(self, exchange_id: str) -> str:
-        return self.contract.getAllowedSwapper(exchange_id)
+    @enforce_types
+    def get_allowed_swapper(self, exchange_id: bytes) -> str:
+        return self.contract.caller.getAllowedSwapper(exchange_id)
 
-    def set_rate(self, exchange_id: str, new_rate: int, from_wallet: Wallet) -> str:
+    @enforce_types
+    def set_rate(self, exchange_id: bytes, new_rate: int, from_wallet: Wallet) -> str:
         return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
 
+    @enforce_types
     def set_allowed_swapper(
-        self, exchange_id: str, new_allowed_swapper: str, from_wallet: Wallet
+        self, exchange_id: bytes, new_allowed_swapper: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "setAllowedSwapper",
@@ -257,30 +272,37 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def toggle_exchange_state(self, exchange_id: str, from_wallet: Wallet) -> str:
+    @enforce_types
+    def toggle_exchange_state(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
-    def get_rate(self, exchange_id: str) -> int:
-        return self.contract.getRate(exchange_id)
-
-    def get_dt_supply(self, exchange_id: str) -> int:
-        return self.contract.getDTSupply(exchange_id)
-
-    def get_bt_supply(self, exchange_id: str) -> int:
-        return self.contract.getBTSupply(exchange_id)
-
-    def get_exchange(self, exchange_id: str) -> tuple:
-        return self.contract.getExchange(exchange_id)
-
-    def get_fees_info(self, exchange_id: str) -> tuple:
-        return self.contract.getFeesInfo(exchange_id)
+    @enforce_types
+    def get_rate(self, exchange_id: bytes) -> int:
+        return self.contract.caller.getRate(exchange_id)
 
     @enforce_types
-    def get_exchanges(self) -> List[str]:
-        return self.contract.getExchanges()
+    def get_dt_supply(self, exchange_id: bytes) -> int:
+        return self.contract.caller.getDTSupply(exchange_id)
 
-    def is_active(self, exchange_id: str) -> bool:
-        return self.contract.isActive(exchange_id)
+    @enforce_types
+    def get_bt_supply(self, exchange_id: bytes) -> int:
+        return self.contract.caller.getBTSupply(exchange_id)
+
+    @enforce_types
+    def get_exchange(self, exchange_id: bytes) -> tuple:
+        return self.contract.caller.getExchange(exchange_id)
+
+    @enforce_types
+    def get_fees_info(self, exchange_id: bytes) -> tuple:
+        return self.contract.caller.getFeesInfo(exchange_id)
+
+    @enforce_types
+    def get_exchanges(self) -> List[bytes]:
+        return self.contract.caller.getExchanges()
+
+    @enforce_types
+    def is_active(self, exchange_id: bytes) -> bool:
+        return self.contract.caller.isActive(exchange_id)
 
 
 class MockExchange(ContractBase):

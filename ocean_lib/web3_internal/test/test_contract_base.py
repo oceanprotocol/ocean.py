@@ -5,6 +5,7 @@
 
 import pytest
 from enforce_typing import enforce_types
+from web3.contract import ContractCaller
 
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -23,8 +24,14 @@ class MyFactory(ContractBase):
 
 @pytest.mark.unit
 def test_name_is_None(web3):
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         # self.name will become None, triggering the error
+        ContractBase(web3, None)
+
+
+@pytest.mark.unit
+def test_nochild(web3):
+    with pytest.raises(AssertionError):
         ContractBase(web3, None)
 
 
@@ -49,6 +56,7 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
 
     # test attributes
     assert factory.name == "ERC721Factory"
+    assert isinstance(factory.contract.caller, ContractCaller)
     assert factory.contract is not None
     assert factory.contract.address == nft_factory_address
     assert ContractBase.to_checksum_address(nft_factory_address) == nft_factory_address
@@ -58,10 +66,11 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     assert factory.address == nft_factory_address
     assert factory.events
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
-    assert factory.contract.createToken
-    assert factory.contract.getCurrentTokenCount
-    assert factory.contract.getTokenTemplate
-
+    assert (
+        "createToken" in factory.function_names
+    ), "The function createToken from the contract does not exist."
+    assert "getCurrentTokenCount" in factory.function_names
+    assert "getTokenTemplate" in factory.function_names
     with pytest.raises(ValueError):
         assert factory.get_event_signature("noevent")
 

@@ -13,31 +13,31 @@ class SideStaking(ContractBase):
 
     @enforce_types
     def get_datatoken_circulating_supply(self, datatoken: str) -> int:
-        return self.contract.getDatatokenCirculatingSupply(datatoken)
+        return self.contract.caller.getDatatokenCirculatingSupply(datatoken)
 
     @enforce_types
     def get_datatoken_current_circulating_supply(self, datatoken: str) -> int:
-        return self.contract.getDatatokenCurrentCirculatingSupply(datatoken)
+        return self.contract.caller.getDatatokenCurrentCirculatingSupply(datatoken)
 
     @enforce_types
     def get_publisher_address(self, datatoken: str) -> str:
-        return self.contract.getPublisherAddress(datatoken)
+        return self.contract.caller.getPublisherAddress(datatoken)
 
     @enforce_types
     def get_base_token_address(self, datatoken: str) -> str:
-        return self.contract.getBaseTokenAddress(datatoken)
+        return self.contract.caller.getBaseTokenAddress(datatoken)
 
     @enforce_types
     def get_pool_address(self, datatoken: str) -> str:
-        return self.contract.getPoolAddress(datatoken)
+        return self.contract.caller.getPoolAddress(datatoken)
 
     @enforce_types
     def get_base_token_balance(self, datatoken: str) -> int:
-        return self.contract.getBaseTokenBalance(datatoken)
+        return self.contract.caller.getBaseTokenBalance(datatoken)
 
     @enforce_types
     def get_datatoken_balance(self, datatoken: str) -> int:
-        return self.contract.getDatatokenBalance(datatoken)
+        return self.contract.caller.getDatatokenBalance(datatoken)
 
     @enforce_types
     def notify_finalize(
