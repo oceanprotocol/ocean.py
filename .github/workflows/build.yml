@@ -5,8 +5,8 @@
 name: Ocean.py release
 
 on:
-  release:
-    types: [created]
+  - push
+  - pull_request
 
 jobs:
   build:
