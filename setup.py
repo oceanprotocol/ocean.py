@@ -48,7 +48,7 @@ test_requirements = [
     "docker",
     "mccabe",
     "pylint",
-    "pytest",
+    "pytest==7.1.3",
     "pytest-watch",
     "Pillow",
     "matplotlib",
