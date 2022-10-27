@@ -720,7 +720,7 @@ class OceanAssets:
         """
         Search an asset in oceanDB using search query.
         :param query: dict with query parameters
-            (e.g.) https://github.com/oceanprotocol/aquarius/blob/develop/docs/for_api_users/API.md
+          More info at: https://docs.oceanprotocol.com/api-references/aquarius-rest-api
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
