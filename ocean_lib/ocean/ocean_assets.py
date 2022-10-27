@@ -42,6 +42,7 @@ from ocean_lib.structures.file_objects import (
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
+from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -53,12 +54,7 @@ class OceanAssets:
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
         network_name = config_dict["NETWORK_NAME"]
-        if network.is_connected():
-            if network.show_active() != network_name:
-                network.disconnect()
-                network.connect(network_name)
-        else:
-            network.connect(network_name)
+        check_network(network_name)
 
         self._config_dict = config_dict
         self._chain_id = network.chain.id
