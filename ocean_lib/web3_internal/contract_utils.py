@@ -56,7 +56,6 @@ def get_addresses_with_fallback(config):
     return addresses
 
 
-# TODO: look into whether these things really need to be done, now that config is a param for contracts
 @enforce_types
 def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
