@@ -99,6 +99,31 @@ def test_data_nft_roles(
 
 
 @pytest.mark.unit
+def test_properties(web3, config):
+    """Tests the events' properties."""
+
+    data_nft_factory = DataNFTFactoryContract(
+        web3, get_address_of_type(config, "ERC721Factory")
+    )
+    assert (
+        data_nft_factory.event_NFTCreated.abi["name"]
+        == DataNFTFactoryContract.EVENT_NFT_CREATED
+    )
+    assert (
+        data_nft_factory.event_TokenCreated.abi["name"]
+        == DataNFTFactoryContract.EVENT_TOKEN_CREATED
+    )
+    assert (
+        data_nft_factory.event_NewPool.abi["name"]
+        == DataNFTFactoryContract.EVENT_NEW_POOL
+    )
+    assert (
+        data_nft_factory.event_NewFixedRate.abi["name"]
+        == DataNFTFactoryContract.EVENT_NEW_FIXED_RATE
+    )
+
+
+@pytest.mark.unit
 def test_nonexistent_template_index(web3, config, publisher_wallet):
     """Test erc721 non existent template creation fail"""
 

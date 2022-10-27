@@ -11,6 +11,36 @@ from ocean_lib.web3_internal.currency import to_wei
 
 
 @pytest.mark.unit
+def test_properties(web3, config):
+    """Tests the events' properties."""
+    dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
+    dispenser = Dispenser(web3, dispenser_address)
+
+    assert (
+        dispenser.event_TokensDispensed.abi["name"] == Dispenser.EVENT_TOKENS_DISPENSED
+    )
+    assert (
+        dispenser.event_OwnerWithdrawed.abi["name"] == Dispenser.EVENT_OWNER_WITHDRAWED
+    )
+    assert (
+        dispenser.event_DispenserAllowedSwapperChanged.abi["name"]
+        == Dispenser.EVENT_ALLOWED_SWAPPER_CHANGED
+    )
+    assert (
+        dispenser.event_DispenserDeactivated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_DEACTIVATED
+    )
+    assert (
+        dispenser.event_DispenserActivated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_ACTIVATED
+    )
+    assert (
+        dispenser.event_DispenserCreated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_CREATED
+    )
+
+
+@pytest.mark.unit
 def test_main(
     web3,
     config,

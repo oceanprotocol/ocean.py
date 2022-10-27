@@ -19,6 +19,30 @@ class Dispenser(ContractBase):
     EVENT_TOKENS_DISPENSED = "TokensDispensed"
     EVENT_OWNER_WITHDRAWED = "OwnerWithdrawed"
 
+    @property
+    def event_DispenserCreated(self):
+        return self.events.DispenserCreated()
+
+    @property
+    def event_DispenserActivated(self):
+        return self.events.DispenserActivated()
+
+    @property
+    def event_DispenserDeactivated(self):
+        return self.events.DispenserDeactivated()
+
+    @property
+    def event_DispenserAllowedSwapperChanged(self):
+        return self.events.DispenserAllowedSwapperChanged()
+
+    @property
+    def event_TokensDispensed(self):
+        return self.events.TokensDispensed()
+
+    @property
+    def event_OwnerWithdrawed(self):
+        return self.events.OwnerWithdrawed()
+
     @enforce_types
     def status(self, datatoken: str) -> tuple:
         return self.contract.status(datatoken)

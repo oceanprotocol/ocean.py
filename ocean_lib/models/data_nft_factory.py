@@ -29,6 +29,38 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     EVENT_DISPENSER_CREATED = "DispenserCreated"
     EVENT_TRANSFER = "Transfer"
 
+    @property
+    def event_NFTCreated(self):
+        return self.events.NFTCreated()
+
+    @property
+    def event_TokenCreated(self):
+        return self.events.TokenCreated()
+
+    @property
+    def event_Template721Added(self):
+        return self.events.Template721Added()
+
+    @property
+    def event_Template20Added(self):
+        return self.events.Template20Added()
+
+    @property
+    def event_NewPool(self):
+        return self.events.NewPool()
+
+    @property
+    def event_NewFixedRate(self):
+        return self.events.NewFixedRate()
+
+    @property
+    def event_DispenserCreated(self):
+        return self.events.DispenserCreated()
+
+    @property
+    def event_Transfer(self):
+        return self.events.Transfer()
+
     @enforce_types
     def verify_nft(self, nft_address: str) -> bool:
         """Checks that a token was registered."""

@@ -18,6 +18,30 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.unit
+def test_properties(datatoken):
+    """Tests the events' properties."""
+    assert datatoken.event_NewFixedRate.abi["name"] == Datatoken.EVENT_NEW_FIXED_RATE
+    assert datatoken.event_MinterProposed.abi["name"] == Datatoken.EVENT_MINTER_PROPOSED
+    assert datatoken.event_OrderStarted.abi["name"] == Datatoken.EVENT_ORDER_STARTED
+    assert datatoken.event_MinterApproved.abi["name"] == Datatoken.EVENT_MINTER_APPROVED
+    assert datatoken.event_OrderReused.abi["name"] == Datatoken.EVENT_ORDER_REUSED
+    assert datatoken.event_OrderExecuted.abi["name"] == Datatoken.EVENT_ORDER_EXECUTED
+    assert (
+        datatoken.event_PublishMarketFeeChanged.abi["name"]
+        == Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED
+    )
+    assert (
+        datatoken.event_PublishMarketFee.abi["name"]
+        == Datatoken.EVENT_PUBLISH_MARKET_FEE
+    )
+    assert (
+        datatoken.event_ConsumeMarketFee.abi["name"]
+        == Datatoken.EVENT_CONSUME_MARKET_FEE
+    )
+    assert datatoken.event_ProviderFee.abi["name"] == Datatoken.EVENT_PROVIDER_FEE
+
+
+@pytest.mark.unit
 def test_main(
     web3: Web3,
     publisher_wallet: Wallet,

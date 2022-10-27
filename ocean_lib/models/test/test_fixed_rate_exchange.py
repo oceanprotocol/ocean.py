@@ -20,6 +20,55 @@ from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 
 
 @pytest.mark.unit
+def test_properties(web3, config):
+    """Tests the events' properties."""
+
+    fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
+
+    assert (
+        fixed_exchange.event_ExchangeCreated.abi["name"]
+        == FixedRateExchange.EVENT_EXCHANGE_CREATED
+    )
+    assert (
+        fixed_exchange.event_ExchangeRateChanged.abi["name"]
+        == FixedRateExchange.EVENT_EXCHANGE_RATE_CHANGED
+    )
+    assert (
+        fixed_exchange.event_ExchangeActivated.abi["name"]
+        == FixedRateExchange.EVENT_EXCHANGE_ACTIVATED
+    )
+    assert (
+        fixed_exchange.event_ExchangeDeactivated.abi["name"]
+        == FixedRateExchange.EVENT_EXCHANGE_DEACTIVATED
+    )
+    assert fixed_exchange.event_Swapped.abi["name"] == FixedRateExchange.EVENT_SWAPPED
+    assert (
+        fixed_exchange.event_TokenCollected.abi["name"]
+        == FixedRateExchange.EVENT_TOKEN_COLLECTED
+    )
+    assert (
+        fixed_exchange.event_OceanFeeCollected.abi["name"]
+        == FixedRateExchange.EVENT_OCEAN_FEE_COLLECTED
+    )
+    assert (
+        fixed_exchange.event_MarketFeeCollected.abi["name"]
+        == FixedRateExchange.EVENT_MARKET_FEE_COLLECTED
+    )
+    assert (
+        fixed_exchange.event_ConsumeMarketFee.abi["name"]
+        == FixedRateExchange.EVENT_CONSUME_MARKET_FEE
+    )
+    assert (
+        fixed_exchange.event_PublishMarketFeeChanged.abi["name"]
+        == FixedRateExchange.EVENT_PUBLISH_MARKET_FEE_CHANGED
+    )
+    assert (
+        fixed_exchange.event_SWAP_FEES.abi["name"]
+        == FixedRateExchange.EVENT_LOG_SWAP_FEES
+    )
+
+
+@pytest.mark.unit
 def test_exchange_rate_creation(
     web3,
     config,

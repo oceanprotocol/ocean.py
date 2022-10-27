@@ -5,19 +5,27 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
-from typing import Any, Optional
+import time
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import requests
 from brownie import network
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
+from hexbytes import HexBytes
 from web3 import Web3
+from web3._utils.events import get_event_data
+from web3._utils.filters import construct_event_filter_params
+from web3.contract import ContractEvent, ContractEvents
+from web3.datastructures import AttributeDict
+from web3.exceptions import MismatchedABI, ValidationError
 
 from ocean_lib.example_config import NETWORK_IDS
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     load_contract,
 )
-from ocean_lib.web3_internal.transactions import wait_for_transaction_status
 from ocean_lib.web3_internal.utils import get_gas_price
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -82,6 +90,18 @@ class ContractBase(object):
         """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
+    @property
+    @enforce_types
+    def events(self) -> ContractEvents:
+        """Expose the underlying contract's events."""
+        return self.contract.events
+
+    @property
+    @enforce_types
+    def function_names(self) -> List[str]:
+        """Returns the list of functions in the contract"""
+        return list(self.contract.functions)
+
     @staticmethod
     @enforce_types
     def to_checksum_address(address: str) -> ChecksumAddress:
@@ -92,6 +112,74 @@ class ContractBase(object):
         :return: address, hex str
         """
         return Web3.toChecksumAddress(address.lower())
+
+    @enforce_types
+    def get_event_signature(self, event_name: str) -> str:
+        """
+        Return signature of event definition to use in the call to eth_getLogs.
+
+        The event signature is used as topic0 (first topic) in the eth_getLogs arguments
+        The signature reflects the event name and argument types.
+
+        :param event_name:
+        :return:
+        """
+        try:
+            e = getattr(self.events, event_name)
+        except MismatchedABI:
+            e = None
+
+        if not e:
+            raise ValueError(
+                f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
+            )
+
+        abi = e().abi
+        types = [param["type"] for param in abi["inputs"]]
+        sig_str = f'{event_name}({",".join(types)})'
+        return Web3.keccak(text=sig_str).hex()
+
+    @enforce_types
+    def subscribe_to_event(
+        self,
+        event_name: str,
+        timeout: int,
+        event_filter: Optional[dict] = None,
+        callback: Optional[Callable] = None,
+        timeout_callback: Optional[Callable] = None,
+        args: Optional[list] = None,
+        wait: Optional[bool] = False,
+        from_block: Optional[Union[str, int]] = "latest",
+        to_block: Optional[Union[str, int]] = "latest",
+    ) -> None:
+        """
+        Create a listener for the event `event_name` on this contract.
+
+        :param event_name: name of the event to subscribe, str
+        :param timeout:
+        :param event_filter:
+        :param callback:
+        :param timeout_callback:
+        :param args:
+        :param wait: if true block the listener until get the event, bool
+        :param from_block: int or None
+        :param to_block: int or None
+        :return: event if blocking is True and an event is received, otherwise returns None
+        """
+        from ocean_lib.web3_internal.event_listener import EventListener
+
+        return EventListener(
+            self.web3,
+            self.CONTRACT_NAME,
+            self.address,
+            event_name,
+            args,
+            filters=event_filter,
+            from_block=from_block,
+            to_block=to_block,
+        ).listen_once(
+            callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
+        )
 
     @enforce_types
     def send_transaction(
@@ -123,11 +211,43 @@ class ContractBase(object):
             _transact.update(transact)
 
         receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
-        receipt.wait(from_wallet.block_confirmations)
+        receipt.wait(from_wallet.block_confirmations.value)
 
         txid = receipt.txid
 
-        return wait_for_transaction_status(from_wallet, txid)
+        return self.wait_for_transaction_status(from_wallet, txid)
+
+    @enforce_types
+    def wait_for_transaction_status(self, wallet: Wallet, txid: str):
+        receipt = TransactionReceipt(txid)
+
+        if wallet.transaction_timeout.value == 0:
+            return txid
+
+        start = time.time()
+        receipt = TransactionReceipt(txid)
+        if receipt.status.value == 1:
+            return txid
+
+        while time.time() - start > wallet.transaction_timeout.value:
+            receipt = TransactionReceipt(txid)
+            if receipt.status.value == 1:
+                return txid
+
+            time.sleep(0.2)
+
+        raise Exception("Transaction Timeout reached without successful status.")
+
+    @enforce_types
+    def get_event_argument_names(self, event_name: str) -> Tuple:
+        """Finds the event arguments by `event_name`.
+
+        :param event_name: str Name of the event to search in the `contract`.
+        :return: `event.argument_names` if event is found or None
+        """
+        event = getattr(self.contract.events, event_name, None)
+        if event:
+            return event().argument_names
 
     @classmethod
     @enforce_types
@@ -162,3 +282,216 @@ class ContractBase(object):
         tx_hash = web3.eth.send_raw_transaction(raw_tx)
 
         return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
+
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
+    def get_event_log(
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]],
+        chunk_size: Optional[int] = 1000,
+    ) -> List[Any]:
+        """Retrieves the first event log which matches the filters parameter criteria.
+        It processes the blocks order backwards.
+
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param chunk_size: int
+        """
+        event = getattr(self.events, event_name)
+
+        chunk = chunk_size
+        _to = to_block
+        _from = _to - chunk + 1
+
+        all_logs = []
+        error_count = 0
+        _from = max(_from, from_block)
+        while _to >= from_block:
+            try:
+                logs = self.getLogs(
+                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
+                )
+                all_logs.extend(logs)
+                if len(all_logs) >= 1:
+                    break
+                _to = _from - 1
+                _from = max(_to - chunk + 1, from_block)
+                error_count = 0
+                if (to_block - _to) % 1000 == 0:
+                    print(
+                        f"    Searched blocks {_from}-{_to}. {event_name} event not yet found."
+                    )
+            except requests.exceptions.ReadTimeout as err:
+                print(f"ReadTimeout ({_from}, {_to}): {err}")
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return all_logs
+
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
+    def get_event_logs(
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]] = None,
+        chunk_size: Optional[int] = 1000,
+    ) -> List[AttributeDict]:
+        """
+        Fetches the list of event logs between the given block numbers.
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param chunk_size: int
+        :return: List of event logs. List will have the structure as below.
+        ```Python
+            [AttributeDict({
+                'args': AttributeDict({}),
+                'event': 'LogNoArguments',
+                'logIndex': 0,
+                'transactionIndex': 0,
+                'transactionHash': HexBytes('...'),
+                'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
+                'blockHash': HexBytes('...'),
+                'blockNumber': 3
+                }),
+            AttributeDict(...),
+            ...
+            ]
+        ```
+        """
+        event = getattr(self.events, event_name)
+
+        chunk = chunk_size
+        _from = from_block
+        _to = _from + chunk - 1
+
+        all_logs = []
+        error_count = 0
+        _to = min(_to, to_block)
+        while _from <= to_block:
+            try:
+                logs = self.getLogs(
+                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
+                )
+                all_logs.extend(logs)
+                _from = _to + 1
+                _to = min(_from + chunk - 1, to_block)
+                error_count = 0
+                if (_from - from_block) % 1000 == 0:
+                    print(
+                        f"    Searched blocks {_from}-{_to}. {len(all_logs)} {event_name} events detected so far."
+                    )
+            except requests.exceptions.ReadTimeout as err:
+                print(f"ReadTimeout ({_from}, {_to}): {err}")
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return all_logs
+
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
+    @staticmethod
+    def getLogs(
+        event: ContractEvent,
+        argument_filters: Optional[Dict[str, Any]] = None,
+        fromBlock: Optional[int] = None,
+        toBlock: Optional[int] = None,
+        blockHash: Optional[HexBytes] = None,
+    ):
+        """Get events for this contract instance using eth_getLogs API.
+
+        This is a stateless method, as opposed to createFilter.
+        It can be safely called against nodes which do not provide
+        eth_newFilter API, like Infura nodes.
+        If there are many events,
+        like ``Transfer`` events for a popular token,
+        the Ethereum node might be overloaded and timeout
+        on the underlying JSON-RPC call.
+        Example - how to get all ERC-20 token transactions
+        for the latest 10 blocks:
+
+        ```python
+            from = max(mycontract.web3.eth.block_number - 10, 1)
+            to = mycontract.web3.eth.block_number
+            events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
+            for e in events:
+                print(e["args"]["from"],
+                    e["args"]["to"],
+                    e["args"]["value"])
+        ```
+        The returned processed log values will look like:
+
+        ```python
+            (
+                AttributeDict({
+                 'args': AttributeDict({}),
+                 'event': 'LogNoArguments',
+                 'logIndex': 0,
+                 'transactionIndex': 0,
+                 'transactionHash': HexBytes('...'),
+                 'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
+                 'blockHash': HexBytes('...'),
+                 'blockNumber': 3
+                }),
+                AttributeDict(...),
+                ...
+            )
+        ```
+
+        See also: :func:`web3.middleware.filter.local_filter_middleware`.
+        :param event: the ContractEvent instance with a web3 instance
+        :param argument_filters:
+        :param fromBlock: block number or "latest", defaults to "latest"
+        :param toBlock: block number or "latest". Defaults to "latest"
+        :param blockHash: block hash. blockHash cannot be set at the
+          same time as fromBlock or toBlock
+        :yield: Tuple of :class:`AttributeDict` instances
+        """
+
+        if not event or not event.web3:
+            raise TypeError(
+                "This method can be only called on an event which has a web3 instance."
+            )
+        abi = event._get_event_abi()
+
+        if argument_filters is None:
+            argument_filters = dict()
+
+        _filters = dict(**argument_filters)
+
+        blkhash_set = blockHash is not None
+        blknum_set = fromBlock is not None or toBlock is not None
+        if blkhash_set and blknum_set:
+            raise ValidationError(
+                "blockHash cannot be set at the same" " time as fromBlock or toBlock"
+            )
+
+        # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
+        # Namely, convert event names to their keccak signatures
+        address = event.address
+        _, event_filter_params = construct_event_filter_params(
+            abi,
+            event.web3.codec,
+            contract_address=address,
+            argument_filters=_filters,
+            fromBlock=fromBlock,
+            toBlock=toBlock,
+        )
+
+        if blockHash is not None:
+            event_filter_params["blockHash"] = blockHash
+
+        # Call JSON-RPC API
+        logs = event.web3.eth.get_logs(event_filter_params)
+
+        # Convert raw binary data to Python proxy objects as described by ABI
+        return tuple(get_event_data(event.web3.codec, abi, entry) for entry in logs)

@@ -5,13 +5,14 @@
 import logging
 import os
 from collections import namedtuple
-from typing import Any
+from typing import Any, List
 
 import web3.gas_strategies.rpc
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_keys import keys
 from eth_utils import decode_hex
+from hexbytes.main import HexBytes
 from web3.main import Web3
 
 from ocean_lib.web3_internal.constants import (
@@ -23,6 +24,33 @@ from ocean_lib.web3_internal.constants import (
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
+
+
+@enforce_types
+def generate_multi_value_hash(types: List[str], values: List[str]) -> HexBytes:
+    """
+    Return the hash of the given list of values.
+    This is equivalent to packing and hashing values in a solidity smart contract
+    hence the use of `soliditySha3`.
+
+    :param types: list of solidity types expressed as strings
+    :param values: list of values matching the `types` list
+    :return: bytes
+    """
+    assert len(types) == len(values)
+    return Web3.solidityKeccak(types, values)
+
+
+@enforce_types
+def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
+    """
+
+    :param msg_hash:
+    :return:
+    """
+    return generate_multi_value_hash(
+        ["string", "bytes32"], ["\x19Ethereum Signed Message:\n32", msg_hash]
+    )
 
 
 @enforce_types
@@ -65,6 +93,17 @@ def private_key_to_public_key(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
+
+
+@enforce_types
+def get_chain_id(web3: Web3) -> int:
+    """
+    Return the ethereum chain id calling the `web3.eth.chain_id` method.
+
+    :param web3: Web3 instance
+    :return: Chain id, int
+    """
+    return int(web3.eth.chain_id)
 
 
 @enforce_types

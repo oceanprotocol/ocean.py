@@ -56,10 +56,39 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     # test methods
     assert factory.contract_name == "ERC721Factory"
     assert factory.address == nft_factory_address
+    assert factory.events
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
     assert factory.contract.createToken
     assert factory.contract.getCurrentTokenCount
     assert factory.contract.getTokenTemplate
+
+    with pytest.raises(ValueError):
+        assert factory.get_event_signature("noevent")
+
+    assert factory.subscribe_to_event("NFTCreated", 30, None) is None
+    assert factory.get_event_argument_names("NFTCreated") == ()
+    block = web3.eth.block_number
+    block_confirmations = alice_ocean.config_dict["BLOCK_CONFIRMATIONS"]
+    assert (
+        len(
+            factory.get_event_logs(
+                "NFTCreated",
+                block - block_confirmations,
+                block - block_confirmations,
+                None,
+            )
+        )
+        == 1
+    ), "The token was not created."
+    log = factory.get_event_log(
+        "NFTCreated", block - block_confirmations, block - block_confirmations, None
+    )
+    assert len(log) == 1, "The token was not created."
+    assert log[0]["event"] == "NFTCreated"
+    assert log[0]["address"] == nft_factory_address
+
+    with pytest.raises(TypeError):
+        ContractBase.getLogs(None)
 
 
 @pytest.mark.unit

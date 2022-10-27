@@ -20,6 +20,23 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.unit
+def test_properties(web3, config):
+    """Tests the events' properties."""
+    data_nft_token_address = get_address_of_type(
+        config_dict=config, address_type=DataNFT.CONTRACT_NAME
+    )
+    data_nft = DataNFT(web3=web3, address=data_nft_token_address)
+
+    assert data_nft.event_TokenCreated.abi["name"] == DataNFT.EVENT_TOKEN_CREATED
+    assert data_nft.event_TokenURIUpdate.abi["name"] == DataNFT.EVENT_TOKEN_URI_UPDATED
+    assert data_nft.event_MetadataCreated.abi["name"] == DataNFT.EVENT_METADATA_CREATED
+    assert data_nft.event_MetadataUpdated.abi["name"] == DataNFT.EVENT_METADATA_UPDATED
+    assert (
+        data_nft.event_MetadataValidated.abi["name"] == DataNFT.EVENT_METADATA_VALIDATED
+    )
+
+
+@pytest.mark.unit
 def test_permissions(
     web3,
     publisher_wallet,
