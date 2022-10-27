@@ -1,69 +1,77 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 """The setup script."""
+
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-from setuptools import find_packages, setup
+from setuptools import find_namespace_packages, setup
 
-with open("README.md") as readme_file:
+with open("README.md", encoding="utf8") as readme_file:
     readme = readme_file.read()
 
-with open("CHANGELOG.md") as history_file:
-    history = history_file.read()
-
+# Installed by pip install ocean-lib
+# or pip install -e .
 install_requirements = [
-    "coloredlogs==15.0.1",
-    "Flask==2.2.2",
-    "Flask-Cors==3.0.10",
-    "flask-swagger==0.2.14",
-    "flask-swagger-ui==4.11.1",
-    "Jinja2>=2.10.1",
+    "ocean-contracts==1.1.7",
+    "coloredlogs",
+    "pyopenssl",
+    "PyJWT",  # not jwt
+    "PyYAML==5.4.1",
     "requests>=2.21.0",
-    "gunicorn==20.1.0",
-    "elasticsearch==7.17.0",
-    "PyYAML==6.0",
-    "pytz==2022.5",
-    "ocean-contracts==1.1.8",
-    "web3==5.31.1",
-    "gevent",
+    "deprecated",
+    "pycryptodomex",
+    "tqdm",
+    "pytz",
+    "web3==5.28.0",
+    "cryptography",
+    "scipy",
+    "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
-    "python-dateutil==2.8.2",
-    "pyshacl==0.20.0",
-    "gql==3.4.0",
-    "aiohttp==3.8.3",
+    "eciespy",
+    # web3 requires eth-abi, requests, and more,
+    # so those will be installed too.
+    # See https://github.com/ethereum/web3.py/blob/master/setup.py
 ]
 
-setup_requirements = ["pytest-runner==6.0.0"]
-
-dev_requirements = [
-    "bumpversion==0.6.0",
-    "pkginfo==1.8.3",
-    "twine==4.0.1",
-    "flake8",
-    "isort",
-    "black",
-    "pre-commit",
-    # not virtualenv: devs should already have it before pip-installing
-    "watchdog==2.1.9",
-    "licenseheaders",
-]
+# Required to run setup.py:
+setup_requirements = ["pytest-runner"]
 
 test_requirements = [
-    "Flask==2.2.2",
-    "codacy-coverage==1.3.11",
-    "coverage==6.5.0",
-    "mccabe==0.6.1",
-    "pylint==2.15.5",
+    "codacy-coverage",
+    "coverage",
+    "docker",
+    "mccabe",
+    "pylint",
     "pytest",
-    "pytest-env",
-    "freezegun==1.2.2",
+    "pytest-watch",
+    "Pillow",
+    "matplotlib",
+    "mkcodes==0.1.1",
 ]
+
+# Possibly required by developers of ocean-lib:
+dev_requirements = [
+    "bumpversion",
+    "pkginfo",
+    "twine",
+    "watchdog",
+    "flake8==3.9.2",
+    "isort==5.10.1",
+    "black==22.3.0",
+    "pre-commit",
+    # for the following: maybe needed, maybe not
+    "pytest",
+    "licenseheaders==0.8.8",
+    "pytest-env",
+]
+
+packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
 
 setup(
     author="leucothia",
@@ -73,29 +81,28 @@ setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
-    description="🐳 Ocean aquarius.",
+    description="🐳 Ocean protocol library.",
     extras_require={
         "test": test_requirements,
         "dev": dev_requirements + test_requirements,
     },
-    include_package_data=True,
     install_requires=install_requirements,
-    keywords="ocean-aquarius",
     license="Apache Software License 2.0",
     long_description=readme,
     long_description_content_type="text/markdown",
-    name="ocean-aquarius",
-    packages=find_packages(include=["aquarius", "aquarius.app"]),
+    include_package_data=True,
+    keywords="ocean-lib",
+    name="ocean-lib",
+    packages=packages,
     setup_requires=setup_requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    url="https://github.com/oceanprotocol/aquarius",
+    url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
-    # bumpversion needs single quotes
-    version='4.5.5',
+    # bumpversion.sh needs single-quotes
+    version='1.6.1',
     # fmt: on
     zip_safe=False,
 )
