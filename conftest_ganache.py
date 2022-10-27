@@ -18,6 +18,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     get_another_consumer_wallet,
     get_consumer_ocean_instance,
@@ -42,6 +43,7 @@ setup_logging()
 
 @pytest.fixture(autouse=True)
 def setup_all(request, config, ocean_token):
+    connect_to_network("development")
     accounts.clear()
 
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
@@ -129,6 +131,7 @@ def ocean_address(config) -> str:
 
 @pytest.fixture
 def ocean_token(config, ocean_address) -> Datatoken:
+    connect_to_network("development")
     return Datatoken(config, ocean_address)
 
 

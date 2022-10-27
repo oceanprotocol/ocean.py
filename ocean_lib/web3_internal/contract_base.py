@@ -7,13 +7,13 @@
 import logging
 from typing import Any, Optional
 
-from brownie import network
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from web3 import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
 from ocean_lib.web3_internal.transactions import wait_for_transaction_status
+from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger(__name__)
 
@@ -35,29 +35,13 @@ class ContractBase(object):
         self.config_dict = config_dict
 
         self.network = config_dict["NETWORK_NAME"]
-        self.connect_to_network()
+        check_network(self.network)
 
         self.contract = load_contract(self.name, address)
         assert not address or (
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
         )
-
-    def connect_to_network(self):
-        if network.show_active() != self.network:
-            if network.is_connected():
-                network.disconnect()
-
-            network.connect(self.network)
-
-    def __getattribute__(self, attr):
-        method = object.__getattribute__(self, attr)
-        if not method:
-            raise Exception("Method %s not implemented" % attr)
-        if callable(method) and not method.__name__ == "connect_to_network":
-            self.connect_to_network()
-
-        return method
 
     @enforce_types
     def __str__(self) -> str:
