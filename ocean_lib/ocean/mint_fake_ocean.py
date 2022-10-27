@@ -7,7 +7,7 @@ import os
 from brownie.network import accounts
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 
@@ -18,11 +18,9 @@ def mint_fake_OCEAN(config: dict) -> None:
     1. Mints tokens
     2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
-    network_addresses = get_addresses_with_fallback(config)
-
     deployer_wallet = accounts.add(os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"))
 
-    OCEAN_token = Datatoken(config, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = Datatoken(config, address=get_ocean_token_address(config))
     amt_distribute = to_wei("2000")
     OCEAN_token.mint(
         deployer_wallet.address, to_wei("20000"), from_wallet=deployer_wallet

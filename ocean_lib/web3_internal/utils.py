@@ -7,9 +7,6 @@ from collections import namedtuple
 from typing import Any
 
 from enforce_typing import enforce_types
-from eth_account.account import Account
-from eth_keys import keys
-from eth_utils import decode_hex
 from web3.main import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
@@ -45,15 +42,3 @@ def split_signature(signature: Any) -> Signature:
         v = 27 + v % 2
 
     return Signature(v, r, s)
-
-
-@enforce_types
-def private_key_to_address(private_key: str) -> str:
-    return Account.from_key(private_key).address
-
-
-@enforce_types
-def private_key_to_public_key(private_key: str) -> str:
-    private_key_bytes = decode_hex(private_key)
-    private_key_object = keys.PrivateKey(private_key_bytes)
-    return private_key_object.public_key
