@@ -819,7 +819,11 @@ class OceanAssets:
         consume_market_order_fee_token: Optional[str] = None,
         consume_market_order_fee_amount: Optional[int] = None,
         consumer_address: Optional[str] = None,
+<<<<<<< HEAD
         userdata: Optional[dict] = None,
+=======
+        userdata: Optional[dict] = None
+>>>>>>> 631afe6 (- add userdata to required function as an optional parameter)
     ):
         # fill in good defaults as needed
         service = service or asset.services[0]
@@ -844,10 +848,14 @@ class OceanAssets:
             )
 
         consumable_result = is_consumable(
+<<<<<<< HEAD
             asset,
             service,
             {"type": "address", "value": wallet.address},
             userdata=userdata,
+=======
+            asset, service, {"type": "address", "value": wallet.address}, userdata=userdata
+>>>>>>> 631afe6 (- add userdata to required function as an optional parameter)
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)

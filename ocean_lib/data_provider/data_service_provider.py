@@ -553,9 +553,13 @@ class DataServiceProvider(DataServiceProviderBase):
 
     @staticmethod
     @enforce_types
+<<<<<<< HEAD
     def check_asset_file_info(
         did: str, service_id: str, provider_uri: str, userdata: Optional[dict] = None
     ) -> bool:
+=======
+    def check_asset_file_info(did: str, service_id: str, provider_uri: str, userdata: Optional[dict] = None) -> bool:
+>>>>>>> 631afe6 (- add userdata to required function as an optional parameter)
         if not did:
             return False
 
