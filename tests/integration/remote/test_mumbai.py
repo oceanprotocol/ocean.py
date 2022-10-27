@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import random
+import time
 import warnings
 
 from ocean_lib.ocean.ocean import Ocean
@@ -22,9 +24,12 @@ def test_nonocean_tx(tmp_path):
     web3 = ocean.web3
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
 
+    normalized_unixtime = time.time() / 1e9
+    amt_send = 1e-8 * (random.random() + normalized_unixtime)
+
     print("Do a send-Ether tx...")
     try:  # it can get away with "insufficient funds" errors, but not others
-        send_ether(config, alice_wallet, bob_wallet.address, "0.0001 ether")
+        send_ether(config, alice_wallet, bob_wallet.address, f"{amt_send:.15f} ether")
     except ValueError as error:
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient test MATIC"))
