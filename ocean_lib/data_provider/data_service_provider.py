@@ -146,7 +146,7 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> None:
         service_endpoint = service.service_endpoint
-        fileinfo_response = FileInfoProvider.fileinfo(did, service)
+        fileinfo_response = FileInfoProvider.fileinfo(did, service, userdata=userdata)
 
         files = fileinfo_response.json()
         indexes = range(len(files))
@@ -187,6 +187,8 @@ class DataServiceProvider(DataServiceProviderBase):
             )
 
             file_name = DataServiceProvider._get_file_name(response)
+            if file_name == None:
+                file_name = did
             DataServiceProvider.write_file(response, destination_folder, file_name)
 
             logger.info(
@@ -551,12 +553,12 @@ class DataServiceProvider(DataServiceProviderBase):
 
     @staticmethod
     @enforce_types
-    def check_asset_file_info(did: str, service_id: str, provider_uri: str) -> bool:
+    def check_asset_file_info(did: str, service_id: str, provider_uri: str, userdata: dict = None) -> bool:
         if not did:
             return False
 
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": did, "serviceId": service_id}
+        data = {"did": did, "serviceId": service_id, "userdata": userdata}
         response = requests.post(endpoint, json=data)
 
         if not response or response.status_code != 200:
