@@ -97,9 +97,13 @@ def is_consumable(
         return ConsumableCodes.ASSET_DISABLED
 
     if userdata is not None:
-        result_check = DataServiceProvider.check_asset_file_info(asset.did, service.id, service.service_endpoint, userdata=userdata)
+        result_check = DataServiceProvider.check_asset_file_info(
+            asset.did, service.id, service.service_endpoint, userdata=userdata
+        )
     else:
-        result_check = DataServiceProvider.check_asset_file_info(asset.did, service.id, service.service_endpoint)
+        result_check = DataServiceProvider.check_asset_file_info(
+            asset.did, service.id, service.service_endpoint
+        )
 
     if with_connectivity_check and not result_check:
         return ConsumableCodes.CONNECTIVITY_FAIL

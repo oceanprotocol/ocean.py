@@ -844,7 +844,10 @@ class OceanAssets:
             )
 
         consumable_result = is_consumable(
-            asset, service, {"type": "address", "value": wallet.address}, userdata=userdata
+            asset,
+            service,
+            {"type": "address", "value": wallet.address},
+            userdata=userdata,
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
