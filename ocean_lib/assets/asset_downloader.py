@@ -58,6 +58,7 @@ def download_asset_files(
         service,
         {"type": "address", "value": consumer_wallet.address},
         with_connectivity_check=True,
+        userdata=userdata,
     )
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
@@ -89,14 +90,22 @@ def is_consumable(
     service: Service,
     credential: Optional[dict] = None,
     with_connectivity_check: bool = True,
+    userdata: Optional[dict] = None,
 ) -> bool:
     """Checks whether an asset is consumable and returns a ConsumableCode."""
     if asset.is_disabled:
         return ConsumableCodes.ASSET_DISABLED
 
-    if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-        asset.did, service.id, service.service_endpoint
-    ):
+    if userdata is not None:
+        result_check = DataServiceProvider.check_asset_file_info(
+            asset.did, service.id, service.service_endpoint, userdata=userdata
+        )
+    else:
+        result_check = DataServiceProvider.check_asset_file_info(
+            asset.did, service.id, service.service_endpoint
+        )
+
+    if with_connectivity_check and not result_check:
         return ConsumableCodes.CONNECTIVITY_FAIL
 
     # to be parameterized in the future, can implement other credential classes

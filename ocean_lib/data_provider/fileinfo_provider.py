@@ -33,12 +33,14 @@ class FileInfoProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def fileinfo(
-        did: str, service: Any, with_checksum: bool = False
+        did: str, service: Any, with_checksum: bool = False, userdata: dict = None
     ) -> Response:  # Can not add Service typing due to enforce_type errors.
         _, fileinfo_endpoint = DataServiceProviderBase.build_fileinfo(
             service.service_endpoint
         )
         payload = {"did": did, "serviceId": service.id}
+        if userdata is not None:
+            payload["userdata"] = userdata
 
         if with_checksum:
             payload["checksum"] = 1
