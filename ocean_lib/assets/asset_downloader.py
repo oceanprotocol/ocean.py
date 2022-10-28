@@ -96,9 +96,12 @@ def is_consumable(
     if asset.is_disabled:
         return ConsumableCodes.ASSET_DISABLED
 
-    if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-        asset.did, service.id, service.service_endpoint, userdata=userdata
-    ):
+    if userdata is not None:
+        result_check = DataServiceProvider.check_asset_file_info(asset.did, service.id, service.service_endpoint, userdata=userdata)
+    else:
+        result_check = DataServiceProvider.check_asset_file_info(asset.did, service.id, service.service_endpoint)
+
+    if with_connectivity_check and not result_check:
         return ConsumableCodes.CONNECTIVITY_FAIL
 
     # to be parameterized in the future, can implement other credential classes

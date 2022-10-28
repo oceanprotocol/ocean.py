@@ -38,7 +38,9 @@ class FileInfoProvider(DataServiceProviderBase):
         _, fileinfo_endpoint = DataServiceProviderBase.build_fileinfo(
             service.service_endpoint
         )
-        payload = {"did": did, "serviceId": service.id, "userdata": userdata}
+        payload = {"did": did, "serviceId": service.id}
+        if userdata is not None:
+            payload["userdata"] = userdata
 
         if with_checksum:
             payload["checksum"] = 1

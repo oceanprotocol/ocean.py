@@ -146,7 +146,10 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> None:
         service_endpoint = service.service_endpoint
-        fileinfo_response = FileInfoProvider.fileinfo(did, service, userdata=userdata)
+        if userdata is not None:
+            fileinfo_response = FileInfoProvider.fileinfo(did, service, userdata=userdata)
+        else:
+            fileinfo_response = FileInfoProvider.fileinfo(did, service)
 
         files = fileinfo_response.json()
         indexes = range(len(files))
@@ -553,12 +556,15 @@ class DataServiceProvider(DataServiceProviderBase):
 
     @staticmethod
     @enforce_types
-    def check_asset_file_info(did: str, service_id: str, provider_uri: str, userdata: dict = None) -> bool:
+    def check_asset_file_info(did: str, service_id: str, provider_uri: str, userdata: Optional[dict] = None) -> bool:
         if not did:
             return False
 
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": did, "serviceId": service_id, "userdata": userdata}
+        data = {"did": did, "serviceId": service_id}
+        if userdata is not None:
+            data["userdata"] = userdata
+
         response = requests.post(endpoint, json=data)
 
         if not response or response.status_code != 200:
