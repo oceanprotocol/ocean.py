@@ -83,6 +83,8 @@ userdata = {
     "path": [WETH, UNI]
 }
 
+service = asset.services[0]
+
 # pay for acces to the service
 order_tx_id = ocean.assets.pay_for_access_service(
     asset,
