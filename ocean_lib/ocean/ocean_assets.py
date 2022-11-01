@@ -694,6 +694,7 @@ class OceanAssets:
         :return: List of assets that match with the query
         """
         logger.info(f"Searching asset containing: {text}")
+        text = text.replace(":", "\\:").replace("\\\\:", "\\:")
         return [
             Asset.from_dict(ddo_dict["_source"])
             for ddo_dict in self._aquarius.query_search(
