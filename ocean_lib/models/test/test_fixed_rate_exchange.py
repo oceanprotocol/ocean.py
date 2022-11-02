@@ -88,7 +88,7 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
     ) == ocean_token.allowance(
         exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        {"from": fixed_exchange.address},
+        fixed_exchange.address,
     )
 
     # Consumer_wallet approves how many DT tokens wants to sell
@@ -211,7 +211,7 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
     ) == ocean_token.allowance(
         exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        {"from": fixed_exchange.address},
+        fixed_exchange.address,
     )
 
     # Fixed Rate Exchange owner withdraws DT balance

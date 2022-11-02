@@ -547,7 +547,7 @@ def test_erc721_datatoken_functions(
         to_wei("0.2"),
         {"from": publisher_wallet},
     )
-    assert datatoken.balanceOf(account=consumer_addr) == to_wei("0.2")
+    assert datatoken.balanceOf(consumer_addr) == to_wei("0.2")
     assert data_nft.owner_of(token_id=1) == publisher_addr
 
     data_nft.transfer_from(
@@ -727,12 +727,10 @@ def test_transfer_nft(
     )
 
     # Make consumer the publish_market_order_fee_address instead of publisher
-    tx_result = datatoken.setPublishingMarketFee(
+    receipt = datatoken.setPublishingMarketFee(
         consumer_addr, ocean_token.address, to_wei(1), {"from": publisher_wallet}
     )
 
-    assert tx_result, "Failed to set the publish fee."
-    receipt = TransactionReceipt(tx_result)
     set_publishing_fee_event = receipt.events[
         Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED
     ]

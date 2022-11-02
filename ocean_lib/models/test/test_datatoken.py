@@ -168,7 +168,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     )
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
-    tx = datatoken.orderExecuted(
+    receipt_interm = datatoken.orderExecuted(
         receipt.txid,
         Web3.toHex(Web3.toBytes(text=provider_data)),
         provider_signed,
@@ -177,7 +177,6 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         consumer_wallet.address,
         {"from": publisher_wallet},
     )
-    receipt_interm = TransactionReceipt(tx)
     executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
     assert executed_event["orderTxId"] == receipt.txid
     assert executed_event["providerAddress"] == provider_fee_address
@@ -213,7 +212,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         )
 
     # Tests reuses order
-    tx = datatoken.reuse_order(
+    receipt_interm = datatoken.reuse_order(
         receipt.txid,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
@@ -226,7 +225,6 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         from_wallet=publisher_wallet,
     )
-    receipt_interm = TransactionReceipt(tx)
     reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
     assert reused_event, "Cannot find OrderReused event"
     assert reused_event["orderTxId"] == receipt.txid
@@ -263,9 +261,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # Approve publisher to burn
     datatoken.approve(publisher_wallet.address, to_wei("10"), {"from": consumer_wallet})
 
-    allowance = datatoken.allowance(
-        consumer_wallet.address, {"from": publisher_wallet.address}
-    )
+    allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
     assert allowance == to_wei("10")
     datatoken.burnFrom(consumer_wallet.address, to_wei("2"), {"from": publisher_wallet})
 
