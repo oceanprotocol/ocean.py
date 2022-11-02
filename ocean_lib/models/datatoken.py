@@ -71,34 +71,6 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def check_provider_fee(
-        self,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: Union[int, str],
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        valid_until: int,
-        provider_data: Union[str, bytes],
-        from_wallet,
-    ) -> str:
-        return self.send_transaction(
-            "checkProviderFee",
-            (
-                ContractBase.to_checksum_address(provider_fee_address),
-                ContractBase.to_checksum_address(provider_fee_token),
-                int(provider_fee_amount),
-                v,
-                r,
-                s,
-                valid_until,
-                provider_data,
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
     def start_order(
         self,
         consumer: str,
@@ -169,88 +141,6 @@ class Datatoken(ContractBase):
                     provider_data,
                 ),
             ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def order_executed(
-        self,
-        order_tx_id: Union[str, bytes],
-        provider_data: Union[str, bytes],
-        provider_signature: Union[str, bytes],
-        consumer_data: Union[str, bytes],
-        consumer_signature: Union[str, bytes],
-        consumer: str,
-        from_wallet,
-    ) -> str:
-        return self.send_transaction(
-            "orderExecuted",
-            (
-                order_tx_id,
-                provider_data,
-                provider_signature,
-                consumer_data,
-                consumer_signature,
-                ContractBase.to_checksum_address(consumer),
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def transferFrom(
-        self, from_address: str, to_address: str, amount: int, from_wallet
-    ) -> str:
-        return self.send_transaction(
-            "transferFrom",
-            (
-                ContractBase.to_checksum_address(from_address),
-                ContractBase.to_checksum_address(to_address),
-                amount,
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def burn_from(self, from_address: str, amount: int, from_wallet) -> str:
-        return self.send_transaction(
-            "burnFrom",
-            (ContractBase.to_checksum_address(from_address), amount),
-            from_wallet,
-        )
-
-    @enforce_types
-    def is_minter(self, account: str) -> bool:
-        return self.contract.isMinter(ContractBase.to_checksum_address(account))
-
-    @enforce_types
-    def add_minter(self, minter_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addMinter",
-            (ContractBase.to_checksum_address(minter_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_minter(self, minter_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removeMinter",
-            (ContractBase.to_checksum_address(minter_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def add_payment_manager(self, fee_manager: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addPaymentManager",
-            (ContractBase.to_checksum_address(fee_manager),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_payment_manager(self, fee_manager: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removePaymentManager",
-            (ContractBase.to_checksum_address(fee_manager),),
             from_wallet,
         )
 

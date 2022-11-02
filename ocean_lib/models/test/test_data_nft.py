@@ -580,7 +580,7 @@ def test_erc721_datatoken_functions(
             {"from": consumer_wallet},
         )
 
-    datatoken.add_minter(minter_address=consumer_addr, from_wallet=consumer_wallet)
+    datatoken.addMinter(consumer_addr, {"from": consumer_wallet})
     datatoken.mint(
         consumer_addr,
         to_wei("0.2"),
@@ -716,9 +716,9 @@ def test_transfer_nft(
     datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(config, datatoken_address)
 
-    assert not datatoken.is_minter(publisher_addr)
-    assert datatoken.is_minter(consumer_addr)
-    datatoken.add_minter(publisher_addr, consumer_wallet)
+    assert not datatoken.isMinter(publisher_addr)
+    assert datatoken.isMinter(consumer_addr)
+    datatoken.addMinter(publisher_addr, {"from": consumer_wallet})
     assert datatoken.get_permissions(publisher_addr)[0]  # publisher is minter now
 
     ocean_token = publisher_ocean_instance.OCEAN_token
@@ -900,7 +900,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(config, datatoken_address)
 
-    assert datatoken.is_minter(publisher_addr)
+    assert datatoken.isMinter(publisher_addr)
 
     ocean_token = publisher_ocean_instance.OCEAN_token
 
@@ -965,7 +965,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert data_nft.owner_of(1) == consumer_addr
     permissions = datatoken.get_permissions(consumer_addr)
     assert not permissions[0]  # the newest owner is not the minter
-    datatoken.add_minter(consumer_addr, consumer_wallet)
+    datatoken.addMinter(consumer_addr, {"from": consumer_wallet})
     assert datatoken.permissions(consumer_addr)[0]
 
     # Consumer wallet has not become the owner of the publisher's exchange

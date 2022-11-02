@@ -51,7 +51,7 @@ def test_main(
 
     # Check minter permissions
     assert datatoken.get_permissions(publisher_wallet.address)[DatatokenRoles.MINTER]
-    assert datatoken.is_minter(publisher_wallet.address)
+    assert datatoken.isMinter(publisher_wallet.address)
 
     # Mint Datatoken to user2 from publisher
     datatoken.mint(consumer_wallet.address, 1, {"from": publisher_wallet})
@@ -59,7 +59,7 @@ def test_main(
 
     # Add minter
     assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
-    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
+    datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
     assert datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Mint Datatoken to user2 from consumer
@@ -67,22 +67,20 @@ def test_main(
     assert datatoken.balanceOf(consumer_wallet.address) == 2
 
     # Should succeed to removeMinter if erc20Deployer
-    datatoken.remove_minter(consumer_wallet.address, publisher_wallet)
+    datatoken.removeMinter(consumer_wallet.address, {"from": publisher_wallet})
     assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
     assert not datatoken.get_permissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
-    datatoken.add_payment_manager(consumer_wallet.address, publisher_wallet)
+    datatoken.addPaymentManager(consumer_wallet.address, {"from": publisher_wallet})
     assert datatoken.get_permissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
 
     # Should succeed to removeFeeManager if erc20Deployer
-    datatoken.remove_payment_manager(
-        fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
-    )
+    datatoken.removePaymentManager(consumer_wallet.address, {"from": publisher_wallet})
     assert not datatoken.get_permissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
@@ -169,14 +167,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     )
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
-    tx = datatoken.order_executed(
-        order_tx_id=receipt.txid,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        provider_signature=provider_signed,
-        consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-        consumer_signature=consumer_signed,
-        consumer=consumer_wallet.address,
-        from_wallet=publisher_wallet,
+    tx = datatoken.orderExecuted(
+        receipt.txid,
+        Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_signed,
+        Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signed,
+        consumer_wallet.address,
+        {"from": publisher_wallet},
     )
     receipt_interm = TransactionReceipt(tx)
     executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
@@ -186,14 +184,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     with pytest.raises(Exception, match="Consumer signature check failed"):
-        datatoken.order_executed(
+        datatoken.orderExecuted(
             receipt.txid,
-            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_signature=provider_signed,
-            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signature=consumer_signed,
-            consumer=consumer_wallet.address,
-            from_wallet=publisher_wallet,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet},
         )
 
     message = Web3.solidityKeccak(
@@ -203,14 +201,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     with pytest.raises(Exception, match="Provider signature check failed"):
-        datatoken.order_executed(
+        datatoken.orderExecuted(
             receipt.txid,
-            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_signature=signed,
-            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signature=consumer_signed,
-            consumer=consumer_wallet.address,
-            from_wallet=publisher_wallet,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet},
         )
 
     # Tests reuses order
@@ -266,7 +264,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
 
     allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
     assert allowance == to_wei("10")
-    datatoken.burn_from(consumer_wallet.address, to_wei("2"), publisher_wallet)
+    datatoken.burnFrom(consumer_wallet.address, to_wei("2"), {"from": publisher_wallet})
 
     assert datatoken.get_total_supply() == initial_total_supply - to_wei("2")
     assert datatoken.balanceOf(
@@ -318,26 +316,20 @@ def test_exceptions(consumer_wallet, datatoken):
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.add_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     #  Should fail to removeMinter even if it's minter
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.remove_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.removeMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.add_payment_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.addPaymentManager(consumer_wallet.address, {"from": consumer_wallet})
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.remove_payment_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
+        datatoken.removePaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet}
         )
 
     # Should fail to setData if NOT erc20Deployer

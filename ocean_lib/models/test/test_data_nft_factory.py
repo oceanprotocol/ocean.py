@@ -109,7 +109,7 @@ def test_main(
     assert data_nft_factory.get_current_template_count() == 2
 
     datatoken = Datatoken(config, datatoken_address)
-    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
+    datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
 
     # Tests creating NFT with ERC20 successfully
     tx = data_nft_factory.create_nft_with_erc20(
@@ -416,8 +416,8 @@ def test_start_multiple_order(
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
 
-    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
-    datatoken.mint(consumer_wallet.address, dt_amount, consumer_wallet)
+    datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
+    datatoken.mint(consumer_wallet.address, dt_amount, {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == dt_amount
 
     datatoken.approve(data_nft_factory_address, dt_amount, consumer_wallet)

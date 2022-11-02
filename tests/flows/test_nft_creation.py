@@ -350,7 +350,7 @@ def test_nft_owner_transfer(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    datatoken.add_minter(consumer_wallet.address, consumer_wallet)
+    datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
