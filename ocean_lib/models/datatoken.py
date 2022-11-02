@@ -35,10 +35,6 @@ class Datatoken(ContractBase):
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
     @enforce_types
-    def router(self) -> str:
-        return self.contract.router()
-
-    @enforce_types
     def create_fixed_rate(
         self,
         fixed_price_address: str,
@@ -71,36 +67,6 @@ class Datatoken(ContractBase):
                     with_mint,
                 ],
             ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def create_dispenser(
-        self,
-        dispenser_address: str,
-        max_tokens: int,
-        max_balance: int,
-        with_mint: bool,
-        allowed_swapper: str,
-        from_wallet,
-    ) -> str:
-        return self.send_transaction(
-            "createDispenser",
-            (
-                ContractBase.to_checksum_address(dispenser_address),
-                max_tokens,
-                max_balance,
-                with_mint,
-                ContractBase.to_checksum_address(allowed_swapper),
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def mint(self, account_address: str, value: int, from_wallet) -> str:
-        return self.send_transaction(
-            "mint",
-            (ContractBase.to_checksum_address(account_address), value),
             from_wallet,
         )
 
@@ -231,25 +197,6 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def transfer(self, to: str, amount: int, from_wallet) -> str:
-        return self.send_transaction(
-            "transfer", (ContractBase.to_checksum_address(to), amount), from_wallet
-        )
-
-    @enforce_types
-    def allowance(self, owner_address: str, spender_address: str) -> int:
-        return self.contract.allowance(
-            ContractBase.to_checksum_address(owner_address),
-            ContractBase.to_checksum_address(spender_address),
-        )
-
-    @enforce_types
-    def approve(self, spender: str, amount: int, from_wallet) -> str:
-        return self.send_transaction(
-            "approve", (ContractBase.to_checksum_address(spender), amount), from_wallet
-        )
-
-    @enforce_types
     def transferFrom(
         self, from_address: str, to_address: str, amount: int, from_wallet
     ) -> str:
@@ -262,10 +209,6 @@ class Datatoken(ContractBase):
             ),
             from_wallet,
         )
-
-    @enforce_types
-    def burn(self, amount: int, from_wallet) -> str:
-        return self.send_transaction("burn", (amount,), from_wallet)
 
     @enforce_types
     def burn_from(self, from_address: str, amount: int, from_wallet) -> str:
@@ -363,50 +306,12 @@ class Datatoken(ContractBase):
         return self.contract.name()
 
     @enforce_types
-    def symbol(self) -> str:
-        return self.contract.symbol()
-
-    @enforce_types
     def get_erc721_address(self) -> str:
         return self.contract.getERC721Address()
 
     @enforce_types
-    def decimals(self) -> int:
-        return self.contract.decimals()
-
-    @enforce_types
-    def cap(self) -> int:
-        return self.contract.cap()
-
-    @enforce_types
     def is_initialized(self) -> bool:
         return self.contract.isInitialized()
-
-    @enforce_types
-    def permit(
-        self,
-        owner_address: str,
-        spender_address: str,
-        value: int,
-        deadline: int,
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        from_wallet,
-    ) -> str:
-        return self.send_transaction(
-            "permit",
-            (
-                ContractBase.to_checksum_address(owner_address),
-                ContractBase.to_checksum_address(spender_address),
-                value,
-                deadline,
-                v,
-                r,
-                s,
-            ),
-            from_wallet,
-        )
 
     @enforce_types
     def get_address_length(self, array: List[str]) -> int:
@@ -443,10 +348,6 @@ class Datatoken(ContractBase):
     @enforce_types
     def get_permissions(self, user: str) -> list:
         return self.contract.getPermissions(ContractBase.to_checksum_address(user))
-
-    @enforce_types
-    def permissions(self, user: str) -> list:
-        return self.contract.permissions(ContractBase.to_checksum_address(user))
 
     @enforce_types
     def get_total_supply(self) -> int:

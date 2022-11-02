@@ -50,7 +50,7 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 Then, have Alice mint datatokens. In the same Python console:
 ```python
-datatoken.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
+datatoken.mint(alice_wallet.address, ocean.to_wei(100), {"from": alice_wallet})
 ```
 
 ## 3. Alice creates an OCEAN-datatoken exchange

@@ -183,9 +183,9 @@ def ocean_assets_download_destination_file_helper(
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     datatoken.mint(
-        account_address=publisher_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        publisher_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     initialize_response = data_provider.initialize(

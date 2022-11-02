@@ -118,9 +118,9 @@ def test_dispenser_creation_without_minter(
 
     # Tests publisher mints tokens and transfer them to the dispenser.
     datatoken.mint(
-        from_wallet=publisher_wallet,
-        account_address=dispenser.address,
-        value=to_wei("1"),
+        dispenser.address,
+        to_wei("1"),
+        {"from": publisher_wallet},
     )
 
     # Tests consumer requests data tokens

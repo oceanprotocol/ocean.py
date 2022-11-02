@@ -42,7 +42,7 @@ datatoken_address = asset.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 to_address = bob_wallet.address
 amt_tokens = ocean.to_wei(10) #just need 1, send more for spare
-datatoken.mint(to_address, amt_tokens, alice_wallet)
+datatoken.mint(to_address, amt_tokens, {"from": alice_wallet})
 ```
 
 ## 4. Bob downloads the dataset
@@ -93,7 +93,7 @@ file_path = ocean.assets.download_asset(
 ## Appendix: Further Flexibility Yet
 
 We can un-bundle even further:
-- `pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees. 
+- `pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees.
 - And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
 
 Here's how it looks, fully un-bundled.

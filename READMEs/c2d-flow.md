@@ -186,8 +186,8 @@ In the same Python console:
 ```python
 # Alice mints DATASET datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
-DATASET_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+DATASET_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
+ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
 ```
 
 ## 6. Bob starts a compute job using a free C2D environment

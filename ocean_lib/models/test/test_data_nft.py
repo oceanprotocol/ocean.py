@@ -543,9 +543,9 @@ def test_erc721_datatoken_functions(
 
     # Tests transfer functions
     datatoken.mint(
-        account_address=consumer_addr,
-        value=to_wei("0.2"),
-        from_wallet=publisher_wallet,
+        consumer_addr,
+        to_wei("0.2"),
+        {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(account=consumer_addr) == to_wei("0.2")
     assert data_nft.owner_of(token_id=1) == publisher_addr
@@ -575,16 +575,16 @@ def test_erc721_datatoken_functions(
     )
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
-            account_address=consumer_addr,
-            value=to_wei("1"),
-            from_wallet=consumer_wallet,
+            consumer_addr,
+            to_wei("1"),
+            {"from": consumer_wallet},
         )
 
     datatoken.add_minter(minter_address=consumer_addr, from_wallet=consumer_wallet)
     datatoken.mint(
-        account_address=consumer_addr,
-        value=to_wei("0.2"),
-        from_wallet=consumer_wallet,
+        consumer_addr,
+        to_wei("0.2"),
+        {"from": consumer_wallet},
     )
     assert datatoken.balanceOf(account=consumer_addr) == to_wei("0.4")
 

@@ -201,8 +201,8 @@ def exchange_swap_fees(
     # Mint datatokens to publisher and
     # Grant infinite approval for exchange to spend publisher's datatokens
     if with_mint != 1:
-        dt.mint(publisher_wallet.address, MAX_WEI, publisher_wallet)
-        dt.approve(exchange.address, MAX_WEI, publisher_wallet)
+        dt.mint(publisher_wallet.address, MAX_WEI, {"from": publisher_wallet})
+        dt.approve(exchange.address, MAX_WEI, {"from": publisher_wallet})
 
     one_base_token = parse_units("1", bt.decimals())
     dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))

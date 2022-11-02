@@ -255,21 +255,21 @@ def test_datatoken_creation(
 @pytest.mark.unit
 def test_datatoken_mint_function(config, publisher_wallet, consumer_wallet, datatoken):
     """Test datatoken failed/successful mint function"""
-    datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
-    datatoken.mint(consumer_wallet.address, 20, publisher_wallet)
+    datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet})
+    datatoken.mint(consumer_wallet.address, 20, {"from": publisher_wallet})
 
     assert datatoken.balanceOf(publisher_wallet.address) == 10
     assert datatoken.balanceOf(consumer_wallet.address) == 20
 
     # Tests failed mint
     with pytest.raises(Exception, match="NOT MINTER"):
-        datatoken.mint(publisher_wallet.address, 10, consumer_wallet)
+        datatoken.mint(publisher_wallet.address, 10, {"from": consumer_wallet})
 
     # Test with another minter
     _, datatoken_2 = deploy_erc721_erc20(config, publisher_wallet, consumer_wallet)
 
-    datatoken_2.mint(publisher_wallet.address, 10, consumer_wallet)
-    datatoken_2.mint(consumer_wallet.address, 20, consumer_wallet)
+    datatoken_2.mint(publisher_wallet.address, 10, {"from": consumer_wallet})
+    datatoken_2.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(publisher_wallet.address) == 10
     assert datatoken.balanceOf(consumer_wallet.address) == 20
@@ -335,7 +335,7 @@ def test_nft_owner_transfer(
         )
 
     with pytest.raises(Exception, match="NOT MINTER"):
-        datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
+        datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet})
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_erc20(
@@ -352,6 +352,6 @@ def test_nft_owner_transfer(
     )
     datatoken.add_minter(consumer_wallet.address, consumer_wallet)
 
-    datatoken.mint(consumer_wallet.address, 20, consumer_wallet)
+    datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20

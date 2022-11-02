@@ -54,7 +54,7 @@ def test_main(
     assert datatoken.is_minter(publisher_wallet.address)
 
     # Mint Datatoken to user2 from publisher
-    datatoken.mint(consumer_wallet.address, 1, publisher_wallet)
+    datatoken.mint(consumer_wallet.address, 1, {"from": publisher_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == 1
 
     # Add minter
@@ -63,7 +63,7 @@ def test_main(
     assert datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Mint Datatoken to user2 from consumer
-    datatoken.mint(consumer_wallet.address, 1, consumer_wallet)
+    datatoken.mint(consumer_wallet.address, 1, {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == 2
 
     # Should succeed to removeMinter if erc20Deployer
@@ -106,8 +106,8 @@ def test_main(
 def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datatoken):
     """Tests startOrder functionality without publish fees, consume fees."""
     # Mint datatokens to use
-    datatoken.mint(consumer_wallet.address, to_wei("10"), publisher_wallet)
-    datatoken.mint(publisher_wallet.address, to_wei("10"), publisher_wallet)
+    datatoken.mint(consumer_wallet.address, to_wei("10"), {"from": publisher_wallet})
+    datatoken.mint(publisher_wallet.address, to_wei("10"), {"from": publisher_wallet})
 
     # Set the fee collector address
     datatoken.set_payment_collector(
@@ -304,9 +304,9 @@ def test_exceptions(consumer_wallet, datatoken):
     # Should fail to mint if wallet is not a minter
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
-            account_address=consumer_wallet.address,
-            value=to_wei("1"),
-            from_wallet=consumer_wallet,
+            consumer_wallet.address,
+            to_wei("1"),
+            {"from": consumer_wallet},
         )
 
     #  Should fail to set new FeeCollector if not NFTOwner

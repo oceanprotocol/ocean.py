@@ -82,9 +82,9 @@ def test_consume_simple_graphql_query(
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Initialize service
@@ -222,9 +222,9 @@ def test_consume_parametrized_graphql_query(
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Initialize service

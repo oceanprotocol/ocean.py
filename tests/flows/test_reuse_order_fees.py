@@ -78,9 +78,9 @@ def test_reuse_order_fees(
 
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Mock non-zero provider fees (simulate first time paying provider fees)
@@ -100,7 +100,7 @@ def test_reuse_order_fees(
         bt.mint(
             consumer_wallet.address,
             parse_units("2000", bt.decimals()),
-            factory_deployer_wallet,
+            {"from": factory_deployer_wallet},
         )
 
     # Start order: pay order fees and provider fees

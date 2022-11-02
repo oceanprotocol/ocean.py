@@ -42,7 +42,7 @@ def test_exchange_rate_creation(
         config, get_address_of_type(config, "FixedPrice")
     )
 
-    datatoken.mint(consumer_addr, amount, publisher_wallet)
+    datatoken.mint(consumer_addr, amount, {"from": publisher_wallet})
     assert datatoken.balanceOf(consumer_addr) == amount
     number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
 

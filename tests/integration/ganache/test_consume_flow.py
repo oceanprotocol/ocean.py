@@ -70,9 +70,9 @@ def test_consume_flow(
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Initialize service
@@ -150,7 +150,7 @@ def test_compact_publish_and_consume(
     )
 
     # share access
-    datatoken.mint(consumer_wallet.address, to_wei(1), publisher_wallet)
+    datatoken.mint(consumer_wallet.address, to_wei(1), {"from": publisher_wallet})
 
     # consume
     _ = ocean_assets.download_file(asset.did, consumer_wallet)

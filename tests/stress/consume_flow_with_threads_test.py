@@ -77,9 +77,9 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     assert response.json()["providerFee"]
 
     datatoken.mint(
-        account_address=consumer_wallet.address,
-        value=ocean.to_wei(20),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        ocean.to_wei(20),
+        {"from": publisher_wallet},
     )
     # Start order for consumer
     provider_fees = response.json()["providerFee"]
