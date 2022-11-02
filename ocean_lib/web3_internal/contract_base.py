@@ -12,7 +12,6 @@ from eth_typing import ChecksumAddress
 from web3 import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
-from ocean_lib.web3_internal.transactions import wait_for_transaction_status
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger(__name__)
@@ -96,17 +95,21 @@ class ContractBase(object):
             # "nonce": nonce
         }
 
-        # only for debugging local ganache
-        # import time
-        # time.sleep(3)
-
-        if transact:
-            _transact.update(transact)
-
         receipt = getattr(self.contract, fn_name)(*fn_args, _transact)
 
-        txid = receipt.txid
+        return receipt.txid
 
-        return wait_for_transaction_status(
-            txid, self.config_dict["TRANSACTION_TIMEOUT"]
-        )
+    # TODO: possiblby uncomment
+    # def __getattribute__(self, attr):
+    #    # this is a temporary fix until we remove from_wallet
+    #    def make_interceptor(callble):
+    #        def func(*args, **kwargs):
+    #            if "from_wallet" in kwargs:
+    #                wallet = kwargs.pop("from_wallet")
+    #                args_new = (*args, {"from": wallet})
+    #            return callble(*args_new, **kwargs)
+    #        return func
+    #    try:
+    #        return object.__getattribute__(self, attr)
+    #    except AttributeError:
+    #        return make_interceptor(object.__getattribute__(self.contract, attr))
