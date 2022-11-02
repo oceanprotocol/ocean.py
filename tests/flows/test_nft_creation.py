@@ -287,7 +287,7 @@ def test_datatoken_set_data(config, publisher_wallet, data_nft, datatoken):
     value = b"SomeData"
 
     assert data_nft.get_data(key) == "0x"
-    datatoken.set_data(value, publisher_wallet)
+    datatoken.setData(value, {"from": publisher_wallet})
 
     assert data_nft.get_data(key).hex() == value.hex()
     """This one is the generic version of updating data into the key-value story.

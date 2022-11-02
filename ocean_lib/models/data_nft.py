@@ -302,10 +302,6 @@ class DataNFT(ContractBase):
         return self.contract.getAddressLength(array)
 
     @enforce_types
-    def get_id(self) -> int:
-        return self.contract.getId()
-
-    @enforce_types
     def get_permissions(self, user: str) -> list:
         return self.contract.getPermissions(ContractBase.to_checksum_address(user))
 

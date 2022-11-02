@@ -259,7 +259,7 @@ class Ocean:
         from_wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
-        datatoken.approve(fixed_price_address, amount, from_wallet)
+        datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
 
         tx = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,

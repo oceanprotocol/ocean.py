@@ -24,13 +24,13 @@ def test_main(
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     # Tests publisher creates a dispenser with minter role
-    _ = datatoken.create_dispenser(
-        dispenser_address=dispenser.address,
-        max_balance=to_wei("1"),
-        max_tokens=to_wei("1"),
-        with_mint=True,
-        allowed_swapper=ZERO_ADDRESS,
-        from_wallet=publisher_wallet,
+    _ = datatoken.createDispenser(
+        dispenser.address,
+        to_wei("1"),
+        to_wei("1"),
+        True,
+        ZERO_ADDRESS,
+        {"from": publisher_wallet},
     )
 
     # Tests publisher gets the dispenser status
@@ -98,13 +98,13 @@ def test_dispenser_creation_without_minter(
     # get the dispenser
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
-    datatoken.create_dispenser(
-        dispenser_address=dispenser.address,
-        max_balance=to_wei("1"),
-        max_tokens=to_wei("1"),
-        with_mint=False,
-        allowed_swapper=ZERO_ADDRESS,
-        from_wallet=publisher_wallet,
+    datatoken.createDispenser(
+        dispenser.address,
+        to_wei("1"),
+        to_wei("1"),
+        False,
+        ZERO_ADDRESS,
+        {"from": publisher_wallet},
     )
 
     # Tests consumer requests data tokens but they are not minted

@@ -420,9 +420,11 @@ def test_start_multiple_order(
     datatoken.mint(consumer_wallet.address, dt_amount, {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == dt_amount
 
-    datatoken.approve(data_nft_factory_address, dt_amount, consumer_wallet)
+    datatoken.approve(data_nft_factory_address, dt_amount, {"from": consumer_wallet})
 
-    datatoken.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
+    datatoken.setPaymentCollector(
+        another_consumer_wallet.address, {"from": publisher_wallet}
+    )
 
     provider_fee_token = mock_dai_contract_address
     provider_fee_amount = 0
@@ -475,7 +477,7 @@ def test_start_multiple_order(
     assert registered_erc20_start_order_event["consumer"] == consumer_wallet.address
 
     assert datatoken.balanceOf(consumer_wallet.address) == 0
-    assert datatoken.balanceOf(datatoken.get_payment_collector()) == (dt_amount * 0.97)
+    assert datatoken.balanceOf(datatoken.getPaymentCollector()) == (dt_amount * 0.97)
 
 
 @pytest.mark.unit

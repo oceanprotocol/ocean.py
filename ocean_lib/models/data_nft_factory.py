@@ -33,7 +33,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         """Checks that a token was registered."""
         data_nft_contract = DataNFT(self.config_dict, nft_address)
         try:
-            data_nft_contract.get_id()
+            data_nft_contract.getId()
             return True
         except BadFunctionCallOutput:
             return False
@@ -385,7 +385,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         exchange_owner: Optional[str] = None,
     ) -> list:
         datatoken_contract = Datatoken(self.config_dict, datatoken)
-        exchange_addresses_and_ids = datatoken_contract.get_fixed_rates()
+        exchange_addresses_and_ids = datatoken_contract.getFixedRates()
         return (
             exchange_addresses_and_ids
             if exchange_owner is None

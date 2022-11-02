@@ -75,30 +75,30 @@ access_service = asset.services[0]
 
 # Create & activate dispenser
 dispenser = ocean.dispenser
-tx = datatoken_enterprise_token.create_dispenser(
-    dispenser_address=dispenser.address,
-    allowed_swapper=ZERO_ADDRESS,
-    max_balance=ocean.to_wei(50),
-    with_mint=True,
-    max_tokens=ocean.to_wei(50),
-    from_wallet=alice_wallet,
+tx = datatoken_enterprise_token.createDispenser(
+    dispenser.address,
+    ZERO_ADDRESS,
+    ocean.to_wei(50),
+    True,
+    ocean.to_wei(50),
+    {"from": alice_wallet},
 )
 assert tx, "Dispenser not created!"
 
 OCEAN_token = ocean.OCEAN_token
 consume_fee_amount = ocean.to_wei(2)
-datatoken_enterprise_token.set_publishing_market_fee(
-    publish_market_order_fee_address=bob_wallet.address,
-    publish_market_order_fee_token=OCEAN_token.address,  # can be also USDC, DAI
-    publish_market_order_fee_amount=consume_fee_amount,
-    from_wallet=alice_wallet,
+datatoken_enterprise_token.setPublishingMarketFee(
+    bob_wallet.address,
+    OCEAN_token.address,  # can be also USDC, DAI
+    consume_fee_amount,
+    {"from": alice_wallet},
 )
 
 # Approve tokens
 OCEAN_token.approve(
-    spender=datatoken_enterprise_token.address,
-    amount=consume_fee_amount,
-    from_wallet=alice_wallet,
+    datatoken_enterprise_token.address,
+    consume_fee_amount,
+    {"from": alice_wallet},
 )
 
 # Prepare data for order
@@ -204,9 +204,9 @@ datatoken_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wa
 
 # Approve tokens
 OCEAN_token.approve(
-    spender=datatoken_enterprise_token.address,
-    amount=ocean.to_wei(1000),
-    from_wallet=alice_wallet,
+    datatoken_enterprise_token.address,
+    ocean.to_wei(1000),
+    {"from": alice_wallet},
 )
 # Approve consume market fee tokens before starting order.
 datatoken_enterprise_token.approve(
@@ -218,9 +218,9 @@ datatoken_enterprise_token.approve(
 # Transfer some Datatoken Enterprise tokens to Bob for buying from the FRE
 datatoken_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
 OCEAN_token.approve(
-    spender=datatoken_enterprise_token.address,
-    amount=ocean.to_wei(1000),
-    from_wallet=bob_wallet,
+    datatoken_enterprise_token.address,
+    ocean.to_wei(1000),
+    {"from": bob_wallet},
 )
 
 tx_id = datatoken_enterprise_token.buy_from_fre_and_order(

@@ -36,7 +36,7 @@ def test_exchange_rate_creation(
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
     publish_market_swap_fee = int(1e15)  # 0.1%
-    pmt_collector = datatoken.get_payment_collector()
+    pmt_collector = datatoken.getPaymentCollector()
 
     fixed_exchange = FixedRateExchange(
         config, get_address_of_type(config, "FixedPrice")
@@ -88,15 +88,17 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
     ) == ocean_token.allowance(
         exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        fixed_exchange.address,
+        {"from": fixed_exchange.address},
     )
 
     # Consumer_wallet approves how many DT tokens wants to sell
     # Consumer_wallet only approves an exact amount so we can check supply etc later in the test
-    datatoken.approve(fixed_exchange.address, amount_dt_to_sell, consumer_wallet)
+    datatoken.approve(
+        fixed_exchange.address, amount_dt_to_sell, {"from": consumer_wallet}
+    )
     # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
     ocean_token.approve(
-        fixed_exchange.address, to_wei("1000000"), another_consumer_wallet
+        fixed_exchange.address, to_wei("1000000"), {"from": another_consumer_wallet}
     )
 
     # Exchange should have supply and fees setup
@@ -178,7 +180,7 @@ def test_exchange_rate_creation(
     datatoken.approve(
         fixed_exchange.address,
         datatoken_dt_balance_consumer_before_swap,
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     datatoken_balance_before = datatoken.balanceOf(consumer_addr)
     ocean_balance_before = ocean_token.balanceOf(consumer_addr)
@@ -209,7 +211,7 @@ def test_exchange_rate_creation(
         exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
     ) == ocean_token.allowance(
         exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        fixed_exchange.address,
+        {"from": fixed_exchange.address},
     )
 
     # Fixed Rate Exchange owner withdraws DT balance
@@ -228,7 +230,7 @@ def test_exchange_rate_creation(
 
     # Fixed Rate Exchange owner withdraws BT balance
     # Needs to buy because he sold all the DT amount and BT balance will be 0.
-    datatoken.approve(fixed_exchange.address, to_wei(10), consumer_wallet)
+    datatoken.approve(fixed_exchange.address, to_wei(10), {"from": consumer_wallet})
 
     fixed_exchange.buy_dt(
         exchange_id,

@@ -44,7 +44,7 @@ def test_permissions(
 
     # Tests failing clearing permissions
     with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.clean_permissions(from_wallet=another_consumer_wallet)
+        data_nft.cleanPermissions({"from": another_consumer_wallet})
 
     # Tests clearing permissions
     data_nft.add_to_create_erc20_list(
@@ -61,9 +61,9 @@ def test_permissions(
     ]
     # Still is not the NFT owner, cannot clear permissions then
     with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.clean_permissions(from_wallet=another_consumer_wallet)
+        data_nft.cleanPermissions({"from": another_consumer_wallet})
 
-    data_nft.clean_permissions(from_wallet=publisher_wallet)
+    data_nft.cleanPermissions({"from": publisher_wallet})
 
     assert not (
         data_nft.get_permissions(user=publisher_addr)[
@@ -430,7 +430,7 @@ def test_create_datatoken_with_usdc_order_fee(
         publish_market_order_fee_address,
         publish_market_order_fee_token,
         publish_market_order_fee_amount,
-    ) = dt.get_publishing_market_fee()
+    ) = dt.getPublishingMarketFee()
     assert publish_market_order_fee_address == publisher_wallet.address
     assert publish_market_order_fee_token == usdc.address
     assert publish_market_order_fee_amount == publish_market_order_fee_amount_in_wei
@@ -722,11 +722,13 @@ def test_transfer_nft(
     assert datatoken.get_permissions(publisher_addr)[0]  # publisher is minter now
 
     ocean_token = publisher_ocean_instance.OCEAN_token
-    ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
+    ocean_token.approve(
+        factory_router.address, to_wei(10000), {"from": consumer_wallet}
+    )
 
     # Make consumer the publish_market_order_fee_address instead of publisher
-    tx_result = datatoken.set_publishing_market_fee(
-        consumer_addr, ocean_token.address, to_wei(1), publisher_wallet
+    tx_result = datatoken.setPublishingMarketFee(
+        consumer_addr, ocean_token.address, to_wei(1), {"from": publisher_wallet}
     )
 
     assert tx_result, "Failed to set the publish fee."
@@ -736,7 +738,7 @@ def test_transfer_nft(
     ]
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
 
-    publish_fees = datatoken.get_publishing_market_fee()
+    publish_fees = datatoken.getPublishingMarketFee()
     assert publish_fees[0] == consumer_addr
     assert publish_fees[1] == ocean_token.address
     assert publish_fees[2] == to_wei(1)
@@ -814,8 +816,9 @@ def test_nft_transfer_with_fre(
     assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.WITH_MINT]
 
-    datatoken.approve(fixed_exchange.address, to_wei(100), consumer_wallet)
-    ocean_token.approve(fixed_exchange.address, to_wei(100), consumer_wallet)
+    datatoken.approve(fixed_exchange.address, to_wei(100), {"from": consumer_wallet})
+    ocean_token.approve(fixed_exchange.address, to_wei(100), {"from": consumer_wallet})
+
     amount_dt_bought = to_wei(2)
     fixed_exchange.buy_dt(
         exchange_id=exchange_id,

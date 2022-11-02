@@ -31,13 +31,13 @@ def test_buy_from_dispenser_and_order(
     mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
-    _ = datatoken_enterprise_token.create_dispenser(
-        dispenser_address=dispenser.address,
-        allowed_swapper=ZERO_ADDRESS,
-        max_balance=to_wei("1"),
-        with_mint=True,
-        max_tokens=to_wei("1"),
-        from_wallet=publisher_wallet,
+    _ = datatoken_enterprise_token.createDispenser(
+        dispenser.address,
+        ZERO_ADDRESS,
+        to_wei("1"),
+        True,
+        to_wei("1"),
+        {"from": publisher_wallet},
     )
 
     status = dispenser.status(datatoken_enterprise_token.address)
@@ -59,13 +59,13 @@ def test_buy_from_dispenser_and_order(
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
-    datatoken_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_address=consume_fee_address,
-        publish_market_order_fee_token=mock_usdc_contract.address,
-        publish_market_order_fee_amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+    datatoken_enterprise_token.setPublishingMarketFee(
+        consume_fee_address,
+        mock_usdc_contract.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
-    publish_fees = datatoken_enterprise_token.get_publishing_market_fee()
+    publish_fees = datatoken_enterprise_token.getPublishingMarketFee()
 
     mock_usdc_contract.transfer(
         to=publisher_wallet.address,
@@ -201,13 +201,13 @@ def test_buy_from_fre_and_order(
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
-    datatoken_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_address=consume_fee_address,
-        publish_market_order_fee_token=mock_usdc_contract.address,
-        publish_market_order_fee_amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+    datatoken_enterprise_token.setPublishingMarketFee(
+        consume_fee_address,
+        mock_usdc_contract.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
-    publish_fees = datatoken_enterprise_token.get_publishing_market_fee()
+    publish_fees = datatoken_enterprise_token.getPublishingMarketFee()
 
     mock_usdc_contract.transfer(
         to=publisher_wallet.address,

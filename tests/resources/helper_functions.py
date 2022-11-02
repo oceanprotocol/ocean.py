@@ -95,7 +95,7 @@ def generate_wallet():
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
-        generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
+        generated_wallet.address, to_wei(50), {"from": deployer_wallet}
     )
     return generated_wallet
 
@@ -262,7 +262,7 @@ def transfer_base_token_if_balance_lte(
         initial_recipient_balance <= min_balance
         and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
     ):
-        base_token.transfer(recipient, amount_to_transfer, from_wallet)
+        base_token.transfer(recipient, amount_to_transfer, {"from": from_wallet})
 
     return base_token.balanceOf(recipient) - initial_recipient_balance
 

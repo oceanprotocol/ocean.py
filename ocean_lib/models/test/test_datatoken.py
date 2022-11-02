@@ -27,27 +27,27 @@ def test_main(
     """Tests successful function calls"""
 
     # Check datatoken params
-    assert datatoken.get_id() == 1
+    assert datatoken.getId() == 1
     assert datatoken.contract.name() == "DT1"
     assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256
 
     # Check data NFT address
-    assert datatoken.get_erc721_address() == data_nft.address
+    assert datatoken.getERC721Address() == data_nft.address
 
     # Check that the Datatoken contract is initialized
-    assert datatoken.is_initialized()
+    assert datatoken.isInitialized()
 
     # Check publish market payment collector
-    assert datatoken.get_payment_collector() == publisher_wallet.address
+    assert datatoken.getPaymentCollector() == publisher_wallet.address
 
     # Set payment collector to consumer
-    datatoken.set_payment_collector(
-        publish_market_order_fee_address=consumer_wallet.address,
-        from_wallet=publisher_wallet,
+    datatoken.setPaymentCollector(
+        consumer_wallet.address,
+        {"from": publisher_wallet},
     )
-    assert datatoken.get_payment_collector() == consumer_wallet.address
+    assert datatoken.getPaymentCollector() == consumer_wallet.address
 
     # Check minter permissions
     assert datatoken.get_permissions(publisher_wallet.address)[DatatokenRoles.MINTER]
@@ -89,12 +89,12 @@ def test_main(
     value = Web3.toHex(text="SomeData")
     key = Web3.keccak(hexstr=datatoken.address)
 
-    datatoken.set_data(data=value, from_wallet=publisher_wallet)
+    datatoken.setData(value, {"from": publisher_wallet})
 
     assert Web3.toHex(data_nft.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
-    datatoken.clean_permissions(from_wallet=publisher_wallet)
+    datatoken.cleanPermissions({"from": publisher_wallet})
 
     permissions = datatoken.get_permissions(publisher_wallet.address)
     assert not permissions[DatatokenRoles.MINTER]
@@ -108,8 +108,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     datatoken.mint(publisher_wallet.address, to_wei("10"), {"from": publisher_wallet})
 
     # Set the fee collector address
-    datatoken.set_payment_collector(
-        get_address_of_type(config, "OPFCommunityFeeCollector"), publisher_wallet
+    datatoken.setPaymentCollector(
+        get_address_of_type(config, "OPFCommunityFeeCollector"),
+        {"from": publisher_wallet},
     )
 
     provider_fee_address = publisher_wallet.address
@@ -235,14 +236,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     assert provider_fee_event, "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params
-    datatoken.set_publishing_market_fee(
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
-        publish_market_order_fee_amount=to_wei("1.2"),
-        from_wallet=publisher_wallet,
+    datatoken.setPublishingMarketFee(
+        publisher_wallet.address,
+        get_address_of_type(config, "MockUSDC"),
+        to_wei("1.2"),
+        {"from": publisher_wallet},
     )
 
-    publish_fees = datatoken.get_publishing_market_fee()
+    publish_fees = datatoken.getPublishingMarketFee()
 
     # PublishMarketFeeAddress set previously
     assert publish_fees[0] == publisher_wallet.address
@@ -251,22 +252,24 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # PublishMarketFeeAmount set previously
     assert publish_fees[2] == to_wei("1.2")
     # Fee collector
-    assert datatoken.get_payment_collector() == get_address_of_type(
+    assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )
 
     # Publisher should succeed to burn some consumer's tokens using burnFrom
-    initial_total_supply = datatoken.get_total_supply()
+    initial_total_supply = datatoken.getTotalSupply()
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
-    datatoken.approve(publisher_wallet.address, to_wei("10"), consumer_wallet)
+    datatoken.approve(publisher_wallet.address, to_wei("10"), {"from": consumer_wallet})
 
-    allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
+    allowance = datatoken.allowance(
+        consumer_wallet.address, {"from": publisher_wallet.address}
+    )
     assert allowance == to_wei("10")
     datatoken.burnFrom(consumer_wallet.address, to_wei("2"), {"from": publisher_wallet})
 
-    assert datatoken.get_total_supply() == initial_total_supply - to_wei("2")
+    assert datatoken.getTotalSupply() == initial_total_supply - to_wei("2")
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("2")
@@ -282,14 +285,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
 
     # Consumer should be able to burn his tokens too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.burn(to_wei("1"), consumer_wallet)
+    datatoken.burn(to_wei("1"), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("1")
 
     # Consumer should be able to transfer too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.transfer(publisher_wallet.address, to_wei("1"), consumer_wallet)
+    datatoken.transfer(publisher_wallet.address, to_wei("1"), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("1")
@@ -309,9 +312,9 @@ def test_exceptions(consumer_wallet, datatoken):
 
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(Exception, match="NOT PAYMENT MANAGER or OWNER"):
-        datatoken.set_payment_collector(
-            publish_market_order_fee_address=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+        datatoken.setPaymentCollector(
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
@@ -334,14 +337,12 @@ def test_exceptions(consumer_wallet, datatoken):
 
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.set_data(
-            data=Web3.toHex(text="SomeData"), from_wallet=consumer_wallet
-        )
+        datatoken.setData(Web3.toHex(text="SomeData"), {"from": consumer_wallet})
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     with pytest.raises(Exception, match="not NFTOwner"):
-        datatoken.clean_permissions(from_wallet=consumer_wallet)
+        datatoken.cleanPermissions({"from": consumer_wallet})
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     with pytest.raises(Exception, match="NOT 721 Contract"):
-        datatoken.clean_from_721(from_wallet=consumer_wallet)
+        datatoken.cleanFrom721({"from": consumer_wallet})

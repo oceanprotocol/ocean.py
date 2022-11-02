@@ -94,7 +94,7 @@ def test_reuse_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, consumer_wallet)
+    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
 
     if base_token_name == "Ocean" and provider_fee_in_unit == "700":
         bt.mint(

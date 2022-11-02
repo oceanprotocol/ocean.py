@@ -43,7 +43,7 @@ def test_market_flow(
     )
 
     # Give the consumer some datatokens so they can order the service
-    datatoken.transfer(consumer_wallet.address, to_wei(10), publisher_wallet)
+    datatoken.transfer(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
 
     # Place order for the download service
     if consumer_type == "publisher":

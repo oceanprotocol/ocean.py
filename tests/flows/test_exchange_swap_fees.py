@@ -194,8 +194,8 @@ def exchange_swap_fees(
         assert details[FixedRateExchangeDetails.DT_SUPPLY] == 0
 
     # Grant infinite approvals for exchange to spend consumer's BT and DT
-    dt.approve(exchange.address, MAX_WEI, consumer_wallet)
-    bt.approve(exchange.address, MAX_WEI, consumer_wallet)
+    dt.approve(exchange.address, MAX_WEI, {"from": consumer_wallet})
+    bt.approve(exchange.address, MAX_WEI, {"from": consumer_wallet})
 
     # if the exchange cannot mint it's own datatokens,
     # Mint datatokens to publisher and
@@ -453,7 +453,7 @@ def collect_bt_or_dt_and_verify_balances(
     """Collet BT or Collect DT and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)
     dt = Datatoken(config, exchange_info[FixedRateExchangeDetails.DATATOKEN])
-    publish_market = dt.get_payment_collector()
+    publish_market = dt.getPaymentCollector()
 
     if token_address == dt.address:
         token = dt

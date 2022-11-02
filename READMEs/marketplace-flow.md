@@ -83,7 +83,7 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
 exchange_address = ocean.fixed_rate_exchange.address
 
 # Bob allows the exchange contract to spend some OCEAN
-OCEAN_token.approve(exchange_address, ocean.to_wei(100), bob_wallet)
+OCEAN_token.approve(exchange_address, ocean.to_wei(100), {"from": bob_wallet})
 
 # Bob starts the exchange. The contract takes some of his OCEAN and adds datatokens.
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS

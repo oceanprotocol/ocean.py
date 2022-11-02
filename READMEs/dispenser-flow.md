@@ -45,13 +45,13 @@ max_amount = ocean.to_wei(50)
 dispenser = ocean.dispenser
 
 # Create dispenser
-datatoken.create_dispenser(
-    dispenser_address=dispenser.address,
-    max_balance=max_amount,
-    max_tokens=max_amount,
-    with_mint=True,
-    allowed_swapper=ZERO_ADDRESS,
-    from_wallet=alice_wallet,
+datatoken.createDispenser(
+    dispenser.address,
+    max_amount,
+    max_amount,
+    True,
+    ZERO_ADDRESS,
+    {"from": alice_wallet},
 )
 
 dispenser_status = dispenser.status(datatoken.address)

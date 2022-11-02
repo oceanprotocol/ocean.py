@@ -136,7 +136,7 @@ def test_start_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, consumer_wallet)
+    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
 
     # Start order for consumer
     consume_market_order_fee = parse_units(
@@ -174,7 +174,7 @@ def test_start_order_fees(
     opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
-    publish_market_order_fee_amount = dt.get_publishing_market_fee()[2]
+    publish_market_order_fee_amount = dt.getPublishingMarketFee()[2]
     assert publish_market_order_fee_amount == publish_market_order_fee
 
     # Get Ocean community fee amount

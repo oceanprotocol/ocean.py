@@ -35,7 +35,7 @@ In the same Python console:
 name = "Binance API v3 klines"
 
 from datetime import datetime, timedelta
-end_datetime = datetime.now() 
+end_datetime = datetime.now()
 start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
@@ -49,13 +49,13 @@ print(f"Just published asset, with did={asset.did}")
 In the same Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-datatoken.create_dispenser(
-    dispenser_address=ocean.dispenser.address,
-    max_balance=ocean.to_wei(10000),
-    max_tokens=ocean.to_wei(10000),
-    with_mint=True,
-    allowed_swapper=ZERO_ADDRESS,
-    from_wallet=alice_wallet,
+datatoken.createDispenser(
+    ocean.dispenser.address,
+    ocean.to_wei(10000),
+    ocean.to_wei(10000),
+    True,
+    ZERO_ADDRESS,
+    {"from": alice_wallet},
 )
 dispenser_status = ocean.dispenser.status(datatoken.address)
 assert dispenser_status[0:3] == [True, alice_wallet.address, True]
@@ -87,7 +87,7 @@ with open(file_name, "r") as file:
     data_str = file.read().rstrip().replace('"', '')
 
 
-data = eval(data_str) 
+data = eval(data_str)
 
 #data is a list of lists
 # -Outer list has one 7 entries; one entry per day.
