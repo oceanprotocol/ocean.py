@@ -43,50 +43,50 @@ def test_main(
     # Tests consumer requests more datatokens then allowed transaction reverts
     with pytest.raises(Exception, match="Amount too high"):
         dispenser.dispense(
-            datatoken=datatoken.address,
-            amount=to_wei("20"),
-            destination=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            datatoken.address,
+            to_wei("20"),
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     # Tests consumer requests data tokens
     _ = dispenser.dispense(
-        datatoken=datatoken.address,
-        amount=to_wei("1"),
-        destination=consumer_wallet.address,
-        from_wallet=consumer_wallet,
+        datatoken.address,
+        to_wei("1"),
+        consumer_wallet.address,
+        {"from": consumer_wallet},
     )
 
     # Tests consumer requests more datatokens then exceeds maxBalance
     with pytest.raises(Exception, match="Caller balance too high"):
         dispenser.dispense(
-            datatoken=datatoken.address,
-            amount=to_wei("1"),
-            destination=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            datatoken.address,
+            to_wei("1"),
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     # Tests publisher deactivates the dispenser
-    dispenser.deactivate(from_wallet=publisher_wallet, datatoken=datatoken.address)
+    dispenser.deactivate(datatoken.address, {"from": publisher_wallet})
     status = dispenser.status(datatoken.address)
     assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
     with pytest.raises(Exception, match="Dispenser not active"):
         dispenser.dispense(
-            datatoken=datatoken.address,
-            amount=to_wei("0.00001"),
-            destination=factory_deployer_wallet.address,
-            from_wallet=factory_deployer_wallet,
+            datatoken.address,
+            to_wei("0.00001"),
+            factory_deployer_wallet.address,
+            {"from": factory_deployer_wallet},
         )
 
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
     with pytest.raises(Exception, match="Invalid owner"):
         dispenser.activate(
-            datatoken=datatoken.address,
-            max_tokens=to_wei("1"),
-            max_balance=to_wei("1"),
-            from_wallet=consumer_wallet,
+            datatoken.address,
+            to_wei("1"),
+            to_wei("1"),
+            {"from": consumer_wallet},
         )
 
 
@@ -110,10 +110,10 @@ def test_dispenser_creation_without_minter(
     # Tests consumer requests data tokens but they are not minted
     with pytest.raises(Exception, match="Not enough reserves"):
         dispenser.dispense(
-            datatoken=datatoken.address,
-            amount=to_wei("1"),
-            destination=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            datatoken.address,
+            to_wei("1"),
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     # Tests publisher mints tokens and transfer them to the dispenser.
@@ -125,14 +125,14 @@ def test_dispenser_creation_without_minter(
 
     # Tests consumer requests data tokens
     dispenser.dispense(
-        datatoken=datatoken.address,
-        amount=to_wei("1"),
-        destination=consumer_wallet.address,
-        from_wallet=consumer_wallet,
+        datatoken.address,
+        to_wei("1"),
+        consumer_wallet.address,
+        {"from": consumer_wallet},
     )
 
     # Tests publisher withdraws all datatokens
-    dispenser.owner_withdraw(datatoken=datatoken.address, from_wallet=publisher_wallet)
+    dispenser.ownerWithdraw(datatoken.address, {"from": publisher_wallet})
 
     status = dispenser.status(datatoken.address)
     assert status[5] == 0

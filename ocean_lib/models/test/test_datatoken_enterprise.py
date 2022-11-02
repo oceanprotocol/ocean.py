@@ -51,10 +51,10 @@ def test_buy_from_dispenser_and_order(
         match="This address is not allowed to request DT",
     ):
         dispenser.dispense(
-            datatoken=datatoken_enterprise_token.address,
-            amount=to_wei("1"),
-            destination=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            datatoken_enterprise_token.address,
+            to_wei("1"),
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     consume_fee_amount = to_wei("2")

@@ -751,7 +751,7 @@ class OceanAssets:
             if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
                 raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
             # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense_tokens(datatoken, amt_dispense_wei, wallet)
+            dispenser.dispense_tokens(datatoken, amt_dispense_wei, {"from": wallet})
 
         # send datatoken to the service, to get access
         print("Order access...")

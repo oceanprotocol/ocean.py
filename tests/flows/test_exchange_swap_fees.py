@@ -166,7 +166,7 @@ def exchange_swap_fees(
     assert market_fee_collector == publisher_wallet.address
 
     # Verify fees are configured correctly
-    if factory_router.is_approved_token(bt.address):
+    if factory_router.isApprovedToken(bt.address):
         assert opc_fee == OPC_SWAP_FEE_APPROVED
     else:
         assert opc_fee == OPC_SWAP_FEE_NOT_APPROVED

@@ -20,7 +20,7 @@ OPC_PROVIDER_FEE = to_wei("0")  # 0%
 # FactoryRouter methods
 @pytest.mark.unit
 def test_router_owner(factory_router: FactoryRouter):
-    assert Web3.isChecksumAddress(factory_router.router_owner())
+    assert Web3.isChecksumAddress(factory_router.routerOwner())
 
 
 @pytest.mark.unit
@@ -30,12 +30,12 @@ def test_factory(config: dict, factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_swap_ocean_fee(factory_router: FactoryRouter):
-    assert factory_router.swap_ocean_fee() == OPC_SWAP_FEE_APPROVED
+    assert factory_router.swapOceanFee() == OPC_SWAP_FEE_APPROVED
 
 
 @pytest.mark.unit
 def test_swap_non_ocean_fee(factory_router: FactoryRouter):
-    assert factory_router.swap_non_ocean_fee() == OPC_SWAP_FEE_NOT_APPROVED
+    assert factory_router.swapNonOceanFee() == OPC_SWAP_FEE_NOT_APPROVED
 
 
 @pytest.mark.unit
@@ -43,29 +43,25 @@ def test_is_approved_token(
     config: dict, factory_router: FactoryRouter, ocean_address: str
 ):
     """Tests that Ocean token has been added to the mapping"""
-    assert factory_router.is_approved_token(ocean_address)
-    assert not (factory_router.is_approved_token(ZERO_ADDRESS))
+    assert factory_router.isApprovedToken(ocean_address)
+    assert not (factory_router.isApprovedToken(ZERO_ADDRESS))
 
 
 @pytest.mark.unit
 def test_is_ss_contract(config: dict, factory_router: FactoryRouter):
     """Tests if ssContract address has been added to the mapping"""
-    assert factory_router.is_ss_contract(get_address_of_type(config, "Staking"))
+    assert factory_router.isSSContract(get_address_of_type(config, "Staking"))
 
 
 @pytest.mark.unit
 def test_is_fixed_rate_contract(config: dict, factory_router: FactoryRouter):
     """Tests that fixedRateExchange address is added to the mapping"""
-    assert factory_router.is_fixed_rate_contract(
-        get_address_of_type(config, "FixedPrice")
-    )
+    assert factory_router.isFixedRateContract(get_address_of_type(config, "FixedPrice"))
 
 
 @pytest.mark.unit
 def test_is_dispenser_contract(config: dict, factory_router: FactoryRouter):
-    assert factory_router.is_dispenser_contract(
-        get_address_of_type(config, "Dispenser")
-    )
+    assert factory_router.isDispenserContract(get_address_of_type(config, "Dispenser"))
 
 
 @pytest.mark.unit
@@ -76,7 +72,7 @@ def test_get_opc_fee(config: dict, factory_router: FactoryRouter, ocean_address:
 
 @pytest.mark.unit
 def test_get_opc_fees(factory_router: FactoryRouter):
-    assert factory_router.get_opc_fees() == [
+    assert factory_router.getOPCFees() == [
         OPC_SWAP_FEE_APPROVED,
         OPC_SWAP_FEE_NOT_APPROVED,
     ]
@@ -84,16 +80,16 @@ def test_get_opc_fees(factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_get_opc_consume_fee(factory_router: FactoryRouter):
-    assert factory_router.get_opc_consume_fee() == OPC_CONSUME_FEE
+    assert factory_router.getOPCConsumeFee() == OPC_CONSUME_FEE
 
 
 @pytest.mark.unit
 def test_get_opc_provider_fee(factory_router: FactoryRouter):
-    assert factory_router.get_opc_provider_fee() == OPC_PROVIDER_FEE
+    assert factory_router.getOPCProviderFee() == OPC_PROVIDER_FEE
 
 
 @pytest.mark.unit
 def test_opc_collector(config: dict, factory_router: FactoryRouter):
-    assert factory_router.get_opc_collector() == get_address_of_type(
+    assert factory_router.getOPCCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )

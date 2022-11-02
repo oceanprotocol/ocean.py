@@ -114,7 +114,7 @@ asset = ocean.assets.resolve(asset_did)
 datatoken_address = asset.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 amt_tokens = ocean.to_wei(1)
-ocean.dispenser.dispense_tokens(datatoken, amt_tokens, bob_wallet)
+ocean.dispenser.dispense_tokens(datatoken, amt_tokens, {"from": bob_wallet})
 
 # Bob sends a datatoken to the service to get access
 order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)

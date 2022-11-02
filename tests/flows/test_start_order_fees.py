@@ -178,7 +178,7 @@ def test_start_order_fees(
     assert publish_market_order_fee_amount == publish_market_order_fee
 
     # Get Ocean community fee amount
-    ocean_community_order_fee = factory_router.get_opc_consume_fee()
+    ocean_community_order_fee = factory_router.getOPCConsumeFee()
     assert ocean_community_order_fee == to_wei("0.03")
 
     one_datatoken = to_wei(1)
