@@ -174,18 +174,18 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=data_nft_publisher.address,
-        from_wallet=data_nft_publisher,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        data_nft_publisher.address,
+        {"from": data_nft_publisher},
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(receipt)
     data_nft = DataNFT(config_dict, token_address)
     if not datatoken_minter:
         return data_nft
@@ -220,7 +220,7 @@ def get_non_existent_nft_template(
     of an Data NFT Factory contract. Returns -1 if template was found.
     """
     for template_nbr in range(check_first):
-        [address, _] = data_nft_factory.get_nft_template(template_nbr)
+        [address, _] = data_nft_factory.getNFTTemplate(template_nbr)
         if address == ZERO_ADDRESS:
             return template_nbr
 

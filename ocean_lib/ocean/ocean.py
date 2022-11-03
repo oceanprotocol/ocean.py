@@ -161,19 +161,19 @@ class Ocean:
 
         nft_factory = self.get_nft_factory()
 
-        tx_id = nft_factory.deploy_erc721_contract(
-            name=name,
-            symbol=symbol,
-            template_index=template_index,
-            additional_metadata_updater=additional_metadata_updater,
-            additional_datatoken_deployer=additional_datatoken_deployer,
-            token_uri=token_uri,
-            transferable=transferable,
-            owner=owner if owner is not None else from_wallet.address,
-            from_wallet=from_wallet,
+        receipt = nft_factory.deployERC721Contract(
+            name,
+            symbol,
+            template_index,
+            additional_metadata_updater,
+            additional_datatoken_deployer,
+            token_uri,
+            transferable,
+            owner if owner is not None else from_wallet.address,
+            {"from": from_wallet},
         )
 
-        address = nft_factory.get_token_address(tx_id)
+        address = nft_factory.get_token_address(receipt)
         assert address, "new NFT token has no address"
         token = DataNFT(self.config_dict, address)
         return token

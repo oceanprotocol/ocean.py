@@ -208,7 +208,7 @@ def test_success_update_metadata(
     metadata_info = data_nft.getMetaData()
     assert not metadata_info[3]
 
-    receipt = data_nft.setMetadata(
+    receipt = data_nft.setMetaData(
         1,
         "http://myprovider:8030",
         b"0x123",
@@ -224,7 +224,7 @@ def test_success_update_metadata(
     assert metadata_info[3]
     assert metadata_info[0] == "http://myprovider:8030"
 
-    receipt = data_nft.setMetadata(
+    receipt = data_nft.setMetaData(
         1,
         "http://foourl",
         b"0x123",
@@ -280,7 +280,7 @@ def test_fails_update_metadata(consumer_wallet, consumer_addr, data_nft):
     )
 
     with pytest.raises(Exception, match="NOT METADATA_ROLE"):
-        data_nft.setMetadata(
+        data_nft.setMetaData(
             1,
             "http://myprovider:8030",
             b"0x123",
@@ -602,18 +602,17 @@ def test_transfer_nft(
 ):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT to TRANSFER",
-        symbol="NFTtT",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=consumer_addr,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_addr,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT to TRANSFER",
+        "NFTtT",
+        1,
+        ZERO_ADDRESS,
+        consumer_addr,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_addr,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
@@ -637,18 +636,17 @@ def test_transfer_nft(
     assert data_nft.ownerOf(1) == consumer_addr
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT1",
-        symbol="NFT",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_addr,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT1",
+        "NFT",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_addr,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     token_address = registered_event["newTokenAddress"]
@@ -833,18 +831,17 @@ def test_transfer_nft_with_erc20_pool_fre(
 ):
     """Tests transferring the NFT after deploying an ERC20, a pool, a FRE."""
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT to TRANSFER",
-        symbol="NFTtT",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=consumer_addr,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_addr,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT to TRANSFER",
+        "NFTtT",
+        1,
+        ZERO_ADDRESS,
+        consumer_addr,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_addr,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_addr
     token_address = registered_event["newTokenAddress"]

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
@@ -28,19 +27,18 @@ def test_data_nft_roles(
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        additional_metadata_updater=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
 
-    receipt = TransactionReceipt(tx)
     assert "NFTCreated" in receipt.events
     assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
 
@@ -117,16 +115,16 @@ def test_nonexistent_template_index(config, publisher_wallet):
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.deploy_erc721_contract(
-            name="DT1",
-            symbol="DTSYMBOL",
-            template_index=non_existent_nft_template,
-            additional_datatoken_deployer=ZERO_ADDRESS,
-            additional_metadata_updater=ZERO_ADDRESS,
-            token_uri="https://oceanprotocol.com/nft/",
-            transferable=True,
-            owner=publisher_wallet.address,
-            from_wallet=publisher_wallet,
+        data_nft_factory.deployERC721Contract(
+            "DT1",
+            "DTSYMBOL",
+            non_existent_nft_template,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+            True,
+            publisher_wallet.address,
+            {"from": publisher_wallet},
         )
 
 
@@ -137,19 +135,18 @@ def test_successful_data_nft_creation(config, publisher_wallet):
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        additional_metadata_updater=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
 
-    receipt = TransactionReceipt(tx)
     assert "NFTCreated" in receipt.events
     assert receipt.events["NFTCreated"]["admin"] == publisher_wallet.address
 
@@ -168,19 +165,19 @@ def test_nft_count(config, publisher_wallet):
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    current_nft_count = data_nft_factory.get_current_nft_count()
-    data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        additional_metadata_updater=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    current_nft_count = data_nft_factory.getCurrentNFTCount()
+    data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    assert data_nft_factory.get_current_nft_count() == current_nft_count + 1
+    assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
 
 @pytest.mark.unit
@@ -190,7 +187,7 @@ def test_nft_template(config):
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    nft_template = data_nft_factory.get_nft_template(1)
+    nft_template = data_nft_factory.getNFTTemplate(1)
     assert nft_template[0] == get_address_of_type(config, "ERC721Template")
     assert nft_template[1] is True
 
@@ -204,19 +201,19 @@ def test_datatoken_creation(
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        additional_metadata_updater=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
 
-    token_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
+    token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     tx_result = data_nft.create_erc20(
@@ -231,7 +228,7 @@ def test_datatoken_creation(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    datatoken_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
+    datatoken_address = receipt.events["NFTCreated"]["newTokenAddress"]
 
     datatoken = Datatoken(config, datatoken_address)
 

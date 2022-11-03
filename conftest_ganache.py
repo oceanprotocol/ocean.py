@@ -157,18 +157,18 @@ def provider_wallet():
 
 @pytest.fixture
 def data_nft(config, publisher_wallet, data_nft_factory):
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(receipt)
     return DataNFT(config, token_address)
 
 

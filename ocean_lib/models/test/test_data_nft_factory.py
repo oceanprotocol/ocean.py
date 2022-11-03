@@ -33,18 +33,17 @@ def test_main(
     )
     data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="DT1",
-        symbol="DTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "DT1",
+        "DTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     assert registered_event["admin"] == publisher_wallet.address
@@ -54,23 +53,23 @@ def test_main(
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
-    current_nft_count = data_nft_factory.get_current_nft_count()
-    data_nft_factory.deploy_erc721_contract(
-        name="DT2",
-        symbol="DTSYMBOL1",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    current_nft_count = data_nft_factory.getCurrentNFTCount()
+    data_nft_factory.deployERC721Contract(
+        "DT2",
+        "DTSYMBOL1",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    assert data_nft_factory.get_current_nft_count() == current_nft_count + 1
+    assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
     nft_template_address = get_address_of_type(config, DataNFT.CONTRACT_NAME, "1")
-    nft_template = data_nft_factory.get_nft_template(1)
+    nft_template = data_nft_factory.getNFTTemplate(1)
     assert nft_template[0] == nft_template_address
     assert nft_template[1] is True
 
@@ -95,18 +94,18 @@ def test_main(
     datatoken_address = registered_token_event["newTokenAddress"]
 
     # Tests templateCount function (one of them should be the Enterprise template)
-    assert data_nft_factory.template_count() == 2
+    assert data_nft_factory.templateCount() == 2
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
         config, Datatoken.CONTRACT_NAME, "1"
     )
-    template = data_nft_factory.get_token_template(1)
+    template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.get_current_template_count() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 2
 
     datatoken = Datatoken(config, datatoken_address)
     datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
@@ -331,18 +330,17 @@ def test_start_multiple_order(
     )
     data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="DT1",
-        symbol="DTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "DT1",
+        "DTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     assert registered_event["admin"] == publisher_wallet.address
@@ -353,23 +351,23 @@ def test_start_multiple_order(
     assert data_nft_factory.check_nft(token_address)
 
     # Tests current NFT count
-    current_nft_count = data_nft_factory.get_current_nft_count()
-    data_nft_factory.deploy_erc721_contract(
-        name="DT2",
-        symbol="DTSYMBOL1",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    current_nft_count = data_nft_factory.getCurrentNFTCount()
+    data_nft_factory.deployERC721Contract(
+        "DT2",
+        "DTSYMBOL1",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    assert data_nft_factory.get_current_nft_count() == current_nft_count + 1
+    assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
     nft_template_address = get_address_of_type(config, DataNFT.CONTRACT_NAME, "1")
-    nft_template = data_nft_factory.get_nft_template(1)
+    nft_template = data_nft_factory.getNFTTemplate(1)
     assert nft_template[0] == nft_template_address
     assert nft_template[1] is True
 
@@ -394,18 +392,18 @@ def test_start_multiple_order(
     datatoken_address = registered_token_event["newTokenAddress"]
 
     # Tests templateCount function (one of them should be the Enterprise template)
-    assert data_nft_factory.template_count() == 2
+    assert data_nft_factory.templateCount() == 2
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
         config, Datatoken.CONTRACT_NAME, "1"
     )
-    template = data_nft_factory.get_token_template(1)
+    template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.get_current_template_count() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 2
 
     # Tests datatoken can be checked as deployed by the factory
     assert data_nft_factory.check_datatoken(datatoken_address)
@@ -490,11 +488,11 @@ def test_fail_get_templates(config):
 
     # Should fail to get the Datatoken template if index = 0
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.get_token_template(0)
+        data_nft_factory.getTokenTemplate(0)
 
     # Should fail to get the Datatoken template if index > templateCount
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.get_token_template(3)
+        data_nft_factory.getTokenTemplate(3)
 
 
 @pytest.mark.unit
@@ -508,18 +506,17 @@ def test_fail_create_erc20(
     )
     data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="DT1",
-        symbol="DTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "DT1",
+        "DTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]

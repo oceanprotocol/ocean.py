@@ -4,7 +4,6 @@
 #
 from typing import List, Optional, Union
 
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
@@ -37,68 +36,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             return True
         except BadFunctionCallOutput:
             return False
-
-    @enforce_types
-    def deploy_erc721_contract(
-        self,
-        name: str,
-        symbol: str,
-        template_index: int,
-        additional_metadata_updater: str,
-        additional_datatoken_deployer: str,
-        token_uri: str,
-        transferable: bool,
-        owner: str,
-        from_wallet,
-    ):
-        return self.send_transaction(
-            "deployERC721Contract",
-            (
-                name,
-                symbol,
-                template_index,
-                ContractBase.to_checksum_address(additional_metadata_updater),
-                ContractBase.to_checksum_address(additional_datatoken_deployer),
-                token_uri,
-                transferable,
-                ContractBase.to_checksum_address(owner),
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def get_current_nft_count(self) -> int:
-        return self.contract.getCurrentNFTCount()
-
-    @enforce_types
-    def get_nft_template(self, template_index: int) -> list:
-        return self.contract.getNFTTemplate(template_index)
-
-    @enforce_types
-    def get_current_nft_template_count(self) -> int:
-        return self.contract.getCurrentNFTTemplateCount()
-
-    @enforce_types
-    def is_contract(self, account_address: str) -> bool:
-        return self.contract.isContract(
-            ContractBase.to_checksum_address(account_address)
-        )
-
-    @enforce_types
-    def get_current_token_count(self) -> int:
-        return self.contract.getCurrentTokenCount()
-
-    @enforce_types
-    def get_token_template(self, index: int) -> list:
-        return self.contract.getTokenTemplate(index)
-
-    @enforce_types
-    def get_current_template_count(self) -> int:
-        return self.contract.getCurrentTemplateCount()
-
-    @enforce_types
-    def template_count(self) -> int:
-        return self.contract.templateCount()
 
     @enforce_types
     def start_multiple_token_order(self, orders: List[OrderData], from_wallet) -> str:
@@ -398,9 +335,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         )
 
     @enforce_types
-    def get_token_address(self, tx_id: Union[str, bytes]):
-        receipt = TransactionReceipt(tx_id)
-
+    def get_token_address(self, receipt):
         return receipt.events["NFTCreated"]["newTokenAddress"]
 
     @enforce_types

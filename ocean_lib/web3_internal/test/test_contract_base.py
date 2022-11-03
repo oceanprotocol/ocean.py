@@ -15,6 +15,7 @@ class MyFactory(ContractBase):
 
     # super-simple functionality, because our main point here is to
     # test ContractBase itself, not a child class.
+    # TODO: possibly removing send transaction will render this moot
     @enforce_types
     def deploy_erc721_contract(self, erc721_data, from_wallet):
         return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)

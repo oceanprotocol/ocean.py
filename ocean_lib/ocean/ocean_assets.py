@@ -436,18 +436,17 @@ class OceanAssets:
             transferable = data_nft_transferable or True
             owner = data_nft_owner or publisher_wallet.address
             # register on-chain
-            tx_id = data_nft_factory.deploy_erc721_contract(
-                name=name,
-                symbol=symbol,
-                template_index=data_nft_template_index,
-                additional_metadata_updater=additional_metadata_updater,
-                additional_datatoken_deployer=additional_datatoken_deployer,
-                token_uri=token_uri,
-                transferable=transferable,
-                owner=owner,
-                from_wallet=publisher_wallet,
+            receipt = data_nft_factory.deployERC721Contract(
+                name,
+                symbol,
+                data_nft_template_index,
+                additional_metadata_updater,
+                additional_datatoken_deployer,
+                token_uri,
+                transferable,
+                owner,
+                {"from": publisher_wallet},
             )
-            receipt = TransactionReceipt(tx_id)
 
             registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
             data_nft_address = registered_event["newTokenAddress"]
@@ -587,7 +586,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        data_nft.setMetadata(
+        data_nft.setMetaData(
             0,
             provider_uri,
             Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
@@ -665,7 +664,7 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
-        tx_result = data_nft.setMetadata(
+        tx_result = data_nft.setMetaData(
             0,
             provider_uri,
             Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
