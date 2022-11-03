@@ -137,7 +137,7 @@ datatoken_enterprise_token.buy_from_dispenser_and_order(
     consume_market_order_fee_token=datatoken_enterprise_token.address,
     consume_market_order_fee_amount=0,
     dispenser_address=dispenser.address,
-    from_wallet=alice_wallet,
+    transaction_parameters={"from": alice_wallet},
 )
 increased_balance = OCEAN_token.balanceOf(bob_wallet.address)
 assert initial_bob_balance < increased_balance
@@ -242,7 +242,7 @@ tx_receipt = datatoken_enterprise_token.buy_from_fre_and_order(
     max_base_token_amount=ocean.to_wei(10),
     consume_market_swap_fee_amount=ocean.to_wei("0.001"),  # 1e15 => 0.1%
     consume_market_swap_fee_address=bob_wallet.address,
-    from_wallet=alice_wallet,
+    transaction_parameters={"from": alice_wallet},
 )
 
 assert tx_receipt.status == 1, "failed buying data tokens from FRE."

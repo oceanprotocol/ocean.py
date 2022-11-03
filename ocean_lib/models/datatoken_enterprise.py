@@ -33,7 +33,7 @@ class DatatokenEnterprise(Datatoken):
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.buyFromFreAndOrder(
             (
@@ -62,7 +62,7 @@ class DatatokenEnterprise(Datatoken):
                 consume_market_swap_fee_amount,
                 ContractBase.to_checksum_address(consume_market_swap_fee_address),
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -82,7 +82,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         dispenser_address: str,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.buyFromDispenserAndOrder(
             (
@@ -105,5 +105,5 @@ class DatatokenEnterprise(Datatoken):
                 ),
             ),
             ContractBase.to_checksum_address(dispenser_address),
-            {"from": from_wallet},
+            transaction_parameters,
         )

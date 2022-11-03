@@ -210,7 +210,7 @@ def ocean_assets_download_destination_file_helper(
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     orders = publisher_ocean_instance.get_user_orders(

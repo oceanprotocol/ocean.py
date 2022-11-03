@@ -156,7 +156,7 @@ def test_start_order_fees(
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
         consume_market_order_fee_amount=consume_market_order_fee,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Get balances

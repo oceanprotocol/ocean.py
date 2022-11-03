@@ -129,7 +129,7 @@ def test_buy_from_dispenser_and_order(
         consume_market_order_fee_token=mock_dai_contract.address,
         consume_market_order_fee_amount=0,
         dispenser_address=dispenser.address,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
@@ -175,7 +175,7 @@ def test_buy_from_fre_and_order(
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.1"),
         with_mint=1,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
@@ -271,7 +271,7 @@ def test_buy_from_fre_and_order(
         max_base_token_amount=to_wei("2.5"),
         consume_market_swap_fee_amount=to_wei("0.001"),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     assert datatoken_enterprise_token.get_total_supply() == to_wei("0")

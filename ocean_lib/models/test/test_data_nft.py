@@ -249,7 +249,7 @@ def test_success_update_metadata(
         token_id=1,
         token_uri="https://anothernewurl.com/nft/",
         metadata_proofs=[],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     assert (
@@ -744,7 +744,7 @@ def test_nft_transfer_with_fre(
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=1,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
@@ -875,7 +875,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]

@@ -47,7 +47,7 @@ class Datatoken(ContractBase):
         fixed_rate: int,
         publish_market_swap_fee_amount: int,
         with_mint: int,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.createFixedRate(
             ContractBase.to_checksum_address(fixed_price_address),
@@ -64,7 +64,7 @@ class Datatoken(ContractBase):
                 publish_market_swap_fee_amount,
                 with_mint,
             ],
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -83,7 +83,7 @@ class Datatoken(ContractBase):
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.startOrder(
             ContractBase.to_checksum_address(consumer),
@@ -103,7 +103,7 @@ class Datatoken(ContractBase):
                 ContractBase.to_checksum_address(consume_market_order_fee_token),
                 consume_market_order_fee_amount,
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -118,7 +118,7 @@ class Datatoken(ContractBase):
         s: Union[str, bytes],
         valid_until: int,
         provider_data: Union[str, bytes],
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.reuseOrder(
             order_tx_id,
@@ -132,7 +132,7 @@ class Datatoken(ContractBase):
                 valid_until,
                 provider_data,
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types

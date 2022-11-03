@@ -97,7 +97,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
         consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     # Download file
     destination = _create_downloads_path(tmpdir)

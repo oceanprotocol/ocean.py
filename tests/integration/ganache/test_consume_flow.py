@@ -99,7 +99,7 @@ def test_consume_flow(
         consume_market_order_fee_address=ZERO_ADDRESS,
         consume_market_order_fee_token=ZERO_ADDRESS,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Download file

@@ -111,7 +111,7 @@ def test_consume_simple_graphql_query(
         consume_market_order_fee_address=ZERO_ADDRESS,
         consume_market_order_fee_token=ZERO_ADDRESS,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Download file
@@ -251,7 +251,7 @@ def test_consume_parametrized_graphql_query(
         consume_market_order_fee_address=ZERO_ADDRESS,
         consume_market_order_fee_token=ZERO_ADDRESS,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Download file

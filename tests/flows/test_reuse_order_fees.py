@@ -118,7 +118,7 @@ def test_reuse_order_fees(
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
         consume_market_order_fee_amount=parse_units("10", bt.decimals()),
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Reuse order where:
@@ -239,7 +239,7 @@ def reuse_order_with_mock_provider_fees(
         s=provider_fees["s"],
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Get balances after reuse_order

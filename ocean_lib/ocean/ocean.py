@@ -271,7 +271,7 @@ class Ocean:
             fixed_rate=fixed_rate,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
-            from_wallet=from_wallet,
+            transaction_parameters={"from": from_wallet},
         )
 
         fixed_price_address == receipt.events[datatoken.EVENT_NEW_FIXED_RATE][

@@ -56,7 +56,7 @@ def test_exchange_rate_creation(
         fixed_rate=rate,
         publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]

@@ -853,7 +853,7 @@ class OceanAssets:
             consume_market_order_fee_address=consume_market_order_fee_address,
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            from_wallet=wallet,
+            transaction_parameters={"from": wallet},
         )
 
         return tx_id
@@ -942,7 +942,7 @@ class OceanAssets:
                 s=provider_fees["s"],
                 valid_until=provider_fees["validUntil"],
                 provider_data=provider_fees["providerData"],
-                from_wallet=wallet,
+                transaction_parameters={"from": wallet},
             )
             return
 
@@ -960,5 +960,5 @@ class OceanAssets:
             consume_market_order_fee_address=consume_market_order_fee_address,
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            from_wallet=wallet,
+            transaction_parameters={"from": wallet},
         )

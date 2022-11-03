@@ -60,7 +60,7 @@ class DataNFT(ContractBase):
         token_id: int,
         token_uri: str,
         metadata_proofs: List[MetadataProof],
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.setMetaDataAndTokenURI(
             (
@@ -74,7 +74,7 @@ class DataNFT(ContractBase):
                 token_uri,
                 metadata_proofs,
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -89,7 +89,7 @@ class DataNFT(ContractBase):
         publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
-        from_wallet,
+        transaction_parameters: dict,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if template_index == 2 and not datatoken_cap:
@@ -106,7 +106,7 @@ class DataNFT(ContractBase):
             ],
             [datatoken_cap, publish_market_order_fee_amount],
             bytess,
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types

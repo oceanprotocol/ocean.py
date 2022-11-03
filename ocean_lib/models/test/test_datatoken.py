@@ -146,7 +146,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei("9")
@@ -221,7 +221,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         valid_until=0,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
     assert reused_event, "Cannot find OrderReused event"

@@ -38,7 +38,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             return False
 
     @enforce_types
-    def start_multiple_token_order(self, orders: List[OrderData], from_wallet) -> str:
+    def start_multiple_token_order(
+        self, orders: List[OrderData], transaction_parameters: dict
+    ) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -66,7 +68,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
             order._replace(consume_fees=tuple(consume_fees))
 
-        return self.contract.startMultipleTokenOrder(orders, {"from": from_wallet})
+        return self.contract.startMultipleTokenOrder(orders, transaction_parameters)
 
     @enforce_types
     def create_nft_with_erc20(
@@ -86,7 +88,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_publish_market_order_fee_token: str,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
-        from_wallet,
+        transaction_parameters: dict,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -117,7 +119,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_cap, datatoken_publish_market_order_fee_amount],
                 datatoken_bytess,
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -148,7 +150,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_rate: int,
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
-        from_wallet,
+        transaction_parameters: dict,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -197,7 +199,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     fixed_price_with_mint,
                 ],
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types
@@ -223,7 +225,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         dispenser_max_balance: int,
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
-        from_wallet,
+        transaction_parameters: dict,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
@@ -261,7 +263,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 dispenser_with_mint,
                 ContractBase.to_checksum_address(dispenser_allowed_swapper),
             ),
-            from_wallet,
+            transaction_parameters,
         )
 
     @enforce_types
@@ -280,7 +282,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         metadata_data: Union[str, bytes],
         metadata_data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
         return self.contract.createNftWithMetaData(
             (
@@ -300,7 +302,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 metadata_data_hash,
                 metadata_proofs,
             ),
-            {"from": from_wallet},
+            transaction_parameters,
         )
 
     @enforce_types

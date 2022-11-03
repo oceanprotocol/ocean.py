@@ -125,7 +125,7 @@ def test_main(
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
@@ -195,7 +195,7 @@ def test_main(
         fixed_price_rate=to_wei("1"),
         fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
         fixed_price_with_mint=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
@@ -248,7 +248,7 @@ def test_main(
         dispenser_max_balance=to_wei(1),
         dispenser_with_mint=True,
         dispenser_allowed_swapper=ZERO_ADDRESS,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
@@ -296,7 +296,7 @@ def test_main(
         metadata_data=Web3.toHex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),
         metadata_proofs=[],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_nft_event, "Cannot find NFTCreated event"
@@ -458,7 +458,9 @@ def test_start_multiple_order(
 
     orders = [order_data, order_data]
 
-    receipt = data_nft_factory.start_multiple_token_order(orders, consumer_wallet)
+    receipt = data_nft_factory.start_multiple_token_order(
+        orders, {"from": consumer_wallet}
+    )
 
     registered_erc20_start_order_event = receipt.events[Datatoken.EVENT_ORDER_STARTED]
 
@@ -588,7 +590,7 @@ def test_datatoken_cap(
             datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
             datatoken_publish_market_order_fee_amount=0,
             datatoken_bytess=[b""],
-            from_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
         )
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
@@ -618,7 +620,7 @@ def test_datatoken_cap(
             fixed_price_rate=to_wei("1"),
             fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
             fixed_price_with_mint=0,
-            from_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
         )
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
@@ -643,5 +645,5 @@ def test_datatoken_cap(
             dispenser_max_balance=to_wei(1),
             dispenser_with_mint=True,
             dispenser_allowed_swapper=ZERO_ADDRESS,
-            from_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
         )

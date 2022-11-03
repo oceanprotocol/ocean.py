@@ -137,7 +137,7 @@ def exchange_swap_fees(
         fixed_rate=bt_per_dt_in_wei,
         publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=with_mint,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     assert (
         fixed_price_address
