@@ -62,22 +62,19 @@ class DataNFT(ContractBase):
         metadata_proofs: List[MetadataProof],
         from_wallet,
     ) -> str:
-        return self.send_transaction(
-            "setMetaDataAndTokenURI",
+        return self.contract.setMetaDataAndTokenURI(
             (
-                (
-                    metadata_state,
-                    metadata_decryptor_url,
-                    metadata_decryptor_address,
-                    flags,
-                    data,
-                    data_hash,
-                    token_id,
-                    token_uri,
-                    metadata_proofs,
-                ),
+                metadata_state,
+                metadata_decryptor_url,
+                metadata_decryptor_address,
+                flags,
+                data,
+                data_hash,
+                token_id,
+                token_uri,
+                metadata_proofs,
             ),
-            from_wallet,
+            {"from": from_wallet},
         )
 
     @enforce_types
@@ -98,21 +95,18 @@ class DataNFT(ContractBase):
         if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
-        return self.send_transaction(
-            "createERC20",
-            (
-                template_index,
-                [name, symbol],
-                [
-                    ContractBase.to_checksum_address(minter),
-                    ContractBase.to_checksum_address(fee_manager),
-                    ContractBase.to_checksum_address(publish_market_order_fee_address),
-                    ContractBase.to_checksum_address(publish_market_order_fee_token),
-                ],
-                [datatoken_cap, publish_market_order_fee_amount],
-                bytess,
-            ),
-            from_wallet,
+        return self.contract.createERC20(
+            template_index,
+            [name, symbol],
+            [
+                ContractBase.to_checksum_address(minter),
+                ContractBase.to_checksum_address(fee_manager),
+                ContractBase.to_checksum_address(publish_market_order_fee_address),
+                ContractBase.to_checksum_address(publish_market_order_fee_token),
+            ],
+            [datatoken_cap, publish_market_order_fee_amount],
+            bytess,
+            {"from": from_wallet},
         )
 
     @enforce_types

@@ -4,7 +4,6 @@
 #
 import pytest
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -75,7 +74,7 @@ def test_main(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    tx_result = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -87,8 +86,7 @@ def test_main(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    assert tx_result, "Failed to create ERC20 token."
-    receipt = TransactionReceipt(tx_result)
+    assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
@@ -111,7 +109,7 @@ def test_main(
     datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
 
     # Tests creating NFT with ERC20 successfully
-    tx = data_nft_factory.create_nft_with_erc20(
+    receipt = data_nft_factory.create_nft_with_erc20(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
         nft_template=1,
@@ -129,7 +127,6 @@ def test_main(
         datatoken_bytess=[b""],
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     # Verify if the NFT was created.
@@ -153,7 +150,7 @@ def test_main(
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
-    tx = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1P",
         symbol="DT1SymbolP",
@@ -165,15 +162,14 @@ def test_main(
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
-    assert tx, "Failed to create ERC20 token."
-    receipt = TransactionReceipt(tx)
+    assert receipt, "Failed to create ERC20 token."
     registered_fee_token_event = receipt.events[
         DataNFTFactoryContract.EVENT_TOKEN_CREATED
     ]
     assert registered_fee_token_event, "Cannot find TokenCreated event."
     fee_datatoken_address = registered_fee_token_event["newTokenAddress"]
 
-    tx = data_nft_factory.create_nft_erc20_with_fixed_rate(
+    receipt = data_nft_factory.create_nft_erc20_with_fixed_rate(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
         nft_template=1,
@@ -201,7 +197,6 @@ def test_main(
         fixed_price_with_mint=0,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     # Verify if the NFT was created.
@@ -232,7 +227,7 @@ def test_main(
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
 
-    tx = data_nft_factory.create_nft_erc20_with_dispenser(
+    receipt = data_nft_factory.create_nft_erc20_with_dispenser(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
         nft_template=1,
@@ -255,7 +250,6 @@ def test_main(
         dispenser_allowed_swapper=ZERO_ADDRESS,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
 
     # Verify if the NFT was created.
@@ -288,7 +282,7 @@ def test_main(
     ], "Invalid data token address by dispenser."
 
     # Create a new erc721 with metadata in one single call and get address
-    tx = data_nft_factory.create_nft_with_metadata(
+    receipt = data_nft_factory.create_nft_with_metadata(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
         nft_template=1,
@@ -304,7 +298,6 @@ def test_main(
         metadata_proofs=[],
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     registered_nft_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
     assert registered_nft_event, "Cannot find NFTCreated event"
     assert (
@@ -373,7 +366,7 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    tx_result = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -385,8 +378,7 @@ def test_start_multiple_order(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    assert tx_result, "Failed to create ERC20 token."
-    receipt = TransactionReceipt(tx_result)
+    assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
@@ -466,12 +458,11 @@ def test_start_multiple_order(
 
     orders = [order_data, order_data]
 
-    tx = data_nft_factory.start_multiple_token_order(orders, consumer_wallet)
-    receipt = TransactionReceipt(tx)
+    receipt = data_nft_factory.start_multiple_token_order(orders, consumer_wallet)
 
     registered_erc20_start_order_event = receipt.events[Datatoken.EVENT_ORDER_STARTED]
 
-    assert tx, "Failed starting multiple token orders."
+    assert receipt, "Failed starting multiple token orders."
     assert registered_erc20_start_order_event["consumer"] == consumer_wallet.address
 
     assert datatoken.balanceOf(consumer_wallet.address) == 0

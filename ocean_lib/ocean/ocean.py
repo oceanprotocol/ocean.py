@@ -9,7 +9,6 @@ import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
@@ -261,7 +260,7 @@ class Ocean:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
         datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
 
-        tx = datatoken.create_fixed_rate(
+        receipt = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,
             base_token_address=base_token.address,
             owner=from_wallet.address,
@@ -275,7 +274,6 @@ class Ocean:
             from_wallet=from_wallet,
         )
 
-        receipt = TransactionReceipt(tx)
         fixed_price_address == receipt.events[datatoken.EVENT_NEW_FIXED_RATE][
             "exchangeContract"
         ]

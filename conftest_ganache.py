@@ -4,7 +4,6 @@
 #
 import pytest
 from brownie.network import accounts
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
@@ -174,7 +173,7 @@ def data_nft(config, publisher_wallet, data_nft_factory):
 
 @pytest.fixture
 def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -187,7 +186,6 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
         from_wallet=publisher_wallet,
     )
 
-    receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
     return Datatoken(config, dt_address)
@@ -195,7 +193,7 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
 
 @pytest.fixture
 def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=2,
         name="DT1",
         symbol="DT1Symbol",
@@ -209,7 +207,6 @@ def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_fact
         datatoken_cap=to_wei(100),
     )
 
-    receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
     return DatatokenEnterprise(config, dt_address)

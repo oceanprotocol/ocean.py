@@ -65,7 +65,8 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             consume_fees[0] = ContractBase.to_checksum_address(order.consume_fees[0])
             consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
             order._replace(consume_fees=tuple(consume_fees))
-        return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
+
+        return self.contract.startMultipleTokenOrder(orders, {"from": from_wallet})
 
     @enforce_types
     def create_nft_with_erc20(
@@ -91,35 +92,32 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
-        return self.send_transaction(
-            "createNftWithErc20",
+        return self.contract.createNftWithErc20(
             (
-                (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    ContractBase.to_checksum_address(nft_owner),
-                ),
-                (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        ContractBase.to_checksum_address(datatoken_minter),
-                        ContractBase.to_checksum_address(datatoken_fee_manager),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_address
-                        ),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_token
-                        ),
-                    ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
-                ),
+                nft_name,
+                nft_symbol,
+                nft_template,
+                nft_token_uri,
+                nft_transferable,
+                ContractBase.to_checksum_address(nft_owner),
             ),
-            from_wallet,
+            (
+                datatoken_template,
+                [datatoken_name, datatoken_symbol],
+                [
+                    ContractBase.to_checksum_address(datatoken_minter),
+                    ContractBase.to_checksum_address(datatoken_fee_manager),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_token
+                    ),
+                ],
+                [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                datatoken_bytess,
+            ),
+            {"from": from_wallet},
         )
 
     @enforce_types
@@ -156,53 +154,50 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
-        return self.send_transaction(
-            "createNftWithErc20WithFixedRate",
+        return self.contract.createNftWithErc20WithFixedRate(
             (
-                (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    ContractBase.to_checksum_address(nft_owner),
-                ),
-                (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        ContractBase.to_checksum_address(datatoken_minter),
-                        ContractBase.to_checksum_address(datatoken_fee_manager),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_address
-                        ),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_token
-                        ),
-                    ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
-                ),
-                (
-                    ContractBase.to_checksum_address(fixed_price_address),
-                    [
-                        ContractBase.to_checksum_address(fixed_price_base_token),
-                        ContractBase.to_checksum_address(fixed_price_owner),
-                        ContractBase.to_checksum_address(
-                            fixed_price_publish_market_swap_fee_collector
-                        ),
-                        ContractBase.to_checksum_address(fixed_price_allowed_swapper),
-                    ],
-                    [
-                        fixed_price_base_token_decimals,
-                        fixed_price_datatoken_decimals,
-                        fixed_price_rate,
-                        fixed_price_publish_market_swap_fee_amount,
-                        fixed_price_with_mint,
-                    ],
-                ),
+                nft_name,
+                nft_symbol,
+                nft_template,
+                nft_token_uri,
+                nft_transferable,
+                ContractBase.to_checksum_address(nft_owner),
             ),
-            from_wallet,
+            (
+                datatoken_template,
+                [datatoken_name, datatoken_symbol],
+                [
+                    ContractBase.to_checksum_address(datatoken_minter),
+                    ContractBase.to_checksum_address(datatoken_fee_manager),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_token
+                    ),
+                ],
+                [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                datatoken_bytess,
+            ),
+            (
+                ContractBase.to_checksum_address(fixed_price_address),
+                [
+                    ContractBase.to_checksum_address(fixed_price_base_token),
+                    ContractBase.to_checksum_address(fixed_price_owner),
+                    ContractBase.to_checksum_address(
+                        fixed_price_publish_market_swap_fee_collector
+                    ),
+                    ContractBase.to_checksum_address(fixed_price_allowed_swapper),
+                ],
+                [
+                    fixed_price_base_token_decimals,
+                    fixed_price_datatoken_decimals,
+                    fixed_price_rate,
+                    fixed_price_publish_market_swap_fee_amount,
+                    fixed_price_with_mint,
+                ],
+            ),
+            {"from": from_wallet},
         )
 
     @enforce_types
@@ -234,40 +229,37 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
-        return self.send_transaction(
-            "createNftWithErc20WithDispenser",
+        return self.contract.createNftWithErc20WithDispenser(
             (
-                (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    ContractBase.to_checksum_address(nft_owner),
-                ),
-                (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        ContractBase.to_checksum_address(datatoken_minter),
-                        ContractBase.to_checksum_address(datatoken_fee_manager),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_address
-                        ),
-                        ContractBase.to_checksum_address(
-                            datatoken_publish_market_order_fee_token
-                        ),
-                    ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
-                ),
-                (
-                    ContractBase.to_checksum_address(dispenser_address),
-                    dispenser_max_tokens,
-                    dispenser_max_balance,
-                    dispenser_with_mint,
-                    ContractBase.to_checksum_address(dispenser_allowed_swapper),
-                ),
+                nft_name,
+                nft_symbol,
+                nft_template,
+                nft_token_uri,
+                nft_transferable,
+                ContractBase.to_checksum_address(nft_owner),
+            ),
+            (
+                datatoken_template,
+                [datatoken_name, datatoken_symbol],
+                [
+                    ContractBase.to_checksum_address(datatoken_minter),
+                    ContractBase.to_checksum_address(datatoken_fee_manager),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_publish_market_order_fee_token
+                    ),
+                ],
+                [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                datatoken_bytess,
+            ),
+            (
+                ContractBase.to_checksum_address(dispenser_address),
+                dispenser_max_tokens,
+                dispenser_max_balance,
+                dispenser_with_mint,
+                ContractBase.to_checksum_address(dispenser_allowed_swapper),
             ),
             from_wallet,
         )
@@ -290,28 +282,25 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         metadata_proofs: List[MetadataProof],
         from_wallet,
     ) -> str:
-        return self.send_transaction(
-            "createNftWithMetaData",
+        return self.contract.createNftWithMetaData(
             (
-                (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    ContractBase.to_checksum_address(nft_owner),
-                ),
-                (
-                    metadata_state,
-                    metadata_decryptor_url,
-                    metadata_decryptor_address,
-                    metadata_flags,
-                    metadata_data,
-                    metadata_data_hash,
-                    metadata_proofs,
-                ),
+                nft_name,
+                nft_symbol,
+                nft_template,
+                nft_token_uri,
+                nft_transferable,
+                ContractBase.to_checksum_address(nft_owner),
             ),
-            from_wallet,
+            (
+                metadata_state,
+                metadata_decryptor_url,
+                metadata_decryptor_address,
+                metadata_flags,
+                metadata_data,
+                metadata_data_hash,
+                metadata_proofs,
+            ),
+            {"from": from_wallet},
         )
 
     @enforce_types

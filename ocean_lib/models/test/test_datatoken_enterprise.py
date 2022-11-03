@@ -6,7 +6,6 @@ import json
 
 import pytest
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -165,7 +164,7 @@ def test_buy_from_fre_and_order(
         config, get_address_of_type(config, "FixedPrice")
     )
 
-    tx = datatoken_enterprise_token.create_fixed_rate(
+    tx_receipt = datatoken_enterprise_token.create_fixed_rate(
         fixed_price_address=fixed_rate_exchange.address,
         base_token_address=mock_usdc_contract.address,
         owner=publisher_wallet.address,
@@ -178,8 +177,6 @@ def test_buy_from_fre_and_order(
         with_mint=1,
         from_wallet=publisher_wallet,
     )
-
-    tx_receipt = TransactionReceipt(tx)
 
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
 

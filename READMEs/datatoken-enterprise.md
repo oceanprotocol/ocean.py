@@ -223,7 +223,7 @@ OCEAN_token.approve(
     {"from": bob_wallet},
 )
 
-tx_id = datatoken_enterprise_token.buy_from_fre_and_order(
+tx_receipt = datatoken_enterprise_token.buy_from_fre_and_order(
     consumer=bob_wallet.address,
     service_index=1,
     provider_fee_address=provider_fee_address,
@@ -245,7 +245,5 @@ tx_id = datatoken_enterprise_token.buy_from_fre_and_order(
     from_wallet=alice_wallet,
 )
 
-from brownie.network.transaction import TransactionReceipt
-tx_receipt = TransactionReceipt(tx_id)
 assert tx_receipt.status == 1, "failed buying data tokens from FRE."
 ```

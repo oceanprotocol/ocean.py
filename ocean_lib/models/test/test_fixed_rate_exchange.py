@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
@@ -46,7 +45,7 @@ def test_exchange_rate_creation(
     assert datatoken.balanceOf(consumer_addr) == amount
     number_of_exchanges_before = fixed_exchange.getNumberOfExchanges()
 
-    tx = datatoken.create_fixed_rate(
+    tx_receipt = datatoken.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
         base_token_address=ocean_token.address,
         owner=consumer_addr,
@@ -59,8 +58,6 @@ def test_exchange_rate_creation(
         with_mint=0,
         from_wallet=publisher_wallet,
     )
-
-    tx_receipt = TransactionReceipt(tx)
 
     registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
 
@@ -154,7 +151,7 @@ def test_exchange_rate_creation(
     assert ocean_balance_publisher_before_swap == 0
     assert datatoken_dt_balance_consumer_before_swap == 0
 
-    receipt = fixed_exchange.buyDT(
+    tx_receipt = fixed_exchange.buyDT(
         exchange_id,
         amount_dt_to_sell,
         no_limit,
@@ -162,8 +159,6 @@ def test_exchange_rate_creation(
         to_wei("0.1"),
         {"from": another_consumer_wallet},
     )
-
-    tx_receipt = TransactionReceipt(receipt)
 
     event_log = tx_receipt.events[FixedRateExchange.EVENT_SWAPPED]
 

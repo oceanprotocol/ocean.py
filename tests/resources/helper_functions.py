@@ -13,7 +13,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from brownie.network import accounts
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from pytest import approx
 from web3 import Web3
@@ -190,7 +189,7 @@ def deploy_erc721_erc20(
     if not datatoken_minter:
         return data_nft
 
-    tx_result = data_nft.create_erc20(
+    tx_receipt2 = data_nft.create_erc20(
         template_index=template_index,
         name="DT1",
         symbol="DT1Symbol",
@@ -202,7 +201,6 @@ def deploy_erc721_erc20(
         bytess=[b""],
         from_wallet=data_nft_publisher,
     )
-    tx_receipt2 = TransactionReceipt(tx_result)
 
     registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
     datatoken_address = registered_event2["newTokenAddress"]

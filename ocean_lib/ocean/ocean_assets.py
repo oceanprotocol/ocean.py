@@ -13,7 +13,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -149,7 +148,7 @@ class OceanAssets:
         bytess: List[bytes],
         from_wallet,
     ) -> str:
-        tx_result = data_nft.create_erc20(
+        receipt = data_nft.create_erc20(
             template_index=template_index,
             name=name,
             symbol=symbol,
@@ -161,9 +160,8 @@ class OceanAssets:
             bytess=bytess,
             from_wallet=from_wallet,
         )
-        assert tx_result, "Failed to create ERC20 token."
+        assert receipt, "Failed to create ERC20 token."
 
-        receipt = TransactionReceipt(tx_result)
         registered_token_event = receipt.events[
             DataNFTFactoryContract.EVENT_TOKEN_CREATED
         ]

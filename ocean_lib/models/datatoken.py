@@ -49,25 +49,22 @@ class Datatoken(ContractBase):
         with_mint: int,
         from_wallet,
     ) -> str:
-        return self.send_transaction(
-            "createFixedRate",
-            (
-                ContractBase.to_checksum_address(fixed_price_address),
-                [
-                    ContractBase.to_checksum_address(base_token_address),
-                    ContractBase.to_checksum_address(owner),
-                    ContractBase.to_checksum_address(publish_market_swap_fee_collector),
-                    ContractBase.to_checksum_address(allowed_swapper),
-                ],
-                [
-                    base_token_decimals,
-                    datatoken_decimals,
-                    fixed_rate,
-                    publish_market_swap_fee_amount,
-                    with_mint,
-                ],
-            ),
-            from_wallet,
+        return self.contract.createFixedRate(
+            ContractBase.to_checksum_address(fixed_price_address),
+            [
+                ContractBase.to_checksum_address(base_token_address),
+                ContractBase.to_checksum_address(owner),
+                ContractBase.to_checksum_address(publish_market_swap_fee_collector),
+                ContractBase.to_checksum_address(allowed_swapper),
+            ],
+            [
+                base_token_decimals,
+                datatoken_decimals,
+                fixed_rate,
+                publish_market_swap_fee_amount,
+                with_mint,
+            ],
+            {"from": from_wallet},
         )
 
     @enforce_types
@@ -88,28 +85,25 @@ class Datatoken(ContractBase):
         consume_market_order_fee_amount: int,
         from_wallet,
     ) -> str:
-        return self.send_transaction(
-            "startOrder",
+        return self.contract.startOrder(
+            ContractBase.to_checksum_address(consumer),
+            service_index,
             (
-                ContractBase.to_checksum_address(consumer),
-                service_index,
-                (
-                    ContractBase.to_checksum_address(provider_fee_address),
-                    ContractBase.to_checksum_address(provider_fee_token),
-                    int(provider_fee_amount),
-                    v,
-                    r,
-                    s,
-                    valid_until,
-                    provider_data,
-                ),
-                (
-                    ContractBase.to_checksum_address(consume_market_order_fee_address),
-                    ContractBase.to_checksum_address(consume_market_order_fee_token),
-                    consume_market_order_fee_amount,
-                ),
+                ContractBase.to_checksum_address(provider_fee_address),
+                ContractBase.to_checksum_address(provider_fee_token),
+                int(provider_fee_amount),
+                v,
+                r,
+                s,
+                valid_until,
+                provider_data,
             ),
-            from_wallet,
+            (
+                ContractBase.to_checksum_address(consume_market_order_fee_address),
+                ContractBase.to_checksum_address(consume_market_order_fee_token),
+                consume_market_order_fee_amount,
+            ),
+            {"from": from_wallet},
         )
 
     @enforce_types
@@ -126,22 +120,19 @@ class Datatoken(ContractBase):
         provider_data: Union[str, bytes],
         from_wallet,
     ) -> str:
-        return self.send_transaction(
-            "reuseOrder",
+        return self.contract.reuseOrder(
+            order_tx_id,
             (
-                order_tx_id,
-                (
-                    ContractBase.to_checksum_address(provider_fee_address),
-                    ContractBase.to_checksum_address(provider_fee_token),
-                    int(provider_fee_amount),
-                    v,
-                    r,
-                    s,
-                    valid_until,
-                    provider_data,
-                ),
+                ContractBase.to_checksum_address(provider_fee_address),
+                ContractBase.to_checksum_address(provider_fee_token),
+                int(provider_fee_amount),
+                v,
+                r,
+                s,
+                valid_until,
+                provider_data,
             ),
-            from_wallet,
+            {"from": from_wallet},
         )
 
     @enforce_types

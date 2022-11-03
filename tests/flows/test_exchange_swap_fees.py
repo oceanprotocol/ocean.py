@@ -5,7 +5,6 @@
 from decimal import Decimal
 
 import pytest
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -127,7 +126,7 @@ def exchange_swap_fees(
 
     fixed_price_address = get_address_of_type(config, "FixedPrice")
     bt_per_dt_in_wei = to_wei(bt_per_dt)
-    tx = dt.create_fixed_rate(
+    receipt = dt.create_fixed_rate(
         fixed_price_address=fixed_price_address,
         base_token_address=bt.address,
         owner=publisher_wallet.address,
@@ -140,7 +139,6 @@ def exchange_swap_fees(
         with_mint=with_mint,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     assert (
         fixed_price_address
         == receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeContract"]

@@ -6,7 +6,6 @@ import json
 
 import pytest
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -132,7 +131,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     signed = network.web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    tx = datatoken.start_order(
+    receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fee_address=provider_fee_address,
@@ -149,7 +148,6 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
-    receipt = TransactionReceipt(tx)
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei("9")
     assert datatoken.balanceOf(
