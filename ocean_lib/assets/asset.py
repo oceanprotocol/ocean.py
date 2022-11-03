@@ -97,11 +97,12 @@ class Asset(AddressCredential):
             if "services" not in values
             else [Service.from_dict(value) for value in values.pop("services")]
         )
-        return cls(
-            values.pop("id"),
-            values.pop("@context"),
-            values.pop("chainId"),
-            values.pop("nftAddress"),
+
+        args = [
+            values.pop("id", None),
+            values.pop("@context", None),
+            values.pop("chainId", None),
+            values.pop("nftAddress", None),
             values.pop("metadata", None),
             services,
             values.pop("credentials", None),
@@ -109,7 +110,12 @@ class Asset(AddressCredential):
             values.pop("datatokens", None),
             values.pop("event", None),
             values.pop("stats", None),
-        )
+        ]
+
+        if args[0] is None:
+            return UnavailableAsset(*args)
+
+        return cls(*args)
 
     @enforce_types
     def as_dictionary(self) -> dict:
@@ -202,3 +208,7 @@ class Asset(AddressCredential):
     @property
     def is_disabled(self) -> bool:
         return not self.metadata or (self.nft and self.nft["state"] != 0)
+
+
+class UnavailableAsset(Asset):
+    pass
