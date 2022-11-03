@@ -210,9 +210,9 @@ OCEAN_token.approve(
 )
 # Approve consume market fee tokens before starting order.
 datatoken_enterprise_token.approve(
-    spender=datatoken_enterprise_token.address,
-    amount=ocean.to_wei(1000),
-    from_wallet=alice_wallet
+    datatoken_enterprise_token.address,
+    ocean.to_wei(1000),
+    {"from": alice_wallet}
 )
 
 # Transfer some Datatoken Enterprise tokens to Bob for buying from the FRE
