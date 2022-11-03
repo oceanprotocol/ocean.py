@@ -856,7 +856,7 @@ class OceanAssets:
             transaction_parameters={"from": wallet},
         )
 
-        return receipt.tx_id
+        return receipt.txid
 
     @enforce_types
     def pay_for_compute_service(

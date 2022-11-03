@@ -249,7 +249,7 @@ def test_datatoken_creation(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            transaction_parameters={"from": consumer_wallet},
+            transaction_parameters={"from": another_consumer_wallet},
         )
 
 

@@ -77,10 +77,10 @@ access_service = asset.services[0]
 dispenser = ocean.dispenser
 tx = datatoken_enterprise_token.createDispenser(
     dispenser.address,
-    ZERO_ADDRESS,
+    ocean.to_wei(50),
     ocean.to_wei(50),
     True,
-    ocean.to_wei(50),
+    ZERO_ADDRESS,
     {"from": alice_wallet},
 )
 assert tx, "Dispenser not created!"
@@ -200,7 +200,7 @@ exchange_id = ocean.create_fixed_rate(
     publisher_wallet=alice_wallet
 )
 
-datatoken_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)
+datatoken_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), {"from": alice_wallet})
 
 # Approve tokens
 OCEAN_token.approve(
@@ -216,7 +216,7 @@ datatoken_enterprise_token.approve(
 )
 
 # Transfer some Datatoken Enterprise tokens to Bob for buying from the FRE
-datatoken_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
+datatoken_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), {"from": alice_wallet})
 OCEAN_token.approve(
     datatoken_enterprise_token.address,
     ocean.to_wei(1000),
