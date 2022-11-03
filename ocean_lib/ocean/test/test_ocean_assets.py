@@ -186,7 +186,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
     registered_token_event = data_nft.contract.events.get_sequence(
         _asset.event.get("block"),
         network.chain[-1].number,
-        DataNFT.EVENT_METADATA_UPDATED,
+        "MetadataUpdated",
     )
 
     assert registered_token_event[0].args.get("flags") == bytes([3])
