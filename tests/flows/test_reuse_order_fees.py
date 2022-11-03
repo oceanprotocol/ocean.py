@@ -104,7 +104,7 @@ def test_reuse_order_fees(
         )
 
     # Start order: pay order fees and provider fees
-    start_order_tx_id = dt.start_order(
+    start_order_receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -127,7 +127,7 @@ def test_reuse_order_fees(
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit="0",
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -143,7 +143,7 @@ def test_reuse_order_fees(
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit=provider_fee_in_unit,
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -162,7 +162,7 @@ def test_reuse_order_fees(
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit="0",
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -178,7 +178,7 @@ def test_reuse_order_fees(
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit=provider_fee_in_unit,
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.tx_id,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,

@@ -128,7 +128,7 @@ def test_permissions(
         b"SomeData",
         {"from": consumer_wallet},
     )
-    assert data_nft.getData(key=b"ARBITRARY_KEY").hex() == b"SomeData".hex()
+    assert data_nft.getData(b"ARBITRARY_KEY").hex() == b"SomeData".hex()
 
     # Tests failing setting new data if user has not STORE UPDATER role.
     assert not (
@@ -148,7 +148,7 @@ def test_permissions(
             b"SomeData",
             {"from": consumer_wallet},
         )
-    assert data_nft.getData(key=b"FOO_KEY").hex() == b"".hex()
+    assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
 
 def test_add_and_remove_permissions(
@@ -483,9 +483,9 @@ def test_erc721_datatoken_functions(
 ):
     """Tests ERC721 Template functions for ERC20 tokens."""
     assert len(data_nft.getTokensList()) == 1
-    assert data_nft.isDeployed(datatoken=datatoken.address)
+    assert data_nft.isDeployed(datatoken.address)
 
-    assert not data_nft.isDeployed(datatoken=consumer_addr)
+    assert not data_nft.isDeployed(consumer_addr)
     receipt = data_nft.setTokenURI(
         1,
         "https://newurl.com/nft/",

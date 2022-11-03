@@ -83,7 +83,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     )
     # Start order for consumer
     provider_fees = response.json()["providerFee"]
-    tx_id = datatoken.start_order(
+    receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -106,7 +106,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
         asset=ddo,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
     )
 
     assert (

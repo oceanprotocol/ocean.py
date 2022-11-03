@@ -69,7 +69,7 @@ def test_exchange_rate_creation(
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generateExchangeId(
-        base_token=ocean_token.address, datatoken=datatoken.address
+        ocean_token.address, datatoken.address
     )
     assert generated_exchange_id == exchange_id
 
@@ -139,7 +139,7 @@ def test_exchange_rate_creation(
     ocean_token.transfer(
         another_consumer_addr,
         ocean_token.balanceOf(consumer_addr),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
 
     # Test buy DT workflow

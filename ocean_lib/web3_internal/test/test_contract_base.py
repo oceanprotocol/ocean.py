@@ -24,18 +24,16 @@ def test_name_is_None(config):
 def test_main(network, alice_wallet, alice_ocean, nft_factory_address, config):
     # test super-simple functionality of child
     factory = MyFactory(config, nft_factory_address)
-    factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "NFTS",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-            True,
-            alice_wallet.address,
-        ),
-        alice_wallet,
+    factory.deployERC721Contract(
+        "NFT",
+        "NFTS",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        alice_wallet.address,
+        {"from": alice_wallet},
     )
 
     # test attributes

@@ -207,24 +207,24 @@ def test_buy_from_fre_and_order(
     publish_fees = datatoken_enterprise_token.getPublishingMarketFee()
 
     mock_usdc_contract.transfer(
-        to=publisher_wallet.address,
-        amount=publish_fees[2] + to_wei("3"),
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        publish_fees[2] + to_wei("3"),
+        {"from": factory_deployer_wallet},
     )
     mock_usdc_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=2**256 - 1,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        2**256 - 1,
+        {"from": publisher_wallet},
     )
     mock_dai_contract.transfer(
-        to=publisher_wallet.address,
-        amount=consume_fee_amount,
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        consume_fee_amount,
+        {"from": factory_deployer_wallet},
     )
     mock_dai_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
 
     provider_fee_address = publisher_wallet.address
