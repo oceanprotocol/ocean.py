@@ -943,7 +943,7 @@ class OceanAssets:
                 valid_until=provider_fees["validUntil"],
                 provider_data=provider_fees["providerData"],
                 transaction_parameters={"from": wallet},
-            )
+            ).txid
             return
 
         asset_compute_input.transfer_tx_id = dt.start_order(
@@ -961,4 +961,4 @@ class OceanAssets:
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters={"from": wallet},
-        )
+        ).txid

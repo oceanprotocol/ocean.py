@@ -32,10 +32,10 @@ def test_buy_from_dispenser_and_order(
 
     _ = datatoken_enterprise_token.createDispenser(
         dispenser.address,
-        ZERO_ADDRESS,
         to_wei("1"),
         True,
         to_wei("1"),
+        ZERO_ADDRESS,
         {"from": publisher_wallet},
     )
 
@@ -132,7 +132,7 @@ def test_buy_from_dispenser_and_order(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
@@ -274,7 +274,7 @@ def test_buy_from_fre_and_order(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address

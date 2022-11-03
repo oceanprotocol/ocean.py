@@ -178,7 +178,7 @@ def test_reuse_order_fees(
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit=provider_fee_in_unit,
-        start_order_tx_id=start_order_receipt.tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,

@@ -267,7 +267,7 @@ def test_exchange_rate_creation(
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] > 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] > 0
 
-    fixed_exchange.collect_market_fee(exchange_id, another_consumer_wallet)
+    fixed_exchange.collectMarketFee(exchange_id, {"from": another_consumer_wallet})
 
     assert (
         ocean_token.balanceOf(another_consumer_addr)

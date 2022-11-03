@@ -496,8 +496,8 @@ def test_erc721_datatoken_functions(
     assert registered_event["updatedBy"] == publisher_addr
     assert registered_event["tokenID"] == 1
     assert registered_event["blockNumber"] == receipt.block_number
-    assert data_nft.tokenURI(token_id=1) == "https://newurl.com/nft/"
-    assert data_nft.tokenURI(token_id=1) == registered_event["tokenURI"]
+    assert data_nft.tokenURI(1) == "https://newurl.com/nft/"
+    assert data_nft.tokenURI(1) == registered_event["tokenURI"]
 
     # Tests failing setting token URI by another user
     with pytest.raises(Exception, match="not NFTOwner"):

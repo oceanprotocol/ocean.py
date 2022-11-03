@@ -253,7 +253,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     )
 
     # Publisher should succeed to burn some consumer's tokens using burnFrom
-    initial_total_supply = datatoken.getTotalSupply()
+    initial_total_supply = datatoken.totalSupply()
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
@@ -263,7 +263,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     assert allowance == to_wei("10")
     datatoken.burnFrom(consumer_wallet.address, to_wei("2"), {"from": publisher_wallet})
 
-    assert datatoken.getTotalSupply() == initial_total_supply - to_wei("2")
+    assert datatoken.totalSupply() == initial_total_supply - to_wei("2")
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("2")
