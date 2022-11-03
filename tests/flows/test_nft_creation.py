@@ -226,7 +226,7 @@ def test_datatoken_creation(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     datatoken_address = receipt.events["NFTCreated"]["newTokenAddress"]
 
@@ -249,7 +249,7 @@ def test_datatoken_creation(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=another_consumer_wallet,
+            transaction_parameters={"from": consumer_wallet},
         )
 
 
@@ -335,7 +335,7 @@ def test_nft_owner_transfer(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
         )
 
     with pytest.raises(Exception, match="NOT MINTER"):
@@ -352,7 +352,7 @@ def test_nft_owner_transfer(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 

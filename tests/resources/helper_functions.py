@@ -199,7 +199,7 @@ def deploy_erc721_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=data_nft_publisher,
+        transaction_parameters={"from": data_nft_publisher},
     )
 
     registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]

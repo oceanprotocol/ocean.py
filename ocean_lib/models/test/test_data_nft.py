@@ -310,7 +310,7 @@ def test_create_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     assert receipt, "Could not create ERC20."
 
@@ -329,7 +329,7 @@ def test_create_erc20(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
         )
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
@@ -350,10 +350,9 @@ def test_create_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         datatoken_cap=to_wei("0.1"),
     )
-    assert tx, "Could not create datatoken Enterprise."
 
     tx = data_nft.create_datatoken(
         template_index=2,
@@ -384,7 +383,7 @@ def test_create_datatoken_with_usdc_order_fee(
         publish_market_order_fee_token=usdc.address,
         publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     dt_address = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED][
         "newTokenAddress"
@@ -434,7 +433,7 @@ def test_create_datatoken_with_non_owner(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
 
@@ -468,7 +467,7 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=consumer_wallet,
+            transaction_parameters={"from": consumer_wallet},
         )
 
 
@@ -536,7 +535,7 @@ def test_erc721_datatoken_functions(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
@@ -667,7 +666,7 @@ def test_transfer_nft(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
 
@@ -847,7 +846,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]

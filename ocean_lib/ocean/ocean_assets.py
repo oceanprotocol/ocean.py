@@ -158,7 +158,7 @@ class OceanAssets:
             publish_market_order_fee_token=publish_market_order_fee_token,
             publish_market_order_fee_amount=publish_market_order_fee_amount,
             bytess=bytess,
-            from_wallet=from_wallet,
+            transaction_parameters={"from": from_wallet},
         )
         assert receipt, "Failed to create ERC20 token."
 

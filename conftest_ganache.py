@@ -183,7 +183,7 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
@@ -203,7 +203,7 @@ def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_fact
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         datatoken_cap=to_wei(100),
     )
 

@@ -166,6 +166,9 @@ class DataNFT(ContractBase):
         if template_index == 2:
             create_args["datatoken_cap"] = datatoken_cap
 
+        create_args["transaction_parameters"] = {"from": create_args["from_wallet"]}
+        create_args.pop("from_wallet")
+
         self.create_erc20(**create_args)
 
         new_elements = [

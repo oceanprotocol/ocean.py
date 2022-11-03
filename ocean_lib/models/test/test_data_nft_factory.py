@@ -84,7 +84,7 @@ def test_main(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
@@ -160,7 +160,7 @@ def test_main(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=to_wei("0.0005"),
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
     registered_fee_token_event = receipt.events[
@@ -376,7 +376,7 @@ def test_start_multiple_order(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
@@ -528,7 +528,7 @@ def test_fail_create_erc20(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=consumer_wallet,
+            transaction_parameters={"from": consumer_wallet},
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
@@ -543,7 +543,7 @@ def test_fail_create_erc20(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=consumer_wallet,
+            transaction_parameters={"from": consumer_wallet},
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
@@ -559,7 +559,7 @@ def test_fail_create_erc20(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            from_wallet=another_consumer_wallet,
+            transaction_parameters={"from": another_consumer_wallet},
         )
 
 
