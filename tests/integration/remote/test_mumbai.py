@@ -9,7 +9,6 @@ import warnings
 from brownie.network import accounts
 
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import connect_to_network
 
 from .util import get_wallets, random_chars
@@ -32,7 +31,7 @@ def test_nonocean_tx(tmp_path):
 
     print("Do a send-Ether tx...")
     try:  # it can get away with "insufficient funds" errors, but not others
-        send_ether(config, alice_wallet, bob_wallet.address, f"{amt_send:.15f} ether")
+        alice_wallet.transfer(bob_wallet.address, f"{amt_send:.15f} ether")
     except ValueError as error:
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient test MATIC"))

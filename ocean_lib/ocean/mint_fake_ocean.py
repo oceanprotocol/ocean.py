@@ -9,7 +9,6 @@ from brownie.network import accounts
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether
 
 
 def mint_fake_OCEAN(config: dict) -> None:
@@ -36,4 +35,4 @@ def mint_fake_OCEAN(config: dict) -> None:
             OCEAN_token.mint(w.address, amt_distribute, {"from": deployer_wallet})
 
         if accounts.at(w.address).balance() < to_wei("2"):
-            send_ether(config, deployer_wallet, w.address, "4 ether")
+            deployer_wallet.transfer(w.address, "4 ether")

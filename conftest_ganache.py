@@ -15,7 +15,6 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     get_another_consumer_wallet,
@@ -66,7 +65,7 @@ def setup_all(request, config, ocean_token):
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if accounts.at(w.address).balance() < to_wei("2"):
-            send_ether(config, wallet, w.address, "4 ether")
+            wallet.transfer(w.address, "4 ether")
 
         if ocean_token.balanceOf(w.address) < to_wei("100"):
             ocean_token.mint(w.address, amt_distribute, {"from": wallet})
