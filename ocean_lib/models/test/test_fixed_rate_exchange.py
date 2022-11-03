@@ -4,7 +4,6 @@
 #
 import pytest
 
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
     FixedRateExchange,
@@ -59,7 +58,7 @@ def test_exchange_rate_creation(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
+    registered_event = tx_receipt.events["NewFixedRate"]
 
     assert fixed_exchange.getNumberOfExchanges() == (number_of_exchanges_before + 1)
     assert registered_event["owner"] == consumer_addr
@@ -160,7 +159,7 @@ def test_exchange_rate_creation(
         {"from": another_consumer_wallet},
     )
 
-    event_log = tx_receipt.events[FixedRateExchange.EVENT_SWAPPED]
+    event_log = tx_receipt.events["Swapped"]
 
     # Check fixed rate exchange outputs. Rate = 1
     assert (
@@ -224,7 +223,7 @@ def test_exchange_rate_creation(
         {"from": consumer_wallet},
     )
 
-    logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
+    logs = receipt.events["TokenCollected"]
     assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs["amount"]
 
     # Fixed Rate Exchange owner withdraws BT balance
@@ -248,7 +247,7 @@ def test_exchange_rate_creation(
         {"from": consumer_wallet},
     )
 
-    logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
+    logs = receipt.events["TokenCollected"]
 
     assert ocean_token.balanceOf(pmt_collector) == bt_balance_before + logs["amount"]
 

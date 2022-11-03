@@ -22,7 +22,6 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
@@ -241,13 +240,6 @@ class Ocean:
             self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
         )
 
-    @property
-    @enforce_types
-    def side_staking(self):
-        return SideStaking(
-            self.config_dict, get_address_of_type(self.config_dict, "Staking")
-        )
-
     @enforce_types
     def create_fixed_rate(
         self,
@@ -274,11 +266,9 @@ class Ocean:
             transaction_parameters={"from": from_wallet},
         )
 
-        fixed_price_address == receipt.events[datatoken.EVENT_NEW_FIXED_RATE][
-            "exchangeContract"
-        ]
+        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
 
-        exchange_id = receipt.events[datatoken.EVENT_NEW_FIXED_RATE]["exchangeId"]
+        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
 
         return exchange_id
 

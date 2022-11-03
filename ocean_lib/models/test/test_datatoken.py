@@ -175,7 +175,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         consumer_wallet.address,
         {"from": publisher_wallet},
     )
-    executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
+    executed_event = receipt_interm.events["OrderExecuted"]
     assert executed_event["orderTxId"] == receipt.txid
     assert executed_event["providerAddress"] == provider_fee_address
 
@@ -223,12 +223,12 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         transaction_parameters={"from": publisher_wallet},
     )
-    reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
+    reused_event = receipt_interm.events["OrderReused"]
     assert reused_event, "Cannot find OrderReused event"
     assert reused_event["orderTxId"] == receipt.txid
     assert reused_event["caller"] == publisher_wallet.address
 
-    provider_fee_event = receipt.events[Datatoken.EVENT_PROVIDER_FEE]
+    provider_fee_event = receipt.events["ProviderFee"]
     assert provider_fee_event, "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params

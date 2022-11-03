@@ -202,7 +202,7 @@ def deploy_erc721_erc20(
         transaction_parameters={"from": data_nft_publisher},
     )
 
-    registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    registered_event2 = tx_receipt2.events["TokenCreated"]
     datatoken_address = registered_event2["newTokenAddress"]
 
     datatoken = Datatoken(config_dict, datatoken_address)

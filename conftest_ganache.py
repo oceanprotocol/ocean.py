@@ -11,7 +11,6 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
@@ -137,11 +136,6 @@ def ocean_token(config, ocean_address) -> Datatoken:
 @pytest.fixture
 def factory_router(config):
     return FactoryRouter(config, get_address_of_type(config, "Router"))
-
-
-@pytest.fixture
-def side_staking(config):
-    return SideStaking(config=config, address=get_address_of_type(config, "Staking"))
 
 
 @pytest.fixture

@@ -18,7 +18,6 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -443,7 +442,7 @@ def test_plain_asset_with_one_datatoken(
         publisher_wallet.address,
         {"from": publisher_wallet},
     )
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = tx_receipt.events["NFTCreated"]
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address = registered_event["newTokenAddress"]
 
@@ -492,7 +491,7 @@ def test_plain_asset_multiple_datatokens(
         publisher_wallet.address,
         {"from": publisher_wallet},
     )
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = tx_receipt.events["NFTCreated"]
 
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address2 = registered_event["newTokenAddress"]

@@ -314,9 +314,7 @@ def test_create_erc20(
     )
     assert receipt, "Could not create ERC20."
 
-    assert receipt.events[
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED
-    ], "Cannot find TokenCreated event."
+    assert receipt.events["TokenCreated"], "Cannot find TokenCreated event."
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft.create_erc20(
@@ -385,9 +383,7 @@ def test_create_datatoken_with_usdc_order_fee(
         bytess=[b""],
         transaction_parameters={"from": publisher_wallet},
     )
-    dt_address = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED][
-        "newTokenAddress"
-    ]
+    dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
     dt = Datatoken(config, dt_address)
 
@@ -437,9 +433,7 @@ def test_create_datatoken_with_non_owner(
     )
     assert receipt, "Failed to create ERC20 token."
 
-    assert receipt.events[
-        DataNFTFactoryContract.EVENT_TOKEN_CREATED
-    ], "Cannot find TokenCreated event."
+    assert receipt.events["TokenCreated"], "Cannot find TokenCreated event."
 
     # Consumer self-revokes permission to create ERC20
     data_nft.removeFromCreateERC20List(
@@ -490,7 +484,7 @@ def test_erc721_datatoken_functions(
         "https://newurl.com/nft/",
         {"from": publisher_wallet},
     )
-    registered_event = receipt.events[DataNFT.EVENT_TOKEN_URI_UPDATED]
+    registered_event = receipt.events["TokenURIUpdate"]
 
     assert registered_event, "Cannot find TokenURIUpdate event."
     assert registered_event["updatedBy"] == publisher_addr
@@ -605,7 +599,7 @@ def test_transfer_nft(
         publisher_addr,
         {"from": publisher_wallet},
     )
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = receipt.events["NFTCreated"]
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
@@ -618,7 +612,7 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+    transfer_event = receipt.events["Transfer"]
 
     assert transfer_event["from"] == publisher_addr
     assert transfer_event["to"] == consumer_addr
@@ -639,7 +633,7 @@ def test_transfer_nft(
         publisher_addr,
         {"from": publisher_wallet},
     )
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = receipt.events["NFTCreated"]
 
     token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
@@ -649,7 +643,7 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+    transfer_event = receipt.events["Transfer"]
 
     assert transfer_event["from"] == publisher_addr
     assert transfer_event["to"] == consumer_addr
@@ -670,7 +664,7 @@ def test_transfer_nft(
     )
     assert receipt, "Failed to create ERC20 token."
 
-    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    registered_token_event = receipt.events["TokenCreated"]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(config, datatoken_address)
@@ -690,9 +684,7 @@ def test_transfer_nft(
         consumer_addr, ocean_token.address, to_wei(1), {"from": publisher_wallet}
     )
 
-    set_publishing_fee_event = receipt.events[
-        Datatoken.EVENT_PUBLISH_MARKET_FEE_CHANGED
-    ]
+    set_publishing_fee_event = receipt.events["PublishMarketFeeChanged"]
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
 
     publish_fees = datatoken.getPublishingMarketFee()
@@ -718,7 +710,7 @@ def test_nft_transfer_with_fre(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+    transfer_event = receipt.events["Transfer"]
 
     assert transfer_event["from"] == publisher_wallet.address
     assert transfer_event["to"] == consumer_wallet.address
@@ -746,7 +738,7 @@ def test_nft_transfer_with_fre(
         transaction_parameters={"from": consumer_wallet},
     )
 
-    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
+    fre_event = receipt.events["NewFixedRate"]
 
     assert fixed_exchange.getNumberOfExchanges() == number_of_exchanges + 1
     assert fre_event["owner"] == consumer_addr
@@ -828,7 +820,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         publisher_addr,
         {"from": publisher_wallet},
     )
-    registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = receipt.events["NFTCreated"]
     assert registered_event["admin"] == publisher_addr
     token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
@@ -849,7 +841,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         transaction_parameters={"from": publisher_wallet},
     )
     assert receipt, "Failed to create ERC20 token."
-    registered_token_event = receipt.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    registered_token_event = receipt.events["TokenCreated"]
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address = registered_token_event["newTokenAddress"]
     datatoken = Datatoken(config, datatoken_address)
@@ -877,7 +869,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
+    fre_event = receipt.events["NewFixedRate"]
     assert fixed_exchange.getNumberOfExchanges() == number_of_exchanges + 1
     assert fre_event["owner"] == publisher_addr
 
@@ -907,7 +899,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events[DataNFTFactoryContract.EVENT_TRANSFER]
+    transfer_event = receipt.events["Transfer"]
 
     assert transfer_event["from"] == publisher_addr
     assert transfer_event["to"] == consumer_addr

@@ -162,9 +162,7 @@ class OceanAssets:
         )
         assert receipt, "Failed to create ERC20 token."
 
-        registered_token_event = receipt.events[
-            DataNFTFactoryContract.EVENT_TOKEN_CREATED
-        ]
+        registered_token_event = receipt.events["TokenCreated"]
         assert registered_token_event, "Cannot find TokenCreated event."
 
         return registered_token_event["newTokenAddress"]
@@ -446,7 +444,7 @@ class OceanAssets:
                 {"from": publisher_wallet},
             )
 
-            registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+            registered_event = receipt.events["NFTCreated"]
             data_nft_address = registered_event["newTokenAddress"]
             data_nft = DataNFT(self._config_dict, data_nft_address)
             if not data_nft:

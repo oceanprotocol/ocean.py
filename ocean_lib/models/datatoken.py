@@ -23,17 +23,6 @@ class Datatoken(ContractBase):
     BASE_COMMUNITY_FEE_PERCENTAGE = BASE / 1000
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
 
-    EVENT_ORDER_STARTED = "OrderStarted"
-    EVENT_ORDER_REUSED = "OrderReused"
-    EVENT_ORDER_EXECUTED = "OrderExecuted"
-    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
-    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
-    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
-    EVENT_PROVIDER_FEE = "ProviderFee"
-    EVENT_MINTER_PROPOSED = "MinterProposed"
-    EVENT_MINTER_APPROVED = "MinterApproved"
-    EVENT_NEW_FIXED_RATE = "NewFixedRate"
-
     @enforce_types
     def create_fixed_rate(
         self,
@@ -149,9 +138,7 @@ class Datatoken(ContractBase):
         chain = Chain()
         to_block = to_block if to_block != "latest" else chain[-1].number
 
-        return self.contract.events.get_sequence(
-            from_block, to_block, self.EVENT_ORDER_STARTED
-        )
+        return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 
 
 class MockERC20(Datatoken):

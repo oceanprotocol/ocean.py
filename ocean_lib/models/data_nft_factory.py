@@ -18,14 +18,6 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 class DataNFTFactoryContract(ERC721TokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
-    EVENT_NFT_CREATED = "NFTCreated"
-    EVENT_TOKEN_CREATED = "TokenCreated"
-    EVENT_TEMPLATE721_ADDED = "Template721Added"
-    EVENT_TEMPLATE20_ADDED = "Template20Added"
-    EVENT_NEW_POOL = "NewPool"
-    EVENT_NEW_FIXED_RATE = "NewFixedRate"
-    EVENT_DISPENSER_CREATED = "DispenserCreated"
-    EVENT_TRANSFER = "Transfer"
 
     @enforce_types
     def verify_nft(self, nft_address: str) -> bool:

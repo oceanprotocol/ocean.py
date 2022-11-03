@@ -39,17 +39,6 @@ class FixedExchangeBaseInOutData(IntEnum):
 
 class FixedRateExchange(ContractBase):
     CONTRACT_NAME = "FixedRateExchange"
-    EVENT_EXCHANGE_CREATED = "ExchangeCreated"
-    EVENT_EXCHANGE_RATE_CHANGED = "ExchangeRateChanged"
-    EVENT_EXCHANGE_ACTIVATED = "ExchangeActivated"
-    EVENT_EXCHANGE_DEACTIVATED = "ExchangeDeactivated"
-    EVENT_SWAPPED = "Swapped"
-    EVENT_TOKEN_COLLECTED = "TokenCollected"
-    EVENT_OCEAN_FEE_COLLECTED = "OceanFeeCollected"
-    EVENT_MARKET_FEE_COLLECTED = "MarketFeeCollected"
-    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
-    EVENT_LOG_SWAP_FEES = "SWAP_FEES"
-    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
 
 
 class MockExchange(ContractBase):

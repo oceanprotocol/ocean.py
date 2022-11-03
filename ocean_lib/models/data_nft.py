@@ -42,12 +42,6 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    EVENT_TOKEN_CREATED = "TokenCreated"
-    EVENT_METADATA_CREATED = "MetadataCreated"
-    EVENT_METADATA_UPDATED = "MetadataUpdated"
-    EVENT_METADATA_VALIDATED = "MetadataValidated"
-    EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
-
     @enforce_types
     def set_metadata_token_uri(
         self,

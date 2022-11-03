@@ -7,4 +7,3 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 class FactoryRouter(ContractBase):
     CONTRACT_NAME = "FactoryRouter"
-    EVENT_NEW_POOL = "NewPool"

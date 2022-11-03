@@ -139,14 +139,11 @@ def exchange_swap_fees(
         with_mint=with_mint,
         transaction_parameters={"from": publisher_wallet},
     )
-    assert (
-        fixed_price_address
-        == receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeContract"]
-    )
+    assert fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
 
     exchange = FixedRateExchange(config, fixed_price_address)
 
-    exchange_id = receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeId"]
+    exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
     assert exchange_id == exchange.generateExchangeId(bt.address, dt.address)
 
     assert exchange.isActive(exchange_id)
@@ -360,7 +357,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     exchange_dt_balance_after = exchange_info[FixedRateExchangeDetails.DT_BALANCE]
 
     # Get Swapped event
-    swapped_event = receipt.events[exchange.EVENT_SWAPPED]
+    swapped_event = receipt.events["Swapped"]
 
     # Assign "in" token and "out" token
     if swapped_event["tokenOutAddress"] == dt.address:
