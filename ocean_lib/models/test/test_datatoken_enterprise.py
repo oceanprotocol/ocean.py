@@ -33,8 +33,8 @@ def test_buy_from_dispenser_and_order(
     _ = datatoken_enterprise_token.createDispenser(
         dispenser.address,
         to_wei("1"),
-        True,
         to_wei("1"),
+        True,
         ZERO_ADDRESS,
         {"from": publisher_wallet},
     )
@@ -142,7 +142,7 @@ def test_buy_from_dispenser_and_order(
 
     assert (
         datatoken_enterprise_token.balanceOf(
-            datatoken_enterprise_token.get_payment_collector()
+            datatoken_enterprise_token.getPaymentCollector()
         )
         == 0
     )
@@ -289,7 +289,7 @@ def test_buy_from_fre_and_order(
 
     assert (
         datatoken_enterprise_token.balanceOf(
-            datatoken_enterprise_token.get_payment_collector()
+            datatoken_enterprise_token.getPaymentCollector()
         )
         == 0
     )

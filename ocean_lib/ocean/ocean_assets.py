@@ -839,7 +839,7 @@ class OceanAssets:
         initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
-        tx_id = dt.start_order(
+        receipt = dt.start_order(
             consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
             provider_fee_address=provider_fees["providerFeeAddress"],
@@ -856,7 +856,7 @@ class OceanAssets:
             transaction_parameters={"from": wallet},
         )
 
-        return tx_id
+        return receipt.tx_id
 
     @enforce_types
     def pay_for_compute_service(

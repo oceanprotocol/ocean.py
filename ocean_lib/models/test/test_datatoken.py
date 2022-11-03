@@ -271,7 +271,10 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # Test transterFrom too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
     datatoken.transferFrom(
-        consumer_wallet.address, publisher_wallet.address, to_wei("1"), publisher_wallet
+        consumer_wallet.address,
+        publisher_wallet.address,
+        to_wei("1"),
+        {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(
         consumer_wallet.address

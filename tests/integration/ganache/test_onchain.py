@@ -98,7 +98,7 @@ def test_consume_simple_onchain_data(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -137,7 +137,7 @@ def test_consume_simple_onchain_data(
         asset=asset,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         service=service,
     )
 
@@ -237,7 +237,7 @@ def test_consume_parametrized_onchain_data(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -276,7 +276,7 @@ def test_consume_parametrized_onchain_data(
         asset=asset,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         service=service,
         userdata={
             "baseToken": asset.nft_address.lower()

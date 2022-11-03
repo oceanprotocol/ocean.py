@@ -97,7 +97,7 @@ def test_consume_simple_graphql_query(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -136,7 +136,7 @@ def test_consume_simple_graphql_query(
         asset=asset,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         service=service,
     )
 
@@ -237,7 +237,7 @@ def test_consume_parametrized_graphql_query(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -277,7 +277,7 @@ def test_consume_parametrized_graphql_query(
         service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         userdata={
             "nftAddress": asset.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters

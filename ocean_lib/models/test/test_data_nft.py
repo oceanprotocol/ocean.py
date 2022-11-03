@@ -514,7 +514,7 @@ def test_erc721_datatoken_functions(
         {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(consumer_addr) == to_wei("0.2")
-    assert data_nft.ownerOf(token_id=1) == publisher_addr
+    assert data_nft.ownerOf(1) == publisher_addr
 
     data_nft.transferFrom(
         publisher_addr,
@@ -523,7 +523,7 @@ def test_erc721_datatoken_functions(
         {"from": publisher_wallet},
     )
     assert data_nft.balanceOf(publisher_addr) == 0
-    assert data_nft.ownerOf(token_id=1) == consumer_addr
+    assert data_nft.ownerOf(1) == consumer_addr
     assert data_nft.getPermissions(consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     data_nft.create_erc20(
         template_index=1,
