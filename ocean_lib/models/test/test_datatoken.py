@@ -50,7 +50,7 @@ def test_main(
     assert datatoken.getPaymentCollector() == consumer_wallet.address
 
     # Check minter permissions
-    assert datatoken.get_permissions(publisher_wallet.address)[DatatokenRoles.MINTER]
+    assert datatoken.getPermissions(publisher_wallet.address)[DatatokenRoles.MINTER]
     assert datatoken.isMinter(publisher_wallet.address)
 
     # Mint Datatoken to user2 from publisher
@@ -58,9 +58,9 @@ def test_main(
     assert datatoken.balanceOf(consumer_wallet.address) == 1
 
     # Add minter
-    assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    assert not datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
     datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
-    assert datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    assert datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Mint Datatoken to user2 from consumer
     datatoken.mint(consumer_wallet.address, 1, {"from": consumer_wallet})
@@ -68,20 +68,20 @@ def test_main(
 
     # Should succeed to removeMinter if erc20Deployer
     datatoken.removeMinter(consumer_wallet.address, {"from": publisher_wallet})
-    assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    assert not datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    assert not datatoken.get_permissions(consumer_wallet.address)[
+    assert not datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
     datatoken.addPaymentManager(consumer_wallet.address, {"from": publisher_wallet})
-    assert datatoken.get_permissions(consumer_wallet.address)[
+    assert datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
 
     # Should succeed to removeFeeManager if erc20Deployer
     datatoken.removePaymentManager(consumer_wallet.address, {"from": publisher_wallet})
-    assert not datatoken.get_permissions(consumer_wallet.address)[
+    assert not datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
 
@@ -91,12 +91,12 @@ def test_main(
 
     datatoken.setData(value, {"from": publisher_wallet})
 
-    assert Web3.toHex(data_nft.get_data(key)) == value
+    assert Web3.toHex(data_nft.getData(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
     datatoken.cleanPermissions({"from": publisher_wallet})
 
-    permissions = datatoken.get_permissions(publisher_wallet.address)
+    permissions = datatoken.getPermissions(publisher_wallet.address)
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 

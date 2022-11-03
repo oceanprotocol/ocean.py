@@ -48,53 +48,57 @@ def test_data_nft_roles(
     data_nft = DataNFT(config, token_address)
 
     # Publisher should be a manager
-    assert data_nft.get_permissions(publisher_wallet.address)[
-        DataNFTPermissions.MANAGER
-    ]
+    assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Consumer address should't be manager
-    assert not data_nft.get_permissions(consumer_wallet.address)[
+    assert not data_nft.getPermissions(consumer_wallet.address)[
         DataNFTPermissions.MANAGER
     ]
 
-    data_nft.add_manager(consumer_wallet.address, publisher_wallet)
+    data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
 
     # Consumer now should be manager
-    assert data_nft.get_permissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
+    assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Check the rest of roles for another_consumer_wallet
-    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+    assert not data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.MANAGER
     ]
-    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+    assert not data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
-    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+    assert not data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.UPDATE_METADATA
     ]
-    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+    assert not data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.STORE
     ]
 
-    data_nft.add_to_create_erc20_list(another_consumer_wallet.address, consumer_wallet)
-    data_nft.add_to_725_store_list(another_consumer_wallet.address, consumer_wallet)
-    data_nft.add_to_metadata_list(another_consumer_wallet.address, consumer_wallet)
+    data_nft.addToCreateERC20List(
+        another_consumer_wallet.address, {"from": consumer_wallet}
+    )
+    data_nft.addTo725StoreList(
+        another_consumer_wallet.address, {"from": consumer_wallet}
+    )
+    data_nft.addToMetadataList(
+        another_consumer_wallet.address, {"from": consumer_wallet}
+    )
 
     # Test rest of add roles functions with newly added manager
-    assert data_nft.get_permissions(another_consumer_wallet.address)[
+    assert data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
-    assert data_nft.get_permissions(another_consumer_wallet.address)[
+    assert data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.UPDATE_METADATA
     ]
-    assert data_nft.get_permissions(another_consumer_wallet.address)[
+    assert data_nft.getPermissions(another_consumer_wallet.address)[
         DataNFTPermissions.STORE
     ]
 
     # Remove the manager
-    data_nft.remove_manager(consumer_wallet.address, publisher_wallet)
+    data_nft.removeManager(consumer_wallet.address, {"from": publisher_wallet})
 
-    assert not data_nft.get_permissions(consumer_wallet.address)[
+    assert not data_nft.getPermissions(consumer_wallet.address)[
         DataNFTPermissions.MANAGER
     ]
 
@@ -151,7 +155,7 @@ def test_successful_data_nft_creation(config, publisher_wallet):
 
     token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
-    owner_balance = data_nft.balance_of(publisher_wallet.address)
+    owner_balance = data_nft.balanceOf(publisher_wallet.address)
     assert data_nft.contract.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert owner_balance == 1
@@ -214,7 +218,7 @@ def test_datatoken_creation(
 
     token_address = TransactionReceipt(tx).events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
-    data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     tx_result = data_nft.create_erc20(
         template_index=1,
         name="DT1",
@@ -231,7 +235,7 @@ def test_datatoken_creation(
 
     datatoken = Datatoken(config, datatoken_address)
 
-    permissions = datatoken.get_permissions(publisher_wallet.address)
+    permissions = datatoken.getPermissions(publisher_wallet.address)
 
     assert permissions[0], "Not a minter"
     assert tx_result, "Error creating datatoken."
@@ -286,17 +290,17 @@ def test_datatoken_set_data(config, publisher_wallet, data_nft, datatoken):
     key = Web3.keccak(hexstr=datatoken.address)
     value = b"SomeData"
 
-    assert data_nft.get_data(key) == "0x"
+    assert data_nft.getData(key) == "0x"
     datatoken.setData(value, {"from": publisher_wallet})
 
-    assert data_nft.get_data(key).hex() == value.hex()
+    assert data_nft.getData(key).hex() == value.hex()
     """This one is the generic version of updating data into the key-value story.
     Only users with 'store' permission can do that.
     NOTE: in this function the key is chosen by the caller."""
 
-    data_nft.set_new_data(b"arbitrary text", value, publisher_wallet)
+    data_nft.setNewData(b"arbitrary text", value, {"from": publisher_wallet})
 
-    res = data_nft.get_data(b"arbitrary text")
+    res = data_nft.getData(b"arbitrary text")
 
     assert res.hex() == value.hex()
 
@@ -307,18 +311,21 @@ def test_nft_owner_transfer(
 ):
     """Test erc721 ownership transfer on token transfer"""
 
-    assert data_nft.owner_of(1) == publisher_wallet.address
+    assert data_nft.ownerOf(1) == publisher_wallet.address
 
     with pytest.raises(Exception, match="transfer of token that is not own"):
-        data_nft.transfer_from(
-            consumer_wallet.address, publisher_wallet.address, 1, publisher_wallet
+        data_nft.transferFrom(
+            consumer_wallet.address,
+            publisher_wallet.address,
+            1,
+            {"from": publisher_wallet},
         )
-    data_nft.transfer_from(
-        publisher_wallet.address, consumer_wallet.address, 1, publisher_wallet
+    data_nft.transferFrom(
+        publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
     )
 
-    assert data_nft.balance_of(publisher_wallet.address) == 0
-    assert data_nft.owner_of(1) == consumer_wallet.address
+    assert data_nft.balanceOf(publisher_wallet.address) == 0
+    assert data_nft.ownerOf(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(

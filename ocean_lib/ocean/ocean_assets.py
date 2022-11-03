@@ -587,17 +587,15 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        data_nft.set_metadata(
-            metadata_state=0,
-            metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=Web3.toChecksumAddress(
-                publisher_wallet.address.lower()
-            ).encode("utf-8"),
-            flags=flags,
-            data=document,
-            data_hash=ddo_hash,
-            metadata_proofs=[proof],
-            from_wallet=publisher_wallet,
+        data_nft.setMetadata(
+            0,
+            provider_uri,
+            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            flags,
+            document,
+            ddo_hash,
+            [proof],
+            {"from": publisher_wallet},
         )
 
         # Fetch the asset on chain
@@ -667,20 +665,18 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
-        tx_result = data_nft.set_metadata(
-            metadata_state=0,
-            metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=Web3.toChecksumAddress(
-                publisher_wallet.address.lower()
-            ).encode("utf-8"),
-            flags=flags,
-            data=document,
-            data_hash=ddo_hash,
-            metadata_proofs=[proof],
-            from_wallet=publisher_wallet,
+        tx_result = data_nft.setMetadata(
+            0,
+            provider_uri,
+            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            flags,
+            document,
+            ddo_hash,
+            [proof],
+            {"from": publisher_wallet},
         )
 
-        return self._aquarius.wait_for_asset_update(asset, tx_result)
+        return self._aquarius.wait_for_asset_update(asset, tx_result.txid)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":

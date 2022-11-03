@@ -148,11 +148,6 @@ class Datatoken(ContractBase):
     def token_name(self) -> str:
         return self.contract.name()
 
-    # TODO: remove at once with other get_permissions in enterprise and NFT
-    @enforce_types
-    def get_permissions(self, user: str) -> list:
-        return self.contract.getPermissions(ContractBase.to_checksum_address(user))
-
     @enforce_types
     def get_start_order_logs(
         self,

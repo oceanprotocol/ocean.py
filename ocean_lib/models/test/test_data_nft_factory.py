@@ -75,7 +75,7 @@ def test_main(
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
-    data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     tx_result = data_nft.create_erc20(
         template_index=1,
         name="DT1",
@@ -316,7 +316,7 @@ def test_main(
     assert (
         data_nft.token_name() == "72120Bundle"
     ), "NFT name doesn't match with the expected one."
-    metadata_info = data_nft.get_metadata()
+    metadata_info = data_nft.getMetaData()
     assert metadata_info[3] is True
     assert metadata_info[0] == "http://myprovider:8030"
 
@@ -374,7 +374,7 @@ def test_start_multiple_order(
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
-    data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     tx_result = data_nft.create_erc20(
         template_index=1,
         name="DT1",
@@ -524,7 +524,7 @@ def test_fail_create_erc20(
     assert registered_event["admin"] == publisher_wallet.address
     token_address = registered_event["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
-    data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
     with pytest.raises(Exception, match="Template index doesnt exist"):
@@ -557,7 +557,7 @@ def test_fail_create_erc20(
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
-    assert data_nft.get_permissions(another_consumer_wallet.address)[1] is False
+    assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_erc20(
             template_index=1,
