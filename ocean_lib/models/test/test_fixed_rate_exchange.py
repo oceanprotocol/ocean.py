@@ -44,7 +44,7 @@ def test_exchange_rate_creation(
 
     datatoken.mint(consumer_addr, amount, {"from": publisher_wallet})
     assert datatoken.balanceOf(consumer_addr) == amount
-    number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
+    number_of_exchanges_before = fixed_exchange.getNumberOfExchanges()
 
     tx = datatoken.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
@@ -64,24 +64,24 @@ def test_exchange_rate_creation(
 
     registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
 
-    assert fixed_exchange.get_number_of_exchanges() == (number_of_exchanges_before + 1)
+    assert fixed_exchange.getNumberOfExchanges() == (number_of_exchanges_before + 1)
     assert registered_event["owner"] == consumer_addr
-    assert len(fixed_exchange.get_exchanges()) == (number_of_exchanges_before + 1)
+    assert len(fixed_exchange.getExchanges()) == (number_of_exchanges_before + 1)
 
     exchange_id = registered_event["exchangeId"]
 
     # Generate exchange id works
-    generated_exchange_id = fixed_exchange.generate_exchange_id(
+    generated_exchange_id = fixed_exchange.generateExchangeId(
         base_token=ocean_token.address, datatoken=datatoken.address
     )
     assert generated_exchange_id == exchange_id
 
     # Exchange is active
-    is_active = fixed_exchange.is_active(exchange_id)
+    is_active = fixed_exchange.isActive(exchange_id)
     assert is_active, "Exchange was not activated correctly!"
 
     # Exchange should not have supply yet
-    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    exchange_details = fixed_exchange.getExchange(exchange_id)
 
     assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == 0
     assert (
@@ -102,7 +102,7 @@ def test_exchange_rate_creation(
     )
 
     # Exchange should have supply and fees setup
-    fee_info = fixed_exchange.get_fees_info(exchange_id)
+    fee_info = fixed_exchange.getFeesInfo(exchange_id)
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
@@ -121,17 +121,22 @@ def test_exchange_rate_creation(
     # Get exchange info
     # Get swapOceanFee
     # token address is not approved, so 0.002
-    assert fixed_exchange.get_opc_fee(ZERO_ADDRESS) == to_wei("0.002")
+    assert fixed_exchange.getOPCFee(ZERO_ADDRESS) == to_wei("0.002")
 
     # Should get the exchange rate
-    exchange_rate = fixed_exchange.get_rate(exchange_id)
+    exchange_rate = fixed_exchange.getRate(exchange_id)
 
     assert rate == exchange_rate
 
     # Buy should fail if price is too high
     with pytest.raises(Exception, match="Too many base tokens"):
-        fixed_exchange.buy_dt(
-            exchange_id, amount_dt_to_sell, 1, ZERO_ADDRESS, 0, another_consumer_wallet
+        fixed_exchange.buyDT(
+            exchange_id,
+            amount_dt_to_sell,
+            1,
+            ZERO_ADDRESS,
+            0,
+            {"from": another_consumer_wallet},
         )
 
     ocean_token.transfer(
@@ -149,13 +154,13 @@ def test_exchange_rate_creation(
     assert ocean_balance_publisher_before_swap == 0
     assert datatoken_dt_balance_consumer_before_swap == 0
 
-    receipt = fixed_exchange.buy_dt(
+    receipt = fixed_exchange.buyDT(
         exchange_id,
         amount_dt_to_sell,
         no_limit,
         consumer_addr,
         to_wei("0.1"),
-        another_consumer_wallet,
+        {"from": another_consumer_wallet},
     )
 
     tx_receipt = TransactionReceipt(receipt)
@@ -184,17 +189,17 @@ def test_exchange_rate_creation(
     )
     datatoken_balance_before = datatoken.balanceOf(consumer_addr)
     ocean_balance_before = ocean_token.balanceOf(consumer_addr)
-    fixed_exchange.sell_dt(
-        exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, consumer_wallet
+    fixed_exchange.sellDT(
+        exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, {"from": consumer_wallet}
     )
 
     # Base balance incremented as expect after selling data tokens
     assert (
         ocean_token.balanceOf(consumer_addr)
-        == fixed_exchange.calc_base_out_given_in_dt(
-            exchange_id=exchange_id,
-            datatoken_amount=amount_dt_to_sell,
-            consume_market_swap_fee_amount=0,
+        == fixed_exchange.calcBaseOutGivenInDT(
+            exchange_id,
+            amount_dt_to_sell,
+            0,
         )[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
         + ocean_balance_before
     )
@@ -204,7 +209,7 @@ def test_exchange_rate_creation(
         == datatoken_balance_before - amount_dt_to_sell
     )
 
-    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    exchange_details = fixed_exchange.getExchange(exchange_id)
 
     assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == amount_dt_to_sell
     assert (
@@ -218,12 +223,11 @@ def test_exchange_rate_creation(
 
     dt_balance_before = datatoken.balanceOf(pmt_collector)
 
-    tx = fixed_exchange.collect_dt(
+    receipt = fixed_exchange.collectDT(
         exchange_id,
         exchange_details[FixedRateExchangeDetails.DT_BALANCE],
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
-    receipt = TransactionReceipt(tx)
 
     logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
     assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs["amount"]
@@ -232,23 +236,22 @@ def test_exchange_rate_creation(
     # Needs to buy because he sold all the DT amount and BT balance will be 0.
     datatoken.approve(fixed_exchange.address, to_wei(10), {"from": consumer_wallet})
 
-    fixed_exchange.buy_dt(
+    fixed_exchange.buyDT(
         exchange_id,
         to_wei(10),
         no_limit,
         consumer_addr,
         to_wei("0.1"),
-        another_consumer_wallet,
+        {"from": another_consumer_wallet},
     )
     assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell + to_wei(10)
     bt_balance_before = ocean_token.balanceOf(pmt_collector)
 
-    tx = fixed_exchange.collect_bt(
+    receipt = fixed_exchange.collectBT(
         exchange_id,
         exchange_details[FixedRateExchangeDetails.BT_BALANCE],
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
-    receipt = TransactionReceipt(tx)
 
     logs = receipt.events[FixedRateExchange.EVENT_TOKEN_COLLECTED]
 
@@ -258,7 +261,7 @@ def test_exchange_rate_creation(
     # Market fee collector bt balance
     bt_balance_before = ocean_token.balanceOf(another_consumer_addr)
 
-    fee_info = fixed_exchange.get_fees_info(exchange_id)
+    fee_info = fixed_exchange.getFeesInfo(exchange_id)
 
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
@@ -279,19 +282,19 @@ def test_exchange_rate_creation(
     # Market fee collector update
     # Only market fee collector should be able to update market_fee_collector
     with pytest.raises(Exception, match="not marketFeeCollector"):
-        fixed_exchange.update_market_fee_collector(
-            exchange_id, consumer_addr, consumer_wallet
+        fixed_exchange.updateMarketFeeCollector(
+            exchange_id, consumer_addr, {"from": consumer_wallet}
         )
 
-    fixed_exchange.update_market_fee_collector(
-        exchange_id, consumer_addr, another_consumer_wallet
+    fixed_exchange.updateMarketFeeCollector(
+        exchange_id, consumer_addr, {"from": another_consumer_wallet}
     )
 
     # Deactive exchange should work
-    fixed_exchange.toggle_exchange_state(exchange_id, publisher_wallet)
-    assert not fixed_exchange.is_active(exchange_id)
-    fixed_exchange.toggle_exchange_state(exchange_id, publisher_wallet)
+    fixed_exchange.toggleExchangeState(exchange_id, {"from": publisher_wallet})
+    assert not fixed_exchange.isActive(exchange_id)
+    fixed_exchange.toggleExchangeState(exchange_id, {"from": publisher_wallet})
 
     # Set exchange rate exchange should work
-    fixed_exchange.set_rate(exchange_id, to_wei("1.1"), publisher_wallet)
-    assert fixed_exchange.get_rate(exchange_id) == to_wei("1.1")
+    fixed_exchange.setRate(exchange_id, to_wei("1.1"), {"from": publisher_wallet})
+    assert fixed_exchange.getRate(exchange_id) == to_wei("1.1")

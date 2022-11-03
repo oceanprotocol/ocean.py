@@ -149,9 +149,9 @@ def exchange_swap_fees(
     exchange = FixedRateExchange(config, fixed_price_address)
 
     exchange_id = receipt.events[dt.EVENT_NEW_FIXED_RATE]["exchangeId"]
-    assert exchange_id == exchange.generate_exchange_id(bt.address, dt.address)
+    assert exchange_id == exchange.generateExchangeId(bt.address, dt.address)
 
-    assert exchange.is_active(exchange_id)
+    assert exchange.isActive(exchange_id)
 
     (
         market_fee,
@@ -159,7 +159,7 @@ def exchange_swap_fees(
         opc_fee,
         market_fee_available,
         ocean_fee_available,
-    ) = exchange.get_fees_info(exchange_id)
+    ) = exchange.getFeesInfo(exchange_id)
 
     # Verify fee collectors are configured correctly
     factory_router = FactoryRouter(config, get_address_of_type(config, "Router"))
@@ -170,9 +170,9 @@ def exchange_swap_fees(
         assert opc_fee == OPC_SWAP_FEE_APPROVED
     else:
         assert opc_fee == OPC_SWAP_FEE_NOT_APPROVED
-    assert exchange.get_opc_fee(bt.address) == opc_fee
-    assert exchange.get_opc_fee(bt.address) == factory_router.get_opc_fee(bt.address)
-    assert exchange.get_market_fee(exchange_id) == publish_market_swap_fee
+    assert exchange.getOPCFee(bt.address) == opc_fee
+    assert exchange.getOPCFee(bt.address) == factory_router.getOPCFee(bt.address)
+    assert exchange.getMarketFee(exchange_id) == publish_market_swap_fee
     assert market_fee == publish_market_swap_fee
 
     # Verify 0 fees have been collected so far
@@ -180,9 +180,9 @@ def exchange_swap_fees(
     assert ocean_fee_available == 0
 
     # Verify that rate is configured correctly
-    assert exchange.get_rate(exchange_id) == bt_per_dt_in_wei
+    assert exchange.getRate(exchange_id) == bt_per_dt_in_wei
 
-    details = exchange.get_exchange(exchange_id)
+    details = exchange.getExchange(exchange_id)
 
     # Verify exchange starting balance and supply.
     assert details[FixedRateExchangeDetails.BT_BALANCE] == 0
@@ -249,18 +249,18 @@ def exchange_swap_fees(
 
     # Update publish market swap fee
     new_publish_market_swap_fee = to_wei("0.09")
-    exchange.update_market_fee(
-        exchange_id, new_publish_market_swap_fee, publisher_wallet
+    exchange.updateMarketFee(
+        exchange_id, new_publish_market_swap_fee, {"from": publisher_wallet}
     )
-    fees_info = exchange.get_fees_info(exchange_id)
+    fees_info = exchange.getFeesInfo(exchange_id)
     assert (
         fees_info[FixedRateExchangeFeesInfo.MARKET_FEE] == new_publish_market_swap_fee
     )
 
     # Increase rate (base tokens per datatoken) by 1
     new_bt_per_dt_in_wei = bt_per_dt_in_wei + to_wei("1")
-    exchange.set_rate(exchange_id, new_bt_per_dt_in_wei, publisher_wallet)
-    assert exchange.get_rate(exchange_id) == new_bt_per_dt_in_wei
+    exchange.setRate(exchange_id, new_bt_per_dt_in_wei, {"from": publisher_wallet})
+    assert exchange.getRate(exchange_id) == new_bt_per_dt_in_wei
 
     new_dt_per_bt_in_wei = to_wei(Decimal(1) / from_wei(new_bt_per_dt_in_wei))
     buy_or_sell_dt_and_verify_balances_swap_fees(
@@ -276,11 +276,11 @@ def exchange_swap_fees(
 
     # Update market fee collector to be the consumer
     new_market_fee_collector = consumer_wallet.address
-    exchange.update_market_fee_collector(
-        exchange_id, new_market_fee_collector, publisher_wallet
+    exchange.updateMarketFeeCollector(
+        exchange_id, new_market_fee_collector, {"from": publisher_wallet}
     )
     assert (
-        exchange.get_fees_info(exchange_id)[
+        exchange.getFeesInfo(exchange_id)[
             FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR
         ]
         == new_market_fee_collector
@@ -315,7 +315,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     consume_market_swap_fee: int,
     consumer_wallet,
 ):
-    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_info = exchange.getExchange(exchange_id)
     bt = Datatoken(config, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
     dt = Datatoken(config, exchange_info[FixedRateExchangeDetails.DATATOKEN])
 
@@ -325,7 +325,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     exchange_bt_balance_before = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
     exchange_dt_balance_before = exchange_info[FixedRateExchangeDetails.DT_BALANCE]
 
-    exchange_fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fees_info = exchange.getFeesInfo(exchange_id)
 
     publish_market_fee_bt_balance_before = exchange_fees_info[
         FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE
@@ -336,25 +336,24 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     consume_market_fee_bt_balance_before = bt.balanceOf(consume_market_swap_fee_address)
 
     if buy_or_sell == "buy":
-        method = exchange.buy_dt
+        method = exchange.buyDT
         min_or_max_base_token = MAX_WEI
     else:
-        method = exchange.sell_dt
+        method = exchange.sellDT
         min_or_max_base_token = 0
 
     # Buy or Sell DT
-    tx = method(
+    receipt = method(
         exchange_id,
         dt_amount,
         min_or_max_base_token,
         consume_market_swap_fee_address,
         consume_market_swap_fee,
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
-    receipt = TransactionReceipt(tx)
 
     # Get exchange info again
-    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_info = exchange.getExchange(exchange_id)
 
     # Get balances after swap
     consumer_bt_balance_after = bt.balanceOf(consumer_wallet.address)
@@ -419,7 +418,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
 
     # Get current fee balances
     # Exchange fees are always base tokens
-    exchange_fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fees_info = exchange.getFeesInfo(exchange_id)
     publish_market_fee_bt_balance_after = exchange_fees_info[
         FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE
     ]
@@ -451,26 +450,26 @@ def collect_bt_or_dt_and_verify_balances(
     from_wallet,
 ):
     """Collet BT or Collect DT and verify balances"""
-    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_info = exchange.getExchange(exchange_id)
     dt = Datatoken(config, exchange_info[FixedRateExchangeDetails.DATATOKEN])
     publish_market = dt.getPaymentCollector()
 
     if token_address == dt.address:
         token = dt
         balance_index = FixedRateExchangeDetails.DT_BALANCE
-        method = exchange.collect_dt
+        method = exchange.collectDT
     else:
         token = Datatoken(config, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
         balance_index = FixedRateExchangeDetails.BT_BALANCE
-        method = exchange.collect_bt
+        method = exchange.collectBT
 
     exchange_token_balance_before = exchange_info[balance_index]
 
     publish_market_token_balance_before = token.balanceOf(publish_market)
 
-    method(exchange_id, exchange_token_balance_before, from_wallet)
+    method(exchange_id, exchange_token_balance_before, {"from": from_wallet})
 
-    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_info = exchange.getExchange(exchange_id)
     exchange_token_balance_after = exchange_info[balance_index]
 
     publish_market_token_balance_after = token.balanceOf(publish_market)
@@ -490,24 +489,24 @@ def collect_fee_and_verify_balances(
     from_wallet,
 ):
     """Collet publish market swap fees or ocean community swap fees and verify balances"""
-    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_info = exchange.getExchange(exchange_id)
     bt = Datatoken(config, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
 
-    fees_info = exchange.get_fees_info(exchange_id)
+    fees_info = exchange.getFeesInfo(exchange_id)
     exchange_fee_balance_before = fees_info[balance_index]
 
     if balance_index == FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE:
-        method = exchange.collect_market_fee
+        method = exchange.collectMarketFee
         fee_collector = fees_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
     else:
-        method = exchange.collect_ocean_fee
+        method = exchange.collectOceanFee
         fee_collector = get_opc_collector_address_from_exchange(exchange)
 
     fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
 
-    method(exchange_id, from_wallet)
+    method(exchange_id, {"from": from_wallet})
 
-    fees_info = exchange.get_fees_info(exchange_id)
+    fees_info = exchange.getFeesInfo(exchange_id)
     exchange_fee_balance_after = fees_info[balance_index]
 
     fee_collector_bt_balance_after = bt.balanceOf(fee_collector)

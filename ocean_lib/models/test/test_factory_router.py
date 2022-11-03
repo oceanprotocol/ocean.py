@@ -66,8 +66,8 @@ def test_is_dispenser_contract(config: dict, factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_get_opc_fee(config: dict, factory_router: FactoryRouter, ocean_address: str):
-    assert factory_router.get_opc_fee(ocean_address) == OPC_SWAP_FEE_APPROVED
-    assert factory_router.get_opc_fee(ZERO_ADDRESS) == OPC_SWAP_FEE_NOT_APPROVED
+    assert factory_router.getOPCFee(ocean_address) == OPC_SWAP_FEE_APPROVED
+    assert factory_router.getOPCFee(ZERO_ADDRESS) == OPC_SWAP_FEE_NOT_APPROVED
 
 
 @pytest.mark.unit

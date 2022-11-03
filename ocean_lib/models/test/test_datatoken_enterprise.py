@@ -184,19 +184,19 @@ def test_buy_from_fre_and_order(
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
 
     exchange_id = new_fixed_rate_event["exchangeId"]
-    status = fixed_rate_exchange.get_exchange(exchange_id)
+    status = fixed_rate_exchange.getExchange(exchange_id)
 
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
 
     with pytest.raises(Exception, match="This address is not allowed to swap"):
-        fixed_rate_exchange.buy_dt(
-            exchange_id=exchange_id,
-            datatoken_amount=to_wei("1"),
-            max_base_token_amount=to_wei("1"),
-            consume_market_swap_fee_address=ZERO_ADDRESS,
-            consume_market_swap_fee_amount=0,
-            from_wallet=consumer_wallet,
+        fixed_rate_exchange.buyDT(
+            exchange_id,
+            to_wei("1"),
+            to_wei("1"),
+            ZERO_ADDRESS,
+            0,
+            {"from": consumer_wallet},
         )
 
     consume_fee_amount = to_wei("2")

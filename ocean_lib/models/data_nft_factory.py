@@ -329,7 +329,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             else [
                 exchange_address_and_id
                 for exchange_address_and_id in exchange_addresses_and_ids
-                if fixed_rate_exchange.get_exchange(exchange_address_and_id[1])[0]
+                if fixed_rate_exchange.getExchange(exchange_address_and_id[1])[0]
                 == exchange_owner
             ]
         )

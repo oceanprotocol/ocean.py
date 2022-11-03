@@ -742,7 +742,7 @@ def test_nft_transfer_with_fre(
     fixed_exchange = FixedRateExchange(
         config, get_address_of_type(config, "FixedPrice")
     )
-    number_of_exchanges = fixed_exchange.get_number_of_exchanges()
+    number_of_exchanges = fixed_exchange.getNumberOfExchanges()
     tx = datatoken.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
         base_token_address=ocean_token.address,
@@ -760,13 +760,13 @@ def test_nft_transfer_with_fre(
     receipt = TransactionReceipt(tx)
     fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
 
-    assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
+    assert fixed_exchange.getNumberOfExchanges() == number_of_exchanges + 1
     assert fre_event["owner"] == consumer_addr
 
     exchange_id = fre_event["exchangeId"]
 
     # Exchange should have supply and fees setup
-    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    exchange_details = fixed_exchange.getExchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == consumer_addr
     assert exchange_details[FixedRateExchangeDetails.DATATOKEN] == datatoken.address
     assert (
@@ -787,35 +787,33 @@ def test_nft_transfer_with_fre(
     ocean_token.approve(fixed_exchange.address, to_wei(100), {"from": consumer_wallet})
 
     amount_dt_bought = to_wei(2)
-    fixed_exchange.buy_dt(
-        exchange_id=exchange_id,
-        datatoken_amount=amount_dt_bought,
-        max_base_token_amount=to_wei(5),
-        consume_market_swap_fee_address=ZERO_ADDRESS,
-        consume_market_swap_fee_amount=0,
-        from_wallet=consumer_wallet,
+    fixed_exchange.buyDT(
+        exchange_id,
+        amount_dt_bought,
+        to_wei(5),
+        ZERO_ADDRESS,
+        0,
+        {"from": consumer_wallet},
     )
     assert (
-        fixed_exchange.get_dt_supply(exchange_id)
+        fixed_exchange.getDTSupply(exchange_id)
         == exchange_details[FixedRateExchangeDetails.DT_SUPPLY] - amount_dt_bought
     )
     assert datatoken.balanceOf(consumer_addr) == amount_dt_bought
-    fixed_exchange.sell_dt(
-        exchange_id=exchange_id,
-        datatoken_amount=to_wei(2),
-        min_base_token_amount=to_wei(1),
-        consume_market_swap_fee_address=ZERO_ADDRESS,
-        consume_market_swap_fee_amount=0,
-        from_wallet=consumer_wallet,
+    fixed_exchange.sellDT(
+        exchange_id,
+        to_wei(2),
+        to_wei(1),
+        ZERO_ADDRESS,
+        0,
+        {"from": consumer_wallet},
     )
     assert (
-        fixed_exchange.get_dt_supply(exchange_id)
+        fixed_exchange.getDTSupply(exchange_id)
         == exchange_details[FixedRateExchangeDetails.DT_SUPPLY] - amount_dt_bought
     )
     assert datatoken.balanceOf(consumer_addr) == 0
-    fixed_exchange.collect_dt(
-        exchange_id=exchange_id, amount=to_wei(1), from_wallet=consumer_wallet
-    )
+    fixed_exchange.collectDT(exchange_id, to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_addr) == to_wei(1)
 
 
@@ -877,7 +875,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     fixed_exchange = FixedRateExchange(
         config, get_address_of_type(config, "FixedPrice")
     )
-    number_of_exchanges = fixed_exchange.get_number_of_exchanges()
+    number_of_exchanges = fixed_exchange.getNumberOfExchanges()
     tx = datatoken.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
         base_token_address=ocean_token.address,
@@ -894,12 +892,12 @@ def test_transfer_nft_with_erc20_pool_fre(
 
     receipt = TransactionReceipt(tx)
     fre_event = receipt.events[DataNFTFactoryContract.EVENT_NEW_FIXED_RATE]
-    assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
+    assert fixed_exchange.getNumberOfExchanges() == number_of_exchanges + 1
     assert fre_event["owner"] == publisher_addr
 
     exchange_id = fre_event["exchangeId"]
 
-    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    exchange_details = fixed_exchange.getExchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == publisher_addr
     assert exchange_details[FixedRateExchangeDetails.DATATOKEN] == datatoken.address
     assert (
@@ -937,6 +935,6 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert datatoken.permissions(consumer_addr)[0]
 
     # Consumer wallet has not become the owner of the publisher's exchange
-    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    exchange_details = fixed_exchange.getExchange(exchange_id)
     assert exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER] == publisher_addr
     assert exchange_details[FixedRateExchangeDetails.ACTIVE]

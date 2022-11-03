@@ -87,13 +87,13 @@ OCEAN_token.approve(exchange_address, ocean.to_wei(100), {"from": bob_wallet})
 
 # Bob starts the exchange. The contract takes some of his OCEAN and adds datatokens.
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-tx_result = ocean.fixed_rate_exchange.buy_dt(
-    exchange_id=exchange_id,
-    datatoken_amount=ocean.to_wei(20),
-    max_base_token_amount=ocean.to_wei(50),
-    consume_market_swap_fee_address=ZERO_ADDRESS,
-    consume_market_swap_fee_amount=0,
-    from_wallet=bob_wallet,
+tx_result = ocean.fixed_rate_exchange.buyDT(
+    exchange_id,
+    ocean.to_wei(20),
+    ocean.to_wei(50),
+    ZERO_ADDRESS,
+    0,
+    {"from": bob_wallet},
 )
 assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```
