@@ -819,6 +819,7 @@ class OceanAssets:
         consume_market_order_fee_token: Optional[str] = None,
         consume_market_order_fee_amount: Optional[int] = None,
         consumer_address: Optional[str] = None,
+        userdata: Optional[dict] = None,
     ):
         # fill in good defaults as needed
         service = service or asset.services[0]
@@ -843,7 +844,10 @@ class OceanAssets:
             )
 
         consumable_result = is_consumable(
-            asset, service, {"type": "address", "value": wallet.address}
+            asset,
+            service,
+            {"type": "address", "value": wallet.address},
+            userdata=userdata,
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
