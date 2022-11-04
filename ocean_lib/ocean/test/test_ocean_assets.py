@@ -12,14 +12,12 @@ import brownie
 import pytest
 from brownie import network
 from brownie.network import accounts
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -188,7 +186,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
     registered_token_event = data_nft.contract.events.get_sequence(
         _asset.event.get("block"),
         network.chain[-1].number,
-        DataNFT.EVENT_METADATA_UPDATED,
+        "MetadataUpdated",
     )
 
     assert registered_token_event[0].args.get("flags") == bytes([3])
@@ -433,19 +431,18 @@ def test_plain_asset_with_one_datatoken(
     data_nft_factory, metadata, files = create_basics(config, data_provider)
 
     # Publisher deploys NFT contract
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT1",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    tx_receipt = data_nft_factory.deployERC721Contract(
+        "NFT1",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    tx_receipt = TransactionReceipt(tx)
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = tx_receipt.events["NFTCreated"]
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address = registered_event["newTokenAddress"]
 
@@ -483,19 +480,18 @@ def test_plain_asset_multiple_datatokens(
     data_provider = DataServiceProvider
     data_nft_factory, metadata, files = create_basics(config, data_provider)
 
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT2",
-        symbol="NFT2SYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    tx_receipt = data_nft_factory.deployERC721Contract(
+        "NFT2",
+        "NFT2SYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    tx_receipt = TransactionReceipt(tx)
-    registered_event = tx_receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+    registered_event = tx_receipt.events["NFTCreated"]
 
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address2 = registered_event["newTokenAddress"]

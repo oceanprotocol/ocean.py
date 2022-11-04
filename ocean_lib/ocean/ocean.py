@@ -9,7 +9,6 @@ import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
@@ -23,7 +22,6 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
@@ -161,19 +159,19 @@ class Ocean:
 
         nft_factory = self.get_nft_factory()
 
-        tx_id = nft_factory.deploy_erc721_contract(
-            name=name,
-            symbol=symbol,
-            template_index=template_index,
-            additional_metadata_updater=additional_metadata_updater,
-            additional_datatoken_deployer=additional_datatoken_deployer,
-            token_uri=token_uri,
-            transferable=transferable,
-            owner=owner if owner is not None else from_wallet.address,
-            from_wallet=from_wallet,
+        receipt = nft_factory.deployERC721Contract(
+            name,
+            symbol,
+            template_index,
+            additional_metadata_updater,
+            additional_datatoken_deployer,
+            token_uri,
+            transferable,
+            owner if owner is not None else from_wallet.address,
+            {"from": from_wallet},
         )
 
-        address = nft_factory.get_token_address(tx_id)
+        address = nft_factory.get_token_address(receipt)
         assert address, "new NFT token has no address"
         token = DataNFT(self.config_dict, address)
         return token
@@ -242,13 +240,6 @@ class Ocean:
             self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
         )
 
-    @property
-    @enforce_types
-    def side_staking(self):
-        return SideStaking(
-            self.config_dict, get_address_of_type(self.config_dict, "Staking")
-        )
-
     @enforce_types
     def create_fixed_rate(
         self,
@@ -259,9 +250,9 @@ class Ocean:
         from_wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
-        datatoken.approve(fixed_price_address, amount, from_wallet)
+        datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
 
-        tx = datatoken.create_fixed_rate(
+        receipt = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,
             base_token_address=base_token.address,
             owner=from_wallet.address,
@@ -272,15 +263,12 @@ class Ocean:
             fixed_rate=fixed_rate,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
-            from_wallet=from_wallet,
+            transaction_parameters={"from": from_wallet},
         )
 
-        receipt = TransactionReceipt(tx)
-        fixed_price_address == receipt.events[datatoken.EVENT_NEW_FIXED_RATE][
-            "exchangeContract"
-        ]
+        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
 
-        exchange_id = receipt.events[datatoken.EVENT_NEW_FIXED_RATE]["exchangeId"]
+        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
 
         return exchange_id
 

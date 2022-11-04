@@ -97,9 +97,9 @@ def test_start_order_fees(
 
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     opc_collector_address = get_opc_collector_address_from_datatoken(dt)
@@ -108,7 +108,7 @@ def test_start_order_fees(
         bt.mint(
             consumer_wallet.address,
             parse_units("2000", bt.decimals()),
-            factory_deployer_wallet,
+            {"from": factory_deployer_wallet},
         )
 
     # Get balances
@@ -136,7 +136,7 @@ def test_start_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, consumer_wallet)
+    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
 
     # Start order for consumer
     consume_market_order_fee = parse_units(
@@ -156,7 +156,7 @@ def test_start_order_fees(
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
         consume_market_order_fee_amount=consume_market_order_fee,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Get balances
@@ -174,11 +174,11 @@ def test_start_order_fees(
     opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
-    publish_market_order_fee_amount = dt.get_publishing_market_fee()[2]
+    publish_market_order_fee_amount = dt.getPublishingMarketFee()[2]
     assert publish_market_order_fee_amount == publish_market_order_fee
 
     # Get Ocean community fee amount
-    ocean_community_order_fee = factory_router.get_opc_consume_fee()
+    ocean_community_order_fee = factory_router.getOPCConsumeFee()
     assert ocean_community_order_fee == to_wei("0.03")
 
     one_datatoken = to_wei(1)

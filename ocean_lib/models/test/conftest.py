@@ -11,7 +11,6 @@ from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether
 from tests.resources.helper_functions import get_ganache_wallet
 
 _NETWORK = "ganache"
@@ -116,7 +115,7 @@ def make_info(name, private_key_name):
             "4"
         ), "Ether balance less than 4."
         if accounts.at(info.address).balance() < to_wei("2"):
-            send_ether(config, wallet, info.address, "4 ether")
+            wallet.transfer(info.address, "4 ether")
 
     from ocean_lib.ocean.ocean import Ocean
 

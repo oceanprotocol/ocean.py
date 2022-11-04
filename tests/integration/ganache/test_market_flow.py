@@ -37,13 +37,13 @@ def test_market_flow(
 
     # Mint data tokens and assign to publisher
     datatoken.mint(
-        account_address=publisher_wallet.address,
-        value=to_wei(50),
-        from_wallet=publisher_wallet,
+        publisher_wallet.address,
+        to_wei(50),
+        {"from": publisher_wallet},
     )
 
     # Give the consumer some datatokens so they can order the service
-    datatoken.transfer(consumer_wallet.address, to_wei(10), publisher_wallet)
+    datatoken.transfer(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
 
     # Place order for the download service
     if consumer_type == "publisher":
@@ -110,7 +110,7 @@ def test_pay_for_access_service_good_default(
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint datatokens to consumer
-    datatoken.mint(consumer_wallet.address, to_wei(50), publisher_wallet)
+    datatoken.mint(consumer_wallet.address, to_wei(50), {"from": publisher_wallet})
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args

@@ -4,7 +4,6 @@
 #
 import pytest
 from brownie.network import accounts
-from brownie.network.transaction import TransactionReceipt
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
@@ -12,12 +11,10 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     get_another_consumer_wallet,
@@ -64,14 +61,14 @@ def setup_all(request, config, ocean_token):
     ), "Ether balance less than 10."
 
     amt_distribute = to_wei("1000")
-    ocean_token.mint(wallet.address, to_wei("20000"), from_wallet=wallet)
+    ocean_token.mint(wallet.address, to_wei("20000"), {"from": wallet})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if accounts.at(w.address).balance() < to_wei("2"):
-            send_ether(config, wallet, w.address, "4 ether")
+            wallet.transfer(w.address, "4 ether")
 
         if ocean_token.balanceOf(w.address) < to_wei("100"):
-            ocean_token.mint(w.address, amt_distribute, from_wallet=wallet)
+            ocean_token.mint(w.address, amt_distribute, {"from": wallet})
 
 
 @pytest.fixture
@@ -141,11 +138,6 @@ def factory_router(config):
 
 
 @pytest.fixture
-def side_staking(config):
-    return SideStaking(config=config, address=get_address_of_type(config, "Staking"))
-
-
-@pytest.fixture
 def data_nft_factory(config):
     return DataNFTFactoryContract(config, get_address_of_type(config, "ERC721Factory"))
 
@@ -157,24 +149,24 @@ def provider_wallet():
 
 @pytest.fixture
 def data_nft(config, publisher_wallet, data_nft_factory):
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        publisher_wallet.address,
+        {"from": publisher_wallet},
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(receipt)
     return DataNFT(config, token_address)
 
 
 @pytest.fixture
 def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -184,10 +176,9 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
-    receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
     return Datatoken(config, dt_address)
@@ -195,7 +186,7 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
 
 @pytest.fixture
 def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
-    tx_id = data_nft.create_erc20(
+    receipt = data_nft.create_erc20(
         template_index=2,
         name="DT1",
         symbol="DT1Symbol",
@@ -205,11 +196,10 @@ def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_fact
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         datatoken_cap=to_wei(100),
     )
 
-    receipt = TransactionReceipt(tx_id)
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
 
     return DatatokenEnterprise(config, dt_address)

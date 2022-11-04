@@ -183,9 +183,9 @@ def ocean_assets_download_destination_file_helper(
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     datatoken.mint(
-        account_address=publisher_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        publisher_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     initialize_response = data_provider.initialize(
@@ -196,7 +196,7 @@ def ocean_assets_download_destination_file_helper(
 
     provider_fees = initialize_response.json()["providerFee"]
 
-    tx_id = datatoken.start_order(
+    receipt = datatoken.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -210,17 +210,17 @@ def ocean_assets_download_destination_file_helper(
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     orders = publisher_ocean_instance.get_user_orders(
         publisher_wallet.address, datatoken.address
     )
     assert datatoken.address in [order.address for order in orders]
-    assert tx_id in [order.transactionHash.hex() for order in orders]
+    assert receipt.txid in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(
-        ddo, access_service, publisher_wallet, tmpdir, tx_id
+        ddo, access_service, publisher_wallet, tmpdir, receipt.txid
     )
 
     assert os.path.exists(written_path)
@@ -232,6 +232,6 @@ def ocean_assets_download_destination_file_helper(
             ddo.services[0],
             publisher_wallet,
             str(tmpdir),
-            tx_id,
+            receipt.txid,
             index=4,
         )

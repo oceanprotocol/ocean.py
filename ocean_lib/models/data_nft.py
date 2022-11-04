@@ -42,42 +42,6 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    EVENT_TOKEN_CREATED = "TokenCreated"
-    EVENT_METADATA_CREATED = "MetadataCreated"
-    EVENT_METADATA_UPDATED = "MetadataUpdated"
-    EVENT_METADATA_VALIDATED = "MetadataValidated"
-    EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
-
-    @enforce_types
-    def set_metadata_state(self, metadata_state: int, from_wallet):
-        return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
-
-    @enforce_types
-    def set_metadata(
-        self,
-        metadata_state: int,
-        metadata_decryptor_url: str,
-        metadata_decryptor_address: bytes,
-        flags: bytes,
-        data: Union[str, bytes],
-        data_hash: Union[str, bytes],
-        metadata_proofs: List[MetadataProof],
-        from_wallet,
-    ) -> str:
-        return self.send_transaction(
-            "setMetaData",
-            (
-                metadata_state,
-                metadata_decryptor_url,
-                metadata_decryptor_address,
-                flags,
-                data,
-                data_hash,
-                metadata_proofs,
-            ),
-            from_wallet,
-        )
-
     @enforce_types
     def set_metadata_token_uri(
         self,
@@ -90,29 +54,22 @@ class DataNFT(ContractBase):
         token_id: int,
         token_uri: str,
         metadata_proofs: List[MetadataProof],
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
-        return self.send_transaction(
-            "setMetaDataAndTokenURI",
+        return self.contract.setMetaDataAndTokenURI(
             (
-                (
-                    metadata_state,
-                    metadata_decryptor_url,
-                    metadata_decryptor_address,
-                    flags,
-                    data,
-                    data_hash,
-                    token_id,
-                    token_uri,
-                    metadata_proofs,
-                ),
+                metadata_state,
+                metadata_decryptor_url,
+                metadata_decryptor_address,
+                flags,
+                data,
+                data_hash,
+                token_id,
+                token_uri,
+                metadata_proofs,
             ),
-            from_wallet,
+            transaction_parameters,
         )
-
-    @enforce_types
-    def get_metadata(self) -> tuple:
-        return self.contract.getMetaData()
 
     @enforce_types
     def create_erc20(
@@ -126,214 +83,29 @@ class DataNFT(ContractBase):
         publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
-        from_wallet,
+        transaction_parameters: dict,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
-        return self.send_transaction(
-            "createERC20",
-            (
-                template_index,
-                [name, symbol],
-                [
-                    ContractBase.to_checksum_address(minter),
-                    ContractBase.to_checksum_address(fee_manager),
-                    ContractBase.to_checksum_address(publish_market_order_fee_address),
-                    ContractBase.to_checksum_address(publish_market_order_fee_token),
-                ],
-                [datatoken_cap, publish_market_order_fee_amount],
-                bytess,
-            ),
-            from_wallet,
+        return self.contract.createERC20(
+            template_index,
+            [name, symbol],
+            [
+                ContractBase.to_checksum_address(minter),
+                ContractBase.to_checksum_address(fee_manager),
+                ContractBase.to_checksum_address(publish_market_order_fee_address),
+                ContractBase.to_checksum_address(publish_market_order_fee_token),
+            ],
+            [datatoken_cap, publish_market_order_fee_amount],
+            bytess,
+            transaction_parameters,
         )
-
-    @enforce_types
-    def add_to_create_erc20_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addToCreateERC20List",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_from_create_erc20_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removeFromCreateERC20List",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def add_to_725_store_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addTo725StoreList",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_from_725_store_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removeFrom725StoreList",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def add_to_metadata_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addToMetadataList",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_from_metadata_list(self, allowed_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removeFromMetadataList",
-            (ContractBase.to_checksum_address(allowed_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def add_manager(self, manager_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "addManager",
-            (ContractBase.to_checksum_address(manager_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def remove_manager(self, manager_address: str, from_wallet) -> str:
-        return self.send_transaction(
-            "removeManager",
-            (ContractBase.to_checksum_address(manager_address),),
-            from_wallet,
-        )
-
-    @enforce_types
-    def add_multiple_users_to_roles(
-        self, addresses: List[str], roles: List[DataNFTPermissions], from_wallet
-    ) -> str:
-        return self.send_transaction(
-            "addMultipleUsersToRoles",
-            (
-                [ContractBase.to_checksum_address(address) for address in addresses],
-                roles,
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def execute_call(
-        self, operation: int, to: str, value: int, data: str, from_wallet
-    ) -> str:
-        return self.send_transaction(
-            "executeCall",
-            (operation, ContractBase.to_checksum_address(to), value, data),
-            from_wallet,
-        )
-
-    def set_new_data(self, key: bytes, value: bytes, from_wallet) -> str:
-        return self.send_transaction("setNewData", (key, value), from_wallet)
-
-    def set_data_erc20(self, key: bytes, value: bytes, from_wallet) -> str:
-        return self.send_transaction("setDataERC20", (key, value), from_wallet)
-
-    def get_data(self, key: bytes) -> bytes:
-        return self.contract.getData(key)
-
-    @enforce_types
-    def token_uri(self, token_id: int) -> str:
-        return self.contract.tokenURI(token_id)
-
-    @enforce_types
-    def transfer_from(
-        self, from_address: str, to_address: str, token_id: int, from_wallet
-    ) -> str:
-        return self.send_transaction(
-            "transferFrom",
-            (
-                ContractBase.to_checksum_address(from_address),
-                ContractBase.to_checksum_address(to_address),
-                token_id,
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def safe_transfer_from(
-        self, from_address: str, to_address: str, token_id: int, from_wallet
-    ) -> str:
-        return self.send_transaction(
-            "safeTransferFrom",
-            (
-                ContractBase.to_checksum_address(from_address),
-                ContractBase.to_checksum_address(to_address),
-                token_id,
-            ),
-            from_wallet,
-        )
-
-    @enforce_types
-    def withdraw(self, from_wallet):
-        return self.send_transaction("withdrawETH", (), from_wallet)
 
     @enforce_types
     def token_name(self) -> str:
         return self.contract.name()
-
-    @enforce_types
-    def symbol(self) -> str:
-        return self.contract.symbol()
-
-    @enforce_types
-    def is_initialized(self) -> bool:
-        return self.contract.isInitialized()
-
-    @enforce_types
-    def clean_permissions(self, from_wallet) -> str:
-        return self.send_transaction("cleanPermissions", (), from_wallet)
-
-    @enforce_types
-    def get_address_length(self, array: List[str]) -> int:
-        return self.contract.getAddressLength(array)
-
-    @enforce_types
-    def get_id(self) -> int:
-        return self.contract.getId()
-
-    @enforce_types
-    def get_permissions(self, user: str) -> list:
-        return self.contract.getPermissions(ContractBase.to_checksum_address(user))
-
-    @enforce_types
-    def balance_of(self, account: str) -> int:
-        return self.contract.balanceOf(ContractBase.to_checksum_address(account))
-
-    @enforce_types
-    def owner_of(self, token_id: int) -> str:
-        return self.contract.ownerOf(token_id)
-
-    @enforce_types
-    def get_tokens_list(self) -> list:
-        return self.contract.getTokensList()
-
-    @enforce_types
-    def is_deployed(self, datatoken: str) -> bool:
-        return self.contract.isDeployed(ContractBase.to_checksum_address(datatoken))
-
-    @enforce_types
-    def is_erc20_deployer(self, account: str) -> bool:
-        return self.contract.isERC20Deployer(ContractBase.to_checksum_address(account))
-
-    @enforce_types
-    def set_token_uri(self, token_id: int, new_token_uri: str, from_wallet) -> str:
-        return self.send_transaction(
-            "setTokenURI", (token_id, new_token_uri), from_wallet
-        )
 
     def create_datatoken(
         self,
@@ -349,7 +121,7 @@ class DataNFT(ContractBase):
         bytess: Optional[List[bytes]] = None,
         datatoken_cap: Optional[int] = None,
     ) -> Datatoken:
-        initial_list = self.get_tokens_list()
+        initial_list = self.getTokensList()
 
         local_values = locals().copy()
         create_args = {
@@ -388,10 +160,13 @@ class DataNFT(ContractBase):
         if template_index == 2:
             create_args["datatoken_cap"] = datatoken_cap
 
+        create_args["transaction_parameters"] = {"from": create_args["from_wallet"]}
+        create_args.pop("from_wallet")
+
         self.create_erc20(**create_args)
 
         new_elements = [
-            item for item in self.get_tokens_list() if item not in initial_list
+            item for item in self.getTokensList() if item not in initial_list
         ]
 
         assert len(new_elements) == 1, "new data token has no address"

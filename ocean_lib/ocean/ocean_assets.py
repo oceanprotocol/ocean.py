@@ -13,7 +13,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -149,7 +148,7 @@ class OceanAssets:
         bytess: List[bytes],
         from_wallet,
     ) -> str:
-        tx_result = data_nft.create_erc20(
+        receipt = data_nft.create_erc20(
             template_index=template_index,
             name=name,
             symbol=symbol,
@@ -159,14 +158,11 @@ class OceanAssets:
             publish_market_order_fee_token=publish_market_order_fee_token,
             publish_market_order_fee_amount=publish_market_order_fee_amount,
             bytess=bytess,
-            from_wallet=from_wallet,
+            transaction_parameters={"from": from_wallet},
         )
-        assert tx_result, "Failed to create ERC20 token."
+        assert receipt, "Failed to create ERC20 token."
 
-        receipt = TransactionReceipt(tx_result)
-        registered_token_event = receipt.events[
-            DataNFTFactoryContract.EVENT_TOKEN_CREATED
-        ]
+        registered_token_event = receipt.events["TokenCreated"]
         assert registered_token_event, "Cannot find TokenCreated event."
 
         return registered_token_event["newTokenAddress"]
@@ -436,20 +432,19 @@ class OceanAssets:
             transferable = data_nft_transferable or True
             owner = data_nft_owner or publisher_wallet.address
             # register on-chain
-            tx_id = data_nft_factory.deploy_erc721_contract(
-                name=name,
-                symbol=symbol,
-                template_index=data_nft_template_index,
-                additional_metadata_updater=additional_metadata_updater,
-                additional_datatoken_deployer=additional_datatoken_deployer,
-                token_uri=token_uri,
-                transferable=transferable,
-                owner=owner,
-                from_wallet=publisher_wallet,
+            receipt = data_nft_factory.deployERC721Contract(
+                name,
+                symbol,
+                data_nft_template_index,
+                additional_metadata_updater,
+                additional_datatoken_deployer,
+                token_uri,
+                transferable,
+                owner,
+                {"from": publisher_wallet},
             )
-            receipt = TransactionReceipt(tx_id)
 
-            registered_event = receipt.events[DataNFTFactoryContract.EVENT_NFT_CREATED]
+            registered_event = receipt.events["NFTCreated"]
             data_nft_address = registered_event["newTokenAddress"]
             data_nft = DataNFT(self._config_dict, data_nft_address)
             if not data_nft:
@@ -587,17 +582,15 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        data_nft.set_metadata(
-            metadata_state=0,
-            metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=Web3.toChecksumAddress(
-                publisher_wallet.address.lower()
-            ).encode("utf-8"),
-            flags=flags,
-            data=document,
-            data_hash=ddo_hash,
-            metadata_proofs=[proof],
-            from_wallet=publisher_wallet,
+        data_nft.setMetaData(
+            0,
+            provider_uri,
+            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            flags,
+            document,
+            ddo_hash,
+            [proof],
+            {"from": publisher_wallet},
         )
 
         # Fetch the asset on chain
@@ -667,20 +660,18 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
-        tx_result = data_nft.set_metadata(
-            metadata_state=0,
-            metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=Web3.toChecksumAddress(
-                publisher_wallet.address.lower()
-            ).encode("utf-8"),
-            flags=flags,
-            data=document,
-            data_hash=ddo_hash,
-            metadata_proofs=[proof],
-            from_wallet=publisher_wallet,
+        tx_result = data_nft.setMetaData(
+            0,
+            provider_uri,
+            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            flags,
+            document,
+            ddo_hash,
+            [proof],
+            {"from": publisher_wallet},
         )
 
-        return self._aquarius.wait_for_asset_update(asset, tx_result)
+        return self._aquarius.wait_for_asset_update(asset, tx_result.txid)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
@@ -752,7 +743,7 @@ class OceanAssets:
             if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
                 raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
             # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense_tokens(datatoken, amt_dispense_wei, wallet)
+            dispenser.dispense_tokens(datatoken, amt_dispense_wei, {"from": wallet})
 
         # send datatoken to the service, to get access
         print("Order access...")
@@ -847,7 +838,7 @@ class OceanAssets:
         initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
-        tx_id = dt.start_order(
+        receipt = dt.start_order(
             consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
             provider_fee_address=provider_fees["providerFeeAddress"],
@@ -861,10 +852,10 @@ class OceanAssets:
             consume_market_order_fee_address=consume_market_order_fee_address,
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            from_wallet=wallet,
+            transaction_parameters={"from": wallet},
         )
 
-        return tx_id
+        return receipt.txid
 
     @enforce_types
     def pay_for_compute_service(
@@ -950,8 +941,8 @@ class OceanAssets:
                 s=provider_fees["s"],
                 valid_until=provider_fees["validUntil"],
                 provider_data=provider_fees["providerData"],
-                from_wallet=wallet,
-            )
+                transaction_parameters={"from": wallet},
+            ).txid
             return
 
         asset_compute_input.transfer_tx_id = dt.start_order(
@@ -968,5 +959,5 @@ class OceanAssets:
             consume_market_order_fee_address=consume_market_order_fee_address,
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            from_wallet=wallet,
-        )
+            transaction_parameters={"from": wallet},
+        ).txid

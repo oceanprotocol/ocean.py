@@ -147,10 +147,10 @@ def _mint_and_build_compute_input(
     datatoken = Datatoken(ocean_instance.config_dict, service.datatoken)
     minter = (
         consumer_wallet
-        if datatoken.is_minter(consumer_wallet.address)
+        if datatoken.isMinter(consumer_wallet.address)
         else publisher_wallet
     )
-    datatoken.mint(consumer_wallet.address, to_wei(10), minter)
+    datatoken.mint(consumer_wallet.address, to_wei(10), {"from": minter})
 
     return ComputeInput(
         dataset_and_userdata.asset,

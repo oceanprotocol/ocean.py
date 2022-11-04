@@ -214,8 +214,8 @@ def c2d_flow_readme(
 
     # Alice mints DATA datatokens and ALGO datatokens to Bob.
     # Alternatively, Bob might have bought these in a market.
-    DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-    ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+    DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
+    ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
 
     # 6. Bob starts a compute job
 

@@ -6,7 +6,6 @@ import json
 
 import pytest
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
@@ -27,63 +26,61 @@ def test_main(
     """Tests successful function calls"""
 
     # Check datatoken params
-    assert datatoken.get_id() == 1
+    assert datatoken.getId() == 1
     assert datatoken.contract.name() == "DT1"
     assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256
 
     # Check data NFT address
-    assert datatoken.get_erc721_address() == data_nft.address
+    assert datatoken.getERC721Address() == data_nft.address
 
     # Check that the Datatoken contract is initialized
-    assert datatoken.is_initialized()
+    assert datatoken.isInitialized()
 
     # Check publish market payment collector
-    assert datatoken.get_payment_collector() == publisher_wallet.address
+    assert datatoken.getPaymentCollector() == publisher_wallet.address
 
     # Set payment collector to consumer
-    datatoken.set_payment_collector(
-        publish_market_order_fee_address=consumer_wallet.address,
-        from_wallet=publisher_wallet,
+    datatoken.setPaymentCollector(
+        consumer_wallet.address,
+        {"from": publisher_wallet},
     )
-    assert datatoken.get_payment_collector() == consumer_wallet.address
+    assert datatoken.getPaymentCollector() == consumer_wallet.address
 
     # Check minter permissions
-    assert datatoken.get_permissions(publisher_wallet.address)[DatatokenRoles.MINTER]
-    assert datatoken.is_minter(publisher_wallet.address)
+    assert datatoken.getPermissions(publisher_wallet.address)[DatatokenRoles.MINTER]
+    assert datatoken.isMinter(publisher_wallet.address)
 
     # Mint Datatoken to user2 from publisher
-    datatoken.mint(consumer_wallet.address, 1, publisher_wallet)
+    datatoken.mint(consumer_wallet.address, 1, {"from": publisher_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == 1
 
     # Add minter
-    assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
-    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
-    assert datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    assert not datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
+    assert datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Mint Datatoken to user2 from consumer
-    datatoken.mint(consumer_wallet.address, 1, consumer_wallet)
+    datatoken.mint(consumer_wallet.address, 1, {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == 2
 
     # Should succeed to removeMinter if erc20Deployer
-    datatoken.remove_minter(consumer_wallet.address, publisher_wallet)
-    assert not datatoken.get_permissions(consumer_wallet.address)[DatatokenRoles.MINTER]
+    datatoken.removeMinter(consumer_wallet.address, {"from": publisher_wallet})
+    assert not datatoken.getPermissions(consumer_wallet.address)[DatatokenRoles.MINTER]
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    assert not datatoken.get_permissions(consumer_wallet.address)[
+    assert not datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
-    datatoken.add_payment_manager(consumer_wallet.address, publisher_wallet)
-    assert datatoken.get_permissions(consumer_wallet.address)[
+    datatoken.addPaymentManager(consumer_wallet.address, {"from": publisher_wallet})
+    assert datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
 
     # Should succeed to removeFeeManager if erc20Deployer
-    datatoken.remove_payment_manager(
-        fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
-    )
-    assert not datatoken.get_permissions(consumer_wallet.address)[
+    datatoken.removePaymentManager(consumer_wallet.address, {"from": publisher_wallet})
+    assert not datatoken.getPermissions(consumer_wallet.address)[
         DatatokenRoles.PAYMENT_MANAGER
     ]
 
@@ -91,14 +88,14 @@ def test_main(
     value = Web3.toHex(text="SomeData")
     key = Web3.keccak(hexstr=datatoken.address)
 
-    datatoken.set_data(data=value, from_wallet=publisher_wallet)
+    datatoken.setData(value, {"from": publisher_wallet})
 
-    assert Web3.toHex(data_nft.get_data(key)) == value
+    assert Web3.toHex(data_nft.getData(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
-    datatoken.clean_permissions(from_wallet=publisher_wallet)
+    datatoken.cleanPermissions({"from": publisher_wallet})
 
-    permissions = datatoken.get_permissions(publisher_wallet.address)
+    permissions = datatoken.getPermissions(publisher_wallet.address)
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
@@ -106,12 +103,13 @@ def test_main(
 def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datatoken):
     """Tests startOrder functionality without publish fees, consume fees."""
     # Mint datatokens to use
-    datatoken.mint(consumer_wallet.address, to_wei("10"), publisher_wallet)
-    datatoken.mint(publisher_wallet.address, to_wei("10"), publisher_wallet)
+    datatoken.mint(consumer_wallet.address, to_wei("10"), {"from": publisher_wallet})
+    datatoken.mint(publisher_wallet.address, to_wei("10"), {"from": publisher_wallet})
 
     # Set the fee collector address
-    datatoken.set_payment_collector(
-        get_address_of_type(config, "OPFCommunityFeeCollector"), publisher_wallet
+    datatoken.setPaymentCollector(
+        get_address_of_type(config, "OPFCommunityFeeCollector"),
+        {"from": publisher_wallet},
     )
 
     provider_fee_address = publisher_wallet.address
@@ -133,7 +131,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     signed = network.web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    tx = datatoken.start_order(
+    receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fee_address=provider_fee_address,
@@ -148,9 +146,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
-    receipt = TransactionReceipt(tx)
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei("9")
     assert datatoken.balanceOf(
@@ -169,31 +166,30 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     )
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
-    tx = datatoken.order_executed(
-        order_tx_id=receipt.txid,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        provider_signature=provider_signed,
-        consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-        consumer_signature=consumer_signed,
-        consumer=consumer_wallet.address,
-        from_wallet=publisher_wallet,
+    receipt_interm = datatoken.orderExecuted(
+        receipt.txid,
+        Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_signed,
+        Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signed,
+        consumer_wallet.address,
+        {"from": publisher_wallet},
     )
-    receipt_interm = TransactionReceipt(tx)
-    executed_event = receipt_interm.events[Datatoken.EVENT_ORDER_EXECUTED]
+    executed_event = receipt_interm.events["OrderExecuted"]
     assert executed_event["orderTxId"] == receipt.txid
     assert executed_event["providerAddress"] == provider_fee_address
 
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     with pytest.raises(Exception, match="Consumer signature check failed"):
-        datatoken.order_executed(
+        datatoken.orderExecuted(
             receipt.txid,
-            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_signature=provider_signed,
-            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signature=consumer_signed,
-            consumer=consumer_wallet.address,
-            from_wallet=publisher_wallet,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet},
         )
 
     message = Web3.solidityKeccak(
@@ -203,18 +199,18 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     with pytest.raises(Exception, match="Provider signature check failed"):
-        datatoken.order_executed(
+        datatoken.orderExecuted(
             receipt.txid,
-            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_signature=signed,
-            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signature=consumer_signed,
-            consumer=consumer_wallet.address,
-            from_wallet=publisher_wallet,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet},
         )
 
     # Tests reuses order
-    tx = datatoken.reuse_order(
+    receipt_interm = datatoken.reuse_order(
         receipt.txid,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
@@ -225,26 +221,25 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
         valid_until=0,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
-    receipt_interm = TransactionReceipt(tx)
-    reused_event = receipt_interm.events[Datatoken.EVENT_ORDER_REUSED]
+    reused_event = receipt_interm.events["OrderReused"]
     assert reused_event, "Cannot find OrderReused event"
     assert reused_event["orderTxId"] == receipt.txid
     assert reused_event["caller"] == publisher_wallet.address
 
-    provider_fee_event = receipt.events[Datatoken.EVENT_PROVIDER_FEE]
+    provider_fee_event = receipt.events["ProviderFee"]
     assert provider_fee_event, "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params
-    datatoken.set_publishing_market_fee(
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
-        publish_market_order_fee_amount=to_wei("1.2"),
-        from_wallet=publisher_wallet,
+    datatoken.setPublishingMarketFee(
+        publisher_wallet.address,
+        get_address_of_type(config, "MockUSDC"),
+        to_wei("1.2"),
+        {"from": publisher_wallet},
     )
 
-    publish_fees = datatoken.get_publishing_market_fee()
+    publish_fees = datatoken.getPublishingMarketFee()
 
     # PublishMarketFeeAddress set previously
     assert publish_fees[0] == publisher_wallet.address
@@ -253,22 +248,22 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # PublishMarketFeeAmount set previously
     assert publish_fees[2] == to_wei("1.2")
     # Fee collector
-    assert datatoken.get_payment_collector() == get_address_of_type(
+    assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )
 
     # Publisher should succeed to burn some consumer's tokens using burnFrom
-    initial_total_supply = datatoken.get_total_supply()
+    initial_total_supply = datatoken.totalSupply()
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
-    datatoken.approve(publisher_wallet.address, to_wei("10"), consumer_wallet)
+    datatoken.approve(publisher_wallet.address, to_wei("10"), {"from": consumer_wallet})
 
     allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
     assert allowance == to_wei("10")
-    datatoken.burn_from(consumer_wallet.address, to_wei("2"), publisher_wallet)
+    datatoken.burnFrom(consumer_wallet.address, to_wei("2"), {"from": publisher_wallet})
 
-    assert datatoken.get_total_supply() == initial_total_supply - to_wei("2")
+    assert datatoken.totalSupply() == initial_total_supply - to_wei("2")
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("2")
@@ -276,7 +271,10 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
     # Test transterFrom too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
     datatoken.transferFrom(
-        consumer_wallet.address, publisher_wallet.address, to_wei("1"), publisher_wallet
+        consumer_wallet.address,
+        publisher_wallet.address,
+        to_wei("1"),
+        {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(
         consumer_wallet.address
@@ -284,14 +282,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
 
     # Consumer should be able to burn his tokens too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.burn(to_wei("1"), consumer_wallet)
+    datatoken.burn(to_wei("1"), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("1")
 
     # Consumer should be able to transfer too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.transfer(publisher_wallet.address, to_wei("1"), consumer_wallet)
+    datatoken.transfer(publisher_wallet.address, to_wei("1"), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - to_wei("1")
@@ -304,52 +302,44 @@ def test_exceptions(consumer_wallet, datatoken):
     # Should fail to mint if wallet is not a minter
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
-            account_address=consumer_wallet.address,
-            value=to_wei("1"),
-            from_wallet=consumer_wallet,
+            consumer_wallet.address,
+            to_wei("1"),
+            {"from": consumer_wallet},
         )
 
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(Exception, match="NOT PAYMENT MANAGER or OWNER"):
-        datatoken.set_payment_collector(
-            publish_market_order_fee_address=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+        datatoken.setPaymentCollector(
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.add_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     #  Should fail to removeMinter even if it's minter
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.remove_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.removeMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.add_payment_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
-        )
+        datatoken.addPaymentManager(consumer_wallet.address, {"from": consumer_wallet})
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.remove_payment_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
+        datatoken.removePaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet}
         )
 
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.set_data(
-            data=Web3.toHex(text="SomeData"), from_wallet=consumer_wallet
-        )
+        datatoken.setData(Web3.toHex(text="SomeData"), {"from": consumer_wallet})
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     with pytest.raises(Exception, match="not NFTOwner"):
-        datatoken.clean_permissions(from_wallet=consumer_wallet)
+        datatoken.cleanPermissions({"from": consumer_wallet})
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     with pytest.raises(Exception, match="NOT 721 Contract"):
-        datatoken.clean_from_721(from_wallet=consumer_wallet)
+        datatoken.cleanFrom721({"from": consumer_wallet})

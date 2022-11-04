@@ -6,7 +6,6 @@ import json
 
 import pytest
 from brownie import network
-from brownie.network.transaction import TransactionReceipt
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
@@ -31,13 +30,13 @@ def test_buy_from_dispenser_and_order(
     mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
-    _ = datatoken_enterprise_token.create_dispenser(
-        dispenser_address=dispenser.address,
-        allowed_swapper=ZERO_ADDRESS,
-        max_balance=to_wei("1"),
-        with_mint=True,
-        max_tokens=to_wei("1"),
-        from_wallet=publisher_wallet,
+    _ = datatoken_enterprise_token.createDispenser(
+        dispenser.address,
+        to_wei("1"),
+        to_wei("1"),
+        True,
+        ZERO_ADDRESS,
+        {"from": publisher_wallet},
     )
 
     status = dispenser.status(datatoken_enterprise_token.address)
@@ -51,44 +50,44 @@ def test_buy_from_dispenser_and_order(
         match="This address is not allowed to request DT",
     ):
         dispenser.dispense(
-            datatoken=datatoken_enterprise_token.address,
-            amount=to_wei("1"),
-            destination=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            datatoken_enterprise_token.address,
+            to_wei("1"),
+            consumer_wallet.address,
+            {"from": consumer_wallet},
         )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
-    datatoken_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_address=consume_fee_address,
-        publish_market_order_fee_token=mock_usdc_contract.address,
-        publish_market_order_fee_amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+    datatoken_enterprise_token.setPublishingMarketFee(
+        consume_fee_address,
+        mock_usdc_contract.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
-    publish_fees = datatoken_enterprise_token.get_publishing_market_fee()
+    publish_fees = datatoken_enterprise_token.getPublishingMarketFee()
 
     mock_usdc_contract.transfer(
-        to=publisher_wallet.address,
-        amount=publish_fees[2],
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        publish_fees[2],
+        {"from": factory_deployer_wallet},
     )
 
     mock_usdc_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
 
     mock_dai_contract.transfer(
-        to=publisher_wallet.address,
-        amount=consume_fee_amount,
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        consume_fee_amount,
+        {"from": factory_deployer_wallet},
     )
 
     mock_dai_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
 
     provider_fee_address = publisher_wallet.address
@@ -130,10 +129,10 @@ def test_buy_from_dispenser_and_order(
         consume_market_order_fee_token=mock_dai_contract.address,
         consume_market_order_fee_amount=0,
         dispenser_address=dispenser.address,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
@@ -143,7 +142,7 @@ def test_buy_from_dispenser_and_order(
 
     assert (
         datatoken_enterprise_token.balanceOf(
-            datatoken_enterprise_token.get_payment_collector()
+            datatoken_enterprise_token.getPaymentCollector()
         )
         == 0
     )
@@ -165,7 +164,7 @@ def test_buy_from_fre_and_order(
         config, get_address_of_type(config, "FixedPrice")
     )
 
-    tx = datatoken_enterprise_token.create_fixed_rate(
+    tx_receipt = datatoken_enterprise_token.create_fixed_rate(
         fixed_price_address=fixed_rate_exchange.address,
         base_token_address=mock_usdc_contract.address,
         owner=publisher_wallet.address,
@@ -176,58 +175,56 @@ def test_buy_from_fre_and_order(
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.1"),
         with_mint=1,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
-
-    tx_receipt = TransactionReceipt(tx)
 
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
 
     exchange_id = new_fixed_rate_event["exchangeId"]
-    status = fixed_rate_exchange.get_exchange(exchange_id)
+    status = fixed_rate_exchange.getExchange(exchange_id)
 
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
 
     with pytest.raises(Exception, match="This address is not allowed to swap"):
-        fixed_rate_exchange.buy_dt(
-            exchange_id=exchange_id,
-            datatoken_amount=to_wei("1"),
-            max_base_token_amount=to_wei("1"),
-            consume_market_swap_fee_address=ZERO_ADDRESS,
-            consume_market_swap_fee_amount=0,
-            from_wallet=consumer_wallet,
+        fixed_rate_exchange.buyDT(
+            exchange_id,
+            to_wei("1"),
+            to_wei("1"),
+            ZERO_ADDRESS,
+            0,
+            {"from": consumer_wallet},
         )
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
-    datatoken_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_address=consume_fee_address,
-        publish_market_order_fee_token=mock_usdc_contract.address,
-        publish_market_order_fee_amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+    datatoken_enterprise_token.setPublishingMarketFee(
+        consume_fee_address,
+        mock_usdc_contract.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
-    publish_fees = datatoken_enterprise_token.get_publishing_market_fee()
+    publish_fees = datatoken_enterprise_token.getPublishingMarketFee()
 
     mock_usdc_contract.transfer(
-        to=publisher_wallet.address,
-        amount=publish_fees[2] + to_wei("3"),
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        publish_fees[2] + to_wei("3"),
+        {"from": factory_deployer_wallet},
     )
     mock_usdc_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=2**256 - 1,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        2**256 - 1,
+        {"from": publisher_wallet},
     )
     mock_dai_contract.transfer(
-        to=publisher_wallet.address,
-        amount=consume_fee_amount,
-        from_wallet=factory_deployer_wallet,
+        publisher_wallet.address,
+        consume_fee_amount,
+        {"from": factory_deployer_wallet},
     )
     mock_dai_contract.approve(
-        spender=datatoken_enterprise_token.address,
-        amount=consume_fee_amount,
-        from_wallet=publisher_wallet,
+        datatoken_enterprise_token.address,
+        consume_fee_amount,
+        {"from": publisher_wallet},
     )
 
     provider_fee_address = publisher_wallet.address
@@ -274,10 +271,10 @@ def test_buy_from_fre_and_order(
         max_base_token_amount=to_wei("2.5"),
         consume_market_swap_fee_amount=to_wei("0.001"),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.get_total_supply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address
@@ -292,7 +289,7 @@ def test_buy_from_fre_and_order(
 
     assert (
         datatoken_enterprise_token.balanceOf(
-            datatoken_enterprise_token.get_payment_collector()
+            datatoken_enterprise_token.getPaymentCollector()
         )
         == 0
     )

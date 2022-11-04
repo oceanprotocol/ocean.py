@@ -83,9 +83,9 @@ def test_consume_simple_onchain_data(
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Initialize service
@@ -98,7 +98,7 @@ def test_consume_simple_onchain_data(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -112,7 +112,7 @@ def test_consume_simple_onchain_data(
         consume_market_order_fee_address=ZERO_ADDRESS,
         consume_market_order_fee_token=ZERO_ADDRESS,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Download file
@@ -137,7 +137,7 @@ def test_consume_simple_onchain_data(
         asset=asset,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         service=service,
     )
 
@@ -222,9 +222,9 @@ def test_consume_parametrized_onchain_data(
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Initialize service
@@ -237,7 +237,7 @@ def test_consume_parametrized_onchain_data(
     provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
-    tx_id = dt.start_order(
+    receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -251,7 +251,7 @@ def test_consume_parametrized_onchain_data(
         consume_market_order_fee_address=ZERO_ADDRESS,
         consume_market_order_fee_token=ZERO_ADDRESS,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Download file
@@ -276,7 +276,7 @@ def test_consume_parametrized_onchain_data(
         asset=asset,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
         service=service,
         userdata={
             "baseToken": asset.nft_address.lower()

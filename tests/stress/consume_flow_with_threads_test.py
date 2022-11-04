@@ -77,13 +77,13 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     assert response.json()["providerFee"]
 
     datatoken.mint(
-        account_address=consumer_wallet.address,
-        value=ocean.to_wei(20),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        ocean.to_wei(20),
+        {"from": publisher_wallet},
     )
     # Start order for consumer
     provider_fees = response.json()["providerFee"]
-    tx_id = datatoken.start_order(
+    receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -97,7 +97,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
         consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
     # Download file
     destination = _create_downloads_path(tmpdir)
@@ -106,7 +106,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
         asset=ddo,
         consumer_wallet=consumer_wallet,
         destination=destination,
-        order_tx_id=tx_id,
+        order_tx_id=receipt.txid,
     )
 
     assert (

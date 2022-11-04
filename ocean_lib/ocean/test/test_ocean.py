@@ -25,4 +25,4 @@ def test_nft_factory(data_nft, datatoken, publisher_ocean_instance, publisher_wa
     assert created_nft.contract.name() == "TEST"
     assert created_nft.symbol() == "TEST2"
     assert created_nft.address
-    assert created_nft.token_uri(1) == "http://oceanprotocol.com/nft"
+    assert created_nft.tokenURI(1) == "http://oceanprotocol.com/nft"

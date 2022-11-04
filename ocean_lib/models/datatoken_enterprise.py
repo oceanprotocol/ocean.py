@@ -33,43 +33,36 @@ class DatatokenEnterprise(Datatoken):
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
-        return self.send_transaction(
-            "buyFromFreAndOrder",
+        return self.contract.buyFromFreAndOrder(
             (
+                ContractBase.to_checksum_address(consumer),
+                service_index,
                 (
-                    ContractBase.to_checksum_address(consumer),
-                    service_index,
-                    (
-                        ContractBase.to_checksum_address(provider_fee_address),
-                        ContractBase.to_checksum_address(provider_fee_token),
-                        int(provider_fee_amount),
-                        v,
-                        r,
-                        s,
-                        valid_until,
-                        provider_data,
-                    ),
-                    (
-                        ContractBase.to_checksum_address(
-                            consume_market_order_fee_address
-                        ),
-                        ContractBase.to_checksum_address(
-                            consume_market_order_fee_token
-                        ),
-                        consume_market_order_fee_amount,
-                    ),
+                    ContractBase.to_checksum_address(provider_fee_address),
+                    ContractBase.to_checksum_address(provider_fee_token),
+                    int(provider_fee_amount),
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
                 ),
                 (
-                    ContractBase.to_checksum_address(exchange_contract),
-                    exchange_id,
-                    max_base_token_amount,
-                    consume_market_swap_fee_amount,
-                    ContractBase.to_checksum_address(consume_market_swap_fee_address),
+                    ContractBase.to_checksum_address(consume_market_order_fee_address),
+                    ContractBase.to_checksum_address(consume_market_order_fee_token),
+                    consume_market_order_fee_amount,
                 ),
             ),
-            from_wallet,
+            (
+                ContractBase.to_checksum_address(exchange_contract),
+                exchange_id,
+                max_base_token_amount,
+                consume_market_swap_fee_amount,
+                ContractBase.to_checksum_address(consume_market_swap_fee_address),
+            ),
+            transaction_parameters,
         )
 
     @enforce_types
@@ -89,35 +82,28 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         dispenser_address: str,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> str:
-        return self.send_transaction(
-            "buyFromDispenserAndOrder",
+        return self.contract.buyFromDispenserAndOrder(
             (
+                ContractBase.to_checksum_address(consumer),
+                service_index,
                 (
-                    ContractBase.to_checksum_address(consumer),
-                    service_index,
-                    (
-                        ContractBase.to_checksum_address(provider_fee_address),
-                        ContractBase.to_checksum_address(provider_fee_token),
-                        int(provider_fee_amount),
-                        v,
-                        r,
-                        s,
-                        valid_until,
-                        provider_data,
-                    ),
-                    (
-                        ContractBase.to_checksum_address(
-                            consume_market_order_fee_address
-                        ),
-                        ContractBase.to_checksum_address(
-                            consume_market_order_fee_token
-                        ),
-                        consume_market_order_fee_amount,
-                    ),
+                    ContractBase.to_checksum_address(provider_fee_address),
+                    ContractBase.to_checksum_address(provider_fee_token),
+                    int(provider_fee_amount),
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
                 ),
-                ContractBase.to_checksum_address(dispenser_address),
+                (
+                    ContractBase.to_checksum_address(consume_market_order_fee_address),
+                    ContractBase.to_checksum_address(consume_market_order_fee_token),
+                    consume_market_order_fee_amount,
+                ),
             ),
-            from_wallet,
+            ContractBase.to_checksum_address(dispenser_address),
+            transaction_parameters,
         )

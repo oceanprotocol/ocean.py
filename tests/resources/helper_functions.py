@@ -13,7 +13,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from brownie.network import accounts
-from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 from pytest import approx
 from web3 import Web3
@@ -27,7 +26,7 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
-from ocean_lib.web3_internal.transactions import send_ether, sign_with_key
+from ocean_lib.web3_internal.transactions import sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
@@ -90,12 +89,12 @@ def generate_wallet():
     generated_wallet = accounts.add(private_key)
     assert generated_wallet.private_key == private_key
     deployer_wallet = get_factory_deployer_wallet(config)
-    send_ether(config, deployer_wallet, generated_wallet.address, "3 ether")
+    deployer_wallet.transfer(generated_wallet.address, "3 ether")
 
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
-        generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
+        generated_wallet.address, to_wei(50), {"from": deployer_wallet}
     )
     return generated_wallet
 
@@ -174,23 +173,23 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    tx = data_nft_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_datatoken_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=data_nft_publisher.address,
-        from_wallet=data_nft_publisher,
+    receipt = data_nft_factory.deployERC721Contract(
+        "NFT",
+        "NFTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        True,
+        data_nft_publisher.address,
+        {"from": data_nft_publisher},
     )
-    token_address = data_nft_factory.get_token_address(tx)
+    token_address = data_nft_factory.get_token_address(receipt)
     data_nft = DataNFT(config_dict, token_address)
     if not datatoken_minter:
         return data_nft
 
-    tx_result = data_nft.create_erc20(
+    tx_receipt2 = data_nft.create_erc20(
         template_index=template_index,
         name="DT1",
         symbol="DT1Symbol",
@@ -200,11 +199,10 @@ def deploy_erc721_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=data_nft_publisher,
+        transaction_parameters={"from": data_nft_publisher},
     )
-    tx_receipt2 = TransactionReceipt(tx_result)
 
-    registered_event2 = tx_receipt2.events[DataNFTFactoryContract.EVENT_TOKEN_CREATED]
+    registered_event2 = tx_receipt2.events["TokenCreated"]
     datatoken_address = registered_event2["newTokenAddress"]
 
     datatoken = Datatoken(config_dict, datatoken_address)
@@ -220,7 +218,7 @@ def get_non_existent_nft_template(
     of an Data NFT Factory contract. Returns -1 if template was found.
     """
     for template_nbr in range(check_first):
-        [address, _] = data_nft_factory.get_nft_template(template_nbr)
+        [address, _] = data_nft_factory.getNFTTemplate(template_nbr)
         if address == ZERO_ADDRESS:
             return template_nbr
 
@@ -262,7 +260,7 @@ def transfer_base_token_if_balance_lte(
         initial_recipient_balance <= min_balance
         and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
     ):
-        base_token.transfer(recipient, amount_to_transfer, from_wallet)
+        base_token.transfer(recipient, amount_to_transfer, {"from": from_wallet})
 
     return base_token.balanceOf(recipient) - initial_recipient_balance
 

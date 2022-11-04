@@ -78,9 +78,9 @@ def test_reuse_order_fees(
 
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
-        account_address=consumer_wallet.address,
-        value=to_wei("50"),
-        from_wallet=publisher_wallet,
+        consumer_wallet.address,
+        to_wei("50"),
+        {"from": publisher_wallet},
     )
 
     # Mock non-zero provider fees (simulate first time paying provider fees)
@@ -94,17 +94,17 @@ def test_reuse_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, consumer_wallet)
+    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
 
     if base_token_name == "Ocean" and provider_fee_in_unit == "700":
         bt.mint(
             consumer_wallet.address,
             parse_units("2000", bt.decimals()),
-            factory_deployer_wallet,
+            {"from": factory_deployer_wallet},
         )
 
     # Start order: pay order fees and provider fees
-    start_order_tx_id = dt.start_order(
+    start_order_receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -118,7 +118,7 @@ def test_reuse_order_fees(
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
         consume_market_order_fee_amount=parse_units("10", bt.decimals()),
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Reuse order where:
@@ -127,7 +127,7 @@ def test_reuse_order_fees(
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit="0",
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -143,7 +143,7 @@ def test_reuse_order_fees(
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit=provider_fee_in_unit,
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -162,7 +162,7 @@ def test_reuse_order_fees(
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit="0",
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -178,7 +178,7 @@ def test_reuse_order_fees(
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
         provider_fee_in_unit=provider_fee_in_unit,
-        start_order_tx_id=start_order_tx_id,
+        start_order_tx_id=start_order_receipt.txid,
         bt=bt,
         dt=dt,
         publisher_wallet=publisher_wallet,
@@ -239,7 +239,7 @@ def reuse_order_with_mock_provider_fees(
         s=provider_fees["s"],
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
-        from_wallet=consumer_wallet,
+        transaction_parameters={"from": consumer_wallet},
     )
 
     # Get balances after reuse_order

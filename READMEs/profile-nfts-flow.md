@@ -71,7 +71,7 @@ symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
 
 # set
-data_nft.set_new_data(profiledata_name_hash, profiledata_val_encr_hex, alice_wallet)
+data_nft.setNewData(profiledata_name_hash, profiledata_val_encr_hex, {"from": alice_wallet})
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -103,7 +103,7 @@ symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)  # bytes
 symkey_val_encr_hex = symkey_val_encr.hex()  # hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
-data_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
+data_nft.setNewData(symkey_name_hash, symkey_val_encr_hex, {"from": alice_wallet})
 ```
 
 ## 6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'
@@ -112,11 +112,11 @@ data_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 from ecies import decrypt as asymmetric_decrypt
 
 # symkey_name_hash = <Dapp would set like above>
-symkey_val_encr2 = data_nft.get_data(symkey_name_hash)
+symkey_val_encr2 = data_nft.getData(symkey_name_hash)
 symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr2)
 
 # profiledata_name_hash = <Dapp would set like above>
-profiledata_val_encr_hex2 = data_nft.get_data(profiledata_name_hash)
+profiledata_val_encr_hex2 = data_nft.getData(profiledata_name_hash)
 profiledata_val2_bytes = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
 profiledata_val2 = profiledata_val2_bytes.decode('utf-8')
 

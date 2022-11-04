@@ -42,13 +42,13 @@ from web3.main import Web3
 key_hash = Web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
 
 # set
-data_nft.set_new_data(key_hash, value, alice_wallet)
+data_nft.setNewData(key_hash, value, {"from": alice_wallet})
 ```
 
 ## 4. Retrieve value from data NFT
 
 ```python
-value2_hex = data_nft.get_data(key_hash)
+value2_hex = data_nft.getData(key_hash)
 value2 = value2_hex.decode('ascii')
 print(f"Found that {key} = {value2}")
 ```
