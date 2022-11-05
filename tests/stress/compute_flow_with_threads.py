@@ -32,7 +32,7 @@ def c2d_flow_readme(
     # Publish the data NFT token
     data_nft = ocean.create_data_nft("NFT1", "NFT1", publisher_wallet)
     assert data_nft.address
-    assert data_nft.token_name()
+    assert data_nft.name()
     assert data_nft.symbol()
 
     # Publish the datatoken

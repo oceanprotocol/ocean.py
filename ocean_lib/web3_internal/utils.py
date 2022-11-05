@@ -8,11 +8,14 @@ from typing import Any
 
 from brownie import network
 from enforce_typing import enforce_types
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from web3.main import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
+keys = KeyAPI(NativeECCBackend)
 
 
 @enforce_types
@@ -23,6 +26,15 @@ def to_32byte_hex(val: int) -> str:
     :return:
     """
     return Web3.toHex(Web3.toBytes(val).rjust(32, b"\0"))
+
+
+def sign_with_key(message_hash, key):
+    pk = keys.PrivateKey(Web3.toBytes(hexstr=key))
+    prefix = "\x19Ethereum Signed Message:\n32"
+    signable_hash = Web3.solidityKeccak(
+        ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
+    )
+    return keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
 
 @enforce_types

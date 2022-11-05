@@ -43,7 +43,7 @@ from base64 import b64encode
 from cryptography.fernet import Fernet
 from eth_account.messages import encode_defunct
 from hashlib import sha256
-from ocean_lib.web3_internal.transactions import sign_with_key
+from ocean_lib.web3_internal.utils import sign_with_key
 from web3.main import Web3
 
 

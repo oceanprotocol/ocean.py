@@ -147,10 +147,10 @@ print(f"config.provider_url = {config['PROVIDER_URL']}")
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 # data NFT
-print(f"data NFT name: {data_nft.token_name()}")
+print(f"data NFT name: {data_nft.name()}")
 print(f"data NFT symbol: {data_nft.symbol()}")
 
 # datatoken
-print(f"datatoken name: {datatoken.token_name()}")
+print(f"datatoken name: {datatoken.name()}")
 print(f"datatoken symbol: {datatoken.symbol()}")
 ```

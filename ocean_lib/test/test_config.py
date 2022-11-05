@@ -16,7 +16,6 @@ def test_metadataCacheUri_config_key():
     config_dict = {
         "NETWORK_NAME": "development",
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
         "PROVIDER_URL": "http://172.15.0.4:8030",
         "DOWNLOADS_PATH": "consume-downloads",
         "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
@@ -31,7 +30,6 @@ def test_incomplete():
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
         "METADATA_CACHE_URI": "http://ItWorked.com",
-        "TRANSACTION_TIMEOUT": "some string",
     }
 
     with pytest.raises(Exception) as exception_info:
@@ -39,4 +37,3 @@ def test_incomplete():
 
     exception_response = json.loads(exception_info.value.args[0])
     assert exception_response["NETWORK_NAME"] == "required"
-    assert exception_response["TRANSACTION_TIMEOUT"] == "must be int"
