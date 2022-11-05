@@ -21,7 +21,7 @@ from web3.main import Web3
 
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.web3_internal.transactions import sign_with_key
+from ocean_lib.web3_internal.utils import sign_with_key
 
 logger = logging.getLogger(__name__)
 

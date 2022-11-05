@@ -44,7 +44,6 @@ def test_ocean_tx__create_url_asset(tmp_path):
 
 def _remote_config_polygon(tmp_path):
     config = {
-        "TRANSACTION_TIMEOUT": 60,
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",

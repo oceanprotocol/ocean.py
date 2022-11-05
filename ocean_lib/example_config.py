@@ -16,7 +16,6 @@ DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "NETWORK_NAME": "development",
-    "TRANSACTION_TIMEOUT": 10 * 60,  # 10 minutes
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
     "PROVIDER_URL": "http://172.15.0.4:8030",
     "DOWNLOADS_PATH": "consume-downloads",
@@ -37,27 +36,21 @@ CONFIG_NETWORK_HELPER = {
     },
     "energyweb": {
         "PROVIDER_URL": "https://v4.provider.energyweb.oceanprotocol.com",
-        "TRANSACTION_TIMEOUT": 60,
     },
     "moonriver": {
         "PROVIDER_URL": "https://v4.provider.moonriver.oceanprotocol.com",
-        "TRANSACTION_TIMEOUT": 60,
     },
     "moonbase": {
         "PROVIDER_URL": "https://v4.provider.moonbase.oceanprotocol.com",
-        "TRANSACTION_TIMEOUT": 60,
     },
     "development": {
         "PROVIDER_URL": DEFAULT_PROVIDER_URL,
-        "TRANSACTION_TIMEOUT": 2,
     },
     "celoalfajores": {
         "PROVIDER_URL": "https://provider.celoalfajores.oceanprotocol.com",
-        "TRANSACTION_TIMEOUT": 60,
     },
     "mumbai": {
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-        "TRANSACTION_TIMEOUT": 60,
     },
 }
 

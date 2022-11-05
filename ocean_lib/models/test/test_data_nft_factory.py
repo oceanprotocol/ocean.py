@@ -300,7 +300,7 @@ def test_main(
     data_nft_address = registered_nft_event["newTokenAddress"]
     data_nft = DataNFT(config, data_nft_address)
     assert (
-        data_nft.token_name() == "72120Bundle"
+        data_nft.name() == "72120Bundle"
     ), "NFT name doesn't match with the expected one."
     metadata_info = data_nft.getMetaData()
     assert metadata_info[3] is True

@@ -9,7 +9,7 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
-from web3 import Web3
+from web3.main import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
 from ocean_lib.web3_internal.utils import check_network
@@ -26,9 +26,8 @@ class ContractBase(object):
     @enforce_types
     def __init__(self, config_dict: dict, address: Optional[str]) -> None:
         """Initialises Contract Base object."""
-        self.name = self.contract_name
         assert (
-            self.name
+            self.contract_name
         ), "contract_name property needs to be implemented in subclasses."
 
         self.config_dict = config_dict
@@ -36,7 +35,7 @@ class ContractBase(object):
         self.network = config_dict["NETWORK_NAME"]
         check_network(self.network)
 
-        self.contract = load_contract(self.name, address)
+        self.contract = load_contract(self.contract_name, address)
         assert not address or (
             self.contract.address.lower() == address.lower()
             and self.address.lower() == address.lower()
@@ -52,12 +51,6 @@ class ContractBase(object):
     def contract_name(self) -> str:
         """Returns the contract name"""
         return self.CONTRACT_NAME
-
-    @property
-    @enforce_types
-    def address(self) -> str:
-        """Return the ethereum address of the solidity contract deployed in current network."""
-        return self.contract.address
 
     @staticmethod
     @enforce_types

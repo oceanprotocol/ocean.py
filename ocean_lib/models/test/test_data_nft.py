@@ -13,8 +13,10 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeDetails,
 )
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+
+BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
 
 @pytest.mark.unit

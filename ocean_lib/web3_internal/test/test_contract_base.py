@@ -37,7 +37,7 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, config):
     )
 
     # test attributes
-    assert factory.name == "ERC721Factory"
+    assert factory.contract_name == "ERC721Factory"
     assert factory.contract is not None
     assert factory.contract.address == nft_factory_address
     assert ContractBase.to_checksum_address(nft_factory_address) == nft_factory_address

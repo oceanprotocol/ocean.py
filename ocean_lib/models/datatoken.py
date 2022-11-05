@@ -125,10 +125,6 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def token_name(self) -> str:
-        return self.contract.name()
-
-    @enforce_types
     def get_start_order_logs(
         self,
         consumer_address: Optional[str] = None,
