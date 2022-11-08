@@ -30,7 +30,7 @@ source venv/bin/activate
 pip3 install wheel
 
 # Install Ocean library. Allow pre-releases to get the latest v4 version.
-pip3 install ocean-lib
+pip3 install --pre ocean-lib
 ```
 
 #### ⚠️ Known issues
