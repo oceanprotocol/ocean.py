@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ### 🏗 Installation
 
-#### ⚙️i Prerequisites
+#### ⚙️ Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
