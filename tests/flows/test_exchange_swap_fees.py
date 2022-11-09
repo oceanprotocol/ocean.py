@@ -19,10 +19,11 @@ from ocean_lib.models.test.test_factory_router import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, to_wei
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
+    int_units,
     transfer_base_token_if_balance_lte,
 )
 
@@ -108,8 +109,8 @@ def exchange_swap_fees(
         base_token_address=bt.address,
         from_wallet=base_token_deployer_wallet,
         recipient=publisher_wallet.address,
-        min_balance=parse_units("1500", bt.decimals()),
-        amount_to_transfer=parse_units("1500", bt.decimals()),
+        min_balance=int_units("1500", bt.decimals()),
+        amount_to_transfer=int_units("1500", bt.decimals()),
     )
 
     transfer_base_token_if_balance_lte(
@@ -117,8 +118,8 @@ def exchange_swap_fees(
         base_token_address=bt.address,
         from_wallet=base_token_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("1500", bt.decimals()),
-        amount_to_transfer=parse_units("1500", bt.decimals()),
+        min_balance=int_units("1500", bt.decimals()),
+        amount_to_transfer=int_units("1500", bt.decimals()),
     )
 
     publish_market_swap_fee = to_wei(publish_market_swap_fee)
@@ -199,7 +200,7 @@ def exchange_swap_fees(
         dt.mint(publisher_wallet.address, MAX_WEI, {"from": publisher_wallet})
         dt.approve(exchange.address, MAX_WEI, {"from": publisher_wallet})
 
-    one_base_token = parse_units("1", bt.decimals())
+    one_base_token = int_units("1", bt.decimals())
     dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(

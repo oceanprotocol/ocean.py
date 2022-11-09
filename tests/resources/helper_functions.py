@@ -362,3 +362,10 @@ def get_file3():
     }
 
     return FilesTypeFactory(file3_dict)
+
+
+def int_units(amount, num_decimals):
+    decimal_amount = Decimal(amount)
+    unit_value = Decimal(10) ** num_decimals
+
+    return int(decimal_amount * unit_value)

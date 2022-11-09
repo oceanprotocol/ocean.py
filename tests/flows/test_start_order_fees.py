@@ -17,13 +17,14 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_opc_collector_address_from_datatoken,
 )
 from tests.resources.helper_functions import (
     get_provider_fees,
+    int_units,
     transfer_base_token_if_balance_lte,
 )
 
@@ -76,11 +77,11 @@ def test_start_order_fees(
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("2000", bt.decimals()),
-        amount_to_transfer=parse_units("2000", bt.decimals()),
+        min_balance=int_units("2000", bt.decimals()),
+        amount_to_transfer=int_units("2000", bt.decimals()),
     )
 
-    publish_market_order_fee = parse_units(
+    publish_market_order_fee = int_units(
         publish_market_order_fee_in_unit, bt.decimals()
     )
 
@@ -107,7 +108,7 @@ def test_start_order_fees(
     if base_token_name == "Ocean" and publish_market_order_fee_in_unit == "500":
         bt.mint(
             consumer_wallet.address,
-            parse_units("2000", bt.decimals()),
+            int_units("2000", bt.decimals()),
             {"from": factory_deployer_wallet},
         )
 
@@ -126,7 +127,7 @@ def test_start_order_fees(
     opc_dt_balance_before = dt.balanceOf(opc_collector_address)
 
     # Get provider fees
-    provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
+    provider_fee = int_units(provider_fee_in_unit, bt.decimals())
     valid_for_two_hours = int((datetime.utcnow() + timedelta(hours=2)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
@@ -139,7 +140,7 @@ def test_start_order_fees(
     bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
 
     # Start order for consumer
-    consume_market_order_fee = parse_units(
+    consume_market_order_fee = int_units(
         consume_market_order_fee_in_unit, bt.decimals()
     )
     dt.start_order(

@@ -2,11 +2,10 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import ROUND_DOWN, Context, Decimal, localcontext
+from decimal import ROUND_DOWN, Context, Decimal
 from typing import Union
 
 from enforce_typing import enforce_types
-from eth_utils.currency import units
 
 from ocean_lib.web3_internal.constants import MAX_UINT256
 
@@ -38,46 +37,6 @@ MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
-def parse_units(
-    amount: Union[Decimal, str, int], unit_name: Union[str, int] = DECIMALS_18
-) -> int:
-    """
-    Convert token amount from a formatted unit to an EVM-compatible integer.
-    float input is purposfully not supported
-    """
-    num_decimals = (
-        int(units[unit_name].log10()) if isinstance(unit_name, str) else unit_name
-    )
-
-    decimal_amount = normalize_and_validate_unit(amount, num_decimals)
-
-    if decimal_amount == Decimal(0):
-        return 0
-
-    unit_value = Decimal(10) ** num_decimals
-
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        return int(decimal_amount * unit_value)
-
-
-@enforce_types
-def normalize_and_validate_unit(
-    amount: Union[Decimal, str, int], decimals: int = DECIMALS_18
-) -> Decimal:
-    """Returns an amount in ether, encoded as a Decimal
-    Takes Decimal, str, or int as input. Purposefully does not support float."""
-    if isinstance(amount, str) or isinstance(amount, int):
-        amount = Decimal(amount)
-
-    if abs(amount) > Decimal(MAX_WEI).scaleb(
-        -decimals, context=ETHEREUM_DECIMAL_CONTEXT
-    ):
-        raise ValueError("Token amount exceeds maximum.")
-
-    return amount
-
-
-@enforce_types
 def from_wei(amount_in_wei: int) -> Decimal:
     unit_value = Decimal(10) ** DECIMALS_18
     return Decimal(amount_in_wei) / unit_value
@@ -85,76 +44,7 @@ def from_wei(amount_in_wei: int) -> Decimal:
 
 @enforce_types
 def to_wei(amount_in_ether: Union[Decimal, str, int]) -> int:
-    return parse_units(amount_in_ether, DECIMALS_18)
+    decimal_amount = Decimal(amount_in_ether)
+    unit_value = Decimal(10) ** DECIMALS_18
 
-
-@enforce_types
-def pretty_ether_and_wei(amount_in_wei: int, ticker: str = "") -> str:
-    """Returns a formatted token amount denoted in wei and human-readable ether
-    with optional ticker symbol.
-
-    This utility is intended for use in log statements, error messages, and
-    assertions where it is desirable to have both full-precision wei values and
-    human-readable ether values.
-
-    Examples:
-    pretty_ether_and_wei(123456789_123456789) == "0.123 (123456789123456789 wei)"
-    pretty_ether_and_wei(123456789_123456789_12345, "OCEAN") == "12.3K OCEAN (12345678912345678912345 wei)"
-    pretty_ether_and_wei(123456789_123456789_123456789, "") == "123M (123456789123456789123456789 wei)"
-    """
-    return "{} ({} wei)".format(
-        pretty_ether(from_wei(amount_in_wei), ticker), amount_in_wei
-    )
-
-
-@enforce_types
-def pretty_ether(
-    amount_in_ether: Union[Decimal, str, int], ticker: str = "", trim: bool = True
-) -> str:
-    """Returns a human-readable token amount denoted in ether with optional ticker symbol
-    Set trim=False to include trailing zeros.
-
-    This function assumes the given ether amount is already quantized to
-    the appropriate number of decimals (like ERC-20 decimals())
-
-    Examples:
-    pretty_ether("0", ticker="OCEAN") == "0 OCEAN"
-    pretty_ether("0.01234") == "1.23e-2"
-    pretty_ether("1234") == "1.23K"
-    pretty_ether("12345678") == "12.3M"
-    pretty_ether("1000000.000", trim=False) == "1.00M"
-    pretty_ether("123456789012") == "123B"
-    pretty_ether("1234567890123") == "1.23e+12"
-    """
-    amount_in_ether = normalize_and_validate_unit(amount_in_ether)
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT) as context:
-
-        # Reduce to 3 significant figures
-        context.prec = 3
-        sig_fig_3 = context.create_decimal(amount_in_ether)
-
-        exponent = sig_fig_3.adjusted()
-
-        if exponent >= 12 or exponent < -1:
-            # format string handles scaling also, so set scale = 0
-            scale = 0
-            fmt_str = "{:e}"
-        elif exponent >= 9:
-            scale = -9
-            fmt_str = "{}B"
-        elif exponent >= 6:
-            scale = -6
-            fmt_str = "{}M"
-        elif exponent >= 3:
-            scale = -3
-            fmt_str = "{}K"
-        else:
-            # scaling and formatting isn't necessary for values between 0 and 1000 (non-inclusive)
-            scale = 0
-            fmt_str = "{}"
-
-        scaled = sig_fig_3.scaleb(scale)
-
-        return (
-            fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
-        )
+    return int(decimal_amount * unit_value)

@@ -40,7 +40,7 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -817,9 +817,9 @@ class OceanAssets:
 
         if balance < to_wei(1):
             raise InsufficientBalance(
-                f"Your token balance {pretty_ether_and_wei(balance, dt.symbol())} is not sufficient "
+                f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
-                f"requires {pretty_ether_and_wei(1, dt.symbol())}."
+                f"requires 1 wei."
             )
 
         consumable_result = is_consumable(

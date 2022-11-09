@@ -11,11 +11,12 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
 from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
     get_provider_fees,
+    int_units,
     transfer_base_token_if_balance_lte,
 )
 
@@ -60,8 +61,8 @@ def test_reuse_order_fees(
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("4000", bt.decimals()),
-        amount_to_transfer=parse_units("4000", bt.decimals()),
+        min_balance=int_units("4000", bt.decimals()),
+        amount_to_transfer=int_units("4000", bt.decimals()),
     )
 
     # Publish asset, service, and datatoken. Orders expire after 5 seconds
@@ -72,7 +73,7 @@ def test_reuse_order_fees(
         publisher_wallet=publisher_wallet,
         publish_market_order_fee_address=publish_market_wallet.address,
         publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=parse_units("10", bt.decimals()),
+        publish_market_order_fee_amount=int_units("10", bt.decimals()),
         timeout=5,
     )
 
@@ -84,7 +85,7 @@ def test_reuse_order_fees(
     )
 
     # Mock non-zero provider fees (simulate first time paying provider fees)
-    provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
+    provider_fee = int_units(provider_fee_in_unit, bt.decimals())
     valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
@@ -99,7 +100,7 @@ def test_reuse_order_fees(
     if base_token_name == "Ocean" and provider_fee_in_unit == "700":
         bt.mint(
             consumer_wallet.address,
-            parse_units("2000", bt.decimals()),
+            int_units("2000", bt.decimals()),
             {"from": factory_deployer_wallet},
         )
 
@@ -117,7 +118,7 @@ def test_reuse_order_fees(
         provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=parse_units("10", bt.decimals()),
+        consume_market_order_fee_amount=int_units("10", bt.decimals()),
         transaction_parameters={"from": consumer_wallet},
     )
 
@@ -219,7 +220,7 @@ def reuse_order_with_mock_provider_fees(
     opc_dt_balance_before = dt.balanceOf(opc_collector_address)
 
     # Mock provider fees
-    provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
+    provider_fee = int_units(provider_fee_in_unit, bt.decimals())
     valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
