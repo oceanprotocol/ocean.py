@@ -2,17 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import csv
 import glob
 import os
-import shutil
 
 import pytest
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from tests.resources.ddo_helpers import get_first_service_by_type
 
@@ -43,7 +40,7 @@ def test1(
 
     # Share access
     to_address = consumer_wallet.address
-    datatoken.mint(to_address, ocean.to_wei(10), publisher_wallet)
+    datatoken.mint(to_address, Web3.toWei(10, "ether"), publisher_wallet)
 
     # Consume
     order_tx_id = ocean.assets.pay_for_access_service(asset, consumer_wallet)

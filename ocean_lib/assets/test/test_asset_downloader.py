@@ -7,6 +7,7 @@ from unittest.mock import patch
 
 import pytest
 from requests.exceptions import InvalidURL
+from web3.main import Web3
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -14,7 +15,6 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import (
     create_basics,
     get_first_service_by_type,
@@ -184,7 +184,7 @@ def ocean_assets_download_destination_file_helper(
 
     datatoken.mint(
         publisher_wallet.address,
-        to_wei("50"),
+        Web3.toWei("50", "ether"),
         {"from": publisher_wallet},
     )
 

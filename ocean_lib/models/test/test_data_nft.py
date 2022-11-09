@@ -14,7 +14,6 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
@@ -351,14 +350,14 @@ def test_create_erc20(
         publish_market_order_fee_amount=0,
         bytess=[b""],
         transaction_parameters={"from": publisher_wallet},
-        datatoken_cap=to_wei("0.1"),
+        datatoken_cap=Web3.toWei("0.1", "ether"),
     )
 
     tx = data_nft.create_datatoken(
         template_index=2,
         name="DatatokenEnterpriseDT1",
         symbol="DatatokenEnterpriseDT1Symbol",
-        datatoken_cap=to_wei("0.1"),
+        datatoken_cap=Web3.toWei("0.1", "ether"),
         from_wallet=publisher_wallet,
     )
     assert tx, "Could not create datatoken Enterprise using create_datatoken."
@@ -372,7 +371,7 @@ def test_create_datatoken_with_usdc_order_fee(
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
-    publish_market_order_fee_amount_in_wei = to_wei(5)
+    publish_market_order_fee_amount_in_wei = Web3.toWei(5, "ether")
     receipt = data_nft.create_erc20(
         template_index=1,
         name="DT1",
@@ -506,10 +505,10 @@ def test_erc721_datatoken_functions(
     # Tests transfer functions
     datatoken.mint(
         consumer_addr,
-        to_wei("0.2"),
+        Web3.toWei("0.2", "ether"),
         {"from": publisher_wallet},
     )
-    assert datatoken.balanceOf(consumer_addr) == to_wei("0.2")
+    assert datatoken.balanceOf(consumer_addr) == Web3.toWei("0.2", "ether")
     assert data_nft.ownerOf(1) == publisher_addr
 
     data_nft.transferFrom(
@@ -536,17 +535,17 @@ def test_erc721_datatoken_functions(
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             consumer_addr,
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
             {"from": consumer_wallet},
         )
 
     datatoken.addMinter(consumer_addr, {"from": consumer_wallet})
     datatoken.mint(
         consumer_addr,
-        to_wei("0.2"),
+        Web3.toWei("0.2", "ether"),
         {"from": consumer_wallet},
     )
-    assert datatoken.balanceOf(consumer_addr) == to_wei("0.4")
+    assert datatoken.balanceOf(consumer_addr) == Web3.toWei("0.4", "ether")
 
 
 @pytest.mark.unit
@@ -678,12 +677,15 @@ def test_transfer_nft(
 
     ocean_token = publisher_ocean_instance.OCEAN_token
     ocean_token.approve(
-        factory_router.address, to_wei(10000), {"from": consumer_wallet}
+        factory_router.address, Web3.toWei(10000, "ether"), {"from": consumer_wallet}
     )
 
     # Make consumer the publish_market_order_fee_address instead of publisher
     receipt = datatoken.setPublishingMarketFee(
-        consumer_addr, ocean_token.address, to_wei(1), {"from": publisher_wallet}
+        consumer_addr,
+        ocean_token.address,
+        Web3.toWei(1, "ether"),
+        {"from": publisher_wallet},
     )
 
     set_publishing_fee_event = receipt.events["PublishMarketFeeChanged"]
@@ -692,7 +694,7 @@ def test_transfer_nft(
     publish_fees = datatoken.getPublishingMarketFee()
     assert publish_fees[0] == consumer_addr
     assert publish_fees[1] == ocean_token.address
-    assert publish_fees[2] == to_wei(1)
+    assert publish_fees[2] == Web3.toWei(1, "ether")
 
 
 def test_nft_transfer_with_fre(
@@ -734,8 +736,8 @@ def test_nft_transfer_with_fre(
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=ocean_token.decimals(),
         datatoken_decimals=datatoken.decimals(),
-        fixed_rate=to_wei(1),
-        publish_market_swap_fee_amount=to_wei("0.001"),
+        fixed_rate=Web3.toWei(1, "ether"),
+        publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
         with_mint=1,
         transaction_parameters={"from": consumer_wallet},
     )
@@ -758,21 +760,27 @@ def test_nft_transfer_with_fre(
     assert (
         exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == ocean_token.decimals()
     )
-    assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
+    assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == Web3.toWei(
+        1, "ether"
+    )
     assert exchange_details[FixedRateExchangeDetails.ACTIVE]
     assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == MAX_UINT256
     assert exchange_details[FixedRateExchangeDetails.DT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.WITH_MINT]
 
-    datatoken.approve(fixed_exchange.address, to_wei(100), {"from": consumer_wallet})
-    ocean_token.approve(fixed_exchange.address, to_wei(100), {"from": consumer_wallet})
+    datatoken.approve(
+        fixed_exchange.address, Web3.toWei(100, "ether"), {"from": consumer_wallet}
+    )
+    ocean_token.approve(
+        fixed_exchange.address, Web3.toWei(100, "ether"), {"from": consumer_wallet}
+    )
 
-    amount_dt_bought = to_wei(2)
+    amount_dt_bought = Web3.toWei(2, "ether")
     fixed_exchange.buyDT(
         exchange_id,
         amount_dt_bought,
-        to_wei(5),
+        Web3.toWei(5, "ether"),
         ZERO_ADDRESS,
         0,
         {"from": consumer_wallet},
@@ -784,8 +792,8 @@ def test_nft_transfer_with_fre(
     assert datatoken.balanceOf(consumer_addr) == amount_dt_bought
     fixed_exchange.sellDT(
         exchange_id,
-        to_wei(2),
-        to_wei(1),
+        Web3.toWei(2, "ether"),
+        Web3.toWei(1, "ether"),
         ZERO_ADDRESS,
         0,
         {"from": consumer_wallet},
@@ -795,8 +803,10 @@ def test_nft_transfer_with_fre(
         == exchange_details[FixedRateExchangeDetails.DT_SUPPLY] - amount_dt_bought
     )
     assert datatoken.balanceOf(consumer_addr) == 0
-    fixed_exchange.collectDT(exchange_id, to_wei(1), {"from": consumer_wallet})
-    assert datatoken.balanceOf(consumer_addr) == to_wei(1)
+    fixed_exchange.collectDT(
+        exchange_id, Web3.toWei(1, "ether"), {"from": consumer_wallet}
+    )
+    assert datatoken.balanceOf(consumer_addr) == Web3.toWei(1, "ether")
 
 
 def test_transfer_nft_with_erc20_pool_fre(
@@ -865,8 +875,8 @@ def test_transfer_nft_with_erc20_pool_fre(
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=ocean_token.decimals(),
         datatoken_decimals=datatoken.decimals(),
-        fixed_rate=to_wei(1),
-        publish_market_swap_fee_amount=to_wei("0.001"),
+        fixed_rate=Web3.toWei(1, "ether"),
+        publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
         with_mint=0,
         transaction_parameters={"from": publisher_wallet},
     )
@@ -887,7 +897,9 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert (
         exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == ocean_token.decimals()
     )
-    assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
+    assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == Web3.toWei(
+        1, "ether"
+    )
     assert exchange_details[FixedRateExchangeDetails.ACTIVE]
     assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_SUPPLY] == 0

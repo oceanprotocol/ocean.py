@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.main import Web3
 
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 
 
 @pytest.mark.unit
@@ -26,8 +26,8 @@ def test_main(
     # Tests publisher creates a dispenser with minter role
     _ = datatoken.createDispenser(
         dispenser.address,
-        to_wei("1"),
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
+        Web3.toWei("1", "ether"),
         True,
         ZERO_ADDRESS,
         {"from": publisher_wallet},
@@ -44,7 +44,7 @@ def test_main(
     with pytest.raises(Exception, match="Amount too high"):
         dispenser.dispense(
             datatoken.address,
-            to_wei("20"),
+            Web3.toWei("20", "ether"),
             consumer_wallet.address,
             {"from": consumer_wallet},
         )
@@ -52,7 +52,7 @@ def test_main(
     # Tests consumer requests data tokens
     _ = dispenser.dispense(
         datatoken.address,
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
         consumer_wallet.address,
         {"from": consumer_wallet},
     )
@@ -61,7 +61,7 @@ def test_main(
     with pytest.raises(Exception, match="Caller balance too high"):
         dispenser.dispense(
             datatoken.address,
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
             consumer_wallet.address,
             {"from": consumer_wallet},
         )
@@ -75,7 +75,7 @@ def test_main(
     with pytest.raises(Exception, match="Dispenser not active"):
         dispenser.dispense(
             datatoken.address,
-            to_wei("0.00001"),
+            Web3.toWei("0.00001", "ether"),
             factory_deployer_wallet.address,
             {"from": factory_deployer_wallet},
         )
@@ -84,8 +84,8 @@ def test_main(
     with pytest.raises(Exception, match="Invalid owner"):
         dispenser.activate(
             datatoken.address,
-            to_wei("1"),
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
+            Web3.toWei("1", "ether"),
             {"from": consumer_wallet},
         )
 
@@ -100,8 +100,8 @@ def test_dispenser_creation_without_minter(
 
     datatoken.createDispenser(
         dispenser.address,
-        to_wei("1"),
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
+        Web3.toWei("1", "ether"),
         False,
         ZERO_ADDRESS,
         {"from": publisher_wallet},
@@ -111,7 +111,7 @@ def test_dispenser_creation_without_minter(
     with pytest.raises(Exception, match="Not enough reserves"):
         dispenser.dispense(
             datatoken.address,
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
             consumer_wallet.address,
             {"from": consumer_wallet},
         )
@@ -119,14 +119,14 @@ def test_dispenser_creation_without_minter(
     # Tests publisher mints tokens and transfer them to the dispenser.
     datatoken.mint(
         dispenser.address,
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
         {"from": publisher_wallet},
     )
 
     # Tests consumer requests data tokens
     dispenser.dispense(
         datatoken.address,
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
         consumer_wallet.address,
         {"from": consumer_wallet},
     )

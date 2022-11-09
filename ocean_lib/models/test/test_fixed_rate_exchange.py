@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.main import Web3
 
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
@@ -13,7 +14,6 @@ from ocean_lib.models.fixed_rate_exchange import (
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 
 
@@ -29,10 +29,10 @@ def test_exchange_rate_creation(
     datatoken,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    amount = to_wei("100000")
-    amount_dt_to_sell = to_wei("100")
-    no_limit = to_wei("100000000000000000000")
-    rate = to_wei("1")
+    amount = Web3.toWei("100000", "ether")
+    amount_dt_to_sell = Web3.toWei("100", "ether")
+    no_limit = Web3.toWei("100000000000000000000", "ether")
+    rate = Web3.toWei("1", "ether")
     publish_market_swap_fee = int(1e15)  # 0.1%
     pmt_collector = datatoken.getPaymentCollector()
 
@@ -94,7 +94,9 @@ def test_exchange_rate_creation(
     )
     # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
     ocean_token.approve(
-        fixed_exchange.address, to_wei("1000000"), {"from": another_consumer_wallet}
+        fixed_exchange.address,
+        Web3.toWei("1000000", "ether"),
+        {"from": another_consumer_wallet},
     )
 
     # Exchange should have supply and fees setup
@@ -117,7 +119,7 @@ def test_exchange_rate_creation(
     # Get exchange info
     # Get swapOceanFee
     # token address is not approved, so 0.002
-    assert fixed_exchange.getOPCFee(ZERO_ADDRESS) == to_wei("0.002")
+    assert fixed_exchange.getOPCFee(ZERO_ADDRESS) == Web3.toWei("0.002", "ether")
 
     # Should get the exchange rate
     exchange_rate = fixed_exchange.getRate(exchange_id)
@@ -155,7 +157,7 @@ def test_exchange_rate_creation(
         amount_dt_to_sell,
         no_limit,
         consumer_addr,
-        to_wei("0.1"),
+        Web3.toWei("0.1", "ether"),
         {"from": another_consumer_wallet},
     )
 
@@ -228,17 +230,21 @@ def test_exchange_rate_creation(
 
     # Fixed Rate Exchange owner withdraws BT balance
     # Needs to buy because he sold all the DT amount and BT balance will be 0.
-    datatoken.approve(fixed_exchange.address, to_wei(10), {"from": consumer_wallet})
+    datatoken.approve(
+        fixed_exchange.address, Web3.toWei(10, "ether"), {"from": consumer_wallet}
+    )
 
     fixed_exchange.buyDT(
         exchange_id,
-        to_wei(10),
+        Web3.toWei(10, "ether"),
         no_limit,
         consumer_addr,
-        to_wei("0.1"),
+        Web3.toWei("0.1", "ether"),
         {"from": another_consumer_wallet},
     )
-    assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell + to_wei(10)
+    assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell + Web3.toWei(
+        10, "ether"
+    )
     bt_balance_before = ocean_token.balanceOf(pmt_collector)
 
     receipt = fixed_exchange.collectBT(
@@ -262,7 +268,7 @@ def test_exchange_rate_creation(
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_addr
     )
-    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
+    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == Web3.toWei("0.001", "ether")
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] > 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] > 0
 
@@ -290,5 +296,7 @@ def test_exchange_rate_creation(
     fixed_exchange.toggleExchangeState(exchange_id, {"from": publisher_wallet})
 
     # Set exchange rate exchange should work
-    fixed_exchange.setRate(exchange_id, to_wei("1.1"), {"from": publisher_wallet})
-    assert fixed_exchange.getRate(exchange_id) == to_wei("1.1")
+    fixed_exchange.setRate(
+        exchange_id, Web3.toWei("1.1", "ether"), {"from": publisher_wallet}
+    )
+    assert fixed_exchange.getRate(exchange_id) == Web3.toWei("1.1", "ether")

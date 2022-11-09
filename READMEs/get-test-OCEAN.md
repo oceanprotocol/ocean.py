@@ -85,8 +85,8 @@ print(f"Address of your account: {wallet.address}")
 
 # get balance
 OCEAN_balance_in_wei = OCEAN_token.balanceOf(wallet.address)
-from ocean_lib.web3_internal.currency import from_wei
-OCEAN_balance_in_ether = from_wei(OCEAN_balance_in_wei)
+from web3.main import Web3
+OCEAN_balance_in_ether = Web3.fromWei(OCEAN_balance_in_wei, "ether")
 print(f"Balance: {OCEAN_balance_in_ether} OCEAN")
 if OCEAN_balance_in_wei == 0:
   print("WARNING: you don't have any OCEAN yet")

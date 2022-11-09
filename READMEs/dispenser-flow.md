@@ -39,7 +39,8 @@ In the same Python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 # Key parameter
-max_amount = ocean.to_wei(50)
+from web3.main import Web3
+max_amount = Web3.toWei(50, "ether")
 
 # Retrieve the dispenser
 dispenser = ocean.dispenser

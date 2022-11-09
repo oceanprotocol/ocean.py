@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -147,8 +148,12 @@ def c2d_flow_readme(
     compute_service.add_publisher_trusted_algorithm(ALGO_asset)
     DATA_asset = ocean.assets.update(DATA_asset, publisher_wallet)
 
-    DATA_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
-    ALGO_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
+    DATA_datatoken.mint(
+        consumer_wallet.address, Web3.toWei(5, "ether"), publisher_wallet
+    )
+    ALGO_datatoken.mint(
+        consumer_wallet.address, Web3.toWei(5, "ether"), publisher_wallet
+    )
 
     # Convenience variables
     DATA_did = DATA_asset.did

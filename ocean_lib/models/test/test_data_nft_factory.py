@@ -14,7 +14,6 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 
 
@@ -158,7 +157,7 @@ def test_main(
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=to_wei("0.0005"),
+        publish_market_order_fee_amount=Web3.toWei("0.0005", "ether"),
         bytess=[b""],
         transaction_parameters={"from": publisher_wallet},
     )
@@ -190,8 +189,8 @@ def test_main(
         fixed_price_allowed_swapper=ZERO_ADDRESS,
         fixed_price_base_token_decimals=18,
         fixed_price_datatoken_decimals=18,
-        fixed_price_rate=to_wei("1"),
-        fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
+        fixed_price_rate=Web3.toWei("1", "ether"),
+        fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
         fixed_price_with_mint=0,
         transaction_parameters={"from": publisher_wallet},
     )
@@ -240,8 +239,8 @@ def test_main(
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         dispenser_address=dispenser_address,
-        dispenser_max_tokens=to_wei(1),
-        dispenser_max_balance=to_wei(1),
+        dispenser_max_tokens=Web3.toWei(1, "ether"),
+        dispenser_max_balance=Web3.toWei(1, "ether"),
         dispenser_with_mint=True,
         dispenser_allowed_swapper=ZERO_ADDRESS,
         transaction_parameters={"from": publisher_wallet},
@@ -396,7 +395,7 @@ def test_start_multiple_order(
 
     # Tests starting multiple token orders successfully
     datatoken = Datatoken(config, datatoken_address)
-    dt_amount = to_wei("2")
+    dt_amount = Web3.toWei("2", "ether")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
 
@@ -611,8 +610,8 @@ def test_datatoken_cap(
             fixed_price_allowed_swapper=ZERO_ADDRESS,
             fixed_price_base_token_decimals=18,
             fixed_price_datatoken_decimals=18,
-            fixed_price_rate=to_wei("1"),
-            fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
+            fixed_price_rate=Web3.toWei("1", "ether"),
+            fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
             fixed_price_with_mint=0,
             transaction_parameters={"from": publisher_wallet},
         )
@@ -635,8 +634,8 @@ def test_datatoken_cap(
             datatoken_publish_market_order_fee_amount=0,
             datatoken_bytess=[b""],
             dispenser_address=ZERO_ADDRESS,
-            dispenser_max_tokens=to_wei(1),
-            dispenser_max_balance=to_wei(1),
+            dispenser_max_tokens=Web3.toWei(1, "ether"),
+            dispenser_max_balance=Web3.toWei(1, "ether"),
             dispenser_with_mint=True,
             dispenser_allowed_swapper=ZERO_ADDRESS,
             transaction_parameters={"from": publisher_wallet},

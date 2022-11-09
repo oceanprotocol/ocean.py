@@ -40,7 +40,6 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -726,12 +725,12 @@ class OceanAssets:
         datatoken = Datatoken(self._config_dict, datatoken_address)
 
         # Ensure access token
-        bal = from_wei(datatoken.balanceOf(wallet.address))
+        bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
         if bal >= 1.0:  # we're good
             pass
         else:  # try to get freely-dispensed asset
             print("Dispense access token...")
-            amt_dispense_wei = to_wei(1)
+            amt_dispense_wei = Web3.toWei(1, "ether")
             dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
             dispenser = Dispenser(self._config_dict, dispenser_addr)
 
@@ -815,11 +814,11 @@ class OceanAssets:
         dt = Datatoken(self._config_dict, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
-        if balance < to_wei(1):
+        if balance < Web3.toWei(1, "ether"):
             raise InsufficientBalance(
-                f"Your token balance {pretty_ether_and_wei(balance, dt.symbol())} is not sufficient "
+                f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
-                f"requires {pretty_ether_and_wei(1, dt.symbol())}."
+                f"requires 1 wei."
             )
 
         consumable_result = is_consumable(

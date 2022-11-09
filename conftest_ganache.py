@@ -4,6 +4,7 @@
 #
 import pytest
 from brownie.network import accounts
+from web3.main import Web3
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
@@ -14,7 +15,6 @@ from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     get_another_consumer_wallet,
@@ -56,18 +56,18 @@ def setup_all(request, config, ocean_token):
         print("Can not find adddresses.")
         return
 
-    assert accounts.at(wallet.address).balance() >= to_wei(
-        "10"
+    assert accounts.at(wallet.address).balance() >= Web3.toWei(
+        "10", "ether"
     ), "Ether balance less than 10."
 
-    amt_distribute = to_wei("1000")
-    ocean_token.mint(wallet.address, to_wei("20000"), {"from": wallet})
+    amt_distribute = Web3.toWei("1000", "ether")
+    ocean_token.mint(wallet.address, Web3.toWei("20000", "ether"), {"from": wallet})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if accounts.at(w.address).balance() < to_wei("2"):
+        if accounts.at(w.address).balance() < Web3.toWei("2", "ether"):
             wallet.transfer(w.address, "4 ether")
 
-        if ocean_token.balanceOf(w.address) < to_wei("100"):
+        if ocean_token.balanceOf(w.address) < Web3.toWei("100", "ether"):
             ocean_token.mint(w.address, amt_distribute, {"from": wallet})
 
 
@@ -197,7 +197,7 @@ def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_fact
         publish_market_order_fee_amount=0,
         bytess=[b""],
         transaction_parameters={"from": publisher_wallet},
-        datatoken_cap=to_wei(100),
+        datatoken_cap=Web3.toWei(100, "ether"),
     )
 
     dt_address = receipt.events["TokenCreated"]["newTokenAddress"]

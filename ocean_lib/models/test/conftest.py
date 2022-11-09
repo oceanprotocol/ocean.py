@@ -6,11 +6,11 @@ import os
 
 import pytest
 from brownie.network import accounts
+from web3.main import Web3
 
 from conftest_ganache import *
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_ganache_wallet
 
 _NETWORK = "ganache"
@@ -111,10 +111,10 @@ def make_info(name, private_key_name):
     info.address = info.wallet.address
     wallet = get_ganache_wallet()
     if wallet:
-        assert accounts.at(wallet.address).balance() >= to_wei(
-            "4"
+        assert accounts.at(wallet.address).balance() >= Web3.toWei(
+            "4", "ether"
         ), "Ether balance less than 4."
-        if accounts.at(info.address).balance() < to_wei("2"):
+        if accounts.at(info.address).balance() < Web3.toWei("2", "ether"):
             wallet.transfer(info.address, "4 ether")
 
     from ocean_lib.ocean.ocean import Ocean

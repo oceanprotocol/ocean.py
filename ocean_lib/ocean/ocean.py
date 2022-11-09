@@ -6,7 +6,6 @@
 """Ocean module."""
 import json
 import logging
-from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
@@ -28,11 +27,6 @@ from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import DECIMALS_18
-from ocean_lib.web3_internal.currency import format_units as _format_units
-from ocean_lib.web3_internal.currency import from_wei as _from_wei
-from ocean_lib.web3_internal.currency import parse_units as _parse_units
-from ocean_lib.web3_internal.currency import to_wei as _to_wei
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -102,22 +96,6 @@ class Ocean:
     @enforce_types
     def OCEAN_token(self) -> Datatoken:
         return Datatoken(self.config_dict, self.OCEAN_address)
-
-    @enforce_types
-    def to_wei(self, amount_in_ether: Union[Decimal, str, int]):
-        return _to_wei(amount_in_ether)
-
-    @enforce_types
-    def from_wei(self, amount_in_wei: int):
-        return _from_wei(amount_in_wei)
-
-    @enforce_types
-    def parse_units(self, amount: Union[Decimal, str, int], units: int = DECIMALS_18):
-        return _parse_units(amount, units)
-
-    @enforce_types
-    def format_units(self, amount: Union[Decimal, str, int], units: int = DECIMALS_18):
-        return _format_units(amount, units)
 
     @enforce_types
     def create_data_nft(
