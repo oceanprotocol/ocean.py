@@ -49,10 +49,11 @@ print(f"Just published asset, with did={asset.did}")
 In the same Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from web3.main import Web3
 datatoken.createDispenser(
     ocean.dispenser.address,
-    ocean.to_wei(10000),
-    ocean.to_wei(10000),
+    Web3.toWei(10000, "ether")
+    Web3.toWei(10000, "ether")
     True,
     ZERO_ADDRESS,
     {"from": alice_wallet},
@@ -113,7 +114,7 @@ In the same Python console:
 asset = ocean.assets.resolve(asset_did)
 datatoken_address = asset.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
-amt_tokens = ocean.to_wei(1)
+amt_tokens = Web3.toWei(1, "ether")
 ocean.dispenser.dispense_tokens(datatoken, amt_tokens, {"from": bob_wallet})
 
 # Bob sends a datatoken to the service to get access

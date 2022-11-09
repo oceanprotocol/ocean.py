@@ -50,7 +50,8 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 Then, have Alice mint datatokens. In the same Python console:
 ```python
-datatoken.mint(alice_wallet.address, ocean.to_wei(100), {"from": alice_wallet})
+from web3.main import Web3
+datatoken.mint(alice_wallet.address, Web3.toWei(100, "ether"), {"from": alice_wallet})
 ```
 
 ## 3. Alice creates an OCEAN-datatoken exchange
@@ -60,8 +61,8 @@ In the same Python console:
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN_token,
-    amount=ocean.to_wei(100),
-    fixed_rate=ocean.to_wei(1),
+    amount=web3.toWei(100, "ether"),
+    fixed_rate=web3.toWei(1, "ether"),
     from_wallet=alice_wallet,
 )
 ```
@@ -83,14 +84,14 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
 exchange_address = ocean.fixed_rate_exchange.address
 
 # Bob allows the exchange contract to spend some OCEAN
-OCEAN_token.approve(exchange_address, ocean.to_wei(100), {"from": bob_wallet})
+OCEAN_token.approve(exchange_address, Web3.toWei(100, "ether"), {"from": bob_wallet})
 
 # Bob starts the exchange. The contract takes some of his OCEAN and adds datatokens.
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 tx_result = ocean.fixed_rate_exchange.buyDT(
     exchange_id,
-    ocean.to_wei(20),
-    ocean.to_wei(50),
+    Web3.toWei(20, "ether"),
+    Web3.toWei(50, "ether"),
     ZERO_ADDRESS,
     0,
     {"from": bob_wallet},

@@ -6,12 +6,13 @@ from datetime import datetime, timedelta
 from time import sleep
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
 from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
@@ -80,7 +81,7 @@ def test_reuse_order_fees(
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
         consumer_wallet.address,
-        to_wei("50"),
+        Web3.toWei("50", "ether"),
         {"from": publisher_wallet},
     )
 

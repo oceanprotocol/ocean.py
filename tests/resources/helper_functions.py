@@ -25,7 +25,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import DECIMALS_18, from_wei, to_wei
+from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.utils import sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
@@ -94,7 +94,7 @@ def generate_wallet():
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
-        generated_wallet.address, to_wei(50), {"from": deployer_wallet}
+        generated_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
     )
     return generated_wallet
 
@@ -329,8 +329,11 @@ def base_token_to_datatoken(
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
     unit_value = Decimal(10) ** DECIMALS_18
-    return to_wei(
-        Decimal(base_token_amount) / unit_value * from_wei(datatokens_per_base_token)
+    return Web3.toWei(
+        Decimal(base_token_amount)
+        / unit_value
+        * Web3.fromWei(datatokens_per_base_token, "ether"),
+        "ether",
     )
 
 

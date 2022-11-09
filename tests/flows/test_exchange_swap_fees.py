@@ -5,6 +5,7 @@
 from decimal import Decimal
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -19,7 +20,7 @@ from ocean_lib.models.test.test_factory_router import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
@@ -122,11 +123,11 @@ def exchange_swap_fees(
         amount_to_transfer=int_units("1500", bt.decimals()),
     )
 
-    publish_market_swap_fee = to_wei(publish_market_swap_fee)
-    consume_market_swap_fee = to_wei(consume_market_swap_fee)
+    publish_market_swap_fee = Web3.toWei(publish_market_swap_fee, "ether")
+    consume_market_swap_fee = Web3.toWei(consume_market_swap_fee, "ether")
 
     fixed_price_address = get_address_of_type(config, "FixedPrice")
-    bt_per_dt_in_wei = to_wei(bt_per_dt)
+    bt_per_dt_in_wei = Web3.toWei(bt_per_dt, "ether")
     receipt = dt.create_fixed_rate(
         fixed_price_address=fixed_price_address,
         base_token_address=bt.address,
@@ -201,7 +202,7 @@ def exchange_swap_fees(
         dt.approve(exchange.address, MAX_WEI, {"from": publisher_wallet})
 
     one_base_token = int_units("1", bt.decimals())
-    dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))
+    dt_per_bt_in_wei = Web3.toWei(Decimal(1) / Decimal(bt_per_dt), "ether")
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
@@ -244,7 +245,7 @@ def exchange_swap_fees(
     )
 
     # Update publish market swap fee
-    new_publish_market_swap_fee = to_wei("0.09")
+    new_publish_market_swap_fee = Web3.toWei("0.09", "ether")
     exchange.updateMarketFee(
         exchange_id, new_publish_market_swap_fee, {"from": publisher_wallet}
     )
@@ -254,11 +255,13 @@ def exchange_swap_fees(
     )
 
     # Increase rate (base tokens per datatoken) by 1
-    new_bt_per_dt_in_wei = bt_per_dt_in_wei + to_wei("1")
+    new_bt_per_dt_in_wei = bt_per_dt_in_wei + Web3.toWei("1", "ether")
     exchange.setRate(exchange_id, new_bt_per_dt_in_wei, {"from": publisher_wallet})
     assert exchange.getRate(exchange_id) == new_bt_per_dt_in_wei
 
-    new_dt_per_bt_in_wei = to_wei(Decimal(1) / from_wei(new_bt_per_dt_in_wei))
+    new_dt_per_bt_in_wei = Web3.toWei(
+        Decimal(1) / Web3.fromWei(new_bt_per_dt_in_wei, "ether"), "ether"
+    )
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
         base_token_to_datatoken(one_base_token, bt.decimals(), new_dt_per_bt_in_wei),

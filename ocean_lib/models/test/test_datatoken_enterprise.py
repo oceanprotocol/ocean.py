@@ -13,7 +13,6 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 
 
@@ -32,8 +31,8 @@ def test_buy_from_dispenser_and_order(
 
     _ = datatoken_enterprise_token.createDispenser(
         dispenser.address,
-        to_wei("1"),
-        to_wei("1"),
+        Web3.toWei("1", "ether"),
+        Web3.toWei("1", "ether"),
         True,
         ZERO_ADDRESS,
         {"from": publisher_wallet},
@@ -51,12 +50,12 @@ def test_buy_from_dispenser_and_order(
     ):
         dispenser.dispense(
             datatoken_enterprise_token.address,
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
             consumer_wallet.address,
             {"from": consumer_wallet},
         )
 
-    consume_fee_amount = to_wei("2")
+    consume_fee_amount = Web3.toWei("2", "ether")
     consume_fee_address = consumer_wallet.address
     datatoken_enterprise_token.setPublishingMarketFee(
         consume_fee_address,
@@ -132,13 +131,13 @@ def test_buy_from_dispenser_and_order(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == Web3.toWei("0", "ether")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
 
     assert balance_opf_consume - balance_opf_consume_before == 0
-    assert balance_publish - balance_publish_before == to_wei("2")
+    assert balance_publish - balance_publish_before == Web3.toWei("2", "ether")
 
     assert (
         datatoken_enterprise_token.balanceOf(
@@ -172,8 +171,8 @@ def test_buy_from_fre_and_order(
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=18,
         datatoken_decimals=18,
-        fixed_rate=to_wei(1),
-        publish_market_swap_fee_amount=to_wei("0.1"),
+        fixed_rate=Web3.toWei(1, "ether"),
+        publish_market_swap_fee_amount=Web3.toWei("0.1", "ether"),
         with_mint=1,
         transaction_parameters={"from": publisher_wallet},
     )
@@ -189,14 +188,14 @@ def test_buy_from_fre_and_order(
     with pytest.raises(Exception, match="This address is not allowed to swap"):
         fixed_rate_exchange.buyDT(
             exchange_id,
-            to_wei("1"),
-            to_wei("1"),
+            Web3.toWei("1", "ether"),
+            Web3.toWei("1", "ether"),
             ZERO_ADDRESS,
             0,
             {"from": consumer_wallet},
         )
 
-    consume_fee_amount = to_wei("2")
+    consume_fee_amount = Web3.toWei("2", "ether")
     consume_fee_address = consumer_wallet.address
     datatoken_enterprise_token.setPublishingMarketFee(
         consume_fee_address,
@@ -208,7 +207,7 @@ def test_buy_from_fre_and_order(
 
     mock_usdc_contract.transfer(
         publisher_wallet.address,
-        publish_fees[2] + to_wei("3"),
+        publish_fees[2] + Web3.toWei("3"),
         {"from": factory_deployer_wallet},
     )
     mock_usdc_contract.approve(
@@ -268,13 +267,13 @@ def test_buy_from_fre_and_order(
         consume_market_order_fee_amount=0,
         exchange_contract=fixed_rate_exchange.address,
         exchange_id=exchange_id,
-        max_base_token_amount=to_wei("2.5"),
-        consume_market_swap_fee_amount=to_wei("0.001"),  # 1e15 => 0.1%
+        max_base_token_amount=Web3.toWei("2.5", "ether"),
+        consume_market_swap_fee_amount=Web3.toWei("0.001", "ether"),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert datatoken_enterprise_token.totalSupply() == to_wei("0")
+    assert datatoken_enterprise_token.totalSupply() == Web3.toWei("0", "ether")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address
@@ -283,9 +282,11 @@ def test_buy_from_fre_and_order(
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
 
     assert balance_consume - balance_consume_before == 0
-    assert provider_fee_balance_after - provider_fee_balance_before == to_wei("0.001")
+    assert provider_fee_balance_after - provider_fee_balance_before == Web3.toWei(
+        "0.001", "ether"
+    )
 
-    assert balance_publish - balance_publish_before == to_wei("2")
+    assert balance_publish - balance_publish_before == Web3.toWei("2", "ether")
 
     assert (
         datatoken_enterprise_token.balanceOf(

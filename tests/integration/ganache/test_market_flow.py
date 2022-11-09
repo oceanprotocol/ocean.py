@@ -8,7 +8,6 @@ import os
 import pytest
 from web3.main import Web3
 
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
@@ -38,12 +37,14 @@ def test_market_flow(
     # Mint data tokens and assign to publisher
     datatoken.mint(
         publisher_wallet.address,
-        to_wei(50),
+        Web3.toWei(50, "ether"),
         {"from": publisher_wallet},
     )
 
     # Give the consumer some datatokens so they can order the service
-    datatoken.transfer(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
+    datatoken.transfer(
+        consumer_wallet.address, Web3.toWei(10, "ether"), {"from": publisher_wallet}
+    )
 
     # Place order for the download service
     if consumer_type == "publisher":
@@ -110,7 +111,9 @@ def test_pay_for_access_service_good_default(
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint datatokens to consumer
-    datatoken.mint(consumer_wallet.address, to_wei(50), {"from": publisher_wallet})
+    datatoken.mint(
+        consumer_wallet.address, Web3.toWei(50, "ether"), {"from": publisher_wallet}
+    )
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args

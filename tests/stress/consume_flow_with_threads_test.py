@@ -8,6 +8,7 @@ import shutil
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -78,7 +79,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
 
     datatoken.mint(
         consumer_wallet.address,
-        ocean.to_wei(20),
+        Web3.toWei(20, "ether"),
         {"from": publisher_wallet},
     )
     # Start order for consumer

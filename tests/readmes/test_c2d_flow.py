@@ -12,6 +12,7 @@ from decimal import Decimal
 import pytest
 from brownie.network import accounts
 from PIL import Image
+from web3.main import Web3
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -214,8 +215,12 @@ def c2d_flow_readme(
 
     # Alice mints DATA datatokens and ALGO datatokens to Bob.
     # Alternatively, Bob might have bought these in a market.
-    DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
-    ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), {"from": alice_wallet})
+    DATA_datatoken.mint(
+        bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet}
+    )
+    ALGO_datatoken.mint(
+        bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet}
+    )
 
     # 6. Bob starts a compute job
 

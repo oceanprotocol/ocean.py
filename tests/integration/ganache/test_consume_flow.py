@@ -6,6 +6,7 @@ import os
 import shutil
 
 import pytest
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -14,7 +15,6 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
@@ -71,7 +71,7 @@ def test_consume_flow(
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        to_wei("50"),
+        Web3.toWei("50", "ether"),
         {"from": publisher_wallet},
     )
 
@@ -150,7 +150,9 @@ def test_compact_publish_and_consume(
     )
 
     # share access
-    datatoken.mint(consumer_wallet.address, to_wei(1), {"from": publisher_wallet})
+    datatoken.mint(
+        consumer_wallet.address, Web3.toWei(1, "ether"), {"from": publisher_wallet}
+    )
 
     # consume
     _ = ocean_assets.download_file(asset.did, consumer_wallet)

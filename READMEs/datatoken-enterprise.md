@@ -50,13 +50,14 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 In the Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from web3.main import Web3
 
 datatoken_enterprise_token = data_nft.create_datatoken(
     name="DT1Name",  # name for datatoken
     symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
-    datatoken_cap=ocean.to_wei(50)
+    datatoken_cap=Web3.toWei(50, "ether")
 )
 print(f"Datatoken Enterprise address: {datatoken_enterprise_token.address}")
 
@@ -77,8 +78,8 @@ access_service = asset.services[0]
 dispenser = ocean.dispenser
 tx = datatoken_enterprise_token.createDispenser(
     dispenser.address,
-    ocean.to_wei(50),
-    ocean.to_wei(50),
+    Web3.toWei(50, "ether"),
+    Web3.toWei(50, "ether"),
     True,
     ZERO_ADDRESS,
     {"from": alice_wallet},
@@ -86,7 +87,7 @@ tx = datatoken_enterprise_token.createDispenser(
 assert tx, "Dispenser not created!"
 
 OCEAN_token = ocean.OCEAN_token
-consume_fee_amount = ocean.to_wei(2)
+consume_fee_amount = Web3.toWei(2, "ether")
 datatoken_enterprise_token.setPublishingMarketFee(
     bob_wallet.address,
     OCEAN_token.address,  # can be also USDC, DAI
@@ -154,7 +155,7 @@ datatoken_enterprise_token = data_nft.create_datatoken(
     symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
-    datatoken_cap=ocean.to_wei(50)
+    datatoken_cap=Web3.toWei(50, "ether")
 )
 print(f"Datatoken Enterprise address: {datatoken_enterprise_token.address}")
 
@@ -178,8 +179,8 @@ OCEAN_token = ocean.OCEAN_token
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken_enterprise_token,
     base_token=OCEAN_token,
-    amount=ocean.to_wei(25),
-    fixed_rate=ocean.to_wei(1),
+    amount=Web3.toWei(25, "ether"),
+    fixed_rate=Web3.toWei(1, "ether"),
     from_wallet=alice_wallet,
 )
 
@@ -200,26 +201,27 @@ exchange_id = ocean.create_fixed_rate(
     publisher_wallet=alice_wallet
 )
 
-datatoken_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), {"from": alice_wallet})
+datatoken_enterprise_token.mint(alice_wallet.address, Web3.toWei(20, "ether"), {"from": alice_wallet})
 
 # Approve tokens
+from web3.main import Web3
 OCEAN_token.approve(
     datatoken_enterprise_token.address,
-    ocean.to_wei(1000),
+    Web3.toWei(1000, "ether"),
     {"from": alice_wallet},
 )
 # Approve consume market fee tokens before starting order.
 datatoken_enterprise_token.approve(
     datatoken_enterprise_token.address,
-    ocean.to_wei(1000),
+    Web3.toWei(1000, "ether"),
     {"from": alice_wallet}
 )
 
 # Transfer some Datatoken Enterprise tokens to Bob for buying from the FRE
-datatoken_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), {"from": alice_wallet})
+datatoken_enterprise_token.transfer(bob_wallet.address, Web3.toWei(15, "ether"), {"from": alice_wallet})
 OCEAN_token.approve(
     datatoken_enterprise_token.address,
-    ocean.to_wei(1000),
+    Web3.toWei(1000, "ether"),
     {"from": bob_wallet},
 )
 
@@ -239,8 +241,8 @@ tx_receipt = datatoken_enterprise_token.buy_from_fre_and_order(
     consume_market_order_fee_amount=0,
     exchange_contract=fixed_rate_exchange.address,
     exchange_id=exchange_id,
-    max_base_token_amount=ocean.to_wei(10),
-    consume_market_swap_fee_amount=ocean.to_wei("0.001"),  # 1e15 => 0.1%
+    max_base_token_amount=Web3.toWei(10, "ether"),
+    consume_market_swap_fee_amount=Web3.toWei("0.001", "ether"),  # 1e15 => 0.1%
     consume_market_swap_fee_address=bob_wallet.address,
     transaction_parameters={"from": alice_wallet},
 )

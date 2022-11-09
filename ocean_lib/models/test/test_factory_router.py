@@ -8,13 +8,12 @@ from web3 import Web3
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 
 # Constants copied from FactoryRouter.sol, used for testing purposes
-OPC_SWAP_FEE_APPROVED = to_wei("0.001")  # 0.1%
-OPC_SWAP_FEE_NOT_APPROVED = to_wei("0.002")  # 0.2%
-OPC_CONSUME_FEE = to_wei("0.03")  # 0.03 DT
-OPC_PROVIDER_FEE = to_wei("0")  # 0%
+OPC_SWAP_FEE_APPROVED = Web3.toWei("0.001", "ether")  # 0.1%
+OPC_SWAP_FEE_NOT_APPROVED = Web3.toWei("0.002", "ether")  # 0.2%
+OPC_CONSUME_FEE = Web3.toWei("0.03", "ether")  # 0.03 DT
+OPC_PROVIDER_FEE = Web3.toWei("0", "ether")  # 0%
 
 
 # FactoryRouter methods
