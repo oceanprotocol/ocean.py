@@ -19,8 +19,7 @@ from ocean_lib.models.test.test_factory_router import (
     OPC_SWAP_FEE_NOT_APPROVED,
 )
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import MAX_WEI
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
@@ -191,15 +190,15 @@ def exchange_swap_fees(
         assert details[FixedRateExchangeDetails.DT_SUPPLY] == 0
 
     # Grant infinite approvals for exchange to spend consumer's BT and DT
-    dt.approve(exchange.address, MAX_WEI, {"from": consumer_wallet})
-    bt.approve(exchange.address, MAX_WEI, {"from": consumer_wallet})
+    dt.approve(exchange.address, MAX_UINT256, {"from": consumer_wallet})
+    bt.approve(exchange.address, MAX_UINT256, {"from": consumer_wallet})
 
     # if the exchange cannot mint it's own datatokens,
     # Mint datatokens to publisher and
     # Grant infinite approval for exchange to spend publisher's datatokens
     if with_mint != 1:
-        dt.mint(publisher_wallet.address, MAX_WEI, {"from": publisher_wallet})
-        dt.approve(exchange.address, MAX_WEI, {"from": publisher_wallet})
+        dt.mint(publisher_wallet.address, MAX_UINT256, {"from": publisher_wallet})
+        dt.approve(exchange.address, MAX_UINT256, {"from": publisher_wallet})
 
     one_base_token = int_units("1", bt.decimals())
     dt_per_bt_in_wei = Web3.toWei(Decimal(1) / Decimal(bt_per_dt), "ether")
@@ -336,7 +335,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
 
     if buy_or_sell == "buy":
         method = exchange.buyDT
-        min_or_max_base_token = MAX_WEI
+        min_or_max_base_token = MAX_UINT256
     else:
         method = exchange.sellDT
         min_or_max_base_token = 0

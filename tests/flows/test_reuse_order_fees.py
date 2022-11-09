@@ -12,7 +12,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.currency import MAX_WEI
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
 from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
@@ -96,7 +96,7 @@ def test_reuse_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
+    bt.approve(dt.address, MAX_UINT256, {"from": consumer_wallet})
 
     if base_token_name == "Ocean" and provider_fee_in_unit == "700":
         bt.mint(

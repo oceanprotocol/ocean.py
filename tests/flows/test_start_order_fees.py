@@ -18,7 +18,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.currency import MAX_WEI
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_opc_collector_address_from_datatoken,
@@ -138,7 +138,7 @@ def test_start_order_fees(
     )
 
     # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, {"from": consumer_wallet})
+    bt.approve(dt.address, MAX_UINT256, {"from": consumer_wallet})
 
     # Start order for consumer
     consume_market_order_fee = int_units(

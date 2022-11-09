@@ -545,7 +545,7 @@ def test_erc721_datatoken_functions(
         Web3.toWei("0.2", "ether"),
         {"from": consumer_wallet},
     )
-    assert datatoken.balanceOf(consumer_addr) == Web3.toWei("0.4")
+    assert datatoken.balanceOf(consumer_addr) == Web3.toWei("0.4", "ether")
 
 
 @pytest.mark.unit

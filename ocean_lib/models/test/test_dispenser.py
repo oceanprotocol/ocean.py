@@ -44,7 +44,7 @@ def test_main(
     with pytest.raises(Exception, match="Amount too high"):
         dispenser.dispense(
             datatoken.address,
-            Web3.toWei("20"),
+            Web3.toWei("20", "ether"),
             consumer_wallet.address,
             {"from": consumer_wallet},
         )
@@ -75,7 +75,7 @@ def test_main(
     with pytest.raises(Exception, match="Dispenser not active"):
         dispenser.dispense(
             datatoken.address,
-            Web3.toWei("0.00001"),
+            Web3.toWei("0.00001", "ether"),
             factory_deployer_wallet.address,
             {"from": factory_deployer_wallet},
         )

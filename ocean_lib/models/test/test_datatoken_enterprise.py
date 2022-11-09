@@ -207,7 +207,7 @@ def test_buy_from_fre_and_order(
 
     mock_usdc_contract.transfer(
         publisher_wallet.address,
-        publish_fees[2] + Web3.toWei("3"),
+        publish_fees[2] + Web3.toWei("3", "ether"),
         {"from": factory_deployer_wallet},
     )
     mock_usdc_contract.approve(

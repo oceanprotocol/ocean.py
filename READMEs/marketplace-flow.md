@@ -61,8 +61,8 @@ In the same Python console:
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN_token,
-    amount=web3.toWei(100, "ether"),
-    fixed_rate=web3.toWei(1, "ether"),
+    amount=Web3.toWei(100, "ether"),
+    fixed_rate=Web3.toWei(1, "ether"),
     from_wallet=alice_wallet,
 )
 ```

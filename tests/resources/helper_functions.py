@@ -25,7 +25,6 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.utils import sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
@@ -328,7 +327,7 @@ def base_token_to_datatoken(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    unit_value = Decimal(10) ** DECIMALS_18
+    unit_value = Decimal(10) ** 18
     return Web3.toWei(
         Decimal(base_token_amount)
         / unit_value
