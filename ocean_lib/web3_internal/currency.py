@@ -38,25 +38,6 @@ MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
-def format_units(amount: int, unit_name: Union[str, int] = DECIMALS_18) -> Decimal:
-    """Convert token amount EVM-compatible integer to a formatted unit."""
-    # Coerce to Decimal because Web3.fromWei can return int 0
-    num_decimals = (
-        int(units[unit_name].log10()) if isinstance(unit_name, str) else unit_name
-    )
-    if amount == 0:
-        return Decimal(0)
-
-    if amount < MIN_WEI or amount > MAX_WEI:
-        raise ValueError("value must be between 1 and 2**256 - 1")
-
-    unit_value = Decimal(10) ** num_decimals
-
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        return Decimal(amount) / unit_value
-
-
-@enforce_types
 def parse_units(
     amount: Union[Decimal, str, int], unit_name: Union[str, int] = DECIMALS_18
 ) -> int:
@@ -98,7 +79,8 @@ def normalize_and_validate_unit(
 
 @enforce_types
 def from_wei(amount_in_wei: int) -> Decimal:
-    return format_units(amount_in_wei, DECIMALS_18)
+    unit_value = Decimal(10) ** DECIMALS_18
+    return Decimal(amount_in_wei) / unit_value
 
 
 @enforce_types
@@ -153,9 +135,6 @@ def pretty_ether(
 
         exponent = sig_fig_3.adjusted()
 
-        if sig_fig_3 == 0:
-            return _trim_zero_to_3_digits_or_less(trim, exponent, ticker)
-
         if exponent >= 12 or exponent < -1:
             # format string handles scaling also, so set scale = 0
             scale = 0
@@ -176,107 +155,6 @@ def pretty_ether(
 
         scaled = sig_fig_3.scaleb(scale)
 
-        if trim:
-            scaled = remove_trailing_zeros(scaled)
-
         return (
             fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
-        )
-
-
-@enforce_types
-def ether_fmt(
-    amount_in_ether: Union[Decimal, str, int],
-    decimals: int = DECIMALS_18,
-    ticker: str = "",
-) -> str:
-    """Convert ether amount to a formatted string."""
-    amount_in_ether = normalize_and_validate_unit(amount_in_ether)
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        return (
-            moneyfmt(amount_in_ether, decimals) + " " + ticker
-            if ticker
-            else moneyfmt(amount_in_ether, decimals)
-        )
-
-
-@enforce_types
-def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailneg=""):
-    """Convert Decimal to a money formatted string.
-    Copied without alteration from https://docs.python.org/3/library/decimal.html#recipes
-
-    places:  required number of places after the decimal point
-    curr:    optional currency symbol before the sign (may be blank)
-    sep:     optional grouping separator (comma, period, space, or blank)
-    dp:      decimal point indicator (comma or period)
-             only specify as blank when places is zero
-    pos:     optional sign for positive numbers: '+', space or blank
-    neg:     optional sign for negative numbers: '-', '(', space or blank
-    trailneg:optional trailing minus indicator:  '-', ')', space or blank
-
-    >>> d = Decimal('-1234567.8901')
-    >>> moneyfmt(d, curr='$')
-    '-$1,234,567.89'
-    >>> moneyfmt(d, places=0, sep='.', dp='', neg='', trailneg='-')
-    '1.234.568-'
-    >>> moneyfmt(d, curr='$', neg='(', trailneg=')')
-    '($1,234,567.89)'
-    >>> moneyfmt(Decimal(123456789), sep=' ')
-    '123 456 789.00'
-    >>> moneyfmt(Decimal('-0.02'), neg='<', trailneg='>')
-    '<0.02>'
-
-    """
-    q = Decimal(10) ** -places  # 2 places --> '0.01'
-    sign, digits, exp = value.quantize(q).as_tuple()
-    result = []
-    digits = list(map(str, digits))
-    build, next = result.append, digits.pop
-    if sign:
-        build(trailneg)
-    for i in range(places):
-        build(next() if digits else "0")
-    if places:
-        build(dp)
-    if not digits:
-        build("0")
-    i = 0
-    while digits:
-        build(next())
-        i += 1
-        if i == 3 and digits:
-            i = 0
-            build(sep)
-    build(curr)
-    build(neg if sign else pos)
-    return "".join(reversed(result))
-
-
-@enforce_types
-def _trim_zero_to_3_digits_or_less(trim: bool, exponent: int, ticker: str) -> str:
-    """Returns a string representation of the number zero, limited to 3 digits
-    This function exists to reduce the cognitive complexity of pretty_ether
-    """
-    if trim:
-        zero = "0"
-    else:
-        if exponent == -1:
-            zero = "0.0"
-        else:
-            zero = "0.00"
-
-    return zero + " " + ticker if ticker else zero
-
-
-@enforce_types
-def remove_trailing_zeros(value: Decimal) -> Decimal:
-    """Returns a Decimal with trailing zeros removed.
-    Adapted from https://docs.python.org/3/library/decimal.html#decimal-faq
-    """
-    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        return (
-            value.quantize(Decimal(1)).normalize()
-            if value == value.to_integral()
-            else value.normalize()
         )

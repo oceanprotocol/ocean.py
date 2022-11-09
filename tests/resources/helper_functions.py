@@ -8,13 +8,13 @@ import logging.config
 import os
 import secrets
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
 from brownie.network import accounts
 from enforce_typing import enforce_types
-from pytest import approx
 from web3 import Web3
 
 from ocean_lib.example_config import ExampleConfig
@@ -25,7 +25,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
+from ocean_lib.web3_internal.currency import DECIMALS_18, from_wei, to_wei
 from ocean_lib.web3_internal.utils import sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
@@ -328,26 +328,9 @@ def base_token_to_datatoken(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
+    unit_value = Decimal(10) ** DECIMALS_18
     return to_wei(
-        format_units(base_token_amount, base_token_decimals)
-        * from_wei(datatokens_per_base_token)
-    )
-
-
-def approx_from_wei(amount_a, amount_b) -> float:
-    """Helper function to compare token amounts in wei
-    with pytest approx function with a relative tolerance of 1e-6."""
-    return approx_format_units(amount_a, DECIMALS_18, amount_b, DECIMALS_18)
-
-
-def approx_format_units(
-    amount_a, unit_name_a, amount_b, unit_name_b, rel=1e-6
-) -> float:
-    """Helper function to compare token amounts where decimals != 18
-    with pytest approx function with a relative tolerance of 1e-6."""
-    return float(format_units(amount_a, unit_name_a)) == approx(
-        float(format_units(amount_b, unit_name_b)),
-        rel=rel,
+        Decimal(base_token_amount) / unit_value * from_wei(datatokens_per_base_token)
     )
 
 
