@@ -179,7 +179,7 @@ class Aquarius:
                 )
                 break
 
-            if time.time() - start > 30:
+            if time.time() - start > 60:
                 break
 
         return ddo
