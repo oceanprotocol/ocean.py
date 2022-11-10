@@ -299,3 +299,13 @@ class Ocean:
         )
 
         return initialize_compute_response.json()
+
+    @enforce_types
+    def search_asset_by_tag(self, tag: str) -> List[Asset]:
+        # all assets that contain the specified tag name
+        all_assets = self.assets.search(tag)
+
+        # filter just by the `tag` key
+        filtered_assets = list(filter(lambda a: tag in a.metadata["tags"], all_assets))
+
+        return filtered_assets
