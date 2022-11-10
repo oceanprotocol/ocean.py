@@ -299,13 +299,11 @@ def run_compute_test(
         log_file = ocean_instance.compute.compute_job_result_logs(
             dataset_and_userdata.asset, service, job_id, consumer_wallet, "algorithmLog"
         )
-        assert "Building Gaussian Process Regressor (GPR) model" in str(log_file[0])
         print(f"got algo log file: {str(log_file)}")
 
         result = ocean_instance.compute.result(
             dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
         )
-        assert result
 
         prev_dt_tx_id = datasets[0].transfer_tx_id
         prev_algo_tx_id = algorithm.transfer_tx_id

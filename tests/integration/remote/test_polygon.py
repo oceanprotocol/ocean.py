@@ -5,9 +5,11 @@
 import warnings
 
 import pytest
+from brownie.network import accounts
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.utils import connect_to_network
 
 from .util import get_wallets, random_chars
 
@@ -16,10 +18,11 @@ from .util import get_wallets, random_chars
 @pytest.mark.integration
 def test_ocean_tx__create_url_asset(tmp_path):
     """On Polygon, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
-
     # setup
+    connect_to_network("polygon")
     config = _remote_config_polygon(tmp_path)
     ocean = Ocean(config)
+    accounts.clear()
     (alice_wallet, _) = get_wallets(ocean)
 
     # Alice call create_url_asset
@@ -44,13 +47,10 @@ def test_ocean_tx__create_url_asset(tmp_path):
 
 def _remote_config_polygon(tmp_path):
     config = {
+        "NETWORK_NAME": "polygon",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
     }
-
-    # -ensure config is truly remote
-    assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
-    assert "oceanprotocol.com" in config["PROVIDER_URL"]
 
     return config

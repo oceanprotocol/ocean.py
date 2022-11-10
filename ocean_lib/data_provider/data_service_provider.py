@@ -413,9 +413,6 @@ class DataServiceProvider(DataServiceProviderBase):
                 job_id, i, dataset_compute_service, consumer
             )
 
-            if result_type != "publishLog":
-                assert result, f"result retrieval unsuccessful. i={i}"
-
             # Extract algorithm output
             if result_type == log_type:
                 function_result.append(result)

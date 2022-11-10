@@ -595,6 +595,8 @@ class OceanAssets:
         # Fetch the asset on chain
         if wait_for_aqua:
             asset = self._aquarius.wait_for_asset(did)
+        else:
+            return did
 
         # Return
         if return_asset:

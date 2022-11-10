@@ -148,7 +148,7 @@ class Aquarius:
         return False, parsed_response
 
     @enforce_types
-    def wait_for_asset(self, did: str, timeout=30):
+    def wait_for_asset(self, did: str, timeout=60):
         start = time.time()
         ddo = None
         while not ddo:
@@ -179,7 +179,7 @@ class Aquarius:
                 )
                 break
 
-            if time.time() - start > 30:
+            if time.time() - start > 60:
                 break
 
         return ddo
