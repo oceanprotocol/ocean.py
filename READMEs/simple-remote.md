@@ -46,15 +46,19 @@ python
 In the Python console:
 ```python
 # Create Ocean instance
+from ocean_lib.web3_internal.utils import connect_to_network
+connect_to_network("mumbai")
+
 import os
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config("mumbai")
 ocean = Ocean(config)
 
-# Create Alice's wallet
-import os
 from brownie.network import accounts
+accounts.clear()
+
+# Create Alice's wallet
 
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice_wallet = accounts.add(alice_private_key)
