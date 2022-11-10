@@ -76,8 +76,4 @@ def _remote_config_mumbai(tmp_path):
         "DOWNLOADS_PATH": "consume-downloads",
     }
 
-    # -ensure config is truly remote
-    assert "oceanprotocol.com" in config["METADATA_CACHE_URI"]
-    assert "oceanprotocol.com" in config["PROVIDER_URL"]
-
     return config
