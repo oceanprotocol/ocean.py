@@ -14,6 +14,7 @@ from ocean_lib.web3_internal.utils import connect_to_network
 from .util import get_wallets, random_chars
 
 
+@pytest.mark.skip(reason="Don't skip, once fixed #1017")
 @pytest.mark.integration
 def test_ocean_tx__create_url_asset(tmp_path):
     """On Polygon, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
