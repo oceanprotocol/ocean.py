@@ -280,3 +280,19 @@ def test_credential_simplification():
     assert (
         simplify_credential_to_address({"type": "address", "value": "0x11"}) == "0x11"
     )
+
+
+@pytest.mark.unit
+def test_is_disabled():
+
+    ddo_dict = get_sample_ddo()
+
+    for state in range(6):
+        ddo_dict["nft"]["state"] = state
+        ddo = Asset.from_dict(ddo_dict)
+
+        # adhere to https://docs.oceanprotocol.com/core-concepts/did-ddo#state
+        if state in [0, 5]:
+            assert not ddo.is_disabled
+        else:
+            assert ddo.is_disabled

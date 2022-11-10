@@ -207,7 +207,7 @@ class Asset(AddressCredential):
 
     @property
     def is_disabled(self) -> bool:
-        return not self.metadata or (self.nft and self.nft["state"] != 0)
+        return not self.metadata or (self.nft and self.nft["state"] not in [0, 5])
 
 
 class UnavailableAsset(Asset):
