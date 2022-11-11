@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Union
+from typing import Any, Union
 
 from enforce_typing import enforce_types
 
@@ -30,7 +30,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         exchange_contract: str,
-        exchange_id: str,
+        exchange_id: Any,
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
