@@ -10,6 +10,7 @@ from brownie import network
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
+from hexbytes.main import HexBytes
 from web3.main import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
@@ -28,7 +29,8 @@ def to_32byte_hex(val: int) -> str:
     return Web3.toHex(Web3.toBytes(val).rjust(32, b"\0"))
 
 
-def sign_with_key(message_hash, key):
+@enforce_types
+def sign_with_key(message_hash: HexBytes, key: str) -> str:
     pk = keys.PrivateKey(Web3.toBytes(hexstr=key))
     prefix = "\x19Ethereum Signed Message:\n32"
     signable_hash = Web3.solidityKeccak(
@@ -57,7 +59,8 @@ def split_signature(signature: Any) -> Signature:
     return Signature(v, r, s)
 
 
-def connect_to_network(network_name):
+@enforce_types
+def connect_to_network(network_name: str):
     if network.is_connected():
         if network.show_active() != network_name:
             network.disconnect()
@@ -66,7 +69,8 @@ def connect_to_network(network_name):
         network.connect(network_name)
 
 
-def check_network(network_name):
+@enforce_types
+def check_network(network_name: str):
     if not network.is_connected():
         raise Exception(
             'Brownie network is not connected. Please call network.connect("{network_name}")'

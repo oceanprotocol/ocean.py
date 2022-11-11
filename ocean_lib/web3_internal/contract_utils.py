@@ -40,7 +40,7 @@ def load_contract(contract_name: str, address: Optional[str]) -> Contract:
 
 
 @enforce_types
-def get_addresses_with_fallback(config):
+def get_addresses_with_fallback(config: dict):
     address_file = config.get("ADDRESS_FILE")
     address_file = (
         os.path.expanduser(address_file)
@@ -57,7 +57,7 @@ def get_addresses_with_fallback(config):
 
 
 @enforce_types
-def get_contracts_addresses(config) -> Optional[Dict[str, str]]:
+def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
     network_name = config["NETWORK_NAME"]
     addresses = get_addresses_with_fallback(config)
