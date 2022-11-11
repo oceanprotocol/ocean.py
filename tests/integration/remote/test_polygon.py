@@ -5,7 +5,8 @@
 import warnings
 
 import pytest
-from brownie.network import accounts
+from brownie.network import accounts, gas_price
+from brownie.network.gas.strategies import LinearScalingStrategy
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
@@ -23,6 +24,9 @@ def test_ocean_tx__create_url_asset(tmp_path):
     ocean = Ocean(config)
     accounts.clear()
     (alice_wallet, _) = get_wallets(ocean)
+
+    gas_strategy = LinearScalingStrategy("150 gwei", "200 gwei")
+    gas_price(gas_strategy)
 
     # Alice call create_url_asset
     # avoid "replacement transaction underpriced" error: make each tx diff't
