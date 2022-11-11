@@ -103,7 +103,6 @@ class DataNFT(ContractBase):
             transaction_parameters,
         )
 
-    @enforce_types
     def create_datatoken(
         self,
         name: str,
