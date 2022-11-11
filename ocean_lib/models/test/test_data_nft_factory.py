@@ -10,9 +10,8 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import create_checksum, get_address_of_type
 from ocean_lib.structures.abi_tuples import OrderData
-from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
 

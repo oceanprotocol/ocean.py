@@ -29,7 +29,11 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import (
+    create_checksum,
+    get_address_of_type,
+    get_ocean_token_address,
+)
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
@@ -38,7 +42,6 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
-from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
