@@ -6,7 +6,6 @@ import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 
@@ -59,12 +58,10 @@ def test_aqua_functions_for_single_ddo(
     assert res.did == ddo.did, "Aquarius could not resolve the did."
     assert res.did == asset.did, "Aquarius could not resolve the did."
 
-    resolved_asset_from_metadata_cache_uri = resolve_asset(
-        asset.did,
-        metadata_cache_uri=publisher_ocean_instance.config_dict.get(
-            "METADATA_CACHE_URI"
-        ),
-    )
+    metadata_cache_uri = publisher_ocean_instance.config_dict.get("METADATA_CACHE_URI")
+    resolved_asset_from_metadata_cache_uri = Aquarius.get_instance(
+        metadata_cache_uri
+    ).get_asset_ddo(asset.did)
     assert isinstance(
         resolved_asset_from_metadata_cache_uri, Asset
     ), "The resolved asset is not an instance of Asset."
