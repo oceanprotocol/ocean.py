@@ -306,6 +306,11 @@ class Ocean:
         all_assets = self.assets.search(tag)
 
         # filter just by the `tag` key
-        filtered_assets = list(filter(lambda a: tag in a.metadata["tags"], all_assets))
+        filtered_assets = list(
+            filter(
+                lambda a: tag in a.metadata["tags"],
+                list(filter(lambda a: "tags" in a.metadata.keys(), all_assets)),
+            )
+        )
 
         return filtered_assets
