@@ -9,9 +9,9 @@ from enforce_typing import enforce_types
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import is_consumable
-from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
@@ -43,9 +43,8 @@ class OceanCompute:
         algorithm_algocustomdata: Optional[dict] = None,
         additional_datasets: List[ComputeInput] = [],
     ) -> str:
-        asset = resolve_asset(
-            dataset.did, metadata_cache_uri=self._config_dict.get("METADATA_CACHE_URI")
-        )
+        metadata_cache_uri = self._config_dict.get("METADATA_CACHE_URI")
+        asset = Aquarius.get_instance(metadata_cache_uri).get_asset_ddo(dataset.did)
         service = asset.get_service_by_id(dataset.service_id)
         assert (
             ServiceTypes.CLOUD_COMPUTE == service.type

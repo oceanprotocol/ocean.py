@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import hashlib
 from typing import Optional
 
 from enforce_typing import enforce_types
@@ -35,3 +36,11 @@ def get_ocean_token_address(config_dict: dict) -> str:
     addresses = get_contracts_addresses(config_dict)
 
     return Web3.toChecksumAddress(addresses.get("Ocean").lower()) if addresses else None
+
+
+@enforce_types
+def create_checksum(text: str) -> str:
+    """
+    :return: str
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()

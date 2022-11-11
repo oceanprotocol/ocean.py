@@ -11,6 +11,8 @@ import logging
 import re
 from typing import Any, Dict, List, Optional, Union
 
+from enforce_typing import enforce_types
+from requests.models import Response
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
@@ -303,7 +305,8 @@ class Service:
         self.compute_values["allowNetworkAccess"] = allow_network_access
         self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
 
-    def encrypt_files(self, nft_address):
+    @enforce_types
+    def encrypt_files(self, nft_address: str) -> Response:
         if self.files and isinstance(self.files, str):
             return
 

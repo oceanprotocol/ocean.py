@@ -20,6 +20,7 @@ class ConsumableCodes:
     CONNECTIVITY_FAIL = 2
     CREDENTIAL_NOT_IN_ALLOW_LIST = 3
     CREDENTIAL_IN_DENY_LIST = 4
+    ASSET_UNLISTED = 5
 
 
 class MalformedCredential(Exception):
