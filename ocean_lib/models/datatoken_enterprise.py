@@ -13,6 +13,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
+    @enforce_types
     def buy_from_fre_and_order(
         self,
         consumer: str,
