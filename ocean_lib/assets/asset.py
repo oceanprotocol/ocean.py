@@ -10,8 +10,8 @@ from enforce_typing import enforce_types
 
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
+from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
-from ocean_lib.utils.utilities import create_checksum
 
 logger = logging.getLogger("ddo")
 

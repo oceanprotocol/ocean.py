@@ -5,12 +5,14 @@
 import os
 
 from brownie.network import accounts
+from enforce_typing import enforce_types
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_ocean_token_address
 
 
+@enforce_types
 def mint_fake_OCEAN(config: dict) -> None:
     """
     Does the following:
