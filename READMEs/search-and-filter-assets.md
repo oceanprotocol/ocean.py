@@ -32,8 +32,6 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 Now, you're Alice. Using [publish-flow](publish-flow.md) model, do:
 
 ```python
-import time
-
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
@@ -78,9 +76,6 @@ for i in range(len(tags)):
     )
     
     print(f"Just published asset, with did={asset.did}")
-
-# The changes take time to settle
-time.sleep(5)
 
 ```
 ## 3. Alice filters assets by their `tags`
