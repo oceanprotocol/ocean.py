@@ -32,8 +32,9 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 Now, you're Alice. Using [publish-flow](publish-flow.md) model, do:
 
 ```python
-from ocean_lib.structures.file_objects import UrlFile
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+#data info
+name = "Branin dataset"
+url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 # Created a list of tags for the following assets
 tags = [
@@ -42,40 +43,17 @@ tags = [
     ["AI", "dataset", "testing"],
 ]
 # Publish few assets for testing
-date_created = "2021-12-28T10:55:11Z"
 for i in range(len(tags)):
 
-    metadata = {
-        "created": date_created,
-        "updated": date_created,
-        "description": "Branin dataset",
-        "name": "Branin dataset",
-        "type": "dataset",
-        "author": "Trent",
-        "license": "CC0: PublicDomain",
-        "tags": tags[i]
-    }
-
-    url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    )
-
-    asset = ocean.assets.create(
-        metadata,
-        alice_wallet,
-        [url_file],
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[alice_wallet.address],
-        datatoken_fee_managers=[alice_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
-    )
-    
+    (data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
     print(f"Just published asset, with did={asset.did}")
+    
+    # Update the metadata introducing `tags`
+    asset.metadata.update({
+        "tags": tags[i]
+    })
+    updated_asset = ocean.assets.update(asset=asset, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    print(f"Just updated the metadata of the asset with did={updated_asset.did}. New metadata is: {updated_asset.metadata}")
 
 ```
 ## 3. Alice filters assets by their `tags`
