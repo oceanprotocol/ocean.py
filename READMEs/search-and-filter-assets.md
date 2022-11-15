@@ -63,7 +63,17 @@ information afterwards.
 
 ```python
 # Get a list of assets filtered by a given tag.
-filtered_assets = ocean.search_asset_by_tag(tag='test')
+# All assets that contain the specified tag name
+tag = "test"
+all_assets = ocean.assets.search(tag)
+
+# Filter just by the `tags` key
+filtered_assets = list(
+    filter(
+        lambda a: tag in a.metadata["tags"],
+        list(filter(lambda a: "tags" in a.metadata.keys(), all_assets)),
+    )
+)
 
 # Make sure that the provided tag is valid.
 assert len(filtered_assets) > 0, "Assets not found with this tag."
