@@ -43,17 +43,14 @@ tags = [
     ["AI", "dataset", "testing"],
 ]
 # Publish few assets for testing
-for i in range(len(tags)):
-
+for tag in tags:
     (data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
     print(f"Just published asset, with did={asset.did}")
     
     # Update the metadata introducing `tags`
-    asset.metadata.update({
-        "tags": tags[i]
-    })
-    updated_asset = ocean.assets.update(asset=asset, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    print(f"Just updated the metadata of the asset with did={updated_asset.did}. New metadata is: {updated_asset.metadata}")
+    asset.metadata.update({"tags": tag})
+    asset = ocean.assets.update(asset=asset, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    print(f"Just updated the metadata of the asset with did={asset.did}.")
 
 ```
 ## 3. Alice filters assets by their `tags`
