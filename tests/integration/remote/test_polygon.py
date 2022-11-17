@@ -24,7 +24,7 @@ def test_ocean_tx__create_url_asset(tmp_path):
     accounts.clear()
     (alice_wallet, _) = get_wallets(ocean)
 
-    priority_fee("50 gwei")
+    priority_fee("75 gwei")
 
     # Alice call create_url_asset
     # avoid "replacement transaction underpriced" error: make each tx diff't
