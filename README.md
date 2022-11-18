@@ -35,6 +35,7 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
 - **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
+- **[Search & filter data assets](READMEs/search-and-filter-assets.md)** - how assets can be found by their `tags` via Aquarius.
 
 ### Remote flows
 
