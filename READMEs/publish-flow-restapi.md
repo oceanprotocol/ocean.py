@@ -52,8 +52,8 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from web3.main import Web3
 datatoken.createDispenser(
     ocean.dispenser.address,
-    Web3.toWei(10000, "ether")
-    Web3.toWei(10000, "ether")
+    Web3.toWei(10000, "ether"),
+    Web3.toWei(10000, "ether"),
     True,
     ZERO_ADDRESS,
     {"from": alice_wallet},
