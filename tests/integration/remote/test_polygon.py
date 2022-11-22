@@ -4,8 +4,9 @@
 #
 import warnings
 
+import brownie.network
 import pytest
-from brownie.network import accounts
+from brownie.network import accounts, priority_fee
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
@@ -14,16 +15,17 @@ from ocean_lib.web3_internal.utils import connect_to_network
 from .util import get_wallets, random_chars
 
 
-@pytest.mark.skip(reason="Don't skip, once fixed #1017")
 @pytest.mark.integration
 def test_ocean_tx__create_url_asset(tmp_path):
-    """On Polygon, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
+    """On Polygon, do the Ocean txs for create_url_asset()."""
     # setup
     connect_to_network("polygon")
     config = _remote_config_polygon(tmp_path)
     ocean = Ocean(config)
     accounts.clear()
     (alice_wallet, _) = get_wallets(ocean)
+
+    priority_fee(brownie.network.chain.priority_fee)
 
     # Alice call create_url_asset
     # avoid "replacement transaction underpriced" error: make each tx diff't
@@ -40,7 +42,7 @@ def test_ocean_tx__create_url_asset(tmp_path):
         if "insufficient funds" in str(error):
             warnings.warn(UserWarning("Warning: Insufficient Polygon MATIC"))
             return
-        raise (error)
+        raise error
 
     print("Success")
 
