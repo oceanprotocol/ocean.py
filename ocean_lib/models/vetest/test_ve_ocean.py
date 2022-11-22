@@ -5,7 +5,6 @@
 import brownie
 import pytest
 
-from conftest import to_wei, from_wei
 from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import get_address_of_type
@@ -59,3 +58,11 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
     assert veOCEAN.balanceOf(alice_wallet, chain.time()) == 0
+
+
+def to_wei(amt_eth) -> int:
+    return int(amt_eth * 1e18)
+
+
+def from_wei(amt_wei: int) -> float:
+    return float(amt_wei / 1e18)

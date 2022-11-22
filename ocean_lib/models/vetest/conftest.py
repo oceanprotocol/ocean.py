@@ -25,10 +25,3 @@ def ve_allocate(config):
 def ve_fee_distributor(config):
     return VeFeeDistributor(config, get_address_of_type(config, "veFeeDistributor"))
 
-
-def to_wei(amt_eth) -> int:
-    return int(amt_eth * 1e18)
-
-
-def from_wei(amt_wei: int) -> float:
-    return float(amt_wei / 1e18)
