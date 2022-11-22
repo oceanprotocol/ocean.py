@@ -17,7 +17,7 @@ from .util import get_wallets, random_chars
 
 @pytest.mark.integration
 def test_ocean_tx__create_url_asset(tmp_path):
-    """On Polygon, do the Ocean txs for create_url_asset(). Captures issue:https://github.com/oceanprotocol/ocean.py/issues/1007#issuecomment-1276286245"""
+    """On Polygon, do the Ocean txs for create_url_asset()."""
     # setup
     connect_to_network("polygon")
     config = _remote_config_polygon(tmp_path)
