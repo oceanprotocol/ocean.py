@@ -50,6 +50,7 @@ We'll use these a lot. So import once, here.
 In the same Python console:
 ```python
 # Set factory envvar. Stay in Python to retain state from before.
+import os
 os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config) #Alice gets some
