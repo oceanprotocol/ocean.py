@@ -75,4 +75,3 @@ def test_batch_events(ve_allocate):
 def setup_function():
     global accounts
     accounts = brownie.network.accounts
-

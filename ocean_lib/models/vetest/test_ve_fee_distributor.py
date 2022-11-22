@@ -16,4 +16,3 @@ def test1(config, ve_fee_distributor, consumer_wallet):
 
     # this is the most important call from a user standpoint. $$ :)
     ve_fee_distributor.claim({"from": consumer_wallet})
-

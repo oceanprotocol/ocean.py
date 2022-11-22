@@ -24,4 +24,3 @@ def ve_allocate(config):
 @pytest.fixture
 def ve_fee_distributor(config):
     return VeFeeDistributor(config, get_address_of_type(config, "veFeeDistributor"))
-
