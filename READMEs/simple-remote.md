@@ -70,6 +70,10 @@ bob_wallet = accounts.add(bob_private_key)
 assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs MATIC"
 ```
 
+If you get a gas-related error like `transaction underpriced`,
+you'll need to change the `priority_fee` or `max_fee`.
+See details in [brownie docs](https://eth-brownie.readthedocs.io/en/stable/core-gas.html).
+
 
 ## 2. Publish Data NFT & Datatoken
 
