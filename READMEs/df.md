@@ -49,19 +49,13 @@ amt_OCEAN_lock = 10.0
 We'll use these a lot. So import once, here. 
 In the same Python console:
 ```python
-# OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config) #Alice gets some
-OCEAN = ocean.OCEAN_token
 
-# veOCEAN
-from ocean_lib.models.ve_ocean import VeOcean
-from ocean_lib.models.ve_allocate import VeAllocate
-from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
-from ocean_lib.ocean.util import get_address_of_type
-veOCEAN = VeOcean(config, get_address_of_type(config, "veOCEAN"))
-ve_allocate = VeAllocate(config, get_address_of_type(config, "veAllocate"))
-ve_fee_distributor = VeFeeDistributor(config, get_address_of_type(config, "veFeeDistributor"))
+OCEAN = ocean.OCEAN_token
+veOCEAN = ocean.ve_ocean
+ve_allocate = ocean.ve_allocate
+ve_fee_distributor = ocean.ve_fee_distributor
 
 #helper functions
 def to_wei(amt_eth) -> int:
