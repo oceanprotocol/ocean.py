@@ -49,13 +49,13 @@ amt_OCEAN_lock = 10.0
 We'll use these a lot. So import once, here. 
 In the same Python console:
 ```python
+# Set factory envvar. Stay in Python to retain state from before.
+os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config) #Alice gets some
 
 OCEAN = ocean.OCEAN_token
 veOCEAN = ocean.ve_ocean
-ve_allocate = ocean.ve_allocate
-ve_fee_distributor = ocean.ve_fee_distributor
 
 #helper functions
 def to_wei(amt_eth) -> int:
@@ -80,7 +80,7 @@ chain.sleep(t1 - t0)
 chain.mine()
 
 #we're now at the beginning of the week. So, lock
-OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), alice_wallet)
+OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), {"from" : alice_wallet})
 veOCEAN.withdraw({"from": alice_wallet}) #withdraw old tokens first
 veOCEAN.create_lock(to_wei(amt_OCEAN_lock), t2, {"from": alice_wallet})
 ```
@@ -99,26 +99,14 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
 # create fixed-rate exchange (FRE)
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-fixedPrice = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
-datatoken.approve(fixedPrice.address, to_wei(num_consumes), alice_wallet)
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-txid = datatoken.create_fixed_rate(
-    fixed_price_address = fixedPrice.address,
-    base_token_address = OCEAN.address,
-    owner = alice_wallet.address,
-    publish_market_swap_fee_collector = alice_wallet.address,
-    allowed_swapper = ZERO_ADDRESS,
-    base_token_decimals = OCEAN.decimals(),
-    datatoken_decimals = datatoken.decimals(),
-    fixed_rate = to_wei(datatoken_price_OCEAN),
-    publish_market_swap_fee_amount = 0,
-    with_mint = 1,
-    from_wallet = alice_wallet
+from web3 import Web3
+exchange_id = ocean.create_fixed_rate(
+    datatoken=datatoken,
+    base_token=OCEAN,
+    amount=Web3.toWei(num_consumes, "ether"),
+    fixed_rate=Web3.toWei(datatoken_price_OCEAN, "ether"),
+    from_wallet=alice_wallet,
 )
-from brownie.network.transaction import TransactionReceipt
-tx = TransactionReceipt(txid)
-exchange_id = tx.events["NewFixedRate"]["exchangeId"]
 ```
 
 
@@ -127,7 +115,7 @@ exchange_id = tx.events["NewFixedRate"]["exchangeId"]
 To stake, you allocate veOCEAN to dataset. In the same Python console:
 ```python
 amt_allocate = 100 #total allocation must be <= 10000 (wei)
-ve_allocate.setAllocation(amt_allocate, data_NFT.address, chain.id, {"from": alice_wallet})
+ocean.ve_allocate.setAllocation(amt_allocate, data_NFT.address, chain.id, {"from": alice_wallet})
 ```
 
 ## 5. Fake-consume data
@@ -141,11 +129,11 @@ In the meantime, this README helps level the playing field around wash consume. 
 amt_pay = datatoken_price_OCEAN * num_consumes
 OCEAN_bal = from_wei(OCEAN.balanceOf(alice_wallet.address))
 assert OCEAN_bal >= amt_pay, f"Have just {OCEAN_bal} OCEAN"
-OCEAN.approve(fixedPrice.address, to_wei(OCEAN_bal), alice_wallet)
-fees_info = fixedPrice.get_fees_info(exchange_id)
+OCEAN.approve(ocean.fixed_rate_exchange.address, to_wei(OCEAN_bal), {"from": alice_wallet})
+fees_info = ocean.fixed_rate_exchange.get_fees_info(exchange_id)
 for i in range(num_consumes):
     print(f"Purchase #{i+1}/{num_consumes}...")
-    txid = fixedPrice.buy_dt(
+    txid = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
     	datatoken_amount=to_wei(num_consumes),
     	max_base_token_amount=to_wei(OCEAN_bal),
@@ -179,7 +167,7 @@ chain.mine()
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 bal_before = from_wei(OCEAN.balanceOf(alice_wallet.address))
-ve_fee_distributor.claim({"from": alice_wallet})
+ocean.ve_fee_distributor.claim({"from": alice_wallet})
 bal_after = from_wei(OCEAN.balanceOf(alice_wallet.address))
 print(f"Just claimed {bal_after-bal_before} OCEAN rewards") 
 ```
