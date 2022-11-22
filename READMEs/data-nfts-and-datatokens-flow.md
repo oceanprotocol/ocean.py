@@ -39,6 +39,15 @@ pip3 install --pre ocean-lib
 
 - Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
+- in order to avoid errors from `brownie`, such as `transaction underpriced`,
+we recommend setting the priority fee before interacting with the smart contracts
+in the python console like this:
+    ```python
+    import brownie.network
+    from brownie.network import priority_fee
+    
+    priority_fee(brownie.network.chain.priority_fee)
+    ```
 #### Create your network configuration file
 
 ocean.py uses brownie to connect to deployed smart contracts. To configure the RPC URLs, gas prices and other settings,
