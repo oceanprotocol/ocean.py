@@ -8,11 +8,6 @@ import pytest
 from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.currency import to_wei
-
-
-def from_wei(amt_wei: int) -> float:
-    return float(amt_wei / 1e18)
 
 
 chain = brownie.network.chain
@@ -30,10 +25,10 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
     TA = to_wei(10)
-    OCEAN.mint(alice_wallet.address, TA, from_wallet=factory_deployer_wallet)
+    OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
-    OCEAN.approve(veOCEAN.address, TA, alice_wallet)
+    OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
     t0 = chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
@@ -50,6 +45,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     assert epoch != 0
 
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
+
     alice_vote_power = from_wei(veOCEAN.balanceOf(alice_wallet, chain.time()))
     expected_vote_power = from_wei(TA) * WEEK / MAXTIME
     assert alice_vote_power == pytest.approx(expected_vote_power, 0.5)
@@ -62,3 +58,11 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
     assert veOCEAN.balanceOf(alice_wallet, chain.time()) == 0
+
+
+def to_wei(amt_eth) -> int:
+    return int(amt_eth * 1e18)
+
+
+def from_wei(amt_wei: int) -> float:
+    return float(amt_wei / 1e18)
