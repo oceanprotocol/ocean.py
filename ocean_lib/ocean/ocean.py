@@ -21,6 +21,9 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.ve_ocean import VeOcean
+from ocean_lib.models.ve_allocate import VeAllocate
+from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
@@ -299,3 +302,25 @@ class Ocean:
         )
 
         return initialize_compute_response.json()
+
+
+    @property
+    @enforce_types
+    def ve_ocean(self):
+        return VeOcean(
+            self.config_dict, get_address_of_type(self.config_dict, "veOCEAN")
+        )
+
+    @property
+    @enforce_types
+    def ve_allocate(self):
+        return VeAllocate(
+            self.config_dict, get_address_of_type(self.config_dict, "veAllocate")
+        )
+
+    @property
+    @enforce_types
+    def ve_fee_distributor(self):
+        return VeFeeDistributor(
+            self.config_dict, get_address_of_type(self.config_dict, "veFeeDistributor")
+        )
