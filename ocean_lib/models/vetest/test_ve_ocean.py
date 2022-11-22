@@ -24,7 +24,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     OCEAN = ocean_token
 
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
-    TA = to_wei(10)
+    TA = to_wei(0.0001)
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
@@ -48,7 +48,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     alice_vote_power = from_wei(veOCEAN.balanceOf(alice_wallet, chain.time()))
     expected_vote_power = from_wei(TA) * WEEK / MAXTIME
-    assert alice_vote_power == pytest.approx(expected_vote_power, 0.5)
+    assert alice_vote_power == pytest.approx(expected_vote_power, TA / 20.0)
 
     brownie.network.chain.sleep(t2)
     chain.mine()
