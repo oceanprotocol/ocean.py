@@ -174,5 +174,9 @@ print(f"Just claimed {bal_after-bal_before} OCEAN rewards")
 
 ## 7. Repeat steps 1-6, for Eth mainnet
 
-FIXME
+We leave this as an exercise to the reader:)
+
+Here's a hint to get started: initial setup is like the [simple-remote flow](simple-remote.md).
+
+Happy Data Farming!
 
