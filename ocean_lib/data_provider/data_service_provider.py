@@ -182,8 +182,7 @@ class DataServiceProvider(DataServiceProviderBase):
                 response, "downloadEndpoint", download_endpoint, payload
             )
 
-            file_name = DataServiceProvider._get_file_name(response)
-            DataServiceProvider.write_file(response, destination_folder, file_name)
+            DataServiceProvider.write_file(response, destination_folder, i)
 
             logger.info(
                 f"Asset downloaded successfully"

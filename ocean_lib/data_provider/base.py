@@ -4,6 +4,7 @@
 #
 
 """Provider module."""
+import json
 import logging
 import os
 import re
@@ -226,17 +227,18 @@ class DataServiceProviderBase:
     def write_file(
         response: Response,
         destination_folder: Union[str, bytes, os.PathLike],
-        file_name: str,
+        index: int,
     ) -> None:
         """
         Write the response content in a file in the destination folder.
         :param response: Response
         :param destination_folder: Destination folder, string
-        :param file_name: File name, string
+        :param index: file index
         :return: None
         """
+
         if response.status_code == 200:
-            with open(os.path.join(destination_folder, file_name), "wb") as f:
+            with open(os.path.join(destination_folder, f"file{index}"), "wb") as f:
                 for chunk in response.iter_content(chunk_size=4096):
                     f.write(chunk)
             logger.info(f"Saved downloaded file in {f.name}")
