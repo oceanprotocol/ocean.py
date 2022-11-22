@@ -303,7 +303,6 @@ class Ocean:
 
         return initialize_compute_response.json()
 
-
     @property
     @enforce_types
     def ve_ocean(self):

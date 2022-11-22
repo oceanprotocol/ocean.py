@@ -35,20 +35,19 @@ def test_nft_factory(data_nft, datatoken, publisher_ocean_instance, publisher_wa
     assert created_nft.address
     assert created_nft.tokenURI(1) == "http://oceanprotocol.com/nft"
 
-    
+
 @pytest.mark.unit
 def test_contract_objects(publisher_ocean_instance):
     ocn = publisher_ocean_instance
-    
+
     assert ocn.OCEAN_address[:2] == "0x"
     assert isinstance(ocn.OCEAN_token, Datatoken)
     assert isinstance(ocn.get_nft_factory(), DataNFTFactoryContract)
-        
+
     assert isinstance(ocn.dispenser, Dispenser)
     assert isinstance(ocn.fixed_rate_exchange, FixedRateExchange)
     assert isinstance(ocn.factory_router, FactoryRouter)
-    
+
     assert isinstance(ocn.ve_ocean, VeOcean)
     assert isinstance(ocn.ve_allocate, VeAllocate)
     assert isinstance(ocn.ve_fee_distributor, VeFeeDistributor)
-    
