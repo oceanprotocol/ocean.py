@@ -36,6 +36,7 @@ In the same Python console:
 # Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs. 
 datatoken_price_OCEAN = 100.0
 num_consumes = 3
+
 # This is how much OCEAN to lock into veOCEAN. It can be small if you're
 # the only staker on your asset. If others stake on your asset, your
 # rewards are pro-rate compared to others' stake in your asset.
@@ -52,6 +53,7 @@ In the same Python console:
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config) #Alice gets some
 OCEAN = ocean.OCEAN_token
+
 # veOCEAN
 from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.models.ve_allocate import VeAllocate
@@ -60,9 +62,11 @@ from ocean_lib.ocean.util import get_address_of_type
 veOCEAN = VeOcean(config, get_address_of_type(config, "veOCEAN"))
 ve_allocate = VeAllocate(config, get_address_of_type(config, "veAllocate"))
 ve_fee_distributor = VeFeeDistributor(config, get_address_of_type(config, "veFeeDistributor"))
+
 #helper functions
 def to_wei(amt_eth) -> int:
     return int(amt_eth * 1e18)
+
 def from_wei(amt_wei: int) -> float:
     return float(amt_wei / 1e18)
 ```
@@ -80,6 +84,7 @@ t1 = t0 // WEEK * WEEK + WEEK #this is a Thursday, because Jan 1 1970 was
 t2 = t1 + WEEK
 chain.sleep(t1 - t0) 
 chain.mine()
+
 #we're now at the beginning of the week. So, lock
 OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), alice_wallet)
 veOCEAN.withdraw({"from": alice_wallet}) #withdraw old tokens first
@@ -94,9 +99,11 @@ In the same Python console:
 #data info
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+
 #create data asset
 (data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
+
 # create fixed-rate exchange (FRE)
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 fixedPrice = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
@@ -155,6 +162,7 @@ for i in range(num_consumes):
     assert txid, "buying datatokens failed"
 DT_bal = from_wei(datatoken.balanceOf(alice_wallet.address))
 assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
+
 # Alice sends datatokens to the service, to get access. This is the "consume".
 for i in range(num_consumes):
     print(f"Consume #{i+1}/{num_consumes}...")
@@ -174,6 +182,7 @@ t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
 chain.sleep(t1 - t0) 
 chain.mine()
+
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 bal_before = from_wei(OCEAN.balanceOf(alice_wallet.address))
 ve_fee_distributor.claim({"from": alice_wallet})
