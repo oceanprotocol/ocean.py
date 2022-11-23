@@ -7,6 +7,8 @@ import time
 import warnings
 
 from brownie.network import accounts
+from brownie.network import priority_fee, gas_price
+from brownie.network.gas.strategies import GasNowScalingStrategy
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.utils import connect_to_network
@@ -18,6 +20,8 @@ def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
     # setup
     connect_to_network("mumbai")
+    _set_aggressive_gas_fees()
+
     config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
     accounts.clear()
@@ -46,8 +50,11 @@ def test_ocean_tx__create_data_nft(tmp_path):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
     # setup
     connect_to_network("mumbai")
+    _set_aggressive_gas_fees()
+
     config = _remote_config_mumbai(tmp_path)
     ocean = Ocean(config)
+
     accounts.clear()
     (alice_wallet, _) = get_wallets(ocean)
 
@@ -77,3 +84,10 @@ def _remote_config_mumbai(tmp_path):
     }
 
     return config
+
+
+def _set_aggressive_gas_fees():
+    # Mumbai uses EIP-1559. So, dynamically determine priority fee & gas price
+    priority_fee("auto")
+    gas_strategy = GasNowScalingStrategy("fast", increment=2.0)
+    gas_price(gas_strategy)
