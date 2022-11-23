@@ -9,7 +9,7 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -86,7 +86,7 @@ def test_start_order_fees(
         publish_market_order_fee_in_unit, bt.decimals()
     )
 
-    asset, service, dt = create_asset_with_order_fee_and_timeout(
+    ddo, service, dt = create_asset_with_order_fee_and_timeout(
         config=config,
         file=file1,
         data_nft=data_nft,
@@ -146,7 +146,7 @@ def test_start_order_fees(
     )
     dt.start_order(
         consumer=consumer_wallet.address,
-        service_index=asset.get_index_of_service(service),
+        service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
         provider_fee_token=provider_fees["providerFeeToken"],
         provider_fee_amount=provider_fees["providerFeeAmount"],
@@ -224,7 +224,7 @@ def create_asset_with_order_fee_and_timeout(
     publish_market_order_fee_token: str,
     publish_market_order_fee_amount: int,
     timeout: int,
-) -> Tuple[Asset, Service, Datatoken]:
+) -> Tuple[DDO, Service, Datatoken]:
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
@@ -265,7 +265,7 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     # Publish asset
-    asset = ocean_assets.create(
+    ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[service],
@@ -273,7 +273,7 @@ def create_asset_with_order_fee_and_timeout(
         deployed_datatokens=[datatoken],
     )
 
-    service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, asset.datatokens[0]["address"])
+    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
-    return asset, service, dt
+    return ddo, service, dt

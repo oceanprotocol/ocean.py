@@ -11,7 +11,7 @@ from attr import dataclass
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.datatoken import Datatoken
@@ -32,12 +32,12 @@ def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     Fixture is registered on chain once and can be used multiple times.
     Reduces setup time."""
     # Dataset with compute service
-    asset = get_registered_asset_with_compute_service(
+    ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 @pytest.fixture
@@ -45,12 +45,12 @@ def dataset_with_compute_service_generator(publisher_wallet, publisher_ocean_ins
     """Returns a new dataset each time fixture is used.
     Useful for tests that need to update the dataset"""
     # Dataset with compute service
-    asset = get_registered_asset_with_compute_service(
+    ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    yield asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    yield ddo
 
 
 @pytest.fixture
@@ -58,12 +58,12 @@ def dataset_with_compute_service_allow_raw_algo(
     publisher_wallet, publisher_ocean_instance
 ):
     # Dataset with compute service
-    asset = get_registered_asset_with_compute_service(
+    ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, allow_raw_algorithms=True
     )
     # verify the asset is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 @pytest.fixture
@@ -71,12 +71,12 @@ def dataset_with_compute_service_and_trusted_algorithm(
     publisher_wallet, publisher_ocean_instance, algorithm
 ):
     # Setup algorithm meta to run raw algorithm
-    asset = get_registered_asset_with_compute_service(
+    ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm]
     )
     # verify the ddo is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 @pytest.fixture
@@ -84,24 +84,24 @@ def dataset_with_compute_service_and_trusted_publisher(
     publisher_wallet, publisher_ocean_instance
 ):
     # Setup algorithm meta to run raw algorithm
-    asset = get_registered_asset_with_compute_service(
+    ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance,
         publisher_wallet,
         trusted_algorithm_publishers=[publisher_wallet.address],
     )
     # verify the ddo is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 def get_algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
-    asset = get_registered_algorithm_with_access_service(
+    ddo = get_registered_algorithm_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 @pytest.fixture
@@ -122,28 +122,28 @@ def raw_algorithm():
 @pytest.fixture
 def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
     # Dataset with access service
-    asset = get_registered_asset_with_access_service(
+    ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
-    publisher_ocean_instance.assets.resolve(asset.did)
-    return asset
+    publisher_ocean_instance.assets.resolve(ddo.did)
+    return ddo
 
 
 @dataclass
-class AssetAndUserdata:
-    asset: Asset
+class DDOAndUserdata:
+    ddo: DDO
     userdata: Optional[dict]
 
 
 def _mint_and_build_compute_input(
-    dataset_and_userdata: AssetAndUserdata,
+    dataset_and_userdata: DDOAndUserdata,
     service_type: str,
     publisher_wallet,
     consumer_wallet,
     ocean_instance: Ocean,
 ) -> ComputeInput:
-    service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
+    service = get_first_service_by_type(dataset_and_userdata.ddo, service_type)
     datatoken = Datatoken(ocean_instance.config_dict, service.datatoken)
     minter = (
         consumer_wallet
@@ -153,7 +153,7 @@ def _mint_and_build_compute_input(
     datatoken.mint(consumer_wallet.address, Web3.toWei(10, "ether"), {"from": minter})
 
     return ComputeInput(
-        dataset_and_userdata.asset,
+        dataset_and_userdata.ddo,
         service,
         userdata=dataset_and_userdata.userdata,
         consume_market_order_fee_token=datatoken.address,
@@ -165,11 +165,11 @@ def run_compute_test(
     ocean_instance: Ocean,
     publisher_wallet,
     consumer_wallet,
-    dataset_and_userdata: AssetAndUserdata,
-    algorithm_and_userdata: Optional[AssetAndUserdata] = None,
+    dataset_and_userdata: DDOAndUserdata,
+    algorithm_and_userdata: Optional[DDOAndUserdata] = None,
     algorithm_meta: Optional[AlgorithmMetadata] = None,
     algorithm_algocustomdata: Optional[dict] = None,
-    additional_datasets_and_userdata: List[AssetAndUserdata] = [],
+    additional_datasets_and_userdata: List[DDOAndUserdata] = [],
     scenarios: Optional[List[str]] = None,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
@@ -191,14 +191,14 @@ def run_compute_test(
     ]
 
     # build additional datasets
-    for asset_and_userdata in additional_datasets_and_userdata:
+    for ddo_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
-        if not get_first_service_by_type(asset_and_userdata.asset, service_type):
+        if not get_first_service_by_type(ddo_and_userdata.ddo, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
 
         datasets.append(
             _mint_and_build_compute_input(
-                asset_and_userdata,
+                ddo_and_userdata,
                 service_type,
                 publisher_wallet,
                 consumer_wallet,
@@ -218,7 +218,7 @@ def run_compute_test(
         )
 
     service = get_first_service_by_type(
-        dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
+        dataset_and_userdata.ddo, ServiceTypes.CLOUD_COMPUTE
     )
 
     free_c2d_env = ocean_instance.compute.get_free_c2d_environment(
@@ -266,7 +266,7 @@ def run_compute_test(
     )
 
     status = ocean_instance.compute.status(
-        dataset_and_userdata.asset, service, job_id, consumer_wallet
+        dataset_and_userdata.ddo, service, job_id, consumer_wallet
     )
     print(f"got job status: {status}")
 
@@ -275,7 +275,7 @@ def run_compute_test(
     ), f"something not right about the compute job, got status: {status}"
 
     status = ocean_instance.compute.stop(
-        dataset_and_userdata.asset, service, job_id, consumer_wallet
+        dataset_and_userdata.ddo, service, job_id, consumer_wallet
     )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
@@ -284,7 +284,7 @@ def run_compute_test(
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
-                dataset_and_userdata.asset, service, job_id, consumer_wallet
+                dataset_and_userdata.ddo, service, job_id, consumer_wallet
             )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
@@ -297,12 +297,12 @@ def run_compute_test(
         assert succeeded, "compute job unsuccessful"
 
         log_file = ocean_instance.compute.compute_job_result_logs(
-            dataset_and_userdata.asset, service, job_id, consumer_wallet, "algorithmLog"
+            dataset_and_userdata.ddo, service, job_id, consumer_wallet, "algorithmLog"
         )
         print(f"got algo log file: {str(log_file)}")
 
         result = ocean_instance.compute.result(
-            dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
+            dataset_and_userdata.ddo, service, job_id, 0, consumer_wallet
         )
 
         prev_dt_tx_id = datasets[0].transfer_tx_id
@@ -370,7 +370,7 @@ def test_compute_raw_algo(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
+        dataset_and_userdata=DDOAndUserdata(
             dataset_with_compute_service_allow_raw_algo, None
         ),
         algorithm_meta=raw_algorithm,
@@ -381,7 +381,7 @@ def test_compute_raw_algo(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+            dataset_and_userdata=DDOAndUserdata(dataset_with_compute_service, None),
             algorithm_meta=raw_algorithm,
         )
 
@@ -399,8 +399,8 @@ def test_compute_registered_algo(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        dataset_and_userdata=DDOAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
     )
 
 
@@ -417,8 +417,8 @@ def test_compute_reuse_order(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        dataset_and_userdata=DDOAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
         scenarios=["reuse_order"],
     )
 
@@ -437,10 +437,10 @@ def test_compute_multi_inputs(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        dataset_and_userdata=DDOAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
         additional_datasets_and_userdata=[
-            AssetAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
+            DDOAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
         ],
     )
 
@@ -459,10 +459,10 @@ def test_compute_trusted_algorithm(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
+        dataset_and_userdata=DDOAndUserdata(
             dataset_with_compute_service_and_trusted_algorithm, None
         ),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
     )
 
     # Expect to fail when non-trusted algorithm is used
@@ -474,10 +474,10 @@ def test_compute_trusted_algorithm(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(
+            dataset_and_userdata=DDOAndUserdata(
                 dataset_with_compute_service_and_trusted_algorithm, None
             ),
-            algorithm_and_userdata=AssetAndUserdata(
+            algorithm_and_userdata=DDOAndUserdata(
                 algorithm_with_different_publisher, None
             ),
         )
@@ -513,8 +513,8 @@ def test_compute_update_trusted_algorithm(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        dataset_and_userdata=DDOAndUserdata(updated_dataset, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
         scenarios=["with_result"],
     )
 
@@ -527,8 +527,8 @@ def test_compute_update_trusted_algorithm(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
-            algorithm_and_userdata=AssetAndUserdata(
+            dataset_and_userdata=DDOAndUserdata(updated_dataset, None),
+            algorithm_and_userdata=DDOAndUserdata(
                 algorithm_with_different_publisher, None
             ),
             scenarios=["with_result"],
@@ -549,10 +549,10 @@ def test_compute_trusted_publisher(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
+        dataset_and_userdata=DDOAndUserdata(
             dataset_with_compute_service_and_trusted_publisher, None
         ),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
     )
 
     # Expect to fail when algorithm with non-trusted publisher is used
@@ -561,10 +561,10 @@ def test_compute_trusted_publisher(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(
+            dataset_and_userdata=DDOAndUserdata(
                 dataset_with_compute_service_and_trusted_publisher, None
             ),
-            algorithm_and_userdata=AssetAndUserdata(
+            algorithm_and_userdata=DDOAndUserdata(
                 algorithm_with_different_publisher, None
             ),
         )
@@ -583,7 +583,7 @@ def test_compute_just_provider_fees(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        dataset_and_userdata=DDOAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=DDOAndUserdata(algorithm, None),
         scenarios=["just_fees"],
     )

@@ -41,7 +41,7 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 This README uses (d) - minting. Specifically, Alice mints a datatoken into Bob's wallet. In the same Python console:
 ```python
 from web3.main import Web3
-datatoken_address = asset.datatokens[0]["address"]
+datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 to_address = bob_wallet.address
 amt_tokens = Web3.toWei(10, "ether") #just need 1, send more for spare
@@ -53,7 +53,7 @@ datatoken.mint(to_address, amt_tokens, {"from": alice_wallet})
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access; then downloads
-file_name = ocean.assets.download_file(asset.did, bob_wallet)
+file_name = ocean.assets.download_file(ddo.did, bob_wallet)
 ```
 
 Bob can verify that the file is downloaded. In a new console:

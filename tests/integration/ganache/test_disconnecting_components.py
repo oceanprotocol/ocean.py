@@ -8,7 +8,7 @@ import time
 import pytest
 import requests
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
@@ -31,7 +31,7 @@ def test_with_wrong_provider(config, caplog):
     _iterative_encrypt(config)
     updating_thread.join()
 
-    assert "Asset urls encrypted successfully" in caplog.text
+    assert "urls encrypted successfully" in caplog.text
     assert exception_flag == 1
 
 
@@ -48,7 +48,7 @@ def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
     # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
     ocean.assets._aquarius.base_url = "http://not-valid-aqua.com"
     with pytest.raises(Exception):
-        ocean.assets._aquarius.validate_asset(Asset())
+        ocean.assets._aquarius.validate_ddo(DDO())
 
 
 def _create_ddo(ocean, publisher):

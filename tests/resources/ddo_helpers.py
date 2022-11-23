@@ -11,7 +11,7 @@ from typing import List, Optional
 import requests
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -74,8 +74,8 @@ def get_sample_algorithm_ddo_dict(filename="ddo_algorithm.json") -> dict:
     return json.loads(metadata)
 
 
-def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> Asset:
-    return Asset.from_dict(get_sample_algorithm_ddo_dict(filename))
+def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
+    return DDO.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
 def get_access_service(
@@ -117,7 +117,7 @@ def create_asset(ocean, publisher, metadata=None, files=None):
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
-    asset = ocean.assets.create(
+    ddo = ocean.assets.create(
         metadata,
         publisher,
         files,
@@ -132,7 +132,7 @@ def create_asset(ocean, publisher, metadata=None, files=None):
         datatoken_bytess=[[b""]],
     )
 
-    return asset
+    return ddo
 
 
 def create_basics(
@@ -176,7 +176,7 @@ def get_registered_asset_with_compute_service(
     ocean_instance: Ocean,
     publisher_wallet,
     allow_raw_algorithms: bool = False,
-    trusted_algorithms: List[Asset] = [],
+    trusted_algorithms: List[DDO] = [],
     trusted_algorithm_publishers: List[str] = [],
 ):
     data_nft, datatoken = deploy_erc721_erc20(
@@ -315,9 +315,9 @@ def wait_for_ddo(ocean, did, timeout=30):
     return ddo
 
 
-def get_first_service_by_type(asset, service_type: str) -> Service:
+def get_first_service_by_type(ddo, service_type: str) -> Service:
     """Return the first Service with the given service type."""
-    return next((service for service in asset.services if service.type == service_type))
+    return next((service for service in ddo.services if service.type == service_type))
 
 
 def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:

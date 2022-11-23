@@ -14,7 +14,7 @@ from requests.models import Response
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
@@ -113,16 +113,16 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         compute_values=dict(),
     )
 
-    mock_asset = Asset()
+    mock_ddo = DDO()
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput(mock_asset, mock_service, "tx_id"),
+            dataset=ComputeInput(mock_ddo, mock_service, "tx_id"),
             compute_environment="some_env",
-            algorithm=ComputeInput(Asset(), mock_service, "tx_id"),
+            algorithm=ComputeInput(DDO(), mock_service, "tx_id"),
         )
     mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
     with pytest.raises(
@@ -131,9 +131,9 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput(Asset(), mock_service, "tx"),
+            dataset=ComputeInput(DDO(), mock_service, "tx"),
             compute_environment="some_env",
-            algorithm=ComputeInput(Asset(), mock_service, "tx"),
+            algorithm=ComputeInput(DDO(), mock_service, "tx"),
         )
 
 
@@ -529,9 +529,9 @@ def test_initialize_compute_failure(config):
     service.service_endpoint = "http://172.15.0.4:8030"
     service.id = "abc"
 
-    asset = Mock(spec=Asset)
-    asset.did = "0x0"
-    compute_input = ComputeInput(asset, service)
+    ddo = Mock(spec=DDO)
+    ddo.did = "0x0"
+    compute_input = ComputeInput(ddo, service)
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
@@ -593,17 +593,17 @@ def test_job_result_failure(config):
 
 @pytest.mark.unit
 def test_check_asset_failure(config):
-    """Tests check_asset_file_info failures."""
-    assert DataSP.check_asset_file_info("", "", config["PROVIDER_URL"]) is False
+    """Tests check_ddo_file_info failures."""
+    assert DataSP.check_ddo_file_info("", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_ddo_file_info("test", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_ddo_file_info("test", "", config["PROVIDER_URL"]) is False
 
     DataSP.set_http_client(get_requests_session())

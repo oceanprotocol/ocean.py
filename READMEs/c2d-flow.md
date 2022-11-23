@@ -102,7 +102,7 @@ DATASET_compute_service = Service(
 )
 
 # Publish asset with compute service on-chain
-DATASET_asset = ocean.assets.create(
+DATASET_ddo = ocean.assets.create(
     metadata=DATASET_metadata,
     publisher_wallet=alice_wallet,
     files=DATASET_files,
@@ -111,7 +111,7 @@ DATASET_asset = ocean.assets.create(
     deployed_datatokens=[DATASET_datatoken],
 )
 
-print(f"DATASET_asset did = '{DATASET_asset.did}'")
+print(f"DATASET_ddo did = '{DATASET_ddo.did}'")
 ```
 
 ## 3. Alice publishes an algorithm
@@ -160,7 +160,7 @@ ALGO_files = [ALGO_url_file]
 
 # Publish asset with compute service on-chain.
 # The download (access service) is automatically created, but you can explore other options as well
-ALGO_asset = ocean.assets.create(
+ALGO_ddo = ocean.assets.create(
     metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
     files=ALGO_files,
@@ -168,16 +168,16 @@ ALGO_asset = ocean.assets.create(
     deployed_datatokens=[ALGO_datatoken],
 )
 
-print(f"ALGO_asset did = '{ALGO_asset.did}'")
+print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
 ```
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
 In the same Python console:
 ```python
-compute_service = DATASET_asset.services[0]
-compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
+compute_service = DATASET_ddo.services[0]
+compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
+DATASET_ddo = ocean.assets.update(DATASET_ddo, alice_wallet)
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
@@ -199,22 +199,22 @@ For demo purposes, we will use the free C2D environment, which requires no provi
 In the same Python console:
 ```python
 # Convenience variables
-DATASET_did = DATASET_asset.did
-ALGO_did = ALGO_asset.did
+DATASET_did = DATASET_ddo.did
+ALGO_did = ALGO_ddo.did
 
 # Operate on updated and indexed assets
-DATASET_asset = ocean.assets.resolve(DATASET_did)
-ALGO_asset = ocean.assets.resolve(ALGO_did)
+DATASET_ddo = ocean.assets.resolve(DATASET_did)
+ALGO_ddo = ocean.assets.resolve(ALGO_did)
 
-compute_service = DATASET_asset.services[0]
-algo_service = ALGO_asset.services[0]
+compute_service = DATASET_ddo.services[0]
+algo_service = ALGO_ddo.services[0]
 free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
 from ocean_lib.models.compute_input import ComputeInput
 
-DATASET_compute_input = ComputeInput(DATASET_asset, compute_service)
-ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
+DATASET_compute_input = ComputeInput(DATASET_ddo, compute_service)
+ALGO_compute_input = ComputeInput(ALGO_ddo, algo_service)
 
 # Pay for dataset and algo for 1 day
 datasets, algorithm = ocean.assets.pay_for_compute_service(
@@ -249,7 +249,7 @@ import time
 from decimal import Decimal
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATASET_asset, compute_service, job_id, bob_wallet)
+    status = ocean.compute.status(DATASET_ddo, compute_service, job_id, bob_wallet)
     if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -265,7 +265,7 @@ For the purpose of this tutorial, let's choose the second option.
 ```python
 # Retrieve algorithm output and log files
 output = ocean.compute.compute_job_result_logs(
-    DATASET_asset, compute_service, job_id, bob_wallet
+    DATASET_ddo, compute_service, job_id, bob_wallet
 )[0]
 
 import pickle

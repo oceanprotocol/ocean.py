@@ -7,7 +7,7 @@ from brownie import network
 
 
 from ocean_lib.agreements.consumable import MalformedCredential
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.credentials import simplify_credential_to_address
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
@@ -19,7 +19,7 @@ from tests.resources.ddo_helpers import (
 
 @pytest.mark.unit
 def test_asset_utils():
-    """Tests the structure of a JSON format of the V4 Asset."""
+    """Tests the structure of a JSON format of the V4 DDO."""
     ddo_dict = get_sample_ddo()
     assert isinstance(ddo_dict, dict)
 
@@ -104,7 +104,7 @@ def test_asset_utils():
     assert ddo_dict["stats"] == {"consumes": 4}
     stats = ddo_dict["stats"]
 
-    ddo = Asset(
+    ddo = DDO(
         did=did,
         context=context,
         chain_id=chain_id,
@@ -119,7 +119,7 @@ def test_asset_utils():
     )
     ddo_dict_v2 = ddo.as_dictionary()
 
-    ddo_v2 = Asset.from_dict(ddo_dict_v2)
+    ddo_v2 = DDO.from_dict(ddo_dict_v2)
     assert ddo_v2.as_dictionary() == ddo_dict
 
 
@@ -128,7 +128,7 @@ def test_add_service():
     """Tests adding a compute service."""
 
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     compute_values = {
         "namespace": "ocean-compute",
         "cpus": 2,
@@ -209,7 +209,7 @@ def test_add_service():
 def test_get_service_by_id():
     """Tests retrieving services from the V4 DDO."""
     ddo_dict = get_sample_ddo_with_compute_service()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     expected_access_service = get_key_from_v4_sample_ddo(
         key="services", file_name="ddo_v4_with_compute_service.json"
     )[0]
@@ -225,7 +225,7 @@ def test_get_service_by_id():
 @pytest.mark.unit
 def test_credentials():
     ddo_dict = get_sample_ddo_with_compute_service()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     assert ddo.requires_address_credential
     assert ddo.allowed_addresses == ["0x123", "0x456"]
     assert ddo.denied_addresses == ["0x2222", "0x333"]
@@ -247,14 +247,14 @@ def test_credentials():
 
     ddo_dict = get_sample_ddo_with_compute_service()
     del ddo_dict["credentials"]["allow"]
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     assert ddo.validate_access({"type": "address", "value": "0x444"}) == 0
     # specifically denied
     assert ddo.validate_access({"type": "address", "value": "0x333"}) == 4
 
     ddo_dict = get_sample_ddo_with_compute_service()
     del ddo_dict["credentials"]["allow"][0]["values"]
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     with pytest.raises(
         MalformedCredential, match="No values key in the address credential"
     ):
@@ -262,13 +262,13 @@ def test_credentials():
 
     ddo_dict = get_sample_ddo_with_compute_service()
     del ddo_dict["credentials"]
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     ddo.remove_address_from_allow_list("0xAA")
     ddo.add_address_to_allow_list("0xAA")
 
     ddo_dict = get_sample_ddo_with_compute_service()
     ddo_dict["credentials"]["allow"] = []
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     ddo.remove_address_from_allow_list("0xAA")
     ddo.add_address_to_allow_list("0xAA")
 
@@ -290,7 +290,7 @@ def test_is_disabled():
 
     for state in range(6):
         ddo_dict["nft"]["state"] = state
-        ddo = Asset.from_dict(ddo_dict)
+        ddo = DDO.from_dict(ddo_dict)
 
         # adhere to https://docs.oceanprotocol.com/core-concepts/did-ddo#state
         if state in [0, 5]:

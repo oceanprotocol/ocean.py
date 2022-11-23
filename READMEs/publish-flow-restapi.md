@@ -42,8 +42,8 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-(data_nft, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
-print(f"Just published asset, with did={asset.did}")
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+print(f"Just published asset, with did={ddo.did}")
 ```
 
 ### 3. Alice makes the API asset available for free, via a dispenser
@@ -71,10 +71,10 @@ Now, you're Bob. First, download the file.
 In the same Python console:
 ```python
 # Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
-asset_did = asset.did
+did = ddo.did
 
 # Bob gets a datatoken from the dispenser; sends it to the service; downloads
-file_name = ocean.assets.download_file(asset_did, bob_wallet)
+file_name = ocean.assets.download_file(did, bob_wallet)
 ```
 
 Now, load the file and use its data.
@@ -113,19 +113,19 @@ Here are the three steps, un-bundled.
 In the same Python console:
 ```python
 # Bob gets an access token from the dispenser
-asset = ocean.assets.resolve(asset_did)
-datatoken_address = asset.datatokens[0]["address"]
+ddo = ocean.assets.resolve(did)
+datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 amt_tokens = Web3.toWei(1, "ether")
 ocean.dispenser.dispense_tokens(datatoken, amt_tokens, {"from": bob_wallet})
 
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 
 # Bob downloads the dataset
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    asset=asset,
+    ddo=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id

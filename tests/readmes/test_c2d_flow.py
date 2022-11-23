@@ -139,7 +139,7 @@ def c2d_flow_readme(
     )
 
     # Publish asset with compute service on-chain.
-    DATA_asset = ocean.assets.create(
+    DATA_ddo = ocean.assets.create(
         metadata=DATA_metadata,
         publisher_wallet=alice_wallet,
         files=DATA_files,
@@ -148,7 +148,7 @@ def c2d_flow_readme(
         deployed_datatokens=[DATA_datatoken],
     )
 
-    assert DATA_asset.did, "create dataset with compute service unsuccessful"
+    assert DATA_ddo.did, "create dataset with compute service unsuccessful"
 
     # 3. Alice publishes algorithm
 
@@ -194,7 +194,7 @@ def c2d_flow_readme(
 
     # Publish asset with compute service on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
-    ALGO_asset = ocean.assets.create(
+    ALGO_ddo = ocean.assets.create(
         metadata=ALGO_metadata,
         publisher_wallet=alice_wallet,
         files=ALGO_files,
@@ -202,12 +202,12 @@ def c2d_flow_readme(
         deployed_datatokens=[ALGO_datatoken],
     )
 
-    assert ALGO_asset.did, "create algorithm unsuccessful"
+    assert ALGO_ddo.did, "create algorithm unsuccessful"
 
     # 4. Alice allows the algorithm for C2D for that data asset
-    compute_service = DATA_asset.services[0]
-    compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-    DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
+    compute_service = DATA_ddo.services[0]
+    compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
+    DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
 
     # 5. Bob acquires datatokens for data and algorithm
     bob_wallet = accounts.add("TEST_PRIVATE_KEY2")
@@ -225,22 +225,22 @@ def c2d_flow_readme(
     # 6. Bob starts a compute job
 
     # Convenience variables
-    DATA_did = DATA_asset.did
-    ALGO_did = ALGO_asset.did
+    DATA_did = DATA_ddo.did
+    ALGO_did = ALGO_ddo.did
 
     # Operate on updated and indexed assets
-    DATA_asset = ocean.assets.resolve(DATA_did)
-    ALGO_asset = ocean.assets.resolve(ALGO_did)
+    DATA_ddo = ocean.assets.resolve(DATA_did)
+    ALGO_ddo = ocean.assets.resolve(ALGO_did)
 
-    compute_service = DATA_asset.services[0]
-    algo_service = ALGO_asset.services[0]
+    compute_service = DATA_ddo.services[0]
+    algo_service = ALGO_ddo.services[0]
 
     free_c2d_env = ocean.compute.get_free_c2d_environment(
         compute_service.service_endpoint
     )
 
-    DATA_compute_input = ComputeInput(DATA_asset, compute_service)
-    ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
+    DATA_compute_input = ComputeInput(DATA_ddo, compute_service)
+    ALGO_compute_input = ComputeInput(ALGO_ddo, algo_service)
 
     # Pay for dataset and algo
     datasets, algorithm = ocean.assets.pay_for_compute_service(
@@ -267,7 +267,7 @@ def c2d_flow_readme(
     # Wait until job is done
     succeeded = False
     for _ in range(0, 200):
-        status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
+        status = ocean.compute.status(DATA_ddo, compute_service, job_id, bob_wallet)
         if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
@@ -277,7 +277,7 @@ def c2d_flow_readme(
 
     # Retrieve algorithm output and log files
     output = ocean.compute.compute_job_result_logs(
-        DATA_asset, compute_service, job_id, bob_wallet
+        DATA_ddo, compute_service, job_id, bob_wallet
     )[0]
     assert output, "algorithm output not found"
 

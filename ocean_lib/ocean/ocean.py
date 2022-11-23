@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Type, Union
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import config_defaults
 from ocean_lib.models.compute_input import ComputeInput
@@ -53,7 +53,7 @@ class Ocean:
             - The DID is registered on-chain with a URL of the metadata store
               to retrieve the DDO from
 
-            `asset = ocean.assets.create(metadata, publisher_wallet)`
+            `ddo = ocean.assets.create(metadata, publisher_wallet)`
 
         2. Discover/Search assets via the current configured metadata store (Aquarius)
 
@@ -262,11 +262,11 @@ class Ocean:
 
     @enforce_types
     def retrieve_provider_fees(
-        self, asset: Asset, access_service: Service, publisher_wallet
+        self, ddo: DDO, access_service: Service, publisher_wallet
     ) -> tuple:
 
         initialize_response = DataServiceProvider.initialize(
-            asset.did, access_service, consumer_address=publisher_wallet.address
+            ddo.did, access_service, consumer_address=publisher_wallet.address
         )
         initialize_data = initialize_response.json()
         provider_fees = initialize_data["providerFee"]

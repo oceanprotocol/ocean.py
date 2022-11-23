@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
@@ -15,7 +15,7 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        asset: Asset,
+        ddo: DDO,
         service: Service,
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
@@ -23,13 +23,13 @@ class ComputeInput:
         consume_market_order_fee_amount: Optional[int] = None,
     ) -> None:
         """Initialise and validate arguments."""
-        assert asset and service is not None, "bad argument values."
+        assert ddo and service is not None, "bad argument values."
 
         if userdata:
             assert isinstance(userdata, dict), "Userdata must be a dictionary."
 
-        self.asset = asset
-        self.did = asset.did
+        self.ddo = ddo
+        self.did = ddo.did
         self.transfer_tx_id = transfer_tx_id
         self.service = service
         self.service_id = service.id

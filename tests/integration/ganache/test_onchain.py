@@ -54,7 +54,7 @@ def test_consume_simple_onchain_data(
     files = [onchain_data]
 
     # Publish a plain asset with one data token on chain
-    asset = ocean_assets.create(
+    ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=[file1],
@@ -70,16 +70,16 @@ def test_consume_simple_onchain_data(
         datatoken_bytess=[[b""]],
     )
 
-    assert asset, "The asset is not created."
-    assert asset.nft["name"] == "NFT"
-    assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == data_nft.address
-    assert asset.nft["owner"] == publisher_wallet.address
-    assert asset.datatokens[0]["name"] == "Datatoken 1"
-    assert asset.datatokens[0]["symbol"] == "DT1"
+    assert ddo, "The ddo is not created."
+    assert ddo.nft["name"] == "NFT"
+    assert ddo.nft["symbol"] == "NFTSYMBOL"
+    assert ddo.nft["address"] == data_nft.address
+    assert ddo.nft["owner"] == publisher_wallet.address
+    assert ddo.datatokens[0]["name"] == "Datatoken 1"
+    assert ddo.datatokens[0]["symbol"] == "DT1"
 
-    service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, asset.datatokens[0]["address"])
+    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
@@ -90,7 +90,7 @@ def test_consume_simple_onchain_data(
 
     # Initialize service
     response = data_provider.initialize(
-        did=asset.did, service=service, consumer_address=consumer_wallet.address
+        did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
     assert response.status_code == 200
@@ -100,7 +100,7 @@ def test_consume_simple_onchain_data(
     # Start order for consumer
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
-        service_index=asset.get_index_of_service(service),
+        service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
         provider_fee_token=provider_fees["providerFeeToken"],
         provider_fee_amount=provider_fees["providerFeeAmount"],
@@ -134,7 +134,7 @@ def test_consume_simple_onchain_data(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        asset=asset,
+        ddo=ddo,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=receipt.txid,
@@ -192,7 +192,7 @@ def test_consume_parametrized_onchain_data(
     ]
 
     # Publish a plain asset with one data token on chain
-    asset = ocean_assets.create(
+    ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=[file1],
@@ -209,16 +209,16 @@ def test_consume_parametrized_onchain_data(
         consumer_parameters=consumer_parameters,
     )
 
-    assert asset, "The asset is not created."
-    assert asset.nft["name"] == "NFT"
-    assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == data_nft.address
-    assert asset.nft["owner"] == publisher_wallet.address
-    assert asset.datatokens[0]["name"] == "Datatoken 1"
-    assert asset.datatokens[0]["symbol"] == "DT1"
+    assert ddo, "The ddo is not created."
+    assert ddo.nft["name"] == "NFT"
+    assert ddo.nft["symbol"] == "NFTSYMBOL"
+    assert ddo.nft["address"] == data_nft.address
+    assert ddo.nft["owner"] == publisher_wallet.address
+    assert ddo.datatokens[0]["name"] == "Datatoken 1"
+    assert ddo.datatokens[0]["symbol"] == "DT1"
 
-    service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, asset.datatokens[0]["address"])
+    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
@@ -229,7 +229,7 @@ def test_consume_parametrized_onchain_data(
 
     # Initialize service
     response = data_provider.initialize(
-        did=asset.did, service=service, consumer_address=consumer_wallet.address
+        did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
     assert response.status_code == 200
@@ -239,7 +239,7 @@ def test_consume_parametrized_onchain_data(
     # Start order for consumer
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
-        service_index=asset.get_index_of_service(service),
+        service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
         provider_fee_token=provider_fees["providerFeeToken"],
         provider_fee_amount=provider_fees["providerFeeAmount"],
@@ -273,13 +273,13 @@ def test_consume_parametrized_onchain_data(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        asset=asset,
+        ddo=ddo,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=receipt.txid,
         service=service,
         userdata={
-            "baseToken": asset.nft_address.lower()
+            "baseToken": ddo.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters
     )
 

@@ -16,8 +16,8 @@ from ocean_lib.services.service import Service
 logger = logging.getLogger("ddo")
 
 
-class Asset(AddressCredentialMixin):
-    """Asset class to create, import, export, validate Asset/DDO objects for V4."""
+class DDO(AddressCredentialMixin):
+    """Create, import, export, and validate DDO objects."""
 
     @enforce_types
     def __init__(
@@ -88,8 +88,8 @@ class Asset(AddressCredentialMixin):
 
     @classmethod
     @enforce_types
-    def from_dict(cls, dictionary: dict) -> "Asset":
-        """Import a JSON dict into this Asset."""
+    def from_dict(cls, dictionary: dict) -> "DDO":
+        """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
 
         services = (
@@ -113,7 +113,7 @@ class Asset(AddressCredentialMixin):
         ]
 
         if args[0] is None:
-            return UnavailableAsset(*args)
+            return UnavailableDDO(*args)
 
         return cls(*args)
 
@@ -210,5 +210,5 @@ class Asset(AddressCredentialMixin):
         return not self.metadata or (self.nft and self.nft["state"] not in [0, 5])
 
 
-class UnavailableAsset(Asset):
+class UnavailableDDO(DDO):
     pass

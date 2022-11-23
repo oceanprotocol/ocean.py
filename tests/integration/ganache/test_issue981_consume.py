@@ -28,14 +28,14 @@ def test1(
     # Publish
     url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
     name = "CEXA ETH-USDT"
-    (data_nft, datatoken, asset) = ocean.assets.create_url_asset(
+    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
     )
 
     # Initialize service
-    service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
+    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     response = data_provider.initialize(
-        did=asset.did, service=service, consumer_address=consumer_wallet.address
+        did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
 
     # Share access
@@ -43,9 +43,9 @@ def test1(
     datatoken.mint(to_address, Web3.toWei(10, "ether"), publisher_wallet)
 
     # Consume
-    order_tx_id = ocean.assets.pay_for_access_service(asset, consumer_wallet)
+    order_tx_id = ocean.assets.pay_for_access_service(ddo, consumer_wallet)
     file_path = ocean.assets.download_asset(
-        asset=asset,
+        ddo=ddo,
         consumer_wallet=consumer_wallet,
         destination=str(tmp_path),
         order_tx_id=order_tx_id,

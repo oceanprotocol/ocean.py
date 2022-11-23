@@ -96,7 +96,7 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
 # create fixed-rate exchange (FRE)

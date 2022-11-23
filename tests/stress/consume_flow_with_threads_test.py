@@ -104,7 +104,7 @@ def consume_flow(ocean: Ocean, config: dict, tmpdir, files):
     destination = _create_downloads_path(tmpdir)
 
     ocean.assets.download_asset(
-        asset=ddo,
+        ddo=ddo,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=receipt.txid,

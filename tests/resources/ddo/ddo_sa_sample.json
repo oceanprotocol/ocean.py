@@ -76,7 +76,7 @@
           "copyrightHolder": "Met Office",
           "links": [
             {
-              "name": "Sample of Asset Data",
+              "name": "Sample of DDO Data",
               "type": "sample",
               "url": "https://foo.com/sample.csv"
             },
