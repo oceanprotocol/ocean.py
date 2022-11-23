@@ -5,6 +5,7 @@
 import pytest
 from brownie import network
 
+
 from ocean_lib.agreements.consumable import MalformedCredential
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.credentials import simplify_credential_to_address
