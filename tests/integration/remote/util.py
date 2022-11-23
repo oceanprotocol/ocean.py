@@ -7,7 +7,7 @@ import random
 import string
 import time
 
-from brownie.network import accounts
+from brownie.network import accounts, chain, priority_fee
 
 
 def get_wallets(ocean):
@@ -32,3 +32,8 @@ def random_chars() -> str:
     cand_chars = string.ascii_uppercase + string.digits
     s = "".join(random.choices(cand_chars, k=8)) + str(time.time())
     return s
+
+
+def set_aggressive_gas_fees():
+    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+    priority_fee(chain.priority_fee)
