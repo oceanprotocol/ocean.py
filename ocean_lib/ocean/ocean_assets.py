@@ -634,9 +634,7 @@ class OceanAssets:
 
         data_nft_address = ddo.nft_address
 
-        assert (
-            data_nft_address
-        ), "nft_address is required for publishing a dataset ddo."
+        assert data_nft_address, "nft_address is required for publishing a dataset ddo."
         data_nft = DataNFT(self._config_dict, data_nft_address)
 
         assert ddo.chain_id == self._chain_id, "Chain id mismatch."

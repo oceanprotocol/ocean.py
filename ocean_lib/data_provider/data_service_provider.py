@@ -185,8 +185,7 @@ class DataServiceProvider(DataServiceProviderBase):
             DataServiceProvider.write_file(response, destination_folder, i)
 
             logger.info(
-                f"File downloaded successfully"
-                f" downloadEndpoint {download_endpoint}"
+                f"File downloaded successfully" f" downloadEndpoint {download_endpoint}"
             )
 
     @staticmethod

@@ -73,9 +73,7 @@ class OceanCompute:
         return job_info["jobId"]
 
     @enforce_types
-    def status(
-        self, ddo: DDO, service: Service, job_id: str, wallet
-    ) -> Dict[str, Any]:
+    def status(self, ddo: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
         """
         Gets job status.
 
@@ -135,9 +133,7 @@ class OceanCompute:
         return result
 
     @enforce_types
-    def stop(
-        self, ddo: DDO, service: Service, job_id: str, wallet
-    ) -> Dict[str, Any]:
+    def stop(self, ddo: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 

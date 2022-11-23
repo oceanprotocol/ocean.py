@@ -1,6 +1,6 @@
 [tool.black]
-exclude = '''
+exclude = """
 (
   setup.py
 )
-'''
+"""
