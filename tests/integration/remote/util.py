@@ -7,7 +7,7 @@ import random
 import string
 import time
 
-from brownie.network import accounts, priority_fee
+from brownie.network import accounts, chain, priority_fee
 
 
 def get_wallets(ocean):
@@ -36,4 +36,4 @@ def random_chars() -> str:
 
 def set_aggressive_gas_fees():
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    priority_fee("auto")
+    priority_fee(chain.priority_fee)
