@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import ConsumableCodes, MalformedCredential
 
 
-class AddressCredential:
+class AddressCredentialMixin:
     @enforce_types
     def get_addresses_of_class(self, access_class: str = "allow") -> list:
         """Get a filtered list of addresses from credentials (use with allow/deny)."""
