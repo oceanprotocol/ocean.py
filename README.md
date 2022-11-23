@@ -54,9 +54,10 @@ Here are flows to try out, from simple to specific detailed variants.
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
 
-### Data Challenge flows
+### Use-case flows
 
-- [Predict-eth repo](https://github.com/oceanprotocol/predict-eth) - data challanges with $ to predict future ETH price.
+- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price.
+- [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 
 ### Learn more
 
