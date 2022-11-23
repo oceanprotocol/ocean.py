@@ -21,7 +21,7 @@ def test_ocean_tx__create_url_asset(tmp_path):
     # setup
     connect_to_network("polygon")
     set_aggressive_gas_fees()
-    
+
     config = _remote_config_polygon(tmp_path)
     ocean = Ocean(config)
     accounts.clear()
