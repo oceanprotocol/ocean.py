@@ -20,11 +20,13 @@ Let's go through each step.
 
 ## 1. Setup
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+From [installation-flow](install.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library
 - [x] Setup : Set envvars
+
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
 ### Create fake OCEAN

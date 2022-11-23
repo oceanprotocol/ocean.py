@@ -11,7 +11,7 @@ The READMEs use one or two remote accounts, with keys `REMOTE_TEST_PRIVATE_KEY1`
 
 ### 1. Setup
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+From [installation-flow](install.md), do:
 - [x] Setup : Prerequisites
 
 ## 2. Create two new accounts (one-time)

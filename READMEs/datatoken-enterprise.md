@@ -27,15 +27,10 @@ Let's go through each step.
 
 ### First steps
 
-To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
+To get started with this guide, please refer to [installation-flow](install.md) and complete the following steps :
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library
-
-
-### Set envvars
-
-Set the required enviroment variables as described in [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md):
 - [x] Setup : Set envvars
 
 
