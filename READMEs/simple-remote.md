@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: _Remotely_ Publish Data NFT & Datatoken
 
-This quickstart is like the [simple-flow](READMEs/data-nfts-and-datatokens-flow.md), but uses [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#mumbai).
+This quickstart is like the [simple-flow](data-nfts-and-datatokens-flow.md), but uses [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#mumbai).
 
 Let's go through each step.
 
@@ -13,7 +13,7 @@ Let's go through each step.
 
 ### Prerequisites & installation
 
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
+From [installation-flow](install.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 

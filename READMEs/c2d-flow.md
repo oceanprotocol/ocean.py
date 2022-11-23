@@ -23,7 +23,7 @@ Let's go through each step.
 
 ### Prerequisites & installation
 
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
+From [installation-flow](install.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 

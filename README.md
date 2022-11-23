@@ -30,6 +30,7 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 Here are flows to try out, from simple to specific detailed variants.
 
+- **[Installation flow](READMEs/install.md)** - the required setup to run ocean.py flows.
 - **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - the essence of Ocean - creating a data NFT & datatoken.
 - **[Publish flow](READMEs/publish-flow.md)** - a dataset is published.
 - **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
