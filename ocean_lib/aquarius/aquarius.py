@@ -163,19 +163,19 @@ class Aquarius:
         return ddo
 
     @enforce_types
-    def wait_for_ddo_update(self, ddo: DDO, tx: str):
+    def wait_for_ddo_update(self, ddo_in: DDO, tx: str):
         start = time.time()
         ddo = None
         while True:
             try:
-                ddo = self.get_ddo(ddo.did)
+                ddo = self.get_ddo(ddo_in.did)
             except ValueError:
                 pass
             if not ddo:
                 time.sleep(0.2)
             elif ddo.event.get("tx") == tx:
                 logger.debug(
-                    f"Transaction matching the given tx id detected in metadata store. ddo.event = {ddo.event}"
+                    f"Transaction matching the given tx id detected in metadata store. ddo_in.event = {ddo_in.event}"
                 )
                 break
 
