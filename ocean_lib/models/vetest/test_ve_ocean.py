@@ -25,7 +25,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
     factory_deployer_wallet.transfer(alice_wallet, "0.001 ether")
-    
+
     TA = to_wei(0.0001)
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
