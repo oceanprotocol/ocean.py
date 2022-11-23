@@ -266,7 +266,7 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
-        return self._create1(name, files, publisher_wallet)
+        return self._create1(name, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -279,7 +279,7 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
-        return self._create1(name, files, publisher_wallet)
+        return self._create1(name, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -294,7 +294,7 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self._create1(name, files, publisher_wallet)
+        return self._create1(name, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def _create1(
