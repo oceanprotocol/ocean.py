@@ -104,8 +104,8 @@ from web3 import Web3
 exchange_id = ocean.create_fixed_rate(
     datatoken=datatoken,
     base_token=OCEAN,
-    amount=Web3.toWei(num_consumes, "ether"),
-    fixed_rate=Web3.toWei(datatoken_price_OCEAN, "ether"),
+    amount=to_wei(num_consumes),
+    fixed_rate=to_wei(datatoken_price_OCEAN),
     from_wallet=alice_wallet,
 )
 ```
@@ -134,15 +134,15 @@ OCEAN.approve(ocean.fixed_rate_exchange.address, to_wei(OCEAN_bal), {"from": ali
 fees_info = ocean.fixed_rate_exchange.get_fees_info(exchange_id)
 for i in range(num_consumes):
     print(f"Purchase #{i+1}/{num_consumes}...")
-    txid = ocean.fixed_rate_exchange.buy_dt(
-        exchange_id=exchange_id,
-    	datatoken_amount=to_wei(num_consumes),
-    	max_base_token_amount=to_wei(OCEAN_bal),
-    	consume_market_swap_fee_address=fees_info[1],
-    	consume_market_swap_fee_amount=fees_info[0],
-    	from_wallet=alice_wallet,
+    tx = ocean.fixed_rate_exchange.buyDT(
+        exchange_id,
+        to_wei(num_consumes), # datatokenAmount
+        to_wei(OCEAN_bal),    # maxBaseTokenAmount
+        fees_info[1], # consumeMarketAddress
+        fees_info[0], # consumeMarketSwapFeeAmount
+        {"from": alice_wallet},
     )
-    assert txid, "buying datatokens failed"
+    assert tx, "buying datatokens failed"
 DT_bal = from_wei(datatoken.balanceOf(alice_wallet.address))
 assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
 
