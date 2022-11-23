@@ -7,8 +7,7 @@ import time
 import warnings
 
 from brownie.network import accounts
-from brownie.network import priority_fee, gas_price
-from brownie.network.gas.strategies import GasNowScalingStrategy
+from brownie.network import priority_fee
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.utils import connect_to_network
@@ -87,7 +86,5 @@ def _remote_config_mumbai(tmp_path):
 
 
 def _set_aggressive_gas_fees():
-    # Mumbai uses EIP-1559. So, dynamically determine priority fee & gas price
+    # Mumbai uses EIP-1559. So, dynamically determine priority fee
     priority_fee("auto")
-    gas_strategy = GasNowScalingStrategy("fast", increment=2.0)
-    gas_price(gas_strategy)
