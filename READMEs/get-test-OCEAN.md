@@ -11,7 +11,7 @@ Here, let's get some OCEAN for the Goerli testnet, and verify in Python that we 
 
 ### Setup
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
+From [installation-flow](install.md), do:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library
 
