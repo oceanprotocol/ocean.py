@@ -20,7 +20,6 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 @pytest.mark.unit
 def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     # inspiration from df-py/util/test/veOcean/test_lock.py
-    brownie.network.gas_limit(chain.block_gas_limit)
     priority_fee(chain.priority_fee)
 
     assert veOCEAN.symbol() == "veOCEAN"
