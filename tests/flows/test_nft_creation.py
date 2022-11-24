@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
+
 import pytest
 from web3.main import Web3
 
@@ -161,12 +163,11 @@ def test_successful_data_nft_creation(config, publisher_wallet):
 @pytest.mark.unit
 def test_nft_count(config, publisher_wallet):
     """Test  erc721 factory NFT count"""
-
     data_nft_factory = DataNFTFactoryContract(
         config, get_address_of_type(config, "ERC721Factory")
     )
-    current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft_factory.deployERC721Contract(
+    count1 = data_nft_factory.getCurrentNFTCount()
+    receipt = data_nft_factory.deployERC721Contract(
         "NFT",
         "NFTSYMBOL",
         1,
@@ -177,8 +178,17 @@ def test_nft_count(config, publisher_wallet):
         publisher_wallet.address,
         {"from": publisher_wallet},
     )
-    assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
+    #has nft count increased?
+    # -weirdly, sometimes it doesn't register immediately. So we give
+    #  it some time to try (100 tries * 0.1 s/try = 10 s)
+    count2 = None
+    for tries in range(100):
+        count2 = data_nft_factory.getCurrentNFTCount()
+        if count2 > count1:
+            break
+        time.sleep(0.1)
+    assert count2 == count1 + 1
 
 @pytest.mark.unit
 def test_nft_template(config):
