@@ -4,12 +4,8 @@
 #
 import brownie
 import pytest
-from brownie.network import priority_fee
-
-from ocean_lib.models.ve_ocean import VeOcean
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-from ocean_lib.ocean.util import get_address_of_type
-
+from brownie.network import gas_price
+from brownie.network.gas.strategies import GasNowStrategy
 
 chain = brownie.network.chain
 accounts = brownie.network.accounts
@@ -20,7 +16,8 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 @pytest.mark.unit
 def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     # inspiration from df-py/util/test/veOcean/test_lock.py
-    priority_fee(chain.priority_fee)
+    gas_strategy = GasNowStrategy("fast")
+    gas_price(gas_strategy)
 
     assert veOCEAN.symbol() == "veOCEAN"
 
