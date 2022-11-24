@@ -87,7 +87,6 @@ def test_script_execution(script, monkeypatch):
             )
             for key in [
                 "asset",
-                "ddo",
                 "ZERO_ADDRESS",
                 # "did",
                 "metadata",
