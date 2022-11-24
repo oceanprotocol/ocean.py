@@ -42,7 +42,7 @@ Here are flows to try out, from simple to specific detailed variants.
 
 - **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
 - **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
-- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model.
+- **[Creator C2D: Put an Asset and its Algorithm for sale in one step](READMEs/c2d-flow.md).**
 
 ### More types of data assets
 
