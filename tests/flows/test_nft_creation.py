@@ -180,12 +180,11 @@ def test_nft_count(config, publisher_wallet):
     )
 
     #has nft count increased?
-    # -weirdly, sometimes it doesn't register immediately. So we give
-    #  it some time to try (100 tries * 0.1 s/try = 10 s)
+    # -sometimes it doesn't register immediately. So give it time if needed
     count2 = None
     for tries in range(100):
         count2 = data_nft_factory.getCurrentNFTCount()
-        if count2 > count1:
+        if count2 > count1: #got it!
             break
         time.sleep(0.1)
     assert count2 == count1 + 1
