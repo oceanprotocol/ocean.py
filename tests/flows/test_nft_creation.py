@@ -179,15 +179,16 @@ def test_nft_count(config, publisher_wallet):
         {"from": publisher_wallet},
     )
 
-    #has nft count increased?
+    # has nft count increased?
     # -sometimes it doesn't register immediately. So give it time if needed
     count2 = None
     for try_i in range(100):
         count2 = data_nft_factory.getCurrentNFTCount()
-        if count2 > count1: #got it!
+        if count2 > count1:  # got it!
             break
         time.sleep(0.1)
     assert count2 == count1 + 1
+
 
 @pytest.mark.unit
 def test_nft_template(config):
