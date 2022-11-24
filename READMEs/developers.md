@@ -131,6 +131,3 @@ Now, this will auto-apply isort (import sorting), flake8 (linting) and black (au
 
 You are welcome to contribute to ocean.py docs and READMEs. For clean markdowns in the READMEs folder, we use the `remark` tool for automatic markdown formatting.
 OCEAN has an official repository containing remark settings, so please follow the instructions [here](https://github.com/oceanprotocol/ocean-remark).
-
-To update the documentation shown in https://docs.oceanprotocol.com/references/read-the-docs/ocean-py/,
-go to https://github.com/oceanprotocol/readthedocs, and follow the steps.
