@@ -96,12 +96,19 @@ pytest ocean_lib/models/test/test_data_nft_factory.py
 
 #run all regular tests; see details on pytest markers to select specific suites
 pytest -m "not slow"
+```
 
+The README tests are special. Here's how to run them:
+```console
+#need to auto-generate READMEs first
+mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
+
+#then run the tests
+pytest tests/readmes/test_readmes.py
 ```
 
 For envvars that aren't set, `pytest` uses values in `pytest.ini`.
 
-Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
 ## 5. Merge
 
