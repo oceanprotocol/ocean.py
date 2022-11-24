@@ -357,7 +357,7 @@ def test_pay_for_access_service_insufficient_balance(
         publisher_ocean_instance.assets.pay_for_access_service(
             ddo,
             empty_wallet,
-            get_first_service_by_type(asset, "access"),
+            get_first_service_by_type(ddo, "access"),
             consume_market_order_fee_address=empty_wallet.address,
             consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
