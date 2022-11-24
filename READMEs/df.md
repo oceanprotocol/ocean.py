@@ -149,7 +149,7 @@ assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
 # Alice sends datatokens to the service, to get access. This is the "consume".
 for i in range(num_consumes):
     print(f"Consume #{i+1}/{num_consumes}...")
-    ocean.assets.pay_for_access_service(asset, alice_wallet)
+    ocean.assets.pay_for_access_service(ddo, alice_wallet)
     #don't need to call e.g. ocean.assets.download_asset() since wash-consuming
 ```
 

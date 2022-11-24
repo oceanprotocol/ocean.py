@@ -79,13 +79,13 @@ Here are the last two steps, un-bundled.
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads the file
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    asset=asset,
+    ddo=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
@@ -104,11 +104,11 @@ Here's how it looks, fully un-bundled.
 In the same python console:
 ```python
 # Bob retrieves the reference to the service object
-service = asset.services[0]
+service = ddo.services[0]
 
 # Bob sends a datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(
-    asset,
+    ddo,
     bob_wallet,
     service,
     consume_market_order_fee_address=bob_wallet.address,
@@ -118,7 +118,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
 
 # Bob now has access! He downloads the asset.
 file_path = ocean.assets.download_asset(
-    asset=asset,
+    ddo=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id,
