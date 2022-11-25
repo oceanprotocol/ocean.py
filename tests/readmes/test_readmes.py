@@ -7,6 +7,10 @@ import runpy
 
 import pytest
 
+
+# This file tests READMEs on local chain (ganache).
+# For tests of READMEs on remote chains, see tests/integration/remote/
+
 scripts = pathlib.Path(__file__, "..", "..", "generated-readmes").resolve().glob("*.py")
 
 
@@ -96,16 +100,3 @@ def test_script_execution(script, monkeypatch):
 
     runpy.run_path(str(script), run_name="__main__", init_globals=globs)
 
-
-def test_simple_remote(monkeypatch):
-    script = pathlib.Path(
-        __file__, "..", "..", "generated-readmes", "test_simple-remote.py"
-    )
-    result = runpy.run_path(str(script), run_name="__main__")
-    ocean, alice_wallet = result["ocean"], result["alice_wallet"]
-    data_nft = ocean.create_data_nft("NFT1", "NFT1", alice_wallet)
-    assert data_nft
-    datatoken = data_nft.create_datatoken(
-        "Datatoken 1", "DT1", from_wallet=alice_wallet
-    )
-    assert datatoken
