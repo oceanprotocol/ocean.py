@@ -4,7 +4,6 @@
 #
 import brownie
 import pytest
-from brownie.network import gas_price
 from brownie.network.gas.strategies import GasNowStrategy
 
 chain = brownie.network.chain
@@ -17,20 +16,25 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     # inspiration from df-py/util/test/veOcean/test_lock.py
     gas_strategy = GasNowStrategy("fast")
-    gas_price(gas_strategy)
 
     assert veOCEAN.symbol() == "veOCEAN"
 
     OCEAN = ocean_token
 
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
-    factory_deployer_wallet.transfer(alice_wallet, "1 ether")
+    factory_deployer_wallet.transfer(alice_wallet, "1 ether", gas_price=gas_strategy)
 
     TA = to_wei(0.0001)
-    OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
+    OCEAN.mint(
+        alice_wallet.address,
+        TA,
+        {"from": factory_deployer_wallet, "gas_price": gas_strategy},
+    )
 
-    veOCEAN.checkpoint({"from": factory_deployer_wallet})
-    OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
+    veOCEAN.checkpoint({"from": factory_deployer_wallet, "gas_price": gas_strategy})
+    OCEAN.approve(
+        veOCEAN.address, TA, {"from": alice_wallet, "gas_price": gas_strategy}
+    )
 
     t0 = chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
@@ -39,7 +43,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
-    veOCEAN.create_lock(TA, t2, {"from": alice_wallet})
+    veOCEAN.create_lock(TA, t2, {"from": alice_wallet, "gas_price": gas_strategy})
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
 
@@ -55,7 +59,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     brownie.network.chain.sleep(t2)
     chain.mine()
 
-    veOCEAN.withdraw({"from": alice_wallet})
+    veOCEAN.withdraw({"from": alice_wallet, "gas_price": gas_strategy})
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
