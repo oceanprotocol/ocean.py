@@ -49,7 +49,9 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
 
-    alice_vote_power = float(Web3.fromWei(veOCEAN.balanceOf(alice_wallet, chain.time()), "ether"))
+    alice_vote_power = float(
+        Web3.fromWei(veOCEAN.balanceOf(alice_wallet, chain.time()), "ether")
+    )
     expected_vote_power = float(Web3.fromWei(TA, "ether")) * WEEK / MAXTIME
     assert alice_vote_power == pytest.approx(expected_vote_power, TA / 20.0)
 
