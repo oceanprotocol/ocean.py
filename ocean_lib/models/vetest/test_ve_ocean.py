@@ -4,7 +4,6 @@
 #
 import brownie
 import pytest
-from brownie.network.gas.strategies import GasNowStrategy
 
 chain = brownie.network.chain
 accounts = brownie.network.accounts
@@ -15,25 +14,26 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 @pytest.mark.unit
 def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     # inspiration from df-py/util/test/veOcean/test_lock.py
-    gas_strategy = GasNowStrategy("fast")
 
     assert veOCEAN.symbol() == "veOCEAN"
 
     OCEAN = ocean_token
 
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
-    factory_deployer_wallet.transfer(alice_wallet, "1 ether", gas_price=gas_strategy)
+    factory_deployer_wallet.transfer(alice_wallet, "1 ether")
 
     TA = to_wei(0.0001)
     OCEAN.mint(
         alice_wallet.address,
         TA,
-        {"from": factory_deployer_wallet, "gas_price": gas_strategy},
+        {"from": factory_deployer_wallet, "gas_limit": chain.block_gas_limit},
     )
 
-    veOCEAN.checkpoint({"from": factory_deployer_wallet, "gas_price": gas_strategy})
+    veOCEAN.checkpoint(
+        {"from": factory_deployer_wallet, "gas_limit": chain.block_gas_limit}
+    )
     OCEAN.approve(
-        veOCEAN.address, TA, {"from": alice_wallet, "gas_price": gas_strategy}
+        veOCEAN.address, TA, {"from": alice_wallet, "gas_limit": chain.block_gas_limit}
     )
 
     t0 = chain.time()
@@ -43,7 +43,9 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
-    veOCEAN.create_lock(TA, t2, {"from": alice_wallet, "gas_price": gas_strategy})
+    veOCEAN.create_lock(
+        TA, t2, {"from": alice_wallet, "gas_limit": chain.block_gas_limit}
+    )
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
 
@@ -59,7 +61,7 @@ def test1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     brownie.network.chain.sleep(t2)
     chain.mine()
 
-    veOCEAN.withdraw({"from": alice_wallet, "gas_price": gas_strategy})
+    veOCEAN.withdraw({"from": alice_wallet, "gas_limit": chain.block_gas_limit})
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
