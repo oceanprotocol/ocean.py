@@ -10,6 +10,7 @@ import warnings
 
 from brownie.network import accounts, chain, priority_fee
 
+
 def remote_config_mumbai(tmp_path):
     config = {
         "NETWORK_NAME": "mumbai",
@@ -60,7 +61,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     - if the test has to repeat, there are nonce errors. Avoid via unique
     - if there are insufficient funds, since they're hard to replace
       automatically in remote testnets, then just skip
-   """
+    """
     # Simplest possible tx: Alice send Bob some fake MATIC
     bob_eth_before = accounts.at(bob_wallet.address).balance()
 
@@ -85,7 +86,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     - if the test has to repeat, there are nonce errors. Avoid via unique
     - if there are insufficient funds, since they're hard to replace
       automatically in remote testnets, then just skip
-   """
+    """
     # Alice publish data NFT
     # avoid "replacement transaction underpriced" error: make each tx diff't
     symbol = random_chars()

@@ -99,4 +99,3 @@ def test_script_execution(script, monkeypatch):
                 globs[key] = result[key]
 
     runpy.run_path(str(script), run_name="__main__", init_globals=globs)
-

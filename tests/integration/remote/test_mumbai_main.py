@@ -39,7 +39,6 @@ def test_ocean_tx__create_data_nft(tmp_path):
 
     accounts.clear()
     (alice_wallet, _) = util.get_wallets()
-    
+
     # Do a simple-as-possible test that uses ocean stack, while accounting for gotchas
     util.do_ocean_tx_and_handle_gotchas(ocean, alice_wallet)
-
