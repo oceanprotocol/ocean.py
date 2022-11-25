@@ -104,8 +104,6 @@ name = "grp"
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
-print(f"ALGO_asset did = '{ALGO_asset.did}'")
-
 # Specify metadata and services, using the Branin test dataset
 ALGO_date_created = "2021-12-28T10:55:11Z"
 ALGO_metadata = {
