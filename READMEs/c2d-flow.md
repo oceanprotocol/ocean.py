@@ -55,7 +55,7 @@ In the same python console:
 
 ```python
 
-# Publish data NFT, datatoken, and aset for dataset based on url
+# Publish data NFT, datatoken, and asset for dataset based on url
 
 # ocean.py offers multiple file object types. A simple url file is enough for here
 from ocean_lib.structures.file_objects import UrlFile
