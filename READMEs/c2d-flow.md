@@ -54,11 +54,17 @@ From [simple-remote](simple-remote.md), do:
 In the same python console:
 
 ```python
+
 # Publish data NFT, datatoken, and aset for dataset based on url
-DATASET_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
+
+# ocean.py offers multiple file object types. A simple url file is enough for here
+from ocean_lib.structures.file_objects import UrlFile
+DATASET_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
+)
 
 name = "Branin dataset"
-(DATASET_data_nft, DATASET_datatoken, DATASET_asset) = ocean.assets.create_url_asset(name, DATASET_url, alice_wallet, wait_for_aqua=True)
+(DATASET_data_nft, DATASET_datatoken, DATASET_asset) = ocean.assets.create_url_asset(name, DATASET_url_file.url, alice_wallet, wait_for_aqua=True)
 print(f"DATASET_data_nft address = '{DATASET_data_nft.address}'")
 print(f"DATASET_datatoken address = '{DATASET_datatoken.address}'")
 
@@ -72,14 +78,15 @@ DATASET_compute_values = {
 }
 
 # Create the Service
-from ocean_lib.structures.file_objects import UrlFile
+
 from ocean_lib.services.service import Service
+DATASET_files = [DATASET_url_file]
 DATASET_compute_service = Service(
     service_id="2",
     service_type="compute",
     service_endpoint=ocean.config_dict["PROVIDER_URL"],
     datatoken=DATASET_datatoken.address,
-    files=[UrlFile(url=DATASET_url)],
+    files=DATASET_files,
     timeout=3600,
     compute_values=DATASET_compute_values,
 )
