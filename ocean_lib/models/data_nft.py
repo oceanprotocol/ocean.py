@@ -161,16 +161,9 @@ class DataNFT(ContractBase):
 
         self.create_erc20(**create_args)
 
-        # grab new_elements
-        # - sometimes new elements doesn't register immediately. So give time
-        new_elements = None
-        for try_i in range(100):
-            new_elements = [
-                item for item in self.getTokensList() if item not in initial_list
-            ]
-            if len(new_elements) == 1:  # got it!
-                break
-            time.sleep(0.1)
+        new_elements = [
+            item for item in self.getTokensList() if item not in initial_list
+        ]
         assert len(new_elements) == 1, "new datatoken has no address"
 
         if template_index == 1:
