@@ -73,6 +73,7 @@ DATASET_compute_values = {
 
 # Create the Service
 from ocean_lib.structures.file_objects import UrlFile
+from ocean_lib.services.service import Service
 DATASET_compute_service = Service(
     service_id="2",
     service_type="compute",
