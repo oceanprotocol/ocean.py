@@ -10,6 +10,8 @@ The latest release of ocean.py makes it very easy for us to interact with datato
 
 In the meantime, this README helps level the playing field around Wash Consume. 
 
+This code should not be used on a live network. By reading and following any of these actions, you absolve others of any responsibilities and agree to be responsible for your own actions.
+
 Here are the steps:
 1. Basic Setup, Ganache, and Python
 2. Setup OCEAN and veOCEAN
@@ -188,36 +190,17 @@ for i in range(num_consumes):
     #don't need to call e.g. ocean.assets.download_asset() since wash-consuming
 ```
 
-## 7. Collect OCEAN rewards
 
-We are now going to simulate collecting our rewards. To do this, we need to advance the clock so Data Farming can conclude. Once Data Farming completes, we calculate the rewards and distribute them.
+## 7. Profit? Mainnet? What's next?
 
-Because Alice participated in Data Farming by using her veOCEAN and helped to curate good datasets (her dataNFT), she is provided with rewards.
-
-Alice is then able to claim these rewards, and profit from wash-consume. 
-
-In the same Python console:
-```python
-#simulate passage of time, until next Thursday, which is the start of DF(X+1)
-WEEK = 7 * 86400 # seconds in a week
-t0 = chain.time()
-t1 = t0 // WEEK * WEEK + WEEK
-t2 = t1 + WEEK
-chain.sleep(t1 - t0) 
-chain.mine()
-
-#Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
-bal_before = from_wei(OCEAN.balanceOf(alice_wallet.address))
-ocean.ve_fee_distributor.claim({"from": alice_wallet})
-bal_after = from_wei(OCEAN.balanceOf(alice_wallet.address))
-print(f"Just claimed {bal_after-bal_before} OCEAN rewards") 
-```
-
-## 8. Repeat steps 1-6, for Eth mainnet
-
-We leave this as an exercise to the reader:)
+Repeat steps 1-6. We leave this as an exercise to the reader:)
 
 Here's a hint to get started: initial setup is like the [simple-remote flow](simple-remote.md).
 
-Happy Data Farming!
+We have now simulated wash-trading and manipulating of DF. Because Alice participated in DF by using her veOCEAN and helped to curate good datasets (her own dataNFT) she should be provided with rewards.
 
+Theoretically, you might be able to replicate this on ETH Mainnet and profit.
+
+This is definitely not financial advice.
+
+Happy Data Farming!
