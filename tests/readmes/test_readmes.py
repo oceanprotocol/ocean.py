@@ -6,6 +6,7 @@ import pathlib
 import runpy
 
 import pytest
+from brownie.exceptions import VirtualMachineError
 
 scripts = pathlib.Path(__file__, "..", "..", "generated-readmes").resolve().glob("*.py")
 
@@ -97,6 +98,14 @@ def test_script_execution(script, monkeypatch):
     runpy.run_path(str(script), run_name="__main__", init_globals=globs)
 
 
+@pytest.mark.skipif(
+    VirtualMachineError(
+        ValueError(
+            {"code": -32000, "message": "insufficient funds for gas * price + value"}
+        )
+    ),
+    reason="requires more funds for remote accounts",
+)
 def test_simple_remote(monkeypatch):
     script = pathlib.Path(
         __file__, "..", "..", "generated-readmes", "test_simple-remote.py"
