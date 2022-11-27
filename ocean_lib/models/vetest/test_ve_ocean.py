@@ -4,6 +4,7 @@
 #
 import brownie
 import pytest
+from web3 import Web3
 
 from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -27,7 +28,7 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
     factory_deployer_wallet.transfer(alice_wallet, "1 ether")
 
-    TA = to_wei(0.0001)
+    TA = Web3.toWei(0.0001, "ether")
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
@@ -49,8 +50,10 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
 
-    alice_vote_power = from_wei(veOCEAN.balanceOf(alice_wallet, chain.time()))
-    expected_vote_power = from_wei(TA) * WEEK / MAXTIME
+    alice_vote_power = float(
+        Web3.fromWei(veOCEAN.balanceOf(alice_wallet, chain.time()), "ether")
+    )
+    expected_vote_power = float(Web3.fromWei(TA, "ether")) * WEEK / MAXTIME
     assert alice_vote_power == pytest.approx(expected_vote_power, TA / 20.0)
 
     brownie.network.chain.sleep(t2)
@@ -61,11 +64,3 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
     assert veOCEAN.balanceOf(alice_wallet, chain.time()) == 0
-
-
-def to_wei(amt_eth) -> int:
-    return int(amt_eth * 1e18)
-
-
-def from_wei(amt_wei: int) -> float:
-    return float(amt_wei / 1e18)

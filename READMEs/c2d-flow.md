@@ -54,24 +54,8 @@ From [simple-remote](simple-remote.md), do:
 In the same python console:
 
 ```python
-# Publish data NFT & datatoken for dataset
-DATASET_data_nft = ocean.create_data_nft('DATASET_DN1', 'DATASET_DN1', alice_wallet)
-print(f"Created data NFT. Its address is {DATASET_data_nft.address}")
 
-DATASET_datatoken = DATASET_data_nft.create_datatoken("DATASET_DT1", "DATASET_DT1", from_wallet=alice_wallet)
-print(f"DATASET_datatoken address = '{DATASET_datatoken.address}'")
-
-# Specify metadata and services for the Branin test dataset
-DATASET_date_created = "2022-09-19T10:55:11Z"
-DATASET_metadata = {
-    "created": DATASET_date_created,
-    "updated": DATASET_date_created,
-    "description": "Branin dataset",
-    "name": "Branin dataset",
-    "type": "dataset",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
-}
+# Publish data NFT, datatoken, and asset for dataset based on url
 
 # ocean.py offers multiple file object types. A simple url file is enough for here
 from ocean_lib.structures.file_objects import UrlFile
@@ -79,7 +63,11 @@ DATASET_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
-DATASET_files = [DATASET_url_file]
+name = "Branin dataset"
+(DATASET_data_nft, DATASET_datatoken, DATASET_asset) = ocean.assets.create_url_asset(name, DATASET_url_file.url, alice_wallet, wait_for_aqua=True)
+print(f"DATASET_data_nft address = '{DATASET_data_nft.address}'")
+print(f"DATASET_datatoken address = '{DATASET_datatoken.address}'")
+
 
 # Set the compute values for compute service
 DATASET_compute_values = {
@@ -90,7 +78,9 @@ DATASET_compute_values = {
 }
 
 # Create the Service
+
 from ocean_lib.services.service import Service
+DATASET_files = [DATASET_url_file]
 DATASET_compute_service = Service(
     service_id="2",
     service_type="compute",
@@ -101,15 +91,9 @@ DATASET_compute_service = Service(
     compute_values=DATASET_compute_values,
 )
 
-# Publish asset with compute service on-chain
-DATASET_asset = ocean.assets.create(
-    metadata=DATASET_metadata,
-    publisher_wallet=alice_wallet,
-    files=DATASET_files,
-    services=[DATASET_compute_service],
-    data_nft_address=DATASET_data_nft.address,
-    deployed_datatokens=[DATASET_datatoken],
-)
+# Add service and update asset
+DATASET_asset.add_service(DATASET_compute_service)
+DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
 
 print(f"DATASET_asset did = '{DATASET_asset.did}'")
 ```
@@ -120,15 +104,16 @@ In the same Python console:
 
 ```python
 # Publish data NFT & datatoken for algorithm
-ALGO_data_nft = ocean.create_data_nft("ALGO_DN1", "ALGO_DN1", alice_wallet)
-print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
+ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
-ALGO_datatoken = ALGO_data_nft.create_datatoken("ALGO_DT1", "ALGO_DT1", from_wallet=alice_wallet)
+name = "grp"
+(ALGO_data_nft, ALGO_datatoken, ALGO_asset) = ocean.assets.create_url_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True)
+
+print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
 ALGO_date_created = "2021-12-28T10:55:11Z"
-
 ALGO_metadata = {
     "created": ALGO_date_created,
     "updated": ALGO_date_created,
@@ -150,23 +135,11 @@ ALGO_metadata = {
     }
 }
 
-# ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
-)
-
-ALGO_files = [ALGO_url_file]
-
-# Publish asset with compute service on-chain.
-# The download (access service) is automatically created, but you can explore other options as well
-ALGO_asset = ocean.assets.create(
-    metadata=ALGO_metadata,
-    publisher_wallet=alice_wallet,
-    files=ALGO_files,
-    data_nft_address=ALGO_data_nft.address,
-    deployed_datatokens=[ALGO_datatoken],
-)
+# update ALGO_Asset metadata
+ALGO_asset.metadata.update(ALGO_metadata)
+ALGO_asset = ocean.assets.update(
+    asset=ALGO_asset, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    
 
 print(f"ALGO_asset did = '{ALGO_asset.did}'")
 ```
@@ -175,9 +148,10 @@ print(f"ALGO_asset did = '{ALGO_asset.did}'")
 
 In the same Python console:
 ```python
-compute_service = DATASET_asset.services[0]
+compute_service = DATASET_asset.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_asset)
 DATASET_asset = ocean.assets.update(DATASET_asset, alice_wallet)
+
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
@@ -206,7 +180,7 @@ ALGO_did = ALGO_asset.did
 DATASET_asset = ocean.assets.resolve(DATASET_did)
 ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-compute_service = DATASET_asset.services[0]
+compute_service = DATASET_asset.services[1]
 algo_service = ALGO_asset.services[0]
 free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
 
