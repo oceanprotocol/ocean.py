@@ -21,7 +21,12 @@ def test_simple_remote_readme(monkeypatch):
         __file__, "..", "..", "..", "generated-readmes", "test_simple-remote.py"
     )
 
-    result = runpy.run_path(str(script), run_name="__main__")
+    try:
+        result = runpy.run_path(str(script), run_name="__main__")
+    except AssertionError as e:  # skip if zero funds in account
+        if "Alice needs MATIC" in str(e) or "Bob needs MATIC" in str(e):
+            return
+        raise (e)
     ocean = result["ocean"]
     alice_wallet = result["alice_wallet"]
 
