@@ -64,7 +64,7 @@ def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]
 
-    if network_addresses is None:
+    if network_addresses is None or len(network_addresses) == 0:
         raise Exception(
             f"Address not found for {network_name}. Please check your address file."
         )
