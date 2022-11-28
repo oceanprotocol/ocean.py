@@ -10,7 +10,7 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
@@ -44,14 +44,14 @@ class OceanCompute:
         additional_datasets: List[ComputeInput] = [],
     ) -> str:
         metadata_cache_uri = self._config_dict.get("METADATA_CACHE_URI")
-        ddo = Aquarius.get_instance(metadata_cache_uri).get_ddo(dataset.did)
-        service = ddo.get_service_by_id(dataset.service_id)
+        asset = Aquarius.get_instance(metadata_cache_uri).get_ddo(dataset.did)
+        service = asset.get_service_by_id(dataset.service_id)
         assert (
             ServiceTypes.CLOUD_COMPUTE == service.type
         ), "service at serviceId is not of type compute service."
 
         consumable_result = is_consumable(
-            ddo,
+            asset,
             service,
             {"type": "address", "value": consumer_wallet.address},
             with_connectivity_check=True,
@@ -73,18 +73,20 @@ class OceanCompute:
         return job_info["jobId"]
 
     @enforce_types
-    def status(self, ddo: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
+    def status(
+        self, asset: Asset, service: Service, job_id: str, wallet
+    ) -> Dict[str, Any]:
         """
         Gets job status.
 
-        :param ddo: DDO offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
         job_info = self._data_provider.compute_job_status(
-            ddo.did, job_id, service, wallet
+            asset.did, job_id, service, wallet
         )
         job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
 
@@ -92,12 +94,12 @@ class OceanCompute:
 
     @enforce_types
     def result(
-        self, ddo: DDO, service: Service, job_id: str, index: int, wallet
+        self, asset: Asset, service: Service, job_id: str, index: int, wallet
     ) -> Dict[str, Any]:
         """
         Gets job result.
 
-        :param ddo: DDO offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param index: compute result index
@@ -111,7 +113,7 @@ class OceanCompute:
     @enforce_types
     def compute_job_result_logs(
         self,
-        ddo: DDO,
+        asset: Asset,
         service: Service,
         job_id: str,
         wallet,
@@ -120,30 +122,32 @@ class OceanCompute:
         """
         Gets job output if exists.
 
-        :param ddo: DDO offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         result = self._data_provider.compute_job_result_logs(
-            ddo, job_id, service, wallet, log_type
+            asset, job_id, service, wallet, log_type
         )
 
         return result
 
     @enforce_types
-    def stop(self, ddo: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
+    def stop(
+        self, asset: Asset, service: Service, job_id: str, wallet
+    ) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 
-        :param ddo: DDO offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         job_info = self._data_provider.stop_compute_job(
-            ddo.did, job_id, service, wallet
+            asset.did, job_id, service, wallet
         )
         job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
         return job_info

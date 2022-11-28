@@ -14,7 +14,7 @@ from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.assets.asset import Asset
 from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -46,49 +46,49 @@ class Aquarius:
 
         self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
-        logging.debug(f"Aquarius (metadata store) connected at {aquarius_url}")
-        logging.debug(f"Aquarius API documentation at {aquarius_url}/api/v1/docs")
-        logging.debug(f"Aquarius DDOs at {self.base_url}")
+        logging.debug(f"Metadata Store connected at {aquarius_url}")
+        logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
+        logging.debug(f"Metadata assets at {self.base_url}")
 
     @classmethod
     def get_instance(cls, metadata_cache_uri: str) -> "Aquarius":
         return cls(metadata_cache_uri)
 
     @enforce_types
-    def get_ddo(self, did: str) -> Optional[DDO]:
+    def get_ddo(self, did: str) -> Optional[Asset]:
         """
-        Retrieve DDO for a given DID.
+        Retrieve asset ddo for a given did.
 
-        :param did: DID string
-        :return: DDO instance
+        :param did: Asset DID string
+        :return: Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
             response_dict = response.json()
 
-            return DDO.from_dict(response_dict)
+            return Asset.from_dict(response_dict)
 
         return None
 
     @enforce_types
     def ddo_exists(self, did: str) -> bool:
         """
-        Return whether the DDO with this did exists in Aqua
+        Return whether the Asset with this did exists in Aqua
 
-        :param did: DID string
+        :param did: Asset DID string
         :return: bool
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-        return f"DID {did} not found in Elasticsearch" not in str(response)
+        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
     def get_ddo_metadata(self, did: str) -> dict:
         """
-        Retrieve DDO's "metadata" field, for a given did.
+        Retrieve asset metadata for a given did.
 
-        :param did: DID string
-        :return: metadata key of the DDO instance
+        :param did: Asset DID string
+        :return: metadata key of the Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/metadata/{did}")
         if response.status_code == 200:
@@ -110,7 +110,7 @@ class Aquarius:
         Example: query_search({"price":[0,10]})
 
         :param search_query: Python dictionary, query following elasticsearch syntax
-        :return: List of DDO
+        :return: List of Asset instance
         """
         response = self.requests_session.post(
             f"{self.base_url}/query",
@@ -124,15 +124,15 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_ddo(self, ddo: DDO) -> Tuple[bool, Union[list, dict]]:
+    def validate_asset(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
         """
-        Validate the ddo.
+        Validate the asset.
 
-        :param ddo: conforming to the ddo accepted by Ocean Protocol, DDO
+        :param asset: conforming to the asset accepted by Ocean Protocol, Asset
         :return: bool
         """
-        ddo_dict = ddo.as_dictionary()
-        data = json.dumps(ddo_dict, separators=(",", ":")).encode("utf-8")
+        asset_dict = asset.as_dictionary()
+        data = json.dumps(asset_dict, separators=(",", ":")).encode("utf-8")
 
         response = self.requests_session.post(
             f"{self.base_url.replace('/v1/', '/')}/ddo/validate",
@@ -148,7 +148,7 @@ class Aquarius:
         return False, parsed_response
 
     @enforce_types
-    def wait_for_ddo(self, did: str, timeout=60):
+    def wait_for_asset(self, did: str, timeout=60):
         start = time.time()
         ddo = None
         while not ddo:
@@ -163,19 +163,19 @@ class Aquarius:
         return ddo
 
     @enforce_types
-    def wait_for_ddo_update(self, ddo_in: DDO, tx: str):
+    def wait_for_asset_update(self, asset: Asset, tx: str):
         start = time.time()
         ddo = None
         while True:
             try:
-                ddo = self.get_ddo(ddo_in.did)
+                ddo = self.get_ddo(asset.did)
             except ValueError:
                 pass
             if not ddo:
                 time.sleep(0.2)
             elif ddo.event.get("tx") == tx:
                 logger.debug(
-                    f"Transaction matching the given tx id detected in metadata store. ddo_in.event = {ddo_in.event}"
+                    f"Transaction matching the given tx id detected in metadata store. asset.event = {ddo.event}"
                 )
                 break
 
