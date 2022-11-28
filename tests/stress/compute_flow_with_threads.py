@@ -81,7 +81,7 @@ def c2d_flow_readme(
     )
 
     # Publish asset with compute service on-chain.
-    DATA_asset = ocean.assets.create(
+    DATA_ddo = ocean.assets.create(
         metadata=DATA_metadata,
         publisher_wallet=publisher_wallet,
         files=DATA_files,
@@ -90,7 +90,7 @@ def c2d_flow_readme(
         deployed_datatokens=[DATA_datatoken],
     )
 
-    assert DATA_asset.did, "create dataset with compute service unsuccessful"
+    assert DATA_ddo.did, "create dataset with compute service unsuccessful"
 
     # Publish the algorithm NFT token
     ALGO_nft_token = ocean.create_data_nft("NFT1", "NFT1", publisher_wallet)
@@ -134,7 +134,7 @@ def c2d_flow_readme(
 
     # Publish asset with compute service on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
-    ALGO_asset = ocean.assets.create(
+    ALGO_ddo = ocean.assets.create(
         metadata=ALGO_metadata,
         publisher_wallet=publisher_wallet,
         files=ALGO_files,
@@ -142,11 +142,11 @@ def c2d_flow_readme(
         deployed_datatokens=[ALGO_datatoken],
     )
 
-    assert ALGO_asset.did, "create algorithm unsuccessful"
+    assert ALGO_ddo.did, "create algorithm unsuccessful"
 
-    compute_service = DATA_asset.services[0]
-    compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-    DATA_asset = ocean.assets.update(DATA_asset, publisher_wallet)
+    compute_service = DATA_ddo.services[0]
+    compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
+    DATA_ddo = ocean.assets.update(DATA_ddo, publisher_wallet)
 
     DATA_datatoken.mint(
         consumer_wallet.address, Web3.toWei(5, "ether"), publisher_wallet
@@ -156,15 +156,15 @@ def c2d_flow_readme(
     )
 
     # Convenience variables
-    DATA_did = DATA_asset.did
-    ALGO_did = ALGO_asset.did
+    DATA_did = DATA_ddo.did
+    ALGO_did = ALGO_ddo.did
 
     # Operate on updated and indexed assets
-    DATA_asset = ocean.assets.resolve(DATA_did)
-    ALGO_asset = ocean.assets.resolve(ALGO_did)
+    DATA_ddo = ocean.assets.resolve(DATA_did)
+    ALGO_ddo = ocean.assets.resolve(ALGO_did)
 
-    compute_service = get_first_service_by_type(DATA_asset, "compute")
-    algo_service = get_first_service_by_type(ALGO_asset, "access")
+    compute_service = get_first_service_by_type(DATA_ddo, "compute")
+    algo_service = get_first_service_by_type(ALGO_ddo, "access")
 
     free_c2d_env = ocean.compute.get_free_c2d_environment(
         compute_service.service_endpoint
@@ -199,7 +199,7 @@ def c2d_flow_readme(
     succeeded = False
     for _ in range(0, 200):
         status = ocean.compute.status(
-            DATA_asset, compute_service, job_id, consumer_wallet
+            DATA_ddo, compute_service, job_id, consumer_wallet
         )
         if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
@@ -214,7 +214,7 @@ def c2d_flow_readme(
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(
-            DATA_asset, compute_service, job_id, i, consumer_wallet
+            DATA_ddo, compute_service, job_id, i, consumer_wallet
         )
         assert result, "result retrieval unsuccessful"
         print(f"result index: {i}, type: {result_type}, contents: {result}")

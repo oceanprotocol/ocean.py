@@ -66,8 +66,8 @@ def test_reuse_order_fees(
         amount_to_transfer=int_units("4000", bt.decimals()),
     )
 
-    # Publish asset, service, and datatoken. Orders expire after 5 seconds
-    asset, service, dt = create_asset_with_order_fee_and_timeout(
+    # Publish ddo, service, and datatoken. Orders expire after 5 seconds
+    ddo, service, dt = create_asset_with_order_fee_and_timeout(
         config=config,
         file=file1,
         data_nft=data_nft,
@@ -108,7 +108,7 @@ def test_reuse_order_fees(
     # Start order: pay order fees and provider fees
     start_order_receipt = dt.start_order(
         consumer=consumer_wallet.address,
-        service_index=asset.get_index_of_service(service),
+        service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
         provider_fee_token=provider_fees["providerFeeToken"],
         provider_fee_amount=provider_fees["providerFeeAmount"],
