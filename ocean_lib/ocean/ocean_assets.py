@@ -295,7 +295,15 @@ class OceanAssets:
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         return self._create1(name, files, publisher_wallet, wait_for_aqua)
-
+    
+    @enforce_types
+    def create_url_algo(
+        self, name: str, url: str, publisher_wallet, container: str, wait_for_aqua: bool = True
+    ) -> tuple:
+        """Create an algo of type "UrlFile", with good defaults"""
+        files = [UrlFile(url)]
+        return self._create1(name, files, publisher_wallet, wait_for_aqua, container)
+    
     @enforce_types
     def _create1(
         self,
@@ -303,6 +311,7 @@ class OceanAssets:
         files: list,
         publisher_wallet,
         wait_for_aqua: bool = True,
+        container: str = '',
     ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
 
@@ -319,6 +328,19 @@ class OceanAssets:
             "type": "dataset",
             "author": publisher_wallet.address[:7],
             "license": "CC0: PublicDomain",
+        }
+        if container == 'python':
+            metadata['type']: "algorithm"
+            metadata['algorithm'] = {
+                "language": "python",
+                "format": "docker-image",
+                "version": "0.1",
+                "container": {
+                "entrypoint": "python $ALGO",
+                "image": "oceanprotocol/algo_dockers",
+                "tag": "python-branin",
+                "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+                },
         }
 
         OCEAN_address = get_ocean_token_address(self._config_dict)
