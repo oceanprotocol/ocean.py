@@ -26,7 +26,7 @@ class Aquarius:
     @enforce_types
     def __init__(self, aquarius_url: str) -> None:
         """
-        The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API.
+        This class wraps Aquarius REST API.
 
         :param aquarius_url: Url of the aquarius instance.
         """
@@ -46,9 +46,9 @@ class Aquarius:
 
         self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
-        logging.debug(f"Metadata Store connected at {aquarius_url}")
-        logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
-        logging.debug(f"Metadata assets at {self.base_url}")
+        logging.debug(f"Aquarius connected at {aquarius_url}")
+        logging.debug(f"Aquarius API documentation at {aquarius_url}/api/v1/docs")
+        logging.debug(f"Metadata assets (DDOs) at {self.base_url}")
 
     @classmethod
     def get_instance(cls, metadata_cache_uri: str) -> "Aquarius":
@@ -56,12 +56,7 @@ class Aquarius:
 
     @enforce_types
     def get_ddo(self, did: str) -> Optional[Asset]:
-        """
-        Retrieve asset ddo for a given did.
-
-        :param did: Asset DID string
-        :return: Asset instance
-        """
+        """Retrieve ddo for a given did."""
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
@@ -73,23 +68,13 @@ class Aquarius:
 
     @enforce_types
     def ddo_exists(self, did: str) -> bool:
-        """
-        Return whether the Asset with this did exists in Aqua
-
-        :param did: Asset DID string
-        :return: bool
-        """
+        """Is this DDO in Aqua?"""
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
     def get_ddo_metadata(self, did: str) -> dict:
-        """
-        Retrieve asset metadata for a given did.
-
-        :param did: Asset DID string
-        :return: metadata key of the Asset instance
-        """
+        """Returns a given DDO's "metadata" field values"""
         response = self.requests_session.get(f"{self.base_url}/metadata/{did}")
         if response.status_code == 200:
             return response.json()
@@ -110,7 +95,7 @@ class Aquarius:
         Example: query_search({"price":[0,10]})
 
         :param search_query: Python dictionary, query following elasticsearch syntax
-        :return: List of Asset instance
+        :return: List of Asset (DDO) instance
         """
         response = self.requests_session.post(
             f"{self.base_url}/query",
@@ -125,11 +110,8 @@ class Aquarius:
 
     @enforce_types
     def validate_ddo(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
-        """
-        Validate the asset.
-
-        :param asset: conforming to the asset accepted by Ocean Protocol, Asset
-        :return: bool
+        """Does the DDO conform to the Ocean DDO schema?
+        Schema definition: https://docs.oceanprotocol.com/core-concepts/did-ddo
         """
         asset_dict = asset.as_dictionary()
         data = json.dumps(asset_dict, separators=(",", ":")).encode("utf-8")
