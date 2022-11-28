@@ -19,8 +19,8 @@ from web3 import Web3
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
+from ocean_lib.assets.ddo import DDO
+from ocean_lib.assets.ddo_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
@@ -68,17 +68,17 @@ class OceanAssets:
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
     @enforce_types
-    def validate(self, asset: Asset) -> Tuple[bool, list]:
+    def validate(self, asset: DDO) -> Tuple[bool, list]:
         """
         Validate that the asset is ok to be stored in aquarius.
 
-        :param asset: Asset.
+        :param asset: DDO.
         :return: (bool, list) list of errors, empty if valid
         """
         # Validation by Aquarius
         validation_result, validation_errors = self._aquarius.validate_ddo(asset)
         if not validation_result:
-            msg = f"Asset has validation errors: {validation_errors}"
+            msg = f"DDO has validation errors: {validation_errors}"
             logger.error(msg)
             raise ValueError(msg)
 
@@ -196,7 +196,7 @@ class OceanAssets:
     @staticmethod
     @enforce_types
     def _encrypt_ddo(
-        asset: Asset,
+        asset: DDO,
         provider_uri: str,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -375,7 +375,7 @@ class OceanAssets:
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
         wait_for_aqua: bool = True,
         return_asset: bool = True,
-    ) -> Optional[Asset]:
+    ) -> Optional[DDO]:
         """Register an asset on-chain.
 
         Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
@@ -462,7 +462,7 @@ class OceanAssets:
         data_nft = DataNFT(self._config_dict, data_nft_address)
 
         # Create a DDO object
-        asset = Asset()
+        asset = DDO()
 
         # Generating the did and adding to the ddo.
         did = f"did:op:{create_checksum(data_nft.address + str(self._chain_id))}"
@@ -611,12 +611,12 @@ class OceanAssets:
     @enforce_types
     def update(
         self,
-        asset: Asset,
+        asset: DDO,
         publisher_wallet,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
-    ) -> Optional[Asset]:
+    ) -> Optional[DDO]:
         """Update an asset on-chain.
 
         :param asset: The updated asset to update on-chain
@@ -624,7 +624,7 @@ class OceanAssets:
         :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
-        :return: Optional[Asset] the updated Asset or None if updated asset not found in metadata cache
+        :return: Optional[DDO] the updated DDO or None if updated asset not found in metadata cache
         """
 
         self._assert_ddo_metadata(asset.metadata)
@@ -647,7 +647,7 @@ class OceanAssets:
         # Validation by Aquarius
         validation_result, errors_or_proof = self.validate(asset)
         if not validation_result:
-            msg = f"Asset has validation errors: {errors_or_proof}"
+            msg = f"DDO has validation errors: {errors_or_proof}"
             logger.error(msg)
             raise ValueError(msg)
 
@@ -676,7 +676,7 @@ class OceanAssets:
         return self._aquarius.wait_for_ddo_update(asset, tx_result.txid)
 
     @enforce_types
-    def resolve(self, did: str) -> "Asset":
+    def resolve(self, did: str) -> "DDO":
         return self._aquarius.get_ddo(did)
 
     @enforce_types
@@ -689,7 +689,7 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         text = text.replace(":", "\\:").replace("\\\\:", "\\:")
         return [
-            Asset.from_dict(ddo_dict["_source"])
+            DDO.from_dict(ddo_dict["_source"])
             for ddo_dict in self._aquarius.query_search(
                 {"query": {"query_string": {"query": text}}}
             )
@@ -706,7 +706,7 @@ class OceanAssets:
         """
         logger.info(f"Searching asset query: {query}")
         return [
-            Asset.from_dict(ddo_dict["_source"])
+            DDO.from_dict(ddo_dict["_source"])
             for ddo_dict in self._aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
@@ -721,7 +721,7 @@ class OceanAssets:
         - 0th service of the datatoken
         - the service *is* a download service
         """
-        # Retrieve the Asset and datatoken objects
+        # Retrieve the DDO and datatoken objects
         print("Resolve did...")
         asset = self.resolve(asset_did)
         datatoken_address = asset.datatokens[0]["address"]
@@ -762,7 +762,7 @@ class OceanAssets:
     @enforce_types
     def download_asset(
         self,
-        asset: Asset,
+        asset: DDO,
         consumer_wallet,
         destination: str,
         order_tx_id: Union[str, bytes],
@@ -793,7 +793,7 @@ class OceanAssets:
     @enforce_types
     def pay_for_access_service(
         self,
-        asset: Asset,
+        asset: DDO,
         wallet,
         service: Optional[Service] = None,
         consume_market_order_fee_address: Optional[str] = None,

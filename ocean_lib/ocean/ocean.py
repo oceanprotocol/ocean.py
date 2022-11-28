@@ -11,7 +11,7 @@ from typing import Dict, List, Optional, Type, Union
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import config_defaults
 from ocean_lib.models.compute_input import ComputeInput
@@ -262,7 +262,7 @@ class Ocean:
 
     @enforce_types
     def retrieve_provider_fees(
-        self, asset: Asset, access_service: Service, publisher_wallet
+        self, asset: DDO, access_service: Service, publisher_wallet
     ) -> tuple:
 
         initialize_response = DataServiceProvider.initialize(

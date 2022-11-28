@@ -11,7 +11,7 @@ from attr import dataclass
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.datatoken import Datatoken
@@ -132,7 +132,7 @@ def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
 
 @dataclass
 class AssetAndUserdata:
-    ddo: Asset
+    ddo: DDO
     userdata: Optional[dict]
 
 

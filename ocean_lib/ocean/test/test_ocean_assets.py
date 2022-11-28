@@ -14,7 +14,7 @@ from brownie import network
 from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
@@ -208,7 +208,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
 
     assert (
         len(publisher_ocean_instance.assets.search(identifier)) == 0
-    ), "Asset search failed."
+    ), "DDO search failed."
 
     create_asset(publisher_ocean_instance, publisher_wallet, metadata)
 
@@ -253,7 +253,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
 def test_ocean_assets_validate(publisher_ocean_instance):
     """Tests that the validate function returns an error for invalid metadata."""
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
 
     assert publisher_ocean_instance.assets.validate(
         ddo
@@ -261,7 +261,7 @@ def test_ocean_assets_validate(publisher_ocean_instance):
 
     ddo_dict = get_sample_ddo()
     ddo_dict["id"] = "something not conformant"
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
 
     with pytest.raises(ValueError):
         publisher_ocean_instance.assets.validate(ddo)
@@ -299,7 +299,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
-        asset = Asset.from_dict(get_sample_ddo())
+        asset = DDO.from_dict(get_sample_ddo())
         mock.return_value = asset
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
@@ -349,7 +349,7 @@ def test_pay_for_access_service_insufficient_balance(
     """Tests if balance is lower than the purchased amount."""
     ddo_dict = copy.deepcopy(get_sample_ddo())
     ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
-    asset = Asset.from_dict(ddo_dict)
+    asset = DDO.from_dict(ddo_dict)
 
     empty_wallet = accounts.add()
 

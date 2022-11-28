@@ -9,7 +9,7 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -224,7 +224,7 @@ def create_asset_with_order_fee_and_timeout(
     publish_market_order_fee_token: str,
     publish_market_order_fee_amount: int,
     timeout: int,
-) -> Tuple[Asset, Service, Datatoken]:
+) -> Tuple[DDO, Service, Datatoken]:
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(

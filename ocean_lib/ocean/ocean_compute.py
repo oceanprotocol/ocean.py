@@ -10,8 +10,8 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_downloader import is_consumable
+from ocean_lib.assets.ddo import DDO
+from ocean_lib.assets.ddo_downloader import is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
@@ -74,12 +74,12 @@ class OceanCompute:
 
     @enforce_types
     def status(
-        self, asset: Asset, service: Service, job_id: str, wallet
+        self, asset: DDO, service: Service, job_id: str, wallet
     ) -> Dict[str, Any]:
         """
         Gets job status.
 
-        :param asset: Asset offering the compute service of this job
+        :param asset: DDO offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
@@ -94,12 +94,12 @@ class OceanCompute:
 
     @enforce_types
     def result(
-        self, asset: Asset, service: Service, job_id: str, index: int, wallet
+        self, asset: DDO, service: Service, job_id: str, index: int, wallet
     ) -> Dict[str, Any]:
         """
         Gets job result.
 
-        :param asset: Asset offering the compute service of this job
+        :param asset: DDO offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param index: compute result index
@@ -113,7 +113,7 @@ class OceanCompute:
     @enforce_types
     def compute_job_result_logs(
         self,
-        asset: Asset,
+        asset: DDO,
         service: Service,
         job_id: str,
         wallet,
@@ -122,7 +122,7 @@ class OceanCompute:
         """
         Gets job output if exists.
 
-        :param asset: Asset offering the compute service of this job
+        :param asset: DDO offering the compute service of this job
         :param service: compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
@@ -136,12 +136,12 @@ class OceanCompute:
 
     @enforce_types
     def stop(
-        self, asset: Asset, service: Service, job_id: str, wallet
+        self, asset: DDO, service: Service, job_id: str, wallet
     ) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 
-        :param asset: Asset offering the compute service of this job
+        :param asset: DDO offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)

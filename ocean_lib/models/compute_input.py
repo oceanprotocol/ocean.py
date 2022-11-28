@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
@@ -15,7 +15,7 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        asset: Asset,
+        asset: DDO,
         service: Service,
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
