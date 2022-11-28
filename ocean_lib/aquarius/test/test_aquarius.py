@@ -50,7 +50,7 @@ def test_aqua_functions_for_single_ddo(
         datatoken_bytess=[[b""]],
     )
 
-    asset = aquarius_instance.wait_for_asset(ddo.did)
+    asset = aquarius_instance.wait_for_ddo(ddo.did)
 
     assert asset.metadata == ddo.metadata
 
