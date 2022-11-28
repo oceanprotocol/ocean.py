@@ -105,6 +105,7 @@ mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
 #then run the tests
 pytest tests/readmes/test_readmes.py
+pytest /tests/integration/remote/test_mumbai_readme.py
 ```
 
 For envvars that aren't set, `pytest` uses values in `pytest.ini`.
