@@ -105,9 +105,9 @@ In the same Python console:
 ```python
 # Publish data NFT & datatoken for algorithm
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
-
 name = "grp"
 ALGO_container = "python"
+
 (ALGO_data_nft, ALGO_datatoken, ALGO_asset) = ocean.assets.create_url_algo(name, ALGO_url, alice_wallet, ALGO_container)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
