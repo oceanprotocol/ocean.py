@@ -71,10 +71,10 @@ Now, you're Bob. First, download the file.
 In the same Python console:
 ```python
 # Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
-did = ddo.did
+ddo_did = ddo.did
 
 # Bob gets a datatoken from the dispenser; sends it to the service; downloads
-file_name = ocean.assets.download_file(did, bob_wallet)
+file_name = ocean.assets.download_file(ddo_did, bob_wallet)
 ```
 
 Now, load the file and use its data.
@@ -113,7 +113,7 @@ Here are the three steps, un-bundled.
 In the same Python console:
 ```python
 # Bob gets an access token from the dispenser
-ddo = ocean.assets.resolve(did)
+ddo = ocean.assets.resolve(ddo_did)
 datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 amt_tokens = Web3.toWei(1, "ether")
@@ -125,7 +125,7 @@ order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 # Bob downloads the dataset
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    ddo=ddo,
+    asset=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
@@ -134,11 +134,3 @@ import glob
 file_name = glob.glob(file_path + "/*")[0]
 print(f"file_name: '{file_name}'")
 ```
-
-
-
-
-
-
-
-

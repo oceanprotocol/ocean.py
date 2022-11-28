@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D flow, using [remote services and Goerli testnet](https://docs.oceanprotocol.com/core-concepts/networks#goerli).
+This quickstart describes a C2D flow, using [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#goerli).
 
 Here are the steps:
 
@@ -55,22 +55,22 @@ In the same python console:
 
 ```python
 
-# Publish data NFT, datatoken, and ddo for dataset based on url
+# Publish data NFT, datatoken, and asset for dataset based on url
 
 # ocean.py offers multiple file object types. A simple url file is enough for here
 from ocean_lib.structures.file_objects import UrlFile
-DATASET_url_file = UrlFile(
+DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
 name = "Branin dataset"
-(DATASET_data_nft, DATASET_datatoken, DATASET_ddo) = ocean.assets.create_url_asset(name, DATASET_url_file.url, alice_wallet, wait_for_aqua=True)
-print(f"DATASET_data_nft address = '{DATASET_data_nft.address}'")
-print(f"DATASET_datatoken address = '{DATASET_datatoken.address}'")
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, alice_wallet, wait_for_aqua=True)
+print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
+print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 
 # Set the compute values for compute service
-DATASET_compute_values = {
+DATA_compute_values = {
     "allowRawAlgorithm": False,
     "allowNetworkAccess": True,
     "publisherTrustedAlgorithms": [],
@@ -80,22 +80,22 @@ DATASET_compute_values = {
 # Create the Service
 
 from ocean_lib.services.service import Service
-DATASET_files = [DATASET_url_file]
-DATASET_compute_service = Service(
+DATA_files = [DATA_url_file]
+DATA_compute_service = Service(
     service_id="2",
     service_type="compute",
     service_endpoint=ocean.config_dict["PROVIDER_URL"],
-    datatoken=DATASET_datatoken.address,
-    files=DATASET_files,
+    datatoken=DATA_datatoken.address,
+    files=DATA_files,
     timeout=3600,
-    compute_values=DATASET_compute_values,
+    compute_values=DATA_compute_values,
 )
 
 # Add service and update asset
-DATASET_ddo.add_service(DATASET_compute_service)
-DATASET_ddo = ocean.assets.update(DATASET_ddo, alice_wallet)
+DATA_ddo.add_service(DATA_compute_service)
+DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
 
-print(f"DATASET_ddo did = '{DATASET_ddo.did}'")
+print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
 
 ## 3. Alice publishes an algorithm
@@ -135,7 +135,7 @@ ALGO_metadata = {
     }
 }
 
-# update ALGO_ddo metadata
+# update ALGO_Asset metadata
 ALGO_ddo.metadata.update(ALGO_metadata)
 ALGO_ddo = ocean.assets.update(
     asset=ALGO_ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
@@ -148,9 +148,9 @@ print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
 
 In the same Python console:
 ```python
-compute_service = DATASET_ddo.services[1]
+compute_service = DATA_ddo.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
-DATASET_ddo = ocean.assets.update(DATASET_ddo, alice_wallet)
+DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
 
 ```
 
@@ -158,41 +158,41 @@ DATASET_ddo = ocean.assets.update(DATASET_ddo, alice_wallet)
 
 In the same Python console:
 ```python
-# Alice mints DATASET datatokens and ALGO datatokens to Bob.
+# Alice mints DATA datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
 from web3.main import Web3
-DATASET_datatoken.mint(bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet})
+DATA_datatoken.mint(bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet})
 ALGO_datatoken.mint(bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet})
 ```
 
 ## 6. Bob starts a compute job using a free C2D environment
 
-Only inputs needed: DATASET_did, ALGO_did. Everything else can get computed as needed.
+Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
 For demo purposes, we will use the free C2D environment, which requires no provider fees.
 
 In the same Python console:
 ```python
 # Convenience variables
-DATASET_did = DATASET_ddo.did
+DATA_did = DATA_ddo.did
 ALGO_did = ALGO_ddo.did
 
 # Operate on updated and indexed assets
-DATASET_ddo = ocean.assets.resolve(DATASET_did)
+DATA_ddo = ocean.assets.resolve(DATA_did)
 ALGO_ddo = ocean.assets.resolve(ALGO_did)
 
-compute_service = DATASET_ddo.services[1]
+compute_service = DATA_ddo.services[1]
 algo_service = ALGO_ddo.services[0]
 free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
 from ocean_lib.models.compute_input import ComputeInput
 
-DATASET_compute_input = ComputeInput(DATASET_ddo, compute_service)
+DATA_compute_input = ComputeInput(DATA_ddo, compute_service)
 ALGO_compute_input = ComputeInput(ALGO_ddo, algo_service)
 
 # Pay for dataset and algo for 1 day
 datasets, algorithm = ocean.assets.pay_for_compute_service(
-    datasets=[DATASET_compute_input],
+    datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,
     wallet=bob_wallet,
@@ -223,7 +223,7 @@ import time
 from decimal import Decimal
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATASET_ddo, compute_service, job_id, bob_wallet)
+    status = ocean.compute.status(DATA_ddo, compute_service, job_id, bob_wallet)
     if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -239,7 +239,7 @@ For the purpose of this tutorial, let's choose the second option.
 ```python
 # Retrieve algorithm output and log files
 output = ocean.compute.compute_job_result_logs(
-    DATASET_ddo, compute_service, job_id, bob_wallet
+    DATA_ddo, compute_service, job_id, bob_wallet
 )[0]
 
 import pickle
@@ -292,5 +292,4 @@ This means you can reuse the same ComputeInput and you don't need to regenerate 
 
 If you wish to upgrade the compute resources, you can use any (paid) C2D environment.
 Inspect the results of `ocean.ocean_compute.get_c2d_environments(service.service_endpoint)` and `ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)` for a preview of what you will pay.
-
 Don't forget to handle any minting, allowance or approvals on the desired token to ensure transactions pass.

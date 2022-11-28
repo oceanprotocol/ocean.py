@@ -4,16 +4,16 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 
-# Quickstart: Search Data Flow
+# Quickstart: Search Assets Flow
 
-This quickstart describes how to find data by their `tags`, using Aquarius.
+This quickstart describes how assets can be found by their `tags` from Aquarius.
 
 
 Here are the steps:
 
 1.  Setup
 2.  Alice creates few assets for testing
-3.  Alice searches & filters data by their `tags`
+3.  Alice searches & filters assets by their `tags`
 
 Let's go through each step.
 
@@ -38,33 +38,35 @@ Now, you're Alice. Using [publish-flow](publish-flow.md) model, do:
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-# Created a list of tags for the following datasets
+# Created a list of tags for the following assets
 tags = [
-    ["test", "ganache", "best"],
+    ["test", "ganache", "best asset"],
     ["test", "ocean"],
     ["AI", "dataset", "testing"],
 ]
-# Publish some assets for testing
+# Publish few assets for testing
 for tag in tags:
     (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
     print(f"Just published asset, with did={ddo.did}")
     
     # Update the metadata introducing `tags`
     ddo.metadata.update({"tags": tag})
-    ddo = ocean.assets.update(ddo=ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    print(f"Just updated the metadata")
+    ddo = ocean.assets.update(asset=ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```
 ## 3. Alice filters assets by their `tags`
 
-Alice can filter the assets by a given tag, and retrieve key info afterwards.
+Alice can filter the assets by a certain tag and after can retrieve the necessary
+information afterwards.
 
 ```python
-# Retrieve assets with tag name "test"
+# Get a list of assets filtered by a given tag.
+# All assets that contain the specified tag name
 tag = "test"
 all_ddos = ocean.assets.search(tag)
 
-# More powerful search: filter just by the `tags` key
+# Filter just by the `tags` key
 filtered_ddos = list(
     filter(
         lambda a: tag in a.metadata["tags"],
@@ -73,7 +75,7 @@ filtered_ddos = list(
 )
 
 # Make sure that the provided tag is valid.
-assert len(filtered_ddos) > 0, f"Nothing found not found having tag {tag}."
+assert len(filtered_ddos) > 0, "Assets not found with this tag."
 
 # Retrieve the wanted information from assets.
 for ddo in filtered_ddos:

@@ -85,7 +85,7 @@ print(f"order_tx_id = '{order_tx_id}'")
 # Bob downloads the file
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    ddo=ddo,
+    asset=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
@@ -118,7 +118,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
 
 # Bob now has access! He downloads the asset.
 file_path = ocean.assets.download_asset(
-    ddo=ddo,
+    asset=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id,
@@ -146,4 +146,3 @@ The file is in ARFF format, used by some AI/ML tools. In our example, it has two
 -3.9286,0.0000,206.1783
 ...
 ```
-
