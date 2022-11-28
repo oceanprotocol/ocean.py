@@ -55,7 +55,7 @@ class Aquarius:
         return cls(metadata_cache_uri)
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Optional[Asset]:
+    def get_ddo(self, did: str) -> Optional[Asset]:
         """
         Retrieve asset ddo for a given did.
 
@@ -152,7 +152,7 @@ class Aquarius:
         start = time.time()
         ddo = None
         while not ddo:
-            ddo = self.get_asset_ddo(did)
+            ddo = self.get_ddo(did)
 
             if not ddo:
                 time.sleep(0.2)
@@ -168,7 +168,7 @@ class Aquarius:
         ddo = None
         while True:
             try:
-                ddo = self.get_asset_ddo(asset.did)
+                ddo = self.get_ddo(asset.did)
             except ValueError:
                 pass
             if not ddo:

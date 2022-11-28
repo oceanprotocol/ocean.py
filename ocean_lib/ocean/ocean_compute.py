@@ -44,7 +44,7 @@ class OceanCompute:
         additional_datasets: List[ComputeInput] = [],
     ) -> str:
         metadata_cache_uri = self._config_dict.get("METADATA_CACHE_URI")
-        asset = Aquarius.get_instance(metadata_cache_uri).get_asset_ddo(dataset.did)
+        asset = Aquarius.get_instance(metadata_cache_uri).get_ddo(dataset.did)
         service = asset.get_service_by_id(dataset.service_id)
         assert (
             ServiceTypes.CLOUD_COMPUTE == service.type

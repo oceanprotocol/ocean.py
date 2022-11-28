@@ -677,7 +677,7 @@ class OceanAssets:
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
-        return self._aquarius.get_asset_ddo(did)
+        return self._aquarius.get_ddo(did)
 
     @enforce_types
     def search(self, text: str) -> list:

@@ -61,7 +61,7 @@ def test_aqua_functions_for_single_ddo(
     metadata_cache_uri = publisher_ocean_instance.config_dict.get("METADATA_CACHE_URI")
     resolved_asset_from_metadata_cache_uri = Aquarius.get_instance(
         metadata_cache_uri
-    ).get_asset_ddo(asset.did)
+    ).get_ddo(asset.did)
     assert isinstance(
         resolved_asset_from_metadata_cache_uri, Asset
     ), "The resolved asset is not an instance of Asset."
