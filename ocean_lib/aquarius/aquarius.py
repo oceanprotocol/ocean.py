@@ -124,7 +124,7 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_asset(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
+    def validate_ddo(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
         """
         Validate the asset.
 
@@ -148,7 +148,7 @@ class Aquarius:
         return False, parsed_response
 
     @enforce_types
-    def wait_for_asset(self, did: str, timeout=60):
+    def wait_for_ddo(self, did: str, timeout=60):
         start = time.time()
         ddo = None
         while not ddo:
@@ -163,7 +163,7 @@ class Aquarius:
         return ddo
 
     @enforce_types
-    def wait_for_asset_update(self, asset: Asset, tx: str):
+    def wait_for_ddo_update(self, asset: Asset, tx: str):
         start = time.time()
         ddo = None
         while True:
