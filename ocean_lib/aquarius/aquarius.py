@@ -83,7 +83,7 @@ class Aquarius:
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
-    def get_asset_metadata(self, did: str) -> dict:
+    def get_ddo_metadata(self, did: str) -> dict:
         """
         Retrieve asset metadata for a given did.
 
