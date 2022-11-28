@@ -61,13 +61,13 @@ Then, please refer to [publish-flow](publish-flow.md) to generate your metadata 
 Asset creation will be based on the deployment of Datatoken Enterprise token like this:
 
 ```python
-asset = ocean.assets.create(
+ddo = ocean.assets.create(
     metadata,
     alice_wallet,
     [url_file],
     deployed_datatokens=[datatoken_enterprise_token]
 )
-access_service = asset.services[0]
+access_service = ddo.services[0]
 
 # Create & activate dispenser
 dispenser = ocean.dispenser
@@ -109,7 +109,7 @@ OCEAN_token.approve(
     valid_until,
     provider_data,
 ) = ocean.retrieve_provider_fees(
-    asset=asset,
+    asset=ddo,
     access_service=access_service,
     publisher_wallet=alice_wallet
 )
@@ -159,13 +159,13 @@ Then, please refer to [publish-flow](publish-flow.md) to generate your metadata 
 Asset creation will be based on the deployment of Datatoken Enterprise token like this:
 
 ```python
-asset = ocean.assets.create(
+ddo = ocean.assets.create(
     metadata,
     alice_wallet,
     [url_file],
     deployed_datatokens=[datatoken_enterprise_token]
 )
-access_service = asset.services[0]
+access_service = ddo.services[0]
 
 # Bob buys 1 DT from the FRE and then startsOrder, while burning that DT
 fixed_rate_exchange = ocean.fixed_rate_exchange
@@ -191,7 +191,7 @@ exchange_id = ocean.create_fixed_rate(
     valid_until,
     provider_data,
 ) = ocean.retrieve_provider_fees(
-    asset=asset,
+    asset=ddo,
     access_service=access_service,
     publisher_wallet=alice_wallet
 )

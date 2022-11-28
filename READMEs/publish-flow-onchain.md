@@ -44,8 +44,8 @@ contract_abi = {
 		}
 
 #create asset
-(data_nft, datatoken, asset) = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, alice_wallet)
-print(f"Just published asset, with did={asset.did}")
+(data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, alice_wallet)
+print(f"Just published asset, with did={ddo.did}")
 ```
 
 That's it! You've created a data asset of "SmartContractCall" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
