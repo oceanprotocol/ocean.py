@@ -781,7 +781,7 @@ class OceanAssets:
         ), f"Service with type {ServiceTypes.ASSET_ACCESS} is not found."
 
         return download_asset_files(
-            asset=asset,
+            ddo=asset,
             service=service,
             consumer_wallet=consumer_wallet,
             destination=destination,
