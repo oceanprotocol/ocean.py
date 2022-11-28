@@ -135,9 +135,7 @@ class OceanCompute:
         return result
 
     @enforce_types
-    def stop(
-        self, asset: DDO, service: Service, job_id: str, wallet
-    ) -> Dict[str, Any]:
+    def stop(self, asset: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 
