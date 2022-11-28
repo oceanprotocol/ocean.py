@@ -41,7 +41,7 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 This README uses (d) - minting. Specifically, Alice mints a datatoken into Bob's wallet. In the same Python console:
 ```python
 from web3.main import Web3
-datatoken_address = asset.datatokens[0]["address"]
+datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 to_address = bob_wallet.address
 amt_tokens = Web3.toWei(10, "ether") #just need 1, send more for spare
@@ -53,7 +53,7 @@ datatoken.mint(to_address, amt_tokens, {"from": alice_wallet})
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access; then downloads
-file_name = ocean.assets.download_file(asset.did, bob_wallet)
+file_name = ocean.assets.download_file(ddo.did, bob_wallet)
 ```
 
 Bob can verify that the file is downloaded. In a new console:
@@ -79,13 +79,13 @@ Here are the last two steps, un-bundled.
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(asset, bob_wallet)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads the file
 # If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
-    asset=asset,
+    asset=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id
@@ -104,11 +104,11 @@ Here's how it looks, fully un-bundled.
 In the same python console:
 ```python
 # Bob retrieves the reference to the service object
-service = asset.services[0]
+service = ddo.services[0]
 
 # Bob sends a datatoken to the service, to get access
 order_tx_id = ocean.assets.pay_for_access_service(
-    asset,
+    ddo,
     bob_wallet,
     service,
     consume_market_order_fee_address=bob_wallet.address,
@@ -118,7 +118,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
 
 # Bob now has access! He downloads the asset.
 file_path = ocean.assets.download_asset(
-    asset=asset,
+    asset=ddo,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id,

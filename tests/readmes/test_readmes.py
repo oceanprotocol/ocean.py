@@ -90,7 +90,7 @@ def test_script_execution(script, monkeypatch):
                 str(prerequisite), run_name="__main__", init_globals=globs
             )
             for key in [
-                "asset",
+                "ddo",
                 "ZERO_ADDRESS",
                 # "did",
                 "metadata",

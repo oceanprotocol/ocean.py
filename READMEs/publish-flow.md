@@ -36,8 +36,8 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data NFT & datatoken & DDO asset
-(data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
-print(f"Just published asset, with did={asset.did}")
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+print(f"Just published asset, with did={ddo.did}")
 ```
 
 That's it! You've created a data asset of "UrlFile" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
@@ -68,7 +68,7 @@ url_file = UrlFile(
 
 # Publish data asset
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-asset = ocean.assets.create(
+ddo = ocean.assets.create(
     metadata,
     alice_wallet,
     [url_file],
@@ -82,7 +82,7 @@ asset = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-print(f"Just published asset, with did={asset.did}")
+print(f"Just published asset, with did={ddo.did}")
 ```
 
 ### Appendix: Metadata Encryption

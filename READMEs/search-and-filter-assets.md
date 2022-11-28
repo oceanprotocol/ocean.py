@@ -46,13 +46,13 @@ tags = [
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, asset) = ocean.assets.create_url_asset(name, url, alice_wallet)
-    print(f"Just published asset, with did={asset.did}")
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+    print(f"Just published asset, with did={ddo.did}")
     
     # Update the metadata introducing `tags`
-    asset.metadata.update({"tags": tag})
-    asset = ocean.assets.update(asset=asset, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    print(f"Just updated the metadata of the asset with did={asset.did}.")
+    ddo.metadata.update({"tags": tag})
+    ddo = ocean.assets.update(asset=ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```
 ## 3. Alice filters assets by their `tags`
@@ -64,23 +64,23 @@ information afterwards.
 # Get a list of assets filtered by a given tag.
 # All assets that contain the specified tag name
 tag = "test"
-all_assets = ocean.assets.search(tag)
+all_ddos = ocean.assets.search(tag)
 
 # Filter just by the `tags` key
-filtered_assets = list(
+filtered_ddos = list(
     filter(
         lambda a: tag in a.metadata["tags"],
-        list(filter(lambda a: "tags" in a.metadata.keys(), all_assets)),
+        list(filter(lambda a: "tags" in a.metadata.keys(), all_ddos)),
     )
 )
 
 # Make sure that the provided tag is valid.
-assert len(filtered_assets) > 0, "Assets not found with this tag."
+assert len(filtered_ddos) > 0, "Assets not found with this tag."
 
 # Retrieve the wanted information from assets.
-for asset in filtered_assets:
-    print(f"asset.did :{asset.did}")
-    print(f"asset.metadata :{asset.metadata}")
-    print(f"asset.nft :{asset.nft}")
-    print(f"asset.datatokens :{asset.datatokens}")
+for ddo in filtered_ddos:
+    print(f"ddo.did :{ddo.did}")
+    print(f"ddo.metadata :{ddo.metadata}")
+    print(f"ddo.nft :{ddo.nft}")
+    print(f"ddo.datatokens :{ddo.datatokens}")
 ```
