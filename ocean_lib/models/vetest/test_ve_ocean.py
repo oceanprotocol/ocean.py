@@ -33,14 +33,16 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
     OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
-    t0 = chain[-1].timestamp # ve funcs use block.timestamp, not chain.time()
+    t0 = chain[-1].timestamp  # ve funcs use block.timestamp, not chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
     t2 = t1 + WEEK
     chain.sleep(t1 - t0)
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
-    veOCEAN.create_lock(TA, t2, {"from": alice_wallet, "gas_limit": chain.block_gas_limit})
+    veOCEAN.create_lock(
+        TA, t2, {"from": alice_wallet, "gas_limit": chain.block_gas_limit}
+    )
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
 
