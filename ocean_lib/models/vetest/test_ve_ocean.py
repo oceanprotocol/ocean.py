@@ -18,7 +18,6 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 
 
 @pytest.mark.unit
-@pytest.mark.skip(reason="Don't skip, once fixed #1096")
 def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     # inspiration from df-py/util/test/veOcean/test_lock.py
     assert veOCEAN.symbol() == "veOCEAN"
@@ -34,14 +33,16 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
     OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
-    t0 = chain.time()
+    t0 = chain[-1].timestamp  # ve funcs use block.timestamp, not chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
     t2 = t1 + WEEK
     chain.sleep(t1 - t0)
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
-    veOCEAN.create_lock(TA, t2, {"from": alice_wallet})
+    veOCEAN.create_lock(
+        TA, t2, {"from": alice_wallet, "gas_limit": chain.block_gas_limit}
+    )
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
 
@@ -51,7 +52,7 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
 
     alice_vote_power = float(
-        Web3.fromWei(veOCEAN.balanceOf(alice_wallet, chain.time()), "ether")
+        Web3.fromWei(veOCEAN.balanceOf(alice_wallet, chain[-1].timestamp), "ether")
     )
     expected_vote_power = float(Web3.fromWei(TA, "ether")) * WEEK / MAXTIME
     assert alice_vote_power == pytest.approx(expected_vote_power, TA / 20.0)
@@ -59,7 +60,7 @@ def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
     brownie.network.chain.sleep(t2)
     chain.mine()
 
-    veOCEAN.withdraw({"from": alice_wallet})
+    veOCEAN.withdraw({"from": alice_wallet, "gas_limit": chain.block_gas_limit})
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
