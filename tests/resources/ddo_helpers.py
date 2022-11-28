@@ -297,7 +297,7 @@ def build_credentials_dict() -> dict:
     return {"allow": [], "deny": []}
 
 
-def wait_for_ddo(ocean, did, timeout=30):
+def wait_for_asset(ocean, did, timeout=30):
     start = time.time()
     ddo = None
     while not ddo:

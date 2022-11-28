@@ -48,7 +48,7 @@ def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
     # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
     ocean.assets._aquarius.base_url = "http://not-valid-aqua.com"
     with pytest.raises(Exception):
-        ocean.assets._aquarius.validate_ddo(Asset())
+        ocean.assets._aquarius.validate_asset(Asset())
 
 
 def _create_ddo(ocean, publisher):
