@@ -70,7 +70,7 @@ class Aquarius:
     def ddo_exists(self, did: str) -> bool:
         """Return whether the ddo with this did exists in Aqua"""
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-        #do _not_ change the string below unless github.com/oceanprotocol/aquarius is changed accordingly
+        # do _not_ change the string below unless github.com/oceanprotocol/aquarius is changed accordingly
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
@@ -116,7 +116,7 @@ class Aquarius:
 
     @enforce_types
     def validate_ddo(self, ddo: Asset) -> Tuple[bool, Union[list, dict]]:
-        """Does the DDO conform to the Ocean DDO schema? 
+        """Does the DDO conform to the Ocean DDO schema?
         Schema definition: https://docs.oceanprotocol.com/core-concepts/did-ddo"""
         ddo_dict = ddo.as_dictionary()
         data = json.dumps(ddo_dict, separators=(",", ":")).encode("utf-8")
