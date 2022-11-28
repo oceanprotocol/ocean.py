@@ -76,7 +76,7 @@ class OceanAssets:
         :return: (bool, list) list of errors, empty if valid
         """
         # Validation by Aquarius
-        validation_result, validation_errors = self._aquarius.validate_asset(asset)
+        validation_result, validation_errors = self._aquarius.validate_ddo(asset)
         if not validation_result:
             msg = f"Asset has validation errors: {validation_errors}"
             logger.error(msg)
@@ -597,7 +597,7 @@ class OceanAssets:
 
         # Fetch the asset on chain
         if wait_for_aqua:
-            asset = self._aquarius.wait_for_asset(did)
+            asset = self._aquarius.wait_for_ddo(did)
 
         # Return
         if return_asset:
@@ -673,7 +673,7 @@ class OceanAssets:
             {"from": publisher_wallet},
         )
 
-        return self._aquarius.wait_for_asset_update(asset, tx_result.txid)
+        return self._aquarius.wait_for_ddo_update(asset, tx_result.txid)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
