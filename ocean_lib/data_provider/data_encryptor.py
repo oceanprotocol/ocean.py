@@ -53,7 +53,7 @@ class DataEncryptor(DataServiceProviderBase):
         )
 
         logger.info(
-            f"DDO urls encrypted successfully, encrypted urls str: {response.text},"
+            f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
             f" encryptedEndpoint {encrypt_endpoint}"
         )
 

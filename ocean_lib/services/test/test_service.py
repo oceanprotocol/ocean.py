@@ -227,7 +227,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         get_sample_ddo_with_compute_service("ddo_v4_with_compute_service2.json")
     )
 
-    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+    with patch("ocean_lib.assets.ddo.FileInfoProvider.fileinfo") as mock:
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
@@ -245,7 +245,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         == publisher_trusted_algorithms
     )
 
-    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+    with patch("ocean_lib.assets.ddo.FileInfoProvider.fileinfo") as mock:
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
@@ -264,7 +264,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     ), "Added a new trusted algorithm failed. The list is empty."
     assert len(new_publisher_trusted_algorithms) == 2
 
-    with patch("ocean_lib.assets.asset.FileInfoProvider.fileinfo") as mock:
+    with patch("ocean_lib.assets.ddo.FileInfoProvider.fileinfo") as mock:
         the_response = Mock(spec=Response)
         the_response.json.return_value = [
             {
