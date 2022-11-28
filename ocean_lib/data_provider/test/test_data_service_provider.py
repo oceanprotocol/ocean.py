@@ -14,7 +14,7 @@ from requests.models import Response
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
@@ -113,7 +113,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         compute_values=dict(),
     )
 
-    mock_asset = Asset()
+    mock_asset = DDO()
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
@@ -122,7 +122,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
             consumer=consumer_wallet,
             dataset=ComputeInput(mock_asset, mock_service, "tx_id"),
             compute_environment="some_env",
-            algorithm=ComputeInput(Asset(), mock_service, "tx_id"),
+            algorithm=ComputeInput(DDO(), mock_service, "tx_id"),
         )
     mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
     with pytest.raises(
@@ -131,9 +131,9 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput(Asset(), mock_service, "tx"),
+            dataset=ComputeInput(DDO(), mock_service, "tx"),
             compute_environment="some_env",
-            algorithm=ComputeInput(Asset(), mock_service, "tx"),
+            algorithm=ComputeInput(DDO(), mock_service, "tx"),
         )
 
 
@@ -529,7 +529,7 @@ def test_initialize_compute_failure(config):
     service.service_endpoint = "http://172.15.0.4:8030"
     service.id = "abc"
 
-    asset = Mock(spec=Asset)
+    asset = Mock(spec=DDO)
     asset.did = "0x0"
     compute_input = ComputeInput(asset, service)
 

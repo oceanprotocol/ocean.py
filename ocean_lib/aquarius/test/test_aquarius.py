@@ -5,7 +5,7 @@
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 
@@ -63,8 +63,8 @@ def test_aqua_functions_for_single_ddo(
         metadata_cache_uri
     ).get_ddo(asset.did)
     assert isinstance(
-        resolved_asset_from_metadata_cache_uri, Asset
-    ), "The resolved asset is not an instance of Asset."
+        resolved_asset_from_metadata_cache_uri, DDO
+    ), "The resolved asset is not an instance of DDO."
     assert (
         resolved_asset_from_metadata_cache_uri.did == asset.did
     ), "Resolve asset function call is unsuccessful."

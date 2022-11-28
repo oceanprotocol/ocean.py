@@ -14,7 +14,7 @@ from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -55,14 +55,14 @@ class Aquarius:
         return cls(metadata_cache_uri)
 
     @enforce_types
-    def get_ddo(self, did: str) -> Optional[Asset]:
+    def get_ddo(self, did: str) -> Optional[DDO]:
         """Retrieve ddo for a given did."""
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
             response_dict = response.json()
 
-            return Asset.from_dict(response_dict)
+            return DDO.from_dict(response_dict)
 
         return None
 
@@ -95,7 +95,7 @@ class Aquarius:
         Example: query_search({"price":[0,10]})
 
         :param search_query: Python dictionary, query following elasticsearch syntax
-        :return: List of Asset (DDO) instance
+        :return: List of DDO
         """
         response = self.requests_session.post(
             f"{self.base_url}/query",
@@ -109,7 +109,7 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_ddo(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
+    def validate_ddo(self, asset: DDO) -> Tuple[bool, Union[list, dict]]:
         """Does the DDO conform to the Ocean DDO schema?
         Schema definition: https://docs.oceanprotocol.com/core-concepts/did-ddo
         """
@@ -145,7 +145,7 @@ class Aquarius:
         return ddo
 
     @enforce_types
-    def wait_for_ddo_update(self, asset: Asset, tx: str):
+    def wait_for_ddo_update(self, asset: DDO, tx: str):
         start = time.time()
         ddo = None
         while True:

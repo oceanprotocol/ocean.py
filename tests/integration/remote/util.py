@@ -74,7 +74,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
         alice_wallet.transfer(bob_wallet.address, f"{amt_send:.15f} ether")
     except (ValueError, VirtualMachineError) as e:
         if "insufficient funds" in str(e) or "underpriced" in str(e):
-            warnings.warn(UserWarning("Warning: EVM reported error: {error}"))
+            warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
             return
         raise (e)
 
@@ -97,7 +97,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     except (ValueError, VirtualMachineError) as e:
         if "insufficient funds" in str(e) or "underpriced" in str(e):
-            warnings.warn(UserWarning("Warning: EVM reported error: {error}"))
+            warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
             return
         raise (e)
 

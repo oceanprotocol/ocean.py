@@ -185,8 +185,7 @@ class DataServiceProvider(DataServiceProviderBase):
             DataServiceProvider.write_file(response, destination_folder, i)
 
             logger.info(
-                f"Asset downloaded successfully"
-                f" downloadEndpoint {download_endpoint}"
+                f"DDO downloaded successfully" f" downloadEndpoint {download_endpoint}"
             )
 
     @staticmethod

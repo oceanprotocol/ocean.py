@@ -11,7 +11,7 @@ from web3.main import Web3
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
@@ -25,7 +25,7 @@ from tests.resources.ddo_helpers import (
 @pytest.mark.unit
 def test_is_consumable():
     ddo_dict = get_sample_ddo()
-    asset = Asset.from_dict(ddo_dict)
+    asset = DDO.from_dict(ddo_dict)
     service_dict = ddo_dict["services"][0]
     service = Service.from_dict(service_dict)
     with patch(
@@ -51,7 +51,7 @@ def test_ocean_assets_download_failure(publisher_wallet):
     """Tests that downloading from an empty service raises an AssertionError."""
 
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     access_service.service_endpoint = None
     ddo.services[0] = access_service
@@ -70,7 +70,7 @@ def test_ocean_assets_download_failure(publisher_wallet):
 def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
 
     with pytest.raises(InvalidURL):
         download_asset_files(
@@ -86,7 +86,7 @@ def test_invalid_provider_uri(publisher_wallet):
 def test_invalid_state(publisher_wallet):
     """Tests different scenarios that raise AssetNotConsumable."""
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     ddo.nft["state"] = 1
 
     with pytest.raises(AssetNotConsumable):
@@ -116,7 +116,7 @@ def test_ocean_assets_download_indexes(
     """Tests different values of indexes that raise AssertionError."""
 
     ddo_dict = get_sample_ddo()
-    ddo = Asset.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
 
     index = range(3)
     with pytest.raises(TypeError):

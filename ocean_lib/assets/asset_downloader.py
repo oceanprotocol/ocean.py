@@ -10,7 +10,7 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @enforce_types
 def download_asset_files(
-    asset: Asset,
+    asset: DDO,
     service: Service,
     consumer_wallet,
     destination: str,
@@ -29,7 +29,7 @@ def download_asset_files(
 ) -> str:
     """Download asset data file or result file from compute job.
 
-    :param asset: Asset instance
+    :param asset: DDO instance
     :param service: Sevice instance
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
@@ -85,7 +85,7 @@ def download_asset_files(
 
 @enforce_types
 def is_consumable(
-    asset: Asset,
+    asset: DDO,
     service: Service,
     credential: Optional[dict] = None,
     with_connectivity_check: bool = True,
