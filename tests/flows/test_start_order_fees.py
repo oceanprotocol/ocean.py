@@ -274,6 +274,6 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, asset.datatokens[0]["address"])
+    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     return ddo, service, dt
