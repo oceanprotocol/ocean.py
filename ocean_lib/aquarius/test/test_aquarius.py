@@ -61,7 +61,7 @@ def test_aqua_functions_for_single_ddo(
     metadata_cache_uri = publisher_ocean_instance.config_dict.get("METADATA_CACHE_URI")
     resolved_asset_from_metadata_cache_uri = Aquarius.get_instance(
         metadata_cache_uri
-    ).get_asset_ddo(asset.did)
+    ).get_ddo(asset.did)
     assert isinstance(
         resolved_asset_from_metadata_cache_uri, Asset
     ), "The resolved asset is not an instance of Asset."
@@ -69,7 +69,7 @@ def test_aqua_functions_for_single_ddo(
         resolved_asset_from_metadata_cache_uri.did == asset.did
     ), "Resolve asset function call is unsuccessful."
 
-    chain_metadata = aquarius_instance.get_asset_metadata(asset.did)
+    chain_metadata = aquarius_instance.get_ddo_metadata(asset.did)
     assert metadata == chain_metadata
 
 
@@ -83,4 +83,4 @@ def test_invalid_search_query(aquarius_instance):
 
 @pytest.mark.unit
 def test_empty_responses(aquarius_instance):
-    assert aquarius_instance.get_asset_metadata("inexistent_ddo") == {}
+    assert aquarius_instance.get_ddo_metadata("inexistent_ddo") == {}
