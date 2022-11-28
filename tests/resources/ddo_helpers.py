@@ -117,7 +117,7 @@ def create_asset(ocean, publisher, metadata=None, files=None):
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
-    asset = ocean.assets.create(
+    ddo = ocean.assets.create(
         metadata,
         publisher,
         files,
@@ -132,7 +132,7 @@ def create_asset(ocean, publisher, metadata=None, files=None):
         datatoken_bytess=[[b""]],
     )
 
-    return asset
+    return ddo
 
 
 def create_basics(
@@ -315,9 +315,9 @@ def wait_for_asset(ocean, did, timeout=30):
     return ddo
 
 
-def get_first_service_by_type(asset, service_type: str) -> Service:
+def get_first_service_by_type(ddo, service_type: str) -> Service:
     """Return the first Service with the given service type."""
-    return next((service for service in asset.services if service.type == service_type))
+    return next((service for service in ddo.services if service.type == service_type))
 
 
 def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:

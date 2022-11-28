@@ -30,8 +30,8 @@ def test_market_flow(
     consumer_ocean = consumer_ocean_instance
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
-    asset = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
-    service = asset.services[0]
+    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    service = ddo.services[0]
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint data tokens and assign to publisher
@@ -49,7 +49,7 @@ def test_market_flow(
     # Place order for the download service
     if consumer_type == "publisher":
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
-            asset,
+            ddo,
             consumer_wallet,
             service=service,
             consume_market_order_fee_address=consumer_wallet.address,
@@ -57,7 +57,7 @@ def test_market_flow(
             consume_market_order_fee_amount=0,
         )
         asset_folder = consumer_ocean.assets.download_asset(
-            asset,
+            ddo,
             consumer_wallet,
             consumer_ocean.config_dict["DOWNLOADS_PATH"],
             order_tx_id,
@@ -65,7 +65,7 @@ def test_market_flow(
         )
     else:
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
-            asset,
+            ddo,
             consumer_wallet,
             service=service,
             consume_market_order_fee_address=another_consumer_wallet.address,
@@ -74,7 +74,7 @@ def test_market_flow(
             consumer_address=another_consumer_wallet.address,
         )
         asset_folder = consumer_ocean.assets.download_asset(
-            asset,
+            ddo,
             another_consumer_wallet,
             another_consumer_ocean.config_dict["DOWNLOADS_PATH"],
             order_tx_id,
@@ -106,8 +106,8 @@ def test_pay_for_access_service_good_default(
 ):
     publisher_ocean, consumer_ocean = publisher_ocean_instance, consumer_ocean_instance
 
-    asset = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
-    service = asset.services[0]
+    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    service = ddo.services[0]
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint datatokens to consumer
@@ -117,10 +117,10 @@ def test_pay_for_access_service_good_default(
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args
-    order_tx_id = consumer_ocean.assets.pay_for_access_service(asset, consumer_wallet)
+    order_tx_id = consumer_ocean.assets.pay_for_access_service(ddo, consumer_wallet)
 
     asset_folder = consumer_ocean.assets.download_asset(
-        asset,
+        ddo,
         consumer_wallet,
         consumer_ocean.config_dict["DOWNLOADS_PATH"],
         order_tx_id,

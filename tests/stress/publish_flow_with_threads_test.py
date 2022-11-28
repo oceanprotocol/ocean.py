@@ -29,7 +29,7 @@ def publish_flow(ocean: Ocean, config: dict):
         metadata,
         files,
     ) = _get_publishing_requirements(ocean, publisher_wallet, config)
-    asset = ocean.assets.create(
+    ddo = ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -39,14 +39,14 @@ def publish_flow(ocean: Ocean, config: dict):
         compress_flag=True,
     )
 
-    assert asset, "The asset is not created."
-    assert asset.nft["name"] == "NFT"
-    assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == data_nft.address
-    assert asset.nft["owner"] == publisher_wallet.address
-    assert asset.datatokens[0]["name"] == "DT1"
-    assert asset.datatokens[0]["symbol"] == "DT1Symbol"
-    assert asset.datatokens[0]["address"] == datatoken.address
+    assert ddo, "The ddo is not created."
+    assert ddo.nft["name"] == "NFT"
+    assert ddo.nft["symbol"] == "NFTSYMBOL"
+    assert ddo.nft["address"] == data_nft.address
+    assert ddo.nft["owner"] == publisher_wallet.address
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
+    assert ddo.datatokens[0]["address"] == datatoken.address
 
 
 def concurrent_publish_flow(concurrent_flows: int, repetitions: int):
