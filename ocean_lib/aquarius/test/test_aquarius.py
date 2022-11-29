@@ -13,9 +13,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 def test_init():
     """Tests initialisation of Aquarius objects."""
     aqua = Aquarius("http://172.15.0.5:5000/api/aquarius/assets")
-    assert (
-        aqua.base_url == "http://172.15.0.5:5000/api/aquarius/assets"
-    ), "Different URL from the specified one."
+    assert aqua.base_url == "http://172.15.0.5:5000/api/aquarius/assets"
 
 
 @pytest.mark.integration
@@ -23,7 +21,7 @@ def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config, file1
 ):
     """Tests against single-ddo functions of Aquarius."""
-    metadata = {
+    metadata1 = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
@@ -33,8 +31,9 @@ def test_aqua_functions_for_single_ddo(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
+    OCEAN_addr = publisher_ocean_instance.OCEAN_address
+    ddo1 = publisher_ocean_instance.assets.create(
+        metadata=metadata1,
         publisher_wallet=publisher_wallet,
         files=[file1],
         datatoken_templates=[1],
@@ -43,34 +42,25 @@ def test_aqua_functions_for_single_ddo(
         datatoken_minters=[publisher_wallet.address],
         datatoken_fee_managers=[publisher_wallet.address],
         datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[
-            publisher_ocean_instance.OCEAN_address
-        ],
+        datatoken_publish_market_order_fee_tokens=[OCEAN_addr],
         datatoken_publish_market_order_fee_amounts=[0],
         datatoken_bytess=[[b""]],
     )
 
-    asset = aquarius_instance.wait_for_ddo(ddo.did)
+    ddo2 = aquarius_instance.wait_for_ddo(ddo1.did)
+    assert ddo2.metadata == ddo1.metadata
 
-    assert asset.metadata == ddo.metadata
+    ddo3 = publisher_ocean_instance.assets.resolve(ddo1.did)
+    assert ddo3.did == ddo1.did, "Aquarius could not resolve the did."
+    assert ddo3.did == ddo2.did, "Aquarius could not resolve the did."
 
-    res = publisher_ocean_instance.assets.resolve(ddo.did)
-    assert res.did == ddo.did, "Aquarius could not resolve the did."
-    assert res.did == asset.did, "Aquarius could not resolve the did."
+    aqua_uri = publisher_ocean_instance.config_dict.get("METADATA_CACHE_URI")
+    ddo4 = Aquarius.get_instance(aqua_uri).get_ddo(ddo2.did)
+    assert isinstance(ddo4, DDO)
+    assert ddo4.did == ddo2.did, "Aquarius could not resolve the did."
 
-    metadata_cache_uri = publisher_ocean_instance.config_dict.get("METADATA_CACHE_URI")
-    resolved_asset_from_metadata_cache_uri = Aquarius.get_instance(
-        metadata_cache_uri
-    ).get_ddo(asset.did)
-    assert isinstance(
-        resolved_asset_from_metadata_cache_uri, DDO
-    ), "The resolved asset is not an instance of DDO."
-    assert (
-        resolved_asset_from_metadata_cache_uri.did == asset.did
-    ), "Resolve asset function call is unsuccessful."
-
-    chain_metadata = aquarius_instance.get_ddo_metadata(asset.did)
-    assert metadata == chain_metadata
+    metadata2 = aquarius_instance.get_ddo_metadata(ddo2.did)
+    assert metadata2 == metadata1
 
 
 @pytest.mark.unit
