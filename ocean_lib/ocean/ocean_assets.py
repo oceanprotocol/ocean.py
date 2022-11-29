@@ -330,8 +330,8 @@ class OceanAssets:
             "license": "CC0: PublicDomain",
         }
         if container == 'python':
-            metadata['type']: "algorithm"
-            metadata['algorithm'] = {
+            metadata["type"] = "algorithm"
+            metadata["algorithm"] = {
                 "language": "python",
                 "format": "docker-image",
                 "version": "0.1",
