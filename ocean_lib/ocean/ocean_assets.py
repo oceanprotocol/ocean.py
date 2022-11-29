@@ -665,9 +665,9 @@ class OceanAssets:
             [proof],
             {"from": publisher_wallet},
         )
-        
+
         ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
-        
+
         return ddo
 
     @enforce_types
