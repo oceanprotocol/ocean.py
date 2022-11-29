@@ -274,10 +274,10 @@ def test_consume_parametrized_graphql_query(
 
     ocean_assets.download_asset(
         ddo,
-        service,
         consumer_wallet,
         destination,
         receipt.txid,
+        service,
         userdata={
             "nftAddress": ddo.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters

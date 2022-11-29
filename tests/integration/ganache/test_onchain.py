@@ -276,8 +276,8 @@ def test_consume_parametrized_onchain_data(
         ddo,
         consumer_wallet,
         destination,
-        order_receipt.txid,
-        service=service,
+        receipt.txid,
+        service,
         userdata={
             "baseToken": ddo.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters
