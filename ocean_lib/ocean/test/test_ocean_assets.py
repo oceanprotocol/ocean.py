@@ -162,7 +162,10 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
     data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
 
     ddo2 = publisher_ocean_instance.assets.update(
-        ddo, publisher_wallet, compress_flag=True, encrypt_flag=True,
+        ddo,
+        publisher_wallet,
+        compress_flag=True,
+        encrypt_flag=True,
     )
 
     registered_token_event = data_nft.contract.events.get_sequence(

@@ -46,7 +46,10 @@ def test1(
     destination = str(tmp_path)
     order_tx_id = ocean.assets.pay_for_access_service(ddo, consumer_wallet)
     file_path = ocean.assets.download_asset(
-        ddo, consumer_wallet, destination, order_tx_id,
+        ddo,
+        consumer_wallet,
+        destination,
+        order_tx_id,
     )
     file_name = glob.glob(file_path + "/*")[0]
     print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0

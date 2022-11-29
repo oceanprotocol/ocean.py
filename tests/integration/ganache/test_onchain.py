@@ -134,7 +134,11 @@ def test_consume_simple_onchain_data(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        ddo, consumer_wallet, destination, receipt.txid, service=service,
+        ddo,
+        consumer_wallet,
+        destination,
+        receipt.txid,
+        service=service,
     )
 
     assert len(
