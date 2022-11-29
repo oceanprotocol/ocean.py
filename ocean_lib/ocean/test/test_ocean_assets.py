@@ -32,9 +32,6 @@ from tests.resources.ddo_helpers import (
 
 @pytest.mark.integration
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
-    """Test various paths for asset registration.
-
-    Happy paths are tested in the publish flow."""
     ocn = publisher_ocean_instance
 
     invalid_did = "did:op:0123456789"
@@ -43,7 +40,6 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
 
 @pytest.mark.integration
 def test_update_metadata(publisher_ocean_instance, publisher_wallet):
-    """Test the update of metadata"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     new_metadata = copy.deepcopy(ddo.metadata)
@@ -54,21 +50,18 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
-    _asset = publisher_ocean_instance.assets.update(
-        asset=ddo, publisher_wallet=publisher_wallet
-    )
+    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
 
-    assert _asset.datatokens == ddo.datatokens
-    assert len(_asset.services) == len(ddo.services)
-    assert _asset.services[0].as_dictionary() == ddo.services[0].as_dictionary()
-    assert _asset.credentials == ddo.credentials
-    assert _asset.metadata["description"] == _description
-    assert _asset.metadata["updated"] == new_metadata["updated"]
+    assert ddo2.datatokens == ddo.datatokens
+    assert len(ddo2.services) == len(ddo.services)
+    assert ddo2.services[0].as_dictionary() == ddo.services[0].as_dictionary()
+    assert ddo2.credentials == ddo.credentials
+    assert ddo2.metadata["description"] == _description
+    assert ddo2.metadata["updated"] == new_metadata["updated"]
 
 
 @pytest.mark.integration
 def test_update_credentials(publisher_ocean_instance, publisher_wallet):
-    """Test that the credentials can be updated."""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     # Update credentials
@@ -79,25 +72,22 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 
     ddo.credentials = _new_credentials
 
-    _asset = publisher_ocean_instance.assets.update(
-        asset=ddo, publisher_wallet=publisher_wallet
-    )
+    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
 
-    assert _asset.credentials == _new_credentials, "Credentials were not updated."
+    assert ddo2.credentials == _new_credentials, "Credentials were not updated."
 
 
 @pytest.mark.integration
 def test_update_datatokens(
     publisher_ocean_instance, publisher_wallet, config, datatoken, file2
 ):
-    """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
     data_provider = DataServiceProvider
 
     files = [file2]
 
     # Add new existing datatoken with service
-    old_asset = copy.deepcopy(ddo)
+    ddo_orig = copy.deepcopy(ddo)
     access_service = Service(
         service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
@@ -118,44 +108,40 @@ def test_update_datatokens(
 
     ddo.services.append(access_service)
 
-    _asset = publisher_ocean_instance.assets.update(
-        asset=ddo, publisher_wallet=publisher_wallet
-    )
+    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
 
-    assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
-    assert len(_asset.services) == len(old_asset.services) + 1
-    assert _asset.datatokens[1].get("address") == datatoken.address
-    assert _asset.datatokens[0].get("address") == old_asset.datatokens[0].get("address")
-    assert _asset.services[0].datatoken == old_asset.datatokens[0].get("address")
-    assert _asset.services[1].datatoken == datatoken.address
+    assert len(ddo2.datatokens) == len(ddo_orig.datatokens) + 1
+    assert len(ddo2.services) == len(ddo_orig.services) + 1
+    assert ddo2.datatokens[1].get("address") == datatoken.address
+    assert ddo2.datatokens[0].get("address") == ddo_orig.datatokens[0].get("address")
+    assert ddo2.services[0].datatoken == ddo_orig.datatokens[0].get("address")
+    assert ddo2.services[1].datatoken == datatoken.address
 
     # Delete datatoken
-    new_asset = copy.deepcopy(_asset)
-    new_metadata = copy.deepcopy(_asset.metadata)
+    ddo3 = copy.deepcopy(ddo2)
+    metadata3 = copy.deepcopy(ddo2.metadata)
     _description = "Test delete datatoken"
-    new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.utcnow().isoformat()
+    metadata3["description"] = _description
+    metadata3["updated"] = datetime.utcnow().isoformat()
 
-    removed_dt = new_asset.datatokens.pop()
+    removed_dt = ddo3.datatokens.pop()
 
-    new_asset.services = [
+    ddo3.services = [
         service
-        for service in new_asset.services
+        for service in ddo3.services
         if service.datatoken != removed_dt.get("address")
     ]
 
-    old_datatokens = _asset.datatokens
+    ddo2_prev_datatokens = ddo2.datatokens
 
-    _asset = publisher_ocean_instance.assets.update(
-        asset=new_asset, publisher_wallet=publisher_wallet
-    )
+    ddo4 = publisher_ocean_instance.assets.update(ddo3, publisher_wallet)
 
-    assert _asset, "Cannot read asset after update."
-    assert len(_asset.datatokens) == 1
-    assert _asset.datatokens[0].get("address") == old_datatokens[0].get("address")
-    assert _asset.services[0].datatoken == old_datatokens[0].get("address")
+    assert ddo4, "Can't read ddo after update."
+    assert len(ddo4.datatokens) == 1
+    assert ddo4.datatokens[0].get("address") == ddo2_prev_datatokens[0].get("address")
+    assert ddo4.services[0].datatoken == ddo2_prev_datatokens[0].get("address")
 
-    nft_token = publisher_ocean_instance.get_nft_token(_asset.nft["address"])
+    nft_token = publisher_ocean_instance.get_nft_token(ddo4.nft["address"])
     bn = network.chain[-1].number
 
     updated_event = nft_token.contract.events.get_sequence(bn, bn, "MetadataUpdated")[0]
@@ -170,21 +156,17 @@ def test_update_datatokens(
 
 @pytest.mark.integration
 def test_update_flags(publisher_ocean_instance, publisher_wallet):
-    """Test the update of flags"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     # Test compress & update flags
     data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
 
-    _asset = publisher_ocean_instance.assets.update(
-        asset=ddo,
-        publisher_wallet=publisher_wallet,
-        compress_flag=True,
-        encrypt_flag=True,
+    ddo2 = publisher_ocean_instance.assets.update(
+        ddo, publisher_wallet, compress_flag=True, encrypt_flag=True,
     )
 
     registered_token_event = data_nft.contract.events.get_sequence(
-        _asset.event.get("block"),
+        ddo2.event.get("block"),
         network.chain[-1].number,
         "MetadataUpdated",
     )
@@ -194,7 +176,6 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
-    """Tests that a created asset can be searched successfully."""
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -251,13 +232,12 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_ocean_assets_validate(publisher_ocean_instance):
-    """Tests that the validate function returns an error for invalid metadata."""
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
 
     assert publisher_ocean_instance.assets.validate(
         ddo
-    ), "asset should be valid, unless the schema changed."
+    ), "ddo should be valid, unless the schema changed"
 
     ddo_dict = get_sample_ddo()
     ddo_dict["id"] = "something not conformant"
@@ -269,7 +249,6 @@ def test_ocean_assets_validate(publisher_ocean_instance):
 
 @pytest.mark.integration
 def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
-    """Tests the creation of an algorithm DDO."""
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -297,33 +276,31 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.unit
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
-    """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
-        asset = DDO.from_dict(get_sample_ddo())
-        mock.return_value = asset
+        ddo = DDO.from_dict(get_sample_ddo())
+        mock.return_value = ddo
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
-                asset,
+                ddo,
                 publisher_wallet,
                 destination="",
                 order_tx_id="",
-                service=asset.services[0],
+                service=ddo.services[0],
                 index=-4,
             )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download_asset(
-                asset,
+                ddo,
                 publisher_wallet,
                 destination="",
                 order_tx_id="",
-                service=asset.services[0],
+                service=ddo.services[0],
                 index="string_index",
             )
 
 
 @pytest.mark.integration
 def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
-    """Tests that we can't create the asset with plecos failure."""
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -346,18 +323,17 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
 def test_pay_for_access_service_insufficient_balance(
     publisher_ocean_instance, config, publisher_wallet, datatoken
 ):
-    """Tests if balance is lower than the purchased amount."""
     ddo_dict = copy.deepcopy(get_sample_ddo())
     ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
-    asset = DDO.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
 
     empty_wallet = accounts.add()
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_access_service(
-            asset,
+            ddo,
             empty_wallet,
-            get_first_service_by_type(asset, "access"),
+            get_first_service_by_type(ddo, "access"),
             consume_market_order_fee_address=empty_wallet.address,
             consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
@@ -370,12 +346,12 @@ def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
 
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, asset) = ocean.assets.create_url_asset(
+    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
     )
 
-    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(asset.datatokens) == 1
+    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(ddo.datatokens) == 1
 
 
 @pytest.mark.integration
@@ -392,12 +368,12 @@ def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
                         }
                    }
     """
-    (data_nft, datatoken, asset) = ocean.assets.create_graphql_asset(
+    (data_nft, datatoken, ddo) = ocean.assets.create_graphql_asset(
         name, url, query, publisher_wallet
     )
 
-    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(asset.datatokens) == 1
+    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(ddo.datatokens) == 1
 
 
 @pytest.mark.integration
@@ -414,12 +390,12 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
         "type": "function",
     }
 
-    (data_nft, datatoken, asset) = ocean.assets.create_onchain_asset(
+    (data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(
         name, contract_address, contract_abi, publisher_wallet
     )
 
-    assert asset.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(asset.datatokens) == 1
+    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
+    assert len(ddo.datatokens) == 1
 
 
 @pytest.mark.integration
@@ -463,7 +439,7 @@ def test_plain_asset_with_one_datatoken(
         datatoken_publish_market_order_fee_amounts=[0],
         datatoken_bytess=[[b""]],
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT1"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft_address
@@ -514,7 +490,7 @@ def test_plain_asset_multiple_datatokens(
         datatoken_publish_market_order_fee_amounts=[0, 0],
         datatoken_bytess=[[b""], [b""]],
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT2"
     assert ddo.nft["symbol"] == "NFT2SYMBOL"
     assert ddo.nft["address"] == data_nft_address2
@@ -579,7 +555,7 @@ def test_plain_asset_multiple_services(
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
@@ -606,7 +582,7 @@ def test_encrypted_asset(
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
@@ -631,7 +607,7 @@ def test_compressed_asset(
         deployed_datatokens=[datatoken],
         compress_flag=True,
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
@@ -657,7 +633,7 @@ def test_compressed_and_encrypted_asset(
         encrypt_flag=True,
         compress_flag=True,
     )
-    assert ddo, "The asset is not created."
+    assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["owner"] == publisher_wallet.address

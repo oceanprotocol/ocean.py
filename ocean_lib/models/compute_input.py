@@ -1,4 +1,4 @@
-#
+`#
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -15,7 +15,7 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        asset: DDO,
+        ddo: DDO,
         service: Service,
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
@@ -23,13 +23,13 @@ class ComputeInput:
         consume_market_order_fee_amount: Optional[int] = None,
     ) -> None:
         """Initialise and validate arguments."""
-        assert asset and service is not None, "bad argument values."
+        assert ddo and service is not None, "bad argument values."
 
         if userdata:
             assert isinstance(userdata, dict), "Userdata must be a dictionary."
 
-        self.asset = asset
-        self.did = asset.did
+        self.ddo = ddo
+        self.did = ddo.did
         self.transfer_tx_id = transfer_tx_id
         self.service = service
         self.service_id = service.id

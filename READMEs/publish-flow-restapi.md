@@ -124,11 +124,10 @@ order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 
 # Bob downloads the dataset
 # If the connection breaks, Bob can request again by showing order_tx_id.
+consumer_wallet = bob_wallet
+destination = './'
 file_path = ocean.assets.download_asset(
-    asset=ddo,
-    consumer_wallet=bob_wallet,
-    destination='./',
-    order_tx_id=order_tx_id
+    ddo, consumer_wallet, destination, order_tx_id
 )
 import glob
 file_name = glob.glob(file_path + "/*")[0]

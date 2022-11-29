@@ -25,7 +25,7 @@ from tests.resources.ddo_helpers import (
 @pytest.mark.unit
 def test_is_consumable():
     ddo_dict = get_sample_ddo()
-    asset = DDO.from_dict(ddo_dict)
+    ddo = DDO.from_dict(ddo_dict)
     service_dict = ddo_dict["services"][0]
     service = Service.from_dict(service_dict)
     with patch(
@@ -33,7 +33,7 @@ def test_is_consumable():
         return_value=False,
     ):
         assert (
-            is_consumable(asset, service, {}, True) == ConsumableCodes.CONNECTIVITY_FAIL
+            is_consumable(ddo, service, {}, True) == ConsumableCodes.CONNECTIVITY_FAIL
         )
 
     with patch(
@@ -41,7 +41,7 @@ def test_is_consumable():
         return_value=True,
     ):
         assert (
-            is_consumable(asset, service, {"type": "address", "value": "0xdddd"}, True)
+            is_consumable(ddo, service, {"type": "address", "value": "0xdddd"}, True)
             == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
         )
 

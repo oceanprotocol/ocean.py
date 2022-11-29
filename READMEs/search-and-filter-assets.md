@@ -51,7 +51,7 @@ for tag in tags:
     
     # Update the metadata introducing `tags`
     ddo.metadata.update({"tags": tag})
-    ddo = ocean.assets.update(asset=ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+    ddo = ocean.assets.update(ddo, alice_wallet, config["PROVIDER_URL"])
     print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```

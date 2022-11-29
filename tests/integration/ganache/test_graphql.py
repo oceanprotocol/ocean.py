@@ -133,10 +133,10 @@ def test_consume_simple_graphql_query(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        asset=ddo,
-        consumer_wallet=consumer_wallet,
-        destination=destination,
-        order_tx_id=receipt.txid,
+        ddo,
+        consumer_wallet,
+        destination,
+        receipt.txid,
         service=service,
     )
 
@@ -273,11 +273,11 @@ def test_consume_parametrized_graphql_query(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        asset=ddo,
-        service=service,
-        consumer_wallet=consumer_wallet,
-        destination=destination,
-        order_tx_id=receipt.txid,
+        ddo,
+        service,
+        consumer_wallet,
+        destination,
+        receipt.txid,
         userdata={
             "nftAddress": ddo.nft_address.lower()
         },  # this is where user is sending the required consumer_parameters
