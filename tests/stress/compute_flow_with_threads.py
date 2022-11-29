@@ -30,7 +30,7 @@ def c2d_flow_readme(
     algorithm_docker_tag,
 ):
     consumer_wallet = publisher_wallet = generate_wallet()
-    # Publish the data NFT token
+    # Publish the data NFT
     data_nft = ocean.create_data_nft("NFT1", "NFT1", publisher_wallet)
     assert data_nft.address
     assert data_nft.name()

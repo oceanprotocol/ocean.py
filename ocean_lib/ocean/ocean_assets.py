@@ -68,15 +68,15 @@ class OceanAssets:
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
     @enforce_types
-    def validate(self, asset: DDO) -> Tuple[bool, list]:
+    def validate(self, ddo: DDO) -> Tuple[bool, list]:
         """
-        Validate that the asset is ok to be stored in aquarius.
+        Validate that the ddo is ok to be stored in aquarius.
 
-        :param asset: DDO.
+        :param ddo: DDO.
         :return: (bool, list) list of errors, empty if valid
         """
         # Validation by Aquarius
-        validation_result, validation_errors = self._aquarius.validate_ddo(asset)
+        validation_result, validation_errors = self._aquarius.validate_ddo(ddo)
         if not validation_result:
             msg = f"DDO has validation errors: {validation_errors}"
             logger.error(msg)
@@ -196,18 +196,18 @@ class OceanAssets:
     @staticmethod
     @enforce_types
     def _encrypt_ddo(
-        asset: DDO,
+        ddo: DDO,
         provider_uri: str,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
     ):
         # Process the DDO
-        asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
+        ddo_dict = ddo.as_dictionary()
+        ddo_string = json.dumps(ddo_dict, separators=(",", ":"))
         ddo_bytes = ddo_string.encode("utf-8")
         ddo_hash = create_checksum(ddo_string)
 
-        # Plain asset
+        # Plain DDO
         if not encrypt_flag and not compress_flag:
             flags = bytes([0])
             document = ddo_bytes
@@ -308,7 +308,7 @@ class OceanAssets:
 
         If wait_for_aqua, then attempt to update aquarius within time constraints.
 
-        Returns (data_nft, datatoken, asset)
+        Returns (data_nft, datatoken, ddo)
         """
         date_created = datetime.now().isoformat()
         metadata = {
@@ -322,7 +322,7 @@ class OceanAssets:
         }
 
         OCEAN_address = get_ocean_token_address(self._config_dict)
-        (data_nft, datatokens, asset) = self.create(
+        (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
             files,
@@ -336,10 +336,10 @@ class OceanAssets:
             datatoken_publish_market_order_fee_amounts=[0],
             datatoken_bytess=[[b""]],
             wait_for_aqua=wait_for_aqua,
-            return_asset=False,
+            return_ddo=False,
         )
         datatoken = None if datatokens is None else datatokens[0]
-        return (data_nft, datatoken, asset)
+        return (data_nft, datatoken, ddo)
 
     # Don't enforce types due to error:
     # TypeError: Subscripted generics cannot be used with class and instance checks
@@ -374,9 +374,9 @@ class OceanAssets:
         compress_flag: Optional[bool] = True,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
         wait_for_aqua: bool = True,
-        return_asset: bool = True,
+        return_ddo: bool = True,
     ) -> Optional[DDO]:
-        """Register an asset on-chain.
+        """Register an asset on-chain. Asset = {data_NFT, >=0 datatokens, DDO}
 
         Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
 
@@ -387,14 +387,14 @@ class OceanAssets:
         :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
-        :param data_nft_address: hex str the address of the data NFT token. The new
-        asset will be associated with this data NFT token address.
-        :param data_nft_name: str name of data NFT token if creating a new one
-        :param data_nft_symbol: str symbol of data NFT token  if creating a new one
-        :param data_nft_template_index: int template index of the data NFT token, by default is 1.
+        :param data_nft_address: hex str the address of the data NFT. The new
+        asset will be associated with this data NFT address.
+        :param data_nft_name: str name of data NFT if creating a new one
+        :param data_nft_symbol: str symbol of data NFT  if creating a new one
+        :param data_nft_template_index: int template index of the data NFT, by default is 1.
         :param data_nft_additional_datatoken_deployer: str address of an additional ERC20 deployer.
         :param data_nft_additional_metadata_updater: str address of an additional metadata updater.
-        :param data_nft_uri: str URL of the data NFT token.
+        :param data_nft_uri: str URL of the data NFT.
         :param datatoken_templates: list of templates indexes for deploying datatokens if deployed_datatokens is None.
         :param datatoken_names: list of names for datatokens if deployed_datatokens is None.
         :param datatoken_symbols: list of symbols for datatokens if deployed_datatokens is None.
@@ -407,9 +407,9 @@ class OceanAssets:
         :param deployed_datatokens: list of datatokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
-        :param wait_for_aqua: wait to ensure asset's updated in aquarius?
-        :param return_asset: return asset, vs tuple?
-        :return: asset [if return_asset == True], otherwise tuple of (data_nft, datatokens, asset)
+        :param wait_for_aqua: wait to ensure ddo's updated in aquarius?
+        :param return_ddo: return ddo, vs tuple?
+        :return: ddo [if return_ddo == True], otherwise tuple of (data_nft, datatokens, ddo)
         """
         self._assert_ddo_metadata(metadata)
 
@@ -451,31 +451,29 @@ class OceanAssets:
             data_nft = DataNFT(self._config_dict, data_nft_address)
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
-                return None if return_asset else (None, None, None)
+                return None if return_ddo else (None, None, None)
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
 
-        assert (
-            data_nft_address
-        ), "nft_address is required for publishing a dataset asset."
+        assert data_nft_address
         data_nft = DataNFT(self._config_dict, data_nft_address)
 
-        # Create a DDO object
-        asset = DDO()
+        # Create DDO object
+        ddo = DDO()
 
-        # Generating the did and adding to the ddo.
+        # Generate the did, add it to the ddo.
         did = f"did:op:{create_checksum(data_nft.address + str(self._chain_id))}"
-        asset.did = did
+        ddo.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
-        asset.chain_id = self._chain_id
-        asset.metadata = metadata
+        ddo.chain_id = self._chain_id
+        ddo.metadata = metadata
 
-        asset.credentials = credentials if credentials else {"allow": [], "deny": []}
+        ddo.credentials = credentials if credentials else {"allow": [], "deny": []}
 
         datatoken_addresses = []
         services = services or []
@@ -565,14 +563,14 @@ class OceanAssets:
                 services=services, deployed_datatokens=deployed_datatokens
             )
 
-        asset.nft_address = data_nft_address
-        asset.datatokens = datatokens
+        ddo.nft_address = data_nft_address
+        ddo.datatokens = datatokens
 
         for service in services:
-            asset.add_service(service)
+            ddo.add_service(service)
 
         # Validation by Aquarius
-        _, proof = self.validate(asset)
+        _, proof = self.validate(ddo)
         proof = (
             proof["publicKey"],
             proof["v"],
@@ -581,7 +579,7 @@ class OceanAssets:
         )
 
         document, flags, ddo_hash = self._encrypt_ddo(
-            asset, provider_uri, encrypt_flag, compress_flag
+            ddo, provider_uri, encrypt_flag, compress_flag
         )
 
         data_nft.setMetaData(
@@ -595,64 +593,59 @@ class OceanAssets:
             {"from": publisher_wallet},
         )
 
-        # Fetch the asset on chain
+        # Fetch the ddo on chain
         if wait_for_aqua:
-            asset = self._aquarius.wait_for_ddo(did)
+            ddo = self._aquarius.wait_for_ddo(did)
 
         # Return
-        if return_asset:
-            return asset
+        if return_ddo:
+            return ddo
         else:
             datatokens = [
                 Datatoken(self._config_dict, d["address"]) for d in datatokens
             ]
-            return (data_nft, datatokens, asset)
+            return (data_nft, datatokens, ddo)
 
     @enforce_types
     def update(
         self,
-        asset: DDO,
+        ddo: DDO,
         publisher_wallet,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
     ) -> Optional[DDO]:
-        """Update an asset on-chain.
+        """Update a ddo on-chain.
 
-        :param asset: The updated asset to update on-chain
-        :param publisher_wallet: account of the publisher updating this asset.
-        :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
-        :param encrypt_flag: bool for encryption of the DDO.
-        :param compress_flag: bool for compression of the DDO.
-        :return: Optional[DDO] the updated DDO or None if updated asset not found in metadata cache
+        :param ddo - DDO to update
+        :param publisher_wallet - who published this ddo
+        :param provider_uri - URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
+        :param encrypt_flag - encrypt this DDO?
+        :param compress_flag - compress this DDO?
+        :return - the updated DDO, or None if updated ddo not found in aquarius
         """
-
-        self._assert_ddo_metadata(asset.metadata)
+        self._assert_ddo_metadata(ddo.metadata)
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config_dict)
 
-        data_nft_address = asset.nft_address
+        assert ddo.nft_address, "need nft address to update a ddo"
+        data_nft = DataNFT(self._config_dict, ddo.nft_address)
 
-        assert (
-            data_nft_address
-        ), "nft_address is required for publishing a dataset asset."
-        data_nft = DataNFT(self._config_dict, data_nft_address)
+        assert ddo.chain_id == self._chain_id
 
-        assert asset.chain_id == self._chain_id, "Chain id mismatch."
-
-        for service in asset.services:
-            service.encrypt_files(asset.nft_address)
+        for service in ddo.services:
+            service.encrypt_files(ddo.nft_address)
 
         # Validation by Aquarius
-        validation_result, errors_or_proof = self.validate(asset)
+        validation_result, errors_or_proof = self.validate(ddo)
         if not validation_result:
             msg = f"DDO has validation errors: {errors_or_proof}"
             logger.error(msg)
             raise ValueError(msg)
 
         document, flags, ddo_hash = self._encrypt_ddo(
-            asset, provider_uri, encrypt_flag, compress_flag
+            ddo, provider_uri, encrypt_flag, compress_flag
         )
 
         proof = (
@@ -673,7 +666,9 @@ class OceanAssets:
             {"from": publisher_wallet},
         )
 
-        return self._aquarius.wait_for_ddo_update(asset, tx_result.txid)
+        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
+
+        return ddo
 
     @enforce_types
     def resolve(self, did: str) -> "DDO":
@@ -682,11 +677,11 @@ class OceanAssets:
     @enforce_types
     def search(self, text: str) -> list:
         """
-        Search an asset in oceanDB using aquarius.
-        :param text: String with the value that you are searching
-        :return: List of assets that match with the query
+        Search for DDOs in aquarius that contain the target text string
+        :param text - target string
+        :return - List of DDOs that match with the query
         """
-        logger.info(f"Searching asset containing: {text}")
+        logger.info(f"Search for DDOs containing text: {text}")
         text = text.replace(":", "\\:").replace("\\\\:", "\\:")
         return [
             DDO.from_dict(ddo_dict["_source"])
@@ -699,12 +694,12 @@ class OceanAssets:
     @enforce_types
     def query(self, query: dict) -> list:
         """
-        Search an asset in oceanDB using search query.
-        :param query: dict with query parameters
+        Search for DDOs in aquarius with a search query dict
+        :param query - dict with query parameters
           More info at: https://docs.oceanprotocol.com/api-references/aquarius-rest-api
-        :return: List of assets that match with the query.
+        :return - List of DDOs that match the query.
         """
-        logger.info(f"Searching asset query: {query}")
+        logger.info(f"Search for DDOs matching query: {query}")
         return [
             DDO.from_dict(ddo_dict["_source"])
             for ddo_dict in self._aquarius.query_search(query)
@@ -712,7 +707,7 @@ class OceanAssets:
         ]
 
     @enforce_types
-    def download_file(self, asset_did: str, wallet) -> str:
+    def download_file(self, did: str, wallet) -> str:
         """Helper method. Given a did, download file to "./". Returns filename.
 
         Assumes that:
@@ -723,15 +718,15 @@ class OceanAssets:
         """
         # Retrieve the DDO and datatoken objects
         print("Resolve did...")
-        asset = self.resolve(asset_did)
-        datatoken_address = asset.datatokens[0]["address"]
+        ddo = self.resolve(did)
+        datatoken_address = ddo.datatokens[0]["address"]
         datatoken = Datatoken(self._config_dict, datatoken_address)
 
         # Ensure access token
         bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
         if bal >= 1.0:  # we're good
             pass
-        else:  # try to get freely-dispensed asset
+        else:  # try to get freely-dispensed ddo
             print("Dispense access token...")
             amt_dispense_wei = Web3.toWei(1, "ether")
             dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
@@ -749,11 +744,11 @@ class OceanAssets:
 
         # send datatoken to the service, to get access
         print("Order access...")
-        order_tx_id = self.pay_for_access_service(asset, wallet)
+        order_tx_id = self.pay_for_access_service(ddo, wallet)
 
-        # download the asset
+        # download
         print("Download file...")
-        file_path = self.download_asset(asset, wallet, "./", order_tx_id)
+        file_path = self.download_asset(ddo, wallet, "./", order_tx_id)
         file_name = glob.glob(file_path + "/*")[0]
         print(f"Done. File: {file_name}")
 
@@ -762,7 +757,7 @@ class OceanAssets:
     @enforce_types
     def download_asset(
         self,
-        asset: DDO,
+        ddo: DDO,
         consumer_wallet,
         destination: str,
         order_tx_id: Union[str, bytes],
@@ -770,7 +765,7 @@ class OceanAssets:
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
-        service = service or asset.services[0]  # fill in good default
+        service = service or ddo.services[0]  # fill in good default
 
         if index is not None:
             assert isinstance(index, int), logger.error("index has to be an integer.")
@@ -780,20 +775,15 @@ class OceanAssets:
             service and service.type == ServiceTypes.ASSET_ACCESS
         ), f"Service with type {ServiceTypes.ASSET_ACCESS} is not found."
 
-        return download_asset_files(
-            ddo=asset,
-            service=service,
-            consumer_wallet=consumer_wallet,
-            destination=destination,
-            order_tx_id=order_tx_id,
-            index=index,
-            userdata=userdata,
+        path: str = download_asset_files(
+            ddo, service, consumer_wallet, destination, order_tx_id, index, userdata
         )
+        return path
 
     @enforce_types
     def pay_for_access_service(
         self,
-        asset: DDO,
+        ddo: DDO,
         wallet,
         service: Optional[Service] = None,
         consume_market_order_fee_address: Optional[str] = None,
@@ -803,7 +793,7 @@ class OceanAssets:
         userdata: Optional[dict] = None,
     ):
         # fill in good defaults as needed
-        service = service or asset.services[0]
+        service = service or ddo.services[0]
         consume_market_order_fee_address = (
             consume_market_order_fee_address or wallet.address
         )
@@ -825,7 +815,7 @@ class OceanAssets:
             )
 
         consumable_result = is_consumable(
-            asset,
+            ddo,
             service,
             {"type": "address", "value": wallet.address},
             userdata=userdata,
@@ -836,7 +826,7 @@ class OceanAssets:
         data_provider = DataServiceProvider
 
         initialize_args = {
-            "did": asset.did,
+            "did": ddo.did,
             "service": service,
             "consumer_address": consumer_address,
         }
@@ -846,7 +836,7 @@ class OceanAssets:
 
         receipt = dt.start_order(
             consumer=consumer_address,
-            service_index=asset.get_index_of_service(service),
+            service_index=ddo.get_index_of_service(service),
             provider_fee_address=provider_fees["providerFeeAddress"],
             provider_fee_token=provider_fees["providerFeeToken"],
             provider_fee_amount=provider_fees["providerFeeAmount"],
@@ -953,7 +943,7 @@ class OceanAssets:
 
         asset_compute_input.transfer_tx_id = dt.start_order(
             consumer=consumer_address,
-            service_index=asset_compute_input.asset.get_index_of_service(service),
+            service_index=asset_compute_input.ddo.get_index_of_service(service),
             provider_fee_address=provider_fees["providerFeeAddress"],
             provider_fee_token=provider_fees["providerFeeToken"],
             provider_fee_amount=provider_fees["providerFeeAmount"],

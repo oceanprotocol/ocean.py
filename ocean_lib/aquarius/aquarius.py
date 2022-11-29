@@ -109,12 +109,12 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_ddo(self, asset: DDO) -> Tuple[bool, Union[list, dict]]:
+    def validate_ddo(self, ddo: DDO) -> Tuple[bool, Union[list, dict]]:
         """Does the DDO conform to the Ocean DDO schema?
         Schema definition: https://docs.oceanprotocol.com/core-concepts/did-ddo
         """
-        asset_dict = asset.as_dictionary()
-        data = json.dumps(asset_dict, separators=(",", ":")).encode("utf-8")
+        ddo_dict = ddo.as_dictionary()
+        data = json.dumps(ddo_dict, separators=(",", ":")).encode("utf-8")
 
         response = self.requests_session.post(
             f"{self.base_url.replace('/v1/', '/')}/ddo/validate",
@@ -145,23 +145,24 @@ class Aquarius:
         return ddo
 
     @enforce_types
-    def wait_for_ddo_update(self, asset: DDO, tx: str):
+    def wait_for_ddo_update(self, ddo: DDO, tx: str):
         start = time.time()
-        ddo = None
+        ddo2 = None
         while True:
             try:
-                ddo = self.get_ddo(asset.did)
+                ddo2 = self.get_ddo(ddo.did)
             except ValueError:
                 pass
-            if not ddo:
+            if not ddo2:
                 time.sleep(0.2)
-            elif ddo.event.get("tx") == tx:
+            elif ddo2.event.get("tx") == tx:
                 logger.debug(
-                    f"Transaction matching the given tx id detected in metadata store. asset.event = {ddo.event}"
+                    f"Transaction matching the given tx id detected in metadata store. ddo2.event = {ddo2.event}"
                 )
                 break
 
-            if time.time() - start > 60:
+            elapsed_time = time.time() - start
+            if elapsed_time > 60:
                 break
 
-        return ddo
+        return ddo2

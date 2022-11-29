@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import ConsumableCodes, MalformedCredential
 
 
-class AddressCredential:
+class AddressCredentialMixin:
     @enforce_types
     def get_addresses_of_class(self, access_class: str = "allow") -> list:
         """Get a filtered list of addresses from credentials (use with allow/deny)."""
@@ -24,7 +24,7 @@ class AddressCredential:
 
     @enforce_types
     def requires_credential(self) -> bool:
-        """Checks whether the asset requires an address credential."""
+        """Checks whether the ddo requires an address credential."""
         allowed_addresses = self.get_addresses_of_class("allow")
         denied_addresses = self.get_addresses_of_class("deny")
 

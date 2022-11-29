@@ -8,7 +8,7 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.credentials import AddressCredential
+from ocean_lib.assets.credentials import AddressCredentialMixin
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
@@ -16,7 +16,7 @@ from ocean_lib.services.service import Service
 logger = logging.getLogger("ddo")
 
 
-class DDO(AddressCredential):
+class DDO(AddressCredentialMixin):
     """Create, import, export, validate DDO objects."""
 
     @enforce_types
@@ -51,7 +51,7 @@ class DDO(AddressCredential):
     @property
     @enforce_types
     def requires_address_credential(self) -> bool:
-        """Checks if an address credential is required on this asset."""
+        """Checks if an address credential is required on this ddo."""
         return self.requires_credential()
 
     @property
@@ -183,8 +183,8 @@ class DDO(AddressCredential):
         return next(
             (
                 index
-                for index, asset_service in enumerate(self.services)
-                if asset_service.id == service.id
+                for index, this_service in enumerate(self.services)
+                if this_service.id == service.id
             ),
             None,
         )

@@ -17,7 +17,7 @@ from tests.resources.ddo_helpers import (
 
 
 @pytest.mark.unit
-def test_asset_utils():
+def test_ddo_utils():
     """Tests the structure of a JSON format of the V4 DDO."""
     ddo_dict = get_sample_ddo()
     assert isinstance(ddo_dict, dict)
@@ -99,7 +99,7 @@ def test_asset_utils():
     }
     event = ddo_dict["event"]
 
-    # Sample asset
+    # Sample ddo
     assert ddo_dict["stats"] == {"consumes": 4}
     stats = ddo_dict["stats"]
 

@@ -85,23 +85,23 @@ def download_asset_files(
 
 @enforce_types
 def is_consumable(
-    asset: DDO,
+    ddo: DDO,
     service: Service,
     credential: Optional[dict] = None,
     with_connectivity_check: bool = True,
     userdata: Optional[dict] = None,
 ) -> bool:
     """Checks whether an asset is consumable and returns a ConsumableCode."""
-    if asset.is_disabled:
+    if ddo.is_disabled:
         return ConsumableCodes.ASSET_DISABLED
 
     if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-        asset.did, service.id, service.service_endpoint, userdata=userdata
+        ddo.did, service.id, service.service_endpoint, userdata=userdata
     ):
         return ConsumableCodes.CONNECTIVITY_FAIL
 
     # to be parameterized in the future, can implement other credential classes
-    if asset.requires_address_credential:
-        return asset.validate_access(credential)
+    if ddo.requires_address_credential:
+        return ddo.validate_access(credential)
 
     return ConsumableCodes.OK

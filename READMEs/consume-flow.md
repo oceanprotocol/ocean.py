@@ -84,11 +84,10 @@ print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads the file
 # If the connection breaks, Bob can request again by showing order_tx_id.
+consumer_wallet = bob_wallet
+destination = './'
 file_path = ocean.assets.download_asset(
-    asset=ddo,
-    consumer_wallet=bob_wallet,
-    destination='./',
-    order_tx_id=order_tx_id
+    ddo, consumer_wallet, destination, order_tx_id
 )
 ```
 
@@ -117,12 +116,10 @@ order_tx_id = ocean.assets.pay_for_access_service(
 )
 
 # Bob now has access! He downloads the asset.
+consumer_wallet = bob_wallet
+destination = './'
 file_path = ocean.assets.download_asset(
-    asset=ddo,
-    consumer_wallet=bob_wallet,
-    destination='./',
-    order_tx_id=order_tx_id,
-    service=service
+    ddo, bob_wallet, destination, order_tx_id, service=service
 )
 ```
 

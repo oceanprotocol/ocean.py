@@ -121,11 +121,7 @@ def test_consume_flow(
     assert len(os.listdir(destination)) == 0
 
     ocean_assets.download_asset(
-        asset=ddo,
-        consumer_wallet=consumer_wallet,
-        destination=destination,
-        order_tx_id=receipt.txid,
-        service=service,
+        ddo, consumer_wallet, destination, receipt.txid, service
     )
 
     assert len(
