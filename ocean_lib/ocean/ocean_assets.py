@@ -624,7 +624,6 @@ class OceanAssets:
         :param compress_flag - compress this DDO?
         :return - the updated DDO, or None if updated ddo not found in aquarius
         """
-
         self._assert_ddo_metadata(ddo.metadata)
 
         if not provider_uri:
@@ -666,8 +665,10 @@ class OceanAssets:
             [proof],
             {"from": publisher_wallet},
         )
-
-        return self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
+        
+        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
+        
+        return ddo
 
     @enforce_types
     def resolve(self, did: str) -> "DDO":
