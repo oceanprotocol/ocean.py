@@ -138,7 +138,7 @@ def test_consume_simple_onchain_data(
         consumer_wallet,
         destination,
         receipt.txid,
-        service=service,
+        service,
     )
 
     assert len(
@@ -272,15 +272,10 @@ def test_consume_parametrized_onchain_data(
 
     assert len(os.listdir(destination)) == 0
 
+    # this is where user is sending the required consumer_parameters
+    userdata = {"baseToken": ddo.nft_address.lower()}
     ocean_assets.download_asset(
-        ddo,
-        consumer_wallet,
-        destination,
-        receipt.txid,
-        service,
-        userdata={
-            "baseToken": ddo.nft_address.lower()
-        },  # this is where user is sending the required consumer_parameters
+        ddo, consumer_wallet, destination, receipt.txid, service, userdata=userdata
     )
 
     assert len(
