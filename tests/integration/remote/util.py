@@ -8,14 +8,12 @@ import string
 import time
 import warnings
 
-from brownie.exceptions import ContractNotFound, TransactionError, \
-    VirtualMachineError
+from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
 
-ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError,
-                   VirtualMachineError)
+ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
 
 
 @enforce_types
@@ -103,7 +101,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     # Alice publish data NFT
     # avoid "replacement transaction underpriced" error: make each tx diff't
     symbol = random_chars()
-    
+
     print("Call create_data_nft(), and wait for it to complete...")
     try:
         data_nft = ocean.create_data_nft(symbol, symbol, alice_wallet)
@@ -113,20 +111,22 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
             warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
             return
         raise (e)
-    
+
     assert data_nft_symbol == symbol
     print("Success")
 
 
 @enforce_types
 def error_is_skippable(error_s: str) -> bool:
-    return ("insufficient funds" in error_s \
-            or "underpriced" in error_s \
-            or "No contract deployed at" in error_s \
-            or "nonce too low" in error_s \
-            or "Internal error" in error_s \
-            or "No data was returned - the call likely reverted" in error_s)
-    
+    return (
+        "insufficient funds" in error_s
+        or "underpriced" in error_s
+        or "No contract deployed at" in error_s
+        or "nonce too low" in error_s
+        or "Internal error" in error_s
+        or "No data was returned - the call likely reverted" in error_s
+    )
+
 
 @enforce_types
 def random_chars() -> str:
