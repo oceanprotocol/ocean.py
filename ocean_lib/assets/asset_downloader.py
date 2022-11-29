@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 @enforce_types
 def download_asset_files(
-    asset: DDO,
+    ddo: DDO,
     service: Service,
     consumer_wallet,
     destination: str,
@@ -29,7 +29,7 @@ def download_asset_files(
 ) -> str:
     """Download asset data file or result file from compute job.
 
-    :param asset: DDO instance
+    :param ddo: DDO instance
     :param service: Sevice instance
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
@@ -53,7 +53,7 @@ def download_asset_files(
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
     consumable_result = is_consumable(
-        asset,
+        ddo,
         service,
         {"type": "address", "value": consumer_wallet.address},
         with_connectivity_check=True,
@@ -62,16 +62,16 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    service_index_in_asset = asset.get_index_of_service(service)
+    service_index_in_asset = ddo.get_index_of_service(service)
     asset_folder = os.path.join(
-        destination, f"datafile.{asset.did},{service_index_in_asset}"
+        destination, f"datafile.{ddo.did},{service_index_in_asset}"
     )
 
     if not os.path.exists(asset_folder):
         os.makedirs(asset_folder)
 
     data_provider.download(
-        did=asset.did,
+        did=ddo.did,
         service=service,
         tx_id=order_tx_id,
         consumer_wallet=consumer_wallet,
