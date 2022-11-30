@@ -95,7 +95,7 @@ pytest ocean_lib/models/test/test_data_nft_factory.py::test_start_multiple_order
 pytest ocean_lib/models/test/test_data_nft_factory.py
 
 #run all regular tests; see details on pytest markers to select specific suites
-pytest -m "not slow"
+pytest
 ```
 
 The README tests are special. Here's how to run them:
