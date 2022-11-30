@@ -11,8 +11,8 @@ Here are the steps:
 
 1.  Setup
 2.  Alice publishes the API asset
-3.  Alice makes the API asset available for free, via a dispenser
-4.  Bob consumes the API asset
+3.  Alice creates a faucet for the asset
+4.  Bob gets a free datatoken, then consumes it
 
 Let's go through each step.
 
@@ -46,25 +46,14 @@ url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTi
 print(f"Just published asset, with did={ddo.did}")
 ```
 
-### 3. Alice makes the API asset available for free, via a dispenser
+### 3. Alice creates a faucet for the asset
 
 In the same Python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from web3.main import Web3
-datatoken.createDispenser(
-    ocean.dispenser.address,
-    Web3.toWei(10000, "ether"),
-    Web3.toWei(10000, "ether"),
-    True,
-    ZERO_ADDRESS,
-    {"from": alice_wallet},
-)
-dispenser_status = ocean.dispenser.status(datatoken.address)
-assert dispenser_status[0:3] == [True, alice_wallet.address, True]
+datatoken.create_dispenser({"from": alice_wallet})
 ```
 
-### 4. Bob consumes the API asset
+### 4. Bob gets a free datatoken, then consumes it
 
 Now, you're Bob. First, download the file.
 
@@ -73,7 +62,7 @@ In the same Python console:
 # Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
 ddo_did = ddo.did
 
-# Bob gets a datatoken from the dispenser; sends it to the service; downloads
+# Bob gets a free datatoken, sends it to the service, and downloads
 file_name = ocean.assets.download_file(ddo_did, bob_wallet)
 ```
 
@@ -112,12 +101,11 @@ Here are the three steps, un-bundled.
 
 In the same Python console:
 ```python
-# Bob gets an access token from the dispenser
+# Bob gets an access token from the faucet dispenser
 ddo = ocean.assets.resolve(ddo_did)
 datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
-amt_tokens = Web3.toWei(1, "ether")
-ocean.dispenser.dispense_tokens(datatoken, amt_tokens, {"from": bob_wallet})
+datatoken.dispense("1 ether", {"from": bob_wallet})
 
 # Bob sends a datatoken to the service to get access
 order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)

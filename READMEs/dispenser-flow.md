@@ -3,7 +3,7 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Faucet to dispense free datatokens
+# Quickstart: Post free data
 
 This quickstart describes how to create a faucet to dispense free datatokens.
 
@@ -12,8 +12,9 @@ It focuses on Alice's experience as a publisher.
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a datatoken
-3.  Alice creates a dispenser
+2.  Alice publishes dataset
+3.  Alice creates a faucet
+4.  Bob requests a datatoken
 
 Let's go through each step.
 
@@ -28,52 +29,61 @@ From [installation-flow](install.md), do:
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
-## 2. Publish Dataset
-
-From [publish-flow](publish-flow.md), do:
-- [x] 2. Publish dataset
-
-Now, you have a `data_NFT`, `datatoken`, and `ddo` for the dataset.
-
-### 3. Dispenser creation & activation
+## 2. Alice publishes dataset
 
 In the same Python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+name = "Branin dataset"
+url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+```
 
-# Key parameter
-from web3.main import Web3
-max_amount = Web3.toWei(50, "ether")
+## 3. Alice creates a faucet
 
-# Retrieve the dispenser
-dispenser = ocean.dispenser
-
-# Create dispenser
-datatoken.createDispenser(
-    dispenser.address,
-    max_amount,
-    max_amount,
-    True,
-    ZERO_ADDRESS,
-    {"from": alice_wallet},
-)
-
-dispenser_status = dispenser.status(datatoken.address)
-assert dispenser_status[0] is True
-assert dispenser_status[1] == alice_wallet.address
-assert dispenser_status[2] is True
-
-initial_balance = datatoken.balanceOf(alice_wallet.address)
-assert initial_balance == 0
-dispenser.dispense_tokens(
-    datatoken, max_amount, {"from": alice_wallet}
-)
-assert datatoken.balanceOf(alice_wallet.address) == max_amount
+In the same Python console:
+```python
+datatoken.create_dispenser({"from": alice_wallet})
 ```
 
 
-## Appendix. Tips & Tricks
+## 4. Bob requests a datatoken
 
-You can combine the transactions to (a) publish data NFT, (b) publish datatoken, and (c) publish dispenser into a _single_ transaction, via the method `create_nft_erc20_with_dispenser`.
+In the same Python console:
+```python
+datatoken.dispense("1 ether", {"from": bob_wallet})
+
+# That's it! To wrap up, let's check Bob's balance
+from web3 import Web3
+bal = datatoken.balanceOf(bob_wallet.address)
+print(f"Bob has {Web3.fromWei(bal, 'ether')} datatokens")
+```
 
 
+## Appendix: Further Flexibility
+
+`create_dispenser()` can take these optional arguments:
+- `max_tokens` - maximum number of tokens to dispense. The default is a large number.
+- `max_balance` - maximum balance of requester. The default is a large number.
+
+A call with both would look like `create_dispenser({"from": alice_wallet}, max_tokens=max_tokens, max_balance=max_balance)`
+
+To learn about dispenser status:
+
+```python
+status = datatoken.dispenser_status()
+print(f"For datatoken {datatoken.address}:")
+print(status)
+```
+
+It will output something like:
+```text
+For datatoken 0x92cA723B61CbD933390aA58b83e1F00cedf4ebb6:
+DispenserStatus:
+  active = True
+  owner_address = 0x1234
+  is_minter = True
+  max_tokens = 1000 (10000000000000000000000 wei)
+  max_balance = 10  (100000000000000000000 wei)
+  balance = 1
+  allowed_swapper = anyone can request
+```
