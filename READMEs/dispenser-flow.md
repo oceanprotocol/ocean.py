@@ -3,9 +3,9 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Dispenser Flow
+# Quickstart: Faucet to dispense free datatokens
 
-This quickstart describes the dispenser flow, a "faucet" to give out free datatokens.
+This quickstart describes how to create a faucet to dispense free datatokens.
 
 It focuses on Alice's experience as a publisher.
 
@@ -13,7 +13,7 @@ Here are the steps:
 
 1.  Setup
 2.  Alice creates a datatoken
-3.  Dispenser creation & activation
+3.  Alice creates a dispenser
 
 Let's go through each step.
 
@@ -28,11 +28,12 @@ From [installation-flow](install.md), do:
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
-## 2. Publish Data NFT & Datatoken
+## 2. Publish Dataset
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 2.1 Create a data NFT
-- [x] 2.2 Create a datatoken from the data NFT
+From [publish-flow](publish-flow.md), do:
+- [x] 2. Publish dataset
+
+Now, you have a `data_NFT`, `datatoken`, and `ddo` for the dataset.
 
 ### 3. Dispenser creation & activation
 

@@ -30,34 +30,34 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 Here are flows to try out, from simple to specific detailed variants.
 
-- **[Installation flow](READMEs/install.md)** - the required setup to run ocean.py flows.
-- **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - the essence of Ocean - creating a data NFT & datatoken.
-- **[Publish flow](READMEs/publish-flow.md)** - a dataset is published.
-- **[Consume flow](READMEs/consume-flow.md)** - a published dataset is consumed (downloaded).
-- **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale at fixed rate, then purchased.
-- **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
-- **[Search & filter data assets](READMEs/search-and-filter-assets.md)** - how assets can be found by their tags via Aquarius.
+- **[Installation](READMEs/install.md)** - need for each flow below
+- **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - publish a dataset's data NFT and datatoken
+- **[Publish flow](READMEs/publish-flow.md)** - publish a dataset's data NFT, datatoken _and_ metadata (DDO)
+- **[Consume flow](READMEs/consume-flow.md)** - download a dataset
+- **[Post priced data](READMEs/marketplace-flow.md)** - post a dataset for sale, having a fixed price
+- **[Post free data](READMEs/dispenser-flow.md)** - post a dataset for free, via a faucet
+- **[Search & filter data](READMEs/search-and-filter-assets.md)** - find assets by tag
 
 ### Remote flows
 
 - **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
-- **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services.
-- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model.
+- **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services
+- **[C2D flow](READMEs/c2d-flow.md)** - uses Compute-to-Data to build an AI model
 
 ### More types of data assets
 
-- **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API-style URIs, showing Binance ETH price feed
-- **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL-style URIs
+- **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API data, showing Binance ETH price feed
+- **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
 
 ### Key-value flows
 
-- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain.
-- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data.
+- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
+- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 
 ### Use-case flows
 
-- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price.
+- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 
 ### Learn more
