@@ -26,8 +26,8 @@ def test1(
     ocean = Ocean(config)
 
     # Publish
-    url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
-    name = "CEXA ETH-USDT"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    name = "My asset"
     (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
     )
