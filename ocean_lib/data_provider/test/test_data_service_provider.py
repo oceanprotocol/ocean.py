@@ -113,14 +113,14 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         compute_values=dict(),
     )
 
-    mock_asset = DDO()
+    mock_ddo = DDO()
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput(mock_asset, mock_service, "tx_id"),
+            dataset=ComputeInput(mock_ddo, mock_service, "tx_id"),
             compute_environment="some_env",
             algorithm=ComputeInput(DDO(), mock_service, "tx_id"),
         )
@@ -529,9 +529,9 @@ def test_initialize_compute_failure(config):
     service.service_endpoint = "http://172.15.0.4:8030"
     service.id = "abc"
 
-    asset = Mock(spec=DDO)
-    asset.did = "0x0"
-    compute_input = ComputeInput(asset, service)
+    ddo = Mock(spec=DDO)
+    ddo.did = "0x0"
+    compute_input = ComputeInput(ddo, service)
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)

@@ -53,12 +53,12 @@ class Ocean:
             - The DID is registered on-chain with a URL of the metadata store
               to retrieve the DDO from
 
-            `asset = ocean.assets.create(metadata, publisher_wallet)`
+            `ddo = ocean.assets.create(metadata, publisher_wallet)`
 
-        2. Discover/Search assets via the current configured metadata store (Aquarius)
+        2. Discover/Search ddos via the current configured metadata store (Aquarius)
 
             - Usage:
-            `assets_list = ocean.assets.search('search text')`
+            `ddos_list = ocean.assets.search('search text')`
 
         An instance of Ocean is parameterized by a `Config` instance.
 
@@ -262,11 +262,11 @@ class Ocean:
 
     @enforce_types
     def retrieve_provider_fees(
-        self, asset: DDO, access_service: Service, publisher_wallet
+        self, ddo: DDO, access_service: Service, publisher_wallet
     ) -> tuple:
 
         initialize_response = DataServiceProvider.initialize(
-            asset.did, access_service, consumer_address=publisher_wallet.address
+            ddo.did, access_service, consumer_address=publisher_wallet.address
         )
         initialize_data = initialize_response.json()
         provider_fees = initialize_data["providerFee"]
