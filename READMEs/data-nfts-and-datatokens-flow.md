@@ -57,6 +57,9 @@ Congrats, you've created your first Ocean data NFT!
 
 ### 2.2 🎉 Create a datatoken from the data NFT
 
+By default, the template index is 1 *(regular datatoken), but use the template_index function
+argument to control that (e.g. template_index=2 for an Enterprise Datatoken).
+
 In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
