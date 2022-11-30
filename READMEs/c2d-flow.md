@@ -112,7 +112,7 @@ ALGO_container = "python"
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
-print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
+print(f"ALGO_asset did = '{ALGO_asset.did}'")
 ```
 
 ## 4. Alice allows the algorithm for C2D for that data asset
