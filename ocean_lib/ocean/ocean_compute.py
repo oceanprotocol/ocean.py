@@ -21,7 +21,6 @@ logger = logging.getLogger("ocean")
 
 
 class OceanCompute:
-
     @enforce_types
     def __init__(
         self, config_dict: dict, data_provider: Type[DataServiceProvider]
@@ -71,9 +70,7 @@ class OceanCompute:
         return job_info["jobId"]
 
     @enforce_types
-    def status(
-        self, ddo: DDO, service: Service, job_id: str, wallet
-    ) -> Dict[str, Any]:
+    def status(self, ddo: DDO, service: Service, job_id: str, wallet) -> Dict[str, Any]:
         """
         Gets job status.
 
