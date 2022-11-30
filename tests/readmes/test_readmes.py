@@ -7,7 +7,6 @@ import runpy
 
 import pytest
 
-
 # This file tests READMEs on local chain (ganache).
 # For tests of READMEs on remote chains, see tests/integration/remote/
 
@@ -45,7 +44,6 @@ def test_script_execution(script, monkeypatch):
     runs_with_prerequisites = [
         "c2d-flow",
         "dispenser-flow",
-        "datatoken-enterprise",
         "marketplace-flow",
         "key-value-flow",
         "profile-nfts-flow",
@@ -76,7 +74,6 @@ def test_script_execution(script, monkeypatch):
 
     runs_with_publish = [
         "consume-flow",
-        "datatoken-enterprise",
     ]
     for item in runs_with_publish:
         if item in script.name:
