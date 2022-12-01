@@ -273,7 +273,7 @@ class DataServiceProvider(DataServiceProviderBase):
     ) -> Dict[str, Any]:
         """
 
-        :param did: hex str the asset/DDO id
+        :param did: hex str the DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
         :param consumer of the consumer's account
@@ -297,7 +297,7 @@ class DataServiceProvider(DataServiceProviderBase):
     ) -> Dict[str, str]:
         """
 
-        :param did: hex str the asset/DDO id
+        :param did: hex str the DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
         :param consumer of the consumer's account
@@ -321,7 +321,7 @@ class DataServiceProvider(DataServiceProviderBase):
     ) -> Dict[str, Any]:
         """
 
-        :param did: hex str the asset/DDO id
+        :param did: hex str the DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param dataset_compute_service:
         :param consumer of the consumer's account
@@ -386,7 +386,7 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def compute_job_result_logs(
-        asset: Any,
+        ddo: Any,
         job_id: str,
         dataset_compute_service: Any,
         consumer,
@@ -401,7 +401,7 @@ class DataServiceProvider(DataServiceProviderBase):
         :return: dict of job_id to result urls.
         """
         status = DataServiceProvider.compute_job_status(
-            asset.did, job_id, dataset_compute_service, consumer
+            ddo.did, job_id, dataset_compute_service, consumer
         )
         function_result = []
         for i in range(len(status["results"])):
