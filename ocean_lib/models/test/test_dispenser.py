@@ -94,17 +94,19 @@ def test_main_flow_via_simple_ux_and_setting_token_counts(
     Set values for max_tokens, max_balance.
     """
     # set params
-    max_tokens = 456
-    max_balance = 789
+    max_tokens = toWei(456, "ether") #max # tokens to dispense
+    max_balance = toWei(789, "ether") # max balance of requester
 
     # basic steps
-    datatoken.create_dispenser({"from": publisher_wallet}, max_tokens, max_balance)
+    datatoken.create_dispenser(
+        {"from": publisher_wallet}, max_tokens, max_balance
+    )
     datatoken.dispense("3 ether", {"from": consumer_wallet})
 
     # check status
-    status = datatokens.dispenser_status()
-    assert status.max_tokens == max_tokens
-    assert status.max_balance == max_balance
+    status = datatoken.dispenser_status()
+    assert fromWei(status.max_tokens, "ether") == 456
+    assert fromWei(status.max_balance, "ether") == 789
     assert status.balance == 0
 
 
