@@ -138,18 +138,18 @@ class Datatoken(ContractBase):
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 
-    
     @enforce_types
     def create_dispenser(
-            self,
-            tx_dict:dict,
-            max_tokens:Optional[int] = None,
-            max_balance:Optional[int] = None):
+        self,
+        tx_dict: dict,
+        max_tokens: Optional[int] = None,
+        max_balance: Optional[int] = None,
+    ):
         """
         Create dispenser faucet this datatoken, to dispense free tokens.
 
         :param: max_tokens - max # tokens to dispense, in wei
-        :param: max_balance - max balance of requester 
+        :param: max_balance - max balance of requester
         :tx_dict: e.g. {"from": alice_wallet}
         :return: tx
         """
@@ -163,8 +163,8 @@ class Datatoken(ContractBase):
 
         # args for contract tx
         dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-        with_mint = True # True -> can always mint more
-        allowed_swapper = ZERO_ADDRESS # 0 -> so anyone can call dispense
+        with_mint = True  # True -> can always mint more
+        allowed_swapper = ZERO_ADDRESS  # 0 -> so anyone can call dispense
 
         # do contract tx
         tx = self.createDispenser(
@@ -177,9 +177,8 @@ class Datatoken(ContractBase):
         )
         return tx
 
-
     @enforce_types
-    def dispense(self, amount:Union[int,str], tx_dict: dict):
+    def dispense(self, amount: Union[int, str], tx_dict: dict):
         """
         Dispense free tokens via the dispenser faucet.
 
@@ -190,28 +189,28 @@ class Datatoken(ContractBase):
         # args for contract tx
         datatoken_addr = self.address
         from_addr = tx_dict["from"].address
-        
+
         # do contract tx
         tx = self._ocean_dispenser().dispense(
             datatoken_addr, amount, from_addr, tx_dict
         )
         return tx
 
-
     @enforce_types
     def dispenser_status(self):
         """:return: DispenserStatus object"""
         # import here to avoid circular import
         from ocean_lib.models.dispenser import DispenserStatus
+
         status_tup = self._ocean_dispenser().status(self.address)
         return DispenserStatus(status_tup)
-
 
     @enforce_types
     def _ocean_dispenser(self):
         """:return: Dispenser object"""
         # import here to avoid circular import
         from ocean_lib.models.dispenser import Dispenser
+
         dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
         return Dispenser(self.config_dict, dispenser_addr)
 
