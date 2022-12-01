@@ -146,7 +146,10 @@ class Datatoken(ContractBase):
         max_balance: Optional[int] = None,
     ):
         """
-        Create dispenser faucet this datatoken, to dispense free tokens.
+        For this datataken, create a dispenser faucet for free tokens.
+
+        This wraps the smart contract method Datatoken.createDispenser()
+          with a simpler interface.
 
         :param: max_tokens - max # tokens to dispense, in wei
         :param: max_balance - max balance of requester
