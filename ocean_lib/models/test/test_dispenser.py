@@ -22,12 +22,12 @@ def test_DispenserStatus():
     max_tokens = 456
     max_bal = 789
     bal = 3
-    swpr = ZERO_ADDRESS #allowed swapper. ZERO_ADDRESS = anyone can request
+    swpr = ZERO_ADDRESS  # allowed swapper. ZERO_ADDRESS = anyone can request
 
     # create the object
     status_tup = (active, owner, is_minter, max_tokens, max_bal, bal, swpr)
     status = DispenserStatus(status_tup)
-    
+
     # verify status
     assert isinstance(status, DispenserStatus)
     assert status.active
@@ -68,7 +68,7 @@ def test_main_flow_via_simple_ux_and_good_defaults(
 
     # check balance
     bal = datatoken.balanceOf(consumer_wallet.address)
-    assert fromWei(bal, 'ether') == 3
+    assert fromWei(bal, "ether") == 3
 
     # check status
     status = datatoken.dispenser_status()
@@ -78,8 +78,8 @@ def test_main_flow_via_simple_ux_and_good_defaults(
     assert status.is_minter == True
     assert status.max_tokens == MAX_UINT256
     assert status.max_balance == MAX_UINT256
-    assert status.balance == 0 # 0, not 3, because it mints on the fly
-    assert status.allowed_swapper == ZERO_ADDRESS #anyone can request
+    assert status.balance == 0  # 0, not 3, because it mints on the fly
+    assert status.allowed_swapper == ZERO_ADDRESS  # anyone can request
 
 
 @pytest.mark.unit
@@ -98,9 +98,7 @@ def test_main_flow_via_simple_ux_and_setting_token_counts(
     max_balance = 789
 
     # basic steps
-    datatoken.create_dispenser(
-        {"from": publisher_wallet}, max_tokens, max_balance
-    )
+    datatoken.create_dispenser({"from": publisher_wallet}, max_tokens, max_balance)
     datatoken.dispense("3 ether", {"from": consumer_wallet})
 
     # check status
@@ -108,8 +106,8 @@ def test_main_flow_via_simple_ux_and_setting_token_counts(
     assert status.max_tokens == max_tokens
     assert status.max_balance == max_balance
     assert status.balance == 0
-    
-    
+
+
 @pytest.mark.unit
 def test_main_flow_via_contract_directly(
     config,
