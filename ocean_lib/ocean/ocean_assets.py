@@ -9,6 +9,7 @@ import json
 import logging
 import lzma
 import os
+import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
@@ -19,8 +20,8 @@ from web3 import Web3
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
@@ -446,7 +447,13 @@ class OceanAssets:
                 {"from": publisher_wallet},
             )
 
-            registered_event = receipt.events["NFTCreated"]
+            with warnings.catch_warnings():
+                warnings.filterwarnings(
+                    "ignore",
+                    message="Event log does not contain enough topics for the given ABI",
+                )
+                registered_event = receipt.events["NFTCreated"]
+
             data_nft_address = registered_event["newTokenAddress"]
             data_nft = DataNFT(self._config_dict, data_nft_address)
             if not data_nft:
