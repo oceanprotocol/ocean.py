@@ -450,7 +450,7 @@ class OceanAssets:
             with warnings.catch_warnings():
                 warnings.filterwarnings(
                     "ignore",
-                    message="Event log does not contain enough topics for the given ABI",
+                    message=".*Event log does not contain enough topics for the given ABI.*",
                 )
                 registered_event = receipt.events["NFTCreated"]
 
