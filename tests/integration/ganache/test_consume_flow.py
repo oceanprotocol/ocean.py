@@ -19,7 +19,6 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.integration
-@pytest.mark.skip(reason="Don't skip, once fixed #1137")
 def test_consume_flow(
     config: dict,
     publisher_wallet,
@@ -140,8 +139,8 @@ def test_compact_publish_and_consume(
     ocean_assets = OceanAssets(config, data_provider)
 
     # publish
-    name = "CEXA"
-    url = "https://cexa.oceanprotocol.io/ohlc?exchange=binance&pair=ETH/USDT"
+    name = "My asset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     (data_nft, datatoken, ddo) = ocean_assets.create_url_asset(
         name, url, publisher_wallet
     )
