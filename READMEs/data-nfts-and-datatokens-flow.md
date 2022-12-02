@@ -64,7 +64,7 @@ In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
 
-datatoken = data_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
+datatoken = data_nft.create_datatoken("Datatoken 1", "DT1", {"from": alice_wallet})
 print(f"Created datatoken. Its address is {datatoken.address}")
 ```
 
