@@ -15,13 +15,16 @@ def test_metadataCacheUri_config_key():
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
         "NETWORK_NAME": "development",
-        "METADATA_CACHE_URI": "http://ItWorkeddd.com",
+        "METADATA_CACHE_URI": "http://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "http://172.15.0.4:8030",
         "DOWNLOADS_PATH": "consume-downloads",
         "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
     }
     ocean_instance = Ocean(config_dict=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config_dict["METADATA_CACHE_URI"]
+    assert (
+        "http://v4.aquarius.oceanprotocol.com"
+        == ocean_instance.config_dict["METADATA_CACHE_URI"]
+    )
 
 
 @pytest.mark.unit
@@ -29,7 +32,7 @@ def test_incomplete():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
     config_dict = {
-        "METADATA_CACHE_URI": "http://ItWorkeddd.com",
+        "METADATA_CACHE_URI": "http://ItWorked.com",
     }
 
     with pytest.raises(Exception) as exception_info:
