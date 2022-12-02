@@ -28,13 +28,7 @@ def test1(
     # Publish
     end_datetime = datetime.now()
     start_datetime = end_datetime - timedelta(days=7)  # the previous week
-    url = "https://api.binance.com/api/v3/klines"
-    userdata = {
-        "symbol": "ETHUSDT",
-        "interval": "1d",
-        "startTime": f"{int(start_datetime.timestamp())*1000}",
-        "endTime": f"{int(end_datetime.timestamp())*1000}",
-    }
+    url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
     name = "Binance ETH-USDT"
     (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
@@ -43,10 +37,7 @@ def test1(
     # Initialize service
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     data_provider.initialize(
-        did=ddo.did,
-        service=service,
-        consumer_address=consumer_wallet.address,
-        userdata=userdata,
+        did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
 
     # Share access
@@ -55,11 +46,12 @@ def test1(
 
     # Consume
     destination = str(tmp_path)
-    order_tx_id = ocean.assets.pay_for_access_service(
-        ddo, consumer_wallet, userdata=userdata
-    )
+    order_tx_id = ocean.assets.pay_for_access_service(ddo, consumer_wallet)
     file_path = ocean.assets.download_asset(
-        ddo, consumer_wallet, destination, order_tx_id, userdata=userdata
+        ddo,
+        consumer_wallet,
+        destination,
+        order_tx_id,
     )
     file_name = glob.glob(file_path + "/*")[0]
     print(f"file_path: '{file_path}'")  # e.g. datafile.0xAf07...48,0
