@@ -72,7 +72,7 @@ def test_main(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    receipt = data_nft.create_erc20(
+    receipt = data_nft.create_datatoken(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -83,6 +83,7 @@ def test_main(
         publish_market_order_fee_amount=0,
         bytess=[b""],
         transaction_parameters={"from": consumer_wallet},
+        wrap_as_object=False,
     )
     assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events["TokenCreated"]
@@ -148,7 +149,7 @@ def test_main(
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
-    receipt = data_nft.create_erc20(
+    receipt = data_nft.create_datatoken(
         template_index=1,
         name="DT1P",
         symbol="DT1SymbolP",
@@ -159,6 +160,7 @@ def test_main(
         publish_market_order_fee_amount=Web3.toWei("0.0005", "ether"),
         bytess=[b""],
         transaction_parameters={"from": publisher_wallet},
+        wrap_as_object=False,
     )
     assert receipt, "Failed to create ERC20 token."
     registered_fee_token_event = receipt.events["TokenCreated"]
@@ -358,7 +360,7 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    receipt = data_nft.create_erc20(
+    receipt = data_nft.create_datatoken(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -369,6 +371,7 @@ def test_start_multiple_order(
         publish_market_order_fee_amount=0,
         bytess=[b""],
         transaction_parameters={"from": consumer_wallet},
+        wrap_as_object=False,
     )
     assert receipt, "Failed to create ERC20 token."
     registered_token_event = receipt.events["TokenCreated"]
@@ -481,7 +484,7 @@ def test_fail_get_templates(config):
 
 
 @pytest.mark.unit
-def test_fail_create_erc20(
+def test_fail_create_datatoken(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Tests multiple failures for creating ERC20 token."""
@@ -510,7 +513,7 @@ def test_fail_create_erc20(
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft.create_erc20(
+        data_nft.create_datatoken(
             template_index=0,
             name="DT1",
             symbol="DT1Symbol",
@@ -525,7 +528,7 @@ def test_fail_create_erc20(
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft.create_erc20(
+        data_nft.create_datatoken(
             template_index=3,
             name="DT1",
             symbol="DT1Symbol",
@@ -541,7 +544,7 @@ def test_fail_create_erc20(
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
-        data_nft.create_erc20(
+        data_nft.create_datatoken(
             template_index=1,
             name="DT1",
             symbol="DT1Symbol",

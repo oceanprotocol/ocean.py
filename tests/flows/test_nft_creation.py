@@ -216,7 +216,7 @@ def test_datatoken_creation(
     token_address = receipt.events["NFTCreated"]["newTokenAddress"]
     data_nft = DataNFT(config, token_address)
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    tx_result = data_nft.create_erc20(
+    tx_result = data_nft.create_datatoken(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -239,7 +239,7 @@ def test_datatoken_creation(
 
     # Tests failed creation of datatoken
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
-        data_nft.create_erc20(
+        data_nft.create_datatoken(
             template_index=1,
             name="DT1",
             symbol="DT1Symbol",
@@ -325,7 +325,7 @@ def test_nft_owner_transfer(
     assert data_nft.ownerOf(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
-        data_nft.create_erc20(
+        data_nft.create_datatoken(
             template_index=1,
             name="DT1",
             symbol="DT1Symbol",
@@ -342,7 +342,7 @@ def test_nft_owner_transfer(
         datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet})
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
-    data_nft.create_erc20(
+    data_nft.create_datatoken(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -353,6 +353,7 @@ def test_nft_owner_transfer(
         publish_market_order_fee_amount=0,
         bytess=[b""],
         transaction_parameters={"from": consumer_wallet},
+        wrap_as_object=False,
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 

@@ -10,7 +10,6 @@ from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -166,7 +165,7 @@ def data_nft(config, publisher_wallet, data_nft_factory):
 
 @pytest.fixture
 def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
-    receipt = data_nft.create_erc20(
+    return data_nft.create_datatoken(
         template_index=1,
         name="DT1",
         symbol="DT1Symbol",
@@ -179,14 +178,10 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
         transaction_parameters={"from": publisher_wallet},
     )
 
-    dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
-
-    return Datatoken(config, dt_address)
-
 
 @pytest.fixture
 def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
-    receipt = data_nft.create_erc20(
+    return data_nft.create_datatoken(
         template_index=2,
         name="DT1",
         symbol="DT1Symbol",
@@ -199,10 +194,6 @@ def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_fact
         transaction_parameters={"from": publisher_wallet},
         datatoken_cap=Web3.toWei(100, "ether"),
     )
-
-    dt_address = receipt.events["TokenCreated"]["newTokenAddress"]
-
-    return DatatokenEnterprise(config, dt_address)
 
 
 @pytest.fixture
