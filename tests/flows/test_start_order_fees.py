@@ -237,7 +237,7 @@ def create_asset_with_order_fee_and_timeout(
         publish_market_order_fee_token=publish_market_order_fee_token,
         publish_market_order_fee_amount=publish_market_order_fee_amount,
         bytess=[b""],
-        from_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
     )
 
     data_provider = DataServiceProvider

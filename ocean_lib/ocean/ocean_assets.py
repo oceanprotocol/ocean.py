@@ -136,41 +136,6 @@ class OceanAssets:
         )
 
     @enforce_types
-    def deploy_datatoken(
-        self,
-        data_nft_factory: DataNFTFactoryContract,
-        data_nft: DataNFT,
-        template_index: int,
-        name: str,
-        symbol: str,
-        minter: str,
-        fee_manager: str,
-        publish_market_order_fee_address: str,
-        publish_market_order_fee_token: str,
-        publish_market_order_fee_amount: int,
-        bytess: List[bytes],
-        from_wallet,
-    ) -> str:
-        receipt = data_nft.create_erc20(
-            template_index=template_index,
-            name=name,
-            symbol=symbol,
-            minter=minter,
-            fee_manager=fee_manager,
-            publish_market_order_fee_address=publish_market_order_fee_address,
-            publish_market_order_fee_token=publish_market_order_fee_token,
-            publish_market_order_fee_amount=publish_market_order_fee_amount,
-            bytess=bytess,
-            transaction_parameters={"from": from_wallet},
-        )
-        assert receipt, "Failed to create ERC20 token."
-
-        registered_token_event = receipt.events["TokenCreated"]
-        assert registered_token_event, "Cannot find TokenCreated event."
-
-        return registered_token_event["newTokenAddress"]
-
-    @enforce_types
     def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
         return next(
             (service.id for service in services if service.datatoken == datatoken), None
@@ -512,28 +477,24 @@ class OceanAssets:
 
         if not deployed_datatokens:
             for datatoken_data_counter in range(len(datatoken_templates)):
-                datatoken_addresses.append(
-                    self.deploy_datatoken(
-                        data_nft_factory=data_nft_factory,
-                        data_nft=data_nft,
-                        template_index=datatoken_templates[datatoken_data_counter],
-                        name=datatoken_names[datatoken_data_counter],
-                        symbol=datatoken_symbols[datatoken_data_counter],
-                        minter=datatoken_minters[datatoken_data_counter],
-                        fee_manager=datatoken_fee_managers[datatoken_data_counter],
-                        publish_market_order_fee_address=datatoken_publish_market_order_fee_addresses[
-                            datatoken_data_counter
-                        ],
-                        publish_market_order_fee_token=datatoken_publish_market_order_fee_tokens[
-                            datatoken_data_counter
-                        ],
-                        publish_market_order_fee_amount=datatoken_publish_market_order_fee_amounts[
-                            datatoken_data_counter
-                        ],
-                        bytess=datatoken_bytess[datatoken_data_counter],
-                        from_wallet=publisher_wallet,
-                    )
+                temp_dt = data_nft.create_datatoken(
+                    template_index=datatoken_templates[datatoken_data_counter],
+                    name=datatoken_names[datatoken_data_counter],
+                    symbol=datatoken_symbols[datatoken_data_counter],
+                    minter=datatoken_minters[datatoken_data_counter],
+                    fee_manager=datatoken_fee_managers[datatoken_data_counter],
+                    publish_market_order_fee_address=datatoken_publish_market_order_fee_addresses[
+                        datatoken_data_counter
+                    ],
+                    publish_market_order_fee_token=datatoken_publish_market_order_fee_tokens[
+                        datatoken_data_counter
+                    ],
+                    publish_market_order_fee_amount=datatoken_publish_market_order_fee_amounts[
+                        datatoken_data_counter
+                    ],
+                    transaction_parameters={"from": publisher_wallet},
                 )
+                datatoken_addresses.append(temp_dt.address)
                 logger.info(
                     f"Successfully created datatoken with address "
                     f"{datatoken_addresses[-1]}."

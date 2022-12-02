@@ -188,7 +188,7 @@ def deploy_erc721_erc20(
     if not datatoken_minter:
         return data_nft
 
-    tx_receipt2 = data_nft.create_erc20(
+    datatoken = data_nft.create_datatoken(
         template_index=template_index,
         name="DT1",
         symbol="DT1Symbol",
@@ -200,11 +200,6 @@ def deploy_erc721_erc20(
         bytess=[b""],
         transaction_parameters={"from": data_nft_publisher},
     )
-
-    registered_event2 = tx_receipt2.events["TokenCreated"]
-    datatoken_address = registered_event2["newTokenAddress"]
-
-    datatoken = Datatoken(config_dict, datatoken_address)
 
     return data_nft, datatoken
 

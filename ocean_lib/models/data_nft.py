@@ -71,25 +71,53 @@ class DataNFT(ContractBase):
             transaction_parameters,
         )
 
-    @enforce_types
-    def create_erc20(
+    def create_datatoken(
         self,
-        template_index: int,
         name: str,
         symbol: str,
-        minter: str,
-        fee_manager: str,
-        publish_market_order_fee_address: str,
-        publish_market_order_fee_token: str,
-        publish_market_order_fee_amount: int,
-        bytess: List[bytes],
         transaction_parameters: dict,
+        template_index: Optional[int] = 1,
+        minter: Optional[str] = None,
+        fee_manager: Optional[str] = None,
+        publish_market_order_fee_address: Optional[str] = None,
+        publish_market_order_fee_token: Optional[str] = None,
+        publish_market_order_fee_amount: Optional[int] = 0,
+        bytess: Optional[List[bytes]] = None,
         datatoken_cap: Optional[int] = None,
-    ) -> str:
+        wrap_as_object: Optional[bool] = True,
+    ) -> Datatoken:
+
+        initial_list = self.getTokensList()
+
+        local_values = locals().copy()
+
+        from_address = (
+            transaction_parameters["from"].address
+            if isinstance(transaction_parameters["from"], object)
+            else transaction_parameters["from"]
+        )
+
+        if minter is None:
+            minter = from_address
+
+        if fee_manager is None:
+            fee_manager = from_address
+
+        if publish_market_order_fee_address is None:
+            publish_market_order_fee_address = from_address
+
+        if publish_market_order_fee_token is None:
+            publish_market_order_fee_token = ZERO_ADDRESS
+
+        if bytess is None:
+            bytess = [b""]
+
         if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
+
         datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
-        return self.contract.createERC20(
+
+        contract_call = self.contract.createERC20(
             template_index,
             [name, symbol],
             [
@@ -103,63 +131,8 @@ class DataNFT(ContractBase):
             transaction_parameters,
         )
 
-    def create_datatoken(
-        self,
-        name: str,
-        symbol: str,
-        from_wallet,
-        template_index: Optional[int] = 1,
-        minter: Optional[str] = None,
-        fee_manager: Optional[str] = None,
-        publish_market_order_fee_address: Optional[str] = None,
-        publish_market_order_fee_token: Optional[str] = None,
-        publish_market_order_fee_amount: Optional[int] = 0,
-        bytess: Optional[List[bytes]] = None,
-        datatoken_cap: Optional[int] = None,
-    ) -> Datatoken:
-        initial_list = self.getTokensList()
-
-        local_values = locals().copy()
-        create_args = {
-            lv_index: local_values[lv_index]
-            for lv_index in [
-                "template_index",
-                "name",
-                "symbol",
-                "from_wallet",
-                "minter",
-                "fee_manager",
-                "publish_market_order_fee_address",
-                "publish_market_order_fee_token",
-                "publish_market_order_fee_amount",
-                "bytess",
-            ]
-        }
-
-        for default_attribute in [
-            "minter",
-            "fee_manager",
-            "publish_market_order_fee_address",
-        ]:
-            if create_args[default_attribute] is None:
-                create_args[default_attribute] = from_wallet.address
-
-        if publish_market_order_fee_token is None:
-            create_args["publish_market_order_fee_token"] = ZERO_ADDRESS
-
-        if bytess is None:
-            create_args["bytess"] = [b""]
-
-        if template_index == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
-
-        if template_index == 2:
-            create_args["datatoken_cap"] = datatoken_cap
-
-        create_args["transaction_parameters"] = {"from": create_args["from_wallet"]}
-        create_args.pop("from_wallet")
-
-        self.create_erc20(**create_args)
+        if not wrap_as_object:
+            return contract_call
 
         new_elements = [
             item for item in self.getTokensList() if item not in initial_list
