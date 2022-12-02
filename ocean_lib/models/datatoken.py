@@ -8,7 +8,9 @@ from typing import Optional, Tuple, Union
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 
 
 class DatatokenRoles(IntEnum):
@@ -135,6 +137,85 @@ class Datatoken(ContractBase):
         to_block = to_block if to_block != "latest" else chain[-1].number
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
+
+    @enforce_types
+    def create_dispenser(
+        self,
+        tx_dict: dict,
+        max_tokens: Optional[int] = None,
+        max_balance: Optional[int] = None,
+    ):
+        """
+        For this datataken, create a dispenser faucet for free tokens.
+
+        This wraps the smart contract method Datatoken.createDispenser()
+          with a simpler interface.
+
+        :param: max_tokens - max # tokens to dispense, in wei
+        :param: max_balance - max balance of requester
+        :tx_dict: e.g. {"from": alice_wallet}
+        :return: tx
+        """
+        # already created, so nothing to do
+        if self.dispenser_status().active:
+            return
+
+        # set max_tokens, max_balance if needed
+        max_tokens = max_tokens or MAX_UINT256
+        max_balance = max_balance or MAX_UINT256
+
+        # args for contract tx
+        dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
+        with_mint = True  # True -> can always mint more
+        allowed_swapper = ZERO_ADDRESS  # 0 -> so anyone can call dispense
+
+        # do contract tx
+        tx = self.createDispenser(
+            dispenser_addr,
+            max_tokens,
+            max_balance,
+            with_mint,
+            allowed_swapper,
+            tx_dict,
+        )
+        return tx
+
+    @enforce_types
+    def dispense(self, amount: Union[int, str], tx_dict: dict):
+        """
+        Dispense free tokens via the dispenser faucet.
+
+        :param: amount - number of tokens to dispense, in wei
+        :tx_dict: e.g. {"from": alice_wallet}
+        :return: tx
+        """
+        # args for contract tx
+        datatoken_addr = self.address
+        from_addr = tx_dict["from"].address
+
+        # do contract tx
+        tx = self._ocean_dispenser().dispense(
+            datatoken_addr, amount, from_addr, tx_dict
+        )
+        return tx
+
+    @enforce_types
+    def dispenser_status(self):
+        """:return: DispenserStatus object"""
+        # import here to avoid circular import
+        from ocean_lib.models.dispenser import DispenserStatus
+
+        status_tup = self._ocean_dispenser().status(self.address)
+        return DispenserStatus(status_tup)
+
+    @enforce_types
+    def _ocean_dispenser(self):
+        """:return: Dispenser object"""
+        # import here to avoid circular import
+        from ocean_lib.models.dispenser import Dispenser
+
+        dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
+        return Dispenser(self.config_dict, dispenser_addr)
 
 
 class MockERC20(Datatoken):
