@@ -4,6 +4,7 @@
 #
 import glob
 import os
+from datetime import datetime, timedelta
 
 import pytest
 from web3.main import Web3
@@ -14,7 +15,6 @@ from ocean_lib.ocean.ocean import Ocean
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
-@pytest.mark.skip(reason="Don't skip, once fixed #1013")
 @pytest.mark.integration
 def test1(
     config: dict,
@@ -26,21 +26,23 @@ def test1(
     ocean = Ocean(config)
 
     # Publish
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    name = "My asset"
+    end_datetime = datetime.now()
+    start_datetime = end_datetime - timedelta(days=7)  # the previous week
+    url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
+    name = "Binance ETH-USDT"
     (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
     )
 
     # Initialize service
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-    response = data_provider.initialize(
+    data_provider.initialize(
         did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
 
     # Share access
     to_address = consumer_wallet.address
-    datatoken.mint(to_address, Web3.toWei(10, "ether"), publisher_wallet)
+    datatoken.mint(to_address, Web3.toWei(10, "ether"), {"from": publisher_wallet})
 
     # Consume
     destination = str(tmp_path)
@@ -64,6 +66,7 @@ def test1(
     with open(file_name, "r") as file:
         # data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
         data_str = file.read().rstrip().replace('"', "")
+
     data = eval(data_str)
 
     # data is a list of lists
@@ -73,3 +76,4 @@ def test1(
 
     # Example: get close prices. These can serve as an approximation to spot price
     close_prices = [float(data_at_day[4]) for data_at_day in data]
+    assert close_prices
