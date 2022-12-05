@@ -544,7 +544,6 @@ def test_plain_asset_multiple_services(
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
         services=[access_service, compute_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -568,11 +567,20 @@ def test_encrypted_asset(
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
+    services = [
+        datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=config.get("PROVIDER_URL"),
+            files=files,
+        )
+    ]
+
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
+        services=services,
         encrypt_flag=True,
     )
     assert ddo, "The ddo is not created."
@@ -592,10 +600,18 @@ def test_compressed_asset(
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
+    services = [
+        datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=config.get("PROVIDER_URL"),
+            files=files,
+        )
+    ]
+
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         compress_flag=True,
@@ -617,10 +633,18 @@ def test_compressed_and_encrypted_asset(
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
+    services = [
+        datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=config.get("PROVIDER_URL"),
+            files=files,
+        )
+    ]
+
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
@@ -647,7 +671,7 @@ def test_asset_creation_errors(
         publisher_ocean_instance.assets.create(
             metadata=metadata,
             publisher_wallet=publisher_wallet,
-            files=files,
+            services=[],
             data_nft_address=some_random_address,
             deployed_datatokens=[datatoken],
             encrypt_flag=True,
@@ -659,7 +683,7 @@ def test_asset_creation_errors(
             publisher_ocean_instance.assets.create(
                 metadata=metadata,
                 publisher_wallet=publisher_wallet,
-                files=files,
+                services=[],
                 data_nft_address=data_nft.address,
                 deployed_datatokens=[datatoken],
                 encrypt_flag=True,

@@ -37,12 +37,7 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import (
-    FilesType,
-    GraphqlQuery,
-    SmartContractCall,
-    UrlFile,
-)
+from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
@@ -248,6 +243,7 @@ class OceanAssets:
         data_nft_address: Optional[str] = None,
         data_nft_arguments: Optional["DataNFTArguments"] = None,
         deployed_datatokens: Optional[List[Datatoken]] = None,
+        services: Optional[list] = None,
         datatoken_arguments: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -330,9 +326,13 @@ class OceanAssets:
             for service in services:
                 ddo.add_service(service)
         else:
+            # TODO: check that all deployed datatokens belong to our data nft
             datatokens = deployed_datatokens
 
-        # TODO: custom services
+            # TODo: check all services belong to one of the deployed datatokens
+            # TODO: require services with deployed datatokens
+            for service in services:
+                ddo.add_service(service)
 
         # Validation by Aquarius
         _, proof = self.validate(ddo)
@@ -832,35 +832,15 @@ class DatatokenArguments:
             f"Successfully created datatoken with address " f"{temp_dt.address}."
         )
 
+        # TODO: check all services are of this dt
         if not self.services:
             self.services = [
-                self.build_access_service(
+                temp_dt.build_access_service(
                     service_id="0",
                     service_endpoint=config_dict.get("PROVIDER_URL"),
-                    datatoken=temp_dt.address,
                     files=self.files,
                     consumer_parameters=self.consumer_parameters,
                 )
             ]
 
         return temp_dt
-
-    @enforce_types
-    def build_access_service(
-        self,
-        service_id: str,
-        service_endpoint: str,
-        datatoken: str,
-        files: List[FilesType],
-        timeout: Optional[int] = 3600,
-        consumer_parameters=None,
-    ) -> Service:
-        return Service(
-            service_id=service_id,
-            service_type=ServiceTypes.ASSET_ACCESS,
-            service_endpoint=service_endpoint,
-            datatoken=datatoken,
-            files=files,
-            timeout=timeout,
-            consumer_parameters=consumer_parameters,
-        )

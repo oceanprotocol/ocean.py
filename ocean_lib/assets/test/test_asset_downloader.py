@@ -11,8 +11,8 @@ from web3.main import Web3
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
@@ -173,14 +173,20 @@ def ocean_assets_download_destination_file_helper(
     data_provider = DataServiceProvider
 
     _, metadata, files = create_basics(config, data_provider)
+    access_service = datatoken.build_access_service(
+        service_id="0",
+        service_endpoint=config.get("PROVIDER_URL"),
+        files=files,
+    )
+
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        services=[access_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    access_service = datatoken.get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     datatoken.mint(
         publisher_wallet.address,

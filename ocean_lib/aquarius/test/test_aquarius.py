@@ -6,7 +6,7 @@ import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.ddo import DDO
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.ocean.ocean_assets import DatatokenArguments
 
 
 @pytest.mark.unit
@@ -31,20 +31,14 @@ def test_aqua_functions_for_single_ddo(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    OCEAN_addr = publisher_ocean_instance.OCEAN_address
     ddo1 = publisher_ocean_instance.assets.create(
         metadata=metadata1,
         publisher_wallet=publisher_wallet,
-        files=[file1],
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[OCEAN_addr],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
+        datatoken_arguments=[
+            DatatokenArguments(
+                template_index=1, name="Datatoken 1", symbol="DT1", files=[file1]
+            )
+        ],
     )
 
     ddo2 = aquarius_instance.wait_for_ddo(ddo1.did)
