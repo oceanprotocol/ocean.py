@@ -67,9 +67,9 @@ In a bash console:
 In a Python console:
 
 ```python
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("development")  # or any network id configured in your brownie network-config.yaml file
+config = get_config_dict("development")  # or any network id configured in your brownie network-config.yaml file
 ocean = Ocean(config)
 
 # create an ERC20 object of OCEAN token

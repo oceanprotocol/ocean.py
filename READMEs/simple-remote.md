@@ -50,9 +50,9 @@ from ocean_lib.web3_internal.utils import connect_to_network
 connect_to_network("mumbai")
 
 import os
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("mumbai")
+config = get_config_dict("mumbai")
 ocean = Ocean(config)
 
 from brownie.network import accounts
