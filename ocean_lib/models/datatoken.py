@@ -107,12 +107,16 @@ class Datatoken(ContractBase):
         basetoken = Datatoken(self.config_dict, exchange_status.baseToken)
         basetoken.approve(FRE_addr, max_basetoken_amt, tx_dict)
 
+        # fees info
+        fees_info = self._ocean_fixed_rate_exchange().get_fees_info(exchange_id)
+
         # peform the buy
         tx = self._ocean_fixed_rate_exchange().buyDT(
             exchange_id,
             datatoken_amt,
             max_basetoken_amt,
-            ZERO_ADDRESS, #consumeMarketAddress
+            fees_info[1], # consumeMarketAddress
+            fees_info[0], # consumeMarketSwapFeeAmount
             0, #consumeMarketSwapFeeAmount
             tx_dict,
         )
