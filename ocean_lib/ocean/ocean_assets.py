@@ -85,80 +85,6 @@ class OceanAssets:
 
         return validation_result, validation_errors
 
-    @enforce_types
-    def _add_defaults(
-        self,
-        services: list,
-        datatoken: str,
-        files: List[FilesType],
-        provider_uri: str = None,
-        consumer_parameters=None,
-    ) -> list:
-        has_access_service = any(
-            map(
-                lambda s: s.type == ServiceTypes.ASSET_ACCESS
-                and s.id == self.find_service_by_datatoken(datatoken, services),
-                services,
-            )
-        )
-
-        if not has_access_service:
-            access_service = self.build_access_service(
-                service_id="0",
-                service_endpoint=self._config_dict.get("PROVIDER_URL"),
-                datatoken=datatoken,
-                files=files,
-                consumer_parameters=consumer_parameters,
-            )
-
-            services.append(access_service)
-
-        return services
-
-    @enforce_types
-    def build_access_service(
-        self,
-        service_id: str,
-        service_endpoint: str,
-        datatoken: str,
-        files: List[FilesType],
-        timeout: Optional[int] = 3600,
-        consumer_parameters=None,
-    ) -> Service:
-        return Service(
-            service_id=service_id,
-            service_type=ServiceTypes.ASSET_ACCESS,
-            service_endpoint=service_endpoint,
-            datatoken=datatoken,
-            files=files,
-            timeout=timeout,
-            consumer_parameters=consumer_parameters,
-        )
-
-    @enforce_types
-    def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
-        return next(
-            (service.id for service in services if service.datatoken == datatoken), None
-        )
-
-    @enforce_types
-    def build_datatokens_list(self, services: list, deployed_datatokens: list) -> list:
-        datatokens = []
-        # (1-n) service per datatoken, 1 datatoken per service
-        for datatoken in deployed_datatokens:
-            datatokens = datatokens + [
-                {
-                    "address": datatoken.address,
-                    "name": datatoken.contract.name(),
-                    "symbol": datatoken.symbol(),
-                    "serviceId": service.id,
-                }
-                for service in services
-                if service.datatoken == datatoken.address
-            ]
-
-        return datatokens
-
     @staticmethod
     @enforce_types
     def _encrypt_ddo(
@@ -291,16 +217,20 @@ class OceanAssets:
         (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
-            files,
-            datatoken_templates=[1],
-            datatoken_names=[name + ": DT1"],
-            datatoken_symbols=["DT1"],
-            datatoken_minters=[publisher_wallet.address],
-            datatoken_fee_managers=[publisher_wallet.address],
-            datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-            datatoken_publish_market_order_fee_tokens=[OCEAN_address],
-            datatoken_publish_market_order_fee_amounts=[0],
-            datatoken_bytess=[[b""]],
+            datatoken_arguments=[
+                DatatokenArguments(
+                    template_index=1,
+                    name=[name + ": DT1"],
+                    symbol="DT1",
+                    minter=publisher_wallet.address,
+                    fee_manager=publisher_wallet.address,
+                    publish_market_order_fee_address=ZERO_ADDRESS,
+                    publish_market_order_fee_token=OCEAN_address,
+                    publish_market_order_fee_amount=0,
+                    bytess=[b""],
+                    files=files,
+                )
+            ],
             wait_for_aqua=wait_for_aqua,
             return_ddo=False,
         )
@@ -313,29 +243,12 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet,
-        files: Optional[List[FilesType]] = None,
-        services: Optional[list] = None,
         credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
         data_nft_address: Optional[str] = None,
-        data_nft_name: Optional[str] = None,
-        data_nft_symbol: Optional[str] = None,
-        data_nft_template_index: Optional[int] = 1,
-        data_nft_additional_datatoken_deployer: Optional[str] = None,
-        data_nft_additional_metadata_updater: Optional[str] = None,
-        data_nft_uri: Optional[str] = None,
-        data_nft_transferable: Optional[bool] = None,
-        data_nft_owner: Optional[str] = None,
-        datatoken_templates: Optional[List[int]] = None,
-        datatoken_names: Optional[List[str]] = None,
-        datatoken_symbols: Optional[List[str]] = None,
-        datatoken_minters: Optional[List[str]] = None,
-        datatoken_fee_managers: Optional[List[str]] = None,
-        datatoken_publish_market_order_fee_addresses: Optional[List[str]] = None,
-        datatoken_publish_market_order_fee_tokens: Optional[List[str]] = None,
-        datatoken_publish_market_order_fee_amounts: Optional[List[int]] = None,
-        datatoken_bytess: Optional[List[List[bytes]]] = None,
+        data_nft_arguments: Optional["DataNFTArguments"] = None,
         deployed_datatokens: Optional[List[Datatoken]] = None,
+        datatoken_arguments: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
@@ -348,28 +261,12 @@ class OceanAssets:
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: account of the publisher registering this asset.
-        :param files: list of files that need to be encrypted before publishing.
-        :param services: list of Service objects.
         :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
         :param data_nft_address: hex str the address of the data NFT. The new
         asset will be associated with this data NFT address.
-        :param data_nft_name: str name of data NFT if creating a new one
-        :param data_nft_symbol: str symbol of data NFT  if creating a new one
-        :param data_nft_template_index: int template index of the data NFT, by default is 1.
-        :param data_nft_additional_datatoken_deployer: str address of an additional ERC20 deployer.
-        :param data_nft_additional_metadata_updater: str address of an additional metadata updater.
-        :param data_nft_uri: str URL of the data NFT.
-        :param datatoken_templates: list of templates indexes for deploying datatokens if deployed_datatokens is None.
-        :param datatoken_names: list of names for datatokens if deployed_datatokens is None.
-        :param datatoken_symbols: list of symbols for datatokens if deployed_datatokens is None.
-        :param datatoken_minters: list of minters for datatokens if deployed_datatokens is None.
-        :param datatoken_fee_managers: list of fee managers for datatokens if deployed_datatokens is None.
-        :param datatoken_publish_market_order_fee_addresses: list of publishing market addresses for datatokens if deployed_datatokens is None.
-        :param datatoken_publish_market_order_fee_tokens: list of fee tokens for datatokens if deployed_datatokens is None.
-        :param datatoken_publish_market_order_fee_amounts: list of fee values for datatokens if deployed_datatokens is None.
-        :param datatoken_bytess: list of arrays of bytes for deploying datatokens, default empty (currently not used, useful for future) if deployed_datatokens is None.
+        :param data_nft_arguments: object of DataNFTArguments type if creating a new one
         :param deployed_datatokens: list of datatokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
@@ -382,54 +279,23 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config_dict)
 
-        address = get_address_of_type(
-            self._config_dict, DataNFTFactoryContract.CONTRACT_NAME
-        )
-        data_nft_factory = DataNFTFactoryContract(self._config_dict, address)
-
         if not data_nft_address:
-            name = data_nft_name or metadata["name"]
-            symbol = data_nft_symbol or name
-            additional_datatoken_deployer = (
-                data_nft_additional_datatoken_deployer or ZERO_ADDRESS
-            )
-            additional_metadata_updater = (
-                data_nft_additional_metadata_updater or ZERO_ADDRESS
-            )
-            token_uri = data_nft_uri or "https://oceanprotocol.com/nft/"
-            transferable = data_nft_transferable or True
-            owner = data_nft_owner or publisher_wallet.address
-            # register on-chain
-            receipt = data_nft_factory.deployERC721Contract(
-                name,
-                symbol,
-                data_nft_template_index,
-                additional_metadata_updater,
-                additional_datatoken_deployer,
-                token_uri,
-                transferable,
-                owner,
-                {"from": publisher_wallet},
-            )
-
-            with warnings.catch_warnings():
-                warnings.filterwarnings(
-                    "ignore",
-                    message=".*Event log does not contain enough topics for the given ABI.*",
+            if not data_nft_arguments:
+                data_nft_arguments = DataNFTArguments(
+                    metadata["name"], metadata["name"]
                 )
-                registered_event = receipt.events["NFTCreated"]
-
-            data_nft_address = registered_event["newTokenAddress"]
-            data_nft = DataNFT(self._config_dict, data_nft_address)
+            data_nft = data_nft_arguments.publish_from(
+                self._config_dict, publisher_wallet
+            )
+            # register on-chain
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None if return_ddo else (None, None, None)
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
-
-        assert data_nft_address
-        data_nft = DataNFT(self._config_dict, data_nft_address)
+        else:
+            data_nft = DataNFT(self._config_dict, data_nft_address)
 
         # Create DDO object
         ddo = DDO()
@@ -447,95 +313,32 @@ class OceanAssets:
 
         ddo.credentials = credentials if credentials else {"allow": [], "deny": []}
 
-        datatoken_addresses = []
-        services = services or []
-        deployed_datatokens = deployed_datatokens or []
-
-        if datatoken_names and len(datatoken_names) > 1:
-            assert len(files) == len(
-                datatoken_names
-            ), "Files structure should be a list of files for each datatoken."
-
-        if len(datatoken_addresses) > 1:
-            assert len(files) == len(
-                datatoken_addresses
-            ), "Files structure should be a list of files for each datatoken."
-
-        if len(deployed_datatokens) > 1:
-            assert len(files) == len(
-                deployed_datatokens
-            ), "Files structure should be a list of files for each datatoken."
-
-        if (
-            len(datatoken_addresses) == 1
-            or len(deployed_datatokens) == 1
-            or (datatoken_names and len(datatoken_names) == 1)
-        ) and (files and not isinstance(files[0], list)):
-            # for the simplest case, where 1 dt is expected,
-            # allow files not to be a nested list
-            files = [files]
+        datatokens = []
 
         if not deployed_datatokens:
-            for datatoken_data_counter in range(len(datatoken_templates)):
-                temp_dt = data_nft.create_datatoken(
-                    template_index=datatoken_templates[datatoken_data_counter],
-                    name=datatoken_names[datatoken_data_counter],
-                    symbol=datatoken_symbols[datatoken_data_counter],
-                    minter=datatoken_minters[datatoken_data_counter],
-                    fee_manager=datatoken_fee_managers[datatoken_data_counter],
-                    publish_market_order_fee_address=datatoken_publish_market_order_fee_addresses[
-                        datatoken_data_counter
-                    ],
-                    publish_market_order_fee_token=datatoken_publish_market_order_fee_tokens[
-                        datatoken_data_counter
-                    ],
-                    publish_market_order_fee_amount=datatoken_publish_market_order_fee_amounts[
-                        datatoken_data_counter
-                    ],
-                    transaction_parameters={"from": publisher_wallet},
-                )
-                datatoken_addresses.append(temp_dt.address)
-                logger.info(
-                    f"Successfully created datatoken with address "
-                    f"{datatoken_addresses[-1]}."
-                )
-            if not services:
-                for i, datatoken_address in enumerate(datatoken_addresses):
-                    services = self._add_defaults(
-                        services,
-                        datatoken_address,
-                        files[i],
-                        provider_uri,
-                        consumer_parameters=consumer_parameters,
+            for datatoken_argument in datatoken_arguments:
+                datatokens.append(
+                    datatoken_argument.create_from_arguments(
+                        self._config_dict, data_nft, publisher_wallet
                     )
-            for i, datatoken_address in enumerate(datatoken_addresses):
-                deployed_datatokens.append(
-                    Datatoken(self._config_dict, datatoken_address)
                 )
-
-            datatokens = self.build_datatokens_list(
-                services=services, deployed_datatokens=deployed_datatokens
-            )
         else:
-            if not services:
-                for i, datatoken in enumerate(deployed_datatokens):
-                    services = self._add_defaults(
-                        services,
-                        datatoken.address,
-                        files[i],
-                        provider_uri,
-                        consumer_parameters=consumer_parameters,
-                    )
-
-            datatokens = self.build_datatokens_list(
-                services=services, deployed_datatokens=deployed_datatokens
-            )
+            datatokens = deployed_datatokens
 
         ddo.nft_address = data_nft_address
-        ddo.datatokens = datatokens
+        ddo.datatokens = [
+            {
+                "address": datatoken.address,
+                "name": datatoken.contract.name(),
+                "symbol": datatoken.symbol(),
+                # "serviceId": service.id, TODO
+            }
+            for datatoken in datatokens
+        ]
 
-        for service in services:
-            ddo.add_service(service)
+        # TODO fix
+        # for service in services:
+        #    ddo.add_service(service)
 
         # Validation by Aquarius
         _, proof = self.validate(ddo)
@@ -928,3 +731,143 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters={"from": wallet},
         ).txid
+
+
+class DataNFTArguments:
+    def __init__(
+        self,
+        name: str,
+        symbol: str,
+        template_index: Optional[int] = 1,
+        additional_datatoken_deployer: Optional[str] = None,
+        additional_metadata_updater: Optional[str] = None,
+        uri: Optional[str] = None,
+        transferable: Optional[bool] = None,
+        owner: Optional[str] = None,
+    ):
+        """
+        :param name: str name of data NFT if creating a new one
+        :param symbol: str symbol of data NFT  if creating a new one
+        :param template_index: int template index of the data NFT, by default is 1.
+        :param additional_datatoken_deployer: str address of an additional ERC20 deployer.
+        :param additional_metadata_updater: str address of an additional metadata updater.
+        :param uri: str URL of the data NFT.
+        """
+        self.name = name
+        self.symbol = symbol or name
+        self.template_index = template_index
+        self.additional_datatoken_deployer = (
+            additional_datatoken_deployer or ZERO_ADDRESS
+        )
+        self.additional_metadata_updater = additional_metadata_updater or ZERO_ADDRESS
+        self.uri = uri or "https://oceanprotocol.com/nft/"
+        self.transferable = transferable or True
+        self.owner = owner
+
+    def publish_from(self, config_dict, wallet):
+        address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
+        data_nft_factory = DataNFTFactoryContract(config_dict, address)
+
+        receipt = data_nft_factory.deployERC721Contract(
+            self.name,
+            self.symbol,
+            self.template_index,
+            self.additional_metadata_updater,
+            self.additional_datatoken_deployer,
+            self.uri,
+            self.transferable,
+            self.owner or wallet.address,
+            {"from": wallet},
+        )
+
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=".*Event log does not contain enough topics for the given ABI.*",
+            )
+            registered_event = receipt.events["NFTCreated"]
+
+        data_nft_address = registered_event["newTokenAddress"]
+        return DataNFT(config_dict, data_nft_address)
+
+
+class DatatokenArguments:
+    def __init__(
+        self,
+        name: str,
+        symbol: str,
+        template_index: Optional[int] = 1,
+        minter: Optional[str] = None,
+        fee_manager: Optional[str] = None,
+        publish_market_order_fee_address: Optional[str] = None,
+        publish_market_order_fee_token: Optional[str] = None,
+        publish_market_order_fee_amount: Optional[int] = 0,
+        bytess: Optional[List[bytes]] = None,
+        services=None,  # TODO: typing
+        files=None,  # TODO: typing
+        consumer_parameters=None,  # TODO: typing
+    ):
+        self.name = name
+        self.symbol = symbol
+        self.template_index = template_index
+        self.minter = minter
+        self.fee_manager = fee_manager
+        self.publish_market_order_fee_address = publish_market_order_fee_address
+        self.publish_market_order_fee_token = publish_market_order_fee_token
+        self.publish_market_order_fee_amount = publish_market_order_fee_amount
+        self.bytess = bytess or [b""]
+        self.services = services
+        self.files = files
+        self.consumer_parameters = consumer_parameters
+
+    def create_from_arguments(self, config_dict, data_nft, wallet):
+        OCEAN_address = get_ocean_token_address(config_dict)
+        temp_dt = data_nft.create_datatoken(
+            name=self.name,
+            symbol=self.symbol,
+            template_index=self.template_index,
+            minter=self.minter or wallet.address,
+            fee_manager=self.fee_manager or wallet.address,
+            publish_market_order_fee_address=self.publish_market_order_fee_address
+            or ZERO_ADDRESS,
+            publish_market_order_fee_token=self.publish_market_order_fee_token
+            or OCEAN_address,
+            publish_market_order_fee_amount=self.publish_market_order_fee_amount,
+            bytess=self.bytess,
+            transaction_parameters={"from": wallet},
+        )
+
+        logger.info(
+            f"Successfully created datatoken with address " f"{temp_dt.address}."
+        )
+
+        if not self.services:
+            self.services = self.build_access_service(
+                service_id="0",
+                service_endpoint=config_dict.get("PROVIDER_URL"),
+                datatoken=temp_dt.address,
+                files=self.files,
+                consumer_parameters=self.consumer_parameters,
+            )
+
+        return temp_dt
+
+    @enforce_types
+    def build_access_service(
+        self,
+        service_id: str,
+        service_endpoint: str,
+        datatoken: str,
+        files: List[FilesType],
+        timeout: Optional[int] = 3600,
+        consumer_parameters=None,
+    ) -> Service:
+        return Service(
+            service_id=service_id,
+            service_type=ServiceTypes.ASSET_ACCESS,
+            service_endpoint=service_endpoint,
+            datatoken=datatoken,
+            files=files,
+            timeout=timeout,
+            consumer_parameters=consumer_parameters,
+        )

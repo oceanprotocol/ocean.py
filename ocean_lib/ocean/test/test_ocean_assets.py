@@ -18,6 +18,7 @@ from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -428,19 +429,10 @@ def test_plain_asset_with_one_datatoken(
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
         data_nft_address=data_nft_address,
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[
-            publisher_ocean_instance.OCEAN_address
+        datatoken_arguments=[
+            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=files)
         ],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
     )
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT1"
@@ -478,20 +470,19 @@ def test_plain_asset_multiple_datatokens(
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=[files, files],
         data_nft_address=data_nft_address2,
-        datatoken_templates=[1, 1],
-        datatoken_names=["Datatoken 2", "Datatoken 3"],
-        datatoken_symbols=["DT2", "DT3"],
-        datatoken_minters=[publisher_wallet.address, publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address, publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[
-            publisher_ocean_instance.OCEAN_address,
-            publisher_ocean_instance.OCEAN_address,
+        datatoken_arguments=[
+            DatatokenArguments(
+                name="Datatoken 2",
+                symbol="DT2",
+                files=files,
+            ),
+            DatatokenArguments(
+                name="Datatoken 3",
+                symbol="DT3",
+                files=files,
+            ),
         ],
-        datatoken_publish_market_order_fee_amounts=[0, 0],
-        datatoken_bytess=[[b""], [b""]],
     )
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT2"
