@@ -11,7 +11,7 @@ import lzma
 import os
 import warnings
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from brownie import network
 from enforce_typing import enforce_types
@@ -208,21 +208,13 @@ class OceanAssets:
             "license": "CC0: PublicDomain",
         }
 
-        OCEAN_address = get_ocean_token_address(self._config_dict)
         (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
             datatoken_arguments=[
                 DatatokenArguments(
-                    template_index=1,
                     name=[name + ": DT1"],
                     symbol="DT1",
-                    minter=publisher_wallet.address,
-                    fee_manager=publisher_wallet.address,
-                    publish_market_order_fee_address=ZERO_ADDRESS,
-                    publish_market_order_fee_token=OCEAN_address,
-                    publish_market_order_fee_amount=0,
-                    bytess=[b""],
                     files=files,
                 )
             ],
@@ -247,7 +239,6 @@ class OceanAssets:
         datatoken_arguments: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
-        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
         wait_for_aqua: bool = True,
         return_ddo: bool = True,
     ) -> Optional[DDO]:

@@ -67,20 +67,15 @@ url_file = UrlFile(
 )
 
 # Publish data asset
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.ocean.ocean_assets import DatatokenArguments
 ddo = ocean.assets.create(
     metadata,
     alice_wallet,
-    [url_file],
-    datatoken_templates=[1],
-    datatoken_names=["Datatoken 1"],
-    datatoken_symbols=["DT1"],
-    datatoken_minters=[alice_wallet.address],
-    datatoken_fee_managers=[alice_wallet.address],
-    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-    datatoken_publish_market_order_fee_amounts=[0],
-    datatoken_bytess=[[b""]],
+    datatoken_arguments=[
+        DatatokenArguments(
+            name="Datatoken 1", symbol="DT1", files=[url_file]
+        )
+    ],
 )
 print(f"Just published asset, with did={ddo.did}")
 ```

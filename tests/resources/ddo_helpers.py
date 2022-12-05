@@ -18,11 +18,11 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
 
 
@@ -120,16 +120,9 @@ def create_asset(ocean, publisher, metadata=None, files=None):
     ddo = ocean.assets.create(
         metadata,
         publisher,
-        files,
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher.address],
-        datatoken_fee_managers=[publisher.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
+        datatoken_arguments=[
+            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=files)
+        ],
     )
 
     return ddo

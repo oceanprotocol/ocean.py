@@ -35,9 +35,7 @@ def test_aqua_functions_for_single_ddo(
         metadata=metadata1,
         publisher_wallet=publisher_wallet,
         datatoken_arguments=[
-            DatatokenArguments(
-                template_index=1, name="Datatoken 1", symbol="DT1", files=[file1]
-            )
+            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=[file1])
         ],
     )
 

@@ -12,7 +12,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
 from ocean_lib.structures.file_objects import FilesType, GraphqlQuery
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
@@ -56,17 +56,13 @@ def test_consume_simple_graphql_query(
     ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=[file1],
-        data_nft_address=data_nft.address,
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
+        datatoken_arguments=[
+            DatatokenArguments(
+                name="Datatoken 1",
+                symbol="DT1",
+                files=[file1],
+            )
+        ],
     )
 
     assert ddo, "The ddo is not created."
@@ -195,18 +191,14 @@ def test_consume_parametrized_graphql_query(
     ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=[file1],
-        data_nft_address=data_nft.address,
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
-        consumer_parameters=consumer_parameters,
+        datatoken_arguments=[
+            DatatokenArguments(
+                name="Datatoken 1",
+                symbol="DT1",
+                files=[file1],
+                consumer_parameters=consumer_parameters,
+            )
+        ],
     )
 
     assert ddo, "The ddo is not created."
