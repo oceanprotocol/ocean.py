@@ -571,7 +571,6 @@ def test_encrypted_asset(
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,

@@ -313,32 +313,26 @@ class OceanAssets:
 
         ddo.credentials = credentials if credentials else {"allow": [], "deny": []}
 
+        ddo.nft_address = data_nft.address
         datatokens = []
 
         if not deployed_datatokens:
+            services = []
             for datatoken_argument in datatoken_arguments:
                 datatokens.append(
                     datatoken_argument.create_from_arguments(
                         self._config_dict, data_nft, publisher_wallet
                     )
                 )
+
+                services.extend(datatoken_argument.services)
+
+            for service in services:
+                ddo.add_service(service)
         else:
             datatokens = deployed_datatokens
 
-        ddo.nft_address = data_nft_address
-        ddo.datatokens = [
-            {
-                "address": datatoken.address,
-                "name": datatoken.contract.name(),
-                "symbol": datatoken.symbol(),
-                # "serviceId": service.id, TODO
-            }
-            for datatoken in datatokens
-        ]
-
-        # TODO fix
-        # for service in services:
-        #    ddo.add_service(service)
+        # TODO: custom services
 
         # Validation by Aquarius
         _, proof = self.validate(ddo)
@@ -372,9 +366,6 @@ class OceanAssets:
         if return_ddo:
             return ddo
         else:
-            datatokens = [
-                Datatoken(self._config_dict, d["address"]) for d in datatokens
-            ]
             return (data_nft, datatokens, ddo)
 
     @enforce_types
@@ -842,13 +833,15 @@ class DatatokenArguments:
         )
 
         if not self.services:
-            self.services = self.build_access_service(
-                service_id="0",
-                service_endpoint=config_dict.get("PROVIDER_URL"),
-                datatoken=temp_dt.address,
-                files=self.files,
-                consumer_parameters=self.consumer_parameters,
-            )
+            self.services = [
+                self.build_access_service(
+                    service_id="0",
+                    service_endpoint=config_dict.get("PROVIDER_URL"),
+                    datatoken=temp_dt.address,
+                    files=self.files,
+                    consumer_parameters=self.consumer_parameters,
+                )
+            ]
 
         return temp_dt
 
