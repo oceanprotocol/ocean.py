@@ -221,38 +221,6 @@ class Ocean:
             self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
         )
 
-    @enforce_types
-    def create_fixed_rate(
-        self,
-        datatoken: Datatoken,
-        base_token: Datatoken,
-        amount: int,
-        fixed_rate: int,
-        from_wallet,
-    ) -> bytes:
-        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
-        datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
-
-        receipt = datatoken.create_fixed_rate(
-            fixed_price_address=fixed_price_address,
-            base_token_address=base_token.address,
-            owner=from_wallet.address,
-            publish_market_swap_fee_collector=from_wallet.address,
-            allowed_swapper=ZERO_ADDRESS,
-            base_token_decimals=base_token.decimals(),
-            datatoken_decimals=datatoken.decimals(),
-            fixed_rate=fixed_rate,
-            publish_market_swap_fee_amount=int(1e15),
-            with_mint=0,
-            transaction_parameters={"from": from_wallet},
-        )
-
-        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
-
-        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
-
-        return exchange_id
-
     @property
     @enforce_types
     def factory_router(self) -> FactoryRouter:
