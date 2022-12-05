@@ -6,8 +6,6 @@
 import copy
 import logging
 
-from enforce_typing import enforce_types
-
 logging.basicConfig(level=logging.INFO)
 
 DEFAULT_METADATA_CACHE_URI = "http://172.15.0.5:5000"
@@ -21,67 +19,37 @@ config_defaults = {
     "DOWNLOADS_PATH": "consume-downloads",
 }
 
-CONFIG_NETWORK_HELPER = {
-    "mainnet": {
-        "PROVIDER_URL": "https://v4.provider.mainnet.oceanprotocol.com",
-    },
-    "goerli": {
-        "PROVIDER_URL": "https://v4.provider.goerli.oceanprotocol.com",
-    },
-    "bsc": {
-        "PROVIDER_URL": "https://v4.provider.bsc.oceanprotocol.com",
-    },
-    "polygon": {
-        "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
-    },
-    "energyweb": {
-        "PROVIDER_URL": "https://v4.provider.energyweb.oceanprotocol.com",
-    },
-    "moonriver": {
-        "PROVIDER_URL": "https://v4.provider.moonriver.oceanprotocol.com",
-    },
-    "moonbase": {
-        "PROVIDER_URL": "https://v4.provider.moonbase.oceanprotocol.com",
-    },
-    "development": {
-        "PROVIDER_URL": DEFAULT_PROVIDER_URL,
-    },
-    "celoalfajores": {
-        "PROVIDER_URL": "https://provider.celoalfajores.oceanprotocol.com",
-    },
-    "mumbai": {
-        "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-    },
+PROVIDER_PER_NETWORK = {
+    "mainnet": "https://v4.provider.mainnet.oceanprotocol.com",
+    "goerli": "https://v4.provider.goerli.oceanprotocol.com",
+    "bsc": "https://v4.provider.bsc.oceanprotocol.com",
+    "polygon": "https://v4.provider.polygon.oceanprotocol.com",
+    "energyweb": "https://v4.provider.energyweb.oceanprotocol.com",
+    "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
+    "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
+    "development": DEFAULT_PROVIDER_URL,
+    "celoalfajores": "https://provider.celoalfajores.oceanprotocol.com",
+    "mumbai": "https://v4.provider.mumbai.oceanprotocol.com",
 }
-
-
-@enforce_types
-def get_config_dict_1(network_name: str) -> dict:
-    if network_name not in CONFIG_NETWORK_HELPER:
-        raise ValueError("The chain id for the specific RPC could not be fetched!")
-
-    config_helper = copy.deepcopy(config_defaults)
-    config_helper.update(CONFIG_NETWORK_HELPER[network_name])
-    config_helper["NETWORK_NAME"] = network_name
-
-    if network_name != "development":
-        config_helper["METADATA_CACHE_URI"] = METADATA_CACHE_URI
-    else:
-        config_helper[
-            "ADDRESS_FILE"
-        ] = "~/.ocean/ocean-contracts/artifacts/address.json"
-
-    return config_helper
 
 
 def get_config_dict(network_name=None) -> dict:
     """Return config dict containing default values for a given network.
     Chain ID is determined by querying the RPC specified by network_url.
     """
-
     if not network_name:
         network_name = "development"
 
-    config_dict = get_config_dict_1(network_name)
+    if network_name not in PROVIDER_PER_NETWORK:
+        raise ValueError("The chain id for the specific RPC could not be fetched!")
+
+    config_dict = copy.deepcopy(config_defaults)
+    config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[network_name]
+    config_dict["NETWORK_NAME"] = network_name
+
+    if network_name != "development":
+        config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
+    else:
+        config_dict["ADDRESS_FILE"] = "~/.ocean/ocean-contracts/artifacts/address.json"
 
     return config_dict
