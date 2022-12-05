@@ -101,12 +101,9 @@ print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
 # create fixed-rate exchange (FRE)
 from web3 import Web3
-exchange_id = ocean.create_fixed_rate(
-    datatoken=datatoken,
-    base_token=OCEAN,
-    amount=to_wei(num_consumes),
-    fixed_rate=to_wei(datatoken_price_OCEAN),
-    from_wallet=alice_wallet,
+exchange_id = datatoken.create_fixed_rate(
+    to_wei(datatoten_price_OCEAN), OCEAN.address, to_wei(num_consumes),
+    {"from"}: alice_wallet}
 )
 ```
 
@@ -127,22 +124,7 @@ In the meantime, this README helps level the playing field around wash consume. 
 
 ```python
 # Alice buys datatokens from herself
-amt_pay = datatoken_price_OCEAN * num_consumes
-OCEAN_bal = from_wei(OCEAN.balanceOf(alice_wallet.address))
-assert OCEAN_bal >= amt_pay, f"Have just {OCEAN_bal} OCEAN"
-OCEAN.approve(ocean.fixed_rate_exchange.address, to_wei(OCEAN_bal), {"from": alice_wallet})
-fees_info = ocean.fixed_rate_exchange.get_fees_info(exchange_id)
-for i in range(num_consumes):
-    print(f"Purchase #{i+1}/{num_consumes}...")
-    tx = ocean.fixed_rate_exchange.buyDT(
-        exchange_id,
-        to_wei(num_consumes), # datatokenAmount
-        to_wei(OCEAN_bal),    # maxBaseTokenAmount
-        fees_info[1], # consumeMarketAddress
-        fees_info[0], # consumeMarketSwapFeeAmount
-        {"from": alice_wallet},
-    )
-    assert tx, "buying datatokens failed"
+datatoken.buy(f"{num_consumes} ether", exchange_id, {"from": alice_wallet})
 DT_bal = from_wei(datatoken.balanceOf(alice_wallet.address))
 assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
 
