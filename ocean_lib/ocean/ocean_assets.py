@@ -189,6 +189,7 @@ class OceanAssets:
         name: str,
         files: list,
         publisher_wallet,
+        metadata=None,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
@@ -198,15 +199,16 @@ class OceanAssets:
         Returns (data_nft, datatoken, ddo)
         """
         date_created = datetime.now().isoformat()
-        metadata = {
-            "created": date_created,
-            "updated": date_created,
-            "description": name,
-            "name": name,
-            "type": "dataset",
-            "author": publisher_wallet.address[:7],
-            "license": "CC0: PublicDomain",
-        }
+        if not metadata:
+            metadata = {
+                "created": date_created,
+                "updated": date_created,
+                "description": name,
+                "name": name,
+                "type": "dataset",
+                "author": publisher_wallet.address[:7],
+                "license": "CC0: PublicDomain",
+            }
 
         (data_nft, datatokens, ddo) = self.create(
             metadata,

@@ -6,7 +6,6 @@ import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.ddo import DDO
-from ocean_lib.ocean.ocean_assets import DatatokenArguments
 
 
 @pytest.mark.unit
@@ -21,23 +20,10 @@ def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config, file1
 ):
     """Tests against single-ddo functions of Aquarius."""
-    metadata1 = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    ddo1 = publisher_ocean_instance.assets.create(
-        metadata=metadata1,
-        publisher_wallet=publisher_wallet,
-        datatoken_arguments=[
-            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=[file1])
-        ],
+    ddo1 = publisher_ocean_instance.assets.create_url_asset(
+        "Sample asset", file1.url, publisher_wallet
     )
+    metadata1 = ddo1.metadata
 
     ddo2 = aquarius_instance.wait_for_ddo(ddo1.did)
     assert ddo2.metadata == ddo1.metadata

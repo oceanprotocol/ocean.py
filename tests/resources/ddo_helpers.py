@@ -93,41 +93,6 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, metadata=None, files=None):
-    """Helper function for asset creation based on ddo_sa_sample.json."""
-    if not metadata:
-        metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
-            "description": "Sample description",
-            "name": "Sample asset",
-            "type": "dataset",
-            "author": "OPF",
-            "license": "https://market.oceanprotocol.com/terms",
-        }
-
-    if not files:
-        file1_dict = {
-            "type": "url",
-            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-            "method": "GET",
-        }
-        file1 = FilesTypeFactory(file1_dict)
-        files = [file1]
-
-    # Publish asset with services on-chain.
-    # The download (access service) is automatically created
-    ddo = ocean.assets.create(
-        metadata,
-        publisher,
-        datatoken_arguments=[
-            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=files)
-        ],
-    )
-
-    return ddo
-
-
 def create_basics(
     config,
     data_provider,
@@ -161,8 +126,16 @@ def create_basics(
     return data_nft_factory, metadata, files
 
 
-def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
-    return create_asset(ocean_instance, publisher_wallet)
+def get_registered_asset_with_access_service(
+    ocean_instance, publisher_wallet, metadata=None
+):
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    files = [UrlFile(url)]
+    _, _, ddo = ocean_instance.assets._create1(
+        "Branin dataset", files, publisher_wallet
+    )
+
+    return ddo
 
 
 def get_registered_asset_with_compute_service(
@@ -251,11 +224,16 @@ def get_registered_algorithm_with_access_service(
         }
     )
 
-    return create_asset(
-        ocean_instance,
-        publisher_wallet,
+    return ocean_instance.assets.create(
         metadata=metadata,
-        files=[algorithm_file],
+        publisher_wallet=publisher_wallet,
+        datatoken_arguments=[
+            DatatokenArguments(
+                name="Algo DT1",
+                symbol="DT1",
+                files=[algorithm_file],
+            )
+        ],
     )
 
 

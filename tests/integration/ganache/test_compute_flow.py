@@ -71,7 +71,7 @@ def dataset_with_compute_service_and_trusted_algorithm(
     publisher_wallet, publisher_ocean_instance, algorithm
 ):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm]
     )
     # verify the ddo is available in Aquarius
@@ -84,7 +84,7 @@ def dataset_with_compute_service_and_trusted_publisher(
     publisher_wallet, publisher_ocean_instance
 ):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance,
         publisher_wallet,
         trusted_algorithm_publishers=[publisher_wallet.address],
@@ -301,7 +301,7 @@ def run_compute_test(
         )
         print(f"got algo log file: {str(log_file)}")
 
-        result = ocean_instance.compute.result(
+        _ = ocean_instance.compute.result(
             dataset_and_userdata.ddo, service, job_id, 0, consumer_wallet
         )
 

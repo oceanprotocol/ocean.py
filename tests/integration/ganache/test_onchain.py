@@ -30,15 +30,6 @@ def test_consume_simple_onchain_data(
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
     abi = {
         "inputs": [],
         "name": "swapOceanFee",
@@ -47,29 +38,13 @@ def test_consume_simple_onchain_data(
         "type": "function",
     }
     router_address = get_address_of_type(config, "Router")
-    onchain_data = SmartContractCall(
-        address=router_address, chainId=network.chain[-1].number, abi=abi
-    )
 
-    files = [onchain_data]
-
-    # Publish a plain asset with one data token on chain
-    ddo = ocean_assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        data_nft_address=data_nft.address,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Datatoken 1",
-                symbol="DT1",
-                files=[file1],
-            )
-        ],
+    data_nft, dt, ddo = ocean_assets.create_onchain_asset(
+        "NFT", router_address, abi, publisher_wallet
     )
 
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
@@ -138,9 +113,9 @@ def test_consume_simple_onchain_data(
         service,
     )
 
-    assert len(
-        os.listdir(os.path.join(destination, os.listdir(destination)[0]))
-    ) == len(files), "The asset folder is empty."
+    assert (
+        len(os.listdir(os.path.join(destination, os.listdir(destination)[0]))) == 1
+    ), "The asset folder is empty."
 
 
 @pytest.mark.integration

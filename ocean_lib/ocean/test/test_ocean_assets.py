@@ -19,14 +19,13 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
-from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
-    create_asset,
     create_basics,
     get_first_service_by_type,
+    get_registered_asset_with_access_service,
     get_sample_ddo,
 )
 
@@ -41,7 +40,9 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
 
 @pytest.mark.integration
 def test_update_metadata(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
 
     new_metadata = copy.deepcopy(ddo.metadata)
 
@@ -63,7 +64,9 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_update_credentials(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
 
     # Update credentials
     _new_credentials = {
@@ -82,7 +85,9 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 def test_update_datatokens(
     publisher_ocean_instance, publisher_wallet, config, datatoken, file2
 ):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
     data_provider = DataServiceProvider
 
     files = [file2]
@@ -157,7 +162,9 @@ def test_update_datatokens(
 
 @pytest.mark.integration
 def test_update_flags(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
 
     # Test compress & update flags
     data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
@@ -195,7 +202,9 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
         len(publisher_ocean_instance.assets.search(identifier)) == 0
     ), "DDO search failed."
 
-    create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+    get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet, metadata
+    )
 
     time.sleep(1)  # apparently changes are not instantaneous
     assert (
@@ -274,7 +283,9 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
         },
     }
 
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+    ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet, metadata
+    )
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
@@ -315,12 +326,16 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
         "license": "https://market.oceanprotocol.com/terms",
     }
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+        get_registered_asset_with_access_service(
+            publisher_ocean_instance, publisher_wallet, metadata
+        )
 
     metadata["name"] = "Sample asset"
     metadata.pop("type")
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+        get_registered_asset_with_access_service(
+            publisher_ocean_instance, publisher_wallet, metadata
+        )
 
 
 @pytest.mark.unit
@@ -352,50 +367,6 @@ def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
         name, url, publisher_wallet
-    )
-
-    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(ddo.datatokens) == 1
-
-
-@pytest.mark.integration
-def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
-    ocean = publisher_ocean_instance
-
-    name = "Data NFTs in Ocean"
-    url = "https://v4.subgraph.goerli.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph"
-    query = """query{
-                   nfts(orderBy: createdTimestamp,orderDirection:desc){
-                        id
-                        symbol
-                        createdTimestamp
-                        }
-                   }
-    """
-    (data_nft, datatoken, ddo) = ocean.assets.create_graphql_asset(
-        name, url, query, publisher_wallet
-    )
-
-    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(ddo.datatokens) == 1
-
-
-@pytest.mark.integration
-def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config):
-    ocean = publisher_ocean_instance
-
-    name = "swapOceanFee function call"
-    contract_address = get_address_of_type(config, "Router")
-    contract_abi = {
-        "inputs": [],
-        "name": "swapOceanFee",
-        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "stateMutability": "view",
-        "type": "function",
-    }
-
-    (data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(
-        name, contract_address, contract_abi, publisher_wallet
     )
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
