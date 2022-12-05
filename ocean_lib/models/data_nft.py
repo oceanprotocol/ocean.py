@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum, IntFlag
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
-from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -41,35 +40,6 @@ class Flags(IntFlag):
 @enforce_types
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
-
-    @enforce_types
-    def set_metadata_token_uri(
-        self,
-        metadata_state: int,
-        metadata_decryptor_url: str,
-        metadata_decryptor_address: bytes,
-        flags: bytes,
-        data: Union[str, bytes],
-        data_hash: Union[str, bytes],
-        token_id: int,
-        token_uri: str,
-        metadata_proofs: List[MetadataProof],
-        transaction_parameters: dict,
-    ) -> str:
-        return self.contract.setMetaDataAndTokenURI(
-            (
-                metadata_state,
-                metadata_decryptor_url,
-                metadata_decryptor_address,
-                flags,
-                data,
-                data_hash,
-                token_id,
-                token_uri,
-                metadata_proofs,
-            ),
-            transaction_parameters,
-        )
 
     def create_datatoken(
         self,

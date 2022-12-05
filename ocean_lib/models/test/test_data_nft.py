@@ -240,17 +240,19 @@ def test_success_update_metadata(
     assert metadata_info[0] == "http://foourl"
 
     # Update tokenURI and set metadata in one call
-    receipt = data_nft.set_metadata_token_uri(
-        metadata_state=1,
-        metadata_decryptor_url="http://foourl",
-        metadata_decryptor_address=b"0x123",
-        flags=Web3.toBytes(hexstr=BLOB),
-        data=Web3.toBytes(hexstr=BLOB),
-        data_hash=Web3.toBytes(hexstr=BLOB),
-        token_id=1,
-        token_uri="https://anothernewurl.com/nft/",
-        metadata_proofs=[],
-        transaction_parameters={"from": publisher_wallet},
+    receipt = data_nft.setMetaDataAndTokenURI(
+        (
+            1,
+            "http://foourl",
+            b"0x123",
+            Web3.toBytes(hexstr=BLOB),
+            Web3.toBytes(hexstr=BLOB),
+            Web3.toBytes(hexstr=BLOB),
+            1,
+            "https://anothernewurl.com/nft/",
+            [],
+        ),
+        {"from": publisher_wallet},
     )
 
     assert (
