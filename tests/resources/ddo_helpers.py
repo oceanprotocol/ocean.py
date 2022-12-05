@@ -5,7 +5,6 @@
 import json
 import os
 import pathlib
-import time
 from typing import List, Optional
 
 import requests
@@ -78,21 +77,7 @@ def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
     return DDO.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
-def get_access_service(
-    ocean_instance, address, date_created, provider_uri=None, timeout=3600
-):
-    if not provider_uri:
-        provider_uri = DataServiceProvider.get_url(ocean_instance.config_dict)
-
-    return ocean_instance.assets.build_access_service(
-        DataServiceProvider.build_download_endpoint(provider_uri)[1],
-        date_created,
-        1.0,
-        address,
-        timeout,
-    )
-
-
+# TODO: maybe remove
 def create_basics(
     config,
     data_provider,
@@ -266,24 +251,6 @@ def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
 def build_credentials_dict() -> dict:
     """Build a credentials dict, used for testing."""
     return {"allow": [], "deny": []}
-
-
-def wait_for_asset(ocean, did, timeout=30):
-    start = time.time()
-    ddo = None
-    while not ddo:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
 
 
 def get_first_service_by_type(ddo, service_type: str) -> Service:
