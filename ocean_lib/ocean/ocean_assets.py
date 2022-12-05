@@ -213,7 +213,7 @@ class OceanAssets:
             publisher_wallet,
             datatoken_arguments=[
                 DatatokenArguments(
-                    name=[name + ": DT1"],
+                    name=f"{name}: DT1",
                     symbol="DT1",
                     files=files,
                 )
