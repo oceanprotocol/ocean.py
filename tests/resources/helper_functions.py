@@ -17,7 +17,7 @@ from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
 
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -29,10 +29,6 @@ from ocean_lib.web3_internal.utils import sign_with_key
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
-
-
-def get_example_config():
-    return ExampleConfig.get_config()
 
 
 @enforce_types
@@ -68,7 +64,7 @@ def get_factory_deployer_wallet(config):
     if not private_key:
         return None
 
-    config = get_example_config()
+    config = get_config_dict()
     return accounts.add(private_key)
 
 
@@ -81,7 +77,7 @@ def get_ganache_wallet():
 @enforce_types
 def generate_wallet():
     """Generates wallets on the fly with funds."""
-    config = get_example_config()
+    config = get_config_dict()
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
@@ -100,7 +96,7 @@ def generate_wallet():
 
 @enforce_types
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
-    config_dict = ExampleConfig.get_config()
+    config_dict = get_config_dict()
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(config_dict, data_provider=data_provider)
     account = get_publisher_wallet()
@@ -110,7 +106,7 @@ def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
 
 @enforce_types
 def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = ExampleConfig.get_config()
+    config = get_config_dict()
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(config, data_provider=data_provider)
     account = get_consumer_wallet()
@@ -120,7 +116,7 @@ def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
 
 @enforce_types
 def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = ExampleConfig.get_config()
+    config = get_config_dict()
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(config, data_provider=data_provider)
     account = get_another_consumer_wallet()

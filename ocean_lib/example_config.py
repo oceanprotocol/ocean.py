@@ -56,7 +56,7 @@ CONFIG_NETWORK_HELPER = {
 
 
 @enforce_types
-def get_config_dict(network_name: str) -> dict:
+def get_config_dict_1(network_name: str) -> dict:
     if network_name not in CONFIG_NETWORK_HELPER:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
 
@@ -74,17 +74,14 @@ def get_config_dict(network_name: str) -> dict:
     return config_helper
 
 
-class ExampleConfig:
-    @staticmethod
-    @enforce_types
-    def get_config(network_name=None) -> dict:
-        """Return config dict containing default values for a given network.
-        Chain ID is determined by querying the RPC specified by network_url.
-        """
+def get_config_dict(network_name=None) -> dict:
+    """Return config dict containing default values for a given network.
+    Chain ID is determined by querying the RPC specified by network_url.
+    """
 
-        if not network_name:
-            network_name = "development"
+    if not network_name:
+        network_name = "development"
 
-        config_dict = get_config_dict(network_name)
+    config_dict = get_config_dict_1(network_name)
 
-        return config_dict
+    return config_dict

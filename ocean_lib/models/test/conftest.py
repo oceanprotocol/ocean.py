@@ -9,7 +9,7 @@ from brownie.network import accounts
 from web3.main import Web3
 
 from conftest_ganache import *
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from tests.resources.helper_functions import get_ganache_wallet
 
@@ -104,7 +104,7 @@ def make_info(name, private_key_name):
         pass
 
     info = _Info()
-    config = ExampleConfig.get_config()
+    config = get_config_dict()
 
     info.private_key = os.environ.get(private_key_name)
     info.wallet = accounts.add(info.private_key)

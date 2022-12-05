@@ -25,9 +25,9 @@ In the Python console:
 from ocean_lib.web3_internal.utils import connect_to_network
 connect_to_network("development")
 
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("development")
+config = get_config_dict("development")
 ocean = Ocean(config)
 
 # Create Alice's wallet

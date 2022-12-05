@@ -12,7 +12,7 @@
 import pytest
 
 from conftest_ganache import *
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.test.conftest import *  # noqa: F401 F403
 
 # Other things to set up, specific to here...
@@ -20,4 +20,4 @@ from ocean_lib.models.test.conftest import *  # noqa: F401 F403
 
 @pytest.fixture
 def example_config():
-    return ExampleConfig.get_config()
+    return get_config_dict()

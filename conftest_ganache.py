@@ -7,6 +7,7 @@ from brownie.network import accounts
 from web3.main import Web3
 
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -19,7 +20,6 @@ from tests.resources.helper_functions import (
     get_another_consumer_wallet,
     get_consumer_ocean_instance,
     get_consumer_wallet,
-    get_example_config,
     get_factory_deployer_wallet,
     get_file1,
     get_file2,
@@ -72,7 +72,7 @@ def setup_all(request, config, ocean_token):
 
 @pytest.fixture
 def config():
-    return get_example_config()
+    return get_config_dict()
 
 
 @pytest.fixture
