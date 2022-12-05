@@ -229,11 +229,16 @@ def test_fileinfo(
     config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
 ):
     _, metadata, files = create_basics(config, DataSP)
+    access_service = datatoken.build_access_service(
+        service_id="0",
+        service_endpoint=config.get("PROVIDER_URL"),
+        files=files,
+    )
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        services=[access_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
@@ -263,10 +268,16 @@ def test_initialize(
     datatoken,
 ):
     _, metadata, files = create_basics(config, DataSP)
+    access_service = datatoken.build_access_service(
+        service_id="0",
+        service_endpoint=config.get("PROVIDER_URL"),
+        files=files,
+    )
+
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        services=[access_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
