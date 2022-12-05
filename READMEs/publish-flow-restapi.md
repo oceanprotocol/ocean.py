@@ -5,13 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish & Consume Flow for REST API-style URIs
 
-This quickstart describes a flow to publish Binance REST API of ETH price feed, to make it available as free data asset on Ocean, and to consume it.
+This quickstart describes a flow to publish Binance REST API of ETH price feed, to make it available as free data DDO on Ocean, and to consume it.
 
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes the API asset
-3.  Alice creates a faucet for the asset
+2.  Alice publishes the API DDO
+3.  Alice creates a faucet for the DDO
 4.  Bob gets a free datatoken, then consumes it
 
 Let's go through each step.
@@ -29,7 +29,7 @@ From [installation-flow](install.md), do:
 From [simple-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
-## 2. Alice publishes the API asset
+## 2. Alice publishes the API DDO
 
 In the same Python console:
 ```python
@@ -41,12 +41,12 @@ end_datetime = datetime.now()
 start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
-#create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
-print(f"Just published asset, with did={ddo.did}")
+#create DDO
+(data_nft, datatoken, ddo) = ocean.ddo.create_url_ddo(name, url, alice_wallet)
+print(f"Just published DDO with did={ddo.did}")
 ```
 
-### 3. Alice creates a faucet for the asset
+### 3. Alice creates a faucet for the DDO
 
 In the same Python console:
 ```python
@@ -59,11 +59,11 @@ Now, you're Bob. First, download the file.
 
 In the same Python console:
 ```python
-# Set asset did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
+# Set DDO did. Practically, you'd get this from Ocean Market. _This_ example uses prior info.
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-file_name = ocean.assets.download_file(ddo_did, bob_wallet)
+file_name = ocean.ddo.download_file(ddo_did, bob_wallet)
 ```
 
 Now, load the file and use its data.
@@ -102,19 +102,19 @@ Here are the three steps, un-bundled.
 In the same Python console:
 ```python
 # Bob gets an access token from the faucet dispenser
-ddo = ocean.assets.resolve(ddo_did)
+ddo = ocean.ddo.resolve(ddo_did)
 datatoken_address = ddo.datatokens[0]["address"]
 datatoken = ocean.get_datatoken(datatoken_address)
 datatoken.dispense("1 ether", {"from": bob_wallet})
 
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+order_tx_id = ocean.ddo.pay_for_access_service(ddo, bob_wallet)
 
 # Bob downloads the dataset
 # If the connection breaks, Bob can request again by showing order_tx_id.
 consumer_wallet = bob_wallet
 destination = './'
-file_path = ocean.assets.download_asset(
+file_path = ocean.ddo.download_ddo(
     ddo, consumer_wallet, destination, order_tx_id
 )
 import glob

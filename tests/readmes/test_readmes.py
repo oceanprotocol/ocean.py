@@ -48,7 +48,7 @@ def test_script_execution(script, monkeypatch):
         "key-value-flow",
         "profile-nfts-flow",
         "consume-flow",
-        "search-and-filter-assets",
+        "search-and-filter-ddos",
     ]
 
     globs = {}

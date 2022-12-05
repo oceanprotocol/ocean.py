@@ -17,13 +17,13 @@ from brownie import network
 from enforce_typing import enforce_types
 from web3 import Web3
 
-from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
+from ocean_lib.agreements.consumable import ConsumableCodes, DDONotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
+from ocean_lib.ddo.ddo_downloader import download_ddo_files, is_consumable
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
@@ -49,12 +49,12 @@ from ocean_lib.web3_internal.utils import check_network
 logger = logging.getLogger("ocean")
 
 
-class OceanAssets:
-    """Ocean asset class for V4."""
+class OceanDDO:
+    """Ocean DDO class for V4."""
 
     @enforce_types
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
-        """Initialises OceanAssets object."""
+        """Initialises OceanDDO object."""
         network_name = config_dict["NETWORK_NAME"]
         check_network(network_name)
 
@@ -96,7 +96,7 @@ class OceanAssets:
     ) -> list:
         has_access_service = any(
             map(
-                lambda s: s.type == ServiceTypes.ASSET_ACCESS
+                lambda s: s.type == ServiceTypes.ACCESS
                 and s.id == self.find_service_by_datatoken(datatoken, services),
                 services,
             )
@@ -127,7 +127,7 @@ class OceanAssets:
     ) -> Service:
         return Service(
             service_id=service_id,
-            service_type=ServiceTypes.ASSET_ACCESS,
+            service_type=ServiceTypes.ACCESS,
             service_endpoint=service_endpoint,
             datatoken=datatoken,
             files=files,
@@ -217,25 +217,25 @@ class OceanAssets:
             metadata, dict
         ), f"Expected metadata of type dict, got {type(metadata)}"
 
-        asset_type = metadata.get("type")
+        ddo_type = metadata.get("type")
 
-        assert asset_type in (
+        assert ddo_type in (
             "dataset",
             "algorithm",
-        ), f"Invalid/unsupported asset type {asset_type}"
+        ), f"Invalid/unsupported DDO type {ddo_type}"
 
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
-    def create_url_asset(
+    def create_url_ddo(
         self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
     ) -> tuple:
-        """Create an asset of type "UrlFile", with good defaults"""
+        """Create a DDO of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
         return self._create1(name, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
-    def create_graphql_asset(
+    def create_graphql_ddo(
         self,
         name: str,
         url: str,
@@ -243,12 +243,12 @@ class OceanAssets:
         publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "GraphqlQuery", with good defaults"""
+        """Create a DDO of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
         return self._create1(name, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
-    def create_onchain_asset(
+    def create_onchain_ddo(
         self,
         name: str,
         contract_address: str,
@@ -256,7 +256,7 @@ class OceanAssets:
         publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "SmartContractCall", with good defaults"""
+        """Create a DDO of type "SmartContractCall", with good defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
@@ -342,19 +342,19 @@ class OceanAssets:
         wait_for_aqua: bool = True,
         return_ddo: bool = True,
     ) -> Optional[DDO]:
-        """Register an asset on-chain. Asset = {data_NFT, >=0 datatokens, DDO}
+        """Register a DDO on-chain. DDO = {data_NFT, >=0 datatokens, DDO}
 
         Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :param publisher_wallet: account of the publisher registering this asset.
+        :param publisher_wallet: account of the publisher registering this DDO.
         :param files: list of files that need to be encrypted before publishing.
         :param services: list of Service objects.
-        :param credentials: credentials dict necessary for the asset.
+        :param credentials: credentials dict necessary for the DDO.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
         :param data_nft_address: hex str the address of the data NFT. The new
-        asset will be associated with this data NFT address.
+        DDO will be associated with this data NFT address.
         :param data_nft_name: str name of data NFT if creating a new one
         :param data_nft_symbol: str symbol of data NFT  if creating a new one
         :param data_nft_template_index: int template index of the data NFT, by default is 1.
@@ -439,9 +439,7 @@ class OceanAssets:
         ddo.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
-            raise AquariusError(
-                f"Asset id {did} is already registered to another asset."
-            )
+            raise AquariusError(f"DDO id {did} is already registered to another DDO.")
         ddo.chain_id = self._chain_id
         ddo.metadata = metadata
 
@@ -719,14 +717,14 @@ class OceanAssets:
 
         # download
         print("Download file...")
-        file_path = self.download_asset(ddo, wallet, "./", order_tx_id)
+        file_path = self.download_ddo(ddo, wallet, "./", order_tx_id)
         file_name = glob.glob(file_path + "/*")[0]
         print(f"Done. File: {file_name}")
 
         return file_name
 
     @enforce_types
-    def download_asset(
+    def download_ddo(
         self,
         ddo: DDO,
         consumer_wallet,
@@ -743,10 +741,10 @@ class OceanAssets:
             assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
         assert (
-            service and service.type == ServiceTypes.ASSET_ACCESS
-        ), f"Service with type {ServiceTypes.ASSET_ACCESS} is not found."
+            service and service.type == ServiceTypes.ACCESS
+        ), f"Service with type {ServiceTypes.ACCESS} is not found."
 
-        path: str = download_asset_files(
+        path: str = download_ddo_files(
             ddo, service, consumer_wallet, destination, order_tx_id, index, userdata
         )
         return path
@@ -792,7 +790,7 @@ class OceanAssets:
             userdata=userdata,
         )
         if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
+            raise DDONotConsumable(consumable_result)
 
         data_provider = DataServiceProvider
 
@@ -879,7 +877,7 @@ class OceanAssets:
     @enforce_types
     def _start_or_reuse_order_based_on_initialize_response(
         self,
-        asset_compute_input: ComputeInput,
+        ddo_compute_input: ComputeInput,
         item: dict,
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
@@ -891,14 +889,14 @@ class OceanAssets:
         valid_order = item.get("validOrder")
 
         if valid_order and not provider_fees:
-            asset_compute_input.transfer_tx_id = valid_order
+            ddo_compute_input.transfer_tx_id = valid_order
             return
 
-        service = asset_compute_input.service
+        service = ddo_compute_input.service
         dt = Datatoken(self._config_dict, service.datatoken)
 
         if valid_order and provider_fees:
-            asset_compute_input.transfer_tx_id = dt.reuse_order(
+            ddo_compute_input.transfer_tx_id = dt.reuse_order(
                 valid_order,
                 provider_fee_address=provider_fees["providerFeeAddress"],
                 provider_fee_token=provider_fees["providerFeeToken"],
@@ -912,9 +910,9 @@ class OceanAssets:
             ).txid
             return
 
-        asset_compute_input.transfer_tx_id = dt.start_order(
+        ddo_compute_input.transfer_tx_id = dt.start_order(
             consumer=consumer_address,
-            service_index=asset_compute_input.ddo.get_index_of_service(service),
+            service_index=ddo_compute_input.ddo.get_index_of_service(service),
             provider_fee_address=provider_fees["providerFeeAddress"],
             provider_fee_token=provider_fees["providerFeeToken"],
             provider_fee_amount=provider_fees["providerFeeAmount"],

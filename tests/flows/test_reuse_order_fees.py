@@ -13,7 +13,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
+from tests.flows.test_start_order_fees import create_ddo_with_order_fee_and_timeout
 from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
     get_provider_fees,
@@ -67,7 +67,7 @@ def test_reuse_order_fees(
     )
 
     # Publish ddo, service, and datatoken. Orders expire after 5 seconds
-    ddo, service, dt = create_asset_with_order_fee_and_timeout(
+    ddo, service, dt = create_ddo_with_order_fee_and_timeout(
         config=config,
         file=file1,
         data_nft=data_nft,

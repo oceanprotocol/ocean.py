@@ -79,7 +79,7 @@
           "copyrightHolder": "Met Office",
           "links": [
             {
-              "name": "Sample of Asset Data",
+              "name": "Sample of DDO Data",
               "type": "sample",
               "url": "https://foo.com/sample.csv"
             },
@@ -116,7 +116,7 @@
       "serviceEndpoint": "http://localhost:8030",
       "attributes": {
         "main": {
-          "name": "dataAssetAccessServiceAgreement",
+          "name": "dataAccessServiceAgreement",
           "creator": "",
           "datePublished": "2019-02-08T08:13:49Z",
           "cost": "1.0",

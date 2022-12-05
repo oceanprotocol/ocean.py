@@ -36,7 +36,7 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Consume flow](READMEs/consume-flow.md)** - download a dataset
 - **[Post priced data](READMEs/marketplace-flow.md)** - post a dataset for sale, having a fixed price
 - **[Post free data](READMEs/dispenser-flow.md)** - post a dataset for free, via a faucet
-- **[Search & filter data](READMEs/search-and-filter-assets.md)** - find assets by tag
+- **[Search & filter data](READMEs/search-and-filter-ddos.md)** - find DDOs by tag
 
 ### Remote flows
 
@@ -44,7 +44,7 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services
 - **[C2D flow](READMEs/c2d-flow.md)** - uses Compute-to-Data to build an AI model
 
-### More types of data assets
+### More types of data DDOs
 
 - **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API data, showing Binance ETH price feed
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data
@@ -58,7 +58,7 @@ Here are flows to try out, from simple to specific detailed variants.
 ### Use-case flows
 
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price
-- [Data Farming](READMEs/df.md) - curate data assets, earn rewards
+- [Data Farming](READMEs/df.md) - curate data DDOs, earn rewards
 
 ### Learn more
 

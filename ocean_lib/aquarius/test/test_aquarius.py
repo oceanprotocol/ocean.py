@@ -5,7 +5,7 @@
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 
@@ -25,14 +25,14 @@ def test_aqua_functions_for_single_ddo(
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample asset",
+        "name": "Sample DDO",
         "type": "dataset",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
 
     OCEAN_addr = publisher_ocean_instance.OCEAN_address
-    ddo1 = publisher_ocean_instance.assets.create(
+    ddo1 = publisher_ocean_instance.ddo.create(
         metadata=metadata1,
         publisher_wallet=publisher_wallet,
         files=[file1],
@@ -50,7 +50,7 @@ def test_aqua_functions_for_single_ddo(
     ddo2 = aquarius_instance.wait_for_ddo(ddo1.did)
     assert ddo2.metadata == ddo1.metadata
 
-    ddo3 = publisher_ocean_instance.assets.resolve(ddo1.did)
+    ddo3 = publisher_ocean_instance.ddo.resolve(ddo1.did)
     assert ddo3.did == ddo1.did, "Aquarius could not resolve the did."
     assert ddo3.did == ddo2.did, "Aquarius could not resolve the did."
 

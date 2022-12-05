@@ -9,16 +9,16 @@ from typing import Optional, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.agreements.consumable import ConsumableCodes, DDONotConsumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.services.service import Service
 
 logger = logging.getLogger(__name__)
 
 
 @enforce_types
-def download_asset_files(
+def download_ddo_files(
     ddo: DDO,
     service: Service,
     consumer_wallet,
@@ -27,7 +27,7 @@ def download_asset_files(
     index: Optional[int] = None,
     userdata: Optional[dict] = None,
 ) -> str:
-    """Download asset data file or result file from compute job.
+    """Download DDO data file or result file from compute job.
 
     :param ddo: DDO instance
     :param service: Sevice instance
@@ -36,16 +36,16 @@ def download_asset_files(
     :param order_tx_id: hex str or hex bytes the transaction hash of the startOrder tx
     :param index: Index of the document that is going to be downloaded, Optional[int]
     :param userdata: Dict of additional data from user
-    :return: asset folder path, str
+    :return: DDO folder path, str
     """
     data_provider = DataServiceProvider
 
     if not service.service_endpoint:
         logger.error(
-            'Consume asset failed, service definition is missing the "serviceEndpoint".'
+            'Consume DDO failed, service definition is missing the "serviceEndpoint".'
         )
         raise AssertionError(
-            'Consume asset failed, service definition is missing the "serviceEndpoint".'
+            'Consume DDO failed, service definition is missing the "serviceEndpoint".'
         )
 
     if index is not None:
@@ -60,27 +60,25 @@ def download_asset_files(
         userdata=userdata,
     )
     if consumable_result != ConsumableCodes.OK:
-        raise AssetNotConsumable(consumable_result)
+        raise DDONotConsumable(consumable_result)
 
-    service_index_in_asset = ddo.get_index_of_service(service)
-    asset_folder = os.path.join(
-        destination, f"datafile.{ddo.did},{service_index_in_asset}"
-    )
+    service_index_in_ddo = ddo.get_index_of_service(service)
+    ddo_folder = os.path.join(destination, f"datafile.{ddo.did},{service_index_in_ddo}")
 
-    if not os.path.exists(asset_folder):
-        os.makedirs(asset_folder)
+    if not os.path.exists(ddo_folder):
+        os.makedirs(ddo_folder)
 
     data_provider.download(
         did=ddo.did,
         service=service,
         tx_id=order_tx_id,
         consumer_wallet=consumer_wallet,
-        destination_folder=asset_folder,
+        destination_folder=ddo_folder,
         index=index,
         userdata=userdata,
     )
 
-    return asset_folder
+    return ddo_folder
 
 
 @enforce_types
@@ -91,11 +89,11 @@ def is_consumable(
     with_connectivity_check: bool = True,
     userdata: Optional[dict] = None,
 ) -> bool:
-    """Checks whether an asset is consumable and returns a ConsumableCode."""
+    """Checks whether a DDO is consumable and returns a ConsumableCode."""
     if ddo.is_disabled:
-        return ConsumableCodes.ASSET_DISABLED
+        return ConsumableCodes.DDO_DISABLED
 
-    if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+    if with_connectivity_check and not DataServiceProvider.check_ddo_file_info(
         ddo.did, service.id, service.service_endpoint, userdata=userdata
     ):
         return ConsumableCodes.CONNECTIVITY_FAIL

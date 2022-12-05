@@ -1,6 +1,10 @@
+<!--
+Copyright 2022 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # Quickstart: Data Farming Flow
 
-This README shows how to do steps in Ocean Data Farming (DF), where you curate data assets to earn rewards. It also helps to democratize "wash consume" until it becomes unprofitable.
+This README shows how to do steps in Ocean Data Farming (DF), where you curate data DDOs to earn rewards. It also helps to democratize "wash consume" until it becomes unprofitable.
 
 Here are the steps:
 
@@ -32,21 +36,21 @@ In Ganache, you can use these parameters as-is. But on Eth mainnet, you need to 
 
 In the same Python console:
 ```python
-# On your asset, your DCV = datatoken_price_OCEAN * num_consumes.
-# Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs. 
+# On your DDO, your DCV = datatoken_price_OCEAN * num_consumes.
+# Your DDO gets rewards pro-rata for its DCV compared to other DDOs' DCVs.
 datatoken_price_OCEAN = 100.0
 num_consumes = 3
 
 # This is how much OCEAN to lock into veOCEAN. It can be small if you're
-# the only staker on your asset. If others stake on your asset, your
-# rewards are pro-rate compared to others' stake in your asset.
+# the only staker on your DDO. If others stake on your DDO, your
+# rewards are pro-rate compared to others' stake in your DDO.
 amt_OCEAN_lock = 10.0
 ```
 
 
 ### 1.3 Setup OCEAN and veOCEAN
 
-We'll use these a lot. So import once, here. 
+We'll use these a lot. So import once, here.
 In the same Python console:
 ```python
 # Set factory envvar. Stay in Python to retain state from before.
@@ -77,7 +81,7 @@ WEEK = 7 * 86400 # seconds in a week
 t0 = chain.time()
 t1 = t0 // WEEK * WEEK + WEEK #this is a Thursday, because Jan 1 1970 was
 t2 = t1 + WEEK
-chain.sleep(t1 - t0) 
+chain.sleep(t1 - t0)
 chain.mine()
 
 #we're now at the beginning of the week. So, lock
@@ -95,9 +99,9 @@ In the same Python console:
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-#create data asset
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
-print(f"Just published asset, with data_NFT.address={data_NFT.address}")
+#create data ddo
+(data_NFT, datatoken, ddo) = ocean.ddo.create_url_ddo(name, url, alice_wallet, wait_for_aqua=False)
+print(f"Just published DDO with data_NFT.address={data_NFT.address}")
 
 # create fixed-rate exchange (FRE)
 from web3 import Web3
@@ -149,8 +153,8 @@ assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
 # Alice sends datatokens to the service, to get access. This is the "consume".
 for i in range(num_consumes):
     print(f"Consume #{i+1}/{num_consumes}...")
-    ocean.assets.pay_for_access_service(ddo, alice_wallet)
-    #don't need to call e.g. ocean.assets.download_asset() since wash-consuming
+    ocean.ddo.pay_for_access_service(ddo, alice_wallet)
+    #don't need to call e.g. ocean.ddo.download_ddo() since wash-consuming
 ```
 
 ## 6. Collect OCEAN rewards
@@ -163,14 +167,14 @@ WEEK = 7 * 86400 # seconds in a week
 t0 = chain.time()
 t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
-chain.sleep(t1 - t0) 
+chain.sleep(t1 - t0)
 chain.mine()
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 bal_before = from_wei(OCEAN.balanceOf(alice_wallet.address))
 ocean.ve_fee_distributor.claim({"from": alice_wallet})
 bal_after = from_wei(OCEAN.balanceOf(alice_wallet.address))
-print(f"Just claimed {bal_after-bal_before} OCEAN rewards") 
+print(f"Just claimed {bal_after-bal_before} OCEAN rewards")
 ```
 
 ## 7. Repeat steps 1-6, for Eth mainnet

@@ -8,9 +8,9 @@ import time
 import pytest
 import requests
 
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
@@ -31,7 +31,7 @@ def test_with_wrong_provider(config, caplog):
     _iterative_encrypt(config)
     updating_thread.join()
 
-    assert "Asset urls encrypted successfully" in caplog.text
+    assert "DDO urls encrypted successfully" in caplog.text
     assert exception_flag == 1
 
 
@@ -46,9 +46,9 @@ def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
     ocean = Ocean(config, DataServiceProvider)
 
     # force a bad URL, assuming initial Ocean and Aquarius objects were created successfully
-    ocean.assets._aquarius.base_url = "http://not-valid-aqua.com"
+    ocean.ddo._aquarius.base_url = "http://not-valid-aqua.com"
     with pytest.raises(Exception):
-        ocean.assets._aquarius.validate_ddo(DDO())
+        ocean.ddo._aquarius.validate_ddo(DDO())
 
 
 def _create_ddo(ocean, publisher):
@@ -57,7 +57,7 @@ def _create_ddo(ocean, publisher):
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample asset",
+        "name": "Sample DDO",
         "type": "dataset",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
@@ -69,7 +69,7 @@ def _create_ddo(ocean, publisher):
     files = [file]
     time.sleep(5)
     try:
-        ocean.assets.create(
+        ocean.ddo.create(
             metadata,
             publisher,
             files,

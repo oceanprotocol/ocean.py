@@ -53,7 +53,7 @@ datatoken.mint(to_address, amt_tokens, {"from": alice_wallet})
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access; then downloads
-file_name = ocean.assets.download_file(ddo.did, bob_wallet)
+file_name = ocean.ddo.download_file(ddo.did, bob_wallet)
 ```
 
 Bob can verify that the file is downloaded. In a new console:
@@ -63,7 +63,7 @@ cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
 
-Congrats to Bob for buying and consuming a data asset!
+Congrats to Bob for buying and consuming a data DDO!
 
 
 ## Appendix. Further Flexibility
@@ -79,14 +79,14 @@ Here are the last two steps, un-bundled.
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+order_tx_id = ocean.ddo.pay_for_access_service(ddo, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads the file
 # If the connection breaks, Bob can request again by showing order_tx_id.
 consumer_wallet = bob_wallet
 destination = './'
-file_path = ocean.assets.download_asset(
+file_path = ocean.ddo.download_ddo(
     ddo, consumer_wallet, destination, order_tx_id
 )
 ```
@@ -96,7 +96,7 @@ file_path = ocean.assets.download_asset(
 
 We can un-bundle even further:
 - `pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees.
-- And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
+- And `download_ddo()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
 
 Here's how it looks, fully un-bundled.
 
@@ -106,7 +106,7 @@ In the same python console:
 service = ddo.services[0]
 
 # Bob sends a datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(
+order_tx_id = ocean.ddo.pay_for_access_service(
     ddo,
     bob_wallet,
     service,
@@ -115,10 +115,10 @@ order_tx_id = ocean.assets.pay_for_access_service(
     consume_market_order_fee_amount=0,
 )
 
-# Bob now has access! He downloads the asset.
+# Bob now has access! He downloads the DDO.
 consumer_wallet = bob_wallet
 destination = './'
-file_path = ocean.assets.download_asset(
+file_path = ocean.ddo.download_ddo(
     ddo, bob_wallet, destination, order_tx_id, service=service
 )
 ```

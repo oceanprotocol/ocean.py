@@ -9,25 +9,26 @@ class ConsumableCodes:
     """
     Contains constant values for:
      - OK
-     - ASSET_DISABLED
+     - DDO_DISABLED
      - CONNECTIVITY_FAIL
      - CREDENTIAL_NOT_IN_ALLOW_LIST
      - CREDENTIAL_IN_DENY_LIST
+     - DDO_UNLISTED
     """
 
     OK = 0
-    ASSET_DISABLED = 1
+    DDO_DISABLED = 1
     CONNECTIVITY_FAIL = 2
     CREDENTIAL_NOT_IN_ALLOW_LIST = 3
     CREDENTIAL_IN_DENY_LIST = 4
-    ASSET_UNLISTED = 5
+    DDO_UNLISTED = 5
 
 
 class MalformedCredential(Exception):
     pass
 
 
-class AssetNotConsumable(Exception):
+class DDONotConsumable(Exception):
     @enforce_types
     def __init__(self, consumable_code: int) -> None:
         self.consumable_code = consumable_code

@@ -9,11 +9,11 @@ import pytest
 from requests.exceptions import InvalidURL
 from web3.main import Web3
 
-from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
+from ocean_lib.agreements.consumable import ConsumableCodes, DDONotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
-from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
+from ocean_lib.ddo.ddo_downloader import download_ddo_files, is_consumable
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     create_basics,
@@ -29,7 +29,7 @@ def test_is_consumable():
     service_dict = ddo_dict["services"][0]
     service = Service.from_dict(service_dict)
     with patch(
-        "ocean_lib.assets.test.test_asset_downloader.DataServiceProvider.check_asset_file_info",
+        "ocean_lib.ddo.test.test_ddo_downloader.DataServiceProvider.check_ddo_file_info",
         return_value=False,
     ):
         assert (
@@ -37,7 +37,7 @@ def test_is_consumable():
         )
 
     with patch(
-        "ocean_lib.assets.test.test_asset_downloader.DataServiceProvider.check_asset_file_info",
+        "ocean_lib.ddo.test.test_ddo_downloader.DataServiceProvider.check_ddo_file_info",
         return_value=True,
     ):
         assert (
@@ -47,17 +47,17 @@ def test_is_consumable():
 
 
 @pytest.mark.unit
-def test_ocean_assets_download_failure(publisher_wallet):
+def test_ocean_ddo_download_failure(publisher_wallet):
     """Tests that downloading from an empty service raises an AssertionError."""
 
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ACCESS)
     access_service.service_endpoint = None
     ddo.services[0] = access_service
 
     with pytest.raises(AssertionError):
-        download_asset_files(
+        download_ddo_files(
             ddo,
             access_service,
             publisher_wallet,
@@ -73,7 +73,7 @@ def test_invalid_provider_uri(publisher_wallet):
     ddo = DDO.from_dict(ddo_dict)
 
     with pytest.raises(InvalidURL):
-        download_asset_files(
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,
@@ -84,13 +84,13 @@ def test_invalid_provider_uri(publisher_wallet):
 
 @pytest.mark.unit
 def test_invalid_state(publisher_wallet):
-    """Tests different scenarios that raise AssetNotConsumable."""
+    """Tests different scenarios that raise DDONotConsumable."""
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
     ddo.nft["state"] = 1
 
-    with pytest.raises(AssetNotConsumable):
-        download_asset_files(
+    with pytest.raises(DDONotConsumable):
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,
@@ -99,8 +99,8 @@ def test_invalid_state(publisher_wallet):
         )
 
     ddo.metadata = []
-    with pytest.raises(AssetNotConsumable):
-        download_asset_files(
+    with pytest.raises(DDONotConsumable):
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,
@@ -110,9 +110,7 @@ def test_invalid_state(publisher_wallet):
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_indexes(
-    publisher_wallet, publisher_ocean_instance, tmpdir
-):
+def test_ocean_ddo_download_indexes(publisher_wallet, publisher_ocean_instance, tmpdir):
     """Tests different values of indexes that raise AssertionError."""
 
     ddo_dict = get_sample_ddo()
@@ -120,7 +118,7 @@ def test_ocean_assets_download_indexes(
 
     index = range(3)
     with pytest.raises(TypeError):
-        download_asset_files(
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,
@@ -131,7 +129,7 @@ def test_ocean_assets_download_indexes(
 
     index = -1
     with pytest.raises(AssertionError):
-        download_asset_files(
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,
@@ -142,7 +140,7 @@ def test_ocean_assets_download_indexes(
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_destination_file(
+def test_ocean_ddo_download_destination_file(
     config,
     tmpdir,
     publisher_wallet,
@@ -151,7 +149,7 @@ def test_ocean_assets_download_destination_file(
     datatoken,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
-    ocean_assets_download_destination_file_helper(
+    ocean_ddo_download_destination_file_helper(
         config,
         str(tmpdir),
         publisher_wallet,
@@ -161,7 +159,7 @@ def test_ocean_assets_download_destination_file(
     )
 
 
-def ocean_assets_download_destination_file_helper(
+def ocean_ddo_download_destination_file_helper(
     config,
     tmpdir,
     publisher_wallet,
@@ -173,14 +171,14 @@ def ocean_assets_download_destination_file_helper(
     data_provider = DataServiceProvider
 
     _, metadata, files = create_basics(config, data_provider)
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ACCESS)
 
     datatoken.mint(
         publisher_wallet.address,
@@ -219,7 +217,7 @@ def ocean_assets_download_destination_file_helper(
     assert datatoken.address in [order.address for order in orders]
     assert receipt.txid in [order.transactionHash.hex() for order in orders]
 
-    written_path = download_asset_files(
+    written_path = download_ddo_files(
         ddo, access_service, publisher_wallet, tmpdir, receipt.txid
     )
 
@@ -227,7 +225,7 @@ def ocean_assets_download_destination_file_helper(
 
     # index not found, even though tx_id exists
     with pytest.raises(AssertionError):
-        download_asset_files(
+        download_ddo_files(
             ddo,
             ddo.services[0],
             publisher_wallet,

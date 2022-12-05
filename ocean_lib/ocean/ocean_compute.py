@@ -7,12 +7,12 @@ from typing import Any, Dict, List, Optional, Type
 
 from enforce_typing import enforce_types
 
-from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
+from ocean_lib.agreements.consumable import ConsumableCodes, DDONotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.ddo import DDO
-from ocean_lib.assets.asset_downloader import is_consumable
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
+from ocean_lib.ddo.ddo_downloader import is_consumable
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -54,7 +54,7 @@ class OceanCompute:
             with_connectivity_check=True,
         )
         if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
+            raise DDONotConsumable(consumable_result)
 
         # Start compute job
         job_info = self._data_provider.start_compute_job(

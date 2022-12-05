@@ -35,12 +35,12 @@ In the same Python console:
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-#create data NFT & datatoken & DDO asset
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
-print(f"Just published asset, with did={ddo.did}")
+#create data NFT & datatoken & DDO
+(data_NFT, datatoken, ddo) = ocean.ddo.create_url_ddo(name, url, alice_wallet)
+print(f"Just published DDO with did={ddo.did}")
 ```
 
-That's it! You've created a data asset of "UrlFile" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
+That's it! You've created a data DDO of "UrlFile" type. It includes a data NFT, a datatoken for the data NFT, and metadata.
 
 ## Appendix: Further Flexibility
 
@@ -60,15 +60,15 @@ metadata = {
     "license": "CC0: PublicDomain",
 }
 
-# Use "UrlFile" asset type. (There are other options)
+# Use "UrlFile" DDO type. (There are other options)
 from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
-# Publish data asset
+# Publish data DDO
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-ddo = ocean.assets.create(
+ddo = ocean.ddo.create(
     metadata,
     alice_wallet,
     [url_file],
@@ -82,18 +82,18 @@ ddo = ocean.assets.create(
     datatoken_publish_market_order_fee_amounts=[0],
     datatoken_bytess=[[b""]],
 )
-print(f"Just published asset, with did={ddo.did}")
+print(f"Just published DDO with did={ddo.did}")
 ```
 
 ### Appendix: Metadata Encryption
 
-The asset metadata is stored on-chain. It's encrypted and compressed by default. Therefore it supports GDPR "right-to-be-forgotten" compliance rules by default.
+The DDO metadata is stored on-chain. It's encrypted and compressed by default. Therefore it supports GDPR "right-to-be-forgotten" compliance rules by default.
 
 You can control this:
-- To disable encryption, use `ocean.assets.create(..., encrypt_flag=False)`.
-- To disable compression, use `ocean.assets.create(..., compress_flag=False)`.
-- To disable both, use `ocean.assets.create(..., encrypt_flag=False, compress_flag=False)`.
+- To disable encryption, use `ocean.ddo.create(..., encrypt_flag=False)`.
+- To disable compression, use `ocean.ddo.create(..., compress_flag=False)`.
+- To disable both, use `ocean.ddo.create(..., encrypt_flag=False, compress_flag=False)`.
 
 ### Appendix: Different Templates
 
-`ocean.assets.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.
+`ocean.ddo.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.

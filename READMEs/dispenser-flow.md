@@ -35,7 +35,7 @@ In the same Python console:
 ```python
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+(data_NFT, datatoken, ddo) = ocean.ddo.create_url_ddo(name, url, alice_wallet)
 ```
 
 ## 3. Alice creates a faucet

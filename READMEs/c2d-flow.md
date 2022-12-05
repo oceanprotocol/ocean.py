@@ -12,7 +12,7 @@ Here are the steps:
 1. Setup
 2. Alice publishes dataset
 3. Alice publishes algorithm
-4. Alice allows the algorithm for C2D for that data asset
+4. Alice allows the algorithm for C2D for that data DDO
 5. Bob acquires datatokens for data and algorithm
 6. Bob starts a compute job using a free C2D environment (no provider fees)
 7. Bob monitors logs / algorithm output
@@ -55,7 +55,7 @@ In the same python console:
 
 ```python
 
-# Publish data NFT, datatoken, and asset for dataset based on url
+# Publish data NFT, datatoken, and DDO for dataset based on url
 
 # ocean.py offers multiple file object types. A simple url file is enough for here
 from ocean_lib.structures.file_objects import UrlFile
@@ -64,7 +64,7 @@ DATA_url_file = UrlFile(
 )
 
 name = "Branin dataset"
-(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, alice_wallet, wait_for_aqua=True)
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.ddo.create_url_ddo(name, DATA_url_file.url, alice_wallet, wait_for_aqua=True)
 print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
@@ -91,9 +91,9 @@ DATA_compute_service = Service(
     compute_values=DATA_compute_values,
 )
 
-# Add service and update asset
+# Add service and update DDO
 DATA_ddo.add_service(DATA_compute_service)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
+DATA_ddo = ocean.ddo.update(DATA_ddo, alice_wallet)
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
@@ -107,7 +107,7 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_url_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.ddo.create_url_ddo(name, ALGO_url, alice_wallet, wait_for_aqua=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
@@ -135,22 +135,21 @@ ALGO_metadata = {
     }
 }
 
-# update ALGO_Asset metadata
+# update algo DDO metadata
 ALGO_ddo.metadata.update(ALGO_metadata)
-ALGO_ddo = ocean.assets.update(
-    asset=ALGO_ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    
+ALGO_ddo = ocean.ddo.update(ddo=ALGO_ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
+
 
 print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
 ```
 
-## 4. Alice allows the algorithm for C2D for that data asset
+## 4. Alice allows the algorithm for C2D for that data DDO
 
 In the same Python console:
 ```python
 compute_service = DATA_ddo.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
+DATA_ddo = ocean.ddo.update(DATA_ddo, alice_wallet)
 
 ```
 
@@ -176,9 +175,9 @@ In the same Python console:
 DATA_did = DATA_ddo.did
 ALGO_did = ALGO_ddo.did
 
-# Operate on updated and indexed assets
-DATA_ddo = ocean.assets.resolve(DATA_did)
-ALGO_ddo = ocean.assets.resolve(ALGO_did)
+# Operate on updated and indexed DDOs
+DATA_ddo = ocean.ddo.resolve(DATA_did)
+ALGO_ddo = ocean.ddo.resolve(ALGO_did)
 
 compute_service = DATA_ddo.services[1]
 algo_service = ALGO_ddo.services[0]
@@ -191,7 +190,7 @@ DATA_compute_input = ComputeInput(DATA_ddo, compute_service)
 ALGO_compute_input = ComputeInput(ALGO_ddo, algo_service)
 
 # Pay for dataset and algo for 1 day
-datasets, algorithm = ocean.assets.pay_for_compute_service(
+datasets, algorithm = ocean.ddo.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,

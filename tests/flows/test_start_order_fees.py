@@ -9,12 +9,12 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.ocean_ddo import OceanDDO
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
@@ -86,7 +86,7 @@ def test_start_order_fees(
         publish_market_order_fee_in_unit, bt.decimals()
     )
 
-    ddo, service, dt = create_asset_with_order_fee_and_timeout(
+    ddo, service, dt = create_ddo_with_order_fee_and_timeout(
         config=config,
         file=file1,
         data_nft=data_nft,
@@ -215,7 +215,7 @@ def test_start_order_fees(
     assert opc_dt_balance_before + ocean_community_order_fee == opc_dt_balance_after
 
 
-def create_asset_with_order_fee_and_timeout(
+def create_ddo_with_order_fee_and_timeout(
     config: dict,
     file: FilesType,
     data_nft: DataNFT,
@@ -241,12 +241,12 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
+    ocean_ddo = OceanDDO(config, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample asset",
+        "name": "Sample DDO",
         "type": "dataset",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
@@ -257,15 +257,15 @@ def create_asset_with_order_fee_and_timeout(
     # Create service with timeout
     service = Service(
         service_id="5",
-        service_type=ServiceTypes.ASSET_ACCESS,
+        service_type=ServiceTypes.ACCESS,
         service_endpoint=data_provider.get_url(config),
         datatoken=datatoken.address,
         files=files,
         timeout=timeout,
     )
 
-    # Publish asset
-    ddo = ocean_assets.create(
+    # Publish DDO
+    ddo = ocean_ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[service],
@@ -273,7 +273,7 @@ def create_asset_with_order_fee_and_timeout(
         deployed_datatokens=[datatoken],
     )
 
-    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    service = get_first_service_by_type(ddo, ServiceTypes.ACCESS)
     dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     return ddo, service, dt

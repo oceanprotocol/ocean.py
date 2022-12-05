@@ -14,8 +14,8 @@ from brownie import network
 from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.ocean.util import get_address_of_type
@@ -23,24 +23,24 @@ from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
-    create_asset,
     create_basics,
+    create_ddo,
     get_first_service_by_type,
     get_sample_ddo,
 )
 
 
 @pytest.mark.integration
-def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
+def test_register_ddo(publisher_ocean_instance, publisher_wallet, consumer_wallet):
     ocn = publisher_ocean_instance
 
     invalid_did = "did:op:0123456789"
-    assert ocn.assets.resolve(invalid_did) is None
+    assert ocn.ddo.resolve(invalid_did) is None
 
 
 @pytest.mark.integration
 def test_update_metadata(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = create_ddo(publisher_ocean_instance, publisher_wallet)
 
     new_metadata = copy.deepcopy(ddo.metadata)
 
@@ -50,7 +50,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
-    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean_instance.ddo.update(ddo, publisher_wallet)
 
     assert ddo2.datatokens == ddo.datatokens
     assert len(ddo2.services) == len(ddo.services)
@@ -62,7 +62,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_update_credentials(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = create_ddo(publisher_ocean_instance, publisher_wallet)
 
     # Update credentials
     _new_credentials = {
@@ -72,7 +72,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 
     ddo.credentials = _new_credentials
 
-    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean_instance.ddo.update(ddo, publisher_wallet)
 
     assert ddo2.credentials == _new_credentials, "Credentials were not updated."
 
@@ -81,7 +81,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 def test_update_datatokens(
     publisher_ocean_instance, publisher_wallet, config, datatoken, file2
 ):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = create_ddo(publisher_ocean_instance, publisher_wallet)
     data_provider = DataServiceProvider
 
     files = [file2]
@@ -90,7 +90,7 @@ def test_update_datatokens(
     ddo_orig = copy.deepcopy(ddo)
     access_service = Service(
         service_id="3",
-        service_type=ServiceTypes.ASSET_ACCESS,
+        service_type=ServiceTypes.ACCESS,
         service_endpoint=data_provider.get_url(config),
         datatoken=datatoken.address,
         files=files,
@@ -108,7 +108,7 @@ def test_update_datatokens(
 
     ddo.services.append(access_service)
 
-    ddo2 = publisher_ocean_instance.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean_instance.ddo.update(ddo, publisher_wallet)
 
     assert len(ddo2.datatokens) == len(ddo_orig.datatokens) + 1
     assert len(ddo2.services) == len(ddo_orig.services) + 1
@@ -134,7 +134,7 @@ def test_update_datatokens(
 
     ddo2_prev_datatokens = ddo2.datatokens
 
-    ddo4 = publisher_ocean_instance.assets.update(ddo3, publisher_wallet)
+    ddo4 = publisher_ocean_instance.ddo.update(ddo3, publisher_wallet)
 
     assert ddo4, "Can't read ddo after update."
     assert len(ddo4.datatokens) == 1
@@ -156,12 +156,12 @@ def test_update_datatokens(
 
 @pytest.mark.integration
 def test_update_flags(publisher_ocean_instance, publisher_wallet):
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
+    ddo = create_ddo(publisher_ocean_instance, publisher_wallet)
 
     # Test compress & update flags
     data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
 
-    ddo2 = publisher_ocean_instance.assets.update(
+    ddo2 = publisher_ocean_instance.ddo.update(
         ddo,
         publisher_wallet,
         compress_flag=True,
@@ -178,7 +178,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
+def test_ocean_ddo_search(publisher_ocean_instance, publisher_wallet):
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -191,19 +191,19 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
     }
 
     assert (
-        len(publisher_ocean_instance.assets.search(identifier)) == 0
+        len(publisher_ocean_instance.ddo.search(identifier)) == 0
     ), "DDO search failed."
 
-    create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+    create_ddo(publisher_ocean_instance, publisher_wallet, metadata)
 
     time.sleep(1)  # apparently changes are not instantaneous
     assert (
-        len(publisher_ocean_instance.assets.search(identifier)) == 1
+        len(publisher_ocean_instance.ddo.search(identifier)) == 1
     ), "Searched for the occurrences of the identifier failed. "
 
     assert (
         len(
-            publisher_ocean_instance.assets.query(
+            publisher_ocean_instance.ddo.query(
                 {
                     "query": {
                         "query_string": {
@@ -218,7 +218,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
     ), "Query failed.The identifier was not found in the name."
     assert (
         len(
-            publisher_ocean_instance.assets.query(
+            publisher_ocean_instance.ddo.query(
                 {
                     "query": {
                         "query_string": {
@@ -234,11 +234,11 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_ocean_assets_validate(publisher_ocean_instance):
+def test_ocean_ddo_validate(publisher_ocean_instance):
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
 
-    assert publisher_ocean_instance.assets.validate(
+    assert publisher_ocean_instance.ddo.validate(
         ddo
     ), "ddo should be valid, unless the schema changed"
 
@@ -247,16 +247,16 @@ def test_ocean_assets_validate(publisher_ocean_instance):
     ddo = DDO.from_dict(ddo_dict)
 
     with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.validate(ddo)
+        publisher_ocean_instance.ddo.validate(ddo)
 
 
 @pytest.mark.integration
-def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
+def test_ocean_ddo_algorithm(publisher_ocean_instance, publisher_wallet):
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample algorithm asset",
+        "name": "Sample algorithm DDO",
         "type": "algorithm",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
@@ -273,17 +273,17 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
         },
     }
 
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+    ddo = create_ddo(publisher_ocean_instance, publisher_wallet, metadata)
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
 @pytest.mark.unit
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
-    with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
+    with patch("ocean_lib.ocean.ocean_ddo.OceanDDO.resolve") as mock:
         ddo = DDO.from_dict(get_sample_ddo())
         mock.return_value = ddo
         with pytest.raises(AssertionError):
-            publisher_ocean_instance.assets.download_asset(
+            publisher_ocean_instance.ddo.download_ddo(
                 ddo,
                 publisher_wallet,
                 destination="",
@@ -292,7 +292,7 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
                 index=-4,
             )
         with pytest.raises(TypeError):
-            publisher_ocean_instance.assets.download_asset(
+            publisher_ocean_instance.ddo.download_ddo(
                 ddo,
                 publisher_wallet,
                 destination="",
@@ -314,12 +314,12 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
         "license": "https://market.oceanprotocol.com/terms",
     }
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+        create_ddo(publisher_ocean_instance, publisher_wallet, metadata)
 
-    metadata["name"] = "Sample asset"
+    metadata["name"] = "Sample DDO"
     metadata.pop("type")
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
+        create_ddo(publisher_ocean_instance, publisher_wallet, metadata)
 
 
 @pytest.mark.unit
@@ -333,7 +333,7 @@ def test_pay_for_access_service_insufficient_balance(
     empty_wallet = accounts.add()
 
     with pytest.raises(InsufficientBalance):
-        publisher_ocean_instance.assets.pay_for_access_service(
+        publisher_ocean_instance.ddo.pay_for_access_service(
             ddo,
             empty_wallet,
             get_first_service_by_type(ddo, "access"),
@@ -344,21 +344,19 @@ def test_pay_for_access_service_insufficient_balance(
 
 
 @pytest.mark.integration
-def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
+def test_create_url_ddo(publisher_ocean_instance, publisher_wallet):
     ocean = publisher_ocean_instance
 
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
-        name, url, publisher_wallet
-    )
+    (data_nft, datatoken, ddo) = ocean.ddo.create_url_ddo(name, url, publisher_wallet)
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1
 
 
 @pytest.mark.integration
-def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
+def test_create_graphql_ddo(publisher_ocean_instance, publisher_wallet):
     ocean = publisher_ocean_instance
 
     name = "Data NFTs in Ocean"
@@ -371,7 +369,7 @@ def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
                         }
                    }
     """
-    (data_nft, datatoken, ddo) = ocean.assets.create_graphql_asset(
+    (data_nft, datatoken, ddo) = ocean.ddo.create_graphql_ddo(
         name, url, query, publisher_wallet
     )
 
@@ -380,7 +378,7 @@ def test_create_graphql_asset(publisher_ocean_instance, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config):
+def test_create_onchain_ddo(publisher_ocean_instance, publisher_wallet, config):
     ocean = publisher_ocean_instance
 
     name = "swapOceanFee function call"
@@ -393,7 +391,7 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
         "type": "function",
     }
 
-    (data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(
+    (data_nft, datatoken, ddo) = ocean.ddo.create_onchain_ddo(
         name, contract_address, contract_abi, publisher_wallet
     )
 
@@ -402,7 +400,7 @@ def test_create_onchain_asset(publisher_ocean_instance, publisher_wallet, config
 
 
 @pytest.mark.integration
-def test_plain_asset_with_one_datatoken(
+def test_plain_ddo_with_one_datatoken(
     publisher_ocean_instance, publisher_wallet, config
 ):
     data_provider = DataServiceProvider
@@ -425,7 +423,7 @@ def test_plain_asset_with_one_datatoken(
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address = registered_event["newTokenAddress"]
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -453,7 +451,7 @@ def test_plain_asset_with_one_datatoken(
 
 
 @pytest.mark.integration
-def test_plain_asset_multiple_datatokens(
+def test_plain_ddo_multiple_datatokens(
     publisher_ocean_instance, publisher_wallet, config
 ):
     data_provider = DataServiceProvider
@@ -475,7 +473,7 @@ def test_plain_asset_multiple_datatokens(
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address2 = registered_event["newTokenAddress"]
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=[files, files],
@@ -514,7 +512,7 @@ def test_plain_asset_multiple_datatokens(
 
 
 @pytest.mark.integration
-def test_plain_asset_multiple_services(
+def test_plain_ddo_multiple_services(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
@@ -522,7 +520,7 @@ def test_plain_asset_multiple_services(
 
     access_service = Service(
         service_id="0",
-        service_type=ServiceTypes.ASSET_ACCESS,
+        service_type=ServiceTypes.ACCESS,
         service_endpoint=data_provider.get_url(config),
         datatoken=datatoken.address,
         files=files,
@@ -550,7 +548,7 @@ def test_plain_asset_multiple_services(
         compute_values=compute_values,
     )
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -571,13 +569,13 @@ def test_plain_asset_multiple_services(
 
 
 @pytest.mark.integration
-def test_encrypted_asset(
+def test_encrypted_ddo(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -596,13 +594,13 @@ def test_encrypted_asset(
 
 
 @pytest.mark.integration
-def test_compressed_asset(
+def test_compressed_ddo(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -621,13 +619,13 @@ def test_compressed_asset(
 
 
 @pytest.mark.integration
-def test_compressed_and_encrypted_asset(
+def test_compressed_and_encrypted_ddo(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
     _, metadata, files = create_basics(config, data_provider)
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
@@ -646,7 +644,7 @@ def test_compressed_and_encrypted_asset(
 
 
 @pytest.mark.unit
-def test_asset_creation_errors(
+def test_ddo_creation_errors(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
@@ -654,7 +652,7 @@ def test_asset_creation_errors(
 
     some_random_address = ZERO_ADDRESS
     with pytest.raises(brownie.exceptions.ContractNotFound):
-        publisher_ocean_instance.assets.create(
+        publisher_ocean_instance.ddo.create(
             metadata=metadata,
             publisher_wallet=publisher_wallet,
             files=files,
@@ -666,7 +664,7 @@ def test_asset_creation_errors(
     with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
         mock.return_value = True
         with pytest.raises(AquariusError):
-            publisher_ocean_instance.assets.create(
+            publisher_ocean_instance.ddo.create(
                 metadata=metadata,
                 publisher_wallet=publisher_wallet,
                 files=files,

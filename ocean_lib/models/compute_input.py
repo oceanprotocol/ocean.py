@@ -6,7 +6,7 @@ from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 

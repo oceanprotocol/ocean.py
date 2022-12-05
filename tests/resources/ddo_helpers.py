@@ -11,8 +11,8 @@ from typing import List, Optional
 import requests
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -84,7 +84,7 @@ def get_access_service(
     if not provider_uri:
         provider_uri = DataServiceProvider.get_url(ocean_instance.config_dict)
 
-    return ocean_instance.assets.build_access_service(
+    return ocean_instance.ddo.build_access_service(
         DataServiceProvider.build_download_endpoint(provider_uri)[1],
         date_created,
         1.0,
@@ -93,14 +93,14 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, metadata=None, files=None):
-    """Helper function for asset creation based on ddo_sa_sample.json."""
+def create_ddo(ocean, publisher, metadata=None, files=None):
+    """Helper function for DDO creation based on ddo_sa_sample.json."""
     if not metadata:
         metadata = {
             "created": "2020-11-15T12:27:48Z",
             "updated": "2021-05-17T21:58:02Z",
             "description": "Sample description",
-            "name": "Sample asset",
+            "name": "Sample DDO",
             "type": "dataset",
             "author": "OPF",
             "license": "https://market.oceanprotocol.com/terms",
@@ -115,9 +115,9 @@ def create_asset(ocean, publisher, metadata=None, files=None):
         file1 = FilesTypeFactory(file1_dict)
         files = [file1]
 
-    # Publish asset with services on-chain.
+    # Publish DDO with services on-chain.
     # The download (access service) is automatically created
-    ddo = ocean.assets.create(
+    ddo = ocean.ddo.create(
         metadata,
         publisher,
         files,
@@ -138,13 +138,13 @@ def create_asset(ocean, publisher, metadata=None, files=None):
 def create_basics(
     config,
     data_provider,
-    asset_type: str = "dataset",
+    ddo_type: str = "dataset",
     files: Optional[List[FilesType]] = None,
 ):
-    """Helper for asset creation, based on ddo_sa_sample.json
+    """Helper for DDO creation, based on ddo_sa_sample.json
 
     Optional arguments:
-    :param asset_type: used to populate metadata.type, optionally set to "algorithm"
+    :param ddo_type: used to populate metadata.type, optionally set to "algorithm"
     :param files: list of file objects creates with FilesTypeFactory
     """
     data_nft_factory_address = get_address_of_type(
@@ -156,8 +156,8 @@ def create_basics(
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample asset",
-        "type": asset_type,
+        "name": "Sample DDO",
+        "type": ddo_type,
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
@@ -168,11 +168,11 @@ def create_basics(
     return data_nft_factory, metadata, files
 
 
-def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
-    return create_asset(ocean_instance, publisher_wallet)
+def get_registered_ddo_with_access_service(ocean_instance, publisher_wallet):
+    return create_ddo(ocean_instance, publisher_wallet)
 
 
-def get_registered_asset_with_compute_service(
+def get_registered_ddo_with_compute_service(
     ocean_instance: Ocean,
     publisher_wallet,
     allow_raw_algorithms: bool = False,
@@ -216,7 +216,7 @@ def get_registered_asset_with_compute_service(
     for publisher in trusted_algorithm_publishers:
         compute_service.add_publisher_trusted_algorithm_publisher(publisher)
 
-    return ocean_instance.assets.create(
+    return ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[compute_service],
@@ -232,7 +232,7 @@ def get_registered_algorithm_with_access_service(
 ):
     config = ocean_instance.config_dict
     data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(config, data_provider, asset_type="algorithm")
+    _, metadata, _ = create_basics(config, data_provider, ddo_type="algorithm")
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -258,7 +258,7 @@ def get_registered_algorithm_with_access_service(
         }
     )
 
-    return create_asset(
+    return create_ddo(
         ocean_instance,
         publisher_wallet,
         metadata=metadata,
@@ -297,12 +297,12 @@ def build_credentials_dict() -> dict:
     return {"allow": [], "deny": []}
 
 
-def wait_for_asset(ocean, did, timeout=30):
+def wait_for_ddo(ocean, did, timeout=30):
     start = time.time()
     ddo = None
     while not ddo:
         try:
-            ddo = ocean.assets.resolve(did)
+            ddo = ocean.ddo.resolve(did)
         except ValueError:
             pass
 

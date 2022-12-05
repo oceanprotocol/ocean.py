@@ -8,7 +8,7 @@
     "created": "2020-11-15T12:27:48Z",
     "updated": "2021-05-17T21:58:02Z",
     "description": "Sample description",
-    "name": "Sample asset",
+    "name": "Sample DDO",
     "type": "dataset",
     "author": "OPF",
     "license": "https://market.oceanprotocol.com/terms"
@@ -41,7 +41,7 @@
   },
   "nft": {
     "address": "0x000000",
-    "name": "Ocean Protocol Asset v4",
+    "name": "Ocean Protocol DDO v4",
     "symbol": "OCEAN-A-v4",
     "owner": "0x0000000",
     "state": 0,

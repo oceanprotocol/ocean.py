@@ -14,12 +14,12 @@ from requests.models import Response
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
-from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
+from ocean_lib.ddo.ddo import DDO
+from ocean_lib.exceptions import DataProviderException, OceanEncryptDDOUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.util import get_ocean_token_address
@@ -230,14 +230,14 @@ def test_fileinfo(
 ):
     _, metadata, files = create_basics(config, DataSP)
 
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ACCESS)
 
     fileinfo_result = FileInfoProvider.fileinfo(
         ddo.did, access_service, with_checksum=True
@@ -263,14 +263,14 @@ def test_initialize(
     datatoken,
 ):
     _, metadata, files = create_basics(config, DataSP)
-    ddo = publisher_ocean_instance.assets.create(
+    ddo = publisher_ocean_instance.ddo.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ACCESS)
 
     initialize_result = DataSP.initialize(
         did=ddo.did,
@@ -466,7 +466,7 @@ def test_encrypt_failure(config):
     http_client = HttpClientEvilMock()
     DataEncryptor.set_http_client(http_client)
 
-    with pytest.raises(OceanEncryptAssetUrlsError):
+    with pytest.raises(OceanEncryptDDOUrlsError):
         DataEncryptor.encrypt({}, config["PROVIDER_URL"])
 
     http_client = HttpClientEmptyMock()
@@ -592,18 +592,18 @@ def test_job_result_failure(config):
 
 
 @pytest.mark.unit
-def test_check_asset_failure(config):
-    """Tests check_asset_file_info failures."""
-    assert DataSP.check_asset_file_info("", "", config["PROVIDER_URL"]) is False
+def test_check_ddo_failure(config):
+    """Tests check_ddo_file_info failures."""
+    assert DataSP.check_ddo_file_info("", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_ddo_file_info("test", "", config["PROVIDER_URL"]) is False
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_ddo_file_info("test", "", config["PROVIDER_URL"]) is False
 
     DataSP.set_http_client(get_requests_session())

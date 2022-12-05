@@ -8,7 +8,7 @@ import os
 import pytest
 from web3.main import Web3
 
-from tests.resources.ddo_helpers import get_registered_asset_with_access_service
+from tests.resources.ddo_helpers import get_registered_ddo_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
 
@@ -30,7 +30,7 @@ def test_market_flow(
     consumer_ocean = consumer_ocean_instance
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    ddo = get_registered_ddo_with_access_service(publisher_ocean, publisher_wallet)
     service = ddo.services[0]
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
@@ -48,7 +48,7 @@ def test_market_flow(
 
     # Place order for the download service
     if consumer_type == "publisher":
-        order_tx_id = consumer_ocean.assets.pay_for_access_service(
+        order_tx_id = consumer_ocean.ddo.pay_for_access_service(
             ddo,
             consumer_wallet,
             service=service,
@@ -56,7 +56,7 @@ def test_market_flow(
             consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
         )
-        asset_folder = consumer_ocean.assets.download_asset(
+        ddo_folder = consumer_ocean.ddo.download_ddo(
             ddo,
             consumer_wallet,
             consumer_ocean.config_dict["DOWNLOADS_PATH"],
@@ -64,7 +64,7 @@ def test_market_flow(
             service,
         )
     else:
-        order_tx_id = consumer_ocean.assets.pay_for_access_service(
+        order_tx_id = consumer_ocean.ddo.pay_for_access_service(
             ddo,
             consumer_wallet,
             service=service,
@@ -73,7 +73,7 @@ def test_market_flow(
             consume_market_order_fee_amount=0,
             consumer_address=another_consumer_wallet.address,
         )
-        asset_folder = consumer_ocean.assets.download_asset(
+        ddo_folder = consumer_ocean.ddo.download_ddo(
             ddo,
             another_consumer_wallet,
             another_consumer_ocean.config_dict["DOWNLOADS_PATH"],
@@ -81,7 +81,7 @@ def test_market_flow(
             service,
         )
 
-    assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
+    assert len(os.listdir(ddo_folder)) >= 1, "The DDO folder is empty."
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, datatoken.address)
     assert (
@@ -106,7 +106,7 @@ def test_pay_for_access_service_good_default(
 ):
     publisher_ocean, consumer_ocean = publisher_ocean_instance, consumer_ocean_instance
 
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    ddo = get_registered_ddo_with_access_service(publisher_ocean, publisher_wallet)
     service = ddo.services[0]
     datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
@@ -117,9 +117,9 @@ def test_pay_for_access_service_good_default(
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args
-    order_tx_id = consumer_ocean.assets.pay_for_access_service(ddo, consumer_wallet)
+    order_tx_id = consumer_ocean.ddo.pay_for_access_service(ddo, consumer_wallet)
 
-    asset_folder = consumer_ocean.assets.download_asset(
+    ddo_folder = consumer_ocean.ddo.download_ddo(
         ddo,
         consumer_wallet,
         consumer_ocean.config_dict["DOWNLOADS_PATH"],
@@ -128,4 +128,4 @@ def test_pay_for_access_service_good_default(
     )
 
     # basic check. Leave thorough checks to other tests here
-    assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
+    assert len(os.listdir(ddo_folder)) >= 1, "The DDO folder is empty."

@@ -54,7 +54,7 @@ class FileInfoProvider(DataServiceProviderBase):
         )
 
         logger.info(
-            f"Retrieved asset files successfully"
+            f"Retrieved DDO files successfully"
             f" FileInfoEndpoint {fileinfo_endpoint} from did {did} with service id {service.id}"
         )
         return response

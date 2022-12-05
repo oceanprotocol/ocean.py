@@ -67,7 +67,7 @@ class Service:
 
         if not name or not description:
             service_to_default_name = {
-                ServiceTypes.ASSET_ACCESS: ServiceTypesNames.DEFAULT_ACCESS_NAME,
+                ServiceTypes.ACCESS: ServiceTypesNames.DEFAULT_ACCESS_NAME,
                 ServiceTypes.CLOUD_COMPUTE: ServiceTypesNames.DEFAULT_COMPUTE_NAME,
             }
 
@@ -216,7 +216,7 @@ class Service:
         trusted_algorithms = self.get_trusted_algorithms()
         if not trusted_algorithms:
             raise ValueError(
-                f"Algorithm {algo_did} is not in trusted algorithms of this asset."
+                f"Algorithm {algo_did} is not in trusted algorithms of this DDO."
             )
         trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
         trusted_algo_publishers = self.get_trusted_algorithm_publishers()
@@ -244,7 +244,7 @@ class Service:
         publisher_address = publisher_address.lower()
         if not trusted_algorithm_publishers:
             raise ValueError(
-                f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
+                f"Publisher {publisher_address} is not in trusted algorithm publishers of this DDO."
             )
 
         trusted_algorithm_publishers = [
@@ -270,7 +270,7 @@ class Service:
     ) -> None:
         """Set the `trusted_algorithms` on the compute service.
 
-        - An assertion is raised if this asset has no compute service
+        - An assertion is raised if this DDO has no compute service
         - Updates the compute service in place
         - Adds the trusted algorithms under privacy.publisherTrustedAlgorithms
 
@@ -280,12 +280,12 @@ class Service:
         :param allow_network_access: bool -- set to True to allow network access to all the algorithms that belong to this dataset
         :param allow_raw_algorithm: bool -- determine whether raw algorithms (i.e. unpublished) can be run on this dataset
         :return: None
-        :raises AssertionError if this asset has no `ServiceTypes.CLOUD_COMPUTE` service
+        :raises AssertionError if this DDO has no `ServiceTypes.CLOUD_COMPUTE` service
         """
         assert not trusted_algorithms or isinstance(trusted_algorithms, list)
         assert (
             self.type == ServiceTypes.CLOUD_COMPUTE is not None
-        ), "this asset does not have a compute service."
+        ), "this DDO does not have a compute service."
 
         for ta in trusted_algorithms:
             assert isinstance(

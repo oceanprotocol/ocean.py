@@ -12,7 +12,7 @@ from enforce_typing import enforce_types
 from requests.models import Response
 
 from ocean_lib.data_provider.base import DataServiceProviderBase
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from ocean_lib.exceptions import OceanEncryptDDOUrlsError
 
 logger = logging.getLogger(__name__)
 
@@ -49,11 +49,11 @@ class DataEncryptor(DataServiceProviderBase):
             encrypt_endpoint,
             payload,
             [201],
-            OceanEncryptAssetUrlsError,
+            OceanEncryptDDOUrlsError,
         )
 
         logger.info(
-            f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
+            f"DDO urls encrypted successfully, encrypted urls str: {response.text},"
             f" encryptedEndpoint {encrypt_endpoint}"
         )
 

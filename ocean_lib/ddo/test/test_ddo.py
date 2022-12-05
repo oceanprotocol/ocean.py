@@ -6,8 +6,8 @@ import pytest
 from brownie import network
 
 from ocean_lib.agreements.consumable import MalformedCredential
-from ocean_lib.assets.ddo import DDO
-from ocean_lib.assets.credentials import simplify_credential_to_address
+from ocean_lib.ddo.credentials import simplify_credential_to_address
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_key_from_v4_sample_ddo,
@@ -38,7 +38,7 @@ def test_ddo_utils():
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
-        "name": "Sample asset",
+        "name": "Sample DDO",
         "type": "dataset",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
@@ -72,7 +72,7 @@ def test_ddo_utils():
 
     assert ddo_dict["nft"] == {
         "address": "0x000000",
-        "name": "Ocean Protocol Asset v4",
+        "name": "Ocean Protocol DDO v4",
         "symbol": "OCEAN-A-v4",
         "owner": "0x0000000",
         "state": 0,

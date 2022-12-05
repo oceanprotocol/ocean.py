@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish & Consume Flow for GraphQL data type
 
-This quickstart describes a flow to publish & consume GraphQL-style URIs. In our example, the data asset is a query to find data NFTs via ocean-subgraph.
+This quickstart describes a flow to publish & consume GraphQL-style URIs. In our example, the data DDO is a query to find data NFTs via ocean-subgraph.
 
 Here are the steps:
 
@@ -42,12 +42,12 @@ query="""query{
                }
 """
 
-#create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_graphql_asset(name, url, query, alice_wallet)
-print(f"Just published asset, with did={ddo.did}")
+#create DDO
+(data_nft, datatoken, ddo) = ocean.ddo.create_graphql_ddo(name, url, query, alice_wallet)
+print(f"Just published DDO with did={ddo.did}")
 ```
 
-That's it! You've created a data asset of "GraphqlQuery" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
+That's it! You've created a data DDO of "GraphqlQuery" type. It includes a data NFT, a datatoken for the data NFT, and metadata.
 
 ## 3.  Consume dataset
 

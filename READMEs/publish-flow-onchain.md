@@ -43,12 +43,12 @@ contract_abi = {
                 "type": "function",
 		}
 
-#create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, alice_wallet)
-print(f"Just published asset, with did={ddo.did}")
+#create DDO
+(data_nft, datatoken, ddo) = ocean.ddo.create_onchain_ddo(name, contract_address, contract_abi, alice_wallet)
+print(f"Just published DDO with did={ddo.did}")
 ```
 
-That's it! You've created a data asset of "SmartContractCall" asset type. It includes a data NFT, a datatoken for the data NFT, and metadata.
+That's it! You've created a data DDO of "SmartContractCall" type. It includes a data NFT, a datatoken for the data NFT, and metadata.
 
 ## 3.  Consume the dataset
 

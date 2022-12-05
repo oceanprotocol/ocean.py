@@ -14,7 +14,7 @@ from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.assets.ddo import DDO
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -48,7 +48,7 @@ class Aquarius:
 
         logging.debug(f"Aquarius connected at {aquarius_url}")
         logging.debug(f"Aquarius API documentation at {aquarius_url}/api/v1/docs")
-        logging.debug(f"Metadata assets (DDOs) at {self.base_url}")
+        logging.debug(f"Metadata DDOs at {self.base_url}")
 
     @classmethod
     def get_instance(cls, metadata_cache_uri: str) -> "Aquarius":
@@ -70,7 +70,7 @@ class Aquarius:
     def ddo_exists(self, did: str) -> bool:
         """Is this DDO in Aqua?"""
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
+        return f"DDO DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
     def get_ddo_metadata(self, did: str) -> dict:

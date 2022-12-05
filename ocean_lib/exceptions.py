@@ -4,7 +4,7 @@
 #
 
 
-class OceanEncryptAssetUrlsError(Exception):
+class OceanEncryptDDOUrlsError(Exception):
     """Error invoking the encrypt endpoint."""
 
 

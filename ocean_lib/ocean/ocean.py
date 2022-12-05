@@ -11,8 +11,8 @@ from typing import Dict, List, Optional, Type, Union
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ddo.ddo import DDO
 from ocean_lib.example_config import config_defaults
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
@@ -21,11 +21,11 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.models.ve_allocate import VeAllocate
 from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
-from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_compute import OceanCompute
+from ocean_lib.ocean.ocean_ddo import OceanDDO
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -47,18 +47,18 @@ class Ocean:
         `ocean = Ocean({...})`
 
         This class provides the main top-level functions in ocean protocol:
-        1. Publish assets metadata and associated services
-            - Each asset is assigned a unique DID and a DID Document (DDO)
-            - The DDO contains the asset's services including the metadata
+        1. Publish DDO metadata and associated services
+            - Each DDO is assigned a unique DID and a DID Document (DDO)
+            - The DDO contains the DDO's services including the metadata
             - The DID is registered on-chain with a URL of the metadata store
               to retrieve the DDO from
 
-            `ddo = ocean.assets.create(metadata, publisher_wallet)`
+            `ddo = ocean.ddo.create(metadata, publisher_wallet)`
 
         2. Discover/Search ddos via the current configured metadata store (Aquarius)
 
             - Usage:
-            `ddos_list = ocean.assets.search('search text')`
+            `ddos_list = ocean.ddo.search('search text')`
 
         An instance of Ocean is parameterized by a `Config` instance.
 
@@ -85,7 +85,7 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        self.assets = OceanAssets(self.config_dict, data_provider)
+        self.ddo = OceanDDO(self.config_dict, data_provider)
         self.compute = OceanCompute(self.config_dict, data_provider)
 
         logger.debug("Ocean instance initialized: ")

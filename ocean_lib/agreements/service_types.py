@@ -8,7 +8,7 @@
 class ServiceTypes:
     """Types of Service allowed in ocean protocol DDO services for V4."""
 
-    ASSET_ACCESS = "access"
+    ACCESS = "access"
     CLOUD_COMPUTE = "compute"
     AUTHORIZATION = "wss"
 
