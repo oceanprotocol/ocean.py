@@ -7,10 +7,14 @@ from typing import Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
+from web3 import Web3
 
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+
+to_checksum_address = ContractBase.to_checksum_address
+toWei, fromWei = Web3.toWei, Web3.fromWei
 
 
 class DatatokenRoles(IntEnum):
@@ -25,39 +29,125 @@ class Datatoken(ContractBase):
     BASE_COMMUNITY_FEE_PERCENTAGE = BASE / 1000
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
 
-    @enforce_types
-    def create_fixed_rate(
-        self,
-        fixed_price_address: str,
-        base_token_address: str,
-        owner: str,
-        publish_market_swap_fee_collector: str,
-        allowed_swapper: str,
-        base_token_decimals: int,
-        datatoken_decimals: int,
-        fixed_rate: int,
-        publish_market_swap_fee_amount: int,
-        with_mint: int,
-        transaction_parameters: dict,
-    ) -> str:
-        return self.contract.createFixedRate(
-            ContractBase.to_checksum_address(fixed_price_address),
-            [
-                ContractBase.to_checksum_address(base_token_address),
-                ContractBase.to_checksum_address(owner),
-                ContractBase.to_checksum_address(publish_market_swap_fee_collector),
-                ContractBase.to_checksum_address(allowed_swapper),
-            ],
-            [
-                base_token_decimals,
-                datatoken_decimals,
-                fixed_rate,
-                publish_market_swap_fee_amount,
-                with_mint,
-            ],
-            transaction_parameters,
-        )
+    #======================================================================
+    # Priced data: fixed-rate exchange
 
+    @enforce_types
+    def create_fixed_rate(self, price, base_token_address: str,amount, tx_dict):
+        """
+        For this datataken, create a fixed-rate exchange.
+
+        This wraps the smart contract method Datatoken.createFixedRate()
+          with a simpler interface.
+
+        :param: price - how many base tokens does 1 datatoken cost? In wei or str
+        :param: base_token_address - e.g. OCEAN address
+        :param: amount - make how many datatokens available, in wei or str
+        :tx_dict: e.g. {"from": alice_wallet}
+        :return: exchange_id
+        """
+        base_token = Datatoken(self.config_dict, base_token_address)
+        from_address = tx_dict["from"].address
+        
+        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
+        self.approve(fixed_price_address, amount, tx_dict)
+
+        receipt = self.contract.createFixedRate(
+            to_checksum_address(fixed_price_address),
+            [
+                to_checksum_address(base_token.address),
+                to_checksum_address(from_address), # owner
+                to_checksum_address(from_address), # pub_mkt_swap_fee_rec
+                to_checksum_address(ZERO_ADDRESS), # allowed_swapper
+            ],
+            [
+                base_token.decimals(),
+                self.decimals(),
+                price,     # fixed_rate
+                int(1e15), # publish_market_swap_fee_amount
+                0,         # with_mint
+            ],
+            tx_dict,
+        )
+        
+        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
+
+        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
+
+        return exchange_id        
+
+
+    @enforce_types
+    def buy(self, datatoken_amt, exchange_id, tx_dict):
+        """
+        Buy datatokens via fixed-rate exchange.
+
+        This wraps the smart contract method FixedRateExchange.buyDT()
+          with a simpler interface.
+
+        :param: exchange_id -- 
+        :param: datatoken_amt -- how many DT to buy? In wei, or str
+        :tx_dict: e.g. {"from": alice_wallet}
+        :return: tx_result
+        """
+        # auto-compute basetoken_amt
+        exchange_status = self.exchange_status(exchange_id)
+        price = exchange_status.fixedRate
+        price_float = float(fromWei(price,"ether"))
+                            
+        if isinstance(datatoken_amt, str):
+            assert "ether" in datatoken_amt, "only currently handles ether"
+            datatoken_amt = toWei(int(datatoken_amt.split()[0]), "ether")
+        datatoken_amt_float = float(fromWei(datatoken_amt, "ether"))
+                                      
+        max_basetoken_amt = toWei(datatoken_amt_float*price_float*1.2,"ether")
+
+        # approve for FRE to spend basetokens
+        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
+        basetoken = Datatoken(self.config_dict, exchange_status.baseToken)
+        basetoken.approve(FRE_addr, max_basetoken_amt, tx_dict)
+
+        # peform the buy
+        tx = self._ocean_fixed_rate_exchange().buyDT(
+            exchange_id,
+            datatoken_amt,
+            max_basetoken_amt,
+            ZERO_ADDRESS, #consumeMarketAddress
+            0, #consumeMarketSwapFeeAmount
+            tx_dict,
+        )
+        return tx
+
+
+    @enforce_types
+    def exchange_status(self, exchange_id):
+        """:return: FixedRateExchangeStatus object"""
+        # import here to avoid circular import
+        from ocean_lib.models.fixed_rate_exchange import FixedRateExchangeStatus
+
+        status_tup = self._ocean_fixed_rate_exchange().getExchange(exchange_id)
+        return FixedRateExchangeStatus(status_tup)
+
+
+    @enforce_types
+    def _ocean_fixed_rate_exchange(self):
+        """:return: FixedRateExchange object"""
+        # import here to avoid circular import
+        from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+
+        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
+        return FixedRateExchange(self.config_dict, FRE_addr)
+
+
+    @enforce_types
+    def get_fixed_rate_exchanges(self) -> list:
+        """:return: list of exchange_id -- all the exchanges for this datatoken"""
+        addrs_and_exchange_ids = self.getFixedRates()
+        exchange_ids = [item[1] for item in addrs_and_exchange_ids]  
+        return exchange_ids
+
+    # ===========================================================================
+    # consume
     @enforce_types
     def start_order(
         self,
@@ -77,11 +167,11 @@ class Datatoken(ContractBase):
         transaction_parameters: dict,
     ) -> str:
         return self.contract.startOrder(
-            ContractBase.to_checksum_address(consumer),
+            to_checksum_address(consumer),
             service_index,
             (
-                ContractBase.to_checksum_address(provider_fee_address),
-                ContractBase.to_checksum_address(provider_fee_token),
+                to_checksum_address(provider_fee_address),
+                to_checksum_address(provider_fee_token),
                 int(provider_fee_amount),
                 v,
                 r,
@@ -90,8 +180,8 @@ class Datatoken(ContractBase):
                 provider_data,
             ),
             (
-                ContractBase.to_checksum_address(consume_market_order_fee_address),
-                ContractBase.to_checksum_address(consume_market_order_fee_token),
+                to_checksum_address(consume_market_order_fee_address),
+                to_checksum_address(consume_market_order_fee_token),
                 consume_market_order_fee_amount,
             ),
             transaction_parameters,
@@ -114,8 +204,8 @@ class Datatoken(ContractBase):
         return self.contract.reuseOrder(
             order_tx_id,
             (
-                ContractBase.to_checksum_address(provider_fee_address),
-                ContractBase.to_checksum_address(provider_fee_token),
+                to_checksum_address(provider_fee_address),
+                to_checksum_address(provider_fee_token),
                 int(provider_fee_amount),
                 v,
                 r,
@@ -138,6 +228,9 @@ class Datatoken(ContractBase):
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 
+    #======================================================================
+    # Free data: dispenser faucet
+    
     @enforce_types
     def create_dispenser(
         self,
