@@ -69,11 +69,8 @@ class Datatoken(ContractBase):
             ],
             tx_dict,
         )
-        
-        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
 
         exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
-
         return exchange_id        
 
 
