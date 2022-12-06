@@ -850,5 +850,8 @@ class DatatokenArguments:
                     consumer_parameters=self.consumer_parameters,
                 )
             ]
+        else:
+            for service in self.services:
+                service.datatoken = temp_dt.address
 
         return temp_dt
