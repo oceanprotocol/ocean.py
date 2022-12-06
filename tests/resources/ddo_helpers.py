@@ -112,15 +112,18 @@ def create_basics(
 
 
 def get_registered_asset_with_access_service(
-    ocean_instance, publisher_wallet, metadata=None
+    ocean_instance, publisher_wallet, metadata=None, return_ddo=True
 ):
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     files = [UrlFile(url)]
-    _, _, ddo = ocean_instance.assets._create1(
-        "Branin dataset", files, publisher_wallet
+    result = ocean_instance.assets._create1(
+        "Branin dataset", files, publisher_wallet, metadata=metadata
     )
 
-    return ddo
+    if return_ddo:
+        return result[2]
+    else:
+        return result
 
 
 def get_registered_asset_with_compute_service(

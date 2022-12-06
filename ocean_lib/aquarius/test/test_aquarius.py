@@ -20,7 +20,7 @@ def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config, file1
 ):
     """Tests against single-ddo functions of Aquarius."""
-    ddo1 = publisher_ocean_instance.assets.create_url_asset(
+    _, _, ddo1 = publisher_ocean_instance.assets.create_url_asset(
         "Sample asset", file1.url, publisher_wallet
     )
     metadata1 = ddo1.metadata

@@ -153,7 +153,7 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
-        return self._create1(name, files, publisher_wallet, wait_for_aqua)
+        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -166,7 +166,7 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
-        return self._create1(name, files, publisher_wallet, wait_for_aqua)
+        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -181,7 +181,7 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self._create1(name, files, publisher_wallet, wait_for_aqua)
+        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
 
     @enforce_types
     def _create1(
@@ -319,12 +319,21 @@ class OceanAssets:
             for service in services:
                 ddo.add_service(service)
         else:
-            # TODO: check that all deployed datatokens belong to our data nft
-            datatokens = deployed_datatokens
+            if not services:
+                logger.warning("services required with deployed_datatokens.")
+                return None, None, None
 
-            # TODo: check all services belong to one of the deployed datatokens
-            # TODO: require services with deployed datatokens
+            datatokens = deployed_datatokens
+            dt_addresses = []
+            for datatoken in datatokens:
+                # TODO: check that all deployed datatokens belong to our data nft
+                dt_addresses.append(datatoken.address)
+
             for service in services:
+                if service.datatoken not in dt_addresses:
+                    logger.warning("Datatoken services mismatch.")
+                    return None, None, None
+
                 ddo.add_service(service)
 
         # Validation by Aquarius
@@ -825,7 +834,6 @@ class DatatokenArguments:
             f"Successfully created datatoken with address " f"{temp_dt.address}."
         )
 
-        # TODO: check all services are of this dt
         if not self.services:
             self.services = [
                 temp_dt.build_access_service(

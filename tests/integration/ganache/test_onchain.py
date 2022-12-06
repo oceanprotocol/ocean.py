@@ -11,11 +11,10 @@ from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.structures.file_objects import FilesType, SmartContractCall
+from ocean_lib.structures.file_objects import SmartContractCall
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
 
@@ -25,8 +24,6 @@ def test_consume_simple_onchain_data(
     config: dict,
     publisher_wallet,
     consumer_wallet,
-    data_nft: DataNFT,
-    file1: FilesType,
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
@@ -47,7 +44,7 @@ def test_consume_simple_onchain_data(
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "Datatoken 1"
+    assert ddo.datatokens[0]["name"] == "NFT: DT1"
     assert ddo.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
@@ -123,8 +120,6 @@ def test_consume_parametrized_onchain_data(
     config: dict,
     publisher_wallet,
     consumer_wallet,
-    data_nft: DataNFT,
-    file1: FilesType,
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
@@ -164,23 +159,23 @@ def test_consume_parametrized_onchain_data(
     ]
 
     # Publish a plain asset with one data token on chain
-    ddo = ocean_assets.create(
+    data_nft, _, ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        data_nft_address=data_nft.address,
         datatoken_arguments=[
             DatatokenArguments(
                 name="Datatoken 1",
                 symbol="DT1",
-                files=[file1],
+                files=files,
                 consumer_parameters=consumer_parameters,
             )
         ],
+        return_ddo=False,
     )
 
     assert ddo, "The ddo is not created."
-    assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["symbol"] == "NFTSYMBOL"
+    assert ddo.nft["name"] == "Sample asset"
+    assert ddo.nft["symbol"] == "Sample asset"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
