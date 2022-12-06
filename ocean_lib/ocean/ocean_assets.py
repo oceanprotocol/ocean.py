@@ -158,7 +158,9 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "UrlFile", with good defaults"""
         files = [UrlFile(url)]
-        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
+        return self.create_with_default_metadata(
+            name, files, publisher_wallet, wait_for_aqua
+        )
 
     @enforce_types
     def create_graphql_asset(
@@ -171,7 +173,9 @@ class OceanAssets:
     ) -> tuple:
         """Create an asset of type "GraphqlQuery", with good defaults"""
         files = [GraphqlQuery(url, query)]
-        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
+        return self.create_with_default_metadata(
+            name, files, publisher_wallet, wait_for_aqua
+        )
 
     @enforce_types
     def create_onchain_asset(
@@ -186,15 +190,16 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self._create1(name, files, publisher_wallet, None, wait_for_aqua)
+        return self.create_with_default_metadata(
+            name, files, publisher_wallet, wait_for_aqua
+        )
 
     @enforce_types
-    def _create1(
+    def create_with_default_metadata(
         self,
         name: str,
         files: list,
         publisher_wallet,
-        metadata=None,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
@@ -204,16 +209,15 @@ class OceanAssets:
         Returns (data_nft, datatoken, ddo)
         """
         date_created = datetime.now().isoformat()
-        if not metadata:
-            metadata = {
-                "created": date_created,
-                "updated": date_created,
-                "description": name,
-                "name": name,
-                "type": "dataset",
-                "author": publisher_wallet.address[:7],
-                "license": "CC0: PublicDomain",
-            }
+        metadata = {
+            "created": date_created,
+            "updated": date_created,
+            "description": name,
+            "name": name,
+            "type": "dataset",
+            "author": publisher_wallet.address[:7],
+            "license": "CC0: PublicDomain",
+        }
 
         (data_nft, datatokens, ddo) = self.create(
             metadata,

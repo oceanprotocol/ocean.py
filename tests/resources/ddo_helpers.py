@@ -104,9 +104,23 @@ def get_registered_asset_with_access_service(
 ):
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     files = [UrlFile(url)] if not more_files else [UrlFile(url), get_file2()]
-    return ocean_instance.assets._create1(
-        "Branin dataset", files, publisher_wallet, metadata=metadata
+
+    if not metadata:
+        metadata = get_default_metadata()
+
+    data_nft, dts, ddo = ocean_instance.assets.create(
+        metadata,
+        publisher_wallet,
+        datatoken_arguments=[
+            DatatokenArguments(
+                name="Branin: DT1",
+                symbol="DT1",
+                files=files,
+            )
+        ],
     )
+
+    return data_nft, dts[0], ddo
 
 
 def get_registered_asset_with_compute_service(
