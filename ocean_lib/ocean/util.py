@@ -44,3 +44,13 @@ def create_checksum(text: str) -> str:
     :return: str
     """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+@enforce_types
+def from_wei(amt_wei: int) -> float:
+    return float(amt_wei / 1e18)
+
+
+@enforce_types
+def to_wei(amt_eth) -> int:
+    return int(amt_eth * 1e18)

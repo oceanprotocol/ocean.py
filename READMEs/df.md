@@ -58,12 +58,7 @@ mint_fake_OCEAN(config) #Alice gets some
 OCEAN = ocean.OCEAN_token
 veOCEAN = ocean.ve_ocean
 
-#helper functions
-def to_wei(amt_eth) -> int:
-    return int(amt_eth * 1e18)
-
-def from_wei(amt_wei: int) -> float:
-    return float(amt_wei / 1e18)
+from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
 

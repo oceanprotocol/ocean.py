@@ -10,6 +10,7 @@ from web3 import Web3
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
+@enforce_types
 class FreStatus:
     def __init__(self, status_tup):
         """
@@ -50,6 +51,7 @@ class FreStatus:
         return s
 
 
+@enforce_types
 class FreFees:
     def __init__(self, fees_tup):
         """
@@ -64,6 +66,7 @@ class FreFees:
         self.marketFeeAvailable = t[3]
         self.oceanFeeAvailable = t[4]
 
+
     def __str__(self):
         s = (
             f"FreFees: \n"
@@ -76,19 +79,50 @@ class FreFees:
         return s
 
 
+@enforce_types
+class BtNeeded:
+    def __init__(self, tup):
+        self.val = tup[0] #baseTokenAmount
+        self.oceanFeeAmount = tup[1]
+        self.publishMarketFeeAmount = tup[2]
+        self.consumeMarketFeeAmount = tup[3]
+
+
+@enforce_types
+class BtReceived:
+    def __init__(self, tup):
+        self.val = tup[0] #baseTokenAmount
+        self.oceanFeeAmount = tup[1]
+        self.publishMarketFeeAmount = tup[2]
+        self.consumeMarketFeeAmount = tup[3]
+
+
+@enforce_types
 class FixedRateExchange(ContractBase):
     CONTRACT_NAME = "FixedRateExchange"
 
-    @enforce_types
     def fees(self, exchange_id) -> FreFees:
         fees_tup = self.contract.getFeesInfo(exchange_id) 
         return FreFees(fees_tup)
 
 
-    @enforce_types
     def status(self, exchange_id) -> FreStatus:
         status_tup = self.contract.getExchange(exchange_id)
         return FreStatus(status_tup)
+
+
+    def BT_needed(self, exchange_id, DT_amt) -> BtNeeded:
+        """How many BTs you need, to buy target amt of DTs (buyDT)"""
+        mkt_fee = self.fees(exchange_id).marketFee
+        tup = self.contract.calcBaseInGivenOutDT(exchange_id, DT_amt, mkt_fee)
+        return BtNeeded(tup)
+
+
+    def BT_received(self, exchange_id, DT_amt) -> BtReceived:
+        """How many BTs you receive, in selling given amt of DTs (sellDT)"""
+        mkt_fee = self.fees(exchange_id).marketFee
+        tup = self.contract.calcBaseOutGivenInDT(exchange_id, DT_amt, mkt_fee)
+        return BtReceived(tup)
 
 
 @enforce_types

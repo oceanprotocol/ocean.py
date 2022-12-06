@@ -7,16 +7,14 @@ from typing import Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
-from web3 import Web3
 
 from ocean_lib.models.fixed_rate_exchange import \
     FixedRateExchange, FreFees, FreStatus
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei, from_wei
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 
 to_checksum_address = ContractBase.to_checksum_address
-toWei, fromWei = Web3.toWei, Web3.fromWei
 
 
 class DatatokenRoles(IntEnum):
@@ -41,6 +39,7 @@ class Datatoken(ContractBase):
             base_token_addr: str,
             amount,
             tx_dict,
+            auto_approve_owner_dt=True,
             owner_addr=None,
             market_fee_collector_addr=None,
             market_fee=0,
@@ -50,7 +49,7 @@ class Datatoken(ContractBase):
         For this datataken, create a fixed-rate exchange.
 
         This wraps the smart contract method Datatoken.createFixedRate()
-          with a simpler interface.
+          with a simpler interface. May also do DT.approve()
 
         Main params:
         - price - how many base tokens does 1 datatoken cost? In wei or str
@@ -59,22 +58,29 @@ class Datatoken(ContractBase):
         - tx_dict - e.g. {"from": alice_wallet}
 
         Optional params, with good defaults
+        - auto_approve_owner_dt - if True and owner==from_addr, then DT.approve
         - owner_addr
         - market_fee_collector_addr - Default to publisher
         - market_fee - in wei or str, e.g. int(1e15) or "0.001 ether"
         - with_mint - bool
         - allowed_swapper - if ZERO_ADDRESS, anyone can swap.
+
+        Return
+        - exchange_id -
+        - tx_receipts - list of tx_receipt, in order they happened
         """
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
         from_addr = tx_dict["from"].address
-        BT = Datatoken(self.config_dict, base_token_addr)
-
+        BT = Datatoken(self.config_dict, base_token_addr)      
         owner_addr = owner_addr or from_addr
         market_fee_collector_addr = market_fee_collector_addr or from_addr
-                
-        self.approve(FRE_addr, amount, tx_dict)
 
-        receipt = self.contract.createFixedRate(
+        tx_receipts = []
+        if auto_approve_owner_dt and owner_addr == from_addr:
+            tx_receipt = self.approve(FRE_addr, amount, tx_dict)
+            tx_receipts.append(tx_receipt)
+
+        tx_receipt = self.contract.createFixedRate(
             to_checksum_address(FRE_addr),
             [
                 to_checksum_address(BT.address),
@@ -91,47 +97,43 @@ class Datatoken(ContractBase):
             ],
             tx_dict,
         )
+        tx_receipts.append(tx_receipt)
 
-        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
-        return exchange_id        
+        exchange_id = tx_receipt.events["NewFixedRate"]["exchangeId"]
+        return (exchange_id, tx_receipts)
 
 
     @enforce_types
-    def buy(self, datatoken_amt, exchange_id, tx_dict):
+    def buy(self,
+            datatoken_amt,
+            exchange_id,
+            tx_dict,
+            max_basetoken_amt=None):
         """
         Buy datatokens via fixed-rate exchange.
 
         This wraps the smart contract method FixedRateExchange.buyDT()
-          with a simpler interface.
+          with a simpler interface. It also calls basetoken.approve().
 
-        :param: exchange_id -- 
-        :param: datatoken_amt -- how many DT to buy? In wei, or str
-        :tx_dict: e.g. {"from": alice_wallet}
-        :return: tx_result
+        Main params:
+        - datatoken_amt - how many DT to buy? In wei, or str
+        - exchange_id -
+        - tx_dict - e.g. {"from": alice_wallet}
+
+        Optional params, with good defaults:
+        - max_basetoken_amt - maximum to spend. Default is caller's balance.
         """
-        # base data
-        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        FRE = FixedRateExchange(self.config_dict, FRE_addr)
-        exchange_status = FRE.status(exchange_id)
-        
-        # auto-compute basetoken_amt
-        price = exchange_status.fixedRate
-        price_float = float(fromWei(price,"ether"))
-                            
-        if isinstance(datatoken_amt, str):
-            assert "ether" in datatoken_amt, "only currently handles ether"
-            datatoken_amt = toWei(int(datatoken_amt.split()[0]), "ether")
-        datatoken_amt_float = float(fromWei(datatoken_amt, "ether"))
-                                      
-        max_basetoken_amt = toWei(datatoken_amt_float*price_float*1.2,"ether")
-
-        # approve for FRE to spend basetokens
-        basetoken = Datatoken(self.config_dict, exchange_status.baseToken)
-        basetoken.approve(FRE_addr, max_basetoken_amt, tx_dict)
-
-        # peform the buy
+        FRE = self._FRE()
         fees = FRE.fees(exchange_id)
-        tx = FRE.buyDT(
+        status = FRE.status(exchange_id)
+        assert status.datatoken == self.address, "exchange_id isn't for this dt"
+        basetoken = Datatoken(self.config_dict, status.baseToken)
+
+        if max_basetoken_amt is None:
+            max_basetoken_amt = FRE.BT_needed(exchange_id, datatoken_amt).val
+        
+        basetoken.approve(FRE.address, max_basetoken_amt, tx_dict)
+        tx_receipt = FRE.buyDT(
             exchange_id,
             datatoken_amt,
             max_basetoken_amt,
@@ -139,8 +141,47 @@ class Datatoken(ContractBase):
             fees.marketFee,
             tx_dict,
         )
-        return tx
+        return tx_receipt
 
+
+    @enforce_types
+    def sell(self, datatoken_amt, exchange_id, tx_dict, min_basetoken_amt=0):
+        """
+        Sell datatokens to the exchange, in return for e.g. OCEAN
+        from the exchange's reserved
+
+        This wraps the smart contract method FixedRateExchange.sellDT()
+          with a simpler interface. It also calls datatoken.approve()
+
+        Main params:
+        - datatoken_amt - how many DT to sell? In wei, or str
+        - exchange_id -
+        - tx_dict - e.g. {"from": alice_wallet}
+
+        Optional params, with good defaults:
+        - min_basetoken_amt - min basetoken to get back
+        """
+        FRE = self._FRE()
+        fees = FRE.fees(exchange_id)
+        status = FRE.status(exchange_id)
+        assert status.datatoken == self.address, "exchange_id isn't for this dt"
+
+        self.approve(FRE.address, datatoken_amt, tx_dict)
+
+        tx_receipt = FRE.sellDT(
+            exchange_id,
+            datatoken_amt,
+            min_basetoken_amt,
+            fees.marketFeeCollector,
+            fees.marketFee,
+            tx_dict,
+        )
+        return tx_receipt
+
+    def _FRE(self) -> FixedRateExchange:
+        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
+        return FixedRateExchange(self.config_dict, FRE_addr)
+    
     @enforce_types
     def get_fixed_rate_exchanges(self) -> list:
         """:return: list of exchange_id -- all the exchanges for this datatoken"""
