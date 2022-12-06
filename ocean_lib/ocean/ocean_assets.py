@@ -227,6 +227,29 @@ class OceanAssets:
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
+    def create_url_algorithm(
+        self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True, algo_info: dict = None,
+    ) -> tuple:
+        """Create an asset of type "algorithm", with good defaults"""
+        if not algo_info:
+            algo_info = {
+                "algorithm": {
+                    "language": "python",
+                    "format": "docker-image",
+                    "version": "0.1",
+                    "container": {
+                        "entrypoint": "python $ALGO",
+                        "image": "oceanprotocol/algo_dockers",
+                        "tag": "python-branin",
+                        "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+                    },
+                }
+            }
+
+        files = [UrlFile(url)]
+        return self._create1(name, files, publisher_wallet, wait_for_aqua, algo_info)
+
+    @enforce_types
     def create_url_asset(
         self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
     ) -> tuple:
@@ -269,6 +292,7 @@ class OceanAssets:
         files: list,
         publisher_wallet,
         wait_for_aqua: bool = True,
+        algo_info: dict = None
     ) -> tuple:
         """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
 
@@ -286,6 +310,10 @@ class OceanAssets:
             "author": publisher_wallet.address[:7],
             "license": "CC0: PublicDomain",
         }
+
+        if algo_info:
+            metadata["type"] = "algorithm"
+            metadata["algorithm"] = algo_info["algorithm"]
 
         OCEAN_address = get_ocean_token_address(self._config_dict)
         (data_nft, datatokens, ddo) = self.create(
