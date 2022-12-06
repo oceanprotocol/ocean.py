@@ -17,12 +17,15 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
-    create_basics,
+    get_default_files,
+    get_default_metadata,
     get_first_service_by_type,
     get_registered_asset_with_access_service,
     get_sample_ddo,
@@ -373,9 +376,12 @@ def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
 def test_plain_asset_with_one_datatoken(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    data_provider = DataServiceProvider
+    data_nft_factory = DataNFTFactoryContract(
+        config, get_address_of_type(config, "ERC721Factory")
+    )
 
-    data_nft_factory, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     # Publisher deploys NFT contract
     tx_receipt = data_nft_factory.deployERC721Contract(
@@ -415,8 +421,12 @@ def test_plain_asset_with_one_datatoken(
 def test_plain_asset_multiple_datatokens(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    data_provider = DataServiceProvider
-    data_nft_factory, metadata, files = create_basics(config, data_provider)
+    data_nft_factory = DataNFTFactoryContract(
+        config, get_address_of_type(config, "ERC721Factory")
+    )
+
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     tx_receipt = data_nft_factory.deployERC721Contract(
         "NFT2",
@@ -476,7 +486,8 @@ def test_plain_asset_multiple_services(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     access_service = Service(
         service_id="0",
@@ -531,8 +542,8 @@ def test_plain_asset_multiple_services(
 def test_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     services = [
         datatoken.build_access_service(
@@ -564,8 +575,8 @@ def test_encrypted_asset(
 def test_compressed_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     services = [
         datatoken.build_access_service(
@@ -597,8 +608,8 @@ def test_compressed_asset(
 def test_compressed_and_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
+    files = get_default_files()
 
     services = [
         datatoken.build_access_service(
@@ -630,8 +641,7 @@ def test_compressed_and_encrypted_asset(
 def test_asset_creation_errors(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
-    data_provider = DataServiceProvider
-    _, metadata, files = create_basics(config, data_provider)
+    metadata = get_default_metadata()
 
     some_random_address = ZERO_ADDRESS
     with pytest.raises(brownie.exceptions.ContractNotFound):

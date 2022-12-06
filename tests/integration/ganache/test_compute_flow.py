@@ -122,7 +122,7 @@ def raw_algorithm():
 @pytest.fixture
 def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
     # Dataset with access service
-    ddo = get_registered_asset_with_access_service(
+    _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius

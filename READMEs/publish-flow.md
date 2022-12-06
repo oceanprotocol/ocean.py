@@ -68,7 +68,7 @@ url_file = UrlFile(
 
 # Publish data asset
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
-ddo = ocean.assets.create(
+_, _, ddo = ocean.assets.create(
     metadata,
     alice_wallet,
     datatoken_arguments=[

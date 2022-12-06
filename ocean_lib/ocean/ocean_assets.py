@@ -11,7 +11,7 @@ import lzma
 import os
 import warnings
 from datetime import datetime
-from typing import List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from brownie import network
 from enforce_typing import enforce_types
@@ -37,7 +37,12 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
+from ocean_lib.structures.file_objects import (
+    FilesType,
+    GraphqlQuery,
+    SmartContractCall,
+    UrlFile,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
@@ -323,7 +328,12 @@ class OceanAssets:
             datatokens = deployed_datatokens
             dt_addresses = []
             for datatoken in datatokens:
-                # TODO: check that all deployed datatokens belong to our data nft
+                if deployed_datatokens[0].address not in data_nft.getTokensList():
+                    logger.warning(
+                        "some deployed_datatokens do not belong to the data nft given."
+                    )
+                    return None, None, None
+
                 dt_addresses.append(datatoken.address)
 
             for service in services:
@@ -789,9 +799,9 @@ class DatatokenArguments:
         publish_market_order_fee_token: Optional[str] = None,
         publish_market_order_fee_amount: Optional[int] = 0,
         bytess: Optional[List[bytes]] = None,
-        services=None,  # TODO: typing
-        files=None,  # TODO: typing
-        consumer_parameters=None,  # TODO: typing
+        services: Optional[list] = None,
+        files: Optional[List[FilesType]] = None,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ):
         self.name = name
         self.symbol = symbol
