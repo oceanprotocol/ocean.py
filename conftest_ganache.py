@@ -76,6 +76,11 @@ def config():
 
 
 @pytest.fixture
+def ocean():
+    return get_publisher_ocean_instance()
+
+
+@pytest.fixture
 def publisher_ocean_instance():
     return get_publisher_ocean_instance()
 
@@ -91,13 +96,28 @@ def aquarius_instance(config):
 
 
 @pytest.fixture
+def alice():
+    return get_publisher_wallet()
+
+
+@pytest.fixture
 def publisher_wallet():
     return get_publisher_wallet()
 
 
 @pytest.fixture
+def bob():
+    return get_consumer_wallet()
+
+
+@pytest.fixture
 def consumer_wallet():
     return get_consumer_wallet()
+
+
+@pytest.fixture
+def carlos():
+    return get_another_consumer_wallet()
 
 
 @pytest.fixture
@@ -126,7 +146,16 @@ def ocean_address(config) -> str:
 
 
 @pytest.fixture
+def OCEAN(config, ocean_address) -> Datatoken:
+    return _ocean_token(config, ocean_address)
+
+
+@pytest.fixture
 def ocean_token(config, ocean_address) -> Datatoken:
+    return _ocean_token(config, ocean_address)
+
+
+def _ocean_token(config, ocean_address) -> Datatoken:
     connect_to_network("development")
     return Datatoken(config, ocean_address)
 

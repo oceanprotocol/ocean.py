@@ -10,51 +10,12 @@ from web3 import Web3
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
-class FixedRateExchangeDetails(IntEnum):
-    EXCHANGE_OWNER = 0
-    DATATOKEN = 1
-    DT_DECIMALS = 2
-    BASE_TOKEN = 3
-    BT_DECIMALS = 4
-    FIXED_RATE = 5
-    ACTIVE = 6
-    DT_SUPPLY = 7
-    BT_SUPPLY = 8
-    DT_BALANCE = 9
-    BT_BALANCE = 10
-    WITH_MINT = 11
-
-
-class FixedRateExchangeFeesInfo(IntEnum):
-    MARKET_FEE = 0
-    MARKET_FEE_COLLECTOR = 1
-    OPC_FEE = 2
-    MARKET_FEE_AVAILABLE = 3
-    OCEAN_FEE_AVAILABLE = 4
-
-
-class FixedExchangeBaseInOutData(IntEnum):
-    BASE_TOKEN_AMOUNT = 0
-    BASE_TOKEN_AMOUNT_BEFORE_FEE = 1
-    OCEAN_FEE_AMOUNT = 2
-    MARKET_FEE_AMOUNT = 3
-
-
-class FixedRateExchange(ContractBase):
-    CONTRACT_NAME = "FixedRateExchange"
-
-
-class MockExchange(ContractBase):
-    CONTRACT_NAME = "MockExchange"
-
-
-class FixedRateExchangeStatus:
+class FreStatus:
     def __init__(self, status_tup):
         """
-        :param:status_tup -- returned from Dispenser.sol::status(dt_addr)
-        which is (bool active, address owner, bool isMinter,
-        uint256 maxTokens, uint256 maxBalance, uint256 balance,
-        address allowedSwapper)
+        :param:status_tup
+          -- returned from FixedRateExchange.sol::getExchange(exchange_id)
+        which is (exchangeOwner, datatoken, .., withMint)
         """
         t = status_tup
         self.exchangeOwner: str = t[0]
@@ -72,7 +33,7 @@ class FixedRateExchangeStatus:
 
     def __str__(self):
         s = (
-            f"FixedRateExchangeStatus: \n"
+            f"FreStatus: \n"
             f"  datatoken = {self.datatoken}\n"
             f"  baseToken = {self.baseToken}\n"
             f"  price in baseToken (fixedRate) = {_strWithWei(self.fixedRate)}\n"
@@ -87,6 +48,47 @@ class FixedRateExchangeStatus:
             f"  exchangeOwner = {self.exchangeOwner}\n"
         )
         return s
+
+
+class FreFees:
+    def __init__(self, fees_tup):
+        """
+        :param:status_tup
+          -- returned from FixedRateExchange.sol::getFeesInfo(exchange_id)
+        which is (marketFee, marketFeeCollector, .., oceanFeeAvailable)
+        """
+        t = fees_tup
+        self.marketFee: int = t[0]
+        self.marketFeeCollector: str = t[1]
+        self.opcFee: int = t[2]
+        self.marketFeeAvailable = t[3]
+        self.oceanFeeAvailable = t[4]
+
+    def __str__(self):
+        s = (
+            f"FreFees: \n"
+            f"  marketFee = {self.marketFee}\n"
+            f"  marketFeeCollector = {self.marketFeeCollector}\n"
+            f"  opcFee = {self.opcFee}\n"
+            f"  marketFeeAvailable = {self.marketFeeAvailable}\n"
+            f"  oceanFeeAvailable = {self.oceanFeeAvailable}\n"
+        )
+        return s
+
+
+class FixedRateExchange(ContractBase):
+    CONTRACT_NAME = "FixedRateExchange"
+
+    @enforce_types
+    def fees(self, exchange_id) -> FreFees:
+        fees_tup = self.contract.getFeesInfo(exchange_id) 
+        return FreFees(fees_tup)
+
+
+    @enforce_types
+    def status(self, exchange_id) -> FreStatus:
+        status_tup = self.contract.getExchange(exchange_id)
+        return FreStatus(status_tup)
 
 
 @enforce_types

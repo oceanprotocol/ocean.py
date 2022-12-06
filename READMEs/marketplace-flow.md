@@ -36,8 +36,7 @@ os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c1
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
-OCEAN_token = ocean.OCEAN_token
-OCEAN_address = OCEAN_token.address
+OCEAN = ocean.OCEAN_token
 
 # Ensure Bob has enough funds
 from brownie.network import accounts
@@ -64,8 +63,8 @@ datatoken.mint(alice_wallet.address, "100 ether", {"from": alice_wallet})
 
 #post for sale
 price = "1 ether" #ie 1 OCEAN
-amount = "100 ether"
-exchange_id = datatoken.create_fixed_rate(price, OCEAN_address, amount, {"from":alice_wallet})
+amount = "100 ether" #ie 100 datatokens
+exchange_id = datatoken.create_fixed_rate(price, OCEAN.address, amount, {"from":alice_wallet})
 ```
 
 Instead of OCEAN, Alice could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, WETH, or other, for a slightly higher fee.
@@ -99,7 +98,7 @@ print(status)
 
 It will output something like:
 ```text
-FixedRateExchangeStatus:
+FreStatus:
   datatoken = 0x92cA723B61CbD933390aA58b83e1F00cedf4ebb6
   basetoken = 0x..
   price in baseToken (fixedRate) = 5 (50000000000000000000 wei)
