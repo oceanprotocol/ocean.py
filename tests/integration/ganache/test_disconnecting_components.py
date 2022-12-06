@@ -13,8 +13,6 @@ from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.file_objects import FilesTypeFactory
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 exception_flag = 0
 
@@ -53,36 +51,9 @@ def test_with_wrong_aquarius(publisher_wallet, caplog, monkeypatch, config):
 
 def _create_ddo(ocean, publisher):
     global exception_flag
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    file_url = "https://foo.txt"
-    file_dict = {"type": "url", "url": file_url, "method": "GET"}
-    file = FilesTypeFactory(file_dict)
-    files = [file]
     time.sleep(5)
     try:
-        ocean.assets.create(
-            metadata,
-            publisher,
-            files,
-            datatoken_templates=[1],
-            datatoken_names=["Datatoken 1"],
-            datatoken_symbols=["DT1"],
-            datatoken_minters=[publisher.address],
-            datatoken_fee_managers=[publisher.address],
-            datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-            datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-            datatoken_publish_market_order_fee_amounts=[0],
-            datatoken_bytess=[[b""]],
-        )
+        ocean.assets.create_url_asset("Sample asset", "https://foo.txt", publisher)
     except requests.exceptions.InvalidURL as err:
         exception_flag = 1
         assert err.args[0] == "InvalidURL http://foourl.com."

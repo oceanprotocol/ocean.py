@@ -3,14 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.services.service import Service
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 class DatatokenRoles(IntEnum):
@@ -216,6 +219,25 @@ class Datatoken(ContractBase):
 
         dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
         return Dispenser(self.config_dict, dispenser_addr)
+
+    @enforce_types
+    def build_access_service(
+        self,
+        service_id: str,
+        service_endpoint: str,
+        files: List[FilesType],
+        timeout: Optional[int] = 3600,
+        consumer_parameters=None,
+    ) -> Service:
+        return Service(
+            service_id=service_id,
+            service_type=ServiceTypes.ASSET_ACCESS,
+            service_endpoint=service_endpoint,
+            datatoken=self.address,
+            files=files,
+            timeout=timeout,
+            consumer_parameters=consumer_parameters,
+        )
 
 
 class MockERC20(Datatoken):

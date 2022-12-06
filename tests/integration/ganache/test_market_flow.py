@@ -30,9 +30,10 @@ def test_market_flow(
     consumer_ocean = consumer_ocean_instance
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet
+    )
     service = ddo.services[0]
-    datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint data tokens and assign to publisher
     datatoken.mint(
@@ -106,9 +107,10 @@ def test_pay_for_access_service_good_default(
 ):
     publisher_ocean, consumer_ocean = publisher_ocean_instance, consumer_ocean_instance
 
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet
+    )
     service = ddo.services[0]
-    datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint datatokens to consumer
     datatoken.mint(

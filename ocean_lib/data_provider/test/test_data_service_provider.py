@@ -24,7 +24,10 @@ from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
-from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
+from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
+    get_registered_asset_with_access_service,
+)
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     TEST_SERVICE_ENDPOINTS,
@@ -225,18 +228,11 @@ def test_encrypt(config, provider_wallet, file1, file2):
 
 
 @pytest.mark.integration
-def test_fileinfo(
-    config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
-):
-    _, metadata, files = create_basics(config, DataSP)
-
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        files=files,
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
+def test_fileinfo(config, publisher_wallet, publisher_ocean_instance):
+    _, _, ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet, more_files=True
     )
+
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     fileinfo_result = FileInfoProvider.fileinfo(
@@ -259,17 +255,11 @@ def test_initialize(
     publisher_wallet,
     publisher_ocean_instance,
     provider_wallet,
-    data_nft,
-    datatoken,
 ):
-    _, metadata, files = create_basics(config, DataSP)
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        files=files,
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
+    _, _, ddo = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
     )
+
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     initialize_result = DataSP.initialize(

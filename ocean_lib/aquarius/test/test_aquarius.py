@@ -6,7 +6,6 @@ import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.ddo import DDO
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 
 @pytest.mark.unit
@@ -21,31 +20,10 @@ def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config, file1
 ):
     """Tests against single-ddo functions of Aquarius."""
-    metadata1 = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    OCEAN_addr = publisher_ocean_instance.OCEAN_address
-    ddo1 = publisher_ocean_instance.assets.create(
-        metadata=metadata1,
-        publisher_wallet=publisher_wallet,
-        files=[file1],
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher_wallet.address],
-        datatoken_fee_managers=[publisher_wallet.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[OCEAN_addr],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
+    _, _, ddo1 = publisher_ocean_instance.assets.create_url_asset(
+        "Sample asset", file1.url, publisher_wallet
     )
+    metadata1 = ddo1.metadata
 
     ddo2 = aquarius_instance.wait_for_ddo(ddo1.did)
     assert ddo2.metadata == ddo1.metadata

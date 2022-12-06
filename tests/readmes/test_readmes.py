@@ -88,8 +88,6 @@ def test_script_execution(script, monkeypatch):
             )
             for key in [
                 "ddo",
-                "ZERO_ADDRESS",
-                # "did",
                 "metadata",
                 "url_file",
             ]:
