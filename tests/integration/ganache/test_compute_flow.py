@@ -32,7 +32,7 @@ def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     Fixture is registered on chain once and can be used multiple times.
     Reduces setup time."""
     # Dataset with compute service
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius
@@ -45,7 +45,7 @@ def dataset_with_compute_service_generator(publisher_wallet, publisher_ocean_ins
     """Returns a new dataset each time fixture is used.
     Useful for tests that need to update the dataset"""
     # Dataset with compute service
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius
@@ -58,7 +58,7 @@ def dataset_with_compute_service_allow_raw_algo(
     publisher_wallet, publisher_ocean_instance
 ):
     # Dataset with compute service
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, allow_raw_algorithms=True
     )
     # verify the ddo is available in Aquarius
@@ -71,7 +71,7 @@ def dataset_with_compute_service_and_trusted_algorithm(
     publisher_wallet, publisher_ocean_instance, algorithm
 ):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm]
     )
     # verify the ddo is available in Aquarius
@@ -84,7 +84,7 @@ def dataset_with_compute_service_and_trusted_publisher(
     publisher_wallet, publisher_ocean_instance
 ):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_asset_with_compute_service(
+    _, _, ddo = get_registered_asset_with_compute_service(
         publisher_ocean_instance,
         publisher_wallet,
         trusted_algorithm_publishers=[publisher_wallet.address],
@@ -96,7 +96,7 @@ def dataset_with_compute_service_and_trusted_publisher(
 
 def get_algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_algorithm_with_access_service(
+    _, _, ddo = get_registered_algorithm_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius

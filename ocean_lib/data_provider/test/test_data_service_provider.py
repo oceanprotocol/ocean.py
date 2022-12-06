@@ -235,7 +235,7 @@ def test_fileinfo(
         files=files,
     )
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[access_service],
@@ -274,7 +274,7 @@ def test_initialize(
         files=files,
     )
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[access_service],

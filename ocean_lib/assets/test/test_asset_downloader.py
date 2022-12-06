@@ -166,7 +166,7 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
     data_nft, datatoken, ddo = get_registered_asset_with_access_service(
-        publisher_ocean_instance, publisher_wallet, return_ddo=False
+        publisher_ocean_instance, publisher_wallet
     )
 
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)

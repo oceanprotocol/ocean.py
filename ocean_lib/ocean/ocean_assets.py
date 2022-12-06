@@ -221,7 +221,6 @@ class OceanAssets:
                 )
             ],
             wait_for_aqua=wait_for_aqua,
-            return_ddo=False,
         )
         datatoken = None if datatokens is None else datatokens[0]
         return (data_nft, datatoken, ddo)
@@ -242,7 +241,6 @@ class OceanAssets:
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
         wait_for_aqua: bool = True,
-        return_ddo: bool = True,
     ) -> Optional[DDO]:
         """Register an asset on-chain. Asset = {data_NFT, >=0 datatokens, DDO}
 
@@ -260,8 +258,7 @@ class OceanAssets:
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
         :param wait_for_aqua: wait to ensure ddo's updated in aquarius?
-        :param return_ddo: return ddo, vs tuple?
-        :return: ddo [if return_ddo == True], otherwise tuple of (data_nft, datatokens, ddo)
+        :return: otherwise tuple of (data_nft, datatokens, ddo)
         """
         self._assert_ddo_metadata(metadata)
 
@@ -279,7 +276,7 @@ class OceanAssets:
             # register on-chain
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
-                return None if return_ddo else (None, None, None)
+                return None, None, None
             logger.info(
                 f"Successfully created NFT with address " f"{data_nft.address}."
             )
@@ -364,11 +361,7 @@ class OceanAssets:
         if wait_for_aqua:
             ddo = self._aquarius.wait_for_ddo(did)
 
-        # Return
-        if return_ddo:
-            return ddo
-        else:
-            return (data_nft, datatokens, ddo)
+        return (data_nft, datatokens, ddo)
 
     @enforce_types
     def update(

@@ -170,7 +170,6 @@ def test_consume_parametrized_onchain_data(
                 consumer_parameters=consumer_parameters,
             )
         ],
-        return_ddo=False,
     )
 
     assert ddo, "The ddo is not created."

@@ -17,7 +17,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -40,7 +39,7 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
 
 @pytest.mark.integration
 def test_update_metadata(publisher_ocean_instance, publisher_wallet):
-    ddo = get_registered_asset_with_access_service(
+    _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
 
@@ -64,7 +63,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_update_credentials(publisher_ocean_instance, publisher_wallet):
-    ddo = get_registered_asset_with_access_service(
+    _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
 
@@ -85,7 +84,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 def test_update_datatokens(
     publisher_ocean_instance, publisher_wallet, config, datatoken, file2
 ):
-    ddo = get_registered_asset_with_access_service(
+    _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     data_provider = DataServiceProvider
@@ -162,12 +161,9 @@ def test_update_datatokens(
 
 @pytest.mark.integration
 def test_update_flags(publisher_ocean_instance, publisher_wallet):
-    ddo = get_registered_asset_with_access_service(
+    data_nft, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
-
-    # Test compress & update flags
-    data_nft = DataNFT(publisher_ocean_instance.config_dict, ddo.nft_address)
 
     ddo2 = publisher_ocean_instance.assets.update(
         ddo,
@@ -283,7 +279,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
         },
     }
 
-    ddo = get_registered_asset_with_access_service(
+    _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet, metadata
     )
     assert ddo, "DDO None. The ddo is not cached after the creation."
@@ -397,7 +393,7 @@ def test_plain_asset_with_one_datatoken(
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address = registered_event["newTokenAddress"]
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft_address,
@@ -438,7 +434,7 @@ def test_plain_asset_multiple_datatokens(
     assert registered_event["admin"] == publisher_wallet.address
     data_nft_address2 = registered_event["newTokenAddress"]
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft_address2,
@@ -512,7 +508,7 @@ def test_plain_asset_multiple_services(
         compute_values=compute_values,
     )
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[access_service, compute_service],
@@ -546,7 +542,7 @@ def test_encrypted_asset(
         )
     ]
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft.address,
@@ -579,7 +575,7 @@ def test_compressed_asset(
         )
     ]
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=services,
@@ -612,7 +608,7 @@ def test_compressed_and_encrypted_asset(
         )
     ]
 
-    ddo = publisher_ocean_instance.assets.create(
+    _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=services,

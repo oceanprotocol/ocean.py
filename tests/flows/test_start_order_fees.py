@@ -265,7 +265,7 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     # Publish asset
-    ddo = ocean_assets.create(
+    data_nft, dt, ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[service],
@@ -274,6 +274,5 @@ def create_asset_with_order_fee_and_timeout(
     )
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     return ddo, service, dt

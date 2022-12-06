@@ -10,11 +10,8 @@ from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
@@ -27,19 +24,16 @@ def test_consume_flow(
     config: dict,
     publisher_wallet,
     consumer_wallet,
-    data_nft: DataNFT,
-    file1: FilesType,
 ):
     ocean = Ocean(config)
 
     # Publish a plain asset with one data token on chain
-    ddo = get_registered_asset_with_access_service(
+    data_nft, dt, ddo = get_registered_asset_with_access_service(
         ocean,
         publisher_wallet,
     )
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, ddo.datatokens[0]["address"])
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(

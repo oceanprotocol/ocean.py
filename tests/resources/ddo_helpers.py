@@ -112,18 +112,13 @@ def create_basics(
 
 
 def get_registered_asset_with_access_service(
-    ocean_instance, publisher_wallet, metadata=None, return_ddo=True
+    ocean_instance, publisher_wallet, metadata=None
 ):
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     files = [UrlFile(url)]
-    result = ocean_instance.assets._create1(
+    return ocean_instance.assets._create1(
         "Branin dataset", files, publisher_wallet, metadata=metadata
     )
-
-    if return_ddo:
-        return result[2]
-    else:
-        return result
 
 
 def get_registered_asset_with_compute_service(
@@ -242,12 +237,6 @@ def get_raw_algorithm() -> str:
                 "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
             },
         }
-    )
-
-
-def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_with_access_service(
-        ocean_instance, wallet, "http://172.15.0.7:8030"
     )
 
 
