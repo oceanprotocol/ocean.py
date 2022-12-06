@@ -24,9 +24,9 @@ jobs:
         version: ['3.8', '3.10', '3.11']
     steps:
       - name: Setup Ocean.py
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.version }}
       - name: Install pypa/build
