@@ -222,13 +222,7 @@ class OceanAssets:
         (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
-            datatoken_arguments=[
-                DatatokenArguments(
-                    name=f"{name}: DT1",
-                    symbol="DT1",
-                    files=files,
-                )
-            ],
+            datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
             wait_for_aqua=wait_for_aqua,
         )
         datatoken = None if datatokens is None else datatokens[0]
@@ -241,12 +235,11 @@ class OceanAssets:
         metadata: dict,
         publisher_wallet,
         credentials: Optional[dict] = None,
-        provider_uri: Optional[str] = None,
         data_nft_address: Optional[str] = None,
-        data_nft_arguments: Optional["DataNFTArguments"] = None,
+        data_nft_args: Optional["DataNFTArguments"] = None,
         deployed_datatokens: Optional[List[Datatoken]] = None,
         services: Optional[list] = None,
-        datatoken_arguments: Optional[List["DatatokenArguments"]] = None,
+        datatoken_args: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
         wait_for_aqua: bool = True,
@@ -258,37 +251,32 @@ class OceanAssets:
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: account of the publisher registering this asset.
         :param credentials: credentials dict necessary for the asset.
-        :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
         :param data_nft_address: hex str the address of the data NFT. The new
         asset will be associated with this data NFT address.
-        :param data_nft_arguments: object of DataNFTArguments type if creating a new one
+        :param data_nft_args: object of DataNFTArguments type if creating a new one
         :param deployed_datatokens: list of datatokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
         :param wait_for_aqua: wait to ensure ddo's updated in aquarius?
-        :return: otherwise tuple of (data_nft, datatokens, ddo)
+        :return: tuple of (data_nft, datatokens, ddo)
         """
         self._assert_ddo_metadata(metadata)
 
-        if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(self._config_dict)
+        provider_uri = DataServiceProvider.get_url(self._config_dict)
 
         if not data_nft_address:
-            if not data_nft_arguments:
-                data_nft_arguments = DataNFTArguments(
-                    metadata["name"], metadata["name"]
-                )
-            data_nft = data_nft_arguments.publish_from(
+            data_nft_args = data_nft_args or DataNFTArguments(
+                metadata["name"], metadata["name"]
+            )
+            data_nft = data_nft_args.deploy_contract(
                 self._config_dict, publisher_wallet
             )
             # register on-chain
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None, None, None
-            logger.info(
-                f"Successfully created NFT with address " f"{data_nft.address}."
-            )
+            logger.info(f"Successfully created NFT with address {data_nft.address}.")
         else:
             data_nft = DataNFT(self._config_dict, data_nft_address)
 
@@ -313,14 +301,13 @@ class OceanAssets:
 
         if not deployed_datatokens:
             services = []
-            for datatoken_argument in datatoken_arguments:
-                datatokens.append(
-                    datatoken_argument.create_from_arguments(
-                        self._config_dict, data_nft, publisher_wallet
-                    )
+            for datatoken_arg in datatoken_args:
+                new_dt = datatoken_arg.create_datatoken(
+                    self._config_dict, data_nft, publisher_wallet
                 )
+                datatokens.append(new_dt)
 
-                services.extend(datatoken_argument.services)
+                services.extend(datatoken_arg.services)
 
             for service in services:
                 ddo.add_service(service)
@@ -334,7 +321,7 @@ class OceanAssets:
             for datatoken in datatokens:
                 if deployed_datatokens[0].address not in data_nft.getTokensList():
                     logger.warning(
-                        "some deployed_datatokens do not belong to the data nft given."
+                        "some deployed_datatokens don't belong to the given data nft."
                     )
                     return None, None, None
 
@@ -764,7 +751,7 @@ class DataNFTArguments:
         self.transferable = transferable or True
         self.owner = owner
 
-    def publish_from(self, config_dict, wallet):
+    def deploy_contract(self, config_dict, wallet):
         address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
         data_nft_factory = DataNFTFactoryContract(config_dict, address)
 
@@ -794,8 +781,8 @@ class DataNFTArguments:
 class DatatokenArguments:
     def __init__(
         self,
-        name: str,
-        symbol: str,
+        name: Optional[str] = "Datatoken 1",
+        symbol: Optional[str] = "DT1",
         template_index: Optional[int] = 1,
         minter: Optional[str] = None,
         fee_manager: Optional[str] = None,
@@ -812,7 +799,9 @@ class DatatokenArguments:
         self.template_index = template_index
         self.minter = minter
         self.fee_manager = fee_manager
-        self.publish_market_order_fee_address = publish_market_order_fee_address
+        self.publish_market_order_fee_address = (
+            publish_market_order_fee_address or ZERO_ADDRESS
+        )
         self.publish_market_order_fee_token = publish_market_order_fee_token
         self.publish_market_order_fee_amount = publish_market_order_fee_amount
         self.bytess = bytess or [b""]
@@ -820,7 +809,7 @@ class DatatokenArguments:
         self.files = files
         self.consumer_parameters = consumer_parameters
 
-    def create_from_arguments(self, config_dict, data_nft, wallet):
+    def create_datatoken(self, config_dict, data_nft, wallet):
         OCEAN_address = get_ocean_token_address(config_dict)
         temp_dt = data_nft.create_datatoken(
             name=self.name,
@@ -828,8 +817,7 @@ class DatatokenArguments:
             template_index=self.template_index,
             minter=self.minter or wallet.address,
             fee_manager=self.fee_manager or wallet.address,
-            publish_market_order_fee_address=self.publish_market_order_fee_address
-            or ZERO_ADDRESS,
+            publish_market_order_fee_address=self.publish_market_order_fee_address,
             publish_market_order_fee_token=self.publish_market_order_fee_token
             or OCEAN_address,
             publish_market_order_fee_amount=self.publish_market_order_fee_amount,

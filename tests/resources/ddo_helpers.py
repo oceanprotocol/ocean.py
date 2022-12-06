@@ -99,6 +99,19 @@ def get_default_files():
     return [get_file1(), get_file2()]
 
 
+def build_default_services(config, datatoken):
+    files = get_default_files()
+    services = [
+        datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=config.get("PROVIDER_URL"),
+            files=files,
+        )
+    ]
+
+    return services
+
+
 def get_registered_asset_with_access_service(
     ocean_instance, publisher_wallet, metadata=None, more_files=False
 ):
@@ -111,13 +124,7 @@ def get_registered_asset_with_access_service(
     data_nft, dts, ddo = ocean_instance.assets.create(
         metadata,
         publisher_wallet,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Branin: DT1",
-                symbol="DT1",
-                files=files,
-            )
-        ],
+        datatoken_args=[DatatokenArguments("Branin: DT1", "DT1", files=files)],
     )
 
     return data_nft, dts[0], ddo
@@ -212,13 +219,7 @@ def get_registered_algorithm_with_access_service(
     return ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Algo DT1",
-                symbol="DT1",
-                files=[algorithm_file],
-            )
-        ],
+        datatoken_args=[DatatokenArguments("Algo DT1", "DT1", files=[algorithm_file])],
     )
 
 

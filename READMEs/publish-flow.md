@@ -71,11 +71,7 @@ from ocean_lib.ocean.ocean_assets import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
     alice_wallet,
-    datatoken_arguments=[
-        DatatokenArguments(
-            name="Datatoken 1", symbol="DT1", files=[url_file]
-        )
-    ],
+    datatoken_args=[DatatokenArguments(files=[url_file])],
 )
 print(f"Just published asset, with did={ddo.did}")
 ```

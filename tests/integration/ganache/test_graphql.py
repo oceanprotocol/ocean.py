@@ -158,17 +158,14 @@ def test_consume_parametrized_graphql_query(
     ]
 
     # Publish a plain asset with one data token on chain
+    dt_arg = DatatokenArguments(
+        files=files,
+        consumer_parameters=consumer_parameters,
+    )
     data_nft, datatoken, ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Datatoken 1",
-                symbol="DT1",
-                files=files,
-                consumer_parameters=consumer_parameters,
-            )
-        ],
+        datatoken_args=[dt_arg],
     )
 
     assert ddo, "The ddo is not created."

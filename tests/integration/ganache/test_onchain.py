@@ -110,9 +110,8 @@ def test_consume_simple_onchain_data(
         service,
     )
 
-    assert (
-        len(os.listdir(os.path.join(destination, os.listdir(destination)[0]))) == 1
-    ), "The asset folder is empty."
+    dir_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
+    assert len(dir_files) == 1, "The asset folder is empty."
 
 
 @pytest.mark.integration
@@ -159,17 +158,11 @@ def test_consume_parametrized_onchain_data(
     ]
 
     # Publish a plain asset with one data token on chain
+    dt_arg = DatatokenArguments(files=files, consumer_parameters=consumer_parameters)
     data_nft, _, ddo = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Datatoken 1",
-                symbol="DT1",
-                files=files,
-                consumer_parameters=consumer_parameters,
-            )
-        ],
+        datatoken_args=[dt_arg],
     )
 
     assert ddo, "The ddo is not created."
@@ -241,6 +234,5 @@ def test_consume_parametrized_onchain_data(
         ddo, consumer_wallet, destination, receipt.txid, service, userdata=userdata
     )
 
-    assert len(
-        os.listdir(os.path.join(destination, os.listdir(destination)[0]))
-    ) == len(files), "The asset folder is empty."
+    dir_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
+    assert len(dir_files) == len(files), "The asset folder is empty."

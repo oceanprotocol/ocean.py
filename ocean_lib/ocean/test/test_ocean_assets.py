@@ -24,6 +24,7 @@ from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
+    build_default_services,
     get_default_files,
     get_default_metadata,
     get_first_service_by_type,
@@ -403,9 +404,7 @@ def test_plain_asset_with_one_datatoken(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft_address,
-        datatoken_arguments=[
-            DatatokenArguments(name="Datatoken 1", symbol="DT1", files=files)
-        ],
+        datatoken_args=[DatatokenArguments(files=files)],
     )
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT1"
@@ -448,17 +447,9 @@ def test_plain_asset_multiple_datatokens(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         data_nft_address=data_nft_address2,
-        datatoken_arguments=[
-            DatatokenArguments(
-                name="Datatoken 2",
-                symbol="DT2",
-                files=files,
-            ),
-            DatatokenArguments(
-                name="Datatoken 3",
-                symbol="DT3",
-                files=files,
-            ),
+        datatoken_args=[
+            DatatokenArguments("Datatoken 2", "DT2", files=files),
+            DatatokenArguments("Datatoken 3", "DT3", files=files),
         ],
     )
     assert ddo, "The ddo is not created."
@@ -543,15 +534,7 @@ def test_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     metadata = get_default_metadata()
-    files = get_default_files()
-
-    services = [
-        datatoken.build_access_service(
-            service_id="0",
-            service_endpoint=config.get("PROVIDER_URL"),
-            files=files,
-        )
-    ]
+    services = build_default_services(config, datatoken)
 
     _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -576,15 +559,7 @@ def test_compressed_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     metadata = get_default_metadata()
-    files = get_default_files()
-
-    services = [
-        datatoken.build_access_service(
-            service_id="0",
-            service_endpoint=config.get("PROVIDER_URL"),
-            files=files,
-        )
-    ]
+    services = build_default_services(config, datatoken)
 
     _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
@@ -609,15 +584,7 @@ def test_compressed_and_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config, data_nft, datatoken
 ):
     metadata = get_default_metadata()
-    files = get_default_files()
-
-    services = [
-        datatoken.build_access_service(
-            service_id="0",
-            service_endpoint=config.get("PROVIDER_URL"),
-            files=files,
-        )
-    ]
+    services = build_default_services(config, datatoken)
 
     _, _, ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
