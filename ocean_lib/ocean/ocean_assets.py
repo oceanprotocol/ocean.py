@@ -751,7 +751,7 @@ class DataNFTArguments:
         self.transferable = transferable or True
         self.owner = owner
 
-    def deploy_contract(self, config_dict, wallet):
+    def deploy_contract(self, config_dict, wallet) -> DataNFT:
         address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
         data_nft_factory = DataNFTFactoryContract(config_dict, address)
 
