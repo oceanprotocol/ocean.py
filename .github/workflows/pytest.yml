@@ -39,9 +39,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements_dev.txt
       - name: Test with pytest
-        run: |
-          mkdir ~/.brownie
-          cp network-config.sample ~/.brownie/network-config.yaml 
+        run: | 
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           coverage run --source ocean_lib -m py.test -m "not slow"
           coverage report
