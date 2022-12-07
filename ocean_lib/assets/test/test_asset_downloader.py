@@ -19,7 +19,7 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_registered_asset_with_access_service,
     get_sample_ddo,
-    get_sample_ddo_with_invalid_provider
+    get_sample_ddo_with_invalid_provider,
 )
 
 

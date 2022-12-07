@@ -228,8 +228,9 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
     if mock_usdc.balanceOf(factory_deployer.address) >= amount:
-        mock_usdc.transfer(recipient, Web3.toWei(
-        amount, "mwei"), { "from": factory_deployer})
+        mock_usdc.transfer(
+            recipient, Web3.toWei(amount, "mwei"), {"from": factory_deployer}
+        )
 
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
 

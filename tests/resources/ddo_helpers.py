@@ -53,7 +53,10 @@ def get_sample_ddo(file_name="ddo_v4_sample.json") -> dict:
         ddo = file_handle.read()
     return json.loads(ddo)
 
-def get_sample_ddo_with_invalid_provider(file_name="ddo_v4_sample_invalid_provider.json") -> dict:
+
+def get_sample_ddo_with_invalid_provider(
+    file_name="ddo_v4_sample_invalid_provider.json",
+) -> dict:
     path = get_resource_path("ddo", file_name)
     with open(path, "r") as file_handle:
         ddo = file_handle.read()

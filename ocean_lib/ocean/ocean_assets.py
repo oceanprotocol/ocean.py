@@ -678,13 +678,13 @@ class OceanAssets:
         )
 
         dt = DatatokenEnterprise(self._config_dict, params["service"].datatoken)
-        
+
         balance = dt.balanceOf(params["consumer_address"])
 
         if balance < Web3.toWei(1, "ether"):
             # check if we have a dispenser or fixedrate
             dispensers = dt.getDispensers()
-            if len(dispensers)>0:
+            if len(dispensers) > 0:
                 receipt = dt.buy_from_dispenser_and_order(
                     consumer=params["consumer_address"],
                     service_index=ddo.get_index_of_service(params["service"]),
@@ -699,7 +699,9 @@ class OceanAssets:
                     consume_market_order_fee_address=params[
                         "consume_market_order_fee_address"
                     ],
-                    consume_market_order_fee_token=params["consume_market_order_fee_token"],
+                    consume_market_order_fee_token=params[
+                        "consume_market_order_fee_token"
+                    ],
                     consume_market_order_fee_amount=params[
                         "consume_market_order_fee_amount"
                     ],
@@ -709,18 +711,22 @@ class OceanAssets:
                 return receipt.txid
             # check for fixed rates
             fixedrates = dt.getFixedRates()
-            if len(fixedrates)>0:
+            if len(fixedrates) > 0:
                 # get price
-                fixed_rate_contract_address=fixedrates[0][0]
-                fixed_rate_exchange_id=fixedrates[0][1]
-                
-                fixed_exchange = FixedRateExchange(self._config_dict,fixed_rate_contract_address)
+                fixed_rate_contract_address = fixedrates[0][0]
+                fixed_rate_exchange_id = fixedrates[0][1]
+
+                fixed_exchange = FixedRateExchange(
+                    self._config_dict, fixed_rate_contract_address
+                )
                 exchange_details = fixed_exchange.getExchange(fixed_rate_exchange_id)
                 base_token_address = exchange_details[3]
-                exchange_rates= fixed_exchange.calcBaseInGivenOutDT(fixed_rate_exchange_id,Web3.toWei("1", "ether"),0)
+                exchange_rates = fixed_exchange.calcBaseInGivenOutDT(
+                    fixed_rate_exchange_id, Web3.toWei("1", "ether"), 0
+                )
                 amount = exchange_rates[0]
                 # make sure we have base tokens in our account
-                base_token = Datatoken(self._config_dict,base_token_address)
+                base_token = Datatoken(self._config_dict, base_token_address)
                 base_token_balance = base_token.balanceOf(params["consumer_address"])
                 if base_token_balance < amount:
                     raise InsufficientBalance(
@@ -728,7 +734,11 @@ class OceanAssets:
                         f"to execute the requested service. This service "
                         f"requires {amount} {base_token.symbol()}."
                     )
-                base_token.approve(params["service"].datatoken,Web3.toWei(amount, "ether"), {"from": params["consumer_address"]})
+                base_token.approve(
+                    params["service"].datatoken,
+                    Web3.toWei(amount, "ether"),
+                    {"from": params["consumer_address"]},
+                )
                 receipt = dt.buy_from_fre_and_order(
                     consumer=params["consumer_address"],
                     service_index=ddo.get_index_of_service(params["service"]),
@@ -743,7 +753,9 @@ class OceanAssets:
                     consume_market_order_fee_address=params[
                         "consume_market_order_fee_address"
                     ],
-                    consume_market_order_fee_token=params["consume_market_order_fee_token"],
+                    consume_market_order_fee_token=params[
+                        "consume_market_order_fee_token"
+                    ],
                     consume_market_order_fee_amount=params[
                         "consume_market_order_fee_amount"
                     ],
@@ -752,7 +764,7 @@ class OceanAssets:
                     max_base_token_amount=MAX_UINT256,
                     consume_market_swap_fee_amount=0,
                     consume_market_swap_fee_address=ZERO_ADDRESS,
-                    transaction_parameters={"from": wallet}
+                    transaction_parameters={"from": wallet},
                 )
                 return receipt.txid
             # no price schemas found..
