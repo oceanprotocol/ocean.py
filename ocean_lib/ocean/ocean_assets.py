@@ -493,18 +493,18 @@ class OceanAssets:
                 dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
                 dispenser = Dispenser(self._config_dict, dispenser_addr)
 
-            # catch key failure modes
-            st = dispenser.status(datatoken.address)
-            active, allowedSwapper = st[0], st[6]
-            if not active:
-                raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
+                # catch key failure modes
+                st = dispenser.status(datatoken.address)
+                active, allowedSwapper = st[0], st[6]
+                if not active:
+                    raise ValueError("No active dispenser for datatoken")
+                if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
+                    raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
 
-            # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(
-                datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
-            )
+                # Try to dispense. If other issues, they'll pop out
+                dispenser.dispense(
+                    datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
+                )
 
             # send datatoken to the service, to get access
             print("Order access...")
