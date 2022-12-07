@@ -25,6 +25,7 @@ from tests.resources.ddo_helpers import (
 )
 from tests.resources.helper_functions import (
     get_provider_fees,
+    get_wallet,
     int_units,
     transfer_base_token_if_balance_lte,
 )
@@ -60,8 +61,6 @@ def test_start_order_fees(
     consumer_wallet,
     provider_wallet,
     factory_deployer_wallet,
-    publish_market_wallet,
-    consume_market_wallet,
     data_nft: DataNFT,
     file1: FilesType,
     factory_router: FactoryRouter,
@@ -71,6 +70,8 @@ def test_start_order_fees(
     provider_fee_in_unit: str,
 ):
     bt = Datatoken(config, get_address_of_type(config, base_token_name))
+    publish_market_wallet = get_wallet(4)
+    consume_market_wallet = get_wallet(5)
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(

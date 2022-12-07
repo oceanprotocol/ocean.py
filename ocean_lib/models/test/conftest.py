@@ -10,7 +10,7 @@ from web3.main import Web3
 
 from conftest_ganache import *
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import get_address_of_type
 from tests.resources.helper_functions import get_ganache_wallet
 
 _NETWORK = "ganache"
@@ -27,11 +27,6 @@ def network():
 @pytest.fixture
 def nft_factory_address(config):
     return get_address_of_type(config, "ERC721Factory")
-
-
-@pytest.fixture
-def OCEAN_address(config):
-    return get_ocean_token_address(config.address_file)
 
 
 @pytest.fixture

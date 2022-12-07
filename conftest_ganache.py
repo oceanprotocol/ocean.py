@@ -6,7 +6,6 @@ import pytest
 from brownie.network import accounts
 from web3.main import Web3
 
-from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -28,7 +27,6 @@ from tests.resources.helper_functions import (
     get_provider_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
-    get_wallet,
     setup_logging,
 )
 
@@ -76,18 +74,13 @@ def config():
 
 
 @pytest.fixture
-def publisher_ocean_instance():
+def publisher_ocean():
     return get_publisher_ocean_instance()
 
 
 @pytest.fixture
 def consumer_ocean_instance():
     return get_consumer_ocean_instance()
-
-
-@pytest.fixture
-def aquarius_instance(config):
-    return Aquarius.get_instance(config.get("METADATA_CACHE_URI"))
 
 
 @pytest.fixture
@@ -103,16 +96,6 @@ def consumer_wallet():
 @pytest.fixture
 def another_consumer_wallet():
     return get_another_consumer_wallet()
-
-
-@pytest.fixture
-def publish_market_wallet():
-    return get_wallet(4)
-
-
-@pytest.fixture
-def consume_market_wallet():
-    return get_wallet(5)
 
 
 @pytest.fixture
@@ -146,6 +129,7 @@ def provider_wallet():
     return get_provider_wallet()
 
 
+# TODO: possibly remove these 3
 @pytest.fixture
 def data_nft(config, publisher_wallet, data_nft_factory):
     receipt = data_nft_factory.deployERC721Contract(
@@ -161,54 +145,6 @@ def data_nft(config, publisher_wallet, data_nft_factory):
     )
     token_address = data_nft_factory.get_token_address(receipt)
     return DataNFT(config, token_address)
-
-
-@pytest.fixture
-def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
-    return data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-    )
-
-
-@pytest.fixture
-def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
-    return data_nft.create_datatoken(
-        template_index=2,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-        datatoken_cap=Web3.toWei(100, "ether"),
-    )
-
-
-@pytest.fixture
-def publisher_addr():
-    return get_publisher_wallet().address
-
-
-@pytest.fixture
-def consumer_addr():
-    return get_consumer_wallet().address
-
-
-@pytest.fixture
-def another_consumer_addr():
-    return get_another_consumer_wallet().address
 
 
 @pytest.fixture

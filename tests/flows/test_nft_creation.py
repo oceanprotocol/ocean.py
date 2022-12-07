@@ -6,7 +6,6 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -18,15 +17,11 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 def test_data_nft_roles(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Test erc721 implicit and explicit role assignments  as well as removing them"""
 
     # NFT Owner is also added as manager when deploying (first time), if transferred that doesn't apply
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
     receipt = data_nft_factory.deployERC721Contract(
         "NFT",
         "NFTSYMBOL",
@@ -102,13 +97,8 @@ def test_data_nft_roles(
 
 
 @pytest.mark.unit
-def test_nonexistent_template_index(config, publisher_wallet):
+def test_nonexistent_template_index(config, data_nft_factory, publisher_wallet):
     """Test erc721 non existent template creation fail"""
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
-
     non_existent_nft_template = get_non_existent_nft_template(
         data_nft_factory, check_first=10
     )
@@ -129,12 +119,8 @@ def test_nonexistent_template_index(config, publisher_wallet):
 
 
 @pytest.mark.unit
-def test_successful_data_nft_creation(config, publisher_wallet):
+def test_successful_data_nft_creation(config, data_nft_factory, publisher_wallet):
     """Test data NFT successful creation"""
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
     receipt = data_nft_factory.deployERC721Contract(
         "NFT",
         "NFTSYMBOL",
@@ -159,12 +145,8 @@ def test_successful_data_nft_creation(config, publisher_wallet):
 
 
 @pytest.mark.unit
-def test_nft_count(config, publisher_wallet):
+def test_nft_count(config, data_nft_factory, publisher_wallet):
     """Test  erc721 factory NFT count"""
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
     current_nft_count = data_nft_factory.getCurrentNFTCount()
     data_nft_factory.deployERC721Contract(
         "NFT",
@@ -181,12 +163,8 @@ def test_nft_count(config, publisher_wallet):
 
 
 @pytest.mark.unit
-def test_nft_template(config):
+def test_nft_template(config, data_nft_factory):
     """Tests get NFT template"""
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
     nft_template = data_nft_factory.getNFTTemplate(1)
     assert nft_template[0] == get_address_of_type(config, "ERC721Template")
     assert nft_template[1] is True
@@ -194,13 +172,9 @@ def test_nft_template(config):
 
 @pytest.mark.unit
 def test_datatoken_creation(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Test erc20 successful creation with owner assigned as minter"""
-
-    data_nft_factory = DataNFTFactoryContract(
-        config, get_address_of_type(config, "ERC721Factory")
-    )
     receipt = data_nft_factory.deployERC721Contract(
         "NFT",
         "NFTSYMBOL",
