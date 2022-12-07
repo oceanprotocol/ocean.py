@@ -39,14 +39,14 @@ def test_service():
     assert sa.id == "1"
     assert sa.name == "Download service"
     assert sa.type == "access"
-    assert sa.service_endpoint == "https://myprovider.com"
+    assert sa.service_endpoint == "http://172.15.0.4:8030"
     assert sa.datatoken == "0x123"
     assert sa.additional_information == {"message": "Sample DDO"}
 
     assert sa.as_dictionary() == {
         "id": "1",
         "type": "access",
-        "serviceEndpoint": "https://myprovider.com",
+        "serviceEndpoint": "http://172.15.0.4:8030",
         "datatokenAddress": "0x123",
         "files": "0x0000",
         "timeout": 0,
@@ -103,7 +103,7 @@ def test_additional_information():
     assert sa.as_dictionary() == {
         "id": "1",
         "type": "access",
-        "serviceEndpoint": "https://myprovider.com",
+        "serviceEndpoint": "http://172.15.0.4:8030",
         "datatokenAddress": "0x123",
         "files": "0x0000",
         "timeout": 0,
