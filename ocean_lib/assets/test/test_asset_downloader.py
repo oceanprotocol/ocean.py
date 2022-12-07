@@ -19,6 +19,7 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_registered_asset_with_access_service,
     get_sample_ddo,
+    get_sample_ddo_with_invalid_provider
 )
 
 
@@ -69,7 +70,7 @@ def test_ocean_assets_download_failure(publisher_wallet):
 @pytest.mark.unit
 def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
-    ddo_dict = get_sample_ddo()
+    ddo_dict = get_sample_ddo_with_invalid_provider()
     ddo = DDO.from_dict(ddo_dict)
 
     with pytest.raises(InvalidURL):
