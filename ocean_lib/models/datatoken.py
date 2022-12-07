@@ -5,6 +5,7 @@
 from enum import IntEnum
 from typing import Optional, Tuple, Union
 
+from brownie import Wei
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
@@ -63,7 +64,7 @@ class Datatoken(ContractBase):
         - market_fee_collector_addr - Default to publisher
         - market_fee - in wei or str, e.g. int(1e15) or "0.001 ether"
         - with_mint - bool
-        - allowed_swapper - if ZERO_ADDRESS, anyone can swap.
+        - allowed_swapper - if ZERO_ADDRESS, anyone can swap
 
         Return
         - exchange_id -
@@ -122,18 +123,29 @@ class Datatoken(ContractBase):
 
         Optional params, with good defaults:
         - max_basetoken_amt - maximum to spend. Default is caller's balance.
+
+        Return
+        - tx_receipts - list of tx_receipt, in order they happened
         """
         FRE = self._FRE()
         fees = FRE.fees(exchange_id)
         status = FRE.status(exchange_id)
         assert status.datatoken == self.address, "exchange_id isn't for this dt"
-        basetoken = Datatoken(self.config_dict, status.baseToken)
+        BT = Datatoken(self.config_dict, status.baseToken)
+        buyer_addr = tx_dict["from"].address
 
         if max_basetoken_amt is None:
             max_basetoken_amt = FRE.BT_needed(exchange_id, datatoken_amt).val
+        max_basetoken_amt = Wei(max_basetoken_amt)
+        assert BT.balanceOf(buyer_addr) >= max_basetoken_amt, "not enough funds"
+
+        tx_receipt0 = BT.approve(FRE.address, max_basetoken_amt, tx_dict)
+
+        # # do we need this??
+        # datatoken_amt = Wei(datatoken_amt)
+        # assert DT.allowance(carlos.address, FRE.address) >= datatoken_amt
         
-        basetoken.approve(FRE.address, max_basetoken_amt, tx_dict)
-        tx_receipt = FRE.buyDT(
+        tx_receipt1 = FRE.buyDT(
             exchange_id,
             datatoken_amt,
             max_basetoken_amt,
@@ -141,7 +153,8 @@ class Datatoken(ContractBase):
             fees.marketFee,
             tx_dict,
         )
-        return tx_receipt
+        tx_receipts = [tx_receipt0, tx_receipt1]
+        return tx_receipts
 
 
     @enforce_types

@@ -226,7 +226,7 @@ def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
 
     # Alice creates exchange. Bob's the owner, and carlos gets fees!
     num_exchanges_before = FRE.getNumberOfExchanges()
-    exchange_id, _ = DT.create_fixed_rate(
+    exchange_id, tx_receipts = DT.create_fixed_rate(
         price = price,
         base_token_addr = OCEAN.address,
         amount = DT_amt,
@@ -235,6 +235,7 @@ def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
         market_fee_collector_addr = carlos.address,
         market_fee = market_fee,
     )
+    assert len(tx_receipts) != 2, "shouldn't have done optional approve()"
     DT.approve(FRE.address, DT_amt, {"from": bob})
 
     # Test exchange count
@@ -244,29 +245,34 @@ def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
     # Test generateExchangeId
     assert FRE.generateExchangeId(OCEAN.address, DT.address) == exchange_id
     
-    # Test exchange supply. It shouldn't have supply yet
+    # Test exchange supply
     status = FRE.status(exchange_id)
     OCEAN_allowance = OCEAN.allowance(bob.address, FRE.address)
-    assert status.dtSupply == 0
-    assert status.btSupply == OCEAN_allowance
+    assert from_wei(status.dtSupply) == from_wei(DT_amt)
+    assert from_wei(status.btSupply) == from_wei(OCEAN_allowance)
 
     # ==========================================================================
     # Carlos buys DT. (Carlos spends OCEAN, Bob spends DT)
     DT_buy = to_wei(11)
 
-    DT_carlos_before = DT.balanceOf(carlos.address)
+    OCEAN_needed = FRE.BT_needed(exchange_id, DT_buy).val
+    OCEAN.transfer(carlos.address, OCEAN_needed, {"from": bob})
+
     DT_bob_before = DT.balanceOf(bob.address)
-    OCEAN_bob_before = OCEAN.balanceOf(bob.address)
+    DT_carlos_before = DT.balanceOf(carlos.address)
+    OCEAN_carlos_before = OCEAN.balanceOf(carlos.address)
 
     # Q: OCEAN.approve() by Carlos? A: It happens inside DT.buy()
     # Q: DT.approve() by Bob? A: He already approved, just after create..()
-    tx_receipt = DT.buy(DT_buy, exchange_id, {"from": carlos})
-    
+    tx_receipts = DT.buy(DT_buy, exchange_id, {"from": carlos})
+
+    assert len(tx_receipts) == 2 # approve(), buyDT()
+    assert DT.balanceOf(bob.address) == (DT_bob_before - DT_buy)
     assert DT.balanceOf(carlos.address) == (DT_carlos_before + DT_buy)
-    assert OCEAN.balanceOf(bob.address) > OCEAN_bob_before
+    assert OCEAN.balanceOf(carlos.address) >= (OCEAN_carlos_before-OCEAN_needed)
 
     # Check fixed rate exchange outputs. Price = Rate = 1
-    event_log = tx_receipt.events["Swapped"]
+    event_log = tx_receipts[-1].events["Swapped"]
     assert (
         event_log["baseTokenSwappedAmount"]
         - event_log["marketFeeAmount"]
@@ -279,22 +285,30 @@ def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
     # Bob sells DT to the exchange, getting OCEAN from exchange's reserve
     DT_sell = to_wei(10)
     
-    DT_bob_before = DT.balanceOf(bob.address)
-    OCEAN_bob_before = OCEAN.balanceOf(bob.address)
+    DT_bob_1_float = from_wei(DT.balanceOf(bob.address))
+    OCEAN_bob_1_float = from_wei(OCEAN.balanceOf(bob.address))
     
     # Q: DT.approve() by Bob? A: It happens inside DT.sell()
     DT.sell(DT_sell, exchange_id, {"from": bob})
     
     # Bob should now have more OCEAN, and fewer DT
-    OCEAN_received, _, _, _ = \
-        FRE.calcBaseOutGivenInDT(exchange_id, DT_sell, 0)
-    assert OCEAN.balanceOf(bob.address) == (OCEAN_bob_before + OCEAN_received)
-    assert DT.balanceOf(bob.address) == (DT_bob_before - DT_sell)
+    OCEAN_received_float = from_wei(FRE.BT_received(exchange_id, DT_sell).val)
+    OCEAN_bob_2_float = from_wei(OCEAN.balanceOf(bob.address))
+    DT_bob_2_float = from_wei(DT.balanceOf(bob.address))
+    assert pytest.approx(OCEAN_bob_2_float, 0.01) \
+        == (OCEAN_bob_1_float + OCEAN_received_float)
+    assert DT_bob_2_float == (DT_bob_1_float - from_wei(DT_sell))
 
     # Test exchange's DT & OCEAN supply
     status = FRE.status(exchange_id)
     assert status.dtSupply == DT_sell
-    assert status.btSupply == OCEAN.allowance(status.exchangeOwner, FRE.address)
+    
+    OCEAN_owner_balance = OCEAN.balanceOf(status.exchangeOwner)
+    OCEAN_allowance_to_FRE = OCEAN.allowance(status.exchangeOwner, FRE.address)
+    if OCEAN_owner_balance < OCEAN_allowance_to_FRE:
+        assert status.btSupply == OCEAN_owner_balance + status.btBalance
+    else:
+        assert status.btSupply == OCEAN_allowance_to_FRE + status.btBalance
 
     # ==========================================================================
     # Bob's the payment collector. He collects his all DT payments
