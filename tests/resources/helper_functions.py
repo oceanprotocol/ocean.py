@@ -94,33 +94,30 @@ def generate_wallet():
     return generated_wallet
 
 
-@enforce_types
-def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+def get_ocean_instance_prerequisites(use_provider_mock=False) -> Ocean:
     config_dict = get_config_dict()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config_dict, data_provider=data_provider)
-    account = get_publisher_wallet()
-    ocn.main_account = account
+    return Ocean(config_dict, data_provider=data_provider)
+
+
+@enforce_types
+def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_publisher_wallet()
     return ocn
 
 
 @enforce_types
 def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = get_config_dict()
-    data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config, data_provider=data_provider)
-    account = get_consumer_wallet()
-    ocn.main_account = account
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_consumer_wallet()
     return ocn
 
 
 @enforce_types
 def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = get_config_dict()
-    data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config, data_provider=data_provider)
-    account = get_another_consumer_wallet()
-    ocn.main_account = account
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_another_consumer_wallet()
     return ocn
 
 
