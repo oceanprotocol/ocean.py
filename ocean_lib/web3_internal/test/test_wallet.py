@@ -12,13 +12,12 @@ from tests.resources.helper_functions import generate_wallet
 
 
 @pytest.mark.unit
-def test_generating_wallets(publisher_ocean_instance):
+def test_generating_wallets(ocean_token):
     generated_wallet = generate_wallet()
     assert generated_wallet.address, "Wallet has not an address."
     assert accounts.at(generated_wallet.address).balance() == Web3.toWei(3, "ether")
 
-    OCEAN_token = publisher_ocean_instance.OCEAN_token
-    assert OCEAN_token.balanceOf(generated_wallet.address) == Web3.toWei(50, "ether")
+    assert ocean_token.balanceOf(generated_wallet.address) == Web3.toWei(50, "ether")
 
     env_key_labels = [
         "TEST_PRIVATE_KEY1",
