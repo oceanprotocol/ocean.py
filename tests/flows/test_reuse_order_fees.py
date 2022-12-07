@@ -8,7 +8,6 @@ from time import sleep
 import pytest
 from web3.main import Web3
 
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
@@ -16,6 +15,7 @@ from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
 from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
     get_provider_fees,
     int_units,
     transfer_base_token_if_balance_lte,
@@ -49,12 +49,12 @@ def test_reuse_order_fees(
     factory_deployer_wallet,
     publish_market_wallet,
     consume_market_wallet,
-    data_nft: DataNFT,
     file1: FilesType,
     base_token_name: str,
     provider_fee_in_unit: str,
 ):
     bt = Datatoken(config, get_address_of_type(config, base_token_name))
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(
