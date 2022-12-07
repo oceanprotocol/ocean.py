@@ -29,6 +29,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import (
     create_checksum,
@@ -479,16 +480,18 @@ class OceanAssets:
         ddo = self.resolve(did)
         datatoken_address = ddo.datatokens[0]["address"]
         datatoken = Datatoken(self._config_dict, datatoken_address)
-
-        # Ensure access token
-        bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
-        if bal >= 1.0:  # we're good
-            pass
-        else:  # try to get freely-dispensed ddo
-            print("Dispense access token...")
-            amt_dispense_wei = Web3.toWei(1, "ether")
-            dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
-            dispenser = Dispenser(self._config_dict, dispenser_addr)
+        template_id = datatoken.get_template_id()
+        if template_id == 1:
+            # free template
+            # Ensure access token
+            bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
+            if bal >= 1.0:  # we're good
+                pass
+            else:  # try to get freely-dispensed ddo
+                print("Dispense access token...")
+                amt_dispense_wei = Web3.toWei(1, "ether")
+                dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
+                dispenser = Dispenser(self._config_dict, dispenser_addr)
 
             # catch key failure modes
             st = dispenser.status(datatoken.address)
@@ -503,9 +506,12 @@ class OceanAssets:
                 datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
             )
 
-        # send datatoken to the service, to get access
-        print("Order access...")
-        order_tx_id = self.pay_for_access_service(ddo, wallet)
+            # send datatoken to the service, to get access
+            print("Order access...")
+            order_tx_id = self.pay_for_access_service(ddo, wallet)
+        elif template_id == 2:
+            # enterprise template
+            order_tx_id = self.pay_for_access_service_enterprise(ddo, wallet)
 
         # download
         print("Download file...")
@@ -612,6 +618,73 @@ class OceanAssets:
             transaction_parameters={"from": wallet},
         )
 
+        return receipt.txid
+
+    @enforce_types
+    def pay_for_access_service_enterprise(
+        self,
+        ddo: DDO,
+        wallet,
+        service: Optional[Service] = None,
+        consume_market_order_fee_address: Optional[str] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = None,
+        consumer_address: Optional[str] = None,
+        userdata: Optional[dict] = None,
+    ):
+        # fill in good defaults as needed
+        service = service or ddo.services[0]
+        consume_market_order_fee_address = (
+            consume_market_order_fee_address or wallet.address
+        )
+        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
+        if consume_market_order_fee_token is None:
+            OCEAN_address = get_ocean_token_address(self._config_dict)
+            consume_market_order_fee_token = OCEAN_address
+        consumer_address = consumer_address or wallet.address
+
+        # main work...
+
+        consumable_result = is_consumable(
+            ddo,
+            service,
+            {"type": "address", "value": wallet.address},
+            userdata=userdata,
+        )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
+
+        data_provider = DataServiceProvider
+
+        initialize_args = {
+            "did": ddo.did,
+            "service": service,
+            "consumer_address": consumer_address,
+        }
+
+        initialize_response = data_provider.initialize(**initialize_args)
+        provider_fees = initialize_response.json()["providerFee"]
+
+        dt = DatatokenEnterprise(self._config_dict, service.datatoken)
+        dispensers = dt.getDispensers()
+
+        receipt = dt.buy_from_dispenser_and_order(
+            consumer=consumer_address,
+            service_index=ddo.get_index_of_service(service),
+            provider_fee_address=provider_fees["providerFeeAddress"],
+            provider_fee_token=provider_fees["providerFeeToken"],
+            provider_fee_amount=provider_fees["providerFeeAmount"],
+            v=provider_fees["v"],
+            r=provider_fees["r"],
+            s=provider_fees["s"],
+            valid_until=provider_fees["validUntil"],
+            provider_data=provider_fees["providerData"],
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            dispenser_address=dispensers[0],
+            transaction_parameters={"from": wallet},
+        )
         return receipt.txid
 
     @enforce_types
