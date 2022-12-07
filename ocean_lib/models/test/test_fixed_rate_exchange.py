@@ -285,40 +285,37 @@ def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
     # Bob sells DT to the exchange, getting OCEAN from exchange's reserve
     DT_sell = to_wei(10)
     
-    DT_bob_1_float = from_wei(DT.balanceOf(bob.address))
-    OCEAN_bob_1_float = from_wei(OCEAN.balanceOf(bob.address))
+    DT_bob1 = DT.balanceOf(bob.address)
+    OCEAN_bob1 = OCEAN.balanceOf(bob.address)
     
     # Q: DT.approve() by Bob? A: It happens inside DT.sell()
     DT.sell(DT_sell, exchange_id, {"from": bob})
     
     # Bob should now have more OCEAN, and fewer DT
-    OCEAN_received_float = from_wei(FRE.BT_received(exchange_id, DT_sell).val)
-    OCEAN_bob_2_float = from_wei(OCEAN.balanceOf(bob.address))
-    DT_bob_2_float = from_wei(DT.balanceOf(bob.address))
-    assert pytest.approx(OCEAN_bob_2_float, 0.01) \
-        == (OCEAN_bob_1_float + OCEAN_received_float)
-    assert DT_bob_2_float == (DT_bob_1_float - from_wei(DT_sell))
+    OCEAN_received = FRE.BT_received(exchange_id, DT_sell).val
+    OCEAN_bob2 = OCEAN.balanceOf(bob.address)
+    DT_bob2 = DT.balanceOf(bob.address)
+    assert pytest.approx(OCEAN_bob2, to_wei(0.01)) \
+        == (OCEAN_bob1 + OCEAN_received)
+    assert DT_bob2 == (DT_bob1 - DT_sell)
 
     # Test exchange's DT & OCEAN supply
     status = FRE.status(exchange_id)
     assert status.dtSupply == DT_sell
     
-    OCEAN_owner_balance = OCEAN.balanceOf(status.exchangeOwner)
-    OCEAN_allowance_to_FRE = OCEAN.allowance(status.exchangeOwner, FRE.address)
-    if OCEAN_owner_balance < OCEAN_allowance_to_FRE:
-        assert status.btSupply == OCEAN_owner_balance + status.btBalance
-    else:
-        assert status.btSupply == OCEAN_allowance_to_FRE + status.btBalance
+    OCEAN_for_FRE = OCEAN.allowance(bob.address, FRE.address)
+    assert OCEAN_bob2 > OCEAN_for_FRE
+    assert status.btSupply == OCEAN_for_FRE + status.btBalance
 
     # ==========================================================================
-    # Bob's the payment collector. He collects his all DT payments
-    assert DT.getPaymentCollector() == bob.address
-    DT_bob_before = DT.balanceOf(bob.address)
+    # Alice is the payment collector. Here, she collects all her DT payments
+    assert DT.getPaymentCollector() == alice.address
+    DT_alice_before = DT.balanceOf(alice.address)
 
-    receipt = FRE.collectDT(exchange_id, status.dtBalance, {"from": bob})
+    receipt = FRE.collectDT(exchange_id, status.dtBalance, {"from": alice})
     DT_received = receipt.events["TokenCollected"]["amount"]
     
-    assert DT.balanceOf(bob.address) == (DT_bob_before + DT_received)
+    assert DT.balanceOf(alice.address) == (DT_alice_before + DT_received)
 
     # ==========================================================================
     # Bob withdraws his OCEAN balance. He needs to buy bc he sold all DT, and BT balance will be 0
