@@ -29,22 +29,6 @@ class Datatoken(ContractBase):
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
 
     @enforce_types
-    def get_template_id(self) -> int:
-        """
-        Returns templateID
-        :return: id
-        """
-        return self.contract.getId()
-
-    @enforce_types
-    def getDispensers(self) -> List[str]:
-        """
-        Returns the list of dispensers created for this datatoken
-        :return: dispensers
-        """
-        return self.contract.getDispensers()
-
-    @enforce_types
     def create_fixed_rate(
         self,
         fixed_price_address: str,
