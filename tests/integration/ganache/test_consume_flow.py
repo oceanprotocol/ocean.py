@@ -149,7 +149,7 @@ def test_ocean_assets_download_with_enterprise_template_and_dispenser(
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_with_enterprise_template_and_dispenser(
+def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
     config: dict, publisher_wallet, consumer_wallet
 ):
     data_provider = DataServiceProvider
