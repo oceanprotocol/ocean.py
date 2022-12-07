@@ -60,6 +60,11 @@ def get_addresses_with_fallback(config: dict):
 def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
     network_name = config["NETWORK_NAME"]
+    if network_name == "polygon-test":
+        network_name = "mumbai"
+
+    if network_name == "polygon-main":
+        network_name = "polygon"
     addresses = get_addresses_with_fallback(config)
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]

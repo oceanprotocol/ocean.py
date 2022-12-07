@@ -16,7 +16,7 @@ from . import util
 def test_nonocean_tx(tmp_path):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
     # setup
-    connect_to_network("mumbai")
+    connect_to_network("polygon-test")
     util.set_aggressive_gas_fees()
 
     config = util.remote_config_mumbai(tmp_path)
@@ -31,7 +31,7 @@ def test_nonocean_tx(tmp_path):
 def test_ocean_tx__create_data_nft(tmp_path):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
     # setup
-    connect_to_network("mumbai")
+    connect_to_network("polygon-test")
     util.set_aggressive_gas_fees()
 
     config = util.remote_config_mumbai(tmp_path)

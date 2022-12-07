@@ -47,7 +47,7 @@ In the Python console:
 ```python
 # Create Ocean instance
 from ocean_lib.web3_internal.utils import connect_to_network
-connect_to_network("mumbai")
+connect_to_network("polygon-test")
 
 import os
 from ocean_lib.example_config import get_config_dict

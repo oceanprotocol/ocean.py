@@ -28,7 +28,6 @@ PROVIDER_PER_NETWORK = {
     "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
     "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
     "development": DEFAULT_PROVIDER_URL,
-    "celoalfajores": "https://provider.celoalfajores.oceanprotocol.com",
     "mumbai": "https://v4.provider.mumbai.oceanprotocol.com",
 }
 

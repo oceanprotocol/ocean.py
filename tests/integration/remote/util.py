@@ -19,7 +19,7 @@ ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachin
 @enforce_types
 def remote_config_mumbai(tmp_path):
     config = {
-        "NETWORK_NAME": "mumbai",
+        "NETWORK_NAME": "polygon-test",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
@@ -31,7 +31,7 @@ def remote_config_mumbai(tmp_path):
 @enforce_types
 def remote_config_polygon(tmp_path):
     config = {
-        "NETWORK_NAME": "polygon",
+        "NETWORK_NAME": "polygon-main",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",

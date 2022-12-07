@@ -2,13 +2,9 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import warnings
-
-import brownie.network
 import pytest
-from brownie.network import accounts, priority_fee
+from brownie.network import accounts
 
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.utils import connect_to_network
 
@@ -19,7 +15,7 @@ from . import util
 def test_ocean_tx__create_data_nft(tmp_path):
     """On Polygon, do a simple Ocean tx: create_data_nft"""
     # setup
-    connect_to_network("polygon")
+    connect_to_network("polygon-main")
     util.set_aggressive_gas_fees()
 
     config = util.remote_config_polygon(tmp_path)
