@@ -53,7 +53,7 @@ def test_ddo_utils():
             "name": "Download service",
             "description": "Download service",
             "datatokenAddress": "0x123",
-            "serviceEndpoint": "https://myprovider.com",
+            "serviceEndpoint": "http://172.15.0.4:8030",
             "timeout": 0,
         }
     ]
@@ -154,7 +154,7 @@ def test_add_service():
     new_service = Service(
         service_id="2",
         service_type="compute",
-        service_endpoint="https://myprovider.com",
+        service_endpoint="http://172.15.0.4:8030",
         datatoken="0x124",
         files="0x0001",
         timeout=3600,
