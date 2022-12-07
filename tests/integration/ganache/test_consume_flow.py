@@ -6,7 +6,9 @@ import os
 import shutil
 
 import pytest
+from brownie.network import accounts
 from web3.main import Web3
+
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -177,10 +179,12 @@ def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
         1,
         {"from": publisher_wallet},
     )
+    empty_wallet = accounts.add()
+
     with pytest.raises(InsufficientBalance):
-        _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+        _ = ocean_assets.download_file(ddo_2.did, empty_wallet)
     # mint 1 Dai and try again
     dai_datatoken = Datatoken(config, base_token_address)
-    send_mock_usdc_to_address(config, consumer_wallet.address, 1.03)
+    send_mock_usdc_to_address(config, consumer_wallet.address, 2)
     # now it should pass
     _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
