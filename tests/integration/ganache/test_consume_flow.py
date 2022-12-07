@@ -181,6 +181,6 @@ def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
         _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
     # mint 1 Dai and try again
     dai_datatoken = Datatoken(config, base_token_address)
-    send_mock_usdc_to_address(config, consumer_wallet.address, 2)
+    send_mock_usdc_to_address(config, consumer_wallet.address, 1.03)
     # now it should pass
     _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
