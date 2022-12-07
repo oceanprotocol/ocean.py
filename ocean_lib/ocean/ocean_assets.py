@@ -480,7 +480,7 @@ class OceanAssets:
         ddo = self.resolve(did)
         datatoken_address = ddo.datatokens[0]["address"]
         datatoken = Datatoken(self._config_dict, datatoken_address)
-        template_id = datatoken.get_template_id()
+        template_id = datatoken.getId()
         if template_id == 1:
             # free template
             # Ensure access token
@@ -548,7 +548,7 @@ class OceanAssets:
         return path
 
     @enforce_types
-    def pay_for_access_service(
+    def get_order_data(
         self,
         ddo: DDO,
         wallet,
@@ -570,17 +570,6 @@ class OceanAssets:
             consume_market_order_fee_token = OCEAN_address
         consumer_address = consumer_address or wallet.address
 
-        # main work...
-        dt = Datatoken(self._config_dict, service.datatoken)
-        balance = dt.balanceOf(wallet.address)
-
-        if balance < Web3.toWei(1, "ether"):
-            raise InsufficientBalance(
-                f"Your token balance {balance} {dt.symbol()} is not sufficient "
-                f"to execute the requested service. This service "
-                f"requires 1 wei."
-            )
-
         consumable_result = is_consumable(
             ddo,
             service,
@@ -600,21 +589,62 @@ class OceanAssets:
 
         initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
+        return {
+            "service": service,
+            "consumer_address": consumer_address,
+            "consume_market_order_fee_address": consume_market_order_fee_address,
+            "consume_market_order_fee_amount": consume_market_order_fee_amount,
+            "consume_market_order_fee_token": consume_market_order_fee_token,
+            "provider_fees": provider_fees,
+        }
 
+    @enforce_types
+    def pay_for_access_service(
+        self,
+        ddo: DDO,
+        wallet,
+        service: Optional[Service] = None,
+        consume_market_order_fee_address: Optional[str] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = None,
+        consumer_address: Optional[str] = None,
+        userdata: Optional[dict] = None,
+    ):
+
+        params = self.get_order_data(
+            ddo,
+            wallet,
+            service,
+            consume_market_order_fee_address,
+            consume_market_order_fee_token,
+            consume_market_order_fee_amount,
+            consumer_address,
+            userdata,
+        )
+        # main work...
+        dt = Datatoken(self._config_dict, params.service.datatoken)
+        balance = dt.balanceOf(wallet.address)
+
+        if balance < Web3.toWei(1, "ether"):
+            raise InsufficientBalance(
+                f"Your token balance {balance} {dt.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires 1 wei."
+            )
         receipt = dt.start_order(
-            consumer=consumer_address,
-            service_index=ddo.get_index_of_service(service),
-            provider_fee_address=provider_fees["providerFeeAddress"],
-            provider_fee_token=provider_fees["providerFeeToken"],
-            provider_fee_amount=provider_fees["providerFeeAmount"],
-            v=provider_fees["v"],
-            r=provider_fees["r"],
-            s=provider_fees["s"],
-            valid_until=provider_fees["validUntil"],
-            provider_data=provider_fees["providerData"],
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            consumer=params["consumer_address"],
+            service_index=ddo.get_index_of_service(params["service"]),
+            provider_fee_address=params["provider_fees"]["providerFeeAddress"],
+            provider_fee_token=params["provider_fees"]["providerFeeToken"],
+            provider_fee_amount=params["provider_fees"]["providerFeeAmount"],
+            v=params["provider_fees"]["v"],
+            r=params["provider_fees"]["r"],
+            s=params["provider_fees"]["s"],
+            valid_until=params["provider_fees"]["validUntil"],
+            provider_data=params["provider_fees"]["providerData"],
+            consume_market_order_fee_address=params["consume_market_order_fee_address"],
+            consume_market_order_fee_token=params["consume_market_order_fee_token"],
+            consume_market_order_fee_amount=params["consume_market_order_fee_amount"],
             transaction_parameters={"from": wallet},
         )
 
@@ -632,56 +662,34 @@ class OceanAssets:
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
-        # fill in good defaults as needed
-        service = service or ddo.services[0]
-        consume_market_order_fee_address = (
-            consume_market_order_fee_address or wallet.address
-        )
-        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
-        if consume_market_order_fee_token is None:
-            OCEAN_address = get_ocean_token_address(self._config_dict)
-            consume_market_order_fee_token = OCEAN_address
-        consumer_address = consumer_address or wallet.address
-
-        # main work...
-
-        consumable_result = is_consumable(
+        params = self.get_order_data(
             ddo,
+            wallet,
             service,
-            {"type": "address", "value": wallet.address},
-            userdata=userdata,
+            consume_market_order_fee_address,
+            consume_market_order_fee_token,
+            consume_market_order_fee_amount,
+            consumer_address,
+            userdata,
         )
-        if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
-
-        data_provider = DataServiceProvider
-
-        initialize_args = {
-            "did": ddo.did,
-            "service": service,
-            "consumer_address": consumer_address,
-        }
-
-        initialize_response = data_provider.initialize(**initialize_args)
-        provider_fees = initialize_response.json()["providerFee"]
 
         dt = DatatokenEnterprise(self._config_dict, service.datatoken)
         dispensers = dt.getDispensers()
 
         receipt = dt.buy_from_dispenser_and_order(
-            consumer=consumer_address,
-            service_index=ddo.get_index_of_service(service),
-            provider_fee_address=provider_fees["providerFeeAddress"],
-            provider_fee_token=provider_fees["providerFeeToken"],
-            provider_fee_amount=provider_fees["providerFeeAmount"],
-            v=provider_fees["v"],
-            r=provider_fees["r"],
-            s=provider_fees["s"],
-            valid_until=provider_fees["validUntil"],
-            provider_data=provider_fees["providerData"],
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            consumer=params["consumer_address"],
+            service_index=ddo.get_index_of_service(params["service"]),
+            provider_fee_address=params["provider_fees"]["providerFeeAddress"],
+            provider_fee_token=params["provider_fees"]["providerFeeToken"],
+            provider_fee_amount=params["provider_fees"]["providerFeeAmount"],
+            v=params["provider_fees"]["v"],
+            r=params["provider_fees"]["r"],
+            s=params["provider_fees"]["s"],
+            valid_until=params["provider_fees"]["validUntil"],
+            provider_data=params["provider_fees"]["providerData"],
+            consume_market_order_fee_address=params["consume_market_order_fee_address"],
+            consume_market_order_fee_token=params["consume_market_order_fee_token"],
+            consume_market_order_fee_amount=params["consume_market_order_fee_amount"],
             dispenser_address=dispensers[0],
             transaction_parameters={"from": wallet},
         )
