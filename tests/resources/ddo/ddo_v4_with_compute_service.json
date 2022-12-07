@@ -21,7 +21,7 @@
       "name": "Download service",
       "description": "Download service",
       "datatokenAddress": "0x123",
-      "serviceEndpoint": "https://myprovider.com",
+      "serviceEndpoint": "http://172.15.0.4:8030",
       "timeout": 0
     },
     {
@@ -31,7 +31,7 @@
       "name": "Compute service",
       "description": "Compute service",
       "datatokenAddress": "0x124",
-      "serviceEndpoint": "https://myprovider.com",
+      "serviceEndpoint": "http://172.15.0.4:8030",
       "timeout": 3600,
       "compute": {
         "namespace": "ocean-compute",
