@@ -10,15 +10,22 @@ from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.exceptions import InsufficientBalance
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_registered_asset_with_access_service,
     get_registered_asset_with_access_service_using_enterprise_template,
 )
+from tests.resources.helper_functions import (
+    send_mock_usdc_to_address
+)
 
+toWei, fromWei = Web3.toWei, Web3.fromWei
 
 @pytest.mark.integration
 def test_consume_flow(
@@ -123,7 +130,7 @@ def test_compact_publish_and_consume(
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_with_different_templates(
+def test_ocean_assets_download_with_enterprise_template_and_dispenser(
     config: dict,
     publisher_wallet,
     consumer_wallet,
@@ -138,8 +145,35 @@ def test_ocean_assets_download_with_different_templates(
     ) = get_registered_asset_with_access_service_using_enterprise_template(
         ocean_assets, publisher_wallet
     )
-    print("*********************************\n")
-    print(datatoken_2)
-    print("*********************************\n")
     datatoken_2.create_dispenser({"from": publisher_wallet})
     _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+
+
+@pytest.mark.integration
+def test_ocean_assets_download_with_enterprise_template_and_dispenser(
+    config: dict,
+    publisher_wallet,
+    consumer_wallet
+    
+):
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, data_provider)
+    # create asset using enterprise template
+    (
+        data_nft_2,
+        datatoken_2,
+        ddo_2,
+    ) = get_registered_asset_with_access_service_using_enterprise_template(
+        ocean_assets, publisher_wallet
+    )
+    fre_address=get_address_of_type(config, "FixedPrice")
+    base_token_address = get_address_of_type(config, "MockUSDC")
+    datatoken_2.create_fixed_rate(fre_address,base_token_address,publisher_wallet.address,ZERO_ADDRESS,datatoken_2.address,6,18,toWei(1, "ether"),0,1,{"from": publisher_wallet})
+    with pytest.raises(InsufficientBalance):
+        _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+    # mint 1 Dai and try again
+    dai_datatoken = Datatoken(config,base_token_address)
+    send_mock_usdc_to_address(config,consumer_wallet.address,2)
+    # now it should pass
+    _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+    
