@@ -503,7 +503,7 @@ class OceanAssets:
                 if not active:
                     raise ValueError("No active dispenser for datatoken")
                 if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                    raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
+                    raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
 
                 # Try to dispense. If other issues, they'll pop out
                 dispenser.dispense(
