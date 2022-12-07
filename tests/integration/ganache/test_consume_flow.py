@@ -183,8 +183,7 @@ def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
 
     with pytest.raises(InsufficientBalance):
         _ = ocean_assets.download_file(ddo_2.did, empty_wallet)
-    # mint 1 Dai and try again
-    dai_datatoken = Datatoken(config, base_token_address)
+    # send 2 MockUSDC to consumer and use that account
     send_mock_usdc_to_address(config, consumer_wallet.address, 2)
     # now it should pass
     _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
