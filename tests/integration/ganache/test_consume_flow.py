@@ -180,7 +180,7 @@ def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
         {"from": publisher_wallet},
     )
     empty_wallet = accounts.add()
-
+    # try with an empty wallet, it should fail with InsufficientBalance
     with pytest.raises(InsufficientBalance):
         _ = ocean_assets.download_file(ddo_2.did, empty_wallet)
     # send 2 MockUSDC to consumer and use that account
