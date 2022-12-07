@@ -629,7 +629,7 @@ class OceanAssets:
             raise InsufficientBalance(
                 f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
-                f"requires 1 wei."
+                f"requires 1 datatoken."
             )
         receipt = dt.start_order(
             consumer=params["consumer_address"],

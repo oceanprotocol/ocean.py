@@ -342,9 +342,13 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
 def test_pay_for_access_service_insufficient_balance(
     publisher_ocean_instance, config, publisher_wallet, datatoken
 ):
-    ddo_dict = copy.deepcopy(get_sample_ddo())
-    ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
-    ddo = DDO.from_dict(ddo_dict)
+    ocean = publisher_ocean_instance
+
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
+        name, url, publisher_wallet
+    )
 
     empty_wallet = accounts.add()
 
