@@ -32,6 +32,9 @@ In the console:
 # For accounts: set private keys
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+
+# For Infura node used in brownie
+export WEB3_INFURA_PROJECT_ID=<your WEB3_INFURA_PROJECT_ID>
 ```
 
 ### Setup in Python

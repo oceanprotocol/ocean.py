@@ -23,12 +23,12 @@ PROVIDER_PER_NETWORK = {
     "mainnet": "https://v4.provider.mainnet.oceanprotocol.com",
     "goerli": "https://v4.provider.goerli.oceanprotocol.com",
     "bsc": "https://v4.provider.bsc.oceanprotocol.com",
-    "polygon": "https://v4.provider.polygon.oceanprotocol.com",
+    "polygon-main": "https://v4.provider.polygon.oceanprotocol.com",
     "energyweb": "https://v4.provider.energyweb.oceanprotocol.com",
     "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
     "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
     "development": DEFAULT_PROVIDER_URL,
-    "mumbai": "https://v4.provider.mumbai.oceanprotocol.com",
+    "polygon-test": "https://v4.provider.mumbai.oceanprotocol.com",
 }
 
 
