@@ -221,9 +221,6 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     to send. Returns the transferred balance.
     """
     factory_deployer = get_factory_deployer_wallet(config)
-    print("************************************")
-    print(factory_deployer)
-    print("******************88")
     mock_usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
