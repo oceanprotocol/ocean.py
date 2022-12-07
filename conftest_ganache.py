@@ -7,12 +7,10 @@ from brownie.network import accounts
 from web3.main import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
@@ -127,24 +125,6 @@ def data_nft_factory(config):
 @pytest.fixture
 def provider_wallet():
     return get_provider_wallet()
-
-
-# TODO: possibly remove these 3
-@pytest.fixture
-def data_nft(config, publisher_wallet, data_nft_factory):
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
-    )
-    token_address = data_nft_factory.get_token_address(receipt)
-    return DataNFT(config, token_address)
 
 
 @pytest.fixture
