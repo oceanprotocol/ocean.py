@@ -122,7 +122,6 @@ def test_compact_publish_and_consume(
     _ = ocean_assets.download_file(ddo.did, consumer_wallet)
 
 
-
 @pytest.mark.integration
 def test_ocean_assets_download_with_different_templates(
     config: dict,
@@ -132,7 +131,11 @@ def test_ocean_assets_download_with_different_templates(
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
     # create asset using enterprise template
-    data_nft_2, datatoken_2, ddo_2 = get_registered_asset_with_access_service_using_enterprise_template(
+    (
+        data_nft_2,
+        datatoken_2,
+        ddo_2,
+    ) = get_registered_asset_with_access_service_using_enterprise_template(
         ocean_assets, publisher_wallet
     )
     print("*********************************\n")
@@ -140,5 +143,3 @@ def test_ocean_assets_download_with_different_templates(
     print("*********************************\n")
     datatoken_2.create_dispenser({"from": publisher_wallet})
     _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
-    
-    

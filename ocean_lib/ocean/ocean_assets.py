@@ -44,7 +44,7 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
-from ocean_lib.web3_internal.constants import MAX_UINT256,ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -874,7 +874,7 @@ class DatatokenArguments:
         services: Optional[list] = None,
         files: Optional[List[FilesType]] = None,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
-        datatoken_cap : Optional[int] = MAX_UINT256
+        datatoken_cap: Optional[int] = MAX_UINT256,
     ):
         self.name = name
         self.symbol = symbol
@@ -906,7 +906,7 @@ class DatatokenArguments:
             publish_market_order_fee_amount=self.publish_market_order_fee_amount,
             bytess=self.bytess,
             transaction_parameters={"from": wallet},
-            datatoken_cap=self.datatoken_cap
+            datatoken_cap=self.datatoken_cap,
         )
 
         logger.info(
