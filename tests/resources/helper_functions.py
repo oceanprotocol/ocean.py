@@ -94,33 +94,30 @@ def generate_wallet():
     return generated_wallet
 
 
-@enforce_types
-def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+def get_ocean_instance_prerequisites(use_provider_mock=False) -> Ocean:
     config_dict = get_config_dict()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config_dict, data_provider=data_provider)
-    account = get_publisher_wallet()
-    ocn.main_account = account
+    return Ocean(config_dict, data_provider=data_provider)
+
+
+@enforce_types
+def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_publisher_wallet()
     return ocn
 
 
 @enforce_types
 def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = get_config_dict()
-    data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config, data_provider=data_provider)
-    account = get_consumer_wallet()
-    ocn.main_account = account
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_consumer_wallet()
     return ocn
 
 
 @enforce_types
 def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
-    config = get_config_dict()
-    data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(config, data_provider=data_provider)
-    account = get_another_consumer_wallet()
-    ocn.main_account = account
+    ocn = get_ocean_instance_prerequisites(use_provider_mock)
+    ocn.main_account = get_another_consumer_wallet()
     return ocn
 
 
@@ -184,6 +181,8 @@ def deploy_erc721_erc20(
     if not datatoken_minter:
         return data_nft
 
+    datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
+
     datatoken = data_nft.create_datatoken(
         template_index=template_index,
         name="DT1",
@@ -194,6 +193,7 @@ def deploy_erc721_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
+        datatoken_cap=datatoken_cap,
         transaction_parameters={"from": data_nft_publisher},
     )
 

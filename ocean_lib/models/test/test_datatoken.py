@@ -8,21 +8,19 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken, DatatokenRoles
+from ocean_lib.models.datatoken import DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
-def test_main(
-    publisher_wallet,
-    consumer_wallet,
-    data_nft: DataNFT,
-    datatoken: Datatoken,
-):
+def test_main(publisher_wallet, consumer_wallet, config):
     """Tests successful function calls"""
+    data_nft, datatoken = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet
+    )
 
     # Check datatoken params
     assert datatoken.getId() == 1
@@ -99,8 +97,11 @@ def test_main(
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
 
-def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datatoken):
+def test_start_order(config, publisher_wallet, consumer_wallet):
     """Tests startOrder functionality without publish fees, consume fees."""
+    data_nft, datatoken = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet
+    )
     # Mint datatokens to use
     datatoken.mint(
         consumer_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
@@ -305,8 +306,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_nft, datato
 
 
 @pytest.mark.unit
-def test_exceptions(consumer_wallet, datatoken):
+def test_exceptions(consumer_wallet, config, publisher_wallet):
     """Tests revert statements in contracts functions"""
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
     # Should fail to mint if wallet is not a minter
     with pytest.raises(Exception, match="NOT MINTER"):

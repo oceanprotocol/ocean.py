@@ -6,8 +6,8 @@ import pytest
 from brownie import network
 
 from ocean_lib.agreements.consumable import MalformedCredential
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.credentials import simplify_credential_to_address
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_key_from_v4_sample_ddo,
@@ -284,7 +284,6 @@ def test_credential_simplification():
 
 @pytest.mark.unit
 def test_is_disabled():
-
     ddo_dict = get_sample_ddo()
 
     for state in range(6):

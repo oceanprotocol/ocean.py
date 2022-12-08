@@ -23,6 +23,7 @@ from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
+    deploy_erc721_erc20,
     int_units,
     transfer_base_token_if_balance_lte,
 )
@@ -60,7 +61,6 @@ def test_exchange_swap_fees(
     another_consumer_wallet,
     publisher_wallet,
     base_token_name: str,
-    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
@@ -73,6 +73,7 @@ def test_exchange_swap_fees(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
     exchange_swap_fees(
         config=config,
         base_token_deployer_wallet=factory_deployer_wallet,
