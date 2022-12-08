@@ -14,6 +14,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
@@ -22,9 +23,12 @@ def test_buy_from_dispenser_and_order(
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
-    datatoken_enterprise_token,
 ):
     """Tests buy_from_dispenser_and_order function of the Datatoken Enterprise"""
+    _, datatoken_enterprise_token = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, 2
+    )
+
     mock_usdc_contract = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
@@ -154,9 +158,12 @@ def test_buy_from_fre_and_order(
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
-    datatoken_enterprise_token,
 ):
     """Tests buy_from_fre_and_order function of the Datatoken Enterprise"""
+    _, datatoken_enterprise_token = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, 2
+    )
+
     mock_usdc_contract = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = Datatoken(config, get_address_of_type(config, "MockDAI"))
     fixed_rate_exchange = FixedRateExchange(

@@ -110,9 +110,7 @@ def test_invalid_state(publisher_wallet):
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_indexes(
-    publisher_wallet, publisher_ocean_instance, tmpdir
-):
+def test_ocean_assets_download_indexes(publisher_wallet):
     """Tests different values of indexes that raise AssertionError."""
 
     ddo_dict = get_sample_ddo()
@@ -143,30 +141,14 @@ def test_ocean_assets_download_indexes(
 
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
-    config,
     tmpdir,
     publisher_wallet,
-    publisher_ocean_instance,
+    publisher_ocean,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
-    ocean_assets_download_destination_file_helper(
-        config,
-        str(tmpdir),
-        publisher_wallet,
-        publisher_ocean_instance,
-    )
-
-
-def ocean_assets_download_destination_file_helper(
-    config,
-    tmpdir,
-    publisher_wallet,
-    publisher_ocean_instance,
-):
-    """Downloading to an existing directory."""
     data_provider = DataServiceProvider
     data_nft, datatoken, ddo = get_registered_asset_with_access_service(
-        publisher_ocean_instance, publisher_wallet
+        publisher_ocean, publisher_wallet
     )
 
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
@@ -202,14 +184,14 @@ def ocean_assets_download_destination_file_helper(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    orders = publisher_ocean_instance.get_user_orders(
+    orders = publisher_ocean.get_user_orders(
         publisher_wallet.address, datatoken.address
     )
     assert datatoken.address in [order.address for order in orders]
     assert receipt.txid in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(
-        ddo, access_service, publisher_wallet, tmpdir, receipt.txid
+        ddo, access_service, publisher_wallet, str(tmpdir), receipt.txid
     )
 
     assert os.path.exists(written_path)
