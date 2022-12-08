@@ -228,7 +228,8 @@ def test_encrypt(provider_wallet, file1, file2):
 
 
 @pytest.mark.integration
-def test_fileinfo(publisher_wallet, publisher_ocean):
+def test_fileinfo_and_initialize(publisher_wallet, publisher_ocean, ocean_address):
+    """Test both fileinfo and initialize to avoid publishing 2 assets."""
     _, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean, publisher_wallet, more_files=True
     )
@@ -247,19 +248,6 @@ def test_fileinfo(publisher_wallet, publisher_ocean):
         assert file["valid"] is True
         matches = "text/plain" if file_index == 0 else "text/xml"
         assert file["contentType"] == matches
-
-
-@pytest.mark.integration
-def test_initialize(
-    ocean_address,
-    publisher_wallet,
-    publisher_ocean,
-):
-    _, _, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
-
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     initialize_result = DataSP.initialize(
         did=ddo.did,
