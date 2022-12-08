@@ -15,6 +15,7 @@ from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
@@ -24,7 +25,6 @@ def test_exchange_rate_creation(
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
-    datatoken,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
     amount = Web3.toWei("100000", "ether")
@@ -32,6 +32,9 @@ def test_exchange_rate_creation(
     no_limit = Web3.toWei("100000000000000000000", "ether")
     rate = Web3.toWei("1", "ether")
     publish_market_swap_fee = int(1e15)  # 0.1%
+
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
+
     pmt_collector = datatoken.getPaymentCollector()
 
     fixed_exchange = FixedRateExchange(

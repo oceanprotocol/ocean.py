@@ -191,7 +191,7 @@ def test_ocean_assets_download_destination_file(
     assert receipt.txid in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(
-        ddo, access_service, publisher_wallet, tmpdir, receipt.txid
+        ddo, access_service, publisher_wallet, str(tmpdir), receipt.txid
     )
 
     assert os.path.exists(written_path)

@@ -181,6 +181,8 @@ def deploy_erc721_erc20(
     if not datatoken_minter:
         return data_nft
 
+    datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
+
     datatoken = data_nft.create_datatoken(
         template_index=template_index,
         name="DT1",
@@ -191,6 +193,7 @@ def deploy_erc721_erc20(
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
+        datatoken_cap=datatoken_cap,
         transaction_parameters={"from": data_nft_publisher},
     )
 
