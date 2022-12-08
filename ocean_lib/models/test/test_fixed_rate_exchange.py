@@ -7,19 +7,21 @@ import pytest
 
 
 from ocean_lib.models.fixed_rate_exchange import \
-    ExchangeDetails, Fees, BtNeeded, BtReceived, FixedRateExchange, OneExchange
+    ExchangeDetails, FeesInfo, BtNeeded, BtReceived, \
+    FixedRateExchange, OneExchange
 
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
-from ocean_lib.ocean.util import get_address_of_type, to_wei, from_wei
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.ocean.util import to_wei, from_wei
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 
-
+from tests.resources.helper_functions import get_wallet
     
 @pytest.mark.unit
-def test_simple_with_defaults(ocean, OCEAN, DT, alice, bob):    
+def test_with_defaults(ocean, OCEAN, DT, alice, bob):    
+    # =========================================================================
     # Create exchange
     (exchange, tx) = DT.create_exchange(
-        price = to_wei(3),
+        rate = to_wei(3),
         base_token_addr = OCEAN.address,
         tx_dict = {"from":alice}
     )
@@ -28,19 +30,14 @@ def test_simple_with_defaults(ocean, OCEAN, DT, alice, bob):
     DT.mint(alice.address, to_wei(100), {"from": alice})
     DT.approve(exchange.address, to_wei(100), {"from": alice})
 
-    # Bob lets exchange pull the OCEAN needed 
-    OCEAN_needed = exchange.BT_needed(to_wei(2))
-    OCEAN.approve(exchange.address, exchange.BT_needed(to_wei(2)), {"from":bob})
+    # Bob lets exchange pull the OCEAN needed
+    consume_market_fee = 0
+    OCEAN.approve(exchange.address, MAX_UINT256, {"from":bob})
     
     # Bob buys 2 datatokens
-    tx = exchange.buy_DT(to_wei(2), {"from": bob})
-
-    # That's it! To wrap up, let's check Bob's balance
-    bal = DT.balanceOf(bob.address)
-    assert from_wei(bal) == 2
-
-    # =========================================================================
-    # Test details...
+    DT_bob1 = DT.balanceOf(bob.address)
+    tx = exchange.buy_DT(datatoken_amt=to_wei(2), tx_dict={"from": bob})
+    assert from_wei(DT.balanceOf(bob.address)) == from_wei(DT_bob1) + 2 
     
     # all exchanges for this DT
     exchanges = DT.get_exchanges()
@@ -60,30 +57,43 @@ def test_simple_with_defaults(ocean, OCEAN, DT, alice, bob):
     assert from_wei(details.bt_balance) == 2 * 3
     assert not details.with_mint
 
-    # Test fees
-    fees = exchange.fees
-    assert from_wei(fees.market_fee) == 0
-    assert fees.market_fee_collector == alice.address
+    # Test fees_info
+    fees = exchange.fees_info
+    assert from_wei(fees.publish_market_fee) == 0 # publish mkt swap fee
+    assert fees.publish_market_fee_collector == alice.address # for publish mkt swaps
     assert from_wei(fees.opc_fee) == 0.001 \
         == from_wei(OPC_SWAP_FEE_APPROVED) # 0.1% *if* BT approved
-    assert from_wei(fees.market_fee_available) == 0
+    assert from_wei(fees.publish_market_fee_available) == 0 # for publish mkt swaps
     assert from_wei(fees.ocean_fee_available) == 2 * 3 * 0.001
     
     assert from_wei(exchange.FRE.getOPCFee(ZERO_ADDRESS)) == 0.002 # 0.2% bc BT not approved
 
     # Test other attributes
-    assert exchange.BT_needed(to_wei(1.0)) >= to_wei(3) 
-    assert exchange.BT_received(to_wei(1.0)) >= to_wei(2) 
+    assert exchange.BT_needed(to_wei(1.0), 0) >= to_wei(3) 
+    assert exchange.BT_received(to_wei(1.0), 0) >= to_wei(2) 
     assert from_wei(exchange.get_rate()) == 3
     assert exchange.get_allowed_swapper() == ZERO_ADDRESS
     assert exchange.is_active()
-        
-    # Bob can't change market fee collector, he's not the owner
-    with pytest.raises(Exception, match="not marketFeeCollector"):
-        exchange.update_market_fee_collector(bob.address, {"from": bob})
 
-    # Alice can change the market fee collector
-    exchange.update_market_fee_collector(bob.address, {"from": alice})
+    # ==========================================================================
+    # Bob sells DT to the exchange
+    DT_sell = to_wei(1.5)
+    
+    DT_bob1 = DT.balanceOf(bob.address)
+    OCEAN_bob1 = OCEAN.balanceOf(bob.address)
+    
+    DT.approve(exchange.address, DT_sell, {"from": bob})
+    exchange.sell_DT(DT_sell, tx_dict={"from": bob})
+
+    assert DT.balanceOf(bob.address) < DT_bob1
+    assert OCEAN.balanceOf(bob.address) > OCEAN_bob1
+
+
+    # ==========================================================================
+    # Change other stuff
+    
+    # Alice changes market fee collector
+    exchange.update_publish_market_fee_collector(bob.address, {"from": alice})
 
     # Test deactivating exchange
     assert exchange.details.owner == alice.address
@@ -95,129 +105,108 @@ def test_simple_with_defaults(ocean, OCEAN, DT, alice, bob):
     exchange.toggle_active({"from": alice})
     assert exchange.is_active()
 
-    # Test setting price (rate)
+    # Test setting rate
     exchange.set_rate(to_wei(1.1), {"from": alice})
     assert from_wei(exchange.get_rate()) == 1.1
 
 
 @pytest.mark.unit
-def test_simple_with_nondefaults(ocean, OCEAN, DT, alice, bob, carlos):    
-    # Create exchange, having many non-default params
+def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
+    carlos, dan = get_wallet(8), get_wallet(9)
+    FRE = ocean.fixed_rate_exchange
+    
+
+    # =================================================================
+    # Alice creates exchange. Bob's the owner, and carlos gets fees!
+    rate = to_wei(1)
+    publish_market_fee = to_wei(0.09)
+    publish_market_fee_collector = alice.address
+    consume_market_fee = to_wei(0.02)
+    consume_market_fee_addr = dan.address
+
+    n_exchanges1 = FRE.getNumberOfExchanges()
     exchange, tx = DT.create_exchange(
-        price = to_wei(2),
+        rate = rate,
         base_token_addr = OCEAN.address,
         owner_addr = bob.address,
-        market_fee_collector_addr = carlos.address,
-        market_fee = to_wei(0.09),
+        publish_market_fee_collector = publish_market_fee_collector,
+        publish_market_fee = publish_market_fee,
         with_mint = True,
-        allowed_swapper = bob.address,
-        tx_dict = {"from":alice}
+        allowed_swapper = carlos.address,
+        tx_dict = {"from": alice},
     )
+    assert FRE.getNumberOfExchanges() == (n_exchanges1 + 1)
+    assert len(FRE.getExchanges()) == (n_exchanges1 + 1)
 
+    # Test, focusing on difference from default
+    assert exchange.details.owner == bob.address
+    assert exchange.details.with_mint
+
+    assert exchange.fees_info.publish_market_fee == publish_market_fee
+    assert exchange.fees_info.publish_market_fee_collector == alice.address
+
+    assert exchange.get_allowed_swapper() == carlos.address
+
+    # =================================================================
     # Alice makes 100 datatokens available on the exchange
     DT.mint(alice.address, to_wei(100), {"from": alice})
     DT.approve(exchange.address, to_wei(100), {"from": alice})
 
-    # Bob buys 2 datatokens
-    OCEAN.approve(exchange.address, exchange.BT_needed(to_wei(2)), {"from":bob})
-    tx = exchange.buy_DT(to_wei(2), {"from": bob})
-
-    # ==============================================================
-    # Test, focusing on difference from default
-
-    # Test details
-    details = exchange.details
-    assert details.owner == bob.address
-    assert details.with_mint
-
-    # Test fees. Focus on difference from default
-    fees = exchange.fees
-    assert from_wei(fees.market_fee) == 0.09
-    assert fees.market_fee_collector == carlos.address
-
-    # Test allowed swapper
-    assert exchange.get_allowed_swapper() == bob.address
-
-
-
-@pytest.mark.unit
-def test_buy_sell_and_claim(config, ocean, OCEAN, DT, alice, bob, carlos):    
-    FRE = ocean.fixed_rate_exchange
-    n_exchanges1 = FRE.getNumberOfExchanges()
-    
-    # Alice creates exchange. Bob's the owner, and carlos gets fees!
-    price = to_wei(1)
-    market_fee = to_wei(0.001)
-    exchange, tx = DT.create_exchange(
-        price = price,
-        base_token_addr = OCEAN.address,
-        tx_dict = {"from": alice},
-        owner_addr = bob.address,
-        market_fee_collector_addr = carlos.address,
-        market_fee = market_fee,
-    )
-
-    # Test exchange count
-    assert FRE.getNumberOfExchanges() == (n_exchanges1 + 1)
-    assert len(FRE.getExchanges()) == (n_exchanges1 + 1)
-
-    # Bob (the owner) makes 100K datatokens available on the exchange
-    DT_amt = to_wei(100000)
-    DT.mint(bob.address, DT_amt, {"from": alice})
-    DT.approve(exchange.address, DT_amt, {"from": bob})
-
-    # ==========================================================================
+    # ==================================================================
     # Carlos buys DT. (Carlos spends OCEAN, Bob spends DT)
     DT_buy = to_wei(11)
-    OCEAN_needed = exchange.BT_needed(DT_buy)
-
+    OCEAN_needed = exchange.BT_needed(DT_buy, consume_market_fee)
     OCEAN.transfer(carlos.address, OCEAN_needed, {"from": bob})#give carlos OCN
 
-    DT_bob1 = DT.balanceOf(bob.address)
     DT_carlos1 = DT.balanceOf(carlos.address)
     OCEAN_carlos1 = OCEAN.balanceOf(carlos.address)
 
     OCEAN.approve(exchange.address, OCEAN_needed, {"from": carlos})
-    tx = exchange.buy_DT(DT_buy, {"from": carlos})
-
-    assert DT.balanceOf(bob.address) == (DT_bob1 - DT_buy)
-    assert DT.balanceOf(carlos.address) == (DT_carlos1 + DT_buy)
-    assert OCEAN.balanceOf(carlos.address) >= (OCEAN_carlos1-OCEAN_needed)
-
-    # Check logs outputs. Price = Rate = 1
-    event_log = tx.events["Swapped"]
-    assert (
-        event_log["baseTokenSwappedAmount"]
-        - event_log["marketFeeAmount"]
-        - event_log["oceanFeeAmount"]
-        - event_log["consumeMarketFeeAmount"]
-        == event_log["datatokenSwappedAmount"]
+    tx = exchange.buy_DT(
+        datatoken_amt = DT_buy,
+        max_basetoken_amt = MAX_UINT256,
+        consume_market_fee_addr = consume_market_fee_addr,
+        consume_market_fee = consume_market_fee,
+        tx_dict = {"from": carlos},
     )
 
+    assert DT.balanceOf(carlos.address) == (DT_carlos1 + DT_buy)
+    assert OCEAN.balanceOf(carlos.address) == (OCEAN_carlos1 - OCEAN_needed)
+
     # ==========================================================================
-    # Bob sells DT to the exchange
+    # Carlos sells DT to the exchange
     DT_sell = to_wei(10)
+
+    DT_exchange1 = exchange.details.dt_supply
+    OCEAN_exchange1 = exchange.details.bt_supply
     
-    DT_bob1 = DT.balanceOf(bob.address)
-    OCEAN_bob1 = OCEAN.balanceOf(bob.address)
+    DT_carlos1 = DT.balanceOf(carlos.address)
+    OCEAN_carlos1 = OCEAN.balanceOf(carlos.address)
     
-    DT.approve(exchange.address, DT_sell, {"from": bob})
-    exchange.sell_DT(DT_sell, {"from": bob})
+    DT.approve(exchange.address, DT_sell, {"from": carlos})
+    exchange.sell_DT(
+        DT_sell,
+        min_basetoken_amt = 0,
+        consume_market_fee_addr = consume_market_fee_addr,
+        consume_market_fee = consume_market_fee,
+        tx_dict={"from": carlos}
+    )
     
-    # Bob should now have more OCEAN, and fewer DT
-    OCEAN_received = exchange.BT_received(DT_sell)
-    OCEAN_bob2 = OCEAN.balanceOf(bob.address)
-    DT_bob2 = DT.balanceOf(bob.address)
-    assert pytest.approx(from_wei(OCEAN_bob2), 0.01) \
-        == (from_wei(OCEAN_bob1) + from_wei(OCEAN_received))
-    assert from_wei(DT_bob2) == (from_wei(DT_bob1) - from_wei(DT_sell))
+    # Carlos should now have more OCEAN, and fewer DT
+    OCEAN_received = exchange.BT_received(DT_sell, consume_market_fee)
+    OCEAN_carlos2 = OCEAN.balanceOf(carlos.address)
+    DT_carlos2 = DT.balanceOf(carlos.address)
+    assert pytest.approx(from_wei(OCEAN_carlos2), 0.01) \
+        == (from_wei(OCEAN_carlos1) + from_wei(OCEAN_received))
+    assert from_wei(DT_carlos2) == (from_wei(DT_carlos1) - from_wei(DT_sell))
 
     # Test exchange's DT & OCEAN supply
-    OCEAN_for_exchange = OCEAN.allowance(bob.address, exchange.address)
     details = exchange.details
-    assert details.dt_supply == DT_sell
-    assert OCEAN_bob2 > OCEAN_for_exchange
-    assert details.bt_supply == OCEAN_for_exchange + details.bt_balance
+    OCEAN_to_exchange = to_wei(from_wei(details.fixed_rate)*from_wei(DT_sell))
+    assert from_wei(details.dt_supply) == \
+        from_wei(DT_exchange1) - from_wei(DT_sell)
+    assert from_wei(details.bt_supply) == \
+        from_wei(OCEAN_exchange1) - from_wei(OCEAN_to_exchange)
 
     # ==========================================================================
     # As payment collector, Alice collects DT payments & BT (OCEAN) payments
@@ -245,29 +234,25 @@ def test_buy_sell_and_claim(config, ocean, OCEAN, DT, alice, bob, carlos):
     assert from_wei(OCEAN.balanceOf(alice.address)) == from_wei(OCEAN_expected)
 
     # ==========================================================================
-    # As market fee collector, Carlos collects fees
-    fees = exchange.fees
-    assert fees.market_fee_collector == carlos.address
-    assert fees.market_fee > 0
-    assert fees.market_fee_available > 0
+    # As publish market fee collector, Alice collects fees
+    fees = exchange.fees_info
+    assert fees.publish_market_fee > 0
+    assert fees.publish_market_fee_available > 0
 
-    OCEAN_carlos1 = OCEAN.balanceOf(carlos.address)
-    exchange.collect_market_fee({"from": carlos})
-    OCEAN_expected = OCEAN_carlos1 + fees.market_fee_available
+    OCEAN_alice1 = OCEAN.balanceOf(alice.address)
+    exchange.collect_publish_market_fee({"from": alice})
+    OCEAN_expected = OCEAN_alice1 + fees.publish_market_fee_available
 
     st_time = time.time() # loop to avoid failure if chain didn't update yet
     while (time.time() - st_time) < 5:
-        if OCEAN.balanceOf(carlos.address) == OCEAN_expected:
+        if OCEAN.balanceOf(alice.address) == OCEAN_expected:
             break
         time.sleep(0.2)
-    assert from_wei(OCEAN.balanceOf(carlos.address)) == from_wei(OCEAN_expected)
+    assert from_wei(OCEAN.balanceOf(alice.address)) == from_wei(OCEAN_expected)
     
 
-
-
-
 @pytest.mark.unit
-def test_ExchangeDetails(alice):
+def test_ExchangeDetails():
     owner = "0xabc"
     datatoken = "0xdef"
     dt_decimals = 18
@@ -315,11 +300,11 @@ def test_ExchangeDetails(alice):
     s = str(details)
     assert "ExchangeDetails" in s
     assert f"datatoken = {datatoken}" in s
-    assert f"price " in s
+    assert f"rate " in s
 
 
 @pytest.mark.unit
-def test_Fees():
+def test_FeesInfo():
     mkt_fee = to_wei(0.03)
     mkt_fee_coll = "0xabc"
     opc_fee = to_wei(0.04)
@@ -327,18 +312,18 @@ def test_Fees():
     opc_avail = to_wei(0.6)
 
     tup = [mkt_fee, mkt_fee_coll, opc_fee, mkt_avail, opc_avail]
-    fees = Fees(tup)
+    fees = FeesInfo(tup)
 
-    assert fees.market_fee == mkt_fee
-    assert fees.market_fee_collector == mkt_fee_coll
+    assert fees.publish_market_fee == mkt_fee
+    assert fees.publish_market_fee_collector == mkt_fee_coll
     assert fees.opc_fee == opc_fee
-    assert fees.market_fee_available == mkt_avail
+    assert fees.publish_market_fee_available == mkt_avail
     assert fees.ocean_fee_available == opc_avail
 
     # Test str. Don't need to be thorough
     s = str(fees)
-    assert "Fees" in s
-    assert f"market_fee_collector = {mkt_fee_coll}" in s
+    assert "FeesInfo" in s
+    assert f"publish_market_fee_collector = {mkt_fee_coll}" in s
 
 
 @pytest.mark.unit

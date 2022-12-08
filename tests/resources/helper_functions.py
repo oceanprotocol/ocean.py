@@ -89,7 +89,7 @@ def generate_wallet():
     ocn = Ocean(config)
     OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
-        generated_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
+        generated_wallet.address, to_wei(50), {"from": deployer_wallet}
     )
     return generated_wallet
 
@@ -232,9 +232,9 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
 
 
 @enforce_types
-def transfer_base_token_if_balance_lte(
+def transfer_bt_if_bal_lte(
     config: dict,
-    base_token_address: str,
+    bt_address: str,
     from_wallet,
     recipient: str,
     min_balance: int,
@@ -244,7 +244,7 @@ def transfer_base_token_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = Datatoken(config, base_token_address)
+    base_token = Datatoken(config, bt_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
@@ -302,7 +302,7 @@ def get_provider_fees(
     return provider_fee
 
 
-def base_token_to_datatoken(
+def convert_bt_amt_to_dt(
     base_token_amount: int,
     base_token_decimals: int,
     datatokens_per_base_token: int,
@@ -319,11 +319,10 @@ def base_token_to_datatoken(
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
     unit_value = Decimal(10) ** 18
-    return Web3.toWei(
+    return to_wei(
         Decimal(base_token_amount)
         / unit_value
-        * Web3.fromWei(datatokens_per_base_token, "ether"),
-        "ether",
+        * from_wei(datatokens_per_base_token),
     )
 
 

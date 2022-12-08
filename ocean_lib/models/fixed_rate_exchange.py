@@ -7,8 +7,9 @@ from typing import Optional, Union
 from brownie import Wei
 from enforce_typing import enforce_types
 
-from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.ocean.util import str_with_wei
+from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 
 
 
@@ -39,7 +40,7 @@ class ExchangeDetails:
             f"ExchangeDetails: \n"
             f"  datatoken = {self.datatoken}\n"
             f"  base_token = {self.base_token}\n"
-            f"  price (fixed_rate) = {str_with_wei(self.fixed_rate)}\n"
+            f"  fixed_rate (price) = {str_with_wei(self.fixed_rate)}\n"
             f"  active = {self.active}\n"
             f"  dt_supply = {str_with_wei(self.dt_supply)}\n"
             f"  bt_supply = {str_with_wei(self.bt_supply)}\n"
@@ -54,32 +55,36 @@ class ExchangeDetails:
 
 
 @enforce_types
-class Fees:
+class FeesInfo:
     def __init__(self, fees_tup):
         """
         :param:details_tup
           -- returned from FixedRateExchange.sol::getFeesInfo(exchange_id)
-        which is (marketFee, marketFeeCollector, .., oceanFeeAvailable)
+        which is {(publish)market(swap)Fee, ..., oceanFeeAvailable}
         """
         t = fees_tup
-        self.market_fee: int = t[0]
-        self.market_fee_collector: str = t[1]
+        self.publish_market_fee: int = t[0]
+        self.publish_market_fee_collector: str = t[1]
         self.opc_fee: int = t[2]
-        self.market_fee_available = t[3]
+        self.publish_market_fee_available = t[3]
         self.ocean_fee_available = t[4]
 
 
     def __str__(self):
         s = (
-            f"Fees: \n"
-            f"  market_fee = {self.market_fee}\n"
-            f"  market_fee_collector = {self.market_fee_collector}\n"
+            f"FeesInfo: \n"
+            f"  publish_market_fee = {self.publish_market_fee}\n"
+            f"  publish_market_fee_collector"
+            f" = {self.publish_market_fee_collector}\n"
             f"  opc_fee = {self.opc_fee}\n"
-            f"  market_fee_available = {self.market_fee_available}\n"
+            f"  publish_market_fee_available"
+            f" = {self.publish_market_fee_available}\n"
             f"  ocean_fee_available = {self.ocean_fee_available}\n"
         )
         return s
 
+    #for attr in dir(obj):
+    #    print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
 @enforce_types
 class BtNeeded:
@@ -142,14 +147,19 @@ class OneExchange:
 
 
     @enforce_types
-    def BT_needed(self, DT_amt: Union[int, str], full_info:bool=False) \
-        -> Union[int, BtNeeded]:
+    def BT_needed(
+            self,
+            DT_amt: Union[int, str],
+            consume_market_fee: int,
+            full_info:bool=False
+    ) -> Union[int, BtNeeded]:
         """
         Returns an int - how many BTs you need, to buy target amt of DTs.
         Or, for an object with all details, set full_info=True.
         """
-        mkt_fee = self.fees.market_fee
-        tup = self._FRE.calcBaseInGivenOutDT(self._id, DT_amt, mkt_fee)
+        tup = self._FRE.calcBaseInGivenOutDT(
+            self._id, DT_amt, consume_market_fee
+        )
         bt_needed_obj = BtNeeded(tup)
         if full_info:
             return bt_needed_obj
@@ -157,14 +167,19 @@ class OneExchange:
 
 
     @enforce_types
-    def BT_received(self, DT_amt: Union[int, str], full_info:bool=False) \
-        -> Union[int, BtReceived]:
+    def BT_received(
+            self,
+            DT_amt: Union[int, str],
+            consume_market_fee: int,
+            full_info: bool=False,
+    ) -> Union[int, BtReceived]:
         """
         Returns an int - how many BTs you receive, in selling given amt of DTs.
         Or, for an object with all details, set full_info=True.
         """
-        mkt_fee = self.fees.market_fee
-        tup = self._FRE.calcBaseOutGivenInDT(self._id, DT_amt, mkt_fee)
+        tup = self._FRE.calcBaseOutGivenInDT(
+            self._id, DT_amt, consume_market_fee
+            )
         bt_recd_obj = BtReceived(tup)
         if full_info:
             return bt_recd_obj
@@ -172,53 +187,57 @@ class OneExchange:
 
 
     @enforce_types
-    def buy_DT(self,
-               datatoken_amt: Union[int, str],
-               tx_dict: dict,
-               max_basetoken_amt: Optional[int] = None):
+    def buy_DT(
+            self,
+            datatoken_amt: Union[int, str],
+            tx_dict: dict,
+            max_basetoken_amt: Optional[int] = MAX_UINT256,
+            consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
+            consume_market_fee: Optional[int] = 0,
+    ):
         """
         Buy datatokens via fixed-rate exchange.
 
         This wraps the smart contract method FixedRateExchange.buyDT()
           with a simpler interface.
 
-        Main params:
+        Params:
         - datatoken_amt - how many DT to buy? In wei, or str
-        - exchange_id -
+        - max_basetoken_amt - maximum to spend
+        - consume_market_fee_addr - market facilitating this swap
+        - consume_market_fee - fee charged by market that's facilitating
         - tx_dict - e.g. {"from": alice_wallet}
-
-        Optional params, with good defaults:
-        - max_basetoken_amt - maximum to spend. Default is caller's balance.
         """
         # import now, to avoid circular import
         from ocean_lib.models.datatoken import Datatoken
         
-        fees = self.fees
         details = self.details
         BT = Datatoken(self._FRE.config_dict, details.base_token)
         buyer_addr = tx_dict["from"].address
 
-        if max_basetoken_amt is None:
-            max_basetoken_amt = self.BT_needed(datatoken_amt)
-        max_basetoken_amt = Wei(max_basetoken_amt)
-        assert BT.balanceOf(buyer_addr) >= max_basetoken_amt, "not enough funds"
+        BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
+        assert BT.balanceOf(buyer_addr) >= BT_needed, "not enough funds"
         
         tx = self._FRE.buyDT(
             self._id,
             datatoken_amt,
             max_basetoken_amt,
-            fees.market_fee_collector,
-            fees.market_fee,
+            consume_market_fee_addr,
+            consume_market_fee,
             tx_dict,
         )
         return tx
 
 
     @enforce_types
-    def sell_DT(self,
-                datatoken_amt: Union[int, str],
-                tx_dict: dict,
-                min_basetoken_amt: Union[int, str] = 0):
+    def sell_DT(
+            self,
+            datatoken_amt: Union[int, str],
+            tx_dict: dict,
+            min_basetoken_amt: Union[int, str] = 0,
+            consume_market_fee_addr: str = ZERO_ADDRESS,
+            consume_market_fee: int = 0,
+    ):
         """
         Sell datatokens to the exchange, in return for e.g. OCEAN
         from the exchange's reserved
@@ -228,20 +247,18 @@ class OneExchange:
 
         Main params:
         - datatoken_amt - how many DT to sell? In wei, or str
-        - exchange_id -
-        - tx_dict - e.g. {"from": alice_wallet}
-
-        Optional params, with good defaults:
         - min_basetoken_amt - min basetoken to get back
+        - exchange_id -
+        - consume_market_fee_addr - market facilitating this swap
+        - consume_market_fee - fee charged by market that's facilitating
+        - tx_dict - e.g. {"from": alice_wallet}
         """
-        fees = self.fees
-
         tx = self._FRE.sellDT(
             self._id,
             datatoken_amt,
             min_basetoken_amt,
-            fees.market_fee_collector,
-            fees.market_fee,
+            consume_market_fee_addr,
+            consume_market_fee,
             tx_dict,
         )
         return tx
@@ -280,7 +297,7 @@ class OneExchange:
 
 
     @enforce_types
-    def collect_market_fee(self, tx_dict: dict):
+    def collect_publish_market_fee(self, tx_dict: dict):
         """
         This exchange collects fees for the publishing market, and
           records updates into its `market_fee_available`.
@@ -294,7 +311,7 @@ class OneExchange:
 
 
     @enforce_types
-    def collect_ocean_fee(self, tx_dict: dict):
+    def collect_opc_fee(self, tx_dict: dict):
         """
         This exchange collects fees for the Ocean Protocol Community (OPC), and
           records updates into its `ocean_fee_available`.
@@ -308,43 +325,50 @@ class OneExchange:
 
 
     @enforce_types
-    def update_market_fee_collector(self, new_addr: str, tx_dict):
+    def update_publish_market_fee_collector(self, new_addr: str, tx_dict):
+        """Update which address collects the publish market swap fees"""
         return self._FRE.updateMarketFeeCollector(self._id, new_addr, tx_dict)
 
 
     @enforce_types
-    def update_market_fee(self, new_amt: Union[str,int], tx_dict):
-        return self._FRE.updateMarketFeeCollector(self._id, new_addr, tx_dict)
+    def update_publish_market_fee(self, new_amt: Union[str,int], tx_dict):
+        """Update the value of the publish market swap fee"""
+        return self._FRE.updateMarketFee(self._id, new_addr, tx_dict)
 
 
     @enforce_types
-    def get_market_fee(self) -> int:
+    def get_publish_market_fee(self) -> int:
+        """Return the value of the publish market swap fee"""
         return self._FRE.getMarketFee(self._id)
 
 
     @enforce_types
     def set_rate(self, new_rate: Union[int,str], tx_dict: dict):
+        """Set price = # base tokens needed to buy 1 datatoken"""
         return self._FRE.setRate(self._id, new_rate, tx_dict)
 
 
     @enforce_types
     def toggle_mint_state(self, with_mint: bool, tx_dict: dict):
+        """Switch 'with_mint' from True <> False"""
         return self._FRE.toggleMintState(self._id, with_mint, tx_dict)
 
 
     @enforce_types
     def toggle_active(self, tx_dict: dict):
+        """Switch whether 'active' from True <> False"""
         return self._FRE.toggleExchangeState(self._id, tx_dict)
 
 
     @enforce_types
     def set_allowed_swapper(self, new_addr: str, tx_dict: dict):
+        """Set allowed swapper. ZERO_ADDRESS means anyone can swap."""
         return self._FRE.setAllowedSwapper(self._id, new_addr, tx_dict)
 
 
     @enforce_types
     def get_rate(self) -> int:
-        """Return the current price (fixed rate) for this exchange"""
+        """Get price = # base tokens needed to buy 1 datatoken"""
         return self._FRE.getRate(self._id)
 
 
@@ -369,15 +393,18 @@ class OneExchange:
 
     @enforce_types
     def get_allowed_swapper(self) -> str:
+        """Get allowed swapper. ZERO_ADDRESS means anyone can swap."""
         return self._FRE.getAllowedSwapper(self._id)
 
 
     @property
-    def fees(self) -> Fees:
+    def fees_info(self) -> FeesInfo:
+        """Get fee information for this exchange, as an object"""
         tup = self._FRE.getFeesInfo(self._id) 
-        return Fees(tup)
+        return FeesInfo(tup)
 
 
     @enforce_types
     def is_active(self) -> bool:
+        """Get whether exchange is 'active'"""
         return self._FRE.isActive(self._id)

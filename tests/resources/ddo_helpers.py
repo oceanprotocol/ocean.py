@@ -253,8 +253,8 @@ def get_first_service_by_type(ddo, service_type: str) -> Service:
     return next((service for service in ddo.services if service.type == service_type))
 
 
-def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
-    return FactoryRouter(exchange.config_dict, exchange.router()).getOPCCollector()
+def get_opc_collector_address_from_exchange(FRE: FixedRateExchange) -> str:
+    return FactoryRouter(FRE.config_dict, FRE.router()).getOPCCollector()
 
 
 def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:

@@ -120,12 +120,12 @@ class Datatoken(ContractBase):
     @enforce_types
     def create_exchange(
             self,
-            price: Union[int, str],
+            rate: Union[int, str],
             base_token_addr: str,
             tx_dict: dict,
             owner_addr: Optional[str] = None,
-            market_fee_collector_addr: Optional[str] = None,
-            market_fee: Union[int, str, None] = 0,
+            publish_market_fee_collector: Optional[str] = None,
+            publish_market_fee: Union[int, str, None] = 0,
             with_mint: Optional[bool] = False,
             allowed_swapper: Optional[str] = ZERO_ADDRESS,
     ) -> tuple:
@@ -136,15 +136,16 @@ class Datatoken(ContractBase):
           with a simpler interface
 
         Main params:
-        - price - how many base tokens does 1 datatoken cost? In wei or str
+        - rate - how many base tokens does 1 datatoken cost? In wei or str
         - base_token_addr - e.g. OCEAN address
         - tx_dict - e.g. {"from": alice_wallet}
 
         Optional params, with good defaults
         - owner_addr
-        - market_fee_collector_addr - Default to publisher
-        - market_fee - in wei or str, e.g. int(1e15) or "0.001 ether"
-        - with_mint - bool
+        - publish_market_fee_collector - fee going to publish mkt
+        - publish_market_fee - in wei or str, e.g. int(1e15) or "0.001 ether"
+        - with_mint - should the exchange mint datatokens as needed, or
+          do they need to by supplied/allowed by participants like base token?
         - allowed_swapper - if ZERO_ADDRESS, anyone can swap
 
         Return
@@ -158,21 +159,21 @@ class Datatoken(ContractBase):
         from_addr = tx_dict["from"].address
         BT = Datatoken(self.config_dict, base_token_addr)      
         owner_addr = owner_addr or from_addr
-        market_fee_collector_addr = market_fee_collector_addr or from_addr
+        publish_market_fee_collector = publish_market_fee_collector or from_addr
 
         tx = self.contract.createFixedRate(
             checksum_addr(FRE_addr),
             [
                 checksum_addr(BT.address),
                 checksum_addr(owner_addr),
-                checksum_addr(market_fee_collector_addr),
+                checksum_addr(publish_market_fee_collector),
                 checksum_addr(allowed_swapper),
             ],
             [
                 BT.decimals(),
                 self.decimals(),
-                price,
-                market_fee,
+                rate,
+                publish_market_fee,
                 with_mint,
             ],
             tx_dict,
