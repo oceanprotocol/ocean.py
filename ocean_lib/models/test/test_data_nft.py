@@ -23,6 +23,8 @@ def test_permissions(
     config,
     data_nft,
 ):
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
+
     """Tests permissions' functions."""
     assert data_nft.contract.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
@@ -210,6 +212,8 @@ def test_add_and_remove_permissions(
 @pytest.mark.unit
 def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data_nft):
     """Tests updating the metadata flow."""
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
+
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[
             DataNFTPermissions.UPDATE_METADATA
@@ -287,6 +291,7 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
 
 def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[
             DataNFTPermissions.UPDATE_METADATA
@@ -363,6 +368,7 @@ def test_create_datatoken_with_usdc_order_fee(
     config: dict, publisher_wallet, data_nft_factory: DataNFTFactoryContract, data_nft
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     publish_market_order_fee_amount_in_wei = Web3.toWei(5, "ether")
     dt = data_nft.create_datatoken(
@@ -438,6 +444,7 @@ def test_fail_creating_erc20(
     data_nft,
 ):
     """Tests failure for creating ERC20 token."""
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[
             DataNFTPermissions.DEPLOY_DATATOKEN
@@ -540,6 +547,7 @@ def test_erc721_datatoken_functions(
 @pytest.mark.unit
 def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of using the transfer functions."""
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
     with pytest.raises(
         Exception,
         match="transfer caller is not owner nor approved",
