@@ -163,12 +163,14 @@ class OceanAssets:
 
     @enforce_types
     def create_algo_asset(
-            self, name: str, url: str,
-            publisher_wallet,
-            image: str = "oceanprotocol/algo_dockers",
-            tag: str = "python-branin",
-            checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-            wait_for_aqua: bool = True
+        self,
+        name: str,
+        url: str,
+        publisher_wallet,
+        image: str = "oceanprotocol/algo_dockers",
+        tag: str = "python-branin",
+        checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+        wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "algorithm", having UrlFiles, with good defaults"""
 
@@ -185,7 +187,7 @@ class OceanAssets:
                 "image": image,
                 "tag": tag,
                 "checksum": checksum,
-            }
+            },
         }
 
         files = [UrlFile(url)]
