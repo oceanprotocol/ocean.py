@@ -18,12 +18,13 @@ def test_init():
 
 @pytest.mark.integration
 def test_aqua_functions_for_single_ddo(publisher_ocean, publisher_wallet, file1):
-    aquarius = Aquarius.get_instance(METADATA_CACHE_URI)
-
     """Tests against single-ddo functions of Aquarius."""
+    aquarius = publisher_ocean.assets._aquarius
+
     _, _, ddo1 = publisher_ocean.assets.create_url_asset(
         "Sample asset", file1.url, publisher_wallet
     )
+
     metadata1 = ddo1.metadata
 
     ddo2 = aquarius.wait_for_ddo(ddo1.did)
