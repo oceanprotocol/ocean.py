@@ -5,6 +5,11 @@
 
 import copy
 import logging
+import os
+from pathlib import Path
+
+from jsonsempai import magic  # noqa: F401
+from addresses import address as contract_addresses  # noqa: F401
 
 logging.basicConfig(level=logging.INFO)
 
@@ -50,6 +55,13 @@ def get_config_dict(network_name=None) -> dict:
     if network_name != "development":
         config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
     else:
-        config_dict["ADDRESS_FILE"] = "~/.ocean/ocean-contracts/artifacts/address.json"
+        address_file = os.getenv("ADDRESS_FILE")
+        address_file = (
+            os.path.expanduser(address_file)
+            if address_file
+            else Path(contract_addresses.__file__).expanduser().resolve()
+        )
+
+        config_dict["ADDRESS_FILE"] = address_file
 
     return config_dict
