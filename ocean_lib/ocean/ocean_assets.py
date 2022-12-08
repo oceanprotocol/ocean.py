@@ -232,7 +232,7 @@ class OceanAssets:
             "author": publisher_wallet.address[:7],
             "license": "CC0: PublicDomain",
         }
-        return metadtaa
+        return metadata
 
     @enforce_types
     def _create_1dt(self, metadata, files, publisher_wallet, wait_for_aqua):
