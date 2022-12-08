@@ -32,9 +32,11 @@ In the console:
 # For accounts: set private keys
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+```
 
-# For Infura node used in brownie
-export WEB3_INFURA_PROJECT_ID=<your WEB3_INFURA_PROJECT_ID>
+To avoid using Infura keys, especially for Polygon networks, use this command in the console:
+```console
+sed 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 ```
 
 ### Setup in Python
