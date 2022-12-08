@@ -317,7 +317,7 @@ def convert_bt_amt_to_dt(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    unit_value = Decimal(10) ** 18  ## FIXME: SHOULDN'T `18` BE `bt_decimals` ??
+    unit_value = Decimal(10) ** 18  # FIXME: SHOULDN'T `18` BE `bt_decimals` ??
     amt_wei = Web3.toWei(
         Decimal(bt_amount) / unit_value * Web3.fromWei(dt_per_bt_in_wei, "ether"),
         "ether",
