@@ -77,7 +77,7 @@ def publisher_ocean():
 
 
 @pytest.fixture
-def consumer_ocean_instance():
+def consumer_ocean():
     return get_consumer_ocean_instance()
 
 

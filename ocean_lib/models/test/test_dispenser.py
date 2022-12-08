@@ -194,9 +194,7 @@ def test_main_flow_via_contract_directly(
         )
 
 
-def test_dispenser_creation_without_minter(
-    config, publisher_wallet, consumer_wallet, datatoken
-):
+def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wallet):
     """Tests dispenser creation without a minter role."""
     _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
