@@ -28,8 +28,11 @@ def test_simple_with_defaults(ocean, OCEAN, DT, alice, bob):
     DT.mint(alice.address, to_wei(100), {"from": alice})
     DT.approve(exchange.address, to_wei(100), {"from": alice})
 
-    # Bob buys 2 datatokens
+    # Bob lets exchange pull the OCEAN needed 
+    OCEAN_needed = exchange.BT_needed(to_wei(2))
     OCEAN.approve(exchange.address, exchange.BT_needed(to_wei(2)), {"from":bob})
+    
+    # Bob buys 2 datatokens
     tx = exchange.buy_DT(to_wei(2), {"from": bob})
 
     # That's it! To wrap up, let's check Bob's balance

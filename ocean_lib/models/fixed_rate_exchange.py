@@ -38,7 +38,7 @@ class ExchangeDetails:
         s = (
             f"ExchangeDetails: \n"
             f"  datatoken = {self.datatoken}\n"
-            f"  baseToken = {self.base_token}\n"
+            f"  base_token = {self.base_token}\n"
             f"  price (fixed_rate) = {str_with_wei(self.fixed_rate)}\n"
             f"  active = {self.active}\n"
             f"  dt_supply = {str_with_wei(self.dt_supply)}\n"

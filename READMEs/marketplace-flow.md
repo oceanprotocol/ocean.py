@@ -3,28 +3,23 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Marketplace Flow
+# Quickstart: Post Priced Data
 
-This quickstart describes where Bob buys datatokens for OCEAN using the fixed-rate exchange flow.
-
-It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
+This quickstart describes posting fixed-price data for sale, and subsequent purchase by others.
 
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes Data NFT & Datatoken
-3.  Alice creates an OCEAN-datatoken exchange
-4.  Bob buys datatokens with OCEAN
+2.  Alice publishes dataset
+3.  Alice posts it for sale
+4.  Bob buys dataset with OCEAN
 
 Let's go through each step.
 
 ## 1. Setup
 
 From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
+- [x] Setup
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
@@ -41,81 +36,74 @@ os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c1
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
-OCEAN_token = ocean.OCEAN_token
+OCEAN = ocean.OCEAN_token
+
+# Ensure Bob has enough funds
+from brownie.network import accounts
+assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
+assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "Bob needs OCEAN"
 ```
 
-## 2. Alice publishes Data NFT & Datatoken
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 2.1 Create a data NFT
-- [x] 2.2 Create a datatoken from the data NFT
-
-Then, have Alice mint datatokens. In the same Python console:
-```python
-from web3.main import Web3
-datatoken.mint(alice_wallet.address, Web3.toWei(100, "ether"), {"from": alice_wallet})
-```
-
-## 3. Alice creates an OCEAN-datatoken exchange
+## 2. Alice publishes dataset
 
 In the same Python console:
 ```python
-exchange_id = ocean.create_fixed_rate(
-    datatoken=datatoken,
-    base_token=OCEAN_token,
-    amount=Web3.toWei(100, "ether"),
-    fixed_rate=Web3.toWei(1, "ether"),
-    from_wallet=alice_wallet,
-)
+name = "Branin dataset"
+url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
 ```
 
-Instead of using OCEAN, Alice could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, WETH, or other, for a slightly higher fee.
 
-## 4. Bob buys datatokens with OCEAN
+## 3. Alice posts dataset for sale
+
+In the same Python console:
+```python
+# create exchange
+from ocean_lib.ocean.util import to_wei, from_wei
+price = to_wei(1)
+exchange = datatoken.create_fixed_rate(price, OCEAN.address, {"from":alice_wallet})
+
+# make 100 datatokens available on the exchange
+datatoken.mint(alice.address, to_wei(100), {"from": alice})
+datatoken.approve(exchange.address, to_wei(100), {"from": alice})
+```
+
+Instead of OCEAN, Alice could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, WETH, or other, for a slightly higher fee.
+
+## 4. Bob buys dataset with OCEAN
 
 Now, you're Bob. In the same Python console:
 ```python
-# Bob verifies having enough funds
-from brownie.network import accounts
-assert accounts.at(bob_wallet.address).balance() > 0, "need ganache ETH"
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
+# let exchange pull the OCEAN needed 
+OCEAN_needed = exchange.BT_needed(to_wei(1))
+OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob})
 
-# Bob retrieves the address of the exchange to use.
-#   For convenience, we the object that Alice created.
-#   In practice, Bob might use search or other means. See the "Tips & Tricks" section for details.
-exchange_address = ocean.fixed_rate_exchange.address
+# buy datatoken
+exchange.buy(to_wei(1), {"from": bob_wallet})
 
-# Bob allows the exchange contract to spend some OCEAN
-OCEAN_token.approve(exchange_address, Web3.toWei(100, "ether"), {"from": bob_wallet})
-
-# Bob starts the exchange. The contract takes some of his OCEAN and adds datatokens.
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-tx_result = ocean.fixed_rate_exchange.buyDT(
-    exchange_id,
-    Web3.toWei(20, "ether"),
-    Web3.toWei(50, "ether"),
-    ZERO_ADDRESS,
-    0,
-    {"from": bob_wallet},
-)
-assert tx_result, "failed buying datatokens at fixed rate for Bob"
+# That's it! To wrap up, let's check Bob's balance
+bal = datatoken.balanceOf(bob_wallet.address)
+print(f"Bob has {from_wei(bal)} datatokens")
 ```
 
 ## Appendix. Tips & Tricks
 
-You can combine the transactions to (a) publish data NFT, (b) publish datatoken, and (c) publish exchange into a _single_ transaction, via the method `create_nft_erc20_with_fixed_rate()`.
-
-If you already created the `exchange_id`, then you can reuse it.
-
-If an exchange has been created before or there are other exchanges for a certain datatoken, it can be searched by providing the datatoken address. In Python consodle:
+Here's how to see all the exchanges that list the datatoken. In the Python console:
 ```python
-# Get a list exchange addresses and ids with a given datatoken and exchange owner.
-datatoken_address = datatoken.address
-nft_factory = ocean.get_nft_factory()
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
-
-# And, we can filter results by the exchange owner.
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
-print(exchange_addresses_and_ids)
+exchange_ids = datatoken.get_fixed_rate_exchanges() #list of exchange_id
 ```
 
+To learn about an exchange's status:
+
+```python
+print(exchange.details)
+```
+
+It will output something like:
+```text
+ExchangeDetails:
+  datatoken = 0x92cA723B61CbD933390aA58b83e1F00cedf4ebb6
+  base_token = 0x..
+  price (fixed_rate) = 5 (50000000000000000000 wei)
+  ...
+```
