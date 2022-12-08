@@ -131,6 +131,11 @@ def ocean_token(config, ocean_address) -> Datatoken:
     return Datatoken(config, ocean_address)
 
 
+@pytest.fixture # alias for ocean_token
+def OCEAN(config, ocean_token) -> Datatoken:
+    return ocean_token
+
+
 @pytest.fixture
 def factory_router(config):
     return FactoryRouter(config, get_address_of_type(config, "Router"))

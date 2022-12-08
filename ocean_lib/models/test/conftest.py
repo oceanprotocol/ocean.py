@@ -50,8 +50,18 @@ def alice_wallet():
 
 
 @pytest.fixture
+def alice(alice_wallet): # alias to alice_wallet
+    return alice_wallet
+
+
+@pytest.fixture
 def alice_ocean():
     return alice_info().ocean
+
+
+@pytest.fixture
+def ocean(alice_ocean): #alias for alice_ocean
+    return alice_ocean
 
 
 @pytest.fixture
@@ -67,6 +77,11 @@ def bob_address():
 @pytest.fixture
 def bob_wallet():
     return bob_info().wallet
+
+
+@pytest.fixture
+def bob(bob_wallet): #alias to bob_wallet
+    return bob_wallet
 
 
 @pytest.fixture

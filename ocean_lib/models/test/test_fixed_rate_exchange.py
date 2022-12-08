@@ -3,167 +3,298 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3.main import Web3
 
-from ocean_lib.models.fixed_rate_exchange import (
-    FixedExchangeBaseInOutData,
-    FixedRateExchange,
-    FixedRateExchangeDetails,
-    FixedRateExchangeFeesInfo,
-)
+
+from ocean_lib.models.fixed_rate_exchange import \
+    ExchangeDetails, Fees, BtNeeded, BtReceived, FixedRateExchange, OneExchange
+
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei, from_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
+
 
 
 @pytest.mark.unit
-def test_exchange_rate_creation(
-    config,
-    ocean_token,
-    publisher_wallet,
-    consumer_wallet,
-    another_consumer_wallet,
-    consumer_addr,
-    another_consumer_addr,
-    datatoken,
-):
-    """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    amount = Web3.toWei("100000", "ether")
-    amount_dt_to_sell = Web3.toWei("100", "ether")
-    no_limit = Web3.toWei("100000000000000000000", "ether")
-    rate = Web3.toWei("1", "ether")
-    publish_market_swap_fee = int(1e15)  # 0.1%
-    pmt_collector = datatoken.getPaymentCollector()
+def test_ExchangeDetails(alice):
+    exchange_owner = "0xabc"
+    datatoken = "0xdef"
+    dt_decimals = 18
+    base_token = "0x123"
+    bt_decimals = 10
+    fixed_rate = to_wei(0.01)
+    active = False
+    dt_supply = to_wei(100)
+    bt_supply = to_wei(101)
+    dt_balance = to_wei(10)
+    bt_balance = to_wei(11)
+    with_mint = True
 
-    fixed_exchange = FixedRateExchange(
-        config, get_address_of_type(config, "FixedPrice")
+    tup = [
+        exchange_owner,
+        datatoken,
+        dt_decimals,
+        base_token,
+        bt_decimals, 
+        fixed_rate,
+        active,
+        dt_supply,
+        bt_supply,
+        dt_balance,
+        bt_balance,
+        with_mint,
+    ]
+    
+    details = ExchangeDetails(tup)
+    
+    assert details.exchange_owner == exchange_owner
+    assert details.datatoken == datatoken
+    assert details.dt_decimals == dt_decimals
+    assert details.base_token == base_token
+    assert details.bt_decimals == bt_decimals
+    assert details.fixed_rate == fixed_rate
+    assert details.active == active
+    assert details.dt_supply == dt_supply
+    assert details.bt_supply == bt_supply
+    assert details.dt_balance == dt_balance
+    assert details.bt_balance == bt_balance
+    assert details.with_mint == with_mint
+
+    # Test str. Don't need to be thorough
+    s = str(details)
+    assert "ExchangeDetails" in s
+    assert f"datatoken = {datatoken}" in s
+    assert f"price " in s
+
+
+@pytest.mark.unit
+def test_Fees():
+    mkt_fee = to_wei(0.03)
+    mkt_fee_coll = "0xabc"
+    opc_fee = to_wei(0.04)
+    mkt_avail = to_wei(0.5)
+    opc_avail = to_wei(0.6)
+
+    tup = [mkt_fee, mkt_fee_coll, opc_fee, mkt_avail, opc_avail]
+    fees = Fees(tup)
+
+    assert fees.market_fee == mkt_fee
+    assert fees.market_fee_collector == mkt_fee_coll
+    assert fees.opc_fee == opc_fee
+    assert fees.market_fee_available == mkt_avail
+    assert fees.ocean_fee_available == opc_avail
+
+    # Test str. Don't need to be thorough
+    s = str(fees)
+    assert "Fees" in s
+    assert f"market_fee_collector = {mkt_fee_coll}" in s
+
+
+@pytest.mark.unit
+def test_BtNeeded():
+    a, b, c, d = 1, 2, 3, 4 #not realistic values, fyi
+    bt_needed = BtNeeded([a, b, c, d])
+    assert bt_needed.base_token_amount == a
+    assert bt_needed.ocean_fee_amount == b
+    assert bt_needed.publish_market_fee_amount == c
+    assert bt_needed.consume_market_fee_amount == d
+
+
+@pytest.mark.unit
+def test_BtReceived():
+    a, b, c, d = 1, 2, 3, 4 #not realistic values, fyi
+    bt_recd = BtReceived([a, b, c, d])
+    assert bt_recd.base_token_amount == a
+    assert bt_recd.ocean_fee_amount == b
+    assert bt_recd.publish_market_fee_amount == c
+    assert bt_recd.consume_market_fee_amount == d
+    
+    
+@pytest.mark.unit
+def test_simple_with_defaults(ocean, OCEAN, alice, bob, datatoken):
+    # =========================================================================
+    # Simple flow
+    
+    # Mint datatokens; create exchange
+    DT = datatoken
+    DT.mint(alice.address, "100 ether", {"from": alice})
+    (exchange, tx) = DT.create_fixed_rate(
+        price = "3 ether",
+        base_token_addr = OCEAN.address, 
+        amount = "100 ether",
+        tx_dict = {"from":alice}
     )
 
-    datatoken.mint(consumer_addr, amount, {"from": publisher_wallet})
-    assert datatoken.balanceOf(consumer_addr) == amount
-    number_of_exchanges_before = fixed_exchange.getNumberOfExchanges()
+    # Bob buys 2 datatokens
+    tx = exchange.buy_DT("2 ether", {"from": bob})
 
-    tx_receipt = datatoken.create_fixed_rate(
-        fixed_price_address=get_address_of_type(config, "FixedPrice"),
-        base_token_address=ocean_token.address,
-        owner=consumer_addr,
-        publish_market_swap_fee_collector=another_consumer_addr,
-        allowed_swapper=ZERO_ADDRESS,
-        base_token_decimals=18,
-        datatoken_decimals=18,
-        fixed_rate=rate,
-        publish_market_swap_fee_amount=publish_market_swap_fee,
-        with_mint=0,
-        transaction_parameters={"from": publisher_wallet},
+    # That's it! To wrap up, let's check Bob's balance
+    bal = DT.balanceOf(bob.address)
+    assert from_wei(bal) == 2
+
+    # =========================================================================
+    # Test details...
+    
+    # all exchanges for this DT
+    exchanges = DT.get_fixed_rate_exchanges()
+    assert [e.exchange_id for e in exchanges] == [exchange.exchange_id]
+
+    # Test details
+    details = exchange.details(exchange_id)
+    assert details.exchange_owner == alice.address
+    assert details.datatoken == DT.address
+    assert details.dt_decimals == DT.decimals()
+    assert from_wei(details.fixed_fate) == 3
+    assert details.active == True
+    assert from_wei(details.dt_supply) == (100 - 2)
+    assert from_wei(details.bt_supply) == 2 * 3
+    assert from_wei(details.dt_balance) == 0
+    assert from_wei(details.bt_balance) == 2 * 3
+    assert details.with_mint == False
+
+    # Test fees
+    fees = exchange.fees()
+    assert from_wei(fees.market_fee) == 0
+    assert fees.market_fee_collector == alice.address
+    assert from_wei(fees.opc_fee) == 0.001 \
+        == from_wei(OPC_SWAP_FEE_APPROVED) # 0.1% *if* BT approved
+    assert from_wei(fees.market_fee_available) == 0
+    assert from_wei(fees.ocean_fee_available) == 2 * 3 * 0.001
+    
+    assert from_wei(exchange.FRE.getOPCFee(ZERO_ADDRESS)) == 0.002 # 0.2% bc BT not approved
+
+    # Test other attributes
+    assert exchange.BT_needed(to_wei(1.0)) >= to_wei(3) 
+    assert exchange.BT_received(to_wei(1.0)) >= to_wei(2) 
+    assert from_wei(exchange.getRate()) == 3
+    assert exchange.getAllowedSwapper() == ZERO_ADDRESS
+    assert exchange.isActive()
+
+
+@pytest.mark.unit
+def test_simple_with_nondefaults(ocean, OCEAN, alice, bob, carlos, datatoken):
+    # =========================================================================
+    # Simple flow
+    
+    # Mint datatokens; create exchange
+    DT = datatoken
+    DT.mint(alice.address, "100 ether", {"from": alice})
+    exchange, tx = DT.create_fixed_rate(
+        price = "2 ether",
+        base_token_addr = OCEAN.address,
+        amount = "100 ether",
+        owner_addr = bob.address,
+        market_fee_collector_addr = carlos.address,
+        market_fee = to_wei(0.09),
+        with_mint = True,
+        allowed_swapper = bob.address,
+        tx_dict = {"from":alice}
     )
 
-    registered_event = tx_receipt.events["NewFixedRate"]
+    # ==============================================================
+    # Test details. Focus on difference from default
 
-    assert fixed_exchange.getNumberOfExchanges() == (number_of_exchanges_before + 1)
-    assert registered_event["owner"] == consumer_addr
-    assert len(fixed_exchange.getExchanges()) == (number_of_exchanges_before + 1)
+    # Test details
+    details = exchange.details()
+    assert details.exchange_owner == bob.address
+    assert details.with_mint == True
 
-    exchange_id = registered_event["exchangeId"]
+    # Test fees. Focus on difference from default
+    fees = exchange.fees()
+    assert from_wei(fees.market_fee) == 0.09
+    assert fees.market_fee_collector == carlos.address
 
-    # Generate exchange id works
-    generated_exchange_id = fixed_exchange.generateExchangeId(
-        ocean_token.address, datatoken.address
+    # Test allowedSwapper
+    assert exchange.getAllowedSwapper() == bob.address
+    
+    # ==========================================================================
+    # Change market fee collector from Carlos -> Bob
+    
+    # Only the current collector (Carlos) can update
+    with pytest.raises(Exception, match="not marketFeeCollector"):
+        exchange.updateMarketFeeCollector(bob.address, {"from": bob})
+
+    exchange.updateMarketFeeCollector(bob.address, {"from": carlos})
+
+    # ==========================================================================
+    # Test deactivating exchange
+    assert exchange.isActive()
+    exchange.toggleExchangeState({"from": alice})
+    assert not exchange.isActive()
+    exchange.toggleExchangeState({"from": alice})
+    assert exchange.isActive()
+
+    # ==========================================================================
+    # Test setting price (rate)
+    exchange.setRate(to_wei(1.1), {"from": alice})
+    assert from_wei(exchange.getRate()) == 1.1
+
+    
+
+
+@pytest.mark.unit
+def test_thorough(config, ocean, OCEAN, alice, bob, carlos, datatoken):
+    # ==========================================================================
+    # Create exchange
+    
+    # base data
+    DT, FRE = datatoken, ocean.fixed_rate_exchange
+    
+    # Set exchange params
+    DT_amt = to_wei(100000)
+    huge_num_DT = to_wei(1e20)
+    price = to_wei(1)
+    market_fee = to_wei(0.001)
+
+    # Bob mints DT
+    DT.mint(bob.address, DT_amt, {"from": alice})
+    assert DT.balanceOf(bob.address) == DT_amt
+
+    # Alice creates exchange. Bob's the owner, and carlos gets fees!
+    num_exchanges_before = FRE.getNumberOfExchanges()
+    exchange_id, tx_receipts = DT.create_fixed_rate(
+        price = price,
+        base_token_addr = OCEAN.address,
+        amount = DT_amt,
+        tx_dict = {"from": alice},
+        owner_addr = bob.address,
+        market_fee_collector_addr = carlos.address,
+        market_fee = market_fee,
     )
-    assert generated_exchange_id == exchange_id
+    assert len(tx_receipts) != 2, "shouldn't have done optional approve()"
+    DT.approve(FRE.address, DT_amt, {"from": bob})
 
-    # Exchange is active
-    is_active = fixed_exchange.isActive(exchange_id)
-    assert is_active, "Exchange was not activated correctly!"
+    # Test exchange count
+    assert FRE.getNumberOfExchanges() == (num_exchanges_before + 1)
+    assert len(FRE.getExchanges()) == (num_exchanges_before + 1)
 
-    # Exchange should not have supply yet
-    exchange_details = fixed_exchange.getExchange(exchange_id)
+    # Test generateExchangeId
+    assert FRE.generateExchangeId(OCEAN.address, DT.address) == exchange_id
+    
+    # Test exchange supply
+    details = FRE.details(exchange_id)
+    OCEAN_allowance = OCEAN.allowance(bob.address, FRE.address)
+    assert from_wei(details.dt_supply) == from_wei(DT_amt)
+    assert from_wei(details.bt_supply) == from_wei(OCEAN_allowance)
 
-    assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == 0
-    assert (
-        exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
-    ) == ocean_token.allowance(
-        exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        fixed_exchange.address,
-    )
+    # ==========================================================================
+    # Carlos buys DT. (Carlos spends OCEAN, Bob spends DT)
+    DT_buy = to_wei(11)
 
-    # Consumer_wallet approves how many DT tokens wants to sell
-    # Consumer_wallet only approves an exact amount so we can check supply etc later in the test
-    datatoken.approve(
-        fixed_exchange.address, amount_dt_to_sell, {"from": consumer_wallet}
-    )
-    # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
-    ocean_token.approve(
-        fixed_exchange.address,
-        Web3.toWei("1000000", "ether"),
-        {"from": another_consumer_wallet},
-    )
+    OCEAN_needed = FRE.BT_needed(exchange_id, DT_buy).val
+    OCEAN.transfer(carlos.address, OCEAN_needed, {"from": bob})
 
-    # Exchange should have supply and fees setup
-    fee_info = fixed_exchange.getFeesInfo(exchange_id)
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
-    assert (
-        fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
-        == another_consumer_addr
-    )
-    # token is approved, so 0.001
-    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == OPC_SWAP_FEE_APPROVED
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] == 0
-    assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
+    DT_bob_before = DT.balanceOf(bob.address)
+    DT_carlos_before = DT.balanceOf(carlos.address)
+    OCEAN_carlos_before = OCEAN.balanceOf(carlos.address)
 
-    # Check OPC fee collector
-    get_opc_collector_address_from_exchange(fixed_exchange) == get_address_of_type(
-        config, "OPFCommunityFeeCollector"
-    )
+    tx = exchange.buy_DT(DT_buy, exchange_id, {"from": carlos})
 
-    # Get exchange info
-    # Get swapOceanFee
-    # token address is not approved, so 0.002
-    assert fixed_exchange.getOPCFee(ZERO_ADDRESS) == Web3.toWei("0.002", "ether")
+    assert DT.balanceOf(bob.address) == (DT_bob_before - DT_buy)
+    assert DT.balanceOf(carlos.address) == (DT_carlos_before + DT_buy)
+    assert OCEAN.balanceOf(carlos.address) >= (OCEAN_carlos_before-OCEAN_needed)
 
-    # Should get the exchange rate
-    exchange_rate = fixed_exchange.getRate(exchange_id)
-
-    assert rate == exchange_rate
-
-    # Buy should fail if price is too high
-    with pytest.raises(Exception, match="Too many base tokens"):
-        fixed_exchange.buyDT(
-            exchange_id,
-            amount_dt_to_sell,
-            1,
-            ZERO_ADDRESS,
-            0,
-            {"from": another_consumer_wallet},
-        )
-
-    ocean_token.transfer(
-        another_consumer_addr,
-        ocean_token.balanceOf(consumer_addr),
-        {"from": consumer_wallet},
-    )
-
-    # Test buy DT workflow
-    ocean_balance_publisher_before_swap = ocean_token.balanceOf(consumer_addr)
-    datatoken_dt_balance_consumer_before_swap = datatoken.balanceOf(
-        another_consumer_addr
-    )
-
-    assert ocean_balance_publisher_before_swap == 0
-    assert datatoken_dt_balance_consumer_before_swap == 0
-
-    tx_receipt = fixed_exchange.buyDT(
-        exchange_id,
-        amount_dt_to_sell,
-        no_limit,
-        consumer_addr,
-        Web3.toWei("0.1", "ether"),
-        {"from": another_consumer_wallet},
-    )
-
-    event_log = tx_receipt.events["Swapped"]
-
-    # Check fixed rate exchange outputs. Rate = 1
+    # Check fixed rate exchange outputs. Price = Rate = 1
+    event_log = tx_receipts[-1].events["Swapped"]
     assert (
         event_log["baseTokenSwappedAmount"]
         - event_log["marketFeeAmount"]
@@ -172,131 +303,71 @@ def test_exchange_rate_creation(
         == event_log["datatokenSwappedAmount"]
     )
 
-    assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell
-    assert ocean_token.balanceOf(consumer_addr) > ocean_balance_publisher_before_swap
-    # Test sell DT workflow
-    datatoken_dt_balance_consumer_before_swap = datatoken.balanceOf(
-        another_consumer_addr
-    )
-    datatoken.approve(
-        fixed_exchange.address,
-        datatoken_dt_balance_consumer_before_swap,
-        {"from": consumer_wallet},
-    )
-    datatoken_balance_before = datatoken.balanceOf(consumer_addr)
-    ocean_balance_before = ocean_token.balanceOf(consumer_addr)
-    fixed_exchange.sellDT(
-        exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, {"from": consumer_wallet}
-    )
+    # ==========================================================================
+    # Bob sells DT to the exchange, getting OCEAN from exchange's reserve
+    DT_sell = to_wei(10)
+    
+    DT_bob1 = DT.balanceOf(bob.address)
+    OCEAN_bob1 = OCEAN.balanceOf(bob.address)
+    
+    exchange.sell_DT(DT_sell, exchange_id, {"from": bob})
+    
+    # Bob should now have more OCEAN, and fewer DT
+    OCEAN_received = FRE.BT_received(exchange_id, DT_sell).val
+    OCEAN_bob2 = OCEAN.balanceOf(bob.address)
+    DT_bob2 = DT.balanceOf(bob.address)
+    assert pytest.approx(OCEAN_bob2, to_wei(0.01)) \
+        == (OCEAN_bob1 + OCEAN_received)
+    assert DT_bob2 == (DT_bob1 - DT_sell)
 
-    # Base balance incremented as expect after selling data tokens
-    assert (
-        ocean_token.balanceOf(consumer_addr)
-        == fixed_exchange.calcBaseOutGivenInDT(
-            exchange_id,
-            amount_dt_to_sell,
-            0,
-        )[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
-        + ocean_balance_before
-    )
+    # Test exchange's DT & OCEAN supply
+    details = FRE.details(exchange_id)
+    assert details.dt_supply == DT_sell
+    
+    OCEAN_for_FRE = OCEAN.allowance(bob.address, FRE.address)
+    assert OCEAN_bob2 > OCEAN_for_FRE
+    assert details.bt_supply == OCEAN_for_FRE + details.bt_balance
 
-    assert (
-        datatoken.balanceOf(consumer_addr)
-        == datatoken_balance_before - amount_dt_to_sell
-    )
+    # ==========================================================================
+    # As payment collector, Alice collects DT payments & BT (OCEAN) payments
+    assert DT.getPaymentCollector() == alice.address
 
-    exchange_details = fixed_exchange.getExchange(exchange_id)
+    DT_alice_before = DT.balanceOf(alice.address)
+    receipt = FRE.collectDT(exchange_id, details.dt_balance, {"from": alice})
+    DT_received = receipt.events["TokenCollected"]["amount"]
+    assert receipt.events["TokenCollected"]["to"] == alice.address
+    DT_expected = DT_alice_before + DT_received
 
-    assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == amount_dt_to_sell
-    assert (
-        exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
-    ) == ocean_token.allowance(
-        exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
-        fixed_exchange.address,
-    )
+    OCEAN_alice_before = OCEAN.balanceOf(alice.address)
+    receipt = FRE.collectBT(exchange_id, details.bt_balance, {"from": alice})
+    OCEAN_received = receipt.events["TokenCollected"]["amount"]
+    assert receipt.events["TokenCollected"]["to"] == alice.address
+    OCEAN_expected = OCEAN_alice_before + OCEAN_received
 
-    # Fixed Rate Exchange owner withdraws DT balance
+    st_time = time.time() # loop to avoid failure if chain didn't update yet
+    while (time.time() - st_time) < 5:
+        if DT.balanceOf(alice.address) == DT_expected \
+           and OCEAN.balanceOf(alice.address) == OCEAN_expected:
+            break
+        time.sleep(0.2)
+    assert DT.balanceOf(alice.address) == DT_expected
+    assert OCEAN.balanceOf(alice.address) == OCEAN_expected
 
-    dt_balance_before = datatoken.balanceOf(pmt_collector)
+    # ==========================================================================
+    # As market fee collector, Carlos collects fees
+    fees = FRE.fees(exchange_id)
+    assert fees.market_fee_collector == carlos.address
+    assert fees.market_fee > 0
+    assert fees.market_Fee_available > 0
 
-    receipt = fixed_exchange.collectDT(
-        exchange_id,
-        exchange_details[FixedRateExchangeDetails.DT_BALANCE],
-        {"from": consumer_wallet},
-    )
+    OCEAN_carlos_before = OCEAN.balanceOf(carlos.address)
+    FRE.collectMarketFee(exchange_id, {"from": carlos})
+    OCEAN_expected = OCEAN_carlos_before + fees.market_fee_available
 
-    logs = receipt.events["TokenCollected"]
-    assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs["amount"]
+    st_time = time.time() # loop to avoid failure if chain didn't update yet
+    while (time.time() - st_time) < 5:
+        if OCEAN.balanceOf(carlos.address) == OCEAN_expected:
+            break
+        time.sleep(0.2)
+    assert OCEAN.balanceOf(carlos.address) == OCEAN_expected
 
-    # Fixed Rate Exchange owner withdraws BT balance
-    # Needs to buy because he sold all the DT amount and BT balance will be 0.
-    datatoken.approve(
-        fixed_exchange.address, Web3.toWei(10, "ether"), {"from": consumer_wallet}
-    )
-
-    fixed_exchange.buyDT(
-        exchange_id,
-        Web3.toWei(10, "ether"),
-        no_limit,
-        consumer_addr,
-        Web3.toWei("0.1", "ether"),
-        {"from": another_consumer_wallet},
-    )
-    assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell + Web3.toWei(
-        10, "ether"
-    )
-    bt_balance_before = ocean_token.balanceOf(pmt_collector)
-
-    receipt = fixed_exchange.collectBT(
-        exchange_id,
-        exchange_details[FixedRateExchangeDetails.BT_BALANCE],
-        {"from": consumer_wallet},
-    )
-
-    logs = receipt.events["TokenCollected"]
-
-    assert ocean_token.balanceOf(pmt_collector) == bt_balance_before + logs["amount"]
-
-    # Exchange should have fees available and claimable
-    # Market fee collector bt balance
-    bt_balance_before = ocean_token.balanceOf(another_consumer_addr)
-
-    fee_info = fixed_exchange.getFeesInfo(exchange_id)
-
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
-    assert (
-        fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
-        == another_consumer_addr
-    )
-    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == Web3.toWei("0.001", "ether")
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] > 0
-    assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] > 0
-
-    fixed_exchange.collectMarketFee(exchange_id, {"from": another_consumer_wallet})
-
-    assert (
-        ocean_token.balanceOf(another_consumer_addr)
-        == bt_balance_before + fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE]
-    )
-
-    # Market fee collector update
-    # Only market fee collector should be able to update market_fee_collector
-    with pytest.raises(Exception, match="not marketFeeCollector"):
-        fixed_exchange.updateMarketFeeCollector(
-            exchange_id, consumer_addr, {"from": consumer_wallet}
-        )
-
-    fixed_exchange.updateMarketFeeCollector(
-        exchange_id, consumer_addr, {"from": another_consumer_wallet}
-    )
-
-    # Deactive exchange should work
-    fixed_exchange.toggleExchangeState(exchange_id, {"from": publisher_wallet})
-    assert not fixed_exchange.isActive(exchange_id)
-    fixed_exchange.toggleExchangeState(exchange_id, {"from": publisher_wallet})
-
-    # Set exchange rate exchange should work
-    fixed_exchange.setRate(
-        exchange_id, Web3.toWei("1.1", "ether"), {"from": publisher_wallet}
-    )
-    assert fixed_exchange.getRate(exchange_id) == Web3.toWei("1.1", "ether")
