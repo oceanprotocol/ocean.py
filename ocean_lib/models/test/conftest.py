@@ -90,6 +90,11 @@ def bob_ocean():
 
 
 @pytest.fixture
+def carlos(another_consumer_wallet): #alias for another_consumer wallet
+    return another_consumer_wallet
+
+
+@pytest.fixture
 def T1():  # 'TOK1' with 1000.0 held by Alice
     return alice_info().T1
 

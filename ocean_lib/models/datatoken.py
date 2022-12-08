@@ -118,11 +118,10 @@ class Datatoken(ContractBase):
     # Priced data: fixed-rate exchange
 
     @enforce_types
-    def create_fixed_rate(
+    def create_exchange(
             self,
             price: Union[int, str],
             base_token_addr: str,
-            amount: Union[int, str],
             tx_dict: dict,
             owner_addr: Optional[str] = None,
             market_fee_collector_addr: Optional[str] = None,
@@ -139,7 +138,6 @@ class Datatoken(ContractBase):
         Main params:
         - price - how many base tokens does 1 datatoken cost? In wei or str
         - base_token_addr - e.g. OCEAN address
-        - amount - make how many datatokens available, in wei or str
         - tx_dict - e.g. {"from": alice_wallet}
 
         Optional params, with good defaults
@@ -187,7 +185,7 @@ class Datatoken(ContractBase):
 
 
     @enforce_types
-    def get_fixed_rate_exchanges(self) -> list:
+    def get_exchanges(self) -> list:
         """return List[OneExchange] - all the exchanges for this datatoken"""
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange

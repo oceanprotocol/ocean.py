@@ -132,7 +132,7 @@ def ocean_token(config, ocean_address) -> Datatoken:
 
 
 @pytest.fixture # alias for ocean_token
-def OCEAN(config, ocean_token) -> Datatoken:
+def OCEAN(ocean_token) -> Datatoken:
     return ocean_token
 
 
@@ -183,6 +183,10 @@ def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
         transaction_parameters={"from": publisher_wallet},
     )
 
+
+@pytest.fixture
+def DT(datatoken): #alias for datatoken
+    return datatoken
 
 @pytest.fixture
 def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
