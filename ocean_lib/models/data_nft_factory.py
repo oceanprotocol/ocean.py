@@ -68,12 +68,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     @enforce_types
     def create_nft_with_erc20(
         self,
-        nft_name: str,
-        nft_symbol: str,
-        nft_template: int,
-        nft_token_uri: str,
-        nft_transferable: bool,
-        nft_owner: str,
+        data_nft_args,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -83,20 +78,22 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_publish_market_order_fee_token: str,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
-        transaction_parameters: dict,
+        wallet=None,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+
+        # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20(
             (
-                nft_name,
-                nft_symbol,
-                nft_template,
-                nft_token_uri,
-                nft_transferable,
-                ContractBase.to_checksum_address(nft_owner),
+                data_nft_args.name,
+                data_nft_args.symbol,
+                data_nft_args.template_index,
+                data_nft_args.uri,
+                data_nft_args.transferable,
+                ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
                 datatoken_template,
@@ -114,18 +111,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_cap, datatoken_publish_market_order_fee_amount],
                 datatoken_bytess,
             ),
-            transaction_parameters,
+            {"from": wallet},
         )
 
     @enforce_types
     def create_nft_erc20_with_fixed_rate(
         self,
-        nft_name: str,
-        nft_symbol: str,
-        nft_template: int,
-        nft_token_uri: str,
-        nft_transferable: bool,
-        nft_owner: str,
+        data_nft_args,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -145,20 +137,21 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_rate: int,
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
-        transaction_parameters: dict,
+        wallet=None,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+        # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20WithFixedRate(
             (
-                nft_name,
-                nft_symbol,
-                nft_template,
-                nft_token_uri,
-                nft_transferable,
-                ContractBase.to_checksum_address(nft_owner),
+                data_nft_args.name,
+                data_nft_args.symbol,
+                data_nft_args.template_index,
+                data_nft_args.uri,
+                data_nft_args.transferable,
+                ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
                 datatoken_template,
@@ -194,18 +187,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                     fixed_price_with_mint,
                 ],
             ),
-            transaction_parameters,
+            {"from": wallet},
         )
 
     @enforce_types
     def create_nft_erc20_with_dispenser(
         self,
-        nft_name: str,
-        nft_symbol: str,
-        nft_template: int,
-        nft_token_uri: str,
-        nft_transferable: bool,
-        nft_owner: str,
+        data_nft_args,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -220,20 +208,21 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         dispenser_max_balance: int,
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
-        transaction_parameters: dict,
+        wallet,
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+        # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20WithDispenser(
             (
-                nft_name,
-                nft_symbol,
-                nft_template,
-                nft_token_uri,
-                nft_transferable,
-                ContractBase.to_checksum_address(nft_owner),
+                data_nft_args.name,
+                data_nft_args.symbol,
+                data_nft_args.template_index,
+                data_nft_args.uri,
+                data_nft_args.transferable,
+                ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
                 datatoken_template,
@@ -258,18 +247,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 dispenser_with_mint,
                 ContractBase.to_checksum_address(dispenser_allowed_swapper),
             ),
-            transaction_parameters,
+            {"from": wallet},
         )
 
     @enforce_types
     def create_nft_with_metadata(
         self,
-        nft_name: str,
-        nft_symbol: str,
-        nft_template: int,
-        nft_token_uri: str,
-        nft_transferable: bool,
-        nft_owner: str,
+        data_nft_args,
         metadata_state: int,
         metadata_decryptor_url: str,
         metadata_decryptor_address: bytes,
@@ -277,16 +261,17 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         metadata_data: Union[str, bytes],
         metadata_data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
-        transaction_parameters: dict,
+        wallet,
     ) -> str:
+        # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithMetaData(
             (
-                nft_name,
-                nft_symbol,
-                nft_template,
-                nft_token_uri,
-                nft_transferable,
-                ContractBase.to_checksum_address(nft_owner),
+                data_nft_args.name,
+                data_nft_args.symbol,
+                data_nft_args.template_index,
+                data_nft_args.uri,
+                data_nft_args.transferable,
+                ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
                 metadata_state,
@@ -297,7 +282,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 metadata_data_hash,
                 metadata_proofs,
             ),
-            transaction_parameters,
+            {"from": wallet},
         )
 
     @enforce_types

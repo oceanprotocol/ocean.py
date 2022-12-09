@@ -32,7 +32,9 @@ def test_main(
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft = data_nft_factory.create_data_nft(DataNFTArguments("DT2", "DTSYMBOL1"))
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT2", "DTSYMBOL1"), publisher_wallet
+    )
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -80,12 +82,7 @@ def test_main(
 
     # Tests creating NFT with ERC20 successfully
     receipt = data_nft_factory.create_nft_with_erc20(
-        nft_name="72120Bundle",
-        nft_symbol="72Bundle",
-        nft_template=1,
-        nft_token_uri="https://oceanprotocol.com/nft/",
-        nft_transferable=True,
-        nft_owner=publisher_wallet.address,
+        DataNFTArguments("72120Bundle", "72Bundle"),
         datatoken_template=1,
         datatoken_name="DTB1",
         datatoken_symbol="DT1Symbol",
@@ -95,7 +92,7 @@ def test_main(
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
+        wallet=publisher_wallet,
     )
     registered_nft_event = receipt.events["NFTCreated"]
 
@@ -139,12 +136,7 @@ def test_main(
     fee_datatoken_address = registered_fee_token_event["newTokenAddress"]
 
     receipt = data_nft_factory.create_nft_erc20_with_fixed_rate(
-        nft_name="72120Bundle",
-        nft_symbol="72Bundle",
-        nft_template=1,
-        nft_token_uri="https://oceanprotocol.com/nft/",
-        nft_transferable=True,
-        nft_owner=publisher_wallet.address,
+        DataNFTArguments("72120Bundle", "72Bundle"),
         datatoken_template=1,
         datatoken_name="DTWithPool",
         datatoken_symbol="DTP",
@@ -164,7 +156,7 @@ def test_main(
         fixed_price_rate=Web3.toWei("1", "ether"),
         fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
         fixed_price_with_mint=0,
-        transaction_parameters={"from": publisher_wallet},
+        wallet=publisher_wallet,
     )
     registered_nft_event = receipt.events["NFTCreated"]
 
@@ -195,12 +187,7 @@ def test_main(
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
 
     receipt = data_nft_factory.create_nft_erc20_with_dispenser(
-        nft_name="72120Bundle",
-        nft_symbol="72Bundle",
-        nft_template=1,
-        nft_token_uri="https://oceanprotocol.com/nft/",
-        nft_transferable=True,
-        nft_owner=publisher_wallet.address,
+        DataNFTArguments("72120Bundle", "72Bundle"),
         datatoken_template=1,
         datatoken_name="DTWithPool",
         datatoken_symbol="DTP",
@@ -215,7 +202,7 @@ def test_main(
         dispenser_max_balance=Web3.toWei(1, "ether"),
         dispenser_with_mint=True,
         dispenser_allowed_swapper=ZERO_ADDRESS,
-        transaction_parameters={"from": publisher_wallet},
+        wallet=publisher_wallet,
     )
     registered_nft_event = receipt.events["NFTCreated"]
 
@@ -248,12 +235,7 @@ def test_main(
 
     # Create a new erc721 with metadata in one single call and get address
     receipt = data_nft_factory.create_nft_with_metadata(
-        nft_name="72120Bundle",
-        nft_symbol="72Bundle",
-        nft_template=1,
-        nft_token_uri="https://oceanprotocol.com/nft/",
-        nft_transferable=True,
-        nft_owner=publisher_wallet.address,
+        DataNFTArguments("72120Bundle", "72Bundle"),
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
         metadata_decryptor_address=b"0x123",
@@ -261,7 +243,7 @@ def test_main(
         metadata_data=Web3.toHex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),
         metadata_proofs=[],
-        transaction_parameters={"from": publisher_wallet},
+        wallet=publisher_wallet,
     )
     registered_nft_event = receipt.events["NFTCreated"]
     assert registered_nft_event, "Cannot find NFTCreated event"
@@ -485,12 +467,7 @@ def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_with_erc20(
-            nft_name="72120Bundle",
-            nft_symbol="72Bundle",
-            nft_template=1,
-            nft_token_uri="https://oceanprotocol.com/nft/",
-            nft_transferable=True,
-            nft_owner=publisher_wallet.address,
+            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
             datatoken_template=2,
             datatoken_name="DTB1",
             datatoken_symbol="EntDT1Symbol",
@@ -500,17 +477,12 @@ def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
             datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
             datatoken_publish_market_order_fee_amount=0,
             datatoken_bytess=[b""],
-            transaction_parameters={"from": publisher_wallet},
+            wallet=publisher_wallet,
         )
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_erc20_with_fixed_rate(
-            nft_name="72120Bundle",
-            nft_symbol="72Bundle",
-            nft_template=1,
-            nft_token_uri="https://oceanprotocol.com/nft/",
-            nft_transferable=True,
-            nft_owner=publisher_wallet.address,
+            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
             datatoken_template=2,
             datatoken_name="DTWithFRE",
             datatoken_symbol="FTEFRE",
@@ -530,17 +502,12 @@ def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
             fixed_price_rate=Web3.toWei("1", "ether"),
             fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
             fixed_price_with_mint=0,
-            transaction_parameters={"from": publisher_wallet},
+            wallet=publisher_wallet,
         )
 
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_erc20_with_dispenser(
-            nft_name="72120Bundle",
-            nft_symbol="72Bundle",
-            nft_template=1,
-            nft_token_uri="https://oceanprotocol.com/nft/",
-            nft_transferable=True,
-            nft_owner=publisher_wallet.address,
+            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
             datatoken_template=2,
             datatoken_name="DTWithDispenser",
             datatoken_symbol="DTED",
@@ -555,5 +522,5 @@ def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
             dispenser_max_balance=Web3.toWei(1, "ether"),
             dispenser_with_mint=True,
             dispenser_allowed_swapper=ZERO_ADDRESS,
-            transaction_parameters={"from": publisher_wallet},
+            wallet=publisher_wallet,
         )
