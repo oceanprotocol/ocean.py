@@ -29,7 +29,7 @@ class Datatoken(ContractBase):
     BASE = 10**18
     BASE_COMMUNITY_FEE_PERCENTAGE = BASE / 1000
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
-    
+
     # ===========================================================================
     # consume
 
@@ -113,20 +113,20 @@ class Datatoken(ContractBase):
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 
-    #======================================================================
+    # ======================================================================
     # Priced data: fixed-rate exchange
 
     @enforce_types
     def create_exchange(
-            self,
-            rate: Union[int, str],
-            base_token_addr: str,
-            tx_dict: dict,
-            owner_addr: Optional[str] = None,
-            publish_market_fee_collector: Optional[str] = None,
-            publish_market_fee: Union[int, str] = 0,
-            with_mint: bool = False,
-            allowed_swapper: str = ZERO_ADDRESS,
+        self,
+        rate: Union[int, str],
+        base_token_addr: str,
+        tx_dict: dict,
+        owner_addr: Optional[str] = None,
+        publish_market_fee_collector: Optional[str] = None,
+        publish_market_fee: Union[int, str] = 0,
+        with_mint: bool = False,
+        allowed_swapper: str = ZERO_ADDRESS,
     ) -> tuple:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
@@ -153,10 +153,10 @@ class Datatoken(ContractBase):
         """
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
-        
+
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
         from_addr = tx_dict["from"].address
-        BT = Datatoken(self.config_dict, base_token_addr)      
+        BT = Datatoken(self.config_dict, base_token_addr)
         owner_addr = owner_addr or from_addr
         publish_market_fee_collector = publish_market_fee_collector or from_addr
 
@@ -183,30 +183,29 @@ class Datatoken(ContractBase):
         exchange = OneExchange(FRE, exchange_id)
         return (exchange, tx)
 
-
     @enforce_types
     def get_exchanges(self) -> list:
         """return List[OneExchange] - all the exchanges for this datatoken"""
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
-        
+
         FRE = self._FRE()
         addrs_and_exchange_ids = self.getFixedRates()
-        exchanges = [OneExchange(FRE, exchange_id)
-                     for _, exchange_id in addrs_and_exchange_ids]
+        exchanges = [
+            OneExchange(FRE, exchange_id) for _, exchange_id in addrs_and_exchange_ids
+        ]
         return exchanges
-
 
     @enforce_types
     def _FRE(self):
         """Return FixedRateExchange - global across all exchanges"""
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
         return FixedRateExchange(self.config_dict, FRE_addr)
 
-
-    #======================================================================
+    # ======================================================================
     # Free data: dispenser faucet
 
     @enforce_types

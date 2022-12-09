@@ -46,7 +46,6 @@ def create_checksum(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-
 @enforce_types
 def from_wei(amt_wei: int):
     return float(amt_wei / 1e18)

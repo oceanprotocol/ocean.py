@@ -64,11 +64,10 @@ class FeesInfo:
         """
         t = fees_tup
         self.publish_market_fee: int = t[0]
-        self.publish_market_fee_collector: str = t[1] #address
+        self.publish_market_fee_collector: str = t[1]  # address
         self.opc_fee: int = t[2]
-        self.publish_market_fee_available = t[3] # in base tokens
-        self.ocean_fee_available = t[4] # in base tokens. Goes to OPC
-
+        self.publish_market_fee_available = t[3]  # in base tokens
+        self.ocean_fee_available = t[4]  # in base tokens. Goes to OPC
 
     def __str__(self):
         s = (
@@ -83,8 +82,9 @@ class FeesInfo:
         )
         return s
 
-    #for attr in dir(obj):
+    # for attr in dir(obj):
     #    print("obj.%s = %r" % (attr, getattr(obj, attr)))
+
 
 @enforce_types
 class BtNeeded:
@@ -132,16 +132,13 @@ class OneExchange:
         self._FRE = FRE
         self._id = exchange_id
 
-
     @property
     def FRE(self):
         return self._FRE
 
-    
     @property
     def exchange_id(self):
         return self._id
-
 
     @property
     def address(self):
@@ -151,55 +148,45 @@ class OneExchange:
     # In some cases, there's a rename for better clarity
     # It's easy to tell the original method name: see what this class calls.
 
-
     @enforce_types
     def BT_needed(
-            self,
-            DT_amt: Union[int, str],
-            consume_market_fee: int,
-            full_info:bool=False
+        self, DT_amt: Union[int, str], consume_market_fee: int, full_info: bool = False
     ) -> Union[int, BtNeeded]:
         """
         Returns an int - how many BTs you need, to buy target amt of DTs.
         Or, for an object with all details, set full_info=True.
         """
-        tup = self._FRE.calcBaseInGivenOutDT(
-            self._id, DT_amt, consume_market_fee
-        )
+        tup = self._FRE.calcBaseInGivenOutDT(self._id, DT_amt, consume_market_fee)
         bt_needed_obj = BtNeeded(tup)
         if full_info:
             return bt_needed_obj
         return bt_needed_obj.base_token_amount
 
-
     @enforce_types
     def BT_received(
-            self,
-            DT_amt: Union[int, str],
-            consume_market_fee: int,
-            full_info: bool=False,
+        self,
+        DT_amt: Union[int, str],
+        consume_market_fee: int,
+        full_info: bool = False,
     ) -> Union[int, BtReceived]:
         """
         Returns an int - how many BTs you receive, in selling given amt of DTs.
         Or, for an object with all details, set full_info=True.
         """
-        tup = self._FRE.calcBaseOutGivenInDT(
-            self._id, DT_amt, consume_market_fee
-            )
+        tup = self._FRE.calcBaseOutGivenInDT(self._id, DT_amt, consume_market_fee)
         bt_recd_obj = BtReceived(tup)
         if full_info:
             return bt_recd_obj
         return bt_recd_obj.base_token_amount
 
-
     @enforce_types
     def buy_DT(
-            self,
-            datatoken_amt: Union[int, str],
-            tx_dict: dict,
-            max_basetoken_amt: Optional[int] = MAX_UINT256,
-            consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
-            consume_market_fee: Optional[int] = 0,
+        self,
+        datatoken_amt: Union[int, str],
+        tx_dict: dict,
+        max_basetoken_amt: Optional[int] = MAX_UINT256,
+        consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
+        consume_market_fee: Optional[int] = 0,
     ):
         """
         Buy datatokens via fixed-rate exchange.
@@ -216,14 +203,14 @@ class OneExchange:
         """
         # import now, to avoid circular import
         from ocean_lib.models.datatoken import Datatoken
-        
+
         details = self.details
         BT = Datatoken(self._FRE.config_dict, details.base_token)
         buyer_addr = tx_dict["from"].address
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
         assert BT.balanceOf(buyer_addr) >= BT_needed, "not enough funds"
-        
+
         tx = self._FRE.buyDT(
             self._id,
             datatoken_amt,
@@ -234,15 +221,14 @@ class OneExchange:
         )
         return tx
 
-
     @enforce_types
     def sell_DT(
-            self,
-            datatoken_amt: Union[int, str],
-            tx_dict: dict,
-            min_basetoken_amt: Union[int, str] = 0,
-            consume_market_fee_addr: str = ZERO_ADDRESS,
-            consume_market_fee: int = 0,
+        self,
+        datatoken_amt: Union[int, str],
+        tx_dict: dict,
+        min_basetoken_amt: Union[int, str] = 0,
+        consume_market_fee_addr: str = ZERO_ADDRESS,
+        consume_market_fee: int = 0,
     ):
         """
         Sell datatokens to the exchange, in return for e.g. OCEAN
@@ -267,11 +253,10 @@ class OneExchange:
         )
         return tx
 
-
     @enforce_types
     def collect_BT(self, amount: Union[int, str], tx_dict: dict):
         """
-        This exchange collects fees denominated in base tokens, and 
+        This exchange collects fees denominated in base tokens, and
           records updates into its `bt_balance`.
 
         *This method* triggers the exchange to send `amount` fees
@@ -283,11 +268,10 @@ class OneExchange:
         """
         return self._FRE.collectBT(self._id, amount, tx_dict)
 
-
     @enforce_types
     def collect_DT(self, amount: Union[int, str], tx_dict: dict):
         """
-        This exchange collects fees denominated in datatokens, and 
+        This exchange collects fees denominated in datatokens, and
           records updates into its `dt_balance`.
 
         *This method* triggers the exchange to send `amount` fees
@@ -298,7 +282,6 @@ class OneExchange:
         Anyone can call this method, since the receiver is constant.
         """
         return self._FRE.collectDT(self._id, amount, tx_dict)
-
 
     @enforce_types
     def collect_publish_market_fee(self, tx_dict: dict):
@@ -313,7 +296,6 @@ class OneExchange:
         """
         return self._FRE.collectMarketFee(self._id, tx_dict)
 
-
     @enforce_types
     def collect_opc_fee(self, tx_dict: dict):
         """
@@ -327,66 +309,55 @@ class OneExchange:
         """
         return self._FRE.collectOceanFee(self._id, tx_dict)
 
-
     @enforce_types
     def update_publish_market_fee_collector(self, new_addr: str, tx_dict):
         """Update which address collects the publish market swap fees"""
         return self._FRE.updateMarketFeeCollector(self._id, new_addr, tx_dict)
 
-
     @enforce_types
-    def update_publish_market_fee(self, new_amt: Union[str,int], tx_dict):
+    def update_publish_market_fee(self, new_amt: Union[str, int], tx_dict):
         """Update the value of the publish market swap fee"""
         return self._FRE.updateMarketFee(self._id, new_amt, tx_dict)
-
 
     @enforce_types
     def get_publish_market_fee(self) -> int:
         """Return the value of the publish market swap fee"""
         return self._FRE.getMarketFee(self._id)
 
-
     @enforce_types
-    def set_rate(self, new_rate: Union[int,str], tx_dict: dict):
+    def set_rate(self, new_rate: Union[int, str], tx_dict: dict):
         """Set price = # base tokens needed to buy 1 datatoken"""
         return self._FRE.setRate(self._id, new_rate, tx_dict)
-
 
     @enforce_types
     def toggle_mint_state(self, with_mint: bool, tx_dict: dict):
         """Switch 'with_mint' from True <> False"""
         return self._FRE.toggleMintState(self._id, with_mint, tx_dict)
 
-
     @enforce_types
     def toggle_active(self, tx_dict: dict):
         """Switch whether 'active' from True <> False"""
         return self._FRE.toggleExchangeState(self._id, tx_dict)
-
 
     @enforce_types
     def set_allowed_swapper(self, new_addr: str, tx_dict: dict):
         """Set allowed swapper. ZERO_ADDRESS means anyone can swap."""
         return self._FRE.setAllowedSwapper(self._id, new_addr, tx_dict)
 
-
     @enforce_types
     def get_rate(self) -> int:
         """Get price = # base tokens needed to buy 1 datatoken"""
         return self._FRE.getRate(self._id)
-
 
     @enforce_types
     def get_dt_supply(self) -> int:
         """Return the current supply of datatokens in this exchange"""
         return self._FRE.getDTSupply(self._id)
 
-
     @enforce_types
     def get_bt_supply(self) -> int:
         """Return the current supply of base tokens in this exchange"""
         return self._FRE.getBTSupply(self._id)
-
 
     @property
     def details(self) -> ExchangeDetails:
@@ -394,19 +365,16 @@ class OneExchange:
         tup = self._FRE.getExchange(self._id)
         return ExchangeDetails(tup)
 
-
     @enforce_types
     def get_allowed_swapper(self) -> str:
         """Get allowed swapper. ZERO_ADDRESS means anyone can swap."""
         return self._FRE.getAllowedSwapper(self._id)
 
-
     @property
     def fees_info(self) -> FeesInfo:
         """Get fee information for this exchange, as an object"""
-        tup = self._FRE.getFeesInfo(self._id) 
+        tup = self._FRE.getFeesInfo(self._id)
         return FeesInfo(tup)
-
 
     @enforce_types
     def is_active(self) -> bool:
