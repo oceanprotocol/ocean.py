@@ -187,6 +187,3 @@ def carlos():
 @pytest.fixture
 def dan():
     return get_wallet(9)
-
-
-    
