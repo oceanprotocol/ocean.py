@@ -19,10 +19,7 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.ddo_helpers import (
-    get_first_service_by_type,
-    get_opc_collector_address_from_datatoken,
-)
+from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import (
     get_provider_fees,
     int_units,
@@ -56,6 +53,7 @@ from tests.resources.helper_functions import (
 )
 def test_start_order_fees(
     config: dict,
+    factory_router,
     publisher_wallet,
     consumer_wallet,
     provider_wallet,
@@ -104,7 +102,7 @@ def test_start_order_fees(
         {"from": publisher_wallet},
     )
 
-    opc_collector_address = get_opc_collector_address_from_datatoken(dt)
+    opc_collector_address = factory_router.getOPCCollector()
 
     if base_token_name == "Ocean" and publish_market_order_fee_in_unit == "500":
         bt.mint(
