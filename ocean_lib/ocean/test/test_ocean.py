@@ -10,14 +10,18 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.models.ve_allocate import VeAllocate
 from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve_ocean import VeOcean
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
-def test_nft_factory(data_nft, datatoken, publisher_ocean_instance, publisher_wallet):
-    ocn = publisher_ocean_instance
+def test_nft_factory(config, publisher_ocean, publisher_wallet):
+    data_nft, datatoken = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet
+    )
+    ocn = publisher_ocean
     assert ocn.get_nft_factory()
 
     assert ocn.get_nft_token(data_nft.address).address == data_nft.address
@@ -37,8 +41,8 @@ def test_nft_factory(data_nft, datatoken, publisher_ocean_instance, publisher_wa
 
 
 @pytest.mark.unit
-def test_contract_objects(publisher_ocean_instance):
-    ocn = publisher_ocean_instance
+def test_contract_objects(publisher_ocean):
+    ocn = publisher_ocean
 
     assert ocn.OCEAN_address[:2] == "0x"
     assert isinstance(ocn.OCEAN_token, Datatoken)
