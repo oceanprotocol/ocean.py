@@ -60,7 +60,7 @@ def test_reuse_order_fees(
     # Send base tokens to the consumer so they can pay for fees
     transfer_bt_if_balance_lte(
         config=config,
-        base_token_address=bt.address,
+        bt_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
         min_balance=int_units("4000", bt.decimals()),

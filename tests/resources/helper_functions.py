@@ -231,7 +231,7 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
 
 
 @enforce_types
-def transfer_bt_if_bal_lte(
+def transfer_bt_if_balance_lte(
     config: dict,
     bt_address: str,
     from_wallet,

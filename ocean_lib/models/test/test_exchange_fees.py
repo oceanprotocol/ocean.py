@@ -21,7 +21,7 @@ from tests.resources.helper_functions import (
     get_wallet,
     convert_bt_amt_to_dt,
     int_units,
-    transfer_bt_if_bal_lte,
+    transfer_bt_if_balance_lte,
 )
 
 
@@ -79,7 +79,7 @@ def test_exchange_swap_fees(
     bt = Datatoken(config, get_address_of_type(config, bt_name))
     dt = datatoken
 
-    transfer_bt_if_bal_lte(
+    transfer_bt_if_balance_lte(
         config=config,
         bt_address=bt.address,
         from_wallet=bt_deployer_wallet,
@@ -88,7 +88,7 @@ def test_exchange_swap_fees(
         amount_to_transfer=int_units("1500", bt.decimals()),
     )
 
-    transfer_bt_if_bal_lte(
+    transfer_bt_if_balance_lte(
         config=config,
         bt_address=bt.address,
         from_wallet=bt_deployer_wallet,
