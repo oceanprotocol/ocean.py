@@ -93,7 +93,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create_data_nft(), and wait for it to complete...")
     try:
-        data_nft = ocean.get_nft_factory.create_data_nft(
+        data_nft = ocean.get_nft_factory().create_data_nft(
             DataNFTArguments(symbol, symbol), alice_wallet
         )
         data_nft_symbol = data_nft.symbol()

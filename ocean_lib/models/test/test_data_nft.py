@@ -612,7 +612,9 @@ def test_transfer_nft(
 
     data_nft = data_nft_factory.create_data_nft(
         DataNFTArguments(
-            "NFT1", "NFT", additional_datatoken_deployer=consumer_wallet.address
+            "NFT to TRANSFER",
+            "NFtT",
+            additional_datatoken_deployer=consumer_wallet.address,
         ),
         publisher_wallet,
     )
