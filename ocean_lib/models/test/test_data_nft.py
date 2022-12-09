@@ -17,8 +17,11 @@ BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
 @pytest.mark.unit
 def test_permissions(
-        publisher_wallet, consumer_wallet, another_consumer_wallet, config,
-        data_nft,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    config,
+    data_nft,
 ):
     """Tests permissions' functions."""
     assert data_nft.contract.name() == "NFT"
@@ -165,7 +168,7 @@ def test_permissions(
 
 
 def test_add_and_remove_permissions(
-        publisher_wallet, consumer_wallet, config, data_nft
+    publisher_wallet, consumer_wallet, config, data_nft
 ):
 
     # Assert consumer has no permissions
@@ -205,9 +208,7 @@ def test_add_and_remove_permissions(
 
 
 @pytest.mark.unit
-def test_success_update_metadata(
-        publisher_wallet, consumer_wallet, config, data_nft
-):
+def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data_nft):
     """Tests updating the metadata flow."""
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[
@@ -284,9 +285,7 @@ def test_success_update_metadata(
     ]
 
 
-def test_fails_update_metadata(
-        consumer_wallet, publisher_wallet, config, data_nft
-):
+def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[
@@ -309,11 +308,11 @@ def test_fails_update_metadata(
 
 @pytest.mark.unit
 def test_create_datatoken(
-        publisher_wallet,
-        consumer_wallet,
-        config,
-        data_nft_factory: DataNFTFactoryContract,
-        data_nft,
+    publisher_wallet,
+    consumer_wallet,
+    config,
+    data_nft_factory: DataNFTFactoryContract,
+    data_nft,
 ):
     """Tests calling create an ERC20 by the owner."""
     assert data_nft.getPermissions(publisher_wallet.address)[
@@ -386,10 +385,7 @@ def test_create_datatoken(
 
 
 def test_create_datatoken_with_usdc_order_fee(
-        config: dict,
-        publisher_wallet,
-        data_nft_factory: DataNFTFactoryContract,
-        data_nft
+    config: dict, publisher_wallet, data_nft_factory: DataNFTFactoryContract, data_nft
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
@@ -420,11 +416,11 @@ def test_create_datatoken_with_usdc_order_fee(
 
 @pytest.mark.unit
 def test_create_datatoken_with_non_owner(
-        publisher_wallet,
-        consumer_wallet,
-        data_nft_factory: DataNFTFactoryContract,
-        config,
-        data_nft
+    publisher_wallet,
+    consumer_wallet,
+    data_nft_factory: DataNFTFactoryContract,
+    config,
+    data_nft,
 ):
     """Tests creating an ERC20 token by wallet other than nft owner"""
     # Assert consumer cannot create ERC20
@@ -467,7 +463,10 @@ def test_create_datatoken_with_non_owner(
 
 @pytest.mark.unit
 def test_fail_creating_erc20(
-        consumer_wallet, publisher_wallet, config, data_nft,
+    consumer_wallet,
+    publisher_wallet,
+    config,
+    data_nft,
 ):
     """Tests failure for creating ERC20 token."""
     assert not (
@@ -492,7 +491,10 @@ def test_fail_creating_erc20(
 
 @pytest.mark.unit
 def test_erc721_datatoken_functions(
-        publisher_wallet, consumer_wallet, config, data_NFT_and_DT,
+    publisher_wallet,
+    consumer_wallet,
+    config,
+    data_NFT_and_DT,
 ):
     """Tests ERC721 Template functions for ERC20 tokens."""
     data_nft, datatoken = data_NFT_and_DT
@@ -572,9 +574,7 @@ def test_erc721_datatoken_functions(
 
 
 @pytest.mark.unit
-def test_fail_transfer_function(
-        consumer_wallet, publisher_wallet, config, data_nft
-):
+def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of using the transfer functions."""
     with pytest.raises(
         Exception,
@@ -701,7 +701,7 @@ def test_transfer_nft(
 
     OCEAN = publisher_ocean.OCEAN_token
     OCEAN.approve(factory_router.address, to_wei(10000), {"from": consumer_wallet})
-    
+
     # Make consumer the publish_market_order_fee_address instead of publisher
     receipt = datatoken.setPublishingMarketFee(
         consumer_wallet.address,
@@ -720,11 +720,11 @@ def test_transfer_nft(
 
 
 def test_nft_transfer_with_fre(
-        config,
-        OCEAN,
-        publisher_wallet,
-        consumer_wallet,
-        data_NFT_and_DT,
+    config,
+    OCEAN,
+    publisher_wallet,
+    consumer_wallet,
+    data_NFT_and_DT,
 ):
     """Tests transferring the NFT before deploying an ERC20, a FRE."""
     data_nft, datatoken = data_NFT_and_DT
@@ -777,6 +777,7 @@ def test_nft_transfer_with_fre(
 
     exchange.collect_DT(to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet) == to_wei(1)
+
 
 def test_nft_transfer_with_fre(
     config,
