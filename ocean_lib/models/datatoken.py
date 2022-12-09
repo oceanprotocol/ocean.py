@@ -9,7 +9,6 @@ from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
 from ocean_lib.agreements.service_types import ServiceTypes
-
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
@@ -125,9 +124,9 @@ class Datatoken(ContractBase):
             tx_dict: dict,
             owner_addr: Optional[str] = None,
             publish_market_fee_collector: Optional[str] = None,
-            publish_market_fee: Union[int, str, None] = 0,
-            with_mint: Optional[bool] = False,
-            allowed_swapper: Optional[str] = ZERO_ADDRESS,
+            publish_market_fee: Union[int, str] = 0,
+            with_mint: bool = False,
+            allowed_swapper: str = ZERO_ADDRESS,
     ) -> tuple:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
