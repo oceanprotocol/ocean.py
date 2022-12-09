@@ -6,11 +6,8 @@ import importlib
 import json
 import logging
 import os
-from pathlib import Path
 from typing import Any, Dict, Optional
 
-from jsonsempai import magic  # noqa: F401
-from addresses import address as contract_addresses  # noqa: F401
 from brownie import Contract
 from enforce_typing import enforce_types
 from web3.main import Web3
@@ -42,11 +39,6 @@ def load_contract(contract_name: str, address: Optional[str]) -> Contract:
 @enforce_types
 def get_addresses_with_fallback(config: dict):
     address_file = config.get("ADDRESS_FILE")
-    address_file = (
-        os.path.expanduser(address_file)
-        if address_file
-        else Path(contract_addresses.__file__).expanduser().resolve()
-    )
 
     if not address_file or not os.path.exists(address_file):
         raise Exception("Address file not found.")

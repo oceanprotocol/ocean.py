@@ -21,7 +21,9 @@ from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
     get_provider_fees,
+    get_wallet,
     int_units,
     transfer_bt_if_balance_lte,
 )
@@ -57,9 +59,6 @@ def test_start_order_fees(
     consumer_wallet,
     provider_wallet,
     factory_deployer_wallet,
-    publish_market_wallet,
-    consume_market_wallet,
-    data_nft: DataNFT,
     file1: FilesType,
     factory_router: FactoryRouter,
     base_token_name: str,
@@ -68,6 +67,9 @@ def test_start_order_fees(
     provider_fee_in_unit: str,
 ):
     bt = Datatoken(config, get_address_of_type(config, base_token_name))
+    data_nft = deploy_erc721_erc20(config, publisher_wallet)
+    publish_market_wallet = get_wallet(4)
+    consume_market_wallet = get_wallet(5)
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_bt_if_balance_lte(

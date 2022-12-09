@@ -118,7 +118,7 @@ def test_additional_information():
 
 
 @pytest.mark.unit
-def test_trusted_algo_functions(publisher_ocean_instance):
+def test_trusted_algo_functions(publisher_ocean):
     algorithm_ddo = get_sample_algorithm_ddo(filename="ddo_algorithm2.json")
     algorithm_ddo.did = "did:op:123"
     algorithm_ddo_v2 = get_sample_algorithm_ddo(filename="ddo_algorithm2.json")
@@ -149,7 +149,7 @@ def test_trusted_algo_functions(publisher_ocean_instance):
 
 
 @pytest.mark.unit
-def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_instance):
+def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     ddo = DDO.from_dict(get_sample_ddo_with_compute_service())
     compute_service = ddo.services[1]
@@ -214,7 +214,7 @@ def test_inexistent_removals():
 
 
 @pytest.mark.unit
-def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
+def test_utilitary_functions_for_trusted_algorithms(publisher_ocean):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     algorithm_ddo = get_sample_algorithm_ddo(filename="ddo_algorithm2.json")
     algorithm_ddo.did = "did:op:123"
@@ -285,7 +285,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
 
 @pytest.mark.unit
-def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance):
+def test_add_trusted_algorithm_no_compute_service(publisher_ocean):
     """Tests if the DDO has or not a compute service."""
     algorithm_ddo = get_sample_algorithm_ddo("ddo_algorithm2.json")
     algorithm_ddo.did = "did:op:0x666"

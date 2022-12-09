@@ -14,7 +14,6 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     OneExchange,
 )
-
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.ocean.util import to_wei, from_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
@@ -23,7 +22,7 @@ from tests.resources.helper_functions import get_wallet
 
 
 @pytest.mark.unit
-def test_with_defaults(ocean, OCEAN, DT, alice, bob):
+def test_with_defaults(OCEAN, DT, alice, bob):
     # =========================================================================
     # Create exchange
     (exchange, tx) = DT.create_exchange(
@@ -117,10 +116,7 @@ def test_with_defaults(ocean, OCEAN, DT, alice, bob):
 
 
 @pytest.mark.unit
-def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
-    carlos, dan = get_wallet(8), get_wallet(9)
-    FRE = ocean.fixed_rate_exchange
-
+def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
     # =================================================================
     # Alice creates exchange. Bob's the owner, and carlos gets fees!
     rate = to_wei(1)
