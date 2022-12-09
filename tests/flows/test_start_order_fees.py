@@ -23,7 +23,7 @@ from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import (
     get_provider_fees,
     int_units,
-    transfer_base_token_if_balance_lte,
+    transfer_bt_if_balance_lte,
 )
 
 
@@ -70,7 +70,7 @@ def test_start_order_fees(
     bt = Datatoken(config, get_address_of_type(config, base_token_name))
 
     # Send base tokens to the consumer so they can pay for fees
-    transfer_base_token_if_balance_lte(
+    transfer_bt_if_balance_lte(
         config=config,
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
