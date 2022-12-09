@@ -360,6 +360,21 @@ def test_pay_for_access_service_insufficient_balance(
 
 
 @pytest.mark.integration
+def test_create_algo_asset(publisher_ocean_instance, publisher_wallet):
+    ocean = publisher_ocean_instance
+
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
+    (data_nft, datatoken, ddo) = ocean.assets.create_algo_asset(
+        name, url, publisher_wallet, wait_for_aqua=False
+    )
+
+    assert ddo.nft["name"] == name
+    assert len(ddo.datatokens) == 1
+    assert ddo.metadata["type"] == "algorithm"
+
+
+@pytest.mark.integration
 def test_create_url_asset(publisher_ocean_instance, publisher_wallet):
     ocean = publisher_ocean_instance
 
