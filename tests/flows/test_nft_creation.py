@@ -5,6 +5,7 @@
 import pytest
 from web3.main import Web3
 
+from ocean_lib.models.arguments import DataNFTArguments
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -87,9 +88,10 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
 
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft_factory.create_data_nft(
-            "DT1",
-            "DTSYMBOL",
-            template_index=non_existent_nft_template,
+            DataNFTArguments(
+                "DT1", "DTSYMBOL", template_index=non_existent_nft_template
+            ),
+            publisher_wallet,
         )
 
 
