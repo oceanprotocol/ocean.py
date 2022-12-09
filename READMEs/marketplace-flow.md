@@ -21,6 +21,11 @@ Let's go through each step.
 From [installation-flow](install.md), do:
 - [x] Setup
 
+In console, set factory envvar:
+```console
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+```
+
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
 
@@ -28,20 +33,15 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 For testing purposes, we can create fake OCEAN by leveraging Ocean token factory. In the same Python console:
 ```python
-# Set factory envvar. Staying in Python console lets you retain state from previous READMEs.
-import os
-os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
-
 # Mint fake OCEAN. Alice & Bob automatically get some.
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
-
 OCEAN = ocean.OCEAN_token
 
 # Ensure Bob has enough funds
 from brownie.network import accounts
 assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "Bob needs OCEAN"
+assert OCEAN.balanceOf(bob_wallet.address) > 0, "Bob needs OCEAN"
 ```
 
 ## 2. Alice publishes dataset
