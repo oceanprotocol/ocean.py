@@ -12,20 +12,7 @@ from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachin
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
-
 ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
-
-
-@enforce_types
-def remote_config_mumbai(tmp_path):
-    config = {
-        "NETWORK_NAME": "mumbai",
-        "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
-        "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-        "DOWNLOADS_PATH": "consume-downloads",
-    }
-
-    return config
 
 
 @enforce_types
