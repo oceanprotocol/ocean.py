@@ -851,4 +851,4 @@ def test_transfer_nft_with_erc20_pool_fre(
     # Consumer wallet has not become the owner of the publisher's exchange
     details = exchange.details
     assert details.owner == publisher_addr
-    assert details.active 
+    assert details.active
