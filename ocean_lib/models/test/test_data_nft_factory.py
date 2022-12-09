@@ -6,6 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
+from ocean_lib.models.arguments import DataNFTArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
@@ -23,38 +24,15 @@ def test_main(
     data_nft_factory,
 ):
     """Tests the utils functions."""
-    receipt = data_nft_factory.deployERC721Contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
-    registered_event = receipt.events["NFTCreated"]
-
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft_factory.deployERC721Contract(
-        "DT2",
-        "DTSYMBOL1",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
-    )
+    data_nft = data_nft_factory.create_data_nft(DataNFTArguments("DT2", "DTSYMBOL1"))
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -305,38 +283,17 @@ def test_start_multiple_order(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests the utils functions."""
-    receipt = data_nft_factory.deployERC721Contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
-    registered_event = receipt.events["NFTCreated"]
-
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
-    assert data_nft_factory.check_nft(token_address)
+    assert data_nft_factory.check_nft(data_nft.address)
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft_factory.deployERC721Contract(
-        "DT2",
-        "DTSYMBOL1",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT2", "DTSYMBOL1"), publisher_wallet
     )
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
@@ -471,21 +428,9 @@ def test_fail_create_datatoken(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests multiple failures for creating ERC20 token."""
-    receipt = data_nft_factory.deployERC721Contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
-    registered_event = receipt.events["NFTCreated"]
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO

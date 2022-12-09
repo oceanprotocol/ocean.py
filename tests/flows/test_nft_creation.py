@@ -86,16 +86,10 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.deployERC721Contract(
+        data_nft_factory.create_data_nft(
             "DT1",
             "DTSYMBOL",
-            non_existent_nft_template,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-            True,
-            publisher_wallet.address,
-            {"from": publisher_wallet},
+            template_index=non_existent_nft_template,
         )
 
 

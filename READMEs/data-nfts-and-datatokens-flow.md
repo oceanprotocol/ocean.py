@@ -49,7 +49,8 @@ assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
 
 In the same Python console:
 ```python
-data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
+from ocean_lib.models.arguments import DataNFTArguments
+data_nft = ocean.get_nft_factory.create_data_nft(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 

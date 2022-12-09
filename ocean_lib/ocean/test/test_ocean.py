@@ -4,7 +4,6 @@
 #
 import pytest
 
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
@@ -26,18 +25,6 @@ def test_nft_factory(config, publisher_ocean, publisher_wallet):
 
     assert ocn.get_nft_token(data_nft.address).address == data_nft.address
     assert ocn.get_datatoken(datatoken.address).address == datatoken.address
-
-    created_nft = ocn.create_data_nft(
-        name="TEST",
-        symbol="TEST2",
-        token_uri="http://oceanprotocol.com/nft",
-        from_wallet=publisher_wallet,
-    )
-    assert isinstance(created_nft, DataNFT)
-    assert created_nft.contract.name() == "TEST"
-    assert created_nft.symbol() == "TEST2"
-    assert created_nft.address
-    assert created_nft.tokenURI(1) == "http://oceanprotocol.com/nft"
 
 
 @pytest.mark.unit

@@ -5,7 +5,8 @@
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
+from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.fixed_rate_exchange import (
@@ -609,21 +610,12 @@ def test_transfer_nft(
 ):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT to TRANSFER",
-        "NFTtT",
-        1,
-        ZERO_ADDRESS,
-        consumer_wallet.address,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments(
+            "NFT1", "NFT", additional_datatoken_deployer=consumer_wallet.address
+        ),
+        publisher_wallet,
     )
-    registered_event = receipt.events["NFTCreated"]
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
@@ -643,21 +635,10 @@ def test_transfer_nft(
     assert data_nft.ownerOf(1) == consumer_wallet.address
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT1",
-        "NFT",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("NFT1", "NFT"), publisher_wallet
     )
-    registered_event = receipt.events["NFTCreated"]
 
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     receipt = data_nft.safeTransferFrom(
         publisher_wallet.address,
         consumer_wallet.address,
@@ -840,21 +821,14 @@ def test_transfer_nft_with_erc20_pool_fre(
 ):
     """Tests transferring the NFT after deploying an ERC20, a pool, a FRE."""
 
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT to TRANSFER",
-        "NFTtT",
-        1,
-        ZERO_ADDRESS,
-        consumer_wallet.address,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments(
+            "NFT to TRANSFER",
+            "NFTtT",
+            additional_datatoken_deployer=consumer_wallet.address,
+        ),
+        publisher_wallet,
     )
-    registered_event = receipt.events["NFTCreated"]
-    assert registered_event["admin"] == publisher_wallet.address
-    token_address = registered_event["newTokenAddress"]
-    data_nft = DataNFT(config, token_address)
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
