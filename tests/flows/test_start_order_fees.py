@@ -53,7 +53,6 @@ from tests.resources.helper_functions import (
 )
 def test_start_order_fees(
     config: dict,
-    factory_router,
     publisher_wallet,
     consumer_wallet,
     provider_wallet,
@@ -178,15 +177,15 @@ def test_start_order_fees(
     assert publish_market_order_fee_amount == publish_market_order_fee
 
     # Get Ocean community fee amount
-    ocean_community_order_fee = factory_router.getOPCConsumeFee()
-    assert ocean_community_order_fee == Web3.toWei("0.03", "ether")
+    opc_order_fee = factory_router.getOPCConsumeFee()
+    assert opc_order_fee == Web3.toWei("0.03", "ether")
 
     one_datatoken = Web3.toWei(1, "ether")
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after
     assert (
-        publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
+        publisher_dt_balance_before + one_datatoken - opc_order_fee
         == publisher_dt_balance_after
     )
     assert (
@@ -210,7 +209,7 @@ def test_start_order_fees(
     assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
     assert provider_dt_balance_before == provider_dt_balance_after
     assert opc_bt_balance_before == opc_bt_balance_after
-    assert opc_dt_balance_before + ocean_community_order_fee == opc_dt_balance_after
+    assert opc_dt_balance_before + opc_order_fee == opc_dt_balance_after
 
 
 def create_asset_with_order_fee_and_timeout(
