@@ -12,7 +12,6 @@ from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachin
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
-
 ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
 
 

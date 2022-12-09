@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pathlib
-import random
 import runpy
 
 from brownie.network import accounts
@@ -12,6 +11,7 @@ from . import util
 
 
 def test_simple_remote_readme(monkeypatch):
+    monkeypatch.delenv("ADDRESS_FILE")
     accounts.clear()
     (ref_alice_wallet, _) = util.get_wallets()
 

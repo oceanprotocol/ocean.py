@@ -7,7 +7,6 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import create_checksum, get_address_of_type
@@ -21,15 +20,9 @@ def test_main(
     config,
     publisher_wallet,
     consumer_wallet,
-    another_consumer_wallet,
-    provider_wallet,
+    data_nft_factory,
 ):
     """Tests the utils functions."""
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
     receipt = data_nft_factory.deployERC721Contract(
         "DT1",
         "DTSYMBOL",
@@ -309,14 +302,9 @@ def test_main(
 
 @pytest.mark.unit
 def test_start_multiple_order(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests the utils functions."""
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
     receipt = data_nft_factory.deployERC721Contract(
         "DT1",
         "DTSYMBOL",
@@ -405,7 +393,7 @@ def test_start_multiple_order(
     datatoken.mint(consumer_wallet.address, dt_amount, {"from": consumer_wallet})
     assert datatoken.balanceOf(consumer_wallet.address) == dt_amount
 
-    datatoken.approve(data_nft_factory_address, dt_amount, {"from": consumer_wallet})
+    datatoken.approve(data_nft_factory.address, dt_amount, {"from": consumer_wallet})
 
     datatoken.setPaymentCollector(
         another_consumer_wallet.address, {"from": publisher_wallet}
@@ -467,13 +455,8 @@ def test_start_multiple_order(
 
 
 @pytest.mark.unit
-def test_fail_get_templates(config):
+def test_fail_get_templates(data_nft_factory):
     """Tests multiple failures for getting tokens' templates."""
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
     # Should fail to get the Datatoken template if index = 0
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft_factory.getTokenTemplate(0)
@@ -485,15 +468,9 @@ def test_fail_get_templates(config):
 
 @pytest.mark.unit
 def test_fail_create_datatoken(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests multiple failures for creating ERC20 token."""
-
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
     receipt = data_nft_factory.deployERC721Contract(
         "DT1",
         "DTSYMBOL",
@@ -559,14 +536,7 @@ def test_fail_create_datatoken(
 
 
 @pytest.mark.unit
-def test_datatoken_cap(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet
-):
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
+def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_with_erc20(
