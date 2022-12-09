@@ -81,17 +81,16 @@ def generate_wallet():
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
-    generated_wallet = accounts.add(private_key)
-    assert generated_wallet.private_key == private_key
+    new_wallet = accounts.add(private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(generated_wallet.address, "3 ether")
+    deployer_wallet.transfer(new_wallet.address, "3 ether")
 
-    ocn = Ocean(config)
-    OCEAN_token = ocn.OCEAN_token
-    OCEAN_token.transfer(
-        generated_wallet.address, to_wei(50), {"from": deployer_wallet}
+    ocean = Ocean(config)
+    OCEAN = ocean.OCEAN_token
+    OCEAN.transfer(
+        new_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
     )
-    return generated_wallet
+    return new_wallet
 
 
 @enforce_types
@@ -303,9 +302,9 @@ def get_provider_fees(
 
 
 def convert_bt_amt_to_dt(
-    base_token_amount: int,
-    base_token_decimals: int,
-    datatokens_per_base_token: int,
+    bt_amount: int,
+    bt_decimals: int,
+    dt_per_bt_in_wei: int,
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
@@ -318,13 +317,14 @@ def convert_bt_amt_to_dt(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    unit_value = Decimal(10) ** 18
-    return to_wei(
-        Decimal(base_token_amount)
+    unit_value = Decimal(10) ** 18 ## FIXME: SHOULDN'T `18` BE `bt_decimals` ??
+    amt_wei = Web3.toWei(
+        Decimal(bt_amount)
         / unit_value
-        * from_wei(datatokens_per_base_token),
+        * Web3.fromWei(dt_per_bt_in_wei, "ether"),
+        "ether",
     )
-
+    return amt_wei
 
 def get_file1():
     file1_dict = {

@@ -7,10 +7,10 @@ from typing import Optional, Union
 from brownie import Wei
 from enforce_typing import enforce_types
 
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import str_with_wei
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-
 
 
 @enforce_types
@@ -64,10 +64,10 @@ class FeesInfo:
         """
         t = fees_tup
         self.publish_market_fee: int = t[0]
-        self.publish_market_fee_collector: str = t[1]
+        self.publish_market_fee_collector: str = t[1] #address
         self.opc_fee: int = t[2]
-        self.publish_market_fee_available = t[3]
-        self.ocean_fee_available = t[4]
+        self.publish_market_fee_available = t[3] # in base tokens
+        self.ocean_fee_available = t[4] # in base tokens. Goes to OPC
 
 
     def __str__(self):
@@ -107,6 +107,12 @@ class BtReceived:
 @enforce_types
 class FixedRateExchange(ContractBase):
     CONTRACT_NAME = "FixedRateExchange"
+
+    def get_opc_collector(self) -> str:
+        """Returns address that collects fees for Ocean Protocol Community"""
+        router_addr = self.router()
+        router = FactoryRouter(self.config_dict, router_addr)
+        return router.getOPCCollector()
 
 
 @enforce_types
@@ -240,7 +246,6 @@ class OneExchange:
     ):
         """
         Sell datatokens to the exchange, in return for e.g. OCEAN
-        from the exchange's reserved
 
         This wraps the smart contract method FixedRateExchange.sellDT()
           with a simpler interface.
@@ -248,7 +253,6 @@ class OneExchange:
         Main params:
         - datatoken_amt - how many DT to sell? In wei, or str
         - min_basetoken_amt - min basetoken to get back
-        - exchange_id -
         - consume_market_fee_addr - market facilitating this swap
         - consume_market_fee - fee charged by market that's facilitating
         - tx_dict - e.g. {"from": alice_wallet}
@@ -333,7 +337,7 @@ class OneExchange:
     @enforce_types
     def update_publish_market_fee(self, new_amt: Union[str,int], tx_dict):
         """Update the value of the publish market swap fee"""
-        return self._FRE.updateMarketFee(self._id, new_addr, tx_dict)
+        return self._FRE.updateMarketFee(self._id, new_amt, tx_dict)
 
 
     @enforce_types

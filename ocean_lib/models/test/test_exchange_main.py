@@ -35,9 +35,9 @@ def test_with_defaults(ocean, OCEAN, DT, alice, bob):
     OCEAN.approve(exchange.address, MAX_UINT256, {"from":bob})
     
     # Bob buys 2 datatokens
-    DT_bob1 = DT.balanceOf(bob.address)
+    DT_bob1 = DT.balanceOf(bob)
     tx = exchange.buy_DT(datatoken_amt=to_wei(2), tx_dict={"from": bob})
-    assert from_wei(DT.balanceOf(bob.address)) == from_wei(DT_bob1) + 2 
+    assert from_wei(DT.balanceOf(bob)) == from_wei(DT_bob1) + 2
     
     # all exchanges for this DT
     exchanges = DT.get_exchanges()
@@ -57,7 +57,7 @@ def test_with_defaults(ocean, OCEAN, DT, alice, bob):
     assert from_wei(details.bt_balance) == 2 * 3
     assert not details.with_mint
 
-    # Test fees_info
+    # Fees tests
     fees = exchange.fees_info
     assert from_wei(fees.publish_market_fee) == 0 # publish mkt swap fee
     assert fees.publish_market_fee_collector == alice.address # for publish mkt swaps
@@ -65,8 +65,10 @@ def test_with_defaults(ocean, OCEAN, DT, alice, bob):
         == from_wei(OPC_SWAP_FEE_APPROVED) # 0.1% *if* BT approved
     assert from_wei(fees.publish_market_fee_available) == 0 # for publish mkt swaps
     assert from_wei(fees.ocean_fee_available) == 2 * 3 * 0.001
-    
-    assert from_wei(exchange.FRE.getOPCFee(ZERO_ADDRESS)) == 0.002 # 0.2% bc BT not approved
+
+    FRE = exchange.FRE
+    assert FRE.get_opc_collector()[:2] == "0x", FRE.get_opc_collector()
+    assert from_wei(FRE.getOPCFee(ZERO_ADDRESS)) == 0.002 # 0.2% bc BT not approved
 
     # Test other attributes
     assert exchange.BT_needed(to_wei(1.0), 0) >= to_wei(3) 
@@ -79,14 +81,14 @@ def test_with_defaults(ocean, OCEAN, DT, alice, bob):
     # Bob sells DT to the exchange
     DT_sell = to_wei(1.5)
     
-    DT_bob1 = DT.balanceOf(bob.address)
-    OCEAN_bob1 = OCEAN.balanceOf(bob.address)
+    DT_bob1 = DT.balanceOf(bob)
+    OCEAN_bob1 = OCEAN.balanceOf(bob)
     
     DT.approve(exchange.address, DT_sell, {"from": bob})
     exchange.sell_DT(DT_sell, tx_dict={"from": bob})
 
-    assert DT.balanceOf(bob.address) < DT_bob1
-    assert OCEAN.balanceOf(bob.address) > OCEAN_bob1
+    assert DT.balanceOf(bob) < DT_bob1
+    assert OCEAN.balanceOf(bob) > OCEAN_bob1
 
 
     # ==========================================================================
@@ -115,7 +117,6 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     carlos, dan = get_wallet(8), get_wallet(9)
     FRE = ocean.fixed_rate_exchange
     
-
     # =================================================================
     # Alice creates exchange. Bob's the owner, and carlos gets fees!
     rate = to_wei(1)
@@ -158,8 +159,8 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     OCEAN_needed = exchange.BT_needed(DT_buy, consume_market_fee)
     OCEAN.transfer(carlos.address, OCEAN_needed, {"from": bob})#give carlos OCN
 
-    DT_carlos1 = DT.balanceOf(carlos.address)
-    OCEAN_carlos1 = OCEAN.balanceOf(carlos.address)
+    DT_carlos1 = DT.balanceOf(carlos)
+    OCEAN_carlos1 = OCEAN.balanceOf(carlos)
 
     OCEAN.approve(exchange.address, OCEAN_needed, {"from": carlos})
     tx = exchange.buy_DT(
@@ -170,8 +171,8 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
         tx_dict = {"from": carlos},
     )
 
-    assert DT.balanceOf(carlos.address) == (DT_carlos1 + DT_buy)
-    assert OCEAN.balanceOf(carlos.address) == (OCEAN_carlos1 - OCEAN_needed)
+    assert DT.balanceOf(carlos) == (DT_carlos1 + DT_buy)
+    assert OCEAN.balanceOf(carlos) == (OCEAN_carlos1 - OCEAN_needed)
 
     # ==========================================================================
     # Carlos sells DT to the exchange
@@ -180,8 +181,8 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     DT_exchange1 = exchange.details.dt_supply
     OCEAN_exchange1 = exchange.details.bt_supply
     
-    DT_carlos1 = DT.balanceOf(carlos.address)
-    OCEAN_carlos1 = OCEAN.balanceOf(carlos.address)
+    DT_carlos1 = DT.balanceOf(carlos)
+    OCEAN_carlos1 = OCEAN.balanceOf(carlos)
     
     DT.approve(exchange.address, DT_sell, {"from": carlos})
     exchange.sell_DT(
@@ -194,8 +195,8 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     
     # Carlos should now have more OCEAN, and fewer DT
     OCEAN_received = exchange.BT_received(DT_sell, consume_market_fee)
-    OCEAN_carlos2 = OCEAN.balanceOf(carlos.address)
-    DT_carlos2 = DT.balanceOf(carlos.address)
+    OCEAN_carlos2 = OCEAN.balanceOf(carlos)
+    DT_carlos2 = DT.balanceOf(carlos)
     assert pytest.approx(from_wei(OCEAN_carlos2), 0.01) \
         == (from_wei(OCEAN_carlos1) + from_wei(OCEAN_received))
     assert from_wei(DT_carlos2) == (from_wei(DT_carlos1) - from_wei(DT_sell))
@@ -212,23 +213,20 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     # As payment collector, Alice collects DT payments & BT (OCEAN) payments
     assert DT.getPaymentCollector() == alice.address
 
-    DT_alice1 = DT.balanceOf(alice.address)
+    DT_alice1 = DT.balanceOf(alice)
     receipt = exchange.collect_DT(details.dt_balance, {"from": alice})
     DT_received = receipt.events["TokenCollected"]["amount"]
     assert receipt.events["TokenCollected"]["to"] == alice.address
     DT_expected = DT_alice1 + DT_received
 
-    OCEAN_alice1 = OCEAN.balanceOf(alice.address)
+    OCEAN_alice1 = OCEAN.balanceOf(alice)
     receipt = exchange.collect_BT(details.bt_balance, {"from": alice})
     OCEAN_received = receipt.events["TokenCollected"]["amount"]
     assert receipt.events["TokenCollected"]["to"] == alice.address
     OCEAN_expected = OCEAN_alice1 + OCEAN_received
 
-    st_time = time.time() # loop to avoid failure if chain didn't update yet
-    while (time.time() - st_time) < 5:
-        if DT.balanceOf(alice.address) == DT_expected \
-           and OCEAN.balanceOf(alice.address) == OCEAN_expected:
-            break
+    st_time = time.time() # loop to ensure chain's updated (shouldn't need!!)
+    while (time.time() - st_time) < 5 and DT.balanceOf(alice) == DT_alice1:
         time.sleep(0.2)
     assert from_wei(DT.balanceOf(alice.address)) == from_wei(DT_expected)
     assert from_wei(OCEAN.balanceOf(alice.address)) == from_wei(OCEAN_expected)
@@ -243,12 +241,11 @@ def test_with_nondefaults(ocean, OCEAN, DT, alice, bob):
     exchange.collect_publish_market_fee({"from": alice})
     OCEAN_expected = OCEAN_alice1 + fees.publish_market_fee_available
 
-    st_time = time.time() # loop to avoid failure if chain didn't update yet
-    while (time.time() - st_time) < 5:
-        if OCEAN.balanceOf(alice.address) == OCEAN_expected:
-            break
+    st_time = time.time() # loop to ensure chain's updated (shouldn't need!!)
+    while (time.time() - st_time) < 5 and OCEAN.balanceOf(alice)==OCEAN_alice1:
         time.sleep(0.2)
-    assert from_wei(OCEAN.balanceOf(alice.address)) == from_wei(OCEAN_expected)
+    
+    assert from_wei(OCEAN.balanceOf(alice)) == from_wei(OCEAN_expected)
     
 
 @pytest.mark.unit
