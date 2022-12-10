@@ -81,17 +81,16 @@ def generate_wallet():
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
-    generated_wallet = accounts.add(private_key)
-    assert generated_wallet.private_key == private_key
+    new_wallet = accounts.add(private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(generated_wallet.address, "3 ether")
+    deployer_wallet.transfer(new_wallet.address, "3 ether")
 
-    ocn = Ocean(config)
-    OCEAN_token = ocn.OCEAN_token
-    OCEAN_token.transfer(
-        generated_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
+    ocean = Ocean(config)
+    OCEAN = ocean.OCEAN_token
+    OCEAN.transfer(
+        new_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
     )
-    return generated_wallet
+    return new_wallet
 
 
 def get_ocean_instance_prerequisites(use_provider_mock=False) -> Ocean:
@@ -232,9 +231,9 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
 
 
 @enforce_types
-def transfer_base_token_if_balance_lte(
+def transfer_bt_if_balance_lte(
     config: dict,
-    base_token_address: str,
+    bt_address: str,
     from_wallet,
     recipient: str,
     min_balance: int,
@@ -244,7 +243,7 @@ def transfer_base_token_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = Datatoken(config, base_token_address)
+    base_token = Datatoken(config, bt_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
@@ -302,10 +301,10 @@ def get_provider_fees(
     return provider_fee
 
 
-def base_token_to_datatoken(
-    base_token_amount: int,
-    base_token_decimals: int,
-    datatokens_per_base_token: int,
+def convert_bt_amt_to_dt(
+    bt_amount: int,
+    bt_decimals: int,
+    dt_per_bt_in_wei: int,
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
@@ -318,13 +317,12 @@ def base_token_to_datatoken(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    unit_value = Decimal(10) ** 18
-    return Web3.toWei(
-        Decimal(base_token_amount)
-        / unit_value
-        * Web3.fromWei(datatokens_per_base_token, "ether"),
+    unit_value = Decimal(10) ** 18  ## FIXME: SHOULDN'T `18` BE `bt_decimals` ??
+    amt_wei = Web3.toWei(
+        Decimal(bt_amount) / unit_value * Web3.fromWei(dt_per_bt_in_wei, "ether"),
         "ether",
     )
+    return amt_wei
 
 
 def get_file1():

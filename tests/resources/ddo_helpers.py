@@ -251,11 +251,3 @@ def build_credentials_dict() -> dict:
 def get_first_service_by_type(ddo, service_type: str) -> Service:
     """Return the first Service with the given service type."""
     return next((service for service in ddo.services if service.type == service_type))
-
-
-def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
-    return FactoryRouter(exchange.config_dict, exchange.router()).getOPCCollector()
-
-
-def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:
-    return FactoryRouter(datatoken.config_dict, datatoken.router()).getOPCCollector()
