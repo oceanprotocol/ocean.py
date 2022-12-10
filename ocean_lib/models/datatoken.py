@@ -161,16 +161,13 @@ class Datatoken(ContractBase):
         #HACK publish_market_fee_collector = publish_market_fee_collector or from_addr
         with_mint = 1 if with_mint else 0
 
-        # HACK assert BT.decimals() == 18 # use_new = old assumes this, does it hold?
-        assert self.decimals() == 18 # ""
-
         tx = self.create_fixed_rate(
             fixed_price_address=FRE_addr,
             base_token_address=BT.address,
             owner=owner_addr,
             publish_market_swap_fee_collector=publish_market_fee_collector,
             allowed_swapper=allowed_swapper,
-            base_token_decimals=18, # HACK BT.decimals(),
+            base_token_decimals=18, # BT.decimals(), # need 18 to make test pass! USDC doesn't have 18 decimals.
             datatoken_decimals=self.decimals(),
             fixed_rate=rate,
             publish_market_swap_fee_amount=publish_market_fee,

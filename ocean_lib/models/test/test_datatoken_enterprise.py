@@ -159,55 +159,31 @@ def test_buy_from_fre_and_order(
     FRE = FixedRateExchange(config, FRE_addr)
 
     # HACK start========================================================
-    use_new = True
-    if use_new:
-        (_, tx_receipt) = DT.create_exchange(
-            rate = to_wei(1),
-            base_token_addr = USDC.address,
-            tx_dict = {"from": publisher_wallet},
-            owner_addr = publisher_wallet.address,
-            publish_market_fee_collector = publisher_wallet.address,
-            publish_market_fee = to_wei(0.1),
-            with_mint = True,
-            allowed_swapper = ZERO_ADDRESS,
-        )
-    else:
-        tx_receipt = DT.create_fixed_rate(
-            fixed_price_address=FRE.address,
-            base_token_address=USDC.address,
-            owner=publisher_wallet.address,
-            publish_market_swap_fee_collector=publisher_wallet.address,
-            allowed_swapper=ZERO_ADDRESS,
-            base_token_decimals=18,
-            datatoken_decimals=18,
-            fixed_rate=to_wei(1),
-            publish_market_swap_fee_amount=to_wei(0.10),
-            with_mint=1,
-            transaction_parameters={"from": publisher_wallet},
-        )
+    (exchange, tx_receipt) = DT.create_exchange(
+        rate = to_wei(1),
+        base_token_addr = USDC.address,
+        tx_dict = {"from": publisher_wallet},
+        owner_addr = publisher_wallet.address,
+        publish_market_fee_collector = publisher_wallet.address,
+        publish_market_fee = to_wei(0.1),
+        with_mint = True,
+        allowed_swapper = ZERO_ADDRESS,
+    )
+
     # HACK END==============================================================
 
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
     exchange_id = new_fixed_rate_event["exchangeId"]
-    status = FRE.getExchange(exchange_id)
     
-    # assert exchange.details.active # HACK1
-    assert status[6] is True  # is active # HACK1
-    
-    # assert exchange.details.with_mint # HACK2
-    assert status[11] is True  # is minter # HACK2
+    assert exchange.details.active
+    assert exchange.details.with_mint
 
-
-
-    
-    # HACK start===========================================================
-    # with pytest.raises(Exception,match="This address is not allowed to swap"):
-    #     exchange.buy_DT(
-    #         datatoken_amt = to_wei(1),
-    #         max_basetoken_amt = to_wei(1),
-    #         tx_dict = {"from": consumer_wallet},
-    #     )
-    # HACK END==============================================================
+    with pytest.raises(Exception,match="This address is not allowed to swap"):
+        exchange.buy_DT(
+            datatoken_amt = to_wei(1),
+            max_basetoken_amt = to_wei(1),
+            tx_dict = {"from": consumer_wallet},
+        )
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
