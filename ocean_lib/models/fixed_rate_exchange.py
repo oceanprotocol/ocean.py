@@ -72,13 +72,15 @@ class FeesInfo:
     def __str__(self):
         s = (
             f"FeesInfo: \n"
-            f"  publish_market_fee = {self.publish_market_fee}\n"
+            f"  publish_market_fee = {str_with_wei(self.publish_market_fee)}\n"
+            f"  publish_market_fee_available"
+            f" = {str_with_wei(self.publish_market_fee_available)}\n"
             f"  publish_market_fee_collector"
             f" = {self.publish_market_fee_collector}\n"
-            f"  opc_fee = {self.opc_fee}\n"
-            f"  publish_market_fee_available"
-            f" = {self.publish_market_fee_available}\n"
-            f"  ocean_fee_available = {self.ocean_fee_available}\n"
+            f"  opc_fee"
+            f" = {str_with_wei(self.opc_fee)}\n"
+            f"  ocean_fee_available (to opc)"
+            f" = {str_with_wei(self.ocean_fee_available)}\n"
         )
         return s
 
@@ -150,7 +152,10 @@ class OneExchange:
 
     @enforce_types
     def BT_needed(
-        self, DT_amt: Union[int, str], consume_market_fee: int, full_info: bool = False
+            self,
+            DT_amt: Union[int, str],
+            consume_market_fee: Union[int, str],
+            full_info: bool = False
     ) -> Union[int, BtNeeded]:
         """
         Returns an int - how many BTs you need, to buy target amt of DTs.
@@ -166,7 +171,7 @@ class OneExchange:
     def BT_received(
         self,
         DT_amt: Union[int, str],
-        consume_market_fee: int,
+        consume_market_fee: Union[int, str],
         full_info: bool = False,
     ) -> Union[int, BtReceived]:
         """
@@ -228,7 +233,7 @@ class OneExchange:
         tx_dict: dict,
         min_basetoken_amt: Union[int, str] = 0,
         consume_market_fee_addr: str = ZERO_ADDRESS,
-        consume_market_fee: int = 0,
+        consume_market_fee: Union[int, str] = 0,
     ):
         """
         Sell datatokens to the exchange, in return for e.g. OCEAN
