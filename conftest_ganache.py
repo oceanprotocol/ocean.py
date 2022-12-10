@@ -9,6 +9,7 @@ from brownie.network import accounts
 from web3.main import Web3
 
 from ocean_lib.example_config import get_config_dict
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -29,6 +30,7 @@ from tests.resources.helper_functions import (
     get_provider_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
+    get_wallet,
     setup_logging,
 )
 
