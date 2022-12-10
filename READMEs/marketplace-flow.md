@@ -61,7 +61,7 @@ In the same Python console:
 # create exchange
 from ocean_lib.ocean.util import to_wei, from_wei
 price = to_wei(1)
-exchange = datatoken.create_fixed_rate(price, OCEAN.address, {"from":alice_wallet})
+exchange = datatoken.create_exchange(price, OCEAN.address, {"from":alice_wallet})
 
 # make 100 datatokens available on the exchange
 datatoken.mint(alice.address, to_wei(100), {"from": alice})
