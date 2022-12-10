@@ -154,42 +154,52 @@ def test_buy_from_fre_and_order(
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
     FRE_addr = get_address_of_type(config, "FixedPrice")
-
-    # HACK start========================================================
-    # (exchange, tx) = DT.create_exchange(
-    #     rate = to_wei(1),
-    #     base_token_addr = USDC.address,
-    #     publish_market_fee = to_wei(0.1),
-    #     with_mint = True,
-    #     tx_dict = {"from": publisher_wallet},
-    # )
-    # assert exchange.details.active
-    # assert exchange.details.with_mint
-
+    
     from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-
     FRE = FixedRateExchange(config, FRE_addr)
 
-    tx_receipt = DT.create_fixed_rate(
-        fixed_price_address=FRE.address,
-        base_token_address=USDC.address,
-        owner=publisher_wallet.address,
-        publish_market_swap_fee_collector=publisher_wallet.address,
-        allowed_swapper=ZERO_ADDRESS,
-        base_token_decimals=18,
-        datatoken_decimals=18,
-        fixed_rate=to_wei(1),
-        publish_market_swap_fee_amount=to_wei(0.10),
-        with_mint=1,
-        transaction_parameters={"from": publisher_wallet},
-    )
+    # HACK start========================================================
+    use_new = True
+    if use_new:
+        (_, tx_receipt) = DT.create_exchange(
+            rate = to_wei(1),
+            base_token_addr = USDC.address,
+            tx_dict = {"from": publisher_wallet},
+            owner_addr = publisher_wallet.address,
+            publish_market_fee_collector = publisher_wallet.address,
+            publish_market_fee = to_wei(0.1),
+            with_mint = True,
+            allowed_swapper = ZERO_ADDRESS,
+        )
+    else:
+        tx_receipt = DT.create_fixed_rate(
+            fixed_price_address=FRE.address,
+            base_token_address=USDC.address,
+            owner=publisher_wallet.address,
+            publish_market_swap_fee_collector=publisher_wallet.address,
+            allowed_swapper=ZERO_ADDRESS,
+            base_token_decimals=18,
+            datatoken_decimals=18,
+            fixed_rate=to_wei(1),
+            publish_market_swap_fee_amount=to_wei(0.10),
+            with_mint=1,
+            transaction_parameters={"from": publisher_wallet},
+        )
+    # HACK END==============================================================
+
     new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
     exchange_id = new_fixed_rate_event["exchangeId"]
     status = FRE.getExchange(exchange_id)
-    assert status[6] is True  # is active
-    assert status[11] is True  # is minter
-    # HACK END==============================================================
+    
+    # assert exchange.details.active # HACK1
+    assert status[6] is True  # is active # HACK1
+    
+    # assert exchange.details.with_mint # HACK2
+    assert status[11] is True  # is minter # HACK2
 
+
+
+    
     # HACK start===========================================================
     # with pytest.raises(Exception,match="This address is not allowed to swap"):
     #     exchange.buy_DT(
@@ -197,15 +207,6 @@ def test_buy_from_fre_and_order(
     #         max_basetoken_amt = to_wei(1),
     #         tx_dict = {"from": consumer_wallet},
     #     )
-    with pytest.raises(Exception, match="This address is not allowed to swap"):
-        FRE.buyDT(
-            exchange_id,
-            to_wei(1),
-            to_wei(1),
-            ZERO_ADDRESS,
-            0,
-            {"from": consumer_wallet},
-        )
     # HACK END==============================================================
 
     consume_fee_amount = to_wei(2)
@@ -278,9 +279,10 @@ def test_buy_from_fre_and_order(
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        exchange_contract=FRE.address,
-        # exchange_id=exchange.exchange_id, #HACK
-        exchange_id=exchange_id,  # HACK
+        #exchange_contract=exchange.address, #HACK1
+        exchange_contract=FRE.address, #HACK1
+        # exchange_id=exchange.exchange_id, #HACK2
+        exchange_id=exchange_id,  # HACK2
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,

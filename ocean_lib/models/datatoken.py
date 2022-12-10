@@ -155,28 +155,45 @@ class Datatoken(ContractBase):
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = tx_dict["from"].address
+        #HACK from_addr = tx_dict["from"].address
         BT = Datatoken(self.config_dict, base_token_addr)
-        owner_addr = owner_addr or from_addr
-        publish_market_fee_collector = publish_market_fee_collector or from_addr
+        #HACK owner_addr = owner_addr or from_addr
+        #HACK publish_market_fee_collector = publish_market_fee_collector or from_addr
+        with_mint = 1 if with_mint else 0
 
-        tx = self.contract.createFixedRate(
-            checksum_addr(FRE_addr),
-            [
-                checksum_addr(BT.address),
-                checksum_addr(owner_addr),
-                checksum_addr(publish_market_fee_collector),
-                checksum_addr(allowed_swapper),
-            ],
-            [
-                BT.decimals(),
-                self.decimals(),
-                rate,
-                publish_market_fee,
-                with_mint,
-            ],
-            tx_dict,
+        # HACK assert BT.decimals() == 18 # use_new = old assumes this, does it hold?
+        assert self.decimals() == 18 # ""
+
+        tx = self.create_fixed_rate(
+            fixed_price_address=FRE_addr,
+            base_token_address=BT.address,
+            owner=owner_addr,
+            publish_market_swap_fee_collector=publish_market_fee_collector,
+            allowed_swapper=allowed_swapper,
+            base_token_decimals=18, # HACK BT.decimals(),
+            datatoken_decimals=self.decimals(),
+            fixed_rate=rate,
+            publish_market_swap_fee_amount=publish_market_fee,
+            with_mint=with_mint,
+            transaction_parameters=tx_dict,
         )
+        # tx = self.contract.createFixedRate(
+        #     checksum_addr(FRE_addr),
+        #     [
+        #         checksum_addr(BT.address),
+        #         checksum_addr(owner_addr),
+        #         checksum_addr(publish_market_fee_collector),
+        #         checksum_addr(allowed_swapper),
+        #     ],
+        #     [
+        #         BT.decimals(),
+        #         self.decimals(),
+        #         rate,
+        #         publish_market_fee,
+        #         with_mint,
+        #     ],
+        #     tx_dict,
+        # )
 
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()
