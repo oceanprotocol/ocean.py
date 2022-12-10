@@ -306,7 +306,6 @@ class Datatoken(ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
-    
     # create_fixed_rate() is a HACK to help debug test_datatoken_enterprise.pu
     @enforce_types
     def create_fixed_rate(
@@ -340,6 +339,7 @@ class Datatoken(ContractBase):
             ],
             transaction_parameters,
         )
+
 
 class MockERC20(Datatoken):
     CONTRACT_NAME = "MockERC20"
