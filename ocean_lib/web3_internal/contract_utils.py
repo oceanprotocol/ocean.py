@@ -51,7 +51,7 @@ def get_contracts_addresses_all_networks(config: dict):
 
 @enforce_types
 def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
-    """Get addresses for the given NETWORK_NAME, from info in ADDRESS_FILE"""
+    """Get addresses for given NETWORK_NAME, from info in ADDRESS_FILE"""
     network_name = config["NETWORK_NAME"]
     addresses = get_contracts_addresses_all_networks(config)
 
