@@ -205,7 +205,7 @@ def reuse_order_with_mock_provider_fees(
 ):
     """Call reuse_order, and verify the balances/fees are correct"""
 
-    router = FactoryRouter(self.config_dict, dt.router())
+    router = FactoryRouter(bt.config_dict, dt.router())
     opc_collector_address = router.getOPCCollector()
 
     # Get balances before reuse_order
