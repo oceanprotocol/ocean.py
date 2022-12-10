@@ -163,8 +163,7 @@ def test_buy_from_fre_and_order(
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
     FRE_addr = get_address_of_type(config, "FixedPrice")
 
-    # =====================================================================
-    # HACK start
+    # HACK start========================================================
     # (exchange, tx) = DT.create_exchange(
     #     rate = to_wei(1),
     #     base_token_addr = USDC.address,
@@ -174,13 +173,6 @@ def test_buy_from_fre_and_order(
     # )
     # assert exchange.details.active
     # assert exchange.details.with_mint
-
-    # with pytest.raises(Exception, match="This address is not allowed to swap"):
-    #     exchange.buy_DT(
-    #         datatoken_amt = to_wei(1),
-    #         max_basetoken_amt = to_wei(1),
-    #         tx_dict = {"from": consumer_wallet},
-    #     )
 
     from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
     FRE = FixedRateExchange(config, FRE_addr)
@@ -203,7 +195,15 @@ def test_buy_from_fre_and_order(
     status = FRE.getExchange(exchange_id)
     assert status[6] is True  # is active
     assert status[11] is True  # is minter
+    #HACK END==============================================================
 
+    # HACK start===========================================================
+    # with pytest.raises(Exception,match="This address is not allowed to swap"):
+    #     exchange.buy_DT(
+    #         datatoken_amt = to_wei(1),
+    #         max_basetoken_amt = to_wei(1),
+    #         tx_dict = {"from": consumer_wallet},
+    #     )
     with pytest.raises(Exception, match="This address is not allowed to swap"):
         FRE.buyDT(
             exchange_id,
@@ -213,8 +213,7 @@ def test_buy_from_fre_and_order(
             0,
             {"from": consumer_wallet},
         )
-    #HACK END
-    # =====================================================================
+    #HACK END==============================================================
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
