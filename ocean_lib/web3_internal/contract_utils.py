@@ -37,11 +37,12 @@ def load_contract(contract_name: str, address: Optional[str]) -> Contract:
 
 
 @enforce_types
-def get_addresses_with_fallback(config: dict):
+def get_contracts_addresses_all_networks(config: dict):
+    """Get addresses, across *all* networks, from info in ADDRESS_FILE"""
     address_file = config.get("ADDRESS_FILE")
 
     if not address_file or not os.path.exists(address_file):
-        raise Exception("Address file not found.")
+        raise Exception(f"Could not find address_file={address_file}.")
     with open(address_file) as f:
         addresses = json.load(f)
 
@@ -50,15 +51,17 @@ def get_addresses_with_fallback(config: dict):
 
 @enforce_types
 def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
-    """Get addresses for all contract names, per network and address_file given."""
+    """Get addresses for given NETWORK_NAME, from info in ADDRESS_FILE"""
     network_name = config["NETWORK_NAME"]
-    addresses = get_addresses_with_fallback(config)
+    addresses = get_contracts_addresses_all_networks(config)
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]
 
     if not network_addresses:
+        address_file = config.get("ADDRESS_FILE")
         raise Exception(
-            f"Address not found for {network_name}. Please check your address file."
+            f"Address not found for network_name={network_name}."
+            f" Please check your address_file={address_file}."
         )
 
     return _checksum_contract_addresses(network_addresses=network_addresses[0])
