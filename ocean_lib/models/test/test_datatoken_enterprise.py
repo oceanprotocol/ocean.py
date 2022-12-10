@@ -158,7 +158,6 @@ def test_buy_from_fre_and_order(
     from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
     FRE = FixedRateExchange(config, FRE_addr)
 
-    # HACK start========================================================
     (exchange, tx_receipt) = DT.create_exchange(
         rate = to_wei(1),
         base_token_addr = USDC.address,
@@ -168,13 +167,7 @@ def test_buy_from_fre_and_order(
         publish_market_fee = to_wei(0.1),
         with_mint = True,
         allowed_swapper = ZERO_ADDRESS,
-    )
-
-    # HACK END==============================================================
-
-    new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
-    exchange_id = new_fixed_rate_event["exchangeId"]
-    
+    )    
     assert exchange.details.active
     assert exchange.details.with_mint
 
@@ -194,16 +187,12 @@ def test_buy_from_fre_and_order(
         {"from": publisher_wallet},
     )
 
-    # HACK start
-    # (publishMarketFeeAddress, _, publishMarketFeeAmount) = \
-    #    DT.getPublishingMarketFee()
-    publish_fees = DT.getPublishingMarketFee()
-    # HACK end
+    (publishMarketFeeAddress, _, publishMarketFeeAmount) = \
+       DT.getPublishingMarketFee()
 
     USDC.transfer(
         publisher_wallet.address,
-        # publishMarketFeeAmount + to_wei(3), #HACK
-        publish_fees[2] + to_wei(3),  # HACK
+        publishMarketFeeAmount + to_wei(3),
         {"from": factory_deployer_wallet},
     )
     USDC.approve(
@@ -255,10 +244,8 @@ def test_buy_from_fre_and_order(
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        #exchange_contract=exchange.address, #HACK1
-        exchange_contract=FRE.address, #HACK1
-        # exchange_id=exchange.exchange_id, #HACK2
-        exchange_id=exchange_id,  # HACK2
+        exchange_contract=exchange.address,
+        exchange_id=exchange.exchange_id,
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
@@ -269,8 +256,7 @@ def test_buy_from_fre_and_order(
 
     provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
-    # publish_bal2 = USDC.balanceOf(publishMarketFeeAddress) #HACK
-    publish_bal2 = USDC.balanceOf(publish_fees[0])  # HACK
+    publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
     assert from_wei(provider_fee_bal2) == from_wei(provider_fee_bal1) + 0.001
