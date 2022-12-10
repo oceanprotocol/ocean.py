@@ -15,7 +15,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -53,7 +53,7 @@ def setup_all(request, config, ocean_token):
     if not wallet:
         return
 
-    if not get_addresses_with_fallback(config):
+    if not get_contracts_addresses_all_networks(config):
         print("Can not find adddresses.")
         return
 
