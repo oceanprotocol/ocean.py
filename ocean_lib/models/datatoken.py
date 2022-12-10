@@ -306,6 +306,40 @@ class Datatoken(ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
+    
+    # create_fixed_rate() is a HACK to help debug test_datatoken_enterprise.pu
+    @enforce_types
+    def create_fixed_rate(
+        self,
+        fixed_price_address: str,
+        base_token_address: str,
+        owner: str,
+        publish_market_swap_fee_collector: str,
+        allowed_swapper: str,
+        base_token_decimals: int,
+        datatoken_decimals: int,
+        fixed_rate: int,
+        publish_market_swap_fee_amount: int,
+        with_mint: int,
+        transaction_parameters: dict,
+    ) -> str:
+        return self.contract.createFixedRate(
+            ContractBase.to_checksum_address(fixed_price_address),
+            [
+                ContractBase.to_checksum_address(base_token_address),
+                ContractBase.to_checksum_address(owner),
+                ContractBase.to_checksum_address(publish_market_swap_fee_collector),
+                ContractBase.to_checksum_address(allowed_swapper),
+            ],
+            [
+                base_token_decimals,
+                datatoken_decimals,
+                fixed_rate,
+                publish_market_swap_fee_amount,
+                with_mint,
+            ],
+            transaction_parameters,
+        )
 
 class MockERC20(Datatoken):
     CONTRACT_NAME = "MockERC20"

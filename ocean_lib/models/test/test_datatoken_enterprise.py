@@ -163,22 +163,58 @@ def test_buy_from_fre_and_order(
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
     FRE_addr = get_address_of_type(config, "FixedPrice")
 
-    (exchange, tx) = DT.create_exchange(
-        rate = to_wei(1),
-        base_token_addr = USDC.address,
-        publish_market_fee = to_wei(0.1),
-        with_mint = True,
-        tx_dict = {"from": publisher_wallet},
-    )
-    assert exchange.details.active
-    assert exchange.details.with_mint
+    # =====================================================================
+    # HACK start
+    # (exchange, tx) = DT.create_exchange(
+    #     rate = to_wei(1),
+    #     base_token_addr = USDC.address,
+    #     publish_market_fee = to_wei(0.1),
+    #     with_mint = True,
+    #     tx_dict = {"from": publisher_wallet},
+    # )
+    # assert exchange.details.active
+    # assert exchange.details.with_mint
+
+    # with pytest.raises(Exception, match="This address is not allowed to swap"):
+    #     exchange.buy_DT(
+    #         datatoken_amt = to_wei(1),
+    #         max_basetoken_amt = to_wei(1),
+    #         tx_dict = {"from": consumer_wallet},
+    #     )
+
+    from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+    FRE = FixedRateExchange(config, FRE_addr)
     
+    tx_receipt = DT.create_fixed_rate(
+        fixed_price_address=FRE.address,
+        base_token_address=USDC.address,
+        owner=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        base_token_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=to_wei(1),
+        publish_market_swap_fee_amount=to_wei(0.10),
+        with_mint=1,
+        transaction_parameters={"from": publisher_wallet},
+    )
+    new_fixed_rate_event = tx_receipt.events["NewFixedRate"]
+    exchange_id = new_fixed_rate_event["exchangeId"]
+    status = FRE.getExchange(exchange_id)
+    assert status[6] is True  # is active
+    assert status[11] is True  # is minter
+
     with pytest.raises(Exception, match="This address is not allowed to swap"):
-        exchange.buy_DT(
-            datatoken_amt = to_wei(1),
-            max_basetoken_amt = to_wei(1),
-            tx_dict = {"from": consumer_wallet},
+        FRE.buyDT(
+            exchange_id,
+            to_wei(1),
+            to_wei(1),
+            ZERO_ADDRESS,
+            0,
+            {"from": consumer_wallet},
         )
+    #HACK END
+    # =====================================================================
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -188,13 +224,17 @@ def test_buy_from_fre_and_order(
         consume_fee_amount,
         {"from": publisher_wallet},
     )
-    
-    (publishMarketFeeAddress, _, publishMarketFeeAmount) = \
-        DT.getPublishingMarketFee()
+
+    #HACK start
+    #(publishMarketFeeAddress, _, publishMarketFeeAmount) = \
+    #    DT.getPublishingMarketFee()
+    publish_fees = DT.getPublishingMarketFee()
+    #HACK end
 
     USDC.transfer(
         publisher_wallet.address,
-        publishMarketFeeAmount + to_wei(3),
+        #publishMarketFeeAmount + to_wei(3), #HACK
+        publish_fees[2] + to_wei(3), #HACK
         {"from": factory_deployer_wallet},
     )
     USDC.approve(DT.address, MAX_UINT256, {"from": publisher_wallet},
@@ -244,7 +284,8 @@ def test_buy_from_fre_and_order(
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
         exchange_contract=FRE.address,
-        exchange_id=exchange.exchange_id,
+        #exchange_id=exchange.exchange_id, #HACK
+        exchange_id=exchange_id, #HACK
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
@@ -255,7 +296,8 @@ def test_buy_from_fre_and_order(
 
     provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
-    publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
+    #publish_bal2 = USDC.balanceOf(publishMarketFeeAddress) #HACK
+    publish_bal2 = USDC.balanceOf(publish_fees[0]) #HACK
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
     assert from_wei(provider_fee_bal2) == from_wei(provider_fee_bal1) + 0.001
