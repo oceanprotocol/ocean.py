@@ -23,7 +23,7 @@ from tests.resources.helper_functions import get_wallet
 
 @pytest.mark.unit
 def test_with_defaults(OCEAN, DT, alice, bob):
-    
+
     # =========================================================================
     # Create exchange
     (exchange, tx) = DT.create_exchange(
