@@ -161,36 +161,23 @@ class Datatoken(ContractBase):
         #HACK publish_market_fee_collector = publish_market_fee_collector or from_addr
         with_mint = 1 if with_mint else 0
 
-        tx = self.create_fixed_rate(
-            fixed_price_address=FRE_addr,
-            base_token_address=BT.address,
-            owner=owner_addr,
-            publish_market_swap_fee_collector=publish_market_fee_collector,
-            allowed_swapper=allowed_swapper,
-            base_token_decimals=18, # BT.decimals(), # need 18 to make test pass! USDC doesn't have 18 decimals.
-            datatoken_decimals=self.decimals(),
-            fixed_rate=rate,
-            publish_market_swap_fee_amount=publish_market_fee,
-            with_mint=with_mint,
-            transaction_parameters=tx_dict,
+        tx = self.contract.createFixedRate(
+            checksum_addr(FRE_addr),
+            [
+                checksum_addr(BT.address),
+                checksum_addr(owner_addr),
+                checksum_addr(publish_market_fee_collector),
+                checksum_addr(allowed_swapper),
+            ],
+            [
+                18, # BT.decimals(), #USDC has 16. Need 18 to make test pass
+                self.decimals(),
+                rate,
+                publish_market_fee,
+                with_mint,
+            ],
+            tx_dict,
         )
-        # tx = self.contract.createFixedRate(
-        #     checksum_addr(FRE_addr),
-        #     [
-        #         checksum_addr(BT.address),
-        #         checksum_addr(owner_addr),
-        #         checksum_addr(publish_market_fee_collector),
-        #         checksum_addr(allowed_swapper),
-        #     ],
-        #     [
-        #         BT.decimals(),
-        #         self.decimals(),
-        #         rate,
-        #         publish_market_fee,
-        #         with_mint,
-        #     ],
-        #     tx_dict,
-        # )
 
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()
