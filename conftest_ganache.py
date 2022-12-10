@@ -2,18 +2,23 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Tuple
+
 import pytest
 from brownie.network import accounts
 from web3.main import Web3
 
 from ocean_lib.example_config import get_config_dict
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
     get_another_consumer_wallet,
     get_consumer_ocean_instance,
     get_consumer_wallet,
@@ -25,6 +30,7 @@ from tests.resources.helper_functions import (
     get_provider_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
+    get_wallet,
     setup_logging,
 )
 
@@ -140,3 +146,50 @@ def file2():
 @pytest.fixture
 def file3():
     return get_file3()
+
+
+@pytest.fixture
+def FRE(config) -> FixedRateExchange:
+    return FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
+
+
+@pytest.fixture
+def data_nft(config, publisher_wallet) -> DataNFT:
+    return deploy_erc721_erc20(config, publisher_wallet)
+
+
+@pytest.fixture
+def data_NFT_and_DT(config, publisher_wallet) -> Tuple[DataNFT, Datatoken]:
+    return deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
+
+
+@pytest.fixture
+def DT(data_NFT_and_DT) -> Datatoken:
+    (_, DT) = data_NFT_and_DT
+    return DT
+
+
+# aliases
+@pytest.fixture
+def OCEAN(ocean_token) -> Datatoken:
+    return ocean_token
+
+
+@pytest.fixture
+def alice(publisher_wallet):
+    return publisher_wallet
+
+
+@pytest.fixture
+def bob(consumer_wallet):
+    return consumer_wallet
+
+
+@pytest.fixture
+def carlos():
+    return get_wallet(8)
+
+
+@pytest.fixture
+def dan():
+    return get_wallet(9)

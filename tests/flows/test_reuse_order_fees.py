@@ -9,17 +9,17 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
-from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_provider_fees,
     get_wallet,
     int_units,
-    transfer_base_token_if_balance_lte,
+    transfer_bt_if_balance_lte,
 )
 
 
@@ -58,9 +58,9 @@ def test_reuse_order_fees(
     consume_market_wallet = get_wallet(5)
 
     # Send base tokens to the consumer so they can pay for fees
-    transfer_base_token_if_balance_lte(
+    transfer_bt_if_balance_lte(
         config=config,
-        base_token_address=bt.address,
+        bt_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
         min_balance=int_units("4000", bt.decimals()),
@@ -205,7 +205,8 @@ def reuse_order_with_mock_provider_fees(
 ):
     """Call reuse_order, and verify the balances/fees are correct"""
 
-    opc_collector_address = get_opc_collector_address_from_datatoken(dt)
+    router = FactoryRouter(bt.config_dict, dt.router())
+    opc_collector_address = router.getOPCCollector()
 
     # Get balances before reuse_order
     publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
