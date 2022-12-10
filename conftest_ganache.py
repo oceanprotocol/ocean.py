@@ -163,6 +163,12 @@ def data_NFT_and_DT(config, publisher_wallet) -> Tuple[DataNFT, Datatoken]:
     return deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
 
+@pytest.fixture
+def DT(data_NFT_and_DT) -> Datatoken:
+    (_, DT) = data_NFT_and_DT
+    return DT
+
+
 # aliases
 @pytest.fixture
 def OCEAN(ocean_token) -> Datatoken:
