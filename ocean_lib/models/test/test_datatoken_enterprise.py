@@ -154,28 +154,26 @@ def test_buy_from_fre_and_order(
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
     FRE_addr = get_address_of_type(config, "FixedPrice")
-    
+
     from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+
     FRE = FixedRateExchange(config, FRE_addr)
 
     (exchange, tx_receipt) = DT.create_exchange(
-        rate = to_wei(1),
-        base_token_addr = USDC.address,
-        tx_dict = {"from": publisher_wallet},
-        owner_addr = publisher_wallet.address,
-        publish_market_fee_collector = publisher_wallet.address,
-        publish_market_fee = to_wei(0.1),
-        with_mint = True,
-        allowed_swapper = ZERO_ADDRESS,
-    )    
+        rate=to_wei(1),
+        base_token_addr=USDC.address,
+        tx_dict={"from": publisher_wallet},
+        publish_market_fee=to_wei(0.1),
+        with_mint=True,
+    )
     assert exchange.details.active
     assert exchange.details.with_mint
 
-    with pytest.raises(Exception,match="This address is not allowed to swap"):
+    with pytest.raises(Exception, match="This address is not allowed to swap"):
         exchange.buy_DT(
-            datatoken_amt = to_wei(1),
-            max_basetoken_amt = to_wei(1),
-            tx_dict = {"from": consumer_wallet},
+            datatoken_amt=to_wei(1),
+            max_basetoken_amt=to_wei(1),
+            tx_dict={"from": consumer_wallet},
         )
 
     consume_fee_amount = to_wei(2)
@@ -187,8 +185,7 @@ def test_buy_from_fre_and_order(
         {"from": publisher_wallet},
     )
 
-    (publishMarketFeeAddress, _, publishMarketFeeAmount) = \
-       DT.getPublishingMarketFee()
+    (publishMarketFeeAddress, _, publishMarketFeeAmount) = DT.getPublishingMarketFee()
 
     USDC.transfer(
         publisher_wallet.address,
@@ -259,7 +256,10 @@ def test_buy_from_fre_and_order(
     publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
-    assert from_wei(provider_fee_bal2) == from_wei(provider_fee_bal1) + 0.001
+    assert (
+        pytest.approx(from_wei(provider_fee_bal2), 0.00001)
+        == from_wei(provider_fee_bal1) + 0.001
+    )
 
     assert from_wei(publish_bal2) == from_wei(publish_bal1) + 2.0
 

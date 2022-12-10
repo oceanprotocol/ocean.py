@@ -152,10 +152,10 @@ class OneExchange:
 
     @enforce_types
     def BT_needed(
-            self,
-            DT_amt: Union[int, str],
-            consume_market_fee: Union[int, str],
-            full_info: bool = False
+        self,
+        DT_amt: Union[int, str],
+        consume_market_fee: Union[int, str],
+        full_info: bool = False,
     ) -> Union[int, BtNeeded]:
         """
         Returns an int - how many BTs you need, to buy target amt of DTs.
