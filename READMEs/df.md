@@ -16,25 +16,32 @@ Let's go through each step.
 
 ## 1. Setup
 
-### 1.1 Basic setup
+From [installation-flow](install.md), do "Setup" section.
 
-From [installation-flow](install.md), do:
-- [x] Setup
-
-In console, set factory envvar:
+We also need to set the factory envvar. In the console:
 ```console
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do "Setup in Python" section. 
 
+Now, we're in the Python console.
 
-### 1.2 Setup key parameters
+Alice needs (fake) OCEAN for later. In the same Python console:
+```python
+# mint OCEAN. Alice will get some
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
 
-In Ganache, you can use these parameters as-is. But on Eth mainnet, you need to choose these for yourself.
+# simpler variable names
+OCEAN = ocean.OCEAN_token
+veOCEAN = ocean.ve_ocean
+alice = alice_wallet
+```
 
-In the same Python console:
+## 2. Lock OCEAN for veOCEAN
+
+First, let's set some key parameters for veOCEAN and DF. On Ganache, you can use these values as-is. But on Eth mainnet, you must choose your own. In the same Python console:
 ```python
 # On your asset, your DCV = DT_price * num_consumes
 # Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs. 
@@ -47,25 +54,7 @@ num_consumes = 3
 amt_OCEAN_lock = 10.0
 ```
 
-
-### 1.3 Setup OCEAN and veOCEAN
-
-In the same Python console:
-```python
-# mint OCEAN. Alice will get some
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
-# simpler variable names
-OCEAN = ocean.OCEAN_token
-veOCEAN = ocean.ve_ocean
-alice = alice_wallet
-```
-
-
-## 2. Lock OCEAN for veOCEAN
-
-In the same Python console:
+Now, let's lock OCEAN for veOCEAN. In the same Python console:
 ```python
 #simulate passage of time, until next Thursday, the start of DF(X)
 from brownie.network import chain
