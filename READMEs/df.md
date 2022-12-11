@@ -16,12 +16,16 @@ Let's go through each step.
 
 ## 1. Setup
 
+### 1.1 Setup from console
+
 From [installation-flow](install.md), do "Setup" section.
 
 We also need to set the factory envvar. In the console:
 ```console
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
+
+### 2.2 Setup in Python
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do "Setup in Python" section. 
 
