@@ -31,6 +31,8 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do "Setu
 
 Now, we're in the Python console.
 
+### 2.3 Fake OCEAN
+
 Alice needs (fake) OCEAN for later. In the same Python console:
 ```python
 # mint OCEAN. Alice will get some
