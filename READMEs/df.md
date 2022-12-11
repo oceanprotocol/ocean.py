@@ -6,7 +6,7 @@ Here are the steps:
 
 1. Setup, in Ganache
 2. Lock OCEAN for veOCEAN
-3. Publish dataset & FRE
+3. Publish dataset & exchange
 4. Allocate veOCEAN to dataset
 5. Fake-consume data
 6. Collect OCEAN rewards
@@ -18,12 +18,16 @@ Let's go through each step.
 
 ### 1.1 Basic setup
 
+From [installation-flow](install.md), do:
+- [x] Setup
+
+In console, set factory envvar:
+```console
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+```
+
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-- [x] Setup : Setup in Python, including `ocean` and `alice_wallet`
+- [x] Setup : Setup in Python
 
 
 ### 1.2 Setup key parameters
@@ -32,9 +36,9 @@ In Ganache, you can use these parameters as-is. But on Eth mainnet, you need to 
 
 In the same Python console:
 ```python
-# On your asset, your DCV = datatoken_price_OCEAN * num_consumes.
+# On your asset, your DCV = DT_price * num_consumes
 # Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs. 
-datatoken_price_OCEAN = 100.0
+DT_price = 100.0 # number of OCEAN needed to buy one datatoken
 num_consumes = 3
 
 # This is how much OCEAN to lock into veOCEAN. It can be small if you're
@@ -46,24 +50,16 @@ amt_OCEAN_lock = 10.0
 
 ### 1.3 Setup OCEAN and veOCEAN
 
-We'll use these a lot. So import once, here. 
 In the same Python console:
 ```python
-# Set factory envvar. Stay in Python to retain state from before.
-import os
-os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
+# mint OCEAN. Alice will get some
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config) #Alice gets some
+mint_fake_OCEAN(config)
 
+# simpler variable names
 OCEAN = ocean.OCEAN_token
 veOCEAN = ocean.ve_ocean
-
-#helper functions
-def to_wei(amt_eth) -> int:
-    return int(amt_eth * 1e18)
-
-def from_wei(amt_wei: int) -> float:
-    return float(amt_wei / 1e18)
+alice = alice_wallet
 ```
 
 
@@ -81,13 +77,14 @@ chain.sleep(t1 - t0)
 chain.mine()
 
 #we're now at the beginning of the week. So, lock
-OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), {"from" : alice_wallet})
-veOCEAN.withdraw({"from": alice_wallet}) #withdraw old tokens first
-veOCEAN.create_lock(to_wei(amt_OCEAN_lock), t2, {"from": alice_wallet})
+from ocean_lib.ocean.util import to_wei, from_wei
+OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), {"from" : alice})
+veOCEAN.withdraw({"from": alice}) #withdraw old tokens first
+veOCEAN.create_lock(to_wei(amt_OCEAN_lock), t2, {"from": alice})
 ```
 
 
-## 3. Publish Dataset & FRE
+## 3. Publish Dataset & Exchange
 
 In the same Python console:
 ```python
@@ -96,18 +93,17 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet, wait_for_aqua=False)
+(data_NFT, DT, ddo) = ocean.assets.create_url_asset(name, url, alice, wait_for_aqua=False)
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
-# create fixed-rate exchange (FRE)
-from web3 import Web3
-exchange_id = ocean.create_fixed_rate(
-    datatoken=datatoken,
-    base_token=OCEAN,
-    amount=to_wei(num_consumes),
-    fixed_rate=to_wei(datatoken_price_OCEAN),
-    from_wallet=alice_wallet,
+#create exchange
+exchange, _ = DT.create_exchange(
+    to_wei(DT_price), OCEAN.address, {"from": alice}
 )
+
+#make datatokens available on the exchange
+DT.mint(alice, to_wei(num_consumes), {"from": alice})
+DT.approve(exchange.address, to_wei(num_consumes), {"from": alice})
 ```
 
 
@@ -116,7 +112,7 @@ exchange_id = ocean.create_fixed_rate(
 To stake, you allocate veOCEAN to dataset. In the same Python console:
 ```python
 amt_allocate = 100 #total allocation must be <= 10000 (wei)
-ocean.ve_allocate.setAllocation(amt_allocate, data_NFT.address, chain.id, {"from": alice_wallet})
+ocean.ve_allocate.setAllocation(amt_allocate, data_NFT.address, chain.id, {"from": alice})
 ```
 
 ## 5. Fake-consume data
@@ -127,29 +123,21 @@ In the meantime, this README helps level the playing field around wash consume. 
 
 ```python
 # Alice buys datatokens from herself
-amt_pay = datatoken_price_OCEAN * num_consumes
-OCEAN_bal = from_wei(OCEAN.balanceOf(alice_wallet.address))
-assert OCEAN_bal >= amt_pay, f"Have just {OCEAN_bal} OCEAN"
-OCEAN.approve(ocean.fixed_rate_exchange.address, to_wei(OCEAN_bal), {"from": alice_wallet})
-fees_info = ocean.fixed_rate_exchange.get_fees_info(exchange_id)
-for i in range(num_consumes):
-    print(f"Purchase #{i+1}/{num_consumes}...")
-    tx = ocean.fixed_rate_exchange.buyDT(
-        exchange_id,
-        to_wei(num_consumes), # datatokenAmount
-        to_wei(OCEAN_bal),    # maxBaseTokenAmount
-        fees_info[1], # consumeMarketAddress
-        fees_info[0], # consumeMarketSwapFeeAmount
-        {"from": alice_wallet},
-    )
-    assert tx, "buying datatokens failed"
-DT_bal = from_wei(datatoken.balanceOf(alice_wallet.address))
-assert DT_bal >= num_consumes, f"Have just {DT_bal} datatokens"
+OCEAN_pay = DT_price * num_consumes
+OCEAN_alice = from_wei(OCEAN.balanceOf(alice))
+assert OCEAN_alice >= OCEAN_pay, f"Have just {OCEAN_alice} OCEAN"
+
+OCEAN.approve(exchange.address, to_wei(OCEAN_alice), {"from": alice})
+exchange.buy_DT(to_wei(num_consumes), {"from": alice})
+
+DT_bal = from_wei(DT.balanceOf(alice))
+assert DT_bal >= num_consumes, \
+    f"Have {DT_bal} datatokens, too few for {num_consumes} consumes"
 
 # Alice sends datatokens to the service, to get access. This is the "consume".
 for i in range(num_consumes):
     print(f"Consume #{i+1}/{num_consumes}...")
-    ocean.assets.pay_for_access_service(ddo, alice_wallet)
+    ocean.assets.pay_for_access_service(ddo, alice)
     #don't need to call e.g. ocean.assets.download_asset() since wash-consuming
 ```
 
@@ -167,10 +155,10 @@ chain.sleep(t1 - t0)
 chain.mine()
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
-bal_before = from_wei(OCEAN.balanceOf(alice_wallet.address))
-ocean.ve_fee_distributor.claim({"from": alice_wallet})
-bal_after = from_wei(OCEAN.balanceOf(alice_wallet.address))
-print(f"Just claimed {bal_after-bal_before} OCEAN rewards") 
+OCEAN_before = from_wei(OCEAN.balanceOf(alice))
+ocean.ve_fee_distributor.claim({"from": alice})
+OCEAN_after = from_wei(OCEAN.balanceOf(alice))
+print(f"Just claimed {OCEAN_after - OCEAN_before} OCEAN rewards") 
 ```
 
 ## 7. Repeat steps 1-6, for Eth mainnet
