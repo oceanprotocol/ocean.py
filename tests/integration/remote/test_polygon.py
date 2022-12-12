@@ -20,9 +20,8 @@ def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
     connect_to_network("polygon")
+    brownie.web3.middleware_stack.inject(geth_poa_middleware, layer=0)
     util.set_aggressive_gas_fees()
-    brownie.web3._custom_middleware.add(geth_poa_middleware)
-    brownie.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     config = get_config_dict("polygon")
     ocean = Ocean(config)
