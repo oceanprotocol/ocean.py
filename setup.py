@@ -34,8 +34,6 @@ install_requirements = [
     "json-sempai==0.4.0",
     "eciespy",
     "eth-brownie",
-    "yarl==1.8.1",
-    "bitarray>=2.6.0,<3",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
