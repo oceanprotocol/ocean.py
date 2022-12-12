@@ -665,6 +665,7 @@ def test_nft_transfer_with_fre(
 ):
     """Tests transferring the NFT before deploying an ERC20, a FRE."""
     data_nft, datatoken = data_NFT_and_DT
+
     assert datatoken.isMinter(publisher_wallet.address)
 
     # The NFT owner (publisher) has ERC20 deployer role & can deploy an exchange
