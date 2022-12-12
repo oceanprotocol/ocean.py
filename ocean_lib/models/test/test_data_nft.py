@@ -342,7 +342,7 @@ def test_create_datatoken(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            datatoken_cap=Web3.toWei("0.1", "ether"),
+            cap=Web3.toWei("0.1", "ether"),
         ),
         publisher_wallet,
     )
@@ -352,7 +352,7 @@ def test_create_datatoken(
         DatatokenArguments(
             name="DatatokenEnterpriseDT1",
             symbol="DatatokenEnterpriseDT1Symbol",
-            datatoken_cap=Web3.toWei("0.1", "ether"),
+            cap=Web3.toWei("0.1", "ether"),
         ),
         publisher_wallet,
     )

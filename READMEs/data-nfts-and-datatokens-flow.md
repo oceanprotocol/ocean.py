@@ -64,8 +64,8 @@ argument to control that (e.g. template_index=2 for an Enterprise Datatoken).
 In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
-
-datatoken = data_nft.create_datatoken("Datatoken 1", "DT1", {"from": alice_wallet})
+from ocean_lib.models.arguments import DataNFTArguments
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
 print(f"Created datatoken. Its address is {datatoken.address}")
 ```
 
