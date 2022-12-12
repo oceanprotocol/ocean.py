@@ -2,8 +2,10 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import brownie
 import pytest
 from brownie.network import accounts
+from web3.middleware import geth_poa_middleware
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
@@ -19,6 +21,8 @@ def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
     # setup
     connect_to_network("polygon")
     util.set_aggressive_gas_fees()
+    brownie.web3._custom_middleware.add(geth_poa_middleware)
+    brownie.web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
     config = get_config_dict("polygon")
     ocean = Ocean(config)
