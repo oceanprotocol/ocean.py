@@ -6,7 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
@@ -83,15 +83,13 @@ def test_main(
     # Tests creating NFT with ERC20 successfully
     receipt = data_nft_factory.create_nft_with_erc20(
         DataNFTArguments("72120Bundle", "72Bundle"),
-        datatoken_template=1,
-        datatoken_name="DTB1",
-        datatoken_symbol="DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publish_market_order_fee_address=publisher_wallet.address,
-        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_publish_market_order_fee_amount=0,
-        datatoken_bytess=[b""],
+        DatatokenArguments(
+            "DTB1",
+            "DT1Symbol",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
         wallet=publisher_wallet,
     )
     registered_nft_event = receipt.events["NFTCreated"]
@@ -137,15 +135,13 @@ def test_main(
 
     receipt = data_nft_factory.create_nft_erc20_with_fixed_rate(
         DataNFTArguments("72120Bundle", "72Bundle"),
-        datatoken_template=1,
-        datatoken_name="DTWithPool",
-        datatoken_symbol="DTP",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publish_market_order_fee_address=publisher_wallet.address,
-        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_publish_market_order_fee_amount=0,
-        datatoken_bytess=[b""],
+        DatatokenArguments(
+            "DTWithPool",
+            "DTP",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
         fixed_price_address=fixed_rate_address,
         fixed_price_base_token=fee_datatoken_address,
         fixed_price_owner=publisher_wallet.address,
@@ -188,15 +184,13 @@ def test_main(
 
     receipt = data_nft_factory.create_nft_erc20_with_dispenser(
         DataNFTArguments("72120Bundle", "72Bundle"),
-        datatoken_template=1,
-        datatoken_name="DTWithPool",
-        datatoken_symbol="DTP",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publish_market_order_fee_address=publisher_wallet.address,
-        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_publish_market_order_fee_amount=0,
-        datatoken_bytess=[b""],
+        DatatokenArguments(
+            "DTWithPool",
+            "DTP",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
         dispenser_address=dispenser_address,
         dispenser_max_tokens=Web3.toWei(1, "ether"),
         dispenser_max_balance=Web3.toWei(1, "ether"),
@@ -466,61 +460,4 @@ def test_fail_create_datatoken(
 def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
     with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft_factory.create_nft_with_erc20(
-            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
-            datatoken_template=2,
-            datatoken_name="DTB1",
-            datatoken_symbol="EntDT1Symbol",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publish_market_order_fee_address=publisher_wallet.address,
-            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-            datatoken_publish_market_order_fee_amount=0,
-            datatoken_bytess=[b""],
-            wallet=publisher_wallet,
-        )
-
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft_factory.create_nft_erc20_with_fixed_rate(
-            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
-            datatoken_template=2,
-            datatoken_name="DTWithFRE",
-            datatoken_symbol="FTEFRE",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publish_market_order_fee_address=publisher_wallet.address,
-            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-            datatoken_publish_market_order_fee_amount=0,
-            datatoken_bytess=[b""],
-            fixed_price_address=ZERO_ADDRESS,
-            fixed_price_base_token=ZERO_ADDRESS,
-            fixed_price_owner=publisher_wallet.address,
-            fixed_price_publish_market_swap_fee_collector=consumer_wallet.address,
-            fixed_price_allowed_swapper=ZERO_ADDRESS,
-            fixed_price_base_token_decimals=18,
-            fixed_price_datatoken_decimals=18,
-            fixed_price_rate=Web3.toWei("1", "ether"),
-            fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
-            fixed_price_with_mint=0,
-            wallet=publisher_wallet,
-        )
-
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft_factory.create_nft_erc20_with_dispenser(
-            DataNFTArguments("72120Bundle", "72Bundle", template_index=2),
-            datatoken_template=2,
-            datatoken_name="DTWithDispenser",
-            datatoken_symbol="DTED",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publish_market_order_fee_address=publisher_wallet.address,
-            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-            datatoken_publish_market_order_fee_amount=0,
-            datatoken_bytess=[b""],
-            dispenser_address=ZERO_ADDRESS,
-            dispenser_max_tokens=Web3.toWei(1, "ether"),
-            dispenser_max_balance=Web3.toWei(1, "ether"),
-            dispenser_with_mint=True,
-            dispenser_allowed_swapper=ZERO_ADDRESS,
-            wallet=publisher_wallet,
-        )
+        DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")

@@ -2,13 +2,17 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import logging
 import warnings
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.structures.file_objects import FilesType
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+
+logger = logging.getLogger("ocean")
 
 
 class DataNFTArguments:
@@ -67,3 +71,76 @@ class DataNFTArguments:
 
         data_nft_address = registered_event["newTokenAddress"]
         return DataNFT(config_dict, data_nft_address)
+
+
+class DatatokenArguments:
+    def __init__(
+        self,
+        name: Optional[str] = "Datatoken 1",
+        symbol: Optional[str] = "DT1",
+        template_index: Optional[int] = 1,
+        minter: Optional[str] = None,
+        fee_manager: Optional[str] = None,
+        publish_market_order_fee_address: Optional[str] = None,
+        publish_market_order_fee_token: Optional[str] = None,
+        publish_market_order_fee_amount: Optional[int] = 0,
+        bytess: Optional[List[bytes]] = None,
+        services: Optional[list] = None,
+        files: Optional[List[FilesType]] = None,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
+        cap: Optional[int] = None,
+    ):
+        if template_index == 2 and not cap:
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
+
+        cap = cap if template_index == 2 else MAX_UINT256
+
+        self.name = name
+        self.symbol = symbol
+        self.template_index = template_index
+        self.minter = minter
+        self.fee_manager = fee_manager
+        self.publish_market_order_fee_address = (
+            publish_market_order_fee_address or ZERO_ADDRESS
+        )
+        self.publish_market_order_fee_token = publish_market_order_fee_token
+        self.publish_market_order_fee_amount = publish_market_order_fee_amount
+        self.bytess = bytess or [b""]
+        self.services = services
+        self.files = files
+        self.consumer_parameters = consumer_parameters
+
+    def create_datatoken(self, config_dict, data_nft, wallet):
+        OCEAN_address = get_ocean_token_address(config_dict)
+        temp_dt = data_nft.create_datatoken(
+            name=self.name,
+            symbol=self.symbol,
+            template_index=self.template_index,
+            minter=self.minter or wallet.address,
+            fee_manager=self.fee_manager or wallet.address,
+            publish_market_order_fee_address=self.publish_market_order_fee_address,
+            publish_market_order_fee_token=self.publish_market_order_fee_token
+            or OCEAN_address,
+            publish_market_order_fee_amount=self.publish_market_order_fee_amount,
+            bytess=self.bytess,
+            transaction_parameters={"from": wallet},
+        )
+
+        logger.info(
+            f"Successfully created datatoken with address " f"{temp_dt.address}."
+        )
+
+        if not self.services:
+            self.services = [
+                temp_dt.build_access_service(
+                    service_id="0",
+                    service_endpoint=config_dict.get("PROVIDER_URL"),
+                    files=self.files,
+                    consumer_parameters=self.consumer_parameters,
+                )
+            ]
+        else:
+            for service in self.services:
+                service.datatoken = temp_dt.address
+
+        return temp_dt

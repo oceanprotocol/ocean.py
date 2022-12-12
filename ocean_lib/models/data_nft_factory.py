@@ -11,8 +11,8 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
-from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
@@ -69,21 +69,10 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     def create_nft_with_erc20(
         self,
         data_nft_args,
-        datatoken_template: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publish_market_order_fee_address: str,
-        datatoken_publish_market_order_fee_token: str,
-        datatoken_publish_market_order_fee_amount: int,
-        datatoken_bytess: List[bytes],
+        datatoken_args,
         wallet=None,
-        datatoken_cap: Optional[int] = None,
     ) -> str:
-        if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+        ocean_address = get_ocean_token_address(self.config_dict)
 
         # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20(
@@ -96,20 +85,24 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
-                datatoken_template,
-                [datatoken_name, datatoken_symbol],
+                datatoken_args.template_index,
+                [datatoken_args.name, datatoken_args.symbol],
                 [
-                    ContractBase.to_checksum_address(datatoken_minter),
-                    ContractBase.to_checksum_address(datatoken_fee_manager),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_address
+                        datatoken_args.minter or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_token
+                        datatoken_args.fee_manager or wallet.address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_token or ocean_address
                     ),
                 ],
-                [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                datatoken_bytess,
+                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                datatoken_args.bytess,
             ),
             {"from": wallet},
         )
@@ -118,15 +111,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     def create_nft_erc20_with_fixed_rate(
         self,
         data_nft_args,
-        datatoken_template: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publish_market_order_fee_address: str,
-        datatoken_publish_market_order_fee_token: str,
-        datatoken_publish_market_order_fee_amount: int,
-        datatoken_bytess: List[bytes],
+        datatoken_args,
         fixed_price_address: str,
         fixed_price_base_token: str,
         fixed_price_owner: str,
@@ -138,11 +123,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
         wallet=None,
-        datatoken_cap: Optional[int] = None,
     ) -> str:
-        if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+        ocean_address = get_ocean_token_address(self.config_dict)
+
         # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20WithFixedRate(
             (
@@ -154,20 +137,24 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
-                datatoken_template,
-                [datatoken_name, datatoken_symbol],
+                datatoken_args.template_index,
+                [datatoken_args.name, datatoken_args.symbol],
                 [
-                    ContractBase.to_checksum_address(datatoken_minter),
-                    ContractBase.to_checksum_address(datatoken_fee_manager),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_address
+                        datatoken_args.minter or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_token
+                        datatoken_args.fee_manager or wallet.address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_token or ocean_address
                     ),
                 ],
-                [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                datatoken_bytess,
+                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                datatoken_args.bytess,
             ),
             (
                 ContractBase.to_checksum_address(fixed_price_address),
@@ -194,26 +181,16 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     def create_nft_erc20_with_dispenser(
         self,
         data_nft_args,
-        datatoken_template: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publish_market_order_fee_address: str,
-        datatoken_publish_market_order_fee_token: str,
-        datatoken_publish_market_order_fee_amount: int,
-        datatoken_bytess: List[bytes],
+        datatoken_args,
         dispenser_address: str,
         dispenser_max_tokens: int,
         dispenser_max_balance: int,
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
         wallet,
-        datatoken_cap: Optional[int] = None,
     ) -> str:
-        if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
+        ocean_address = get_ocean_token_address(self.config_dict)
+
         # TODO: I'd rather return wrapped objects here
         return self.contract.createNftWithErc20WithDispenser(
             (
@@ -225,20 +202,24 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
             ),
             (
-                datatoken_template,
-                [datatoken_name, datatoken_symbol],
+                datatoken_args.template_index,
+                [datatoken_args.name, datatoken_args.symbol],
                 [
-                    ContractBase.to_checksum_address(datatoken_minter),
-                    ContractBase.to_checksum_address(datatoken_fee_manager),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_address
+                        datatoken_args.minter or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_publish_market_order_fee_token
+                        datatoken_args.fee_manager or wallet.address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_address
+                    ),
+                    ContractBase.to_checksum_address(
+                        datatoken_args.publish_market_order_fee_token or ocean_address
                     ),
                 ],
-                [datatoken_cap, datatoken_publish_market_order_fee_amount],
-                datatoken_bytess,
+                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                datatoken_args.bytess,
             ),
             (
                 ContractBase.to_checksum_address(dispenser_address),

@@ -10,7 +10,7 @@ import logging
 import lzma
 import os
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from brownie import network
 from enforce_typing import enforce_types
@@ -24,7 +24,7 @@ from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -36,12 +36,7 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import (
-    FilesType,
-    GraphqlQuery,
-    SmartContractCall,
-    UrlFile,
-)
+from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
@@ -717,70 +712,3 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters={"from": wallet},
         ).txid
-
-
-class DatatokenArguments:
-    def __init__(
-        self,
-        name: Optional[str] = "Datatoken 1",
-        symbol: Optional[str] = "DT1",
-        template_index: Optional[int] = 1,
-        minter: Optional[str] = None,
-        fee_manager: Optional[str] = None,
-        publish_market_order_fee_address: Optional[str] = None,
-        publish_market_order_fee_token: Optional[str] = None,
-        publish_market_order_fee_amount: Optional[int] = 0,
-        bytess: Optional[List[bytes]] = None,
-        services: Optional[list] = None,
-        files: Optional[List[FilesType]] = None,
-        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
-    ):
-        self.name = name
-        self.symbol = symbol
-        self.template_index = template_index
-        self.minter = minter
-        self.fee_manager = fee_manager
-        self.publish_market_order_fee_address = (
-            publish_market_order_fee_address or ZERO_ADDRESS
-        )
-        self.publish_market_order_fee_token = publish_market_order_fee_token
-        self.publish_market_order_fee_amount = publish_market_order_fee_amount
-        self.bytess = bytess or [b""]
-        self.services = services
-        self.files = files
-        self.consumer_parameters = consumer_parameters
-
-    def create_datatoken(self, config_dict, data_nft, wallet):
-        OCEAN_address = get_ocean_token_address(config_dict)
-        temp_dt = data_nft.create_datatoken(
-            name=self.name,
-            symbol=self.symbol,
-            template_index=self.template_index,
-            minter=self.minter or wallet.address,
-            fee_manager=self.fee_manager or wallet.address,
-            publish_market_order_fee_address=self.publish_market_order_fee_address,
-            publish_market_order_fee_token=self.publish_market_order_fee_token
-            or OCEAN_address,
-            publish_market_order_fee_amount=self.publish_market_order_fee_amount,
-            bytess=self.bytess,
-            transaction_parameters={"from": wallet},
-        )
-
-        logger.info(
-            f"Successfully created datatoken with address " f"{temp_dt.address}."
-        )
-
-        if not self.services:
-            self.services = [
-                temp_dt.build_access_service(
-                    service_id="0",
-                    service_endpoint=config_dict.get("PROVIDER_URL"),
-                    files=self.files,
-                    consumer_parameters=self.consumer_parameters,
-                )
-            ]
-        else:
-            for service in self.services:
-                service.datatoken = temp_dt.address
-
-        return temp_dt
