@@ -57,7 +57,7 @@ connect_to_network("polygon-test")
 import os
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = get_config_dict("mumbai")
+config = get_config_dict("polygon-test")
 ocean = Ocean(config)
 
 from brownie.network import accounts
