@@ -239,10 +239,11 @@ class OceanAssets:
     @enforce_types
     def _create_1dt(self, metadata, files, publisher_wallet, wait_for_aqua):
         """Call create(), focusing on just one datatoken"""
+        name = metadata["name"]
         (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
-            datatoken_args=[DatatokenArguments(f"{ddo_name}: DT1", files=files)],
+            datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
             wait_for_aqua=wait_for_aqua,
         )
         datatoken = None if datatokens is None else datatokens[0]
