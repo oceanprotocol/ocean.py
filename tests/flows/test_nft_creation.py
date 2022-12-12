@@ -5,7 +5,7 @@
 import pytest
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -131,16 +131,11 @@ def test_datatoken_creation(
     # Tests failed creation of datatoken
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            template_index=1,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": another_consumer_wallet},
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            another_consumer_wallet,
         )
 
 
@@ -222,16 +217,13 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet):
     # Owner is not NFT owner anymore, nor has any other role, neither older users
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            template_index=1,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=publisher_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": publisher_wallet},
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+                publish_market_order_fee_address=publisher_wallet.address,
+                publish_market_order_fee_token=ZERO_ADDRESS,
+            ),
+            publisher_wallet,
         )
 
     with pytest.raises(Exception, match="NOT MINTER"):
@@ -239,17 +231,13 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet):
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=consumer_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=consumer_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            publish_market_order_fee_address=consumer_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 

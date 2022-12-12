@@ -5,7 +5,7 @@
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -319,25 +319,20 @@ def test_create_datatoken(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
 
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-        wrap_as_object=False,
+    datatoken = data_nft.create_datatoken(
+        DatatokenArguments(
+            "DT1",
+            "DT1Symbol",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        publisher_wallet,
     )
-    assert receipt, "Could not create ERC20."
+    assert datatoken, "Could not create ERC20."
 
-    assert receipt.events["TokenCreated"], "Cannot find TokenCreated event."
-
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft.create_datatoken(
+    dt_ent = data_nft.create_datatoken(
+        DatatokenArguments(
             template_index=2,
             name="DatatokenEnterpriseDT1",
             symbol="DatatokenEnterpriseDT1Symbol",
@@ -347,41 +342,21 @@ def test_create_datatoken(
             publish_market_order_fee_token=ZERO_ADDRESS,
             publish_market_order_fee_amount=0,
             bytess=[b""],
-            transaction_parameters={"from": publisher_wallet},
-        )
+            datatoken_cap=Web3.toWei("0.1", "ether"),
+        ),
+        publisher_wallet,
+    )
+    assert dt_ent, "Could not create datatoken Enterprise with explicit parameters"
 
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        data_nft.create_datatoken(
-            template_index=2,
+    dt_ent = data_nft.create_datatoken(
+        DatatokenArguments(
             name="DatatokenEnterpriseDT1",
-            symbol="DatattokenEnterpriseDT1Symbol",
-            transaction_parameters={"from": publisher_wallet},
-        )
-
-    tx = data_nft.create_datatoken(
-        template_index=2,
-        name="DatatokenEnterpriseDT1",
-        symbol="DatatokenEnterpriseDT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-        datatoken_cap=Web3.toWei("0.1", "ether"),
-        wrap_as_object=False,
+            symbol="DatatokenEnterpriseDT1Symbol",
+            datatoken_cap=Web3.toWei("0.1", "ether"),
+        ),
+        publisher_wallet,
     )
-    assert tx, "Could not create datatoken Enterprise with explicit parameters"
-
-    tx = data_nft.create_datatoken(
-        template_index=2,
-        name="DatatokenEnterpriseDT1",
-        symbol="DatatokenEnterpriseDT1Symbol",
-        datatoken_cap=Web3.toWei("0.1", "ether"),
-        transaction_parameters={"from": publisher_wallet},
-    )
-    assert tx, "Could not create datatoken Enterprise with implicit parameters."
+    assert dt_ent, "Could not create datatoken Enterprise with implicit parameters."
 
 
 def test_create_datatoken_with_usdc_order_fee(
@@ -391,16 +366,14 @@ def test_create_datatoken_with_usdc_order_fee(
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     publish_market_order_fee_amount_in_wei = Web3.toWei(5, "ether")
     dt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=usdc.address,
-        publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=usdc.address,
+            publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
+        ),
+        publisher_wallet,
     )
 
     # Check publish fee info
@@ -435,22 +408,18 @@ def test_create_datatoken_with_non_owner(
     ]
 
     # Consumer creates ERC20
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+    dt = data_nft.create_datatoken(
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=publisher_wallet.address,
+            fee_manager=publisher_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
     )
-    assert receipt, "Failed to create ERC20 token."
-
-    assert receipt.events["TokenCreated"], "Cannot find TokenCreated event."
+    assert dt, "Failed to create ERC20 token."
 
     # Consumer self-revokes permission to create ERC20
     data_nft.removeFromCreateERC20List(
@@ -476,16 +445,14 @@ def test_fail_creating_erc20(
     )
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            template_index=1,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": consumer_wallet},
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+                minter=publisher_wallet.address,
+                publish_market_order_fee_address=publisher_wallet.address,
+                publish_market_order_fee_token=ZERO_ADDRESS,
+            ),
+            consumer_wallet,
         )
 
 
@@ -545,17 +512,14 @@ def test_erc721_datatoken_functions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=publisher_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
     )
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
@@ -654,25 +618,16 @@ def test_transfer_nft(
     assert data_nft.isERC20Deployer(consumer_wallet.address)
 
     # Creates an ERC20
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=consumer_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+    datatoken = data_nft.create_datatoken(
+        DatatokenArguments(
+            "DT1",
+            "DT1Symbol",
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
     )
-    assert receipt, "Failed to create ERC20 token."
-
-    registered_token_event = receipt.events["TokenCreated"]
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event["newTokenAddress"]
-    datatoken = Datatoken(config, datatoken_address)
+    assert datatoken, "Failed to create ERC20 token."
 
     assert not datatoken.isMinter(publisher_wallet.address)
     assert datatoken.isMinter(consumer_wallet.address)

@@ -8,9 +8,12 @@ from typing import Any, Dict, List, Optional
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_base import ContractBase
 
 logger = logging.getLogger("ocean")
 
@@ -93,7 +96,7 @@ class DatatokenArguments:
         if template_index == 2 and not cap:
             raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
 
-        cap = cap if template_index == 2 else MAX_UINT256
+        self.cap = cap if template_index == 2 else MAX_UINT256
 
         self.name = name
         self.symbol = symbol
@@ -110,29 +113,45 @@ class DatatokenArguments:
         self.files = files
         self.consumer_parameters = consumer_parameters
 
-    def create_datatoken(self, config_dict, data_nft, wallet):
+    def create_datatoken(self, data_nft, wallet):
+        config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
-        temp_dt = data_nft.create_datatoken(
-            name=self.name,
-            symbol=self.symbol,
-            template_index=self.template_index,
-            minter=self.minter or wallet.address,
-            fee_manager=self.fee_manager or wallet.address,
-            publish_market_order_fee_address=self.publish_market_order_fee_address,
-            publish_market_order_fee_token=self.publish_market_order_fee_token
-            or OCEAN_address,
-            publish_market_order_fee_amount=self.publish_market_order_fee_amount,
-            bytess=self.bytess,
+        initial_list = data_nft.getTokensList()
+
+        data_nft.contract.createERC20(
+            self.template_index,
+            [self.name, self.symbol],
+            [
+                ContractBase.to_checksum_address(self.minter or wallet.address),
+                ContractBase.to_checksum_address(self.fee_manager or wallet.address),
+                ContractBase.to_checksum_address(self.publish_market_order_fee_address),
+                ContractBase.to_checksum_address(
+                    self.publish_market_order_fee_token or OCEAN_address
+                ),
+            ],
+            [self.cap, self.publish_market_order_fee_amount],
+            self.bytess,
             transaction_parameters={"from": wallet},
         )
 
+        new_elements = [
+            item for item in self.getTokensList() if item not in initial_list
+        ]
+        assert len(new_elements) == 1, "new data token has no address"
+
+        datatoken = (
+            Datatoken(config_dict, new_elements[0])
+            if self.template_index == 1
+            else DatatokenEnterprise(config_dict, new_elements[0])
+        )
+
         logger.info(
-            f"Successfully created datatoken with address " f"{temp_dt.address}."
+            f"Successfully created datatoken with address " f"{datatoken.address}."
         )
 
         if not self.services:
             self.services = [
-                temp_dt.build_access_service(
+                datatoken.build_access_service(
                     service_id="0",
                     service_endpoint=config_dict.get("PROVIDER_URL"),
                     files=self.files,
@@ -141,6 +160,6 @@ class DatatokenArguments:
             ]
         else:
             for service in self.services:
-                service.datatoken = temp_dt.address
+                service.datatoken = datatoken.address
 
-        return temp_dt
+        return datatoken

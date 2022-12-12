@@ -296,9 +296,7 @@ class OceanAssets:
         if not deployed_datatokens:
             services = []
             for datatoken_arg in datatoken_args:
-                new_dt = datatoken_arg.create_datatoken(
-                    self._config_dict, data_nft, publisher_wallet
-                )
+                new_dt = datatoken_arg.create_datatoken(data_nft, publisher_wallet)
                 datatokens.append(new_dt)
 
                 services.extend(datatoken_arg.services)

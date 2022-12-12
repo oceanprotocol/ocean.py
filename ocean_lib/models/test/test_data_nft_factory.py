@@ -45,23 +45,16 @@ def test_main(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+    datatoken = data_nft.create_datatoken(
+        DatatokenArguments(
+            "DT1P",
+            "DT1Symbol",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
     )
-    assert receipt, "Failed to create ERC20 token."
-    registered_token_event = receipt.events["TokenCreated"]
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event["newTokenAddress"]
+    assert datatoken, "Failed to create ERC20 token."
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.templateCount() == 2
@@ -77,7 +70,6 @@ def test_main(
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.getCurrentTemplateCount() == 2
 
-    datatoken = Datatoken(config, datatoken_address)
     datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
 
     # Tests creating NFT with ERC20 successfully
@@ -115,23 +107,19 @@ def test_main(
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1P",
-        symbol="DT1SymbolP",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=Web3.toWei("0.0005", "ether"),
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-        wrap_as_object=False,
+    datatoken = data_nft.create_datatoken(
+        DatatokenArguments(
+            "DT1P",
+            "DT1SymbolP",
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+            publish_market_order_fee_amount=Web3.toWei("0.0005", "ether"),
+        ),
+        publisher_wallet,
     )
-    assert receipt, "Failed to create ERC20 token."
-    registered_fee_token_event = receipt.events["TokenCreated"]
-    assert registered_fee_token_event, "Cannot find TokenCreated event."
-    fee_datatoken_address = registered_fee_token_event["newTokenAddress"]
+    assert datatoken, "Failed to create ERC20 token."
+    fee_datatoken_address = datatoken.address
 
     receipt = data_nft_factory.create_nft_erc20_with_fixed_rate(
         DataNFTArguments("72120Bundle", "72Bundle"),
@@ -281,23 +269,17 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
-    receipt = data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": consumer_wallet},
-        wrap_as_object=False,
+    datatoken = data_nft.create_datatoken(
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=publisher_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
     )
-    assert receipt, "Failed to create ERC20 token."
-    registered_token_event = receipt.events["TokenCreated"]
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address = registered_token_event["newTokenAddress"]
+    assert datatoken, "Failed to create ERC20 token."
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.templateCount() == 2
@@ -314,10 +296,10 @@ def test_start_multiple_order(
     assert data_nft_factory.getCurrentTemplateCount() == 2
 
     # Tests datatoken can be checked as deployed by the factory
-    assert data_nft_factory.check_datatoken(datatoken_address)
+    assert data_nft_factory.check_datatoken(datatoken.address)
 
     # Tests starting multiple token orders successfully
-    datatoken = Datatoken(config, datatoken_address)
+    datatoken = Datatoken(config, datatoken.address)
     dt_amount = Web3.toWei("2", "ether")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
@@ -352,7 +334,7 @@ def test_start_multiple_order(
     signature = split_signature(signed)
 
     order_data = OrderData(
-        datatoken_address,
+        datatoken.address,
         consumer_wallet.address,
         1,
         (
@@ -412,47 +394,35 @@ def test_fail_create_datatoken(
     # Should fail to create a specific ERC20 Template if the index is ZERO
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft.create_datatoken(
-            template_index=0,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": consumer_wallet},
+            DatatokenArguments(
+                template_index=0,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            consumer_wallet,
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft.create_datatoken(
-            template_index=3,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": consumer_wallet},
+            DatatokenArguments(
+                template_index=3,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            consumer_wallet,
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            template_index=1,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-            fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
-            bytess=[b""],
-            transaction_parameters={"from": another_consumer_wallet},
+            DatatokenArguments(
+                template_index=1,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            another_consumer_wallet,
         )
 
 
