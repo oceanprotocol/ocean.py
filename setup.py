@@ -33,7 +33,7 @@ install_requirements = [
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
     "eciespy",
-    "eth-brownie==1.19.1",
+    "eth-brownie",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -63,7 +63,7 @@ dev_requirements = [
     "watchdog",
     "flake8==5.0.4",
     "isort==5.10.1",
-    "black==22.6.0",  # need to keep this up to date to brownie
+    "black",  # need to keep this up to date to brownie
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
