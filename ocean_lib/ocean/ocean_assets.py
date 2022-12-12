@@ -220,6 +220,7 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
+        metadata = self._default_metadata(name, publisher_wallet)
         return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
