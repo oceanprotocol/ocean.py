@@ -53,6 +53,7 @@ def test_main(
             publish_market_order_fee_address=publisher_wallet.address,
             publish_market_order_fee_token=ZERO_ADDRESS,
         ),
+        publisher_wallet,
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -73,7 +74,7 @@ def test_main(
     datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
 
     # Tests creating NFT with ERC20 successfully
-    receipt = data_nft_factory.create_nft_with_erc20(
+    data_nft_token2, datatoken2 = data_nft_factory.create_nft_with_erc20(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTB1",
@@ -84,22 +85,8 @@ def test_main(
         ),
         wallet=publisher_wallet,
     )
-    registered_nft_event = receipt.events["NFTCreated"]
-
-    # Verify if the NFT was created.
-    assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event["admin"] == publisher_wallet.address
-    data_nft_address2 = registered_nft_event["newTokenAddress"]
-    data_nft_token2 = DataNFT(config, data_nft_address2)
     assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
-
-    registered_token_event = receipt.events["TokenCreated"]
-
-    # Verify if the ERC20 token was created.
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address2 = registered_token_event["newTokenAddress"]
-    datatoken2 = Datatoken(config, datatoken_address2)
     assert datatoken2.contract.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
 
@@ -121,7 +108,11 @@ def test_main(
     assert datatoken, "Failed to create ERC20 token."
     fee_datatoken_address = datatoken.address
 
-    receipt = data_nft_factory.create_nft_erc20_with_fixed_rate(
+    (
+        data_nft_token4,
+        datatoken4,
+        one_fixed_rate,
+    ) = data_nft_factory.create_nft_erc20_with_fixed_rate(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTWithPool",
@@ -142,35 +133,17 @@ def test_main(
         fixed_price_with_mint=0,
         wallet=publisher_wallet,
     )
-    registered_nft_event = receipt.events["NFTCreated"]
 
-    # Verify if the NFT was created.
-    assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event["admin"] == publisher_wallet.address
-    data_nft_address4 = registered_nft_event["newTokenAddress"]
-    data_nft_token4 = DataNFT(config, data_nft_address4)
     assert data_nft_token4.contract.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
-
-    registered_token_event = receipt.events["TokenCreated"]
-
-    # Verify if the ERC20 token was created.
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address4 = registered_token_event["newTokenAddress"]
-    datatoken4 = Datatoken(config, datatoken_address4)
     assert datatoken4.contract.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
-
-    registered_fixed_rate_event = receipt.events["NewFixedRate"]
-
-    # Verify if the Fixed Rate Exchange was created.
-    assert registered_fixed_rate_event, "Cannot find NewFixedRate event."
-    assert registered_fixed_rate_event["exchangeId"], "Invalid exchange id."
+    assert one_fixed_rate.address == fixed_rate_address
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
 
-    receipt = data_nft_factory.create_nft_erc20_with_dispenser(
+    data_nft_token5, datatoken5 = data_nft_factory.create_nft_erc20_with_dispenser(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTWithPool",
@@ -186,37 +159,15 @@ def test_main(
         dispenser_allowed_swapper=ZERO_ADDRESS,
         wallet=publisher_wallet,
     )
-    registered_nft_event = receipt.events["NFTCreated"]
-
-    # Verify if the NFT was created.
-    assert registered_nft_event, "Cannot find NFTCreated event."
-    assert registered_nft_event["admin"] == publisher_wallet.address
-    data_nft_address5 = registered_nft_event["newTokenAddress"]
-    data_nft_token5 = DataNFT(config, data_nft_address5)
     assert data_nft_token5.contract.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
-
-    registered_token_event = receipt.events["TokenCreated"]
-
-    # Verify if the datatoken was created.
-    assert registered_token_event, "Cannot find TokenCreated event."
-    datatoken_address5 = registered_token_event["newTokenAddress"]
-    datatoken5 = Datatoken(config, datatoken_address5)
     assert datatoken5.contract.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
     _ = Dispenser(config, dispenser_address)
 
-    registered_dispenser_event = receipt.events["DispenserCreated"]
-
-    # Verify if the Dispenser data token was created.
-    assert registered_dispenser_event, "Cannot find DispenserCreated event."
-    assert registered_dispenser_event[
-        "datatokenAddress"
-    ], "Invalid data token address by dispenser."
-
     # Create a new erc721 with metadata in one single call and get address
-    receipt = data_nft_factory.create_nft_with_metadata(
+    data_nft = data_nft_factory.create_nft_with_metadata(
         DataNFTArguments("72120Bundle", "72Bundle"),
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
@@ -227,13 +178,6 @@ def test_main(
         metadata_proofs=[],
         wallet=publisher_wallet,
     )
-    registered_nft_event = receipt.events["NFTCreated"]
-    assert registered_nft_event, "Cannot find NFTCreated event"
-    assert (
-        registered_nft_event["admin"] == publisher_wallet.address
-    ), "Invalid NFT owner!"
-    data_nft_address = registered_nft_event["newTokenAddress"]
-    data_nft = DataNFT(config, data_nft_address)
     assert (
         data_nft.name() == "72120Bundle"
     ), "NFT name doesn't match with the expected one."

@@ -113,7 +113,7 @@ class DatatokenArguments:
         self.files = files
         self.consumer_parameters = consumer_parameters
 
-    def create_datatoken(self, data_nft, wallet):
+    def create_datatoken(self, data_nft, wallet, with_services=False):
         config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
@@ -131,11 +131,11 @@ class DatatokenArguments:
             ],
             [self.cap, self.publish_market_order_fee_amount],
             self.bytess,
-            transaction_parameters={"from": wallet},
+            {"from": wallet},
         )
 
         new_elements = [
-            item for item in self.getTokensList() if item not in initial_list
+            item for item in data_nft.getTokensList() if item not in initial_list
         ]
         assert len(new_elements) == 1, "new data token has no address"
 
@@ -149,17 +149,18 @@ class DatatokenArguments:
             f"Successfully created datatoken with address " f"{datatoken.address}."
         )
 
-        if not self.services:
-            self.services = [
-                datatoken.build_access_service(
-                    service_id="0",
-                    service_endpoint=config_dict.get("PROVIDER_URL"),
-                    files=self.files,
-                    consumer_parameters=self.consumer_parameters,
-                )
-            ]
-        else:
-            for service in self.services:
-                service.datatoken = datatoken.address
+        if with_services:
+            if not self.services:
+                self.services = [
+                    datatoken.build_access_service(
+                        service_id="0",
+                        service_endpoint=config_dict.get("PROVIDER_URL"),
+                        files=self.files,
+                        consumer_parameters=self.consumer_parameters,
+                    )
+                ]
+            else:
+                for service in self.services:
+                    service.datatoken = datatoken.address
 
         return datatoken

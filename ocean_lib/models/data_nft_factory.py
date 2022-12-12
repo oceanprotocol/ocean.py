@@ -9,9 +9,10 @@ from web3.exceptions import BadFunctionCallOutput
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import get_ocean_token_address
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -74,8 +75,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         ocean_address = get_ocean_token_address(self.config_dict)
 
-        # TODO: I'd rather return wrapped objects here
-        return self.contract.createNftWithErc20(
+        receipt = self.contract.createNftWithErc20(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -107,6 +107,20 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             {"from": wallet},
         )
 
+        registered_nft_event = receipt.events["NFTCreated"]
+        data_nft_address = registered_nft_event["newTokenAddress"]
+        data_nft_token = DataNFT(self.config_dict, data_nft_address)
+
+        registered_token_event = receipt.events["TokenCreated"]
+        datatoken_address = registered_token_event["newTokenAddress"]
+        datatoken = (
+            Datatoken(self.config_dict, datatoken_address)
+            if datatoken_args.template_index == 1
+            else DatatokenEnterprise(self.config_dict, datatoken_address)
+        )
+
+        return data_nft_token, datatoken
+
     @enforce_types
     def create_nft_erc20_with_fixed_rate(
         self,
@@ -126,8 +140,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         ocean_address = get_ocean_token_address(self.config_dict)
 
-        # TODO: I'd rather return wrapped objects here
-        return self.contract.createNftWithErc20WithFixedRate(
+        receipt = self.contract.createNftWithErc20WithFixedRate(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -177,6 +190,27 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             {"from": wallet},
         )
 
+        registered_nft_event = receipt.events["NFTCreated"]
+        data_nft_address = registered_nft_event["newTokenAddress"]
+        data_nft_token = DataNFT(self.config_dict, data_nft_address)
+
+        registered_token_event = receipt.events["TokenCreated"]
+        datatoken_address = registered_token_event["newTokenAddress"]
+        datatoken = (
+            Datatoken(self.config_dict, datatoken_address)
+            if datatoken_args.template_index == 1
+            else DatatokenEnterprise(self.config_dict, datatoken_address)
+        )
+
+        registered_fixed_rate_event = receipt.events["ExchangeCreated"]
+        exchange_id = registered_fixed_rate_event["exchangeId"]
+        fixed_rate_exchange = FixedRateExchange(
+            self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
+        )
+        exchange = OneExchange(fixed_rate_exchange, exchange_id)
+
+        return data_nft_token, datatoken, exchange
+
     @enforce_types
     def create_nft_erc20_with_dispenser(
         self,
@@ -191,8 +225,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         ocean_address = get_ocean_token_address(self.config_dict)
 
-        # TODO: I'd rather return wrapped objects here
-        return self.contract.createNftWithErc20WithDispenser(
+        receipt = self.contract.createNftWithErc20WithDispenser(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -231,6 +264,23 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             {"from": wallet},
         )
 
+        registered_nft_event = receipt.events["NFTCreated"]
+        data_nft_address = registered_nft_event["newTokenAddress"]
+        data_nft_token = DataNFT(self.config_dict, data_nft_address)
+
+        registered_token_event = receipt.events["TokenCreated"]
+        datatoken_address = registered_token_event["newTokenAddress"]
+        datatoken = (
+            Datatoken(self.config_dict, datatoken_address)
+            if datatoken_args.template_index == 1
+            else DatatokenEnterprise(self.config_dict, datatoken_address)
+        )
+
+        registered_dispenser_event = receipt.events["DispenserCreated"]
+        assert registered_dispenser_event["datatokenAddress"] == datatoken_address
+
+        return data_nft_token, datatoken
+
     @enforce_types
     def create_nft_with_metadata(
         self,
@@ -244,8 +294,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         metadata_proofs: List[MetadataProof],
         wallet,
     ) -> str:
-        # TODO: I'd rather return wrapped objects here
-        return self.contract.createNftWithMetaData(
+        receipt = self.contract.createNftWithMetaData(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -265,6 +314,11 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             ),
             {"from": wallet},
         )
+        registered_nft_event = receipt.events["NFTCreated"]
+        data_nft_address = registered_nft_event["newTokenAddress"]
+        data_nft_token = DataNFT(self.config_dict, data_nft_address)
+
+        return data_nft_token
 
     @enforce_types
     def search_exchange_by_datatoken(
