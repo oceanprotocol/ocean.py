@@ -20,7 +20,7 @@ def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
     connect_to_network("polygon-main")
     util.set_aggressive_gas_fees()
 
-    config = get_config_dict("polygon")
+    config = get_config_dict("polygon-main")
     ocean = Ocean(config)
 
     accounts.clear()
