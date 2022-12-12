@@ -159,7 +159,7 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, publisher_wallet)
         files = [UrlFile(url)]
-        return _create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_algo_asset(
@@ -191,7 +191,7 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
-        return _create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -205,7 +205,7 @@ class OceanAssets:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
         metadata = self._default_metadata(name, publisher_wallet)
         files = [GraphqlQuery(url, query)]
-        return self.create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -220,7 +220,7 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self.create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def _default_metadata(self, name: str, publisher_wallet, type="dataset") -> dict:
