@@ -180,6 +180,7 @@ def deploy_erc721_erc20(
             cap=datatoken_cap,
             name="DT1",
             symbol="DT1Symbol",
+            minter=datatoken_minter.address,
             publish_market_order_fee_address=data_nft_publisher.address,
             publish_market_order_fee_token=ZERO_ADDRESS,
         ),

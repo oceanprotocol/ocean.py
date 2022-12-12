@@ -202,7 +202,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             else DatatokenEnterprise(self.config_dict, datatoken_address)
         )
 
-        registered_fixed_rate_event = receipt.events["ExchangeCreated"]
+        registered_fixed_rate_event = receipt.events["NewFixedRate"]
         exchange_id = registered_fixed_rate_event["exchangeId"]
         fixed_rate_exchange = FixedRateExchange(
             self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")

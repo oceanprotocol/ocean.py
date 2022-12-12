@@ -685,7 +685,7 @@ def test_nft_transfer_with_fre(
     (exchange, tx) = datatoken.create_exchange(
         rate=to_wei(1),
         base_token_addr=OCEAN.address,
-        publish_market_fee_amount=to_wei(0.01),
+        publish_market_fee=to_wei(0.01),
         with_mint=True,
         tx_dict={"from": consumer_wallet},
     )
