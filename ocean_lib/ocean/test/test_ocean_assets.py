@@ -639,7 +639,7 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
     (data_nft, datatoken, ddo) = ocean.assets.create_algo_asset(
-        name, url, publisher_wallet, wait_for_aqua=False
+        name, url, publisher_wallet
     )
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
