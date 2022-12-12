@@ -25,7 +25,6 @@ from tests.resources.helper_functions import (
 )
 
 
-@pytest.mark.skip(reason="this is failing because ganache isn't updating")
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "bt_name, publish_market_swap_fee, consume_market_swap_fee, bt_per_dt, with_mint",
@@ -56,8 +55,8 @@ def test_exchange_swap_fees(
     factory_deployer_wallet,
     bob,
     alice,
+    DT,
     bt_name: str,
-    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
@@ -77,7 +76,7 @@ def test_exchange_swap_fees(
     FRE = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
 
     bt = Datatoken(config, get_address_of_type(config, bt_name))
-    dt = datatoken
+    dt = DT
 
     transfer_bt_if_balance_lte(
         config=config,
@@ -280,8 +279,6 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
         consume_market_swap_fee,
     )
 
-    time.sleep(10)  # FIXME, we shouldn't need this!
-
     # Get balances after swap
     details = exchange.details
     BT_bob2 = bt.balanceOf(bob)
@@ -404,7 +401,7 @@ def collect_fee_and_verify_balances(
         fee_collector = exchange.fees_info.publish_market_fee_collector
     elif fee_type == "ocean_fee":
         BT_exchange_fee_avail1 = exchange.fees_info.ocean_fee_available
-        method = exchange.collect_ocean_fee
+        method = exchange.collect_opc_fee
         fee_collector = FRE.get_opc_collector()
     else:
         raise ValueError(fee_type)
@@ -413,12 +410,10 @@ def collect_fee_and_verify_balances(
 
     method({"from": from_wallet})
 
-    time.sleep(10)  # FIXME, we shouldn't need this!
-
     if fee_type == "publish_market_fee":
         BT_exchange_fee_avail2 = exchange.fees_info.publish_market_fee_available
     else:
-        BT_exchange_fee_avail2 = exchange.fees_info.opc_fee_available
+        BT_exchange_fee_avail2 = exchange.fees_info.ocean_fee_available
 
     BT_fee_collector2 = bt.balanceOf(fee_collector)
 
