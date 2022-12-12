@@ -3,28 +3,28 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Marketplace Flow
+# Quickstart: Post Priced Data
 
-This quickstart describes where Bob buys datatokens for OCEAN using the fixed-rate exchange flow.
-
-It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
+This quickstart describes posting fixed-price data for sale, and subsequent purchase by others.
 
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes Data NFT & Datatoken
-3.  Alice creates an OCEAN-datatoken exchange
-4.  Bob buys datatokens with OCEAN
+2.  Alice publishes dataset
+3.  Alice posts it for sale
+4.  Bob buys dataset with OCEAN
 
 Let's go through each step.
 
 ## 1. Setup
 
 From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
+- [x] Setup
+
+In console, set factory envvar:
+```console
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+```
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] Setup : Setup in Python
@@ -33,89 +33,95 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 
 For testing purposes, we can create fake OCEAN by leveraging Ocean token factory. In the same Python console:
 ```python
-# Set factory envvar. Staying in Python console lets you retain state from previous READMEs.
-import os
-os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
-
 # Mint fake OCEAN. Alice & Bob automatically get some.
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
+OCEAN = ocean.OCEAN_token
 
-OCEAN_token = ocean.OCEAN_token
+# Ensure Bob has enough funds
+from brownie.network import accounts
+assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
+assert OCEAN.balanceOf(bob_wallet.address) > 0, "Bob needs OCEAN"
 ```
 
-## 2. Alice publishes Data NFT & Datatoken
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 2.1 Create a data NFT
-- [x] 2.2 Create a datatoken from the data NFT
-
-Then, have Alice mint datatokens. In the same Python console:
-```python
-from web3.main import Web3
-datatoken.mint(alice_wallet.address, Web3.toWei(100, "ether"), {"from": alice_wallet})
-```
-
-## 3. Alice creates an OCEAN-datatoken exchange
+## 2. Alice publishes dataset
 
 In the same Python console:
 ```python
-exchange_id = ocean.create_fixed_rate(
-    datatoken=datatoken,
-    base_token=OCEAN_token,
-    amount=Web3.toWei(100, "ether"),
-    fixed_rate=Web3.toWei(1, "ether"),
-    from_wallet=alice_wallet,
-)
+name = "Branin dataset"
+url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
 ```
 
-Instead of using OCEAN, Alice could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, WETH, or other, for a slightly higher fee.
 
-## 4. Bob buys datatokens with OCEAN
+## 3. Alice posts dataset for sale
+
+In the same Python console:
+```python
+# create exchange
+from ocean_lib.ocean.util import to_wei, from_wei
+price = to_wei(1)
+exchange, _ = datatoken.create_exchange(price, OCEAN.address, {"from":alice_wallet})
+
+# make 100 datatokens available on the exchange
+datatoken.mint(alice_wallet, to_wei(100), {"from": alice_wallet})
+datatoken.approve(exchange.address, to_wei(100), {"from": alice_wallet})
+```
+
+Instead of OCEAN, Alice could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, WETH, or other, for a slightly higher fee.
+
+## 4. Bob buys dataset with OCEAN
 
 Now, you're Bob. In the same Python console:
 ```python
-# Bob verifies having enough funds
-from brownie.network import accounts
-assert accounts.at(bob_wallet.address).balance() > 0, "need ganache ETH"
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need OCEAN"
+# let exchange pull the OCEAN needed 
+OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
+OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob_wallet})
 
-# Bob retrieves the address of the exchange to use.
-#   For convenience, we the object that Alice created.
-#   In practice, Bob might use search or other means. See the "Tips & Tricks" section for details.
-exchange_address = ocean.fixed_rate_exchange.address
+# buy datatoken
+exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob_wallet})
 
-# Bob allows the exchange contract to spend some OCEAN
-OCEAN_token.approve(exchange_address, Web3.toWei(100, "ether"), {"from": bob_wallet})
-
-# Bob starts the exchange. The contract takes some of his OCEAN and adds datatokens.
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-tx_result = ocean.fixed_rate_exchange.buyDT(
-    exchange_id,
-    Web3.toWei(20, "ether"),
-    Web3.toWei(50, "ether"),
-    ZERO_ADDRESS,
-    0,
-    {"from": bob_wallet},
-)
-assert tx_result, "failed buying datatokens at fixed rate for Bob"
+# That's it! To wrap up, let's check Bob's balance
+bal = datatoken.balanceOf(bob_wallet.address)
+print(f"Bob has {from_wei(bal)} datatokens")
 ```
 
 ## Appendix. Tips & Tricks
 
-You can combine the transactions to (a) publish data NFT, (b) publish datatoken, and (c) publish exchange into a _single_ transaction, via the method `create_nft_erc20_with_fixed_rate()`.
-
-If you already created the `exchange_id`, then you can reuse it.
-
-If an exchange has been created before or there are other exchanges for a certain datatoken, it can be searched by providing the datatoken address. In Python consodle:
+Here's how to see all the exchanges that list the datatoken. In the Python console:
 ```python
-# Get a list exchange addresses and ids with a given datatoken and exchange owner.
-datatoken_address = datatoken.address
-nft_factory = ocean.get_nft_factory()
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
-
-# And, we can filter results by the exchange owner.
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
-print(exchange_addresses_and_ids)
+exchanges = datatoken.get_exchanges() # list of OneExchange
 ```
 
+To learn more about the exchange status:
+
+```python
+print(exchange.details)
+print(exchange.fees_info)
+```
+
+It will output something like:
+```text
+>>> print(exchange.details)
+ExchangeDetails: 
+  datatoken = 0xdA3cf7aE9b28E1A9B5F295201d9AcbEf14c43019
+  base_token = 0x24f42342C7C171a66f2B7feB5c712471bED92A97
+  fixed_rate (price) = 1.0 (1000000000000000000 wei)
+  active = True
+  dt_supply = 99.0 (99000000000000000000 wei)
+  bt_supply = 1.0 (1000000000000000000 wei)
+  dt_balance = 0.0 (0 wei)
+  bt_balance = 1.0 (1000000000000000000 wei)
+  with_mint = False
+  dt_decimals = 18
+  bt_decimals = 18
+  owner = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
+
+>>> print(exchange.fees_info)
+FeesInfo: 
+  publish_market_fee = 0.0 (0 wei)
+  publish_market_fee_available = 0.0 (0 wei)
+  publish_market_fee_collector = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
+  opc_fee = 0.001 (1000000000000000 wei)
+  ocean_fee_available (to opc) = 0.001 (1000000000000000 wei)
+```
