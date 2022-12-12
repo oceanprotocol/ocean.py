@@ -665,7 +665,24 @@ def test_nft_transfer_with_fre(
 ):
     """Tests transferring the NFT before deploying an ERC20, a FRE."""
     data_nft, datatoken = data_NFT_and_DT
+    assert datatoken.isMinter(publisher_wallet.address)
 
+    # The NFT owner (publisher) has ERC20 deployer role & can deploy an exchange
+    (exchange, tx) = datatoken.create_exchange(
+        rate=to_wei(1),
+        base_token_addr=OCEAN.address,
+        publish_market_fee=to_wei(0.01),
+        tx_dict={"from": publisher_wallet},
+    )
+
+    # Exchange should have supply and fees setup
+    # (Don't test thoroughly here, since exchange has its own unit tests)
+    details = exchange.details
+    assert details.owner == publisher_wallet.address
+    assert details.datatoken == datatoken.address
+    assert details.fixed_rate == to_wei(1)
+
+    # Now do a transfer
     receipt = data_nft.safeTransferFrom(
         publisher_wallet.address,
         consumer_wallet.address,
@@ -676,41 +693,16 @@ def test_nft_transfer_with_fre(
 
     assert transfer_event["from"] == publisher_wallet.address
     assert transfer_event["to"] == consumer_wallet.address
-    assert data_nft.balanceOf(consumer_wallet.address) == 1
-    assert data_nft.balanceOf(publisher_wallet.address) == 0
-    assert data_nft.isERC20Deployer(consumer_wallet.address) is True
-    assert data_nft.ownerOf(1) == consumer_wallet.address
+    assert data_nft.balanceOf(consumer_wallet) == 1
+    assert data_nft.balanceOf(publisher_wallet) == 0
+    assert data_nft.isERC20Deployer(consumer_wallet)
+    assert data_nft.ownerOf(1) == consumer_wallet
+    permissions = datatoken.getPermissions(consumer_wallet)
+    assert not permissions[0]  # the newest owner is not the minter
+    datatoken.addMinter(consumer_wallet, {"from": consumer_wallet})
+    assert datatoken.permissions(consumer_wallet)[0]
 
-    # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy an exchange
-    (exchange, tx) = datatoken.create_exchange(
-        rate=to_wei(1),
-        base_token_addr=OCEAN.address,
-        publish_market_fee=to_wei(0.01),
-        with_mint=True,
-        tx_dict={"from": consumer_wallet},
-    )
-
-    # Exchange should have supply and fees setup
-    # (Don't test thoroughly here, since exchange has its own unit tests)
+    # Consumer wallet has not become the owner of the publisher's exchange
     details = exchange.details
-    details.owner == consumer_wallet.address
-    assert details.datatoken == datatoken.address
-    assert details.fixed_rate == to_wei(1)
-
-    # Can this new NFT owner buy, sell, and collect like we'd expect?
-    datatoken.approve(exchange.address, to_wei(100), {"from": consumer_wallet})
-    OCEAN.approve(exchange.address, to_wei(100), {"from": consumer_wallet})
-
-    DT_supply1 = exchange.details.dt_supply
-    DT_bought = to_wei(2)
-    exchange.buy_DT(DT_bought, {"from": consumer_wallet})
-    assert exchange.details.dt_supply == DT_supply1 - DT_bought
-    assert datatoken.balanceOf(consumer_wallet) == DT_bought
-
-    DT_supply1 = exchange.details.dt_supply
-    exchange.sell_DT(DT_bought, {"from": consumer_wallet})
-    assert exchange.details.dt_supply == DT_supply1 + DT_bought
-    assert datatoken.balanceOf(consumer_wallet) == 0
-
-    exchange.collect_DT(to_wei(1), {"from": consumer_wallet})
-    assert datatoken.balanceOf(consumer_wallet) == to_wei(1)
+    assert details.owner == publisher_wallet.address
+    assert details.active
