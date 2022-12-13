@@ -8,19 +8,19 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
+from ocean_lib.models.arguments import DatatokenArguments
 from ocean_lib.models.datatoken import DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
-def test_main(publisher_wallet, consumer_wallet, config):
+def test_main(
+    publisher_wallet, consumer_wallet, another_consumer_wallet, data_NFT_and_DT
+):
     """Tests successful function calls"""
-    data_nft, datatoken = deploy_erc721_erc20(
-        config, publisher_wallet, publisher_wallet
-    )
+    data_nft, datatoken = data_NFT_and_DT
 
     # Check datatoken params
     assert datatoken.getId() == 1
@@ -96,12 +96,19 @@ def test_main(publisher_wallet, consumer_wallet, config):
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            another_consumer_wallet,
+        )
 
-def test_start_order(config, publisher_wallet, consumer_wallet):
+
+def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
     """Tests startOrder functionality without publish fees, consume fees."""
-    data_nft, datatoken = deploy_erc721_erc20(
-        config, publisher_wallet, publisher_wallet
-    )
+    data_nft, datatoken = data_NFT_and_DT
     # Mint datatokens to use
     datatoken.mint(
         consumer_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
@@ -306,9 +313,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
 
 
 @pytest.mark.unit
-def test_exceptions(consumer_wallet, config, publisher_wallet):
+def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     """Tests revert statements in contracts functions"""
-    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
+    datatoken = DT
 
     # Should fail to mint if wallet is not a minter
     with pytest.raises(Exception, match="NOT MINTER"):
