@@ -16,6 +16,7 @@ from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
+@pytest.mark.skip(reason="revive this test to fully complete #1190")
 @pytest.mark.unit
 def test_buy_from_dispenser_and_order(
     config,
