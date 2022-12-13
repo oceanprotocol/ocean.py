@@ -251,10 +251,6 @@ def test_buy_from_fre_and_order(
     publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
-    assert (
-        pytest.approx(from_wei(provider_fee_bal2), 0.00001)
-        == from_wei(provider_fee_bal1) + 0.001
-    )
 
     assert from_wei(publish_bal2) == from_wei(publish_bal1) + 2.0
 
