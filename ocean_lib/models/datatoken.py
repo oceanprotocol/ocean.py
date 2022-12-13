@@ -160,13 +160,6 @@ class Datatoken(ContractBase):
         owner_addr = owner_addr or from_addr
         publish_market_fee_collector = publish_market_fee_collector or from_addr
 
-        # test_datatoken_enterprise only passes when BT_decimals == 18,
-        # even if BT.decimals() != 18. Accomodate with this workaround:
-        if "DatatokenEnterprise" in str(self.__class__):
-            BT_decimals = 18
-        else:
-            BT_decimals = BT.decimals()
-
         tx = self.contract.createFixedRate(
             checksum_addr(FRE_addr),
             [
@@ -176,7 +169,7 @@ class Datatoken(ContractBase):
                 checksum_addr(allowed_swapper),
             ],
             [
-                BT_decimals,
+                BT.decimals(),
                 self.decimals(),
                 rate,
                 publish_market_fee,
