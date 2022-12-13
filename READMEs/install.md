@@ -11,7 +11,57 @@ This quickstart describes the required setup to run `ocean.py` flows.
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5 - Python 3.10.4
 
-### 2. Download barge and run services
+In a new console:
+
+```console
+# Create your working directory
+mkdir my_project
+cd my_project
+
+# Initialize virtual environment and activate it. Install artifacts.
+python3 -m venv venv
+source venv/bin/activate
+```
+
+##### Install the library
+```console
+# Avoid errors for the step that follows
+pip3 install wheel
+
+# Install Ocean library. Allow pre-releases to get the latest v4 version.
+pip3 install --pre ocean-lib
+
+```
+
+#### ⚠️ Known issues
+
+- for M1 processors, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues. It is recommended to install them individually, e.g. `pip3 install coincurve && pip3 install cryptography`
+
+- Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
+
+### Configure brownie & network
+
+ocean.py uses brownie to connect to deployed smart contracts.
+Please check that you have configured RPC URLs, gas prices and other settings to 
+all networks according to your preferences by editing the `network-config.yaml` in your `~/.brownie` folder
+before proceeding.
+Your default `network-config.yaml` includes values for most [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains.
+One exception is Energy Web Chain. To support it, add the following to your `network-config.yaml` file:
+
+```yaml
+- name: energyweb
+  networks:
+  - chainid: 246
+    host: https://rpc.energyweb.org
+    id: energyweb
+    name: energyweb
+```
+⚠️ Ocean.py follows the exact `id` name for networks name from the default brownie configuration file.
+Make sure that your wanted network name matches the corresponding brownie `id`.
+
+Please check that you have configured all networks before proceeding. Here is a more complete sample from brownie itself: https://eth-brownie.readthedocs.io/en/v1.6.5/config.html.
+
+### ⬇️Download barge and run services
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
