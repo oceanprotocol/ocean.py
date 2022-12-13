@@ -13,20 +13,16 @@ This quickstart describes the required setup to run `ocean.py` flows.
 
 ### 2. Download barge and run services
 
-Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
-
 In a new console:
 
 ```console
-# Grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
+# Create your working directory
+mkdir my_project
+cd my_project
 
-# Clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
+# Initialize virtual environment and activate it. Install artifacts.
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 Now that we have barge running, we can mostly ignore its console while it runs.
@@ -64,13 +60,23 @@ From the `pip install` step, here are potential issues and workarounds.
 
 ### 4. Configure brownie & network
 
-ocean.py uses brownie to connect to deployed smart contracts. To configure the RPC URLs, gas prices and other settings,
-create and fill in a network-config.yml in your `~/.brownie` folder, or copy our (very basic) sample from ocean.py:
+ocean.py uses brownie to connect to deployed smart contracts.
+Please check that you have configured RPC URLs, gas prices and other settings to 
+all networks according to your preferences by editing the `network-config.yaml` in your `~/.brownie` folder
+before proceeding.
+Your default `network-config.yaml` includes values for most [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains.
+One exception is Energy Web Chain. To support it, add the following to your `network-config.yaml` file:
 
-```console
-mkdir ~/.brownie
-cp network-config.sample ~/.brownie/network-config.yaml
+```yaml
+- name: energyweb
+  networks:
+  - chainid: 246
+    host: https://rpc.energyweb.org
+    id: energyweb
+    name: energyweb
 ```
+⚠️ Ocean.py follows the exact `id` name for networks name from the default brownie configuration file.
+Make sure that your wanted network name matches the corresponding brownie `id`.
 
 Please check that you have configured all networks before proceeding. Here is a more complete sample from brownie itself: https://eth-brownie.readthedocs.io/en/v1.6.5/config.html.
 
