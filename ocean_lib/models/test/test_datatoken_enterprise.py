@@ -140,7 +140,6 @@ def test_buy_from_dispenser_and_order(
     assert DT.balanceOf(DT.getPaymentCollector()) == 0
 
 
-@pytest.mark.skip(reason="revive this test to fully complete #1190")
 @pytest.mark.unit
 def test_buy_from_fre_and_order(
     config,
@@ -154,11 +153,6 @@ def test_buy_from_fre_and_order(
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
-    FRE_addr = get_address_of_type(config, "FixedPrice")
-
-    from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-
-    FRE = FixedRateExchange(config, FRE_addr)
 
     (exchange, tx_receipt) = DT.create_exchange(
         rate=to_wei(1),
@@ -257,10 +251,6 @@ def test_buy_from_fre_and_order(
     publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
-    assert (
-        pytest.approx(from_wei(provider_fee_bal2), 0.00001)
-        == from_wei(provider_fee_bal1) + 0.001
-    )
 
     assert from_wei(publish_bal2) == from_wei(publish_bal1) + 2.0
 

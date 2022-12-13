@@ -299,21 +299,20 @@ def convert_bt_amt_to_dt(
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
-
-    When creating a pool, the "rate" argument is the datatokens per base token,
-    and can be passed directly into this function.
-
-    When creating an exchange, the "rate" argument is the base tokens per datatoken,
-    so it needs to be inverted before passing into this function.
-
-    Datatokens always have 18 decimals, even when the base tokens don't.
+    dt_per_bt_in_wei = 1 / bt_per_dt = 1 / price
+    Datatokens always have 18 decimals, even if base tokens don't.
     """
-    unit_value = Decimal(10) ** 18  # FIXME: SHOULDN'T `18` BE `bt_decimals` ??
-    amt_wei = Web3.toWei(
-        Decimal(bt_amount) / unit_value * Web3.fromWei(dt_per_bt_in_wei, "ether"),
-        "ether",
-    )
-    return amt_wei
+    bt_amount_wei = bt_amount
+
+    bt_amount_float = float(bt_amount_wei) / 10**bt_decimals
+
+    dt_per_bt_float = float(dt_per_bt_in_wei) / 10**18  # price always has 18 dec
+
+    dt_amount_float = bt_amount_float * dt_per_bt_float
+
+    dt_amount_wei = int(dt_amount_float * 10**18)
+
+    return dt_amount_wei
 
 
 def get_file1():
