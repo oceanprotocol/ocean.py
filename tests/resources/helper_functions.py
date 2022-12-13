@@ -18,6 +18,7 @@ from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -164,36 +165,26 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        data_nft_publisher.address,
-        {"from": data_nft_publisher},
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("NFT", "NFTSYMBOL"), data_nft_publisher
     )
-    token_address = data_nft_factory.get_token_address(receipt)
-    data_nft = DataNFT(config_dict, token_address)
+
     if not datatoken_minter:
         return data_nft
 
     datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
-        template_index=template_index,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=datatoken_minter.address,
-        fee_manager=data_nft_publisher.address,
-        publish_market_order_fee_address=data_nft_publisher.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        datatoken_cap=datatoken_cap,
-        transaction_parameters={"from": data_nft_publisher},
+        DatatokenArguments(
+            template_index=template_index,
+            cap=datatoken_cap,
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=datatoken_minter.address,
+            publish_market_order_fee_address=data_nft_publisher.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        data_nft_publisher,
     )
 
     return data_nft, datatoken
@@ -317,7 +308,7 @@ def convert_bt_amt_to_dt(
 
     Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    unit_value = Decimal(10) ** 18  ## FIXME: SHOULDN'T `18` BE `bt_decimals` ??
+    unit_value = Decimal(10) ** 18  # FIXME: SHOULDN'T `18` BE `bt_decimals` ??
     amt_wei = Web3.toWei(
         Decimal(bt_amount) / unit_value * Web3.fromWei(dt_per_bt_in_wei, "ether"),
         "ether",

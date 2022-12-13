@@ -34,7 +34,8 @@ We'll create a data NFT like in Simple Flow, except we set `transferable=False` 
 In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
-data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet, transferable=False)
+from ocean_lib.models.arguments import DataNFTArguments
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), alice_wallet)
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
