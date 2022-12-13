@@ -41,7 +41,7 @@ pip3 install --pre ocean-lib
 
 - Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
-#### Edit your network configuration file
+### Configure brownie & network
 
 ocean.py uses brownie to connect to deployed smart contracts.
 Please check that you have configured RPC URLs, gas prices and other settings to 

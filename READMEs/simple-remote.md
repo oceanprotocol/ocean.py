@@ -34,7 +34,11 @@ export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 ```
 
-To avoid using Infura keys, especially for Polygon networks, use this command in the console:
+The brownie default RPCs require you to have your own infura account, and corresponding token WEB3_INFURA_PROJECT_ID.
+
+- If you have an infura account: set the envvar `WEB3_INFURA_PROJECT_ID`
+- If not: one way is to get an Infura account. Simpler yet is you can bypass the need for it, by changing to RPCs that don't need tokens. The command below replaces infura RPCs with public RPCs:
+
 ```console
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 ```
