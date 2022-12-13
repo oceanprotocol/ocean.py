@@ -13,16 +13,20 @@ This quickstart describes the required setup to run `ocean.py` flows.
 
 ### 2. Download barge and run services
 
+Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
+
 In a new console:
 
 ```console
-# Create your working directory
-mkdir my_project
-cd my_project
+# Grab repo
+git clone https://github.com/oceanprotocol/barge
+cd barge
 
-# Initialize virtual environment and activate it. Install artifacts.
-python3 -m venv venv
-source venv/bin/activate
+# Clean up old containers (to be sure)
+docker system prune -a --volumes
+
+# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+./start_ocean.sh
 ```
 
 Now that we have barge running, we can mostly ignore its console while it runs.
