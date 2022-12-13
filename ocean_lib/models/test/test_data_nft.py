@@ -707,3 +707,107 @@ def test_nft_transfer_with_fre(
     details = exchange.details
     assert details.owner == publisher_wallet.address
     assert details.active
+
+
+@pytest.mark.unit
+def test_fail_create_datatoken(
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
+):
+    """Tests multiple failures for creating ERC20 token."""
+    data_nft = data_nft_factory.create_data_nft(
+        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
+    )
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
+
+    # Should fail to create a specific ERC20 Template if the index is ZERO
+    with pytest.raises(Exception, match="Template index doesnt exist"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                template_index=0,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            consumer_wallet,
+        )
+
+    # Should fail to create a specific ERC20 Template if the index doesn't exist
+    with pytest.raises(Exception, match="Template index doesnt exist"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                template_index=3,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            consumer_wallet,
+        )
+
+    # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
+    assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                template_index=1,
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            another_consumer_wallet,
+        )
+
+
+@pytest.mark.unit
+def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
+    # create NFT with ERC20
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
+        DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")
+
+
+@pytest.mark.unit
+def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
+    """Test erc721 ownership transfer on token transfer"""
+    data_nft, datatoken = data_NFT_and_DT
+
+    assert data_nft.ownerOf(1) == publisher_wallet.address
+
+    with pytest.raises(Exception, match="transfer of token that is not own"):
+        data_nft.transferFrom(
+            consumer_wallet.address,
+            publisher_wallet.address,
+            1,
+            {"from": publisher_wallet},
+        )
+    data_nft.transferFrom(
+        publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
+    )
+
+    assert data_nft.balanceOf(publisher_wallet.address) == 0
+    assert data_nft.ownerOf(1) == consumer_wallet.address
+    # Owner is not NFT owner anymore, nor has any other role, neither older users
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+                publish_market_order_fee_address=publisher_wallet.address,
+                publish_market_order_fee_token=ZERO_ADDRESS,
+            ),
+            publisher_wallet,
+        )
+
+    with pytest.raises(Exception, match="NOT MINTER"):
+        datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet})
+
+    # NewOwner now owns the NFT, is already Manager by default and has all roles
+    data_nft.create_datatoken(
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            publish_market_order_fee_address=consumer_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        consumer_wallet,
+    )
+    datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
+
+    datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
+
+    assert datatoken.balanceOf(consumer_wallet.address) == 20

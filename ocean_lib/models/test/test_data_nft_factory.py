@@ -14,10 +14,11 @@ from ocean_lib.ocean.util import create_checksum, get_address_of_type
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.helper_functions import get_non_existent_nft_template
 
 
 @pytest.mark.unit
-def test_main(
+def test_nft_creation(
     config,
     publisher_wallet,
     consumer_wallet,
@@ -71,8 +72,15 @@ def test_main(
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.getCurrentTemplateCount() == 2
 
-    datatoken.addMinter(consumer_wallet.address, {"from": publisher_wallet})
 
+@pytest.mark.unit
+def test_combo_functions(
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    data_nft_factory,
+):
+    """Tests the utils functions."""
     # Tests creating NFT with ERC20 successfully
     data_nft_token2, datatoken2 = data_nft_factory.create_nft_with_erc20(
         DataNFTArguments("72120Bundle", "72Bundle"),
@@ -94,7 +102,7 @@ def test_main(
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
-    datatoken = data_nft.create_datatoken(
+    datatoken = data_nft_token2.create_datatoken(
         DatatokenArguments(
             "DT1P",
             "DT1SymbolP",
@@ -326,52 +334,17 @@ def test_fail_get_templates(data_nft_factory):
 
 
 @pytest.mark.unit
-def test_fail_create_datatoken(
-    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
-):
-    """Tests multiple failures for creating ERC20 token."""
-    data_nft = data_nft_factory.create_data_nft(
-        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
+def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
+    """Test erc721 non existent template creation fail"""
+    non_existent_nft_template = get_non_existent_nft_template(
+        data_nft_factory, check_first=10
     )
-    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
+    assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    # Should fail to create a specific ERC20 Template if the index is ZERO
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=0,
-                name="DT1",
-                symbol="DT1Symbol",
+        data_nft_factory.create_data_nft(
+            DataNFTArguments(
+                "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
-            consumer_wallet,
+            publisher_wallet,
         )
-
-    # Should fail to create a specific ERC20 Template if the index doesn't exist
-    with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=3,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            consumer_wallet,
-        )
-
-    # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
-    assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
-        data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=1,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            another_consumer_wallet,
-        )
-
-
-@pytest.mark.unit
-def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
-    # create NFT with ERC20
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
-        DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")
