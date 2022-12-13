@@ -53,19 +53,15 @@ pip3 install --pre ocean-lib
 
 #### Potential issues & workarounds
 
-From the `pip install` step, here are potential issues and workarounds.
-
 - Issue: if you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues.
 - Workaround: install them individually: `pip3 install coincurve && pip3 install cryptography`
-
-
 - Issue: if you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
 ### 4. Configure brownie & network
 
 ocean.py uses brownie to connect to deployed smart contracts.
-Please check that you have configured RPC URLs, gas prices and other settings to 
+Please check that you have configured RPC URLs, gas prices and other settings to
 all networks according to your preferences by editing the `network-config.yaml` in your `~/.brownie` folder
 before proceeding.
 Your default `network-config.yaml` includes values for most [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains.

@@ -140,6 +140,7 @@ def test_buy_from_dispenser_and_order(
     assert DT.balanceOf(DT.getPaymentCollector()) == 0
 
 
+@pytest.mark.skip(reason="revive this test to fully complete #1190")
 @pytest.mark.unit
 def test_buy_from_fre_and_order(
     config,
