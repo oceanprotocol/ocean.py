@@ -15,10 +15,10 @@ def test_nonocean_tx(tmp_path, monkeypatch):
     """Do a simple non-Ocean tx on Mumbai. Only use Ocean config"""
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
-    connect_to_network("mumbai")
+    connect_to_network("polygon-test")
     util.set_aggressive_gas_fees()
 
-    config = get_config_dict("mumbai")
+    config = get_config_dict("polygon-test")
     ocean = Ocean(config)
     accounts.clear()
     (alice_wallet, bob_wallet) = util.get_wallets()
@@ -31,10 +31,10 @@ def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
     """On Mumbai, do a simple Ocean tx: create_data_nft"""
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
-    connect_to_network("mumbai")
+    connect_to_network("polygon-test")
     util.set_aggressive_gas_fees()
 
-    config = get_config_dict("mumbai")
+    config = get_config_dict("polygon-test")
     ocean = Ocean(config)
 
     accounts.clear()
