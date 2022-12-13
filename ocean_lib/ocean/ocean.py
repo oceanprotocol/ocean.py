@@ -21,9 +21,9 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.models.ve_allocate import VeAllocate
 from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
@@ -101,63 +101,6 @@ class Ocean:
         return Datatoken(self.config_dict, self.OCEAN_address)
 
     @enforce_types
-    def create_data_nft(
-        self,
-        name: str,
-        symbol: str,
-        from_wallet,
-        token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
-        template_index: Optional[int] = 1,
-        additional_datatoken_deployer: Optional[str] = None,
-        additional_metadata_updater: Optional[str] = None,
-        transferable: bool = True,
-        owner: Optional[str] = None,
-    ) -> DataNFT:
-        """
-        This method deploys a ERC721 token contract on the blockchain.
-        Usage:
-        ```python
-            config = { ... }
-            ocean = Ocean(config)
-            wallet = accounts.add(...)
-            data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
-        ```
-        :param name: data NFT name, str
-        :param symbol: data NFT symbol, str
-        :param from_wallet instance, wallet
-        :param template_index: Template type of the token, int
-        :param additional_datatoken_deployer: Address of another ERC20 deployer, str
-        :param token_uri: URL for the data NFT, str
-
-        :return: `DataNFT` instance
-        """
-
-        if not additional_datatoken_deployer:
-            additional_datatoken_deployer = ZERO_ADDRESS
-
-        if not additional_metadata_updater:
-            additional_metadata_updater = ZERO_ADDRESS
-
-        nft_factory = self.get_nft_factory()
-
-        receipt = nft_factory.deployERC721Contract(
-            name,
-            symbol,
-            template_index,
-            additional_metadata_updater,
-            additional_datatoken_deployer,
-            token_uri,
-            transferable,
-            owner if owner is not None else from_wallet.address,
-            {"from": from_wallet},
-        )
-
-        address = nft_factory.get_token_address(receipt)
-        assert address, "new NFT token has no address"
-        token = DataNFT(self.config_dict, address)
-        return token
-
-    @enforce_types
     def get_nft_token(self, token_address: str) -> DataNFT:
         """
         :param token_address: Token contract address, str
@@ -175,17 +118,17 @@ class Ocean:
 
         return Datatoken(self.config_dict, token_address)
 
+    @property
     @enforce_types
-    def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
+    def data_nft_factory(self) -> DataNFTFactoryContract:
         """
         :param nft_factory_address: contract address, str
 
         :return: `DataNFTFactoryContract` instance
         """
-        if not nft_factory_address:
-            nft_factory_address = get_address_of_type(
-                self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
-            )
+        nft_factory_address = get_address_of_type(
+            self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
+        )
 
         return DataNFTFactoryContract(self.config_dict, nft_factory_address)
 

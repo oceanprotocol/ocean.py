@@ -12,6 +12,8 @@ from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachin
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
+from ocean_lib.models.arguments import DataNFTArguments
+
 ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
 
 
@@ -92,7 +94,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
 @enforce_types
 def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
-    """Call create_data_nft(), but handle several gotchas for this test use case:
+    """Call create() from data NFT, but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
     - if there are insufficient funds, since they're hard to replace
       automatically in remote testnets, then just skip
@@ -101,9 +103,11 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     # avoid "replacement transaction underpriced" error: make each tx diff't
     symbol = random_chars()
 
-    print("Call create_data_nft(), and wait for it to complete...")
+    print("Call create() from data NFT, and wait for it to complete...")
     try:
-        data_nft = ocean.create_data_nft(symbol, symbol, alice_wallet)
+        data_nft = ocean.data_nft_factory.create(
+            DataNFTArguments(symbol, symbol), alice_wallet
+        )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:
         if error_is_skippable(str(e)):

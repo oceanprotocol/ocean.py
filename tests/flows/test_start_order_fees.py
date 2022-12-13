@@ -11,6 +11,7 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.arguments import DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -227,16 +228,14 @@ def create_asset_with_order_fee_and_timeout(
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
-        template_index=1,
-        name="Datatoken 1",
-        symbol="DT1",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publish_market_order_fee_address,
-        publish_market_order_fee_token=publish_market_order_fee_token,
-        publish_market_order_fee_amount=publish_market_order_fee_amount,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
+        DatatokenArguments(
+            name="Datatoken 1",
+            symbol="DT1",
+            publish_market_order_fee_address=publish_market_order_fee_address,
+            publish_market_order_fee_token=publish_market_order_fee_token,
+            publish_market_order_fee_amount=publish_market_order_fee_amount,
+        ),
+        publisher_wallet,
     )
 
     data_provider = DataServiceProvider
