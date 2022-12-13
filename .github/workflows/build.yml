@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - main
+      - v3-11
     tags:
       - '**'
   pull_request:
@@ -21,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        version: ['3.8', '3.10']
+        version: ['3.8', '3.10', '3.11']
     steps:
       - name: Setup Ocean.py
         uses: actions/checkout@v3
