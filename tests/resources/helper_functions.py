@@ -314,13 +314,13 @@ def convert_bt_amt_to_dt(
     Datatokens always have 18 decimals, even if base tokens don't.
     """
     bt_amount_wei = bt_amount
-    
+
     bt_amount_float = float(bt_amount_wei) / 10**bt_decimals
 
-    dt_per_bt_float = float(dt_per_bt_in_wei) / 10**18 #price always has 18 dec
-    
+    dt_per_bt_float = float(dt_per_bt_in_wei) / 10**18  # price always has 18 dec
+
     dt_amount_float = bt_amount_float * dt_per_bt_float
-    
+
     dt_amount_wei = int(dt_amount_float * 10**18)
 
     return dt_amount_wei
