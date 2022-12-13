@@ -42,6 +42,13 @@ jobs:
           --sdist
           --wheel
           --outdir dist/
+      - name: Install pip
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+      - name: Install coincurve separately
+        if: ${{ matrix.os == 'macos-latest' }}
+        run: python -m pip install coincurve && python -m pip install cryptography
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
