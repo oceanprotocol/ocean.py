@@ -17,10 +17,10 @@ def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
     """On Polygon, do a simple Ocean tx: create_data_nft"""
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
-    connect_to_network("polygon")
+    connect_to_network("polygon-main")
     util.set_aggressive_gas_fees()
 
-    config = get_config_dict("polygon")
+    config = get_config_dict("polygon-main")
     ocean = Ocean(config)
 
     accounts.clear()
