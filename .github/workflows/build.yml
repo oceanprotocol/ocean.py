@@ -47,13 +47,10 @@ jobs:
         working-directory: ${{ github.workspace }}
         run: |
           python -m pip install --upgrade pip
-      - name: Install coincurve separately
+      - name: Install Mac OS specific dependencies
         if: ${{ matrix.os == 'macos-latest' }}
         run: |
-          brew install autoconf
-          brew install automake
-          brew install libtool
-          python -m pip install coincurve && python -m pip install cryptography
+          brew install autoconf automake libtool
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
