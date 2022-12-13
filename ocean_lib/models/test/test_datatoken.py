@@ -13,7 +13,6 @@ from ocean_lib.models.datatoken import DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
