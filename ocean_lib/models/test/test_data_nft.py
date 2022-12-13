@@ -574,7 +574,7 @@ def test_transfer_nft(
 ):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments(
             "NFT to TRANSFER",
             "NFTtT",
@@ -601,7 +601,7 @@ def test_transfer_nft(
     assert data_nft.ownerOf(1) == consumer_wallet.address
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("NFT1", "NFT"), publisher_wallet
     )
 
@@ -714,7 +714,7 @@ def test_fail_create_datatoken(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests multiple failures for creating ERC20 token."""
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})

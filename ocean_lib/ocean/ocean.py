@@ -118,17 +118,17 @@ class Ocean:
 
         return Datatoken(self.config_dict, token_address)
 
+    @property
     @enforce_types
-    def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
+    def data_nft_factory(self) -> DataNFTFactoryContract:
         """
         :param nft_factory_address: contract address, str
 
         :return: `DataNFTFactoryContract` instance
         """
-        if not nft_factory_address:
-            nft_factory_address = get_address_of_type(
-                self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
-            )
+        nft_factory_address = get_address_of_type(
+            self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
+        )
 
         return DataNFTFactoryContract(self.config_dict, nft_factory_address)
 

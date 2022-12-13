@@ -30,7 +30,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         except BadFunctionCallOutput:
             return False
 
-    def create_data_nft(self, data_nft_args, wallet):
+    def create(self, data_nft_args, wallet):
         return data_nft_args.deploy_contract(self.config_dict, wallet)
 
     @enforce_types
@@ -67,7 +67,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         return self.contract.startMultipleTokenOrder(orders, transaction_parameters)
 
     @enforce_types
-    def create_nft_with_erc20(
+    def create_with_erc20(
         self,
         data_nft_args,
         datatoken_args,
@@ -122,7 +122,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         return data_nft_token, datatoken
 
     @enforce_types
-    def create_nft_erc20_with_fixed_rate(
+    def create_with_erc20_and_fixed_rate(
         self,
         data_nft_args,
         datatoken_args,
@@ -212,7 +212,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         return data_nft_token, datatoken, exchange
 
     @enforce_types
-    def create_nft_erc20_with_dispenser(
+    def create_with_erc20_and_dispenser(
         self,
         data_nft_args,
         datatoken_args,
@@ -282,7 +282,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         return data_nft_token, datatoken
 
     @enforce_types
-    def create_nft_with_metadata(
+    def create_with_metadata(
         self,
         data_nft_args,
         metadata_state: int,

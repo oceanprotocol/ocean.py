@@ -21,7 +21,7 @@ def test_nft_factory(config, publisher_ocean, publisher_wallet):
         config, publisher_wallet, publisher_wallet
     )
     ocn = publisher_ocean
-    assert ocn.get_nft_factory()
+    assert ocn.data_nft_factory
 
     assert ocn.get_nft_token(data_nft.address).address == data_nft.address
     assert ocn.get_datatoken(datatoken.address).address == datatoken.address
@@ -33,7 +33,7 @@ def test_contract_objects(publisher_ocean):
 
     assert ocn.OCEAN_address[:2] == "0x"
     assert isinstance(ocn.OCEAN_token, Datatoken)
-    assert isinstance(ocn.get_nft_factory(), DataNFTFactoryContract)
+    assert isinstance(ocn.data_nft_factory, DataNFTFactoryContract)
 
     assert isinstance(ocn.dispenser, Dispenser)
     assert isinstance(ocn.fixed_rate_exchange, FixedRateExchange)

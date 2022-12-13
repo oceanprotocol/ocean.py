@@ -27,8 +27,8 @@ def test_nonocean_tx(tmp_path, monkeypatch):
     util.do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet)
 
 
-def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
-    """On Mumbai, do a simple Ocean tx: create_data_nft"""
+def test_ocean_tx__create(tmp_path, monkeypatch):
+    """On Mumbai, do a simple Ocean tx: create"""
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
     connect_to_network("mumbai")

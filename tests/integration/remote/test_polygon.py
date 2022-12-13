@@ -13,8 +13,8 @@ from . import util
 
 
 @pytest.mark.integration
-def test_ocean_tx__create_data_nft(tmp_path, monkeypatch):
-    """On Polygon, do a simple Ocean tx: create_data_nft"""
+def test_ocean_tx__create(tmp_path, monkeypatch):
+    """On Polygon, do a simple Ocean tx: create"""
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
     connect_to_network("polygon")

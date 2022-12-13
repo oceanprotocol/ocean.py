@@ -165,7 +165,7 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("NFT", "NFTSYMBOL"), data_nft_publisher
     )
 

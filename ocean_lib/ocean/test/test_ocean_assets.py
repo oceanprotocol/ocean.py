@@ -381,7 +381,7 @@ def test_plain_asset_with_one_datatoken(publisher_ocean, publisher_wallet, confi
     files = get_default_files()
 
     # Publisher deploys NFT contract
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("NFT1", "NFTSYMBOL"), publisher_wallet
     )
 
@@ -410,7 +410,7 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
     metadata = get_default_metadata()
     files = get_default_files()
 
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("NFT2", "NFT2SYMBOL"), publisher_wallet
     )
 

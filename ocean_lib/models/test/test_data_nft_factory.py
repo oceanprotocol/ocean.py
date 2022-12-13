@@ -25,7 +25,7 @@ def test_nft_creation(
     data_nft_factory,
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
     assert data_nft.contract.name() == "DT1"
@@ -33,7 +33,7 @@ def test_nft_creation(
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("DT2", "DTSYMBOL1"), publisher_wallet
     )
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
@@ -82,7 +82,7 @@ def test_combo_functions(
 ):
     """Tests the utils functions."""
     # Tests creating NFT with ERC20 successfully
-    data_nft_token2, datatoken2 = data_nft_factory.create_nft_with_erc20(
+    data_nft_token2, datatoken2 = data_nft_factory.create_with_erc20(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTB1",
@@ -120,7 +120,7 @@ def test_combo_functions(
         data_nft_token4,
         datatoken4,
         one_fixed_rate,
-    ) = data_nft_factory.create_nft_erc20_with_fixed_rate(
+    ) = data_nft_factory.create_with_erc20_and_fixed_rate(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTWithPool",
@@ -151,7 +151,7 @@ def test_combo_functions(
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
 
-    data_nft_token5, datatoken5 = data_nft_factory.create_nft_erc20_with_dispenser(
+    data_nft_token5, datatoken5 = data_nft_factory.create_with_erc20_and_dispenser(
         DataNFTArguments("72120Bundle", "72Bundle"),
         DatatokenArguments(
             "DTWithPool",
@@ -175,7 +175,7 @@ def test_combo_functions(
     _ = Dispenser(config, dispenser_address)
 
     # Create a new erc721 with metadata in one single call and get address
-    data_nft = data_nft_factory.create_nft_with_metadata(
+    data_nft = data_nft_factory.create_with_metadata(
         DataNFTArguments("72120Bundle", "72Bundle"),
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
@@ -199,7 +199,7 @@ def test_start_multiple_order(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
     )
     assert data_nft.contract.name() == "DT1"
@@ -208,7 +208,7 @@ def test_start_multiple_order(
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft = data_nft_factory.create_data_nft(
+    data_nft = data_nft_factory.create(
         DataNFTArguments("DT2", "DTSYMBOL1"), publisher_wallet
     )
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
@@ -342,7 +342,7 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.create_data_nft(
+        data_nft_factory.create(
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
