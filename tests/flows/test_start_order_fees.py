@@ -11,6 +11,7 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.arguments import DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -19,16 +20,13 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.ddo_helpers import (
-    get_first_service_by_type,
-    get_opc_collector_address_from_datatoken,
-)
+from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_provider_fees,
     get_wallet,
     int_units,
-    transfer_base_token_if_balance_lte,
+    transfer_bt_if_balance_lte,
 )
 
 
@@ -75,9 +73,9 @@ def test_start_order_fees(
     consume_market_wallet = get_wallet(5)
 
     # Send base tokens to the consumer so they can pay for fees
-    transfer_base_token_if_balance_lte(
+    transfer_bt_if_balance_lte(
         config=config,
-        base_token_address=bt.address,
+        bt_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
         min_balance=int_units("2000", bt.decimals()),
@@ -106,7 +104,7 @@ def test_start_order_fees(
         {"from": publisher_wallet},
     )
 
-    opc_collector_address = get_opc_collector_address_from_datatoken(dt)
+    opc_collector_address = factory_router.getOPCCollector()
 
     if base_token_name == "Ocean" and publish_market_order_fee_in_unit == "500":
         bt.mint(
@@ -182,15 +180,15 @@ def test_start_order_fees(
     assert publish_market_order_fee_amount == publish_market_order_fee
 
     # Get Ocean community fee amount
-    ocean_community_order_fee = factory_router.getOPCConsumeFee()
-    assert ocean_community_order_fee == Web3.toWei("0.03", "ether")
+    opc_order_fee = factory_router.getOPCConsumeFee()
+    assert opc_order_fee == Web3.toWei("0.03", "ether")
 
     one_datatoken = Web3.toWei(1, "ether")
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after
     assert (
-        publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
+        publisher_dt_balance_before + one_datatoken - opc_order_fee
         == publisher_dt_balance_after
     )
     assert (
@@ -214,7 +212,7 @@ def test_start_order_fees(
     assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
     assert provider_dt_balance_before == provider_dt_balance_after
     assert opc_bt_balance_before == opc_bt_balance_after
-    assert opc_dt_balance_before + ocean_community_order_fee == opc_dt_balance_after
+    assert opc_dt_balance_before + opc_order_fee == opc_dt_balance_after
 
 
 def create_asset_with_order_fee_and_timeout(
@@ -230,16 +228,14 @@ def create_asset_with_order_fee_and_timeout(
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
-        template_index=1,
-        name="Datatoken 1",
-        symbol="DT1",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publish_market_order_fee_address,
-        publish_market_order_fee_token=publish_market_order_fee_token,
-        publish_market_order_fee_amount=publish_market_order_fee_amount,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
+        DatatokenArguments(
+            name="Datatoken 1",
+            symbol="DT1",
+            publish_market_order_fee_address=publish_market_order_fee_address,
+            publish_market_order_fee_token=publish_market_order_fee_token,
+            publish_market_order_fee_amount=publish_market_order_fee_amount,
+        ),
+        publisher_wallet,
     )
 
     data_provider = DataServiceProvider

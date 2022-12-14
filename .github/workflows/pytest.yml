@@ -38,10 +38,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_dev.txt
+          brownie bake github-actions
+          sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
       - name: Test with pytest
         run: |
-          mkdir ~/.brownie
-          cp network-config.sample ~/.brownie/network-config.yaml 
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           coverage run --source ocean_lib -m py.test -m "not slow"
           coverage report

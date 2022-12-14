@@ -33,7 +33,9 @@ install_requirements = [
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
     "eciespy",
-    "eth-brownie==1.19.1",
+    "eth-brownie",
+    "yarl==1.8.1",
+    "bitarray>=2.6.0,<3",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -63,7 +65,7 @@ dev_requirements = [
     "watchdog",
     "flake8==5.0.4",
     "isort==5.10.1",
-    "black==22.6.0",  # need to keep this up to date to brownie
+    "black",  # need to keep this up to date to brownie
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
@@ -102,7 +104,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='2.0.0-alpha.4',
+    version='2.0.0-alpha.5',
     # fmt: on
     zip_safe=False,
 )

@@ -18,6 +18,7 @@ from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
+from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -81,17 +82,16 @@ def generate_wallet():
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
-    generated_wallet = accounts.add(private_key)
-    assert generated_wallet.private_key == private_key
+    new_wallet = accounts.add(private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(generated_wallet.address, "3 ether")
+    deployer_wallet.transfer(new_wallet.address, "3 ether")
 
-    ocn = Ocean(config)
-    OCEAN_token = ocn.OCEAN_token
-    OCEAN_token.transfer(
-        generated_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
+    ocean = Ocean(config)
+    OCEAN = ocean.OCEAN_token
+    OCEAN.transfer(
+        new_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
     )
-    return generated_wallet
+    return new_wallet
 
 
 def get_ocean_instance_prerequisites(use_provider_mock=False) -> Ocean:
@@ -165,36 +165,26 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        data_nft_publisher.address,
-        {"from": data_nft_publisher},
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("NFT", "NFTSYMBOL"), data_nft_publisher
     )
-    token_address = data_nft_factory.get_token_address(receipt)
-    data_nft = DataNFT(config_dict, token_address)
+
     if not datatoken_minter:
         return data_nft
 
     datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
-        template_index=template_index,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=datatoken_minter.address,
-        fee_manager=data_nft_publisher.address,
-        publish_market_order_fee_address=data_nft_publisher.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        datatoken_cap=datatoken_cap,
-        transaction_parameters={"from": data_nft_publisher},
+        DatatokenArguments(
+            template_index=template_index,
+            cap=datatoken_cap,
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=datatoken_minter.address,
+            publish_market_order_fee_address=data_nft_publisher.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+        ),
+        data_nft_publisher,
     )
 
     return data_nft, datatoken
@@ -233,9 +223,9 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
 
 
 @enforce_types
-def transfer_base_token_if_balance_lte(
+def transfer_bt_if_balance_lte(
     config: dict,
-    base_token_address: str,
+    bt_address: str,
     from_wallet,
     recipient: str,
     min_balance: int,
@@ -245,7 +235,7 @@ def transfer_base_token_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = Datatoken(config, base_token_address)
+    base_token = Datatoken(config, bt_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
@@ -303,29 +293,27 @@ def get_provider_fees(
     return provider_fee
 
 
-def base_token_to_datatoken(
-    base_token_amount: int,
-    base_token_decimals: int,
-    datatokens_per_base_token: int,
+def convert_bt_amt_to_dt(
+    bt_amount: int,
+    bt_decimals: int,
+    dt_per_bt_in_wei: int,
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
-
-    When creating a pool, the "rate" argument is the datatokens per base token,
-    and can be passed directly into this function.
-
-    When creating an exchange, the "rate" argument is the base tokens per datatoken,
-    so it needs to be inverted before passing into this function.
-
-    Datatokens always have 18 decimals, even when the base tokens don't.
+    dt_per_bt_in_wei = 1 / bt_per_dt = 1 / price
+    Datatokens always have 18 decimals, even if base tokens don't.
     """
-    unit_value = Decimal(10) ** 18
-    return Web3.toWei(
-        Decimal(base_token_amount)
-        / unit_value
-        * Web3.fromWei(datatokens_per_base_token, "ether"),
-        "ether",
-    )
+    bt_amount_wei = bt_amount
+
+    bt_amount_float = float(bt_amount_wei) / 10**bt_decimals
+
+    dt_per_bt_float = float(dt_per_bt_in_wei) / 10**18  # price always has 18 dec
+
+    dt_amount_float = bt_amount_float * dt_per_bt_float
+
+    dt_amount_wei = int(dt_amount_float * 10**18)
+
+    return dt_amount_wei
 
 
 def get_file1():

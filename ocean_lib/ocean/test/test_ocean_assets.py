@@ -17,6 +17,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
+from ocean_lib.models.arguments import DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.ocean.util import get_address_of_type
@@ -382,31 +383,20 @@ def test_plain_asset_with_one_datatoken(publisher_ocean, publisher_wallet, confi
     files = get_default_files()
 
     # Publisher deploys NFT contract
-    tx_receipt = data_nft_factory.deployERC721Contract(
-        "NFT1",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("NFT1", "NFTSYMBOL"), publisher_wallet
     )
-    registered_event = tx_receipt.events["NFTCreated"]
-    assert registered_event["admin"] == publisher_wallet.address
-    data_nft_address = registered_event["newTokenAddress"]
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        data_nft_address=data_nft_address,
+        data_nft_address=data_nft.address,
         datatoken_args=[DatatokenArguments(files=files)],
     )
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT1"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == data_nft_address
+    assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
     assert ddo.datatokens[0]["symbol"] == "DT1"
@@ -422,26 +412,14 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
     metadata = get_default_metadata()
     files = get_default_files()
 
-    tx_receipt = data_nft_factory.deployERC721Contract(
-        "NFT2",
-        "NFT2SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("NFT2", "NFT2SYMBOL"), publisher_wallet
     )
-    registered_event = tx_receipt.events["NFTCreated"]
-
-    assert registered_event["admin"] == publisher_wallet.address
-    data_nft_address2 = registered_event["newTokenAddress"]
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        data_nft_address=data_nft_address2,
+        data_nft_address=data_nft.address,
         datatoken_args=[
             DatatokenArguments("Datatoken 2", "DT2", files=files),
             DatatokenArguments("Datatoken 3", "DT3", files=files),
@@ -450,7 +428,7 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
     assert ddo, "The ddo is not created."
     assert ddo.nft["name"] == "NFT2"
     assert ddo.nft["symbol"] == "NFT2SYMBOL"
-    assert ddo.nft["address"] == data_nft_address2
+    assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 2"
     assert ddo.datatokens[0]["symbol"] == "DT2"
