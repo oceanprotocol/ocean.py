@@ -107,7 +107,7 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_url_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True, is_algo=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True, is_algo=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
