@@ -154,7 +154,7 @@ def test_buy_from_fre_and_order(
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
 
-    (exchange, tx_receipt) = DT.create_exchange(
+    exchange = DT.create_exchange(
         rate=to_wei(1),
         base_token_addr=USDC.address,
         tx_dict={"from": publisher_wallet},

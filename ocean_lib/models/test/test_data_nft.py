@@ -669,7 +669,7 @@ def test_nft_transfer_with_fre(
     assert datatoken.isMinter(publisher_wallet.address)
 
     # The NFT owner (publisher) has ERC20 deployer role & can deploy an exchange
-    (exchange, tx) = datatoken.create_exchange(
+    exchange = datatoken.create_exchange(
         rate=to_wei(1),
         base_token_addr=OCEAN.address,
         publish_market_fee=to_wei(0.01),
