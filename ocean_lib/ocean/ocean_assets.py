@@ -147,14 +147,45 @@ class OceanAssets:
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
+    def create_algo_asset(
+        self,
+        name: str,
+        url: str,
+        publisher_wallet,
+        image: str = "oceanprotocol/algo_dockers",
+        tag: str = "python-branin",
+        checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Create asset of type "algorithm", having UrlFiles, with good defaults"""
+
+        if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
+            assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
+
+        metadata = self._default_metadata(name, publisher_wallet, "algorithm")
+        metadata["algorithm"] = {
+            "language": "python",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "python $ALGO",
+                "image": image,
+                "tag": tag,
+                "checksum": checksum,
+            },
+        }
+
+        files = [UrlFile(url)]
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+
+    @enforce_types
     def create_url_asset(
         self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
     ) -> tuple:
-        """Create an asset of type "UrlFile", with good defaults"""
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        metadata = self._default_metadata(name, publisher_wallet)
         files = [UrlFile(url)]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -165,11 +196,10 @@ class OceanAssets:
         publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "GraphqlQuery", with good defaults"""
+        """Create asset of type "data", having GraphqlQuery files, w good defaults"""
+        metadata = self._default_metadata(name, publisher_wallet)
         files = [GraphqlQuery(url, query)]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -180,39 +210,31 @@ class OceanAssets:
         publisher_wallet,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "SmartContractCall", with good defaults"""
+        """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        metadata = self._default_metadata(name, publisher_wallet)
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
-    def create_with_default_metadata(
-        self,
-        name: str,
-        files: list,
-        publisher_wallet,
-        wait_for_aqua: bool = True,
-    ) -> tuple:
-        """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
-
-        If wait_for_aqua, then attempt to update aquarius within time constraints.
-
-        Returns (data_nft, datatoken, ddo)
-        """
+    def _default_metadata(self, name: str, publisher_wallet, type="dataset") -> dict:
         date_created = datetime.now().isoformat()
         metadata = {
             "created": date_created,
             "updated": date_created,
             "description": name,
             "name": name,
-            "type": "dataset",
+            "type": type,
             "author": publisher_wallet.address[:7],
             "license": "CC0: PublicDomain",
         }
+        return metadata
 
+    @enforce_types
+    def _create_1dt(self, metadata, files, publisher_wallet, wait_for_aqua):
+        """Call create(), focusing on just one datatoken"""
+        name = metadata["name"]
         (data_nft, datatokens, ddo) = self.create(
             metadata,
             publisher_wallet,
