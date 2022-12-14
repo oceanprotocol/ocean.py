@@ -120,40 +120,31 @@ def build_default_services(config, datatoken):
 
 
 def get_registered_asset_with_access_service(
-    ocean_instance, publisher_wallet, metadata=None, more_files=False
+    ocean_instance,
+    publisher_wallet,
+    metadata=None,
+    more_files=False,
+    use_enterprise=False,
 ):
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     files = [UrlFile(url)] if not more_files else [UrlFile(url), get_file2()]
 
     if not metadata:
         metadata = get_default_metadata()
+
+    template_index = 2 if use_enterprise else 1
+    datatoken_cap = Web3.toWei(100, "ether") if use_enterprise else None
 
     data_nft, dts, ddo = ocean_instance.assets.create(
         metadata,
         publisher_wallet,
-        datatoken_args=[DatatokenArguments("Branin: DT1", "DT1", files=files)],
-    )
-
-    return data_nft, dts[0], ddo
-
-
-def get_registered_asset_with_access_service_using_enterprise_template(
-    ocean_assets, publisher_wallet, metadata=None, more_files=False
-):
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    files = [UrlFile(url)] if not more_files else [UrlFile(url), get_file2()]
-
-    if not metadata:
-        metadata = get_default_metadata()
-
-    datatoken_cap = Web3.toWei(100, "ether")
-
-    data_nft, dts, ddo = ocean_assets.create(
-        metadata,
-        publisher_wallet,
         datatoken_args=[
             DatatokenArguments(
-                "Branin: DT2", "DT2", files=files, template_index=2, cap=datatoken_cap
+                f"Branin: DT{template_index}",
+                f"DT{template_index}",
+                files=files,
+                template_index=template_index,
+                cap=datatoken_cap,
             )
         ],
     )

@@ -9,11 +9,9 @@ import pytest
 from brownie.network import accounts
 from web3.main import Web3
 
-
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import InsufficientBalance
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
@@ -21,7 +19,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_registered_asset_with_access_service,
-    get_registered_asset_with_access_service_using_enterprise_template,
 )
 from tests.resources.helper_functions import send_mock_usdc_to_address
 
@@ -130,39 +127,34 @@ def test_compact_publish_and_consume(
     _ = ocean_assets.download_file(ddo.did, consumer_wallet)
 
 
+@pytest.mark.parametrize("use_enterprise", [True, False])
 @pytest.mark.integration
-def test_ocean_assets_download_with_enterprise_template_and_dispenser(
-    config: dict,
+def test_ocean_assets_download_with_dispenser(
     publisher_wallet,
+    publisher_ocean,
     consumer_wallet,
+    consumer_ocean,
+    use_enterprise,
 ):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
-    # create asset using enterprise template
-    (
-        data_nft_2,
-        datatoken_2,
-        ddo_2,
-    ) = get_registered_asset_with_access_service_using_enterprise_template(
-        ocean_assets, publisher_wallet
+    (data_nft_2, datatoken_2, ddo_2,) = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet, use_enterprise=use_enterprise
     )
     datatoken_2.create_dispenser({"from": publisher_wallet})
-    _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+    _ = consumer_ocean.assets.download_file(ddo_2.did, consumer_wallet)
 
 
+@pytest.mark.parametrize("use_enterprise", [True, False])
 @pytest.mark.integration
-def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
-    config: dict, publisher_wallet, consumer_wallet
+def test_ocean_assets_download_with_fixedrate(
+    config: dict,
+    publisher_wallet,
+    publisher_ocean,
+    consumer_wallet,
+    consumer_ocean,
+    use_enterprise,
 ):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
-    # create asset using enterprise template
-    (
-        data_nft_2,
-        datatoken_2,
-        ddo_2,
-    ) = get_registered_asset_with_access_service_using_enterprise_template(
-        ocean_assets, publisher_wallet
+    (data_nft_2, datatoken_2, ddo_2,) = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet, use_enterprise=use_enterprise
     )
     fre_address = get_address_of_type(config, "FixedPrice")
     base_token_address = get_address_of_type(config, "MockUSDC")
@@ -182,8 +174,8 @@ def test_ocean_assets_download_with_enterprise_template_and_fixedrate(
     empty_wallet = accounts.add()
     # try with an empty wallet, it should fail with InsufficientBalance
     with pytest.raises(InsufficientBalance):
-        _ = ocean_assets.download_file(ddo_2.did, empty_wallet)
+        _ = consumer_ocean.assets.download_file(ddo_2.did, empty_wallet)
     # send 2 MockUSDC to consumer and use that account
     send_mock_usdc_to_address(config, consumer_wallet.address, 2)
     # now it should pass
-    _ = ocean_assets.download_file(ddo_2.did, consumer_wallet)
+    _ = consumer_ocean.assets.download_file(ddo_2.did, consumer_wallet)
