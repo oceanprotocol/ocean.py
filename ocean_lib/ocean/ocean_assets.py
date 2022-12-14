@@ -29,13 +29,8 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
-from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import (
-    create_checksum,
-    get_address_of_type,
-    get_ocean_token_address,
-)
+from ocean_lib.ocean.util import create_checksum, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
@@ -475,38 +470,9 @@ class OceanAssets:
         ddo = self.resolve(did)
         datatoken_address = ddo.datatokens[0]["address"]
         datatoken = Datatoken(self._config_dict, datatoken_address)
-        template_id = datatoken.getId()
-        if template_id == 1:
-            # free template
-            # Ensure access token
-            bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
-            if bal >= 1.0:  # we're good
-                pass
-            else:  # try to get freely-dispensed ddo
-                print("Dispense access token...")
-                amt_dispense_wei = Web3.toWei(1, "ether")
-                dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
-                dispenser = Dispenser(self._config_dict, dispenser_addr)
+        datatoken.dispense_if_free(wallet)
 
-                # catch key failure modes
-                st = dispenser.status(datatoken.address)
-                active, allowedSwapper = st[0], st[6]
-                if not active:
-                    raise ValueError("No active dispenser for datatoken")
-                if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                    raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
-
-                # Try to dispense. If other issues, they'll pop out
-                dispenser.dispense(
-                    datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
-                )
-
-            # send datatoken to the service, to get access
-            print("Order access...")
-            order_tx_id = self.pay_for_access_service(ddo, wallet)
-        elif template_id == 2:
-            # enterprise template
-            order_tx_id = self.pay_for_access_service_enterprise(ddo, wallet)
+        order_tx_id = self.pay_for_access_service(ddo, wallet)
 
         # download
         print("Download file...")
@@ -618,14 +584,28 @@ class OceanAssets:
         )
         # main work...
         dt = Datatoken(self._config_dict, params["service"].datatoken)
+        if dt.getId() != 2:
+            dt = DatatokenEnterprise(self._config_dict, params["service"].datatoken)
+
         balance = dt.balanceOf(wallet.address)
 
         if balance < Web3.toWei(1, "ether"):
-            raise InsufficientBalance(
+            message = (
                 f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
                 f"requires 1 datatoken."
             )
+            if dt.getId() != 2:
+                raise InsufficientBalance(message)
+            else:
+                success, bought_tx = self.buy_from_pricing_schema(
+                    ddo, dt, params, wallet
+                )
+                if success:
+                    return bought_tx
+
+                raise InsufficientBalance(f"{message} {bought_tx}.")
+
         receipt = dt.start_order(
             consumer=params["consumer_address"],
             service_index=ddo.get_index_of_service(params["service"]),
@@ -646,124 +626,15 @@ class OceanAssets:
         return receipt.txid
 
     @enforce_types
-    def pay_for_access_service_enterprise(
-        self,
-        ddo: DDO,
-        wallet,
-        service: Optional[Service] = None,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = None,
-        consumer_address: Optional[str] = None,
-        userdata: Optional[dict] = None,
-    ):
-        params = self.get_order_data(
-            ddo,
-            wallet,
-            service,
-            consume_market_order_fee_address,
-            consume_market_order_fee_token,
-            consume_market_order_fee_amount,
-            consumer_address,
-            userdata,
-        )
+    def buy_from_pricing_schema(self, ddo, dt, params, wallet):
+        dispensers = dt.getDispensers()
+        fixedrates = dt.getFixedRates()
 
-        dt = DatatokenEnterprise(self._config_dict, params["service"].datatoken)
+        if not dispensers and not fixedrates:
+            return False, "No pricing schemas found."
 
-        balance = dt.balanceOf(params["consumer_address"])
-
-        if balance < Web3.toWei(1, "ether"):
-            # check if we have a dispenser or fixedrate
-            dispensers = dt.getDispensers()
-            if len(dispensers) > 0:
-                receipt = dt.buy_from_dispenser_and_order(
-                    consumer=params["consumer_address"],
-                    service_index=ddo.get_index_of_service(params["service"]),
-                    provider_fee_address=params["provider_fees"]["providerFeeAddress"],
-                    provider_fee_token=params["provider_fees"]["providerFeeToken"],
-                    provider_fee_amount=params["provider_fees"]["providerFeeAmount"],
-                    v=params["provider_fees"]["v"],
-                    r=params["provider_fees"]["r"],
-                    s=params["provider_fees"]["s"],
-                    valid_until=params["provider_fees"]["validUntil"],
-                    provider_data=params["provider_fees"]["providerData"],
-                    consume_market_order_fee_address=params[
-                        "consume_market_order_fee_address"
-                    ],
-                    consume_market_order_fee_token=params[
-                        "consume_market_order_fee_token"
-                    ],
-                    consume_market_order_fee_amount=params[
-                        "consume_market_order_fee_amount"
-                    ],
-                    dispenser_address=dispensers[0],
-                    transaction_parameters={"from": wallet},
-                )
-                return receipt.txid
-            # check for fixed rates
-            fixedrates = dt.getFixedRates()
-            if len(fixedrates) > 0:
-                # get price
-                fixed_rate_contract_address = fixedrates[0][0]
-                fixed_rate_exchange_id = fixedrates[0][1]
-
-                fixed_exchange = FixedRateExchange(
-                    self._config_dict, fixed_rate_contract_address
-                )
-                exchange_details = fixed_exchange.getExchange(fixed_rate_exchange_id)
-                base_token_address = exchange_details[3]
-                exchange_rates = fixed_exchange.calcBaseInGivenOutDT(
-                    fixed_rate_exchange_id, Web3.toWei("1", "ether"), 0
-                )
-                amount = exchange_rates[0]
-                # make sure we have base tokens in our account
-                base_token = Datatoken(self._config_dict, base_token_address)
-                base_token_balance = base_token.balanceOf(params["consumer_address"])
-                if base_token_balance < amount:
-                    raise InsufficientBalance(
-                        f"Your token balance {base_token_balance} {base_token.symbol()} is not sufficient "
-                        f"to execute the requested service. This service "
-                        f"requires {amount} {base_token.symbol()}."
-                    )
-                base_token.approve(
-                    params["service"].datatoken,
-                    Web3.toWei(amount, "ether"),
-                    {"from": params["consumer_address"]},
-                )
-                receipt = dt.buy_from_fre_and_order(
-                    consumer=params["consumer_address"],
-                    service_index=ddo.get_index_of_service(params["service"]),
-                    provider_fee_address=params["provider_fees"]["providerFeeAddress"],
-                    provider_fee_token=params["provider_fees"]["providerFeeToken"],
-                    provider_fee_amount=params["provider_fees"]["providerFeeAmount"],
-                    v=params["provider_fees"]["v"],
-                    r=params["provider_fees"]["r"],
-                    s=params["provider_fees"]["s"],
-                    valid_until=params["provider_fees"]["validUntil"],
-                    provider_data=params["provider_fees"]["providerData"],
-                    consume_market_order_fee_address=params[
-                        "consume_market_order_fee_address"
-                    ],
-                    consume_market_order_fee_token=params[
-                        "consume_market_order_fee_token"
-                    ],
-                    consume_market_order_fee_amount=params[
-                        "consume_market_order_fee_amount"
-                    ],
-                    exchange_contract=fixed_rate_contract_address,
-                    exchange_id=fixed_rate_exchange_id,
-                    max_base_token_amount=MAX_UINT256,
-                    consume_market_swap_fee_amount=0,
-                    consume_market_swap_fee_address=ZERO_ADDRESS,
-                    transaction_parameters={"from": wallet},
-                )
-                return receipt.txid
-            # no price schemas found..
-            return None
-
-        else:
-            # we already have 1 DT in wallet, so just use it
-            receipt = dt.start_order(
+        if len(dispensers) > 0:
+            receipt = dt.buy_from_dispenser_and_order(
                 consumer=params["consumer_address"],
                 service_index=ddo.get_index_of_service(params["service"]),
                 provider_fee_address=params["provider_fees"]["providerFeeAddress"],
@@ -781,9 +652,67 @@ class OceanAssets:
                 consume_market_order_fee_amount=params[
                     "consume_market_order_fee_amount"
                 ],
+                dispenser_address=dispensers[0],
                 transaction_parameters={"from": wallet},
             )
-            return receipt.txid
+            return True, receipt.txid
+
+        if len(fixedrates) > 0:
+            # get price
+            fixed_rate_contract_address = fixedrates[0][0]
+            fixed_rate_exchange_id = fixedrates[0][1]
+
+            fixed_exchange = FixedRateExchange(
+                self._config_dict, fixed_rate_contract_address
+            )
+            exchange_details = fixed_exchange.getExchange(fixed_rate_exchange_id)
+            base_token_address = exchange_details[3]
+            exchange_rates = fixed_exchange.calcBaseInGivenOutDT(
+                fixed_rate_exchange_id, Web3.toWei("1", "ether"), 0
+            )
+            amount = exchange_rates[0]
+            # make sure we have base tokens in our account
+            base_token = Datatoken(self._config_dict, base_token_address)
+            base_token_balance = base_token.balanceOf(params["consumer_address"])
+            if base_token_balance < amount:
+                return False, (
+                    f"Your token balance {base_token_balance} {base_token.symbol()} is not sufficient "
+                    f"to execute the requested service. This service "
+                    f"requires {amount} {base_token.symbol()}."
+                )
+            base_token.approve(
+                params["service"].datatoken,
+                Web3.toWei(amount, "ether"),
+                {"from": params["consumer_address"]},
+            )
+            receipt = dt.buy_from_fre_and_order(
+                consumer=params["consumer_address"],
+                service_index=ddo.get_index_of_service(params["service"]),
+                provider_fee_address=params["provider_fees"]["providerFeeAddress"],
+                provider_fee_token=params["provider_fees"]["providerFeeToken"],
+                provider_fee_amount=params["provider_fees"]["providerFeeAmount"],
+                v=params["provider_fees"]["v"],
+                r=params["provider_fees"]["r"],
+                s=params["provider_fees"]["s"],
+                valid_until=params["provider_fees"]["validUntil"],
+                provider_data=params["provider_fees"]["providerData"],
+                consume_market_order_fee_address=params[
+                    "consume_market_order_fee_address"
+                ],
+                consume_market_order_fee_token=params["consume_market_order_fee_token"],
+                consume_market_order_fee_amount=params[
+                    "consume_market_order_fee_amount"
+                ],
+                exchange_contract=fixed_rate_contract_address,
+                exchange_id=fixed_rate_exchange_id,
+                max_base_token_amount=MAX_UINT256,
+                consume_market_swap_fee_amount=0,
+                consume_market_swap_fee_address=ZERO_ADDRESS,
+                transaction_parameters={"from": wallet},
+            )
+            return True, receipt.txid
+
+        return False, "unknown error"
 
     @enforce_types
     def pay_for_compute_service(
