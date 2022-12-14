@@ -589,7 +589,7 @@ class OceanAssets:
         )
 
         try:
-            dt.dispense_if_needed(wallet)
+            dt.get_if_needed(wallet)
         except ValueError as e:
             raise InsufficientBalance(f"{message} {e}.")
 

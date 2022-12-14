@@ -307,28 +307,76 @@ class Datatoken(ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
-    def dispense_if_needed(self, wallet):
+    def get_if_needed(self, wallet):
         bal = Web3.fromWei(self.balanceOf(wallet.address), "ether")
         if bal >= 1.0:  # we're good
             return
+        if self.getId() != 1:
+            return
 
-        print("Dispense access token...")
-        amt_dispense_wei = Web3.toWei(1, "ether")
-        dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-        from ocean_lib.models.dispenser import Dispenser  # isort: skip
+        dispensers = dt.getDispensers()
+        fixedrates = dt.getFixedRates()
 
-        dispenser = Dispenser(self.config_dict, dispenser_addr)
+        if not dispensers and not fixedrates:
+            raise ValueError("No pricing schemas found")
 
-        # catch key failure modes
-        st = dispenser.status(self.address)
-        active, allowedSwapper = st[0], st[6]
-        if not active:
-            raise ValueError("No active dispenser for datatoken")
-        if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-            raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
+        if len(dispensers) > 0:
+            print("Dispense access token...")
+            amt_dispense_wei = Web3.toWei(1, "ether")
+            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
+            from ocean_lib.models.dispenser import Dispenser  # isort: skip
 
-        # Try to dispense. If other issues, they'll pop out
-        dispenser.dispense(self.address, amt_dispense_wei, wallet, {"from": wallet})
+            dispenser = Dispenser(self.config_dict, dispenser_addr)
+
+            # catch key failure modes
+            st = dispenser.status(self.address)
+            active, allowedSwapper = st[0], st[6]
+            if not active:
+                raise ValueError("No active dispenser for datatoken")
+            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
+                raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
+
+            # Try to dispense. If other issues, they'll pop out
+            dispenser.dispense(self.address, amt_dispense_wei, wallet, {"from": wallet})
+
+        # get price for FRE
+        fixed_rate_contract_address = fixedrates[0][0]
+        fixed_rate_exchange_id = fixedrates[0][1]
+        from ocean_lib.models.fixed_rate_exchange import (
+            FixedRateExchange,
+        )  # isort: skip
+
+        fixed_exchange = FixedRateExchange(
+            self.config_dict, fixed_rate_contract_address
+        )
+        exchange_details = fixed_exchange.getExchange(fixed_rate_exchange_id)
+        base_token_address = exchange_details[3]
+        exchange_rates = fixed_exchange.calcBaseInGivenOutDT(
+            fixed_rate_exchange_id, Web3.toWei("1", "ether"), 0
+        )
+        amount = exchange_rates[0]
+        # make sure we have base tokens in our account
+        base_token = Datatoken(self.config_dict, base_token_address)
+        base_token_balance = base_token.balanceOf(wallet.address)
+        if base_token_balance < amount:
+            raise ValueError(
+                f"Your token balance {base_token_balance} {base_token.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires {amount} {base_token.symbol()}."
+            )
+        base_token.approve(
+            self.address,
+            Web3.toWei(amount, "ether"),
+            {"from": wallet.address},
+        )
+        fixed_exchange.buyDT(
+            self._id,
+            Web3.toWei(1, "ether"),
+            amount,
+            ZERO_ADDRESS,
+            0,
+            {"from": wallet.address},
+        )
 
 
 class MockERC20(Datatoken):
