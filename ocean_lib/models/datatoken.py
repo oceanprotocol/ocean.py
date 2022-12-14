@@ -307,7 +307,7 @@ class Datatoken(ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
-    def dispense_if_free(self, wallet):
+    def dispense_if_needed(self, wallet):
         bal = Web3.fromWei(self.balanceOf(wallet.address), "ether")
         if bal >= 1.0:  # we're good
             return

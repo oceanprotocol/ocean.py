@@ -583,15 +583,18 @@ class OceanAssets:
             dt = DatatokenEnterprise(self._config_dict, params["service"].datatoken)
 
         balance = dt.balanceOf(wallet.address)
+        message = (
+            f"Your token balance {balance} {dt.symbol()} is not sufficient "
+            f"to execute the requested service. This service "
+            f"requires 1 datatoken."
+        )
 
-        dt.dispense_if_free(wallet)
+        try:
+            dt.dispense_if_needed(wallet)
+        except ValueError as e:
+            raise InsufficientBalance(f"{message} {e}.")
 
         if balance < Web3.toWei(1, "ether"):
-            message = (
-                f"Your token balance {balance} {dt.symbol()} is not sufficient "
-                f"to execute the requested service. This service "
-                f"requires 1 datatoken."
-            )
             if dt.getId() == 1:
                 raise InsufficientBalance(message)
             else:

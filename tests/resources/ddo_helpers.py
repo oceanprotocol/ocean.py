@@ -8,6 +8,7 @@ import pathlib
 from typing import List
 
 import requests
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -145,11 +146,15 @@ def get_registered_asset_with_access_service_using_enterprise_template(
     if not metadata:
         metadata = get_default_metadata()
 
+    datatoken_cap = Web3.toWei(100, "ether")
+
     data_nft, dts, ddo = ocean_assets.create(
         metadata,
         publisher_wallet,
         datatoken_args=[
-            DatatokenArguments("Branin: DT2", "DT2", files=files, template_index=2)
+            DatatokenArguments(
+                "Branin: DT2", "DT2", files=files, template_index=2, cap=datatoken_cap
+            )
         ],
     )
 
