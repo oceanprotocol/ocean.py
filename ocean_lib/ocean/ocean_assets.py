@@ -584,7 +584,7 @@ class OceanAssets:
         )
         # main work...
         dt = Datatoken(self._config_dict, params["service"].datatoken)
-        if dt.getId() != 2:
+        if dt.getId() == 2:
             dt = DatatokenEnterprise(self._config_dict, params["service"].datatoken)
 
         balance = dt.balanceOf(wallet.address)
@@ -595,7 +595,7 @@ class OceanAssets:
                 f"to execute the requested service. This service "
                 f"requires 1 datatoken."
             )
-            if dt.getId() != 2:
+            if dt.getId() == 1:
                 raise InsufficientBalance(message)
             else:
                 success, bought_tx = self.buy_from_pricing_schema(
