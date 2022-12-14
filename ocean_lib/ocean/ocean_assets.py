@@ -146,8 +146,7 @@ class OceanAssets:
 
         assert "name" in metadata, "Must have name in metadata."
 
-
-@enforce_types
+    @enforce_types
     def create_algo_asset(
         self,
         name: str,
@@ -188,7 +187,7 @@ class OceanAssets:
         files = [UrlFile(url)]
         return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
-   @enforce_types
+    @enforce_types
     def create_graphql_asset(
         self,
         name: str,
