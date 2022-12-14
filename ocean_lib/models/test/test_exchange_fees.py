@@ -101,7 +101,7 @@ def test_exchange_swap_fees(
     consume_market_swap_fee = Web3.toWei(consume_market_swap_fee, "ether")
 
     bt_per_dt_in_wei = Web3.toWei(bt_per_dt, "ether")
-    exchange, tx = dt.create_exchange(
+    exchange = dt.create_exchange(
         rate=bt_per_dt_in_wei,
         base_token_addr=bt.address,
         tx_dict={"from": alice},

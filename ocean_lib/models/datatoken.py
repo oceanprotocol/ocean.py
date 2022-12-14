@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
@@ -127,7 +128,8 @@ class Datatoken(ContractBase):
         publish_market_fee: Union[int, str] = 0,
         with_mint: bool = False,
         allowed_swapper: str = ZERO_ADDRESS,
-    ) -> tuple:
+        full_info: bool = False,
+    ) -> Union[OneExchange, tuple]:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
 
@@ -146,10 +148,11 @@ class Datatoken(ContractBase):
         - with_mint - should the exchange mint datatokens as needed, or
           do they need to by supplied/allowed by participants like base token?
         - allowed_swapper - if ZERO_ADDRESS, anyone can swap
+        - full_info - return just OneExchange, or (OneExchange, <other info>)
 
         Return
         - exchange - OneExchange
-        - tx_receipt
+        - (maybe) tx_receipt
         """
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
@@ -181,7 +184,9 @@ class Datatoken(ContractBase):
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
-        return (exchange, tx)
+        if full_info:
+            return (exchange, tx)
+        return exchange
 
     @enforce_types
     def get_exchanges(self) -> list:
