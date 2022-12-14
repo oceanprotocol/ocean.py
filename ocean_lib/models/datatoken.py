@@ -308,33 +308,27 @@ class Datatoken(ContractBase):
         )
 
     def dispense_if_free(self, wallet):
-        template_id = self.getId()
-
-        if template_id != 1:
-            # only free priced can use dispensers
-            return
-
         bal = Web3.fromWei(self.balanceOf(wallet.address), "ether")
         if bal >= 1.0:  # we're good
-            pass
-        else:  # try to get freely-dispensed ddo
-            print("Dispense access token...")
-            amt_dispense_wei = Web3.toWei(1, "ether")
-            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-            from ocean_lib.models.dispenser import Dispenser  # isort: skip
+            return
 
-            dispenser = Dispenser(self.config_dict, dispenser_addr)
+        print("Dispense access token...")
+        amt_dispense_wei = Web3.toWei(1, "ether")
+        dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
+        from ocean_lib.models.dispenser import Dispenser  # isort: skip
 
-            # catch key failure modes
-            st = dispenser.status(self.address)
-            active, allowedSwapper = st[0], st[6]
-            if not active:
-                raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
+        dispenser = Dispenser(self.config_dict, dispenser_addr)
 
-            # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(self.address, amt_dispense_wei, wallet, {"from": wallet})
+        # catch key failure modes
+        st = dispenser.status(self.address)
+        active, allowedSwapper = st[0], st[6]
+        if not active:
+            raise ValueError("No active dispenser for datatoken")
+        if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
+            raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
+
+        # Try to dispense. If other issues, they'll pop out
+        dispenser.dispense(self.address, amt_dispense_wei, wallet, {"from": wallet})
 
 
 class MockERC20(Datatoken):

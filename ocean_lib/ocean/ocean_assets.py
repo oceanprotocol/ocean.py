@@ -468,10 +468,6 @@ class OceanAssets:
         # Retrieve the DDO and datatoken objects
         print("Resolve did...")
         ddo = self.resolve(did)
-        datatoken_address = ddo.datatokens[0]["address"]
-        datatoken = Datatoken(self._config_dict, datatoken_address)
-        datatoken.dispense_if_free(wallet)
-
         order_tx_id = self.pay_for_access_service(ddo, wallet)
 
         # download
@@ -571,7 +567,6 @@ class OceanAssets:
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
-
         params = self.get_order_data(
             ddo,
             wallet,
@@ -589,6 +584,8 @@ class OceanAssets:
 
         balance = dt.balanceOf(wallet.address)
 
+        dt.dispense_if_free(wallet)
+
         if balance < Web3.toWei(1, "ether"):
             message = (
                 f"Your token balance {balance} {dt.symbol()} is not sufficient "
@@ -598,13 +595,13 @@ class OceanAssets:
             if dt.getId() == 1:
                 raise InsufficientBalance(message)
             else:
-                success, bought_tx = self.buy_from_pricing_schema(
+                success, bought_tx_or_message = self.buy_from_pricing_schema(
                     ddo, dt, params, wallet
                 )
                 if success:
-                    return bought_tx
+                    return bought_tx_or_message
 
-                raise InsufficientBalance(f"{message} {bought_tx}.")
+                raise InsufficientBalance(f"{message} {bought_tx_or_message}.")
 
         receipt = dt.start_order(
             consumer=params["consumer_address"],
