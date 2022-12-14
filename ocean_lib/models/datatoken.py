@@ -314,8 +314,8 @@ class Datatoken(ContractBase):
         if self.getId() != 1:
             return
 
-        dispensers = dt.getDispensers()
-        fixedrates = dt.getFixedRates()
+        dispensers = self.getDispensers()
+        fixedrates = self.getFixedRates()
 
         if not dispensers and not fixedrates:
             raise ValueError("No pricing schemas found")
