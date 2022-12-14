@@ -107,40 +107,10 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_url_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
-
-# Specify metadata and services, using the Branin test dataset
-ALGO_date_created = "2021-12-28T10:55:11Z"
-ALGO_metadata = {
-    "created": ALGO_date_created,
-    "updated": ALGO_date_created,
-    "description": "gpr",
-    "name": "gpr",
-    "type": "algorithm",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
-    "algorithm": {
-        "language": "python",
-        "format": "docker-image",
-        "version": "0.1",
-        "container": {
-            "entrypoint": "python $ALGO",
-            "image": "oceanprotocol/algo_dockers",
-            "tag": "python-branin",
-            "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-        },
-    }
-}
-
-# update ALGO_Asset metadata
-ALGO_ddo.metadata.update(ALGO_metadata)
-ALGO_ddo = ocean.assets.update(
-    asset=ALGO_ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    
-
 print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
 ```
 
