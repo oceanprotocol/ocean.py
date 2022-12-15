@@ -183,8 +183,7 @@ def test_buy_from_fre_and_order(
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        exchange_contract=exchange.address,
-        exchange_id=exchange.exchange_id,
+        exchange=exchange,
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,

@@ -25,13 +25,20 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
-        exchange_contract: str,
-        exchange_id: Any,
+        exchange: Any,
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
         transaction_parameters: dict,
     ) -> str:
+        fre_address = get_address_of_type(self.config_dict, "FixedRate")
+
+        # import now, to avoid circular import
+        from ocean_lib.models.fixed_rate_exchange import OneExchange
+
+        if not isinstance(exchange, OneExchange):
+            exchange = OneExchange(fre_address, exchange)
+
         return self.contract.buyFromFreAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
@@ -53,8 +60,8 @@ class DatatokenEnterprise(Datatoken):
                 ),
             ),
             (
-                ContractBase.to_checksum_address(exchange_contract),
-                exchange_id,
+                ContractBase.to_checksum_address(exchange.address),
+                exchange.exchange_id,
                 max_base_token_amount,
                 consume_market_swap_fee_amount,
                 ContractBase.to_checksum_address(consume_market_swap_fee_address),
