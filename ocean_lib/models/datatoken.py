@@ -205,6 +205,7 @@ class Datatoken(ContractBase):
         tx_dict: dict,
         max_tokens: Optional[int] = None,
         max_balance: Optional[int] = None,
+        with_mint: Optional[bool] = True,
     ):
         """
         For this datataken, create a dispenser faucet for free tokens.
@@ -227,7 +228,7 @@ class Datatoken(ContractBase):
 
         # args for contract tx
         dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-        with_mint = True  # True -> can always mint more
+        with_mint = with_mint  # True -> can always mint more
         allowed_swapper = ZERO_ADDRESS  # 0 -> so anyone can call dispense
 
         # do contract tx

@@ -31,7 +31,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_swap_fee_address: str,
         transaction_parameters: dict,
     ) -> str:
-        fre_address = get_address_of_type(self.config_dict, "FixedRate")
+        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange

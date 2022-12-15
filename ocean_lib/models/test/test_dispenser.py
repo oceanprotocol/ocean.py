@@ -202,6 +202,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
         {"from": publisher_wallet},
         toWei(1, "ether"),
         toWei(1, "ether"),
+        with_mint=False,
     )
 
     # Tests consumer requests data tokens but they are not minted
