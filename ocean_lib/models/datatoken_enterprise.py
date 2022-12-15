@@ -2,12 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Any, Union
+from typing import Any
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.contract_base import ContractBase
+
+checksum_addr = ContractBase.to_checksum_address
 
 
 class DatatokenEnterprise(Datatoken):
@@ -18,14 +20,7 @@ class DatatokenEnterprise(Datatoken):
         self,
         consumer: str,
         service_index: int,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: Union[int, str],
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        valid_until: int,
-        provider_data: Union[str, bytes],
+        provider_fees: dict,
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
@@ -41,14 +36,14 @@ class DatatokenEnterprise(Datatoken):
                 ContractBase.to_checksum_address(consumer),
                 service_index,
                 (
-                    ContractBase.to_checksum_address(provider_fee_address),
-                    ContractBase.to_checksum_address(provider_fee_token),
-                    int(provider_fee_amount),
-                    v,
-                    r,
-                    s,
-                    valid_until,
-                    provider_data,
+                    checksum_addr(provider_fees["providerFeeAddress"]),
+                    checksum_addr(provider_fees["providerFeeToken"]),
+                    int(provider_fees["providerFeeAmount"]),
+                    provider_fees["v"],
+                    provider_fees["r"],
+                    provider_fees["s"],
+                    provider_fees["validUntil"],
+                    provider_fees["providerData"],
                 ),
                 (
                     ContractBase.to_checksum_address(consume_market_order_fee_address),
@@ -71,14 +66,7 @@ class DatatokenEnterprise(Datatoken):
         self,
         consumer: str,
         service_index: int,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: Union[int, str],
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        valid_until: int,
-        provider_data: Union[str, bytes],
+        provider_fees: dict,
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
@@ -90,14 +78,14 @@ class DatatokenEnterprise(Datatoken):
                 ContractBase.to_checksum_address(consumer),
                 service_index,
                 (
-                    ContractBase.to_checksum_address(provider_fee_address),
-                    ContractBase.to_checksum_address(provider_fee_token),
-                    int(provider_fee_amount),
-                    v,
-                    r,
-                    s,
-                    valid_until,
-                    provider_data,
+                    checksum_addr(provider_fees["providerFeeAddress"]),
+                    checksum_addr(provider_fees["providerFeeToken"]),
+                    int(provider_fees["providerFeeAmount"]),
+                    provider_fees["v"],
+                    provider_fees["r"],
+                    provider_fees["s"],
+                    provider_fees["validUntil"],
+                    provider_fees["providerData"],
                 ),
                 (
                     ContractBase.to_checksum_address(consume_market_order_fee_address),

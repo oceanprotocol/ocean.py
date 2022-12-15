@@ -126,14 +126,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
+        provider_fees=provider_fees,
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
@@ -205,15 +198,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
         receipt.txid,
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
+        provider_fees=provider_fees,
         transaction_parameters={"from": publisher_wallet},
     )
     reused_event = receipt_interm.events["OrderReused"]

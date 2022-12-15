@@ -9,8 +9,8 @@ from brownie.network.state import Chain
 from enforce_typing import enforce_types
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.models.fixed_rate_exchange import OneExchange
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
@@ -39,14 +39,7 @@ class Datatoken(ContractBase):
         self,
         consumer: str,
         service_index: int,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: Union[int, str],
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        valid_until: int,
-        provider_data: Union[str, bytes],
+        provider_fees: dict,
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
@@ -56,14 +49,14 @@ class Datatoken(ContractBase):
             checksum_addr(consumer),
             service_index,
             (
-                checksum_addr(provider_fee_address),
-                checksum_addr(provider_fee_token),
-                int(provider_fee_amount),
-                v,
-                r,
-                s,
-                valid_until,
-                provider_data,
+                checksum_addr(provider_fees["providerFeeAddress"]),
+                checksum_addr(provider_fees["providerFeeToken"]),
+                int(provider_fees["providerFeeAmount"]),
+                provider_fees["v"],
+                provider_fees["r"],
+                provider_fees["s"],
+                provider_fees["validUntil"],
+                provider_fees["providerData"],
             ),
             (
                 checksum_addr(consume_market_order_fee_address),
@@ -77,27 +70,20 @@ class Datatoken(ContractBase):
     def reuse_order(
         self,
         order_tx_id: Union[str, bytes],
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: Union[int, str],
-        v: int,
-        r: Union[str, bytes],
-        s: Union[str, bytes],
-        valid_until: int,
-        provider_data: Union[str, bytes],
+        provider_fees: dict,
         transaction_parameters: dict,
     ) -> str:
         return self.contract.reuseOrder(
             order_tx_id,
             (
-                checksum_addr(provider_fee_address),
-                checksum_addr(provider_fee_token),
-                int(provider_fee_amount),
-                v,
-                r,
-                s,
-                valid_until,
-                provider_data,
+                checksum_addr(provider_fees["providerFeeAddress"]),
+                checksum_addr(provider_fees["providerFeeToken"]),
+                int(provider_fees["providerFeeAmount"]),
+                provider_fees["v"],
+                provider_fees["r"],
+                provider_fees["s"],
+                provider_fees["validUntil"],
+                provider_fees["providerData"],
             ),
             transaction_parameters,
         )
