@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-
 import pytest
 from brownie import network
 from web3.main import Web3
@@ -12,7 +10,7 @@ from ocean_lib.models.arguments import DatatokenArguments
 from ocean_lib.models.datatoken import DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.helper_functions import get_mock_provider_fees
 
 
 @pytest.mark.unit
@@ -123,37 +121,19 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         {"from": publisher_wallet},
     )
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = get_address_of_type(config, "MockUSDC")
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            0,
-        ],
-    )
-
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+    provider_fees = get_mock_provider_fees("MockUSDC", publisher_wallet)
 
     receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=0,
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=publisher_wallet.address,
         consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
@@ -165,9 +145,11 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         get_address_of_type(config, "OPFCommunityFeeCollector")
     ) == Web3.toWei("1", "ether")
 
+    provider_fee_address = publisher_wallet.address
+    provider_data = provider_fees["providerData"]
     provider_message = Web3.solidityKeccak(
         ["bytes32", "bytes"],
-        [receipt.txid, Web3.toHex(Web3.toBytes(text=provider_data))],
+        [receipt.txid, provider_data],
     )
     provider_signed = network.web3.eth.sign(provider_fee_address, data=provider_message)
 
@@ -179,7 +161,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
 
     receipt_interm = datatoken.orderExecuted(
         receipt.txid,
-        Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_data,
         provider_signed,
         Web3.toHex(Web3.toBytes(text="12345")),
         consumer_signed,
@@ -195,7 +177,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     with pytest.raises(Exception, match="Consumer signature check failed"):
         datatoken.orderExecuted(
             receipt.txid,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_data,
             provider_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
@@ -212,8 +194,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     with pytest.raises(Exception, match="Provider signature check failed"):
         datatoken.orderExecuted(
             receipt.txid,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            signed,
+            provider_data,
+            consumer_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
@@ -223,14 +205,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
         receipt.txid,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=0,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         transaction_parameters={"from": publisher_wallet},
     )

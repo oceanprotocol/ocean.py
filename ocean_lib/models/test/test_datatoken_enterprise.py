@@ -2,18 +2,12 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-
 import pytest
-from brownie import network
-from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import get_address_of_type, to_wei, from_wei
+from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
 
 
 @pytest.mark.unit
@@ -87,24 +81,10 @@ def test_buy_from_dispenser_and_order(
         {"from": publisher_wallet},
     )
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = DAI.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
@@ -114,14 +94,14 @@ def test_buy_from_dispenser_and_order(
     _ = DT.buy_from_dispenser_and_order(
         consumer=consume_fee_address,
         service_index=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
         valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
@@ -199,24 +179,10 @@ def test_buy_from_fre_and_order(
     )
     DAI.approve(DT.address, consume_fee_amount, {"from": publisher_wallet})
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = DAI.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
     consume_bal1 = DAI.balanceOf(consume_fee_address)
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
@@ -225,14 +191,14 @@ def test_buy_from_fre_and_order(
     _ = DT.buy_from_fre_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
-        provider_fee_address=publisher_wallet.address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
         valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
