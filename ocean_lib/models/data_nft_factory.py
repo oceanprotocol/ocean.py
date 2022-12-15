@@ -126,7 +126,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        fixed_price_address: str,
         fixed_price_base_token: str,
         fixed_price_owner: str,
         fixed_price_publish_market_swap_fee_collector: str,
@@ -139,6 +138,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         wallet=None,
     ) -> str:
         ocean_address = get_ocean_token_address(self.config_dict)
+        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
 
         receipt = self.contract.createNftWithErc20WithFixedRate(
             (
@@ -216,7 +216,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        dispenser_address: str,
         dispenser_max_tokens: int,
         dispenser_max_balance: int,
         dispenser_with_mint: bool,
@@ -224,6 +223,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         wallet,
     ) -> str:
         ocean_address = get_ocean_token_address(self.config_dict)
+        dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
 
         receipt = self.contract.createNftWithErc20WithDispenser(
             (

@@ -6,7 +6,7 @@ import pytest
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
 
 
@@ -22,15 +22,11 @@ def test_buy_from_dispenser_and_order(
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
-    FRE_addr = get_address_of_type(config, "Dispenser")
 
-    _ = DT.createDispenser(
-        FRE_addr,
-        to_wei(1),  # max_tokens
-        to_wei(1),  # max_balance
-        True,  # with_mint
-        ZERO_ADDRESS,  # allowed_swapper
-        {"from": publisher_wallet},
+    _ = DT.create_dispenser(
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        tx_dict={"from": publisher_wallet},
     )
 
     status = DT.dispenser_status()
@@ -98,7 +94,6 @@ def test_buy_from_dispenser_and_order(
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        dispenser_address=FRE_addr,
         transaction_parameters={"from": publisher_wallet},
     )
 

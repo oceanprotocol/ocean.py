@@ -7,6 +7,7 @@ from typing import Any
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
@@ -70,9 +71,9 @@ class DatatokenEnterprise(Datatoken):
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
-        dispenser_address: str,
         transaction_parameters: dict,
     ) -> str:
+        dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
         return self.contract.buyFromDispenserAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
