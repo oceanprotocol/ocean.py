@@ -94,28 +94,3 @@ def test_consume_flow(
     assert (
         len(os.listdir(os.path.join(destination, os.listdir(destination)[0]))) == 1
     ), "The asset folder is empty."
-
-
-@pytest.mark.integration
-def test_compact_publish_and_consume(
-    config: dict,
-    publisher_wallet,
-    consumer_wallet,
-):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
-
-    # publish
-    name = "My asset"
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, ddo) = ocean_assets.create_url_asset(
-        name, url, publisher_wallet
-    )
-
-    # share access
-    datatoken.mint(
-        consumer_wallet.address, Web3.toWei(1, "ether"), {"from": publisher_wallet}
-    )
-
-    # consume
-    _ = ocean_assets.download_file(ddo.did, consumer_wallet)

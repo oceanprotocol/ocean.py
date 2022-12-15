@@ -481,57 +481,6 @@ class OceanAssets:
         ]
 
     @enforce_types
-    def download_file(self, did: str, wallet) -> str:
-        """Helper method. Given a did, download file to "./". Returns filename.
-
-        Assumes that:
-        - wallet holds datatoken, or datatoken will freely dispense
-        - 0th datatoken of this did
-        - 0th service of the datatoken
-        - the service *is* a download service
-        """
-        # Retrieve the DDO and datatoken objects
-        print("Resolve did...")
-        ddo = self.resolve(did)
-        datatoken_address = ddo.datatokens[0]["address"]
-        datatoken = Datatoken(self._config_dict, datatoken_address)
-
-        # Ensure access token
-        bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
-        if bal >= 1.0:  # we're good
-            pass
-        else:  # try to get freely-dispensed ddo
-            print("Dispense access token...")
-            amt_dispense_wei = Web3.toWei(1, "ether")
-            dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
-            dispenser = Dispenser(self._config_dict, dispenser_addr)
-
-            # catch key failure modes
-            st = dispenser.status(datatoken.address)
-            active, allowedSwapper = st[0], st[6]
-            if not active:
-                raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
-
-            # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(
-                datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
-            )
-
-        # send datatoken to the service, to get access
-        print("Order access...")
-        order_tx_id = self.pay_for_access_service(ddo, wallet)
-
-        # download
-        print("Download file...")
-        file_path = self.download_asset(ddo, wallet, "./", order_tx_id)
-        file_name = glob.glob(file_path + "/*")[0]
-        print(f"Done. File: {file_name}")
-
-        return file_name
-
-    @enforce_types
     def download_asset(
         self,
         ddo: DDO,
