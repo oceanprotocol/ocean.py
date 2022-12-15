@@ -63,7 +63,7 @@ In the same Python console:
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-datatoken.dispense(to_wei(1), {"from": bob_wallet})
+datatoken.dispense("1 ether", {"from": bob_wallet})
 order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
 file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
 ```
