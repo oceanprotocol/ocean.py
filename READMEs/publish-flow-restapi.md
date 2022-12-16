@@ -63,7 +63,9 @@ In the same Python console:
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-file_name = ocean.assets.download_file(ddo_did, bob_wallet)
+datatoken.dispense("1 ether", {"from": bob_wallet})
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
 ```
 
 Now, load the file and use its data.
@@ -89,35 +91,3 @@ data = eval(data_str)
 close_prices = [float(data_at_day[4]) for data_at_day in data]
 ```
 
-## Appendix. Further Flexibility
-
-Step 4's `download_file()` did three things:
-
-- Checked if Bob has access tokens. He didn't, so the dispenser gave him some
-- Sent a datatoken to the service to get access
-- Downloaded the file
-
-Here are the three steps, un-bundled.
-
-In the same Python console:
-```python
-# Bob gets an access token from the faucet dispenser
-ddo = ocean.assets.resolve(ddo_did)
-datatoken_address = ddo.datatokens[0]["address"]
-datatoken = ocean.get_datatoken(datatoken_address)
-datatoken.dispense("1 ether", {"from": bob_wallet})
-
-# Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
-
-# Bob downloads the dataset
-# If the connection breaks, Bob can request again by showing order_tx_id.
-consumer_wallet = bob_wallet
-destination = './'
-file_path = ocean.assets.download_asset(
-    ddo, consumer_wallet, destination, order_tx_id
-)
-import glob
-file_name = glob.glob(file_path + "/*")[0]
-print(f"file_name: '{file_name}'")
-```
