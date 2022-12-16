@@ -52,8 +52,11 @@ datatoken.mint(to_address, amt_tokens, {"from": alice_wallet})
 
 In the same Python console:
 ```python
-# Bob sends a datatoken to the service to get access; then downloads
-file_name = ocean.assets.download_file(ddo.did, bob_wallet)
+# Bob sends a datatoken to the service to get access
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+
+# Bob downloads the file. If the connection breaks, Bob can try again
+file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
 ```
 
 Bob can verify that the file is downloaded. In a new console:
@@ -68,33 +71,7 @@ Congrats to Bob for buying and consuming a data asset!
 
 ## Appendix. Further Flexibility
 
-Step 4's `download_file()` did three things:
-
-- Checked if Bob has access tokens. Bob did, so nothing else needed
-- Sent a datatoken to the service to get access
-- Downloaded the file
-
-Here are the last two steps, un-bundled.
-
-In the same Python console:
-```python
-# Bob sends a datatoken to the service, to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
-print(f"order_tx_id = '{order_tx_id}'")
-
-# Bob downloads the file
-# If the connection breaks, Bob can request again by showing order_tx_id.
-consumer_wallet = bob_wallet
-destination = './'
-file_path = ocean.assets.download_asset(
-    ddo, consumer_wallet, destination, order_tx_id
-)
-```
-
-
-## Appendix: Further Flexibility Yet
-
-We can un-bundle even further:
+We can un-bundle the steps further:
 - `pay_for_access_service()` fills in good defaults of using the 0th service (if >1 services available) and zero fees.
 - And `download_asset()` fills in a good default for `service` too, as well as for `index` and `userdata` (not shown).
 

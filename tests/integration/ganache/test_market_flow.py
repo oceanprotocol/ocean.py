@@ -17,8 +17,8 @@ from tests.resources.helper_functions import get_another_consumer_ocean_instance
 def test_market_flow(
     publisher_wallet,
     consumer_wallet,
-    publisher_ocean_instance,
-    consumer_ocean_instance,
+    publisher_ocean,
+    consumer_ocean,
     another_consumer_wallet,
     consumer_type,
 ):
@@ -26,13 +26,13 @@ def test_market_flow(
 
     The parameter implicit_none sends the payload with an empty key as the delegated consumer.
     The parameter explicit_none sends None as the delegated consumer, explicitly."""
-    publisher_ocean = publisher_ocean_instance
-    consumer_ocean = consumer_ocean_instance
+    consumer_ocean = consumer_ocean
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet
+    )
     service = ddo.services[0]
-    datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint data tokens and assign to publisher
     datatoken.mint(
@@ -101,14 +101,13 @@ def test_market_flow(
 def test_pay_for_access_service_good_default(
     publisher_wallet,
     consumer_wallet,
-    publisher_ocean_instance,
-    consumer_ocean_instance,
+    publisher_ocean,
+    consumer_ocean,
 ):
-    publisher_ocean, consumer_ocean = publisher_ocean_instance, consumer_ocean_instance
-
-    ddo = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
+    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet
+    )
     service = ddo.services[0]
-    datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint datatokens to consumer
     datatoken.mint(

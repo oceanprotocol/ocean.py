@@ -19,12 +19,15 @@ from ocean_lib.data_provider.base import DataServiceProviderBase, urljoin
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
+from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
-from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
+from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
+    get_registered_asset_with_access_service,
+)
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     TEST_SERVICE_ENDPOINTS,
@@ -64,7 +67,7 @@ def test_set_http_client(with_nice_client):
 
 
 @pytest.mark.unit
-def test_initialize_fails(config):
+def test_initialize_fails():
     """Tests failures of initialize endpoint."""
     mock_service = Service(
         service_id="some_service_id",
@@ -84,7 +87,7 @@ def test_initialize_fails(config):
             userdata={"test_dict_key": "test_dict_value"},
         )
 
-    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
+    mock_service.service_endpoint = DEFAULT_PROVIDER_URL
     with pytest.raises(
         DataProviderException,
         match=f"Failed to get a response for request: initializeEndpoint={DataSP.build_initialize_endpoint(mock_service.service_endpoint)[1]}",
@@ -101,7 +104,7 @@ def test_initialize_fails(config):
 
 
 @pytest.mark.unit
-def test_start_compute_job_fails_empty(consumer_wallet, config):
+def test_start_compute_job_fails_empty(consumer_wallet):
     """Tests failures of compute job from endpoint with empty response."""
     mock_service = Service(
         service_id="some_service_id",
@@ -124,7 +127,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
             compute_environment="some_env",
             algorithm=ComputeInput(DDO(), mock_service, "tx_id"),
         )
-    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
+    mock_service.service_endpoint = DEFAULT_PROVIDER_URL
     with pytest.raises(
         DataProviderException, match="The dataset.documentId field is required."
     ):
@@ -147,7 +150,7 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
 
 
 @pytest.mark.unit
-def test_compute_job_result_fails(provider_wallet, config):
+def test_compute_job_result_fails(provider_wallet):
     """Tests failure of compute job starting."""
 
     mock_service = Service(
@@ -166,7 +169,7 @@ def test_compute_job_result_fails(provider_wallet, config):
 
 
 @pytest.mark.unit
-def test_delete_job_result(provider_wallet, config):
+def test_delete_job_result(provider_wallet):
     """Tests a failure & a success of compute job deletion."""
     mock_service = Service(
         service_id="some_service_id",
@@ -187,17 +190,17 @@ def test_delete_job_result(provider_wallet, config):
         )
 
     # Success of compute job deletion.
-    mock_service.service_endpoint = f"{config['PROVIDER_URL']}"
+    mock_service.service_endpoint = DEFAULT_PROVIDER_URL
     DataSP.delete_compute_job("some_did", "some_job_id", mock_service, provider_wallet)
 
 
 @pytest.mark.integration
-def test_encrypt(config, provider_wallet, file1, file2):
+def test_encrypt(provider_wallet, file1, file2):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
     # Encrypt file objects
     res = {"files": [file1.to_dict(), file2.to_dict()]}
-    result = DataEncryptor.encrypt(res, config["PROVIDER_URL"])
+    result = DataEncryptor.encrypt(res, DEFAULT_PROVIDER_URL)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -211,7 +214,7 @@ def test_encrypt(config, provider_wallet, file1, file2):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataEncryptor.encrypt(test_string, config["PROVIDER_URL"])
+    encrypt_result = DataEncryptor.encrypt(test_string, DEFAULT_PROVIDER_URL)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -225,18 +228,12 @@ def test_encrypt(config, provider_wallet, file1, file2):
 
 
 @pytest.mark.integration
-def test_fileinfo(
-    config, publisher_wallet, publisher_ocean_instance, data_nft, datatoken
-):
-    _, metadata, files = create_basics(config, DataSP)
-
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        files=files,
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
+def test_fileinfo_and_initialize(publisher_wallet, publisher_ocean, ocean_address):
+    """Test both fileinfo and initialize to avoid publishing 2 assets."""
+    _, _, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet, more_files=True
     )
+
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     fileinfo_result = FileInfoProvider.fileinfo(
@@ -252,26 +249,6 @@ def test_fileinfo(
         matches = "text/plain" if file_index == 0 else "text/xml"
         assert file["contentType"] == matches
 
-
-@pytest.mark.integration
-def test_initialize(
-    config,
-    publisher_wallet,
-    publisher_ocean_instance,
-    provider_wallet,
-    data_nft,
-    datatoken,
-):
-    _, metadata, files = create_basics(config, DataSP)
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        files=files,
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
-    )
-    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-
     initialize_result = DataSP.initialize(
         did=ddo.did,
         service=access_service,
@@ -281,9 +258,7 @@ def test_initialize(
     assert initialize_result.status_code == 200
     response_json = initialize_result.json()
     assert response_json["providerFee"]["providerFeeAmount"] == "0"
-    assert response_json["providerFee"]["providerFeeToken"] == get_ocean_token_address(
-        config
-    )
+    assert response_json["providerFee"]["providerFeeToken"] == ocean_address
 
 
 @pytest.mark.unit
@@ -295,10 +270,10 @@ def test_invalid_file_name():
 
 
 @pytest.mark.integration
-def test_expose_endpoints(config):
+def test_expose_endpoints():
     """Tests that the DataServiceProvider exposes all service endpoints."""
     service_endpoints = TEST_SERVICE_ENDPOINTS
-    provider_uri = DataSP.get_url(config)
+    provider_uri = DEFAULT_PROVIDER_URL
     valid_endpoints = DataSP.get_service_endpoints(provider_uri)
     assert len(valid_endpoints) == len(service_endpoints)
     assert [
@@ -307,18 +282,18 @@ def test_expose_endpoints(config):
 
 
 @pytest.mark.integration
-def test_c2d_environments(config):
+def test_c2d_environments():
     """Tests that the test ocean-compute env exists on the DataServiceProvider."""
-    provider_uri = DataSP.get_url(config)
+    provider_uri = DEFAULT_PROVIDER_URL
     c2d_envs = DataSP.get_c2d_environments(provider_uri)
     c2d_env_ids = [elem["id"] for elem in c2d_envs]
     assert "ocean-compute" in c2d_env_ids, "ocean-compute env not found."
 
 
 @pytest.mark.integration
-def test_provider_address(config):
+def test_provider_address():
     """Tests that a provider address exists on the DataServiceProvider."""
-    provider_uri = DataSP.get_url(config)
+    provider_uri = DEFAULT_PROVIDER_URL
     provider_address = DataSP.get_provider_address(provider_uri)
     assert provider_address, "Failed to get provider address."
 
@@ -405,7 +380,7 @@ def test_build_endpoint():
 
 
 @pytest.mark.integration
-def test_build_specific_endpoints(config):
+def test_build_specific_endpoints():
     """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
     endpoints = TEST_SERVICE_ENDPOINTS
 
@@ -415,8 +390,8 @@ def test_build_specific_endpoints(config):
     original_func = DataSP.get_service_endpoints
     DataSP.get_service_endpoints = get_service_endpoints
 
-    provider_uri = DataSP.get_url(config)
-    base_uri = DataSP.get_root_uri(config["PROVIDER_URL"])
+    provider_uri = DEFAULT_PROVIDER_URL
+    base_uri = DataSP.get_root_uri(DEFAULT_PROVIDER_URL)
     assert DataSP.build_download_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["download"][1]
     )
@@ -461,25 +436,25 @@ def test_check_single_file_info():
 
 
 @pytest.mark.unit
-def test_encrypt_failure(config):
+def test_encrypt_failure():
     """Tests encrypt failures."""
     http_client = HttpClientEvilMock()
     DataEncryptor.set_http_client(http_client)
 
     with pytest.raises(OceanEncryptAssetUrlsError):
-        DataEncryptor.encrypt({}, config["PROVIDER_URL"])
+        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataEncryptor.encrypt({}, config["PROVIDER_URL"])
+        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL)
 
     DataSP.set_http_client(get_requests_session())
 
 
 @pytest.mark.unit
-def test_fileinfo_failure(config):
+def test_fileinfo_failure():
     """Tests successful fileinfo failures."""
     service = Mock(spec=Service)
     service.service_endpoint = "http://172.15.0.4:8030"
@@ -501,7 +476,7 @@ def test_fileinfo_failure(config):
 
 
 @pytest.mark.unit
-def test_initialize_failure(config):
+def test_initialize_failure():
     """Tests initialize failures."""
     service = Mock(spec=Service)
     service.service_endpoint = "http://172.15.0.4:8030"
@@ -523,7 +498,7 @@ def test_initialize_failure(config):
 
 
 @pytest.mark.unit
-def test_initialize_compute_failure(config):
+def test_initialize_compute_failure():
     """Tests initialize_compute failures."""
     service = Mock(spec=Service)
     service.service_endpoint = "http://172.15.0.4:8030"
@@ -566,7 +541,7 @@ def test_initialize_compute_failure(config):
 
 
 @pytest.mark.unit
-def test_job_result_failure(config):
+def test_job_result_failure():
     """Tests compute job result failures."""
     service = Mock(spec=Service)
     service.service_endpoint = "http://172.15.0.4:8030"
@@ -592,18 +567,18 @@ def test_job_result_failure(config):
 
 
 @pytest.mark.unit
-def test_check_asset_failure(config):
+def test_check_asset_failure():
     """Tests check_asset_file_info failures."""
-    assert DataSP.check_asset_file_info("", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_asset_file_info("", "", DEFAULT_PROVIDER_URL) is False
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_asset_file_info("test", "", DEFAULT_PROVIDER_URL) is False
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
-    assert DataSP.check_asset_file_info("test", "", config["PROVIDER_URL"]) is False
+    assert DataSP.check_asset_file_info("test", "", DEFAULT_PROVIDER_URL) is False
 
     DataSP.set_http_client(get_requests_session())

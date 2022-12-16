@@ -5,24 +5,21 @@
 import json
 import os
 import pathlib
-import time
-from typing import List, Optional
+from typing import List
 
 import requests
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.structures.file_objects import FilesTypeFactory, UrlFile
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
 
 
@@ -78,68 +75,8 @@ def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
     return DDO.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
-def get_access_service(
-    ocean_instance, address, date_created, provider_uri=None, timeout=3600
-):
-    if not provider_uri:
-        provider_uri = DataServiceProvider.get_url(ocean_instance.config_dict)
-
-    return ocean_instance.assets.build_access_service(
-        DataServiceProvider.build_download_endpoint(provider_uri)[1],
-        date_created,
-        1.0,
-        address,
-        timeout,
-    )
-
-
-def create_asset(ocean, publisher, metadata=None, files=None):
-    """Helper function for asset creation based on ddo_sa_sample.json."""
-    if not metadata:
-        metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
-            "description": "Sample description",
-            "name": "Sample asset",
-            "type": "dataset",
-            "author": "OPF",
-            "license": "https://market.oceanprotocol.com/terms",
-        }
-
-    if not files:
-        file1_dict = {
-            "type": "url",
-            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-            "method": "GET",
-        }
-        file1 = FilesTypeFactory(file1_dict)
-        files = [file1]
-
-    # Publish asset with services on-chain.
-    # The download (access service) is automatically created
-    ddo = ocean.assets.create(
-        metadata,
-        publisher,
-        files,
-        datatoken_templates=[1],
-        datatoken_names=["Datatoken 1"],
-        datatoken_symbols=["DT1"],
-        datatoken_minters=[publisher.address],
-        datatoken_fee_managers=[publisher.address],
-        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-        datatoken_publish_market_order_fee_amounts=[0],
-        datatoken_bytess=[[b""]],
-    )
-
-    return ddo
-
-
-def create_basics(
-    config,
-    data_provider,
+def get_default_metadata(
     asset_type: str = "dataset",
-    files: Optional[List[FilesType]] = None,
 ):
     """Helper for asset creation, based on ddo_sa_sample.json
 
@@ -147,12 +84,7 @@ def create_basics(
     :param asset_type: used to populate metadata.type, optionally set to "algorithm"
     :param files: list of file objects creates with FilesTypeFactory
     """
-    data_nft_factory_address = get_address_of_type(
-        config, DataNFTFactoryContract.CONTRACT_NAME
-    )
-    data_nft_factory = DataNFTFactoryContract(config, data_nft_factory_address)
-
-    metadata = {
+    return {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
@@ -162,14 +94,40 @@ def create_basics(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    if files is None:
-        files = [get_file1(), get_file2()]
 
-    return data_nft_factory, metadata, files
+def get_default_files():
+    return [get_file1(), get_file2()]
 
 
-def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
-    return create_asset(ocean_instance, publisher_wallet)
+def build_default_services(config, datatoken):
+    files = get_default_files()
+    services = [
+        datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=config.get("PROVIDER_URL"),
+            files=files,
+        )
+    ]
+
+    return services
+
+
+def get_registered_asset_with_access_service(
+    ocean_instance, publisher_wallet, metadata=None, more_files=False
+):
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    files = [UrlFile(url)] if not more_files else [UrlFile(url), get_file2()]
+
+    if not metadata:
+        metadata = get_default_metadata()
+
+    data_nft, dts, ddo = ocean_instance.assets.create(
+        metadata,
+        publisher_wallet,
+        datatoken_args=[DatatokenArguments("Branin: DT1", "DT1", files=files)],
+    )
+
+    return data_nft, dts[0], ddo
 
 
 def get_registered_asset_with_compute_service(
@@ -191,7 +149,9 @@ def get_registered_asset_with_compute_service(
     arff_file = UrlFile(
         url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
     )
-    _, metadata, files = create_basics(config, data_provider, files=[arff_file])
+
+    metadata = get_default_metadata()
+    files = [arff_file]
 
     # Set the compute values for compute service
     compute_values = {
@@ -230,9 +190,7 @@ def get_registered_asset_with_compute_service(
 def get_registered_algorithm_with_access_service(
     ocean_instance: Ocean, publisher_wallet
 ):
-    config = ocean_instance.config_dict
-    data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(config, data_provider, asset_type="algorithm")
+    metadata = get_default_metadata(asset_type="algorithm")
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -258,11 +216,10 @@ def get_registered_algorithm_with_access_service(
         }
     )
 
-    return create_asset(
-        ocean_instance,
-        publisher_wallet,
+    return ocean_instance.assets.create(
         metadata=metadata,
-        files=[algorithm_file],
+        publisher_wallet=publisher_wallet,
+        datatoken_args=[DatatokenArguments("Algo DT1", "DT1", files=[algorithm_file])],
     )
 
 
@@ -286,43 +243,11 @@ def get_raw_algorithm() -> str:
     )
 
 
-def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_with_access_service(
-        ocean_instance, wallet, "http://172.15.0.7:8030"
-    )
-
-
 def build_credentials_dict() -> dict:
     """Build a credentials dict, used for testing."""
     return {"allow": [], "deny": []}
 
 
-def wait_for_asset(ocean, did, timeout=30):
-    start = time.time()
-    ddo = None
-    while not ddo:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
-
-
 def get_first_service_by_type(ddo, service_type: str) -> Service:
     """Return the first Service with the given service type."""
     return next((service for service in ddo.services if service.type == service_type))
-
-
-def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
-    return FactoryRouter(exchange.config_dict, exchange.router()).getOPCCollector()
-
-
-def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:
-    return FactoryRouter(datatoken.config_dict, datatoken.router()).getOPCCollector()

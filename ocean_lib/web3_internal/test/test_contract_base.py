@@ -5,8 +5,10 @@
 
 import pytest
 
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
+from tests.resources.helper_functions import get_wallet
 
 
 class MyFactory(ContractBase):
@@ -21,8 +23,10 @@ def test_name_is_None(config):
 
 
 @pytest.mark.unit
-def test_main(network, alice_wallet, alice_ocean, nft_factory_address, config):
+def test_main(config):
+    alice_wallet = get_wallet(1)
     # test super-simple functionality of child
+    nft_factory_address = get_address_of_type(config, "ERC721Factory")
     factory = MyFactory(config, nft_factory_address)
     factory.deployERC721Contract(
         "NFT",

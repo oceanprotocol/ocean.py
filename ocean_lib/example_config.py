@@ -5,8 +5,11 @@
 
 import copy
 import logging
+import os
+from pathlib import Path
 
-from enforce_typing import enforce_types
+from jsonsempai import magic  # noqa: F401
+from addresses import address as contract_addresses  # noqa: F401
 
 logging.basicConfig(level=logging.INFO)
 
@@ -21,70 +24,49 @@ config_defaults = {
     "DOWNLOADS_PATH": "consume-downloads",
 }
 
-CONFIG_NETWORK_HELPER = {
-    "mainnet": {
-        "PROVIDER_URL": "https://v4.provider.mainnet.oceanprotocol.com",
-    },
-    "goerli": {
-        "PROVIDER_URL": "https://v4.provider.goerli.oceanprotocol.com",
-    },
-    "bsc": {
-        "PROVIDER_URL": "https://v4.provider.bsc.oceanprotocol.com",
-    },
-    "polygon": {
-        "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
-    },
-    "energyweb": {
-        "PROVIDER_URL": "https://v4.provider.energyweb.oceanprotocol.com",
-    },
-    "moonriver": {
-        "PROVIDER_URL": "https://v4.provider.moonriver.oceanprotocol.com",
-    },
-    "moonbase": {
-        "PROVIDER_URL": "https://v4.provider.moonbase.oceanprotocol.com",
-    },
-    "development": {
-        "PROVIDER_URL": DEFAULT_PROVIDER_URL,
-    },
-    "celoalfajores": {
-        "PROVIDER_URL": "https://provider.celoalfajores.oceanprotocol.com",
-    },
-    "mumbai": {
-        "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
-    },
+PROVIDER_PER_NETWORK = {
+    "mainnet": "https://v4.provider.mainnet.oceanprotocol.com",
+    "goerli": "https://v4.provider.goerli.oceanprotocol.com",
+    "bsc": "https://v4.provider.bsc.oceanprotocol.com",
+    "polygon-main": "https://v4.provider.polygon.oceanprotocol.com",
+    "energyweb": "https://v4.provider.energyweb.oceanprotocol.com",
+    "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
+    "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
+    "development": DEFAULT_PROVIDER_URL,
+    "polygon-test": "https://v4.provider.mumbai.oceanprotocol.com",
 }
 
 
-@enforce_types
-def get_config_dict(network_name: str) -> dict:
-    if network_name not in CONFIG_NETWORK_HELPER:
+def get_config_dict(network_name=None) -> dict:
+    """Return config dict containing default values for a given network.
+    Chain ID is determined by querying the RPC specified by network_url.
+    """
+    if not network_name:
+        network_name = "development"
+
+    if network_name not in PROVIDER_PER_NETWORK:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
 
-    config_helper = copy.deepcopy(config_defaults)
-    config_helper.update(CONFIG_NETWORK_HELPER[network_name])
-    config_helper["NETWORK_NAME"] = network_name
+    config_dict = copy.deepcopy(config_defaults)
+    config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[network_name]
+    config_dict["NETWORK_NAME"] = network_name
 
     if network_name != "development":
-        config_helper["METADATA_CACHE_URI"] = METADATA_CACHE_URI
+        config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
+
+    if os.getenv("ADDRESS_FILE"):
+        base_file = os.getenv("ADDRESS_FILE")
+        address_file = os.path.expanduser(base_file)
+    elif network_name == "development":
+        # this is auto-created when barge is run
+        base_file = "~/.ocean/ocean-contracts/artifacts/address.json"
+        address_file = os.path.expanduser(base_file)
     else:
-        config_helper[
-            "ADDRESS_FILE"
-        ] = "~/.ocean/ocean-contracts/artifacts/address.json"
+        # `contract_addresses` comes from "ocean-contracts" pypi library,
+        # a JSON blob holding addresses of contract deployments, per network
+        address_file = Path(contract_addresses.__file__).expanduser().resolve()
+    assert os.path.exists(address_file), f"Could not find address_file={address_file}."
 
-    return config_helper
+    config_dict["ADDRESS_FILE"] = address_file
 
-
-class ExampleConfig:
-    @staticmethod
-    @enforce_types
-    def get_config(network_name=None) -> dict:
-        """Return config dict containing default values for a given network.
-        Chain ID is determined by querying the RPC specified by network_url.
-        """
-
-        if not network_name:
-            network_name = "development"
-
-        config_dict = get_config_dict(network_name)
-
-        return config_dict
+    return config_dict

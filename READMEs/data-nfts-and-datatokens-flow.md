@@ -25,9 +25,9 @@ In the Python console:
 from ocean_lib.web3_internal.utils import connect_to_network
 connect_to_network("development")
 
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config("development")
+config = get_config_dict("development")
 ocean = Ocean(config)
 
 # Create Alice's wallet
@@ -49,7 +49,8 @@ assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
 
 In the same Python console:
 ```python
-data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet)
+from ocean_lib.models.arguments import DataNFTArguments
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 
@@ -63,8 +64,8 @@ argument to control that (e.g. template_index=2 for an Enterprise Datatoken).
 In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
-
-datatoken = data_nft.create_datatoken("Datatoken 1", "DT1", {"from": alice_wallet})
+from ocean_lib.models.arguments import DatatokenArguments
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
 print(f"Created datatoken. Its address is {datatoken.address}")
 ```
 
@@ -72,7 +73,7 @@ Congrats, you've created your first Ocean datatoken! 🐋
 
 ## Appendix. Tips & Tricks
 
-You can combine creating a data NFT and datatoken into a single call: `ocean.create_nft_with_erc20()`.
+You can combine creating a data NFT and datatoken into a single call: `ocean.data_nft_factory.create_with_erc20()`.
 
 To learn more about some of the objects you created, here are some examples.
 ```python

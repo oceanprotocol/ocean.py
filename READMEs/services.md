@@ -16,14 +16,14 @@ We now describe how to use these.
 
 ## 1. Set config values for services
 
-Here we set the config  dict. You can use boilerplate from ExampleConfig.
+Here we set the config  dict. You can use boilerplate from example config.
 
 ```python
 import os
-from ocean_lib.example_config import ExampleConfig
+from ocean_lib.example_config import get_config_dict
 
 # configure the components
-config = ExampleConfig.get_config()
+config = get_config_dict()
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.

@@ -2,24 +2,26 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Tuple
+
 import pytest
 from brownie.network import accounts
 from web3.main import Web3
 
-from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.contract_utils import get_addresses_with_fallback
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
     get_another_consumer_wallet,
     get_consumer_ocean_instance,
     get_consumer_wallet,
-    get_example_config,
     get_factory_deployer_wallet,
     get_file1,
     get_file2,
@@ -51,7 +53,7 @@ def setup_all(request, config, ocean_token):
     if not wallet:
         return
 
-    if not get_addresses_with_fallback(config):
+    if not get_contracts_addresses_all_networks(config):
         print("Can not find adddresses.")
         return
 
@@ -72,22 +74,17 @@ def setup_all(request, config, ocean_token):
 
 @pytest.fixture
 def config():
-    return get_example_config()
+    return get_config_dict()
 
 
 @pytest.fixture
-def publisher_ocean_instance():
+def publisher_ocean():
     return get_publisher_ocean_instance()
 
 
 @pytest.fixture
-def consumer_ocean_instance():
+def consumer_ocean():
     return get_consumer_ocean_instance()
-
-
-@pytest.fixture
-def aquarius_instance(config):
-    return Aquarius.get_instance(config.get("METADATA_CACHE_URI"))
 
 
 @pytest.fixture
@@ -103,16 +100,6 @@ def consumer_wallet():
 @pytest.fixture
 def another_consumer_wallet():
     return get_another_consumer_wallet()
-
-
-@pytest.fixture
-def publish_market_wallet():
-    return get_wallet(4)
-
-
-@pytest.fixture
-def consume_market_wallet():
-    return get_wallet(5)
 
 
 @pytest.fixture
@@ -147,71 +134,6 @@ def provider_wallet():
 
 
 @pytest.fixture
-def data_nft(config, publisher_wallet, data_nft_factory):
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        publisher_wallet.address,
-        {"from": publisher_wallet},
-    )
-    token_address = data_nft_factory.get_token_address(receipt)
-    return DataNFT(config, token_address)
-
-
-@pytest.fixture
-def datatoken(config, data_nft, publisher_wallet, data_nft_factory):
-    return data_nft.create_datatoken(
-        template_index=1,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-    )
-
-
-@pytest.fixture
-def datatoken_enterprise_token(config, data_nft, publisher_wallet, data_nft_factory):
-    return data_nft.create_datatoken(
-        template_index=2,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
-        datatoken_cap=Web3.toWei(100, "ether"),
-    )
-
-
-@pytest.fixture
-def publisher_addr():
-    return get_publisher_wallet().address
-
-
-@pytest.fixture
-def consumer_addr():
-    return get_consumer_wallet().address
-
-
-@pytest.fixture
-def another_consumer_addr():
-    return get_another_consumer_wallet().address
-
-
-@pytest.fixture
 def file1():
     return get_file1()
 
@@ -224,3 +146,50 @@ def file2():
 @pytest.fixture
 def file3():
     return get_file3()
+
+
+@pytest.fixture
+def FRE(config) -> FixedRateExchange:
+    return FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
+
+
+@pytest.fixture
+def data_nft(config, publisher_wallet) -> DataNFT:
+    return deploy_erc721_erc20(config, publisher_wallet)
+
+
+@pytest.fixture
+def data_NFT_and_DT(config, publisher_wallet) -> Tuple[DataNFT, Datatoken]:
+    return deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
+
+
+@pytest.fixture
+def DT(data_NFT_and_DT) -> Datatoken:
+    (_, DT) = data_NFT_and_DT
+    return DT
+
+
+# aliases
+@pytest.fixture
+def OCEAN(ocean_token) -> Datatoken:
+    return ocean_token
+
+
+@pytest.fixture
+def alice(publisher_wallet):
+    return publisher_wallet
+
+
+@pytest.fixture
+def bob(consumer_wallet):
+    return consumer_wallet
+
+
+@pytest.fixture
+def carlos():
+    return get_wallet(8)
+
+
+@pytest.fixture
+def dan():
+    return get_wallet(9)

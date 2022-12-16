@@ -8,16 +8,4 @@
 #  sets up convenient-to-use wallets/accounts for Alice & Bob, datatokens, more.
 # *This* directory wants similar items. To avoid code repetition,
 #  here we simply import that conftest's contents.
-
-import pytest
-
 from conftest_ganache import *
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.test.conftest import *  # noqa: F401 F403
-
-# Other things to set up, specific to here...
-
-
-@pytest.fixture
-def example_config():
-    return ExampleConfig.get_config()

@@ -7,7 +7,8 @@ from web3.main import Web3
 
 from ocean_lib.models.dispenser import Dispenser, DispenserStatus
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS, MAX_UINT256
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 toWei, fromWei = Web3.toWei, Web3.fromWei
 
@@ -32,7 +33,7 @@ def test_DispenserStatus():
     assert isinstance(status, DispenserStatus)
     assert status.active
     assert status.owner_address == "0x1234"
-    assert status.is_minter == True
+    assert status.is_minter is True
     assert status.max_tokens == 456
     assert status.max_balance == 789
     assert status.balance == 3
@@ -42,7 +43,7 @@ def test_DispenserStatus():
     s = str(status)
     assert "DispenserStatus" in s
     assert "active = True" in s
-    assert f"owner_address = 0x1234" in s
+    assert "owner_address = 0x1234" in s
     assert "is_minter" in s
     assert "max_tokens" in s
     assert "max_balance" in s
@@ -52,15 +53,16 @@ def test_DispenserStatus():
 
 @pytest.mark.unit
 def test_main_flow_via_simple_ux_and_good_defaults(
+    config,
     publisher_wallet,
     consumer_wallet,
-    datatoken,
 ):
     """
     Tests main flow, via simple interface Datatoken.create_dispenser().
     Focus on the basic steps.
     Use good defaults for max_tokens, max_balance, more.
     """
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
     # basic steps
     datatoken.create_dispenser({"from": publisher_wallet})
@@ -75,7 +77,7 @@ def test_main_flow_via_simple_ux_and_good_defaults(
     assert isinstance(status, DispenserStatus)
     assert status.active
     assert status.owner_address == publisher_wallet.address
-    assert status.is_minter == True
+    assert status.is_minter is True
     assert status.max_tokens == MAX_UINT256
     assert status.max_balance == MAX_UINT256
     assert status.balance == 0  # 0, not 3, because it mints on the fly
@@ -84,15 +86,16 @@ def test_main_flow_via_simple_ux_and_good_defaults(
 
 @pytest.mark.unit
 def test_main_flow_via_simple_ux_and_setting_token_counts(
+    config,
     publisher_wallet,
     consumer_wallet,
-    datatoken,
 ):
     """
     Tests main flow, via simple interface Datatoken.create_dispenser().
     Focus on the basic steps.
     Set values for max_tokens, max_balance.
     """
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
     # set params
     max_tokens = toWei(456, "ether")  # max # tokens to dispense
     max_balance = toWei(789, "ether")  # max balance of requester
@@ -114,12 +117,12 @@ def test_main_flow_via_contract_directly(
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
-    datatoken,
 ):
     """
     Tests main flow, via direct calls to smart contracts (more args).
     Has not just basic steps, but also advanced actions.
     """
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
     # get the dispenser
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
@@ -191,10 +194,9 @@ def test_main_flow_via_contract_directly(
         )
 
 
-def test_dispenser_creation_without_minter(
-    config, publisher_wallet, consumer_wallet, datatoken
-):
+def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wallet):
     """Tests dispenser creation without a minter role."""
+    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
     # get the dispenser
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))

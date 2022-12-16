@@ -11,13 +11,13 @@ from web3.main import Web3
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.ddo import DDO
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
+from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
-    create_basics,
     get_first_service_by_type,
+    get_registered_asset_with_access_service,
     get_sample_ddo,
 )
 
@@ -110,9 +110,7 @@ def test_invalid_state(publisher_wallet):
 
 
 @pytest.mark.integration
-def test_ocean_assets_download_indexes(
-    publisher_wallet, publisher_ocean_instance, tmpdir
-):
+def test_ocean_assets_download_indexes(publisher_wallet):
     """Tests different values of indexes that raise AssertionError."""
 
     ddo_dict = get_sample_ddo()
@@ -143,43 +141,16 @@ def test_ocean_assets_download_indexes(
 
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
-    config,
     tmpdir,
     publisher_wallet,
-    publisher_ocean_instance,
-    data_nft,
-    datatoken,
+    publisher_ocean,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
-    ocean_assets_download_destination_file_helper(
-        config,
-        str(tmpdir),
-        publisher_wallet,
-        publisher_ocean_instance,
-        data_nft,
-        datatoken,
-    )
-
-
-def ocean_assets_download_destination_file_helper(
-    config,
-    tmpdir,
-    publisher_wallet,
-    publisher_ocean_instance,
-    data_nft,
-    datatoken,
-):
-    """Downloading to an existing directory."""
     data_provider = DataServiceProvider
-
-    _, metadata, files = create_basics(config, data_provider)
-    ddo = publisher_ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        files=files,
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
+    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
+        publisher_ocean, publisher_wallet
     )
+
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     datatoken.mint(
@@ -213,14 +184,14 @@ def ocean_assets_download_destination_file_helper(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    orders = publisher_ocean_instance.get_user_orders(
+    orders = publisher_ocean.get_user_orders(
         publisher_wallet.address, datatoken.address
     )
     assert datatoken.address in [order.address for order in orders]
     assert receipt.txid in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(
-        ddo, access_service, publisher_wallet, tmpdir, receipt.txid
+        ddo, access_service, publisher_wallet, str(tmpdir), receipt.txid
     )
 
     assert os.path.exists(written_path)
