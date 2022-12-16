@@ -7,6 +7,7 @@ from typing import List, Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
@@ -297,6 +298,46 @@ class Datatoken(ContractBase):
             timeout=timeout,
             consumer_parameters=consumer_parameters,
         )
+
+    def dispense_and_order(
+        self,
+        consumer: str,
+        service_index: int,
+        provider_fees: dict,
+        transaction_parameters: dict,
+        consume_market_order_fee_address: Optional[str] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = 0,
+    ) -> str:
+        bal = Web3.fromWei(self.balanceOf(consumer), "ether")
+        if bal < 1.0:
+            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
+            from ocean_lib.models.dispenser import Dispenser  # isort: skip
+
+            dispenser = Dispenser(self.config_dict, dispenser_addr)
+
+            # catch key failure modes
+            st = dispenser.status(self.address)
+            active, allowedSwapper = st[0], st[6]
+            if not active:
+                raise ValueError("No active dispenser for datatoken")
+            if allowedSwapper not in [ZERO_ADDRESS, consumer]:
+                raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
+
+            # Try to dispense. If other issues, they'll pop out
+            dispenser.dispense(self.address, "1 ether", consumer, {"from": consumer})
+
+        return self.start_order(
+            consumer=ContractBase.to_checksum_address(consumer),
+            service_index=service_index,
+            provider_fees=provider_fees,
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            transaction_parameters={"from": consumer},
+        )
+
+        return
 
 
 class MockERC20(Datatoken):

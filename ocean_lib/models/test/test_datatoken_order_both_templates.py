@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from datetime import datetime
+
 import pytest
 
 from ocean_lib.models.datatoken import Datatoken
@@ -9,16 +11,22 @@ from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
 
+valid_until = int(datetime(2032, 12, 31).timestamp())
+
 
 @pytest.mark.unit
+@pytest.mark.parametrize("template_index", [1, 2])
 def test_dispense_and_order_with_non_defaults(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
+    template_index,
 ):
     """Tests dispense_and_order function of the Datatoken Enterprise"""
-    _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
+    _, DT = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, template_index
+    )
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
@@ -77,7 +85,6 @@ def test_dispense_and_order_with_non_defaults(
         {"from": publisher_wallet},
     )
 
-    valid_until = 1958133628  # 2032
     provider_fees = get_mock_provider_fees(
         "MockDAI", publisher_wallet, valid_until=valid_until
     )
@@ -110,14 +117,14 @@ def test_dispense_and_order_with_non_defaults(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("template_index", [1, 2])
 def test_dispense_and_order_with_defaults(
-    config,
-    publisher_wallet,
-    consumer_wallet,
-    factory_deployer_wallet,
+    config, publisher_wallet, consumer_wallet, factory_deployer_wallet, template_index
 ):
     """Tests dispense_and_order function of the Datatoken Enterprise"""
-    _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
+    _, DT = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, template_index
+    )
 
     _ = DT.create_dispenser(
         max_tokens=to_wei(1),
@@ -125,7 +132,6 @@ def test_dispense_and_order_with_defaults(
         tx_dict={"from": publisher_wallet},
     )
 
-    valid_until = 1958133628  # 2032
     provider_fees = get_mock_provider_fees(
         "MockDAI", publisher_wallet, valid_until=valid_until
     )
@@ -200,7 +206,6 @@ def test_buy_from_fre_and_order(
     )
     DAI.approve(DT.address, consume_fee_amount, {"from": publisher_wallet})
 
-    valid_until = 1958133628  # 2032
     provider_fees = get_mock_provider_fees(
         "MockDAI", publisher_wallet, valid_until=valid_until
     )
