@@ -333,7 +333,9 @@ class Datatoken(ContractBase):
                 raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
 
             # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(self.address, "1 ether", consumer, {"from": consumer})
+            dispenser.dispense(
+                self.address, "1 ether", consumer, transaction_parameters
+            )
 
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
@@ -346,7 +348,7 @@ class Datatoken(ContractBase):
                 consume_market_order_fee_token or ZERO_ADDRESS
             ),
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            transaction_parameters={"from": consumer},
+            transaction_parameters=transaction_parameters,
         )
 
     @enforce_types
@@ -373,10 +375,10 @@ class Datatoken(ContractBase):
             exchange = OneExchange(fre_address, exchange)
 
         exchange.buy_DT(
-            datatoken_amt="1 ether",
+            datatoken_amt=Web3.toWei(1, "ether"),
             consume_market_fee_addr=consume_market_order_fee_address,
             consume_market_fee=consume_market_order_fee_amount,
-            tx_dict={"from": consumer},
+            tx_dict=transaction_parameters,
         )
 
         return self.start_order(
@@ -386,7 +388,7 @@ class Datatoken(ContractBase):
             consume_market_order_fee_address=consume_market_order_fee_address,
             consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
-            transaction_parameters={"from": consumer},
+            transaction_parameters=transaction_parameters,
         )
 
 
