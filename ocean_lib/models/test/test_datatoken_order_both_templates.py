@@ -205,7 +205,11 @@ def test_buy_from_exchange_and_order(
         consume_fee_amount,
         {"from": factory_deployer_wallet},
     )
-    DAI.approve(DT.address, consume_fee_amount, {"from": publisher_wallet})
+    DAI.approve(
+        (DT.address if template_index == 2 else exchange.address),
+        consume_fee_amount,
+        {"from": publisher_wallet},
+    )
 
     provider_fees = get_mock_provider_fees(
         "MockDAI", publisher_wallet, valid_until=valid_until
