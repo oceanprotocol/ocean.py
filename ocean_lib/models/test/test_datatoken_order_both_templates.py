@@ -43,12 +43,13 @@ def test_dispense_and_order_with_non_defaults(
     assert status.owner_address == publisher_wallet.address
     assert status.is_minter
 
-    # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
-    # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
-    # Below, we test the quirk.
-    match_s = "This address is not allowed to request DT"
-    with pytest.raises(Exception, match=match_s):
-        DT.dispense(to_wei(1), {"from": consumer_wallet})
+    if template_index == 2:
+        # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
+        # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
+        # Below, we test the quirk.
+        match_s = "This address is not allowed to request DT"
+        with pytest.raises(Exception, match=match_s):
+            DT.dispense(to_wei(1), {"from": consumer_wallet})
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -148,14 +149,14 @@ def test_dispense_and_order_with_defaults(
 
 
 @pytest.mark.unit
-def test_buy_from_fre_and_order(
+def test_buy_from_exchange_and_order(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
 ):
-    """Tests buy_from_fre_and_order function of the Datatoken Enterprise"""
+    """Tests buy_from_exchange_and_order function of the Datatoken Enterprise"""
     _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
@@ -214,7 +215,7 @@ def test_buy_from_fre_and_order(
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
     provider_fee_bal1 = USDC.balanceOf(another_consumer_wallet.address)
 
-    _ = DT.buy_from_fre_and_order(
+    _ = DT.buy_from_exchange_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,

@@ -18,7 +18,7 @@ class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
     @enforce_types
-    def buy_from_fre_and_order(
+    def buy_from_exchange_and_order(
         self,
         consumer: str,
         service_index: int,

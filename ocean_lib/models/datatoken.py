@@ -331,13 +331,15 @@ class Datatoken(ContractBase):
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_address=(
+                consume_market_order_fee_address or ZERO_ADDRESS
+            ),
+            consume_market_order_fee_token=(
+                consume_market_order_fee_token or ZERO_ADDRESS
+            ),
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters={"from": consumer},
         )
-
-        return
 
 
 class MockERC20(Datatoken):
