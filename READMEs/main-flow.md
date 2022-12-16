@@ -79,4 +79,4 @@ ls branin.arff
 
 ## Next step
 
-You're now done all the quickstart steps! There are now many possible directions. Please go back to the [main README](README.md) to find what suits you.
+You're now done all the quickstart steps! There are now many possible directions. Please go back to the [main README](../README.md) to find what suits you.
