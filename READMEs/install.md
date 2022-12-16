@@ -15,6 +15,8 @@ This quickstart describes the required setup to run `ocean.py` flows.
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
+Barge helps you quickly become familiar with Ocean, because the local blockchain has low latency and no transaction fees. Accordingly, many READMEs use it. However, if you plan to only use Ocean with remote services, you can skip this step.
+
 In a new console:
 
 ```console
