@@ -11,13 +11,13 @@ from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provi
 
 
 @pytest.mark.unit
-def test_buy_from_dispenser_and_order(
+def test_dispense_and_order_with_non_defaults(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
 ):
-    """Tests buy_from_dispenser_and_order function of the Datatoken Enterprise"""
+    """Tests dispense_and_order function of the Datatoken Enterprise"""
     _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
@@ -87,7 +87,7 @@ def test_buy_from_dispenser_and_order(
     balance_opf_consume_before = DAI.balanceOf(opf_collector_address)
     publish_bal_before = USDC.balanceOf(consumer_wallet.address)
 
-    _ = DT.buy_from_dispenser_and_order(
+    tx = DT.dispense_and_order(
         consumer=consume_fee_address,
         service_index=1,
         provider_fees=provider_fees,
@@ -97,6 +97,7 @@ def test_buy_from_dispenser_and_order(
         transaction_parameters={"from": publisher_wallet},
     )
 
+    assert tx
     assert DT.totalSupply() == to_wei(0)
 
     balance_opf_consume = DAI.balanceOf(opf_collector_address)
@@ -106,6 +107,38 @@ def test_buy_from_dispenser_and_order(
     assert balance_publish - publish_bal_before == to_wei(2)
 
     assert DT.balanceOf(DT.getPaymentCollector()) == 0
+
+
+@pytest.mark.unit
+def test_dispense_and_order_with_defaults(
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_deployer_wallet,
+):
+    """Tests dispense_and_order function of the Datatoken Enterprise"""
+    _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
+
+    _ = DT.create_dispenser(
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        tx_dict={"from": publisher_wallet},
+    )
+
+    valid_until = 1958133628  # 2032
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
+    )
+
+    tx = DT.dispense_and_order(
+        consumer=consumer_wallet.address,
+        service_index=1,
+        provider_fees=provider_fees,
+        transaction_parameters={"from": publisher_wallet},
+    )
+
+    assert tx
+    assert DT.totalSupply() == to_wei(0)
 
 
 @pytest.mark.unit

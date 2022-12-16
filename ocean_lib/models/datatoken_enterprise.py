@@ -2,12 +2,13 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Any
+from typing import Any, Optional
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
@@ -70,15 +71,15 @@ class DatatokenEnterprise(Datatoken):
         )
 
     @enforce_types
-    def buy_from_dispenser_and_order(
+    def dispense_and_order(
         self,
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         transaction_parameters: dict,
+        consume_market_order_fee_address: Optional[str] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = 0,
     ) -> str:
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
         return self.contract.buyFromDispenserAndOrder(
@@ -96,8 +97,12 @@ class DatatokenEnterprise(Datatoken):
                     provider_fees["providerData"],
                 ),
                 (
-                    ContractBase.to_checksum_address(consume_market_order_fee_address),
-                    ContractBase.to_checksum_address(consume_market_order_fee_token),
+                    ContractBase.to_checksum_address(
+                        consume_market_order_fee_address or ZERO_ADDRESS
+                    ),
+                    ContractBase.to_checksum_address(
+                        consume_market_order_fee_token or ZERO_ADDRESS
+                    ),
                     consume_market_order_fee_amount,
                 ),
             ),
