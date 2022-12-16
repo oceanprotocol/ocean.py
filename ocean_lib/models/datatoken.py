@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
@@ -145,7 +145,11 @@ class Datatoken(ContractBase):
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = tx_dict["from"].address
+        from_addr = (
+            tx_dict["from"].address
+            if hasattr(tx_dict["from"], "address")
+            else tx_dict["from"]
+        )
         BT = Datatoken(self.config_dict, base_token_addr)
         owner_addr = owner_addr or from_addr
         publish_market_fee_collector = publish_market_fee_collector or from_addr
@@ -254,7 +258,11 @@ class Datatoken(ContractBase):
         """
         # args for contract tx
         datatoken_addr = self.address
-        from_addr = tx_dict["from"].address
+        from_addr = (
+            tx_dict["from"].address
+            if hasattr(tx_dict["from"], "address")
+            else tx_dict["from"]
+        )
 
         # do contract tx
         tx = self._ocean_dispenser().dispense(
@@ -337,6 +345,46 @@ class Datatoken(ContractBase):
             consume_market_order_fee_token=(
                 consume_market_order_fee_token or ZERO_ADDRESS
             ),
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            transaction_parameters={"from": consumer},
+        )
+
+    @enforce_types
+    def buy_from_exchange_and_order(
+        self,
+        consumer: str,
+        service_index: int,
+        provider_fees: dict,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
+        exchange: Any,
+        max_base_token_amount: int,
+        consume_market_swap_fee_amount: int,
+        consume_market_swap_fee_address: str,
+        transaction_parameters: dict,
+    ) -> str:
+        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
+
+        # import now, to avoid circular import
+        from ocean_lib.models.fixed_rate_exchange import OneExchange
+
+        if not isinstance(exchange, OneExchange):
+            exchange = OneExchange(fre_address, exchange)
+
+        exchange.buy_DT(
+            datatoken_amt="1 ether",
+            consume_market_fee_addr=consume_market_order_fee_address,
+            consume_market_fee=consume_market_order_fee_amount,
+            tx_dict={"from": consumer},
+        )
+
+        return self.start_order(
+            consumer=ContractBase.to_checksum_address(consumer),
+            service_index=service_index,
+            provider_fees=provider_fees,
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters={"from": consumer},
         )

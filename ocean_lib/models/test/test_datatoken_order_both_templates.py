@@ -144,15 +144,19 @@ def test_dispense_and_order_with_defaults(
 
 
 @pytest.mark.unit
+@pytest.mark.parametrize("template_index", [1, 2])
 def test_buy_from_exchange_and_order(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
+    template_index,
 ):
     """Tests buy_from_exchange_and_order function of the Datatoken Enterprise"""
-    _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
+    _, DT = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, template_index
+    )
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
@@ -167,12 +171,13 @@ def test_buy_from_exchange_and_order(
     assert exchange.details.active
     assert exchange.details.with_mint
 
-    with pytest.raises(Exception, match="This address is not allowed to swap"):
-        exchange.buy_DT(
-            datatoken_amt=to_wei(1),
-            max_basetoken_amt=to_wei(1),
-            tx_dict={"from": consumer_wallet},
-        )
+    if template_index == 2:
+        with pytest.raises(Exception, match="This address is not allowed to swap"):
+            exchange.buy_DT(
+                datatoken_amt=to_wei(1),
+                max_basetoken_amt=to_wei(1),
+                tx_dict={"from": consumer_wallet},
+            )
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
