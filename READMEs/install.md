@@ -87,6 +87,10 @@ Please check that you have configured all networks before proceeding. Here is a 
 
 In the same console (or another one with venv activated):
 ```console
+# keys for alice and bob in readmes
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+
+# needed when minting fake OCEAN
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```

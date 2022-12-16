@@ -28,10 +28,12 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ## 🏄 Quickstart
 
-Here are flows to try out, from simple to specific detailed variants.
+- **[Install Ocean](READMEs/install.md)** - need for each flow below
+- **[Local](READMEs/main-local.md)** - setup, publish, post for free/priced, acquire, consume
+- **[Remote](READMEs/main-remote.md)** - "" but for remote
 
-- **[Installation](READMEs/install.md)** - need for each flow below
-- **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - publish a dataset's data NFT and datatoken
+## Further flexibility - local flows
+
 - **[Publish flow](READMEs/publish-flow.md)** - publish a dataset's data NFT, datatoken _and_ metadata (DDO)
 - **[Consume flow](READMEs/consume-flow.md)** - download a dataset
 - **[Post priced data](READMEs/marketplace-flow.md)** - post a dataset for sale, having a fixed price
@@ -52,6 +54,7 @@ Here are flows to try out, from simple to specific detailed variants.
 
 ### Key-value flows
 
+- **[Just NFT & token](READMEs/data-nfts-and-datatokens-flow.md)** - publish just a data NFT and datatoken
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 

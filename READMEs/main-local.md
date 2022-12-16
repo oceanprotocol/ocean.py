@@ -5,12 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Local
 
-## 1. Installation
+## 1. Setup
 
-From [installation-flow](install.md), do:
+### Installation
+
+From [install.md](install.md), do:
 - [x] Setup
 
-## 1. Setup in Python
+### Setup in Python
 
 In the same console, run Python console:
 ```console
@@ -23,32 +25,36 @@ In the Python console:
 from ocean_lib.web3_internal.utils import connect_to_network
 connect_to_network("development")
 
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.example_config import get_config_dict
 config = ExampleConfig.get_config("development")
+
+from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean(config)
+OCEAN = ocean.OCEAN_token
 
 # Create Alice's wallet
 import os
 from brownie.network import accounts
 accounts.clear()
+
 alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice_wallet = accounts.add(alice_private_key)
+alice = accounts.add(alice_private_key)
+assert accounts.at(alice).balance() > 0, "Alice needs ganache ETH"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = accounts.add(bob_private_key)
-assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
+bob = accounts.add(bob_private_key)
+assert accounts.at(bob).balance() > 0, "Bob needs ganache ETH"
 
-# Create fake OCEAN. Alice & Bob automatically get some.
-import os
-os.environ['FACTORY_DEPLOYER_PRIVATE_KEY'] = '0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58'
+# Mint fake OCEAN to Alice & Bob
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
-OCEAN_token = ocean.OCEAN_token
+
+# Compact wei <> eth conversion
+from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
-## 1. Alice publishes dataset
+## 2. Alice publishes dataset
 
 In the same Python console:
 ```python
@@ -56,54 +62,55 @@ In the same Python console:
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-#create data NFT & datatoken & DDO asset
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+#create data asset
+(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
 print(f"Just published asset, with did={ddo.did}")
 ```
 
-### 1. Bob gets access to the dataset
+### 3. Bob gets access to the dataset
 
-Bob wants to consume the dataset that Alice just published. The first step is for Bob to get 1.0 datatokens. Below, we show four possible approaches.
+Bob wants to consume the dataset that Alice just published. The first step is for Bob to get 1.0 datatokens. Below, we show four possible approaches A-D.
 
 In the same Python console:
 ```python
-#Approach 1: Alice mints datatokens to Bob
-datatoken.mint(bob_wallet.address, "1 ether", {"from": alice_wallet})
+#Approach A: Alice mints datatokens to Bob
+datatoken.mint(bob, "1 ether", {"from": alice})
 
-#Approach 2: Alice mints for herself, and transfers to Bob
-datatoken.mint(alice_wallet.address, "1 ether", {"from": alice_wallet})
-datatoken.transfer(bob_wallet.address, "1 ether", {"from": alice_wallet})
+#Approach B: Alice mints for herself, and transfers to Bob
+datatoken.mint(alice, "1 ether", {"from": alice})
+datatoken.transfer(bob, "1 ether", {"from": alice})
 
-#Approach 3: Alice posts for free, via a faucet; Bob requests & gets
-datatoken.create_dispenser({"from": alice_wallet})
-datatoken.dispense("1 ether", {"from": bob_wallet})
+#Approach C: Alice posts for free, via a faucet; Bob requests & gets
+datatoken.create_dispenser({"from": alice})
+datatoken.dispense("1 ether", {"from": bob})
 
-#Approach 4: Alice posts for sale; Bob buys
-exchange_id = ocean.create_fixed_rate(
-    datatoken, OCEAN_token, 
-    amount=Web3.toWei(100, "ether"),
-    fixed_rate=Web3.toWei(1, "ether"),
-    from_wallet=alice_wallet,
-)
-OCEAN_token.approve(ocean.fixed_rate_exchange.address, "100 ether", {"from": bob_wallet})
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-tx_result = ocean.fixed_rate_exchange.buyDT(
-    exchange_id,
-    Web3.toWei(20, "ether"),
-    Web3.toWei(50, "ether"),
-    ZERO_ADDRESS,
-    0,
-    {"from": bob_wallet},
-)
+#Approach D: Alice posts for sale; Bob buys
+# D.1 Alice creates exchange
+price = to_wei(100)
+exchange = datatoken.create_exchange(price, OCEAN.address, {"from": alice})
+
+# D.2 Alice makes 100 datatokens available on the exchange
+datatoken.mint(alice_wallet, to_wei(100), {"from": alice_wallet})
+datatoken.approve(exchange.address, to_wei(100), {"from": alice_wallet})
+
+# D.3 Bob lets exchange pull the OCEAN needed 
+OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
+OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob_wallet})
+
+# D.4 Bob buys datatoken
+exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob_wallet})
 ````
 
 
-### 1. Bob consumes the dataset
+### 4. Bob consumes the dataset
 
 In the same Python console:
 ```python
-# Bob sends a datatoken to the service to get access; then downloads
-file_name = ocean.assets.download_file(ddo.did, bob_wallet)
+# Bob sends a datatoken to the service to get access
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+
+# Bob downloads the file. If the connection breaks, Bob can try again
+file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
 ```
 
 Bob can verify that the file is downloaded. In a new console:
