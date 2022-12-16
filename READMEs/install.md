@@ -2,40 +2,17 @@
 Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
-## Setup
-This quickstart describes the required setup to run `ocean.py` flows.
+# Install Ocean
 
-### 1. Prerequisites
+## Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5 - Python 3.10.4
 
-### 2. Download barge and run services
-
-Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
-
-Barge helps you quickly become familiar with Ocean, because the local blockchain has low latency and no transaction fees. Accordingly, many READMEs use it. However, if you plan to only use Ocean with remote services, you can skip this step.
+## Install ocean.py library
 
 In a new console:
-
-```console
-# Grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-# Clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
-```
-
-Now that we have barge running, we can mostly ignore its console while it runs.
-
-### 3. Install ocean.py library
-
-In a *new* console (separate from barge):
 
 ```console
 # Create your working directory
@@ -53,44 +30,16 @@ pip3 install wheel
 pip3 install --pre ocean-lib
 ```
 
-#### Potential issues & workarounds
+## Potential issues & workarounds
 
 - Issue: if you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues.
 - Workaround: install them individually: `pip3 install coincurve && pip3 install cryptography`
+
 - Issue: if you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
-### 4. Configure brownie & network
+## Next step
 
-ocean.py uses brownie to connect to deployed smart contracts.
-Please check that you have configured RPC URLs, gas prices and other settings to
-all networks according to your preferences by editing the `network-config.yaml` in your `~/.brownie` folder
-before proceeding.
-Your default `network-config.yaml` includes values for most [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains.
-One exception is Energy Web Chain. To support it, add the following to your `network-config.yaml` file:
+You've now installed Ocean, great!
 
-```yaml
-- name: energyweb
-  networks:
-  - chainid: 246
-    host: https://rpc.energyweb.org
-    id: energyweb
-    name: energyweb
-```
-⚠️ Ocean.py follows the exact `id` name for networks name from the default brownie configuration file.
-Make sure that your wanted network name matches the corresponding brownie `id`.
-
-Please check that you have configured all networks before proceeding. Here is a more complete sample from brownie itself: https://eth-brownie.readthedocs.io/en/v1.6.5/config.html.
-
-
-### 5. Set envvars
-
-In the same console (or another one with venv activated):
-```console
-# keys for alice and bob in readmes
-export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
-export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
-
-# needed when minting fake OCEAN
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-```
+Next up is for you to [configure Brownie](brownie.md), to connect with smart contracts.

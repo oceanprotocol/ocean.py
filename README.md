@@ -22,15 +22,17 @@ ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
 This is in beta state. If you run into problems, please open up a [new issue](/issues).
 
-- [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
+- [🏄 Quickstart](#-quickstart)
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 
 ## 🏄 Quickstart
 
-- **[Install Ocean](READMEs/install.md)** - need for each flow below
-- **[Local](READMEs/main-local.md)** - setup, publish, post for free/priced, acquire, consume
-- **[Remote](READMEs/main-remote.md)** - "" but for remote
+ 1. [Install Ocean](READMEs/install.md)
+ 2. [Configure brownie](READMEs/brownie.md)
+ 3. [Setup locally](READMEs/setup-local.md) or [remotely](READMEs/setup-remote.md).
+ 4. Walk through the [main flow](main-flow.md): publish asset, post for free / for sale, dispense it / buy it, and consume it.
+
 
 ## Further flexibility - local flows
 

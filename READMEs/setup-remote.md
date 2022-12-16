@@ -3,23 +3,19 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Remote
+# Remote Setup
 
-## 1. Setup
+Here, we do setup for Mumbai, the testnet for Polygon. It's similar for other remote chains.
 
-### Installation
+We assume you've already installed Ocean, and configured brownie.
 
-From [install.md](install.md), do:
-- [x] Setup
-
-
-### Create Mumbai Accounts (One-Time)
+## 1. Create Mumbai Accounts (One-Time)
 
 From [get-test-MATIC](get-test-MATIC.md), do:
 - [x] Create two new accounts
 - [x] Get (fake) MATIC
 
-### Set envvars
+## 2. Set envvars
 
 In the console:
 ```console
@@ -37,9 +33,7 @@ The brownie default RPCs require you to have your own infura account, and corres
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 ```
 
-### Setup in Python
-
-Let's load services info and account info into Python `Config` and `Wallet` objects respectively.
+## 3. Setup in Python
 
 In your working console, run Python:
 ```console
@@ -73,12 +67,13 @@ bob_wallet = accounts.add(bob_private_key)
 assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs MATIC"
 ```
 
-If you get a gas-related error like `transaction underpriced`,
-you'll need to change the `priority_fee` or `max_fee`.
-See details in [brownie docs](https://eth-brownie.readthedocs.io/en/stable/core-gas.html).
+If you get a gas-related error like `transaction underpriced`, you'll need to change the `priority_fee` or `max_fee`. See details in [brownie docs](https://eth-brownie.readthedocs.io/en/stable/core-gas.html).
 
 
-## Steps 2, 3, 4, etc
+## Next step
 
-These are the same as the main local flow. Please follow them in [main-local.md](main-local.md).
+You've now set up everything you need for testing on a remote chain, congrats! it's similar for any remote chain.
 
+The next step - the fun one - is to walk through the [main flow](main-flow.md). In it, you'll publish a data asset, post for free / for sale, dispense it / buy it, and consume it.
+
+Because you've set up for remote, you'll be doing all these steps on the remote network.

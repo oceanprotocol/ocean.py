@@ -3,58 +3,15 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Local
+# Main flow
 
-## 1. Setup
+This step is the fun one! In it, you'll publish a data asset, post for free / for sale, dispense it / buy it, and consume it.
 
-### Installation
+We assume you've already installed Ocean, configured Brownie, and done either local or remote setup.
 
-From [install.md](install.md), do:
-- [x] Setup
+This flow works for local or remote setup, without any changes (!)
 
-### Setup in Python
-
-In the same console, run Python console:
-```console
-python
-```
-
-In the Python console:
-```python
-# Create Ocean instance
-from ocean_lib.web3_internal.utils import connect_to_network
-connect_to_network("development")
-
-from ocean_lib.example_config import get_config_dict
-config = ExampleConfig.get_config("development")
-
-from ocean_lib.ocean.ocean import Ocean
-ocean = Ocean(config)
-OCEAN = ocean.OCEAN_token
-
-# Create Alice's wallet
-import os
-from brownie.network import accounts
-accounts.clear()
-
-alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice = accounts.add(alice_private_key)
-assert accounts.at(alice).balance() > 0, "Alice needs ganache ETH"
-
-# Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
-bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob = accounts.add(bob_private_key)
-assert accounts.at(bob).balance() > 0, "Bob needs ganache ETH"
-
-# Mint fake OCEAN to Alice & Bob
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
-# Compact wei <> eth conversion
-from ocean_lib.ocean.util import to_wei, from_wei
-```
-
-## 2. Alice publishes dataset
+## 1. Alice publishes dataset
 
 In the same Python console:
 ```python
@@ -67,7 +24,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 print(f"Just published asset, with did={ddo.did}")
 ```
 
-### 3. Bob gets access to the dataset
+## 2. Bob gets access to the dataset
 
 Bob wants to consume the dataset that Alice just published. The first step is for Bob to get 1.0 datatokens. Below, we show four possible approaches A-D.
 
@@ -101,8 +58,7 @@ OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob_wallet})
 exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob_wallet})
 ````
 
-
-### 4. Bob consumes the dataset
+## 3. Bob consumes the dataset
 
 In the same Python console:
 ```python
@@ -119,3 +75,8 @@ Bob can verify that the file is downloaded. In a new console:
 cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
+
+
+## Next step
+
+You're now done all the quickstart steps! There are now many possible directions. Please go back to the [main README](README.md) to find what suits you.
