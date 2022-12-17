@@ -200,16 +200,17 @@ def test_buy_from_exchange_and_order(
         MAX_UINT256,
         {"from": publisher_wallet},
     )
+    USDC.approve(
+        exchange.address,
+        MAX_UINT256,
+        {"from": publisher_wallet},
+    )
     DAI.transfer(
         publisher_wallet.address,
         consume_fee_amount,
         {"from": factory_deployer_wallet},
     )
-    DAI.approve(
-        (DT.address if template_index == 2 else exchange.address),
-        consume_fee_amount,
-        {"from": publisher_wallet},
-    )
+    DAI.approve(DT.address, consume_fee_amount, {"from": publisher_wallet})
 
     provider_fees = get_mock_provider_fees(
         "MockDAI", publisher_wallet, valid_until=valid_until
@@ -233,7 +234,8 @@ def test_buy_from_exchange_and_order(
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert DT.totalSupply() == to_wei(0)
+    if template_index == 2:
+        assert DT.totalSupply() == to_wei(0)
 
     provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
