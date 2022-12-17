@@ -317,7 +317,13 @@ class Datatoken(ContractBase):
         consume_market_order_fee_token: Optional[str] = None,
         consume_market_order_fee_amount: Optional[int] = 0,
     ) -> str:
-        bal = Web3.fromWei(self.balanceOf(consumer), "ether")
+        buyer_addr = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
+
+        bal = Web3.fromWei(self.balanceOf(buyer_addr), "ether")
         if bal < 1.0:
             dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
             from ocean_lib.models.dispenser import Dispenser  # isort: skip
@@ -329,12 +335,12 @@ class Datatoken(ContractBase):
             active, allowedSwapper = st[0], st[6]
             if not active:
                 raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, consumer]:
+            if allowedSwapper not in [ZERO_ADDRESS, buyer_addr]:
                 raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
 
             # Try to dispense. If other issues, they'll pop out
             dispenser.dispense(
-                self.address, "1 ether", consumer, transaction_parameters
+                self.address, "1 ether", buyer_addr, transaction_parameters
             )
 
         return self.start_order(
