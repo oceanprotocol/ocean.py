@@ -245,4 +245,5 @@ def test_buy_from_exchange_and_order(
 
     assert from_wei(publish_bal2) == from_wei(publish_bal1) + 2.0
 
-    assert from_wei(DT.balanceOf(DT.getPaymentCollector())) == 0
+    if template_index == 2:
+        assert from_wei(DT.balanceOf(DT.getPaymentCollector())) == 0
