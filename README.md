@@ -28,10 +28,10 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ## 🏄 Quickstart
 
- 1. [Install Ocean](READMEs/install.md)
- 2. [Configure brownie](READMEs/brownie.md)
- 3. [Setup locally](READMEs/setup-local.md) or [remotely](READMEs/setup-remote.md).
- 4. Walk through the [main flow](main-flow.md): publish asset, post for free / for sale, dispense it / buy it, and consume it.
+ 1. **[Install Ocean](READMEs/install.md)**
+ 2. **[Configure brownie](READMEs/brownie.md)**
+ 3. **[Setup locally](READMEs/setup-local.md)** or **[remotely](READMEs/setup-remote.md)**
+ 4. **[Walk through main flow](main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
 
 
 ## Further flexibility - local flows
@@ -42,14 +42,9 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 - **[Post free data](READMEs/dispenser-flow.md)** - post a dataset for free, via a faucet
 - **[Search & filter data](READMEs/search-and-filter-assets.md)** - find assets by tag
 
-### Remote flows
-
-- **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
-- **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services
-- **[C2D flow](READMEs/c2d-flow.md)** - uses Compute-to-Data to build an AI model
-
 ### More types of data assets
 
+- **[C2D flow](READMEs/c2d-flow.md)** - use Compute-to-Data to build an AI model
 - **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API data, showing Binance ETH price feed
 - **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data
 - **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
@@ -65,9 +60,12 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 
-### Learn more
+### Get test tokens
 
 - [Get test OCEAN](READMEs/get-test-OCEAN.md) - from Goerli
+- [Get test MATIC](READMEs/get-test-MATIC.md) - from Mumbai network
+
+### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 
