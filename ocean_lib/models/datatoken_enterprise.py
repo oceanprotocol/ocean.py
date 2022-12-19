@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Any, Optional
+from typing import Any
 
 from enforce_typing import enforce_types
 
@@ -27,7 +27,7 @@ class DatatokenEnterprise(Datatoken):
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
         transaction_parameters: dict,
-        consume_market_fees: Optional[Any] = None,
+        consume_market_fees=None,
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 
@@ -75,7 +75,7 @@ class DatatokenEnterprise(Datatoken):
         service_index: int,
         provider_fees: dict,
         transaction_parameters: dict,
-        consume_market_fees: Optional[Any] = None,
+        consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
             from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
