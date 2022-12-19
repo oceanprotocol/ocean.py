@@ -5,12 +5,15 @@
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
+from ocean_lib.models.arguments import (
+    DataNFTArguments,
+    DatatokenArguments,
+    FeeTokenArguments,
+)
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type, to_wei
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
@@ -324,8 +327,6 @@ def test_create_datatoken(
             "DT1",
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         publisher_wallet,
     )
@@ -338,9 +339,6 @@ def test_create_datatoken(
             symbol="DatatokenEnterpriseDT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=0,
             bytess=[b""],
             cap=Web3.toWei("0.1", "ether"),
         ),
@@ -369,9 +367,11 @@ def test_create_datatoken_with_usdc_order_fee(
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=usdc.address,
-            publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
+            publish_market_fees=FeeTokenArguments(
+                address=publisher_wallet.address,
+                token=usdc.address,
+                amount=publish_market_order_fee_amount_in_wei,
+            ),
         ),
         publisher_wallet,
     )
@@ -414,8 +414,6 @@ def test_create_datatoken_with_non_owner(
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         consumer_wallet,
     )
@@ -449,8 +447,6 @@ def test_fail_creating_erc20(
                 name="DT1",
                 symbol="DT1Symbol",
                 minter=publisher_wallet.address,
-                publish_market_order_fee_address=publisher_wallet.address,
-                publish_market_order_fee_token=ZERO_ADDRESS,
             ),
             consumer_wallet,
         )
@@ -516,8 +512,6 @@ def test_erc721_datatoken_functions(
             name="DT1",
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         consumer_wallet,
     )
@@ -622,8 +616,6 @@ def test_transfer_nft(
         DatatokenArguments(
             "DT1",
             "DT1Symbol",
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         consumer_wallet,
     )
@@ -639,7 +631,7 @@ def test_transfer_nft(
     OCEAN = publisher_ocean.OCEAN_token
     OCEAN.approve(factory_router.address, to_wei(10000), {"from": consumer_wallet})
 
-    # Make consumer the publish_market_order_fee_address instead of publisher
+    # Make consumer the publish market order fee address instead of publisher
     receipt = datatoken.setPublishingMarketFee(
         consumer_wallet.address,
         OCEAN.address,
@@ -787,8 +779,6 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
             DatatokenArguments(
                 name="DT1",
                 symbol="DT1Symbol",
-                publish_market_order_fee_address=publisher_wallet.address,
-                publish_market_order_fee_token=ZERO_ADDRESS,
             ),
             publisher_wallet,
         )
@@ -801,8 +791,6 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
-            publish_market_order_fee_address=consumer_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         consumer_wallet,
     )

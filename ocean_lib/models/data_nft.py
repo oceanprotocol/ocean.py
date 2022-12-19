@@ -40,12 +40,3 @@ class DataNFT(ContractBase):
 
     def create_datatoken(self, datatoken_args, wallet) -> Datatoken:
         return datatoken_args.create_datatoken(self, wallet)
-
-        # TODO
-        # def ZERO ADDRESS
-        # if publish_market_order_fee_address is None:
-        #    publish_market_order_fee_address = from_address
-
-        # def Ocean address
-        # if publish_market_order_fee_token is None:
-        #    publish_market_order_fee_token = ZERO_ADDRESS

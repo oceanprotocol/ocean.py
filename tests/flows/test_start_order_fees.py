@@ -91,9 +91,11 @@ def test_start_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fee_address=publish_market_wallet.address,
-        publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=publish_market_order_fee,
+        publish_market_order_fees=FeeTokenArguments(
+            address=publish_market_wallet.address,
+            token=bt.address,
+            amount=publish_market_order_fee,
+        ),
         timeout=3600,
     )
 
@@ -215,9 +217,7 @@ def create_asset_with_order_fee_and_timeout(
     file: FilesType,
     data_nft: DataNFT,
     publisher_wallet,
-    publish_market_order_fee_address: str,
-    publish_market_order_fee_token: str,
-    publish_market_order_fee_amount: int,
+    publish_market_order_fees,
     timeout: int,
 ) -> Tuple[DDO, Service, Datatoken]:
 
@@ -226,9 +226,7 @@ def create_asset_with_order_fee_and_timeout(
         DatatokenArguments(
             name="Datatoken 1",
             symbol="DT1",
-            publish_market_order_fee_address=publish_market_order_fee_address,
-            publish_market_order_fee_token=publish_market_order_fee_token,
-            publish_market_order_fee_amount=publish_market_order_fee_amount,
+            publish_market_order_fees=publish_market_order_fees,
         ),
         publisher_wallet,
     )

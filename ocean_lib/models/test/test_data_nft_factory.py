@@ -6,7 +6,11 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
+from ocean_lib.models.arguments import (
+    DataNFTArguments,
+    DatatokenArguments,
+    FeeTokenArguments,
+)
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
@@ -51,8 +55,6 @@ def test_nft_creation(
             "DT1P",
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         publisher_wallet,
     )
@@ -88,8 +90,6 @@ def test_combo_functions(
             "DTB1",
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         wallet=publisher_wallet,
     )
@@ -107,9 +107,11 @@ def test_combo_functions(
             "DT1P",
             "DT1SymbolP",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
-            publish_market_order_fee_amount=Web3.toWei("0.0005", "ether"),
+            publish_market_order_fees=FeeTokenArguments(
+                address=publisher_wallet.address,
+                token=ZERO_ADDRESS,
+                amount=Web3.toWei("0.0005", "ether"),
+            ),
         ),
         publisher_wallet,
     )
@@ -126,8 +128,6 @@ def test_combo_functions(
             "DTWithPool",
             "DTP",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         fixed_price_base_token=fee_datatoken_address,
         fixed_price_owner=publisher_wallet.address,
@@ -156,8 +156,6 @@ def test_combo_functions(
             "DTWithPool",
             "DTP",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         dispenser_max_tokens=Web3.toWei(1, "ether"),
         dispenser_max_balance=Web3.toWei(1, "ether"),
@@ -224,8 +222,6 @@ def test_start_multiple_order(
             name="DT1",
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
-            publish_market_order_fee_address=publisher_wallet.address,
-            publish_market_order_fee_token=ZERO_ADDRESS,
         ),
         consumer_wallet,
     )

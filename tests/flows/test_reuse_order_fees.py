@@ -74,9 +74,11 @@ def test_reuse_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fee_address=publish_market_wallet.address,
-        publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=int_units("10", bt.decimals()),
+        publish_market_order_fees=FeeTokenArguments(
+            address=publish_market_wallet.address,
+            token=bt.address,
+            amount=int_units("10", bt.decimals()),
+        ),
         timeout=5,
     )
 

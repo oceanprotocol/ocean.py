@@ -20,6 +20,29 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 logger = logging.getLogger("ocean")
 
 
+class FeeTokenArguments:
+    def __init__(
+        self,
+        address: Optional[str] = None,
+        token: Optional[str] = None,
+        amount: Optional[int] = 0,
+    ):
+        if not address:
+            self.address = ZERO_ADDRESS
+
+        if not token:
+            self.token = ZERO_ADDRESS
+
+        self.amount = amount
+
+    def to_tuple(self):
+        return (
+            Web3.toChecksumAddress(self.address.lower()),
+            Web3.toChecksumAddress(self.token.lower()),
+            self.amount,
+        )
+
+
 class DataNFTArguments:
     def __init__(
         self,
@@ -86,9 +109,7 @@ class DatatokenArguments:
         template_index: Optional[int] = 1,
         minter: Optional[str] = None,
         fee_manager: Optional[str] = None,
-        publish_market_order_fee_address: Optional[str] = None,
-        publish_market_order_fee_token: Optional[str] = None,
-        publish_market_order_fee_amount: Optional[int] = 0,
+        publish_market_order_fees: Optional[FeeTokenArguments] = None,
         bytess: Optional[List[bytes]] = None,
         services: Optional[list] = None,
         files: Optional[List[FilesType]] = None,
@@ -105,20 +126,21 @@ class DatatokenArguments:
         self.template_index = template_index
         self.minter = minter
         self.fee_manager = fee_manager
-        self.publish_market_order_fee_address = (
-            publish_market_order_fee_address or ZERO_ADDRESS
-        )
-        self.publish_market_order_fee_token = publish_market_order_fee_token
-        self.publish_market_order_fee_amount = publish_market_order_fee_amount
         self.bytess = bytess or [b""]
         self.services = services
         self.files = files
         self.consumer_parameters = consumer_parameters
+        self.publish_market_order_fees = publish_market_order_fees
 
     def create_datatoken(self, data_nft, wallet, with_services=False):
         config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
+
+        if not self.publish_market_order_fees:
+            self.publish_market_order_fees = FeeTokenArguments(
+                address=wallet.address, token=OCEAN_address
+            )
 
         data_nft.contract.createERC20(
             self.template_index,
@@ -126,12 +148,10 @@ class DatatokenArguments:
             [
                 ContractBase.to_checksum_address(self.minter or wallet.address),
                 ContractBase.to_checksum_address(self.fee_manager or wallet.address),
-                ContractBase.to_checksum_address(self.publish_market_order_fee_address),
-                ContractBase.to_checksum_address(
-                    self.publish_market_order_fee_token or OCEAN_address
-                ),
+                self.publish_market_order_fees.address,
+                self.publish_market_order_fees.token,
             ],
-            [self.cap, self.publish_market_order_fee_amount],
+            [self.cap, self.publish_market_order_fees.amount],
             self.bytess,
             {"from": wallet},
         )
@@ -166,26 +186,3 @@ class DatatokenArguments:
                     service.datatoken = datatoken.address
 
         return datatoken
-
-
-class FeeTokenArguments:
-    def __init__(
-        self,
-        address: Optional[str] = None,
-        token: Optional[str] = None,
-        amount: Optional[int] = 0,
-    ):
-        if not address:
-            self.address = ZERO_ADDRESS
-
-        if not token:
-            self.token = ZERO_ADDRESS
-
-        self.amount = amount
-
-    def to_tuple(self):
-        return (
-            Web3.toChecksumAddress(self.address.lower()),
-            Web3.toChecksumAddress(self.token.lower()),
-            self.amount,
-        )
