@@ -31,7 +31,7 @@ from ocean_lib.models.arguments import (
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import create_checksum, get_ocean_token_address
+from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
@@ -515,13 +515,6 @@ class OceanAssets:
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
-        OCEAN_address = get_ocean_token_address(self._config_dict)
-
-        consume_market_fees = FeeTokenArguments(
-            address=consume_market_fees.address or wallet.address,
-            token=consume_market_fees.token or OCEAN_address,
-        )
-
         consumer_address = consumer_address or wallet.address
 
         # main work...

@@ -222,20 +222,24 @@ def test_buy_DT_and_order(
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
     provider_fee_bal1 = USDC.balanceOf(another_consumer_wallet.address)
 
-    tx = DT.buy_DT_and_order(
-        consumer=another_consumer_wallet.address,
-        service_index=1,
-        provider_fees=provider_fees,
-        consume_market_fees=FeeTokenArguments(
+    args = {
+        "consumer": another_consumer_wallet.address,
+        "service_index": 1,
+        "provider_fees": provider_fees,
+        "consume_market_fees": FeeTokenArguments(
             address=consume_fee_address,
             token=DAI.address,
         ),
-        exchange=exchange,
-        max_base_token_amount=to_wei(2.5),
-        consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
-        consume_market_swap_fee_address=another_consumer_wallet.address,
-        transaction_parameters={"from": publisher_wallet},
-    )
+        "exchange": exchange,
+        "transaction_parameters": {"from": publisher_wallet},
+    }
+
+    if template_index == 2:
+        args["max_base_token_amount"] = to_wei(2.5)
+        args["consume_market_swap_fee_amount"] = to_wei(0.001)  # 1e15 => 0.1%
+        args["consume_market_swap_fee_address"] = another_consumer_wallet.address
+
+    tx = DT.buy_DT_and_order(**args)
 
     assert tx
 

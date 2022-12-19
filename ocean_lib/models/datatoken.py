@@ -361,7 +361,6 @@ class Datatoken(ContractBase):
         service_index: int,
         provider_fees: dict,
         exchange: Any,
-        max_base_token_amount: int,
         transaction_parameters: dict,
         consume_market_fees=None,
     ) -> str:
