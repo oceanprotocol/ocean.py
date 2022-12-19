@@ -129,14 +129,17 @@ class DatatokenArguments:
         self.services = services
         self.files = files
         self.consumer_parameters = consumer_parameters
-        self.publish_market_order_fees = publish_market_order_fees
+        self.publish_market_order_fees = (
+            publish_market_order_fees or FeeTokenArguments()
+        )
+        self.set_default_fees_at_deploy = not publish_market_order_fees
 
     def create_datatoken(self, data_nft, wallet, with_services=False):
         config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
 
-        if not self.publish_market_order_fees:
+        if self.set_default_fees_at_deploy:
             self.publish_market_order_fees = FeeTokenArguments(
                 address=wallet.address, token=OCEAN_address
             )

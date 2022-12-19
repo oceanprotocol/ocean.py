@@ -313,7 +313,7 @@ class Datatoken(ContractBase):
         service_index: int,
         provider_fees: dict,
         transaction_parameters: dict,
-        consume_market_fees: Optional[Any],
+        consume_market_fees: Optional[Any] = None,
     ) -> str:
         if not consume_market_fees:
             from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
@@ -363,7 +363,7 @@ class Datatoken(ContractBase):
         exchange: Any,
         max_base_token_amount: int,
         transaction_parameters: dict,
-        consume_market_fees: Optional[Any],
+        consume_market_fees: Optional[Any] = None,
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 

@@ -367,7 +367,7 @@ def test_create_datatoken_with_usdc_order_fee(
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
-            publish_market_fees=FeeTokenArguments(
+            publish_market_order_fees=FeeTokenArguments(
                 address=publisher_wallet.address,
                 token=usdc.address,
                 amount=publish_market_order_fee_amount_in_wei,
