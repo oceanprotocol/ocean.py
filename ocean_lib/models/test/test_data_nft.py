@@ -616,6 +616,9 @@ def test_transfer_nft(
         DatatokenArguments(
             "DT1",
             "DT1Symbol",
+            publish_market_order_fees=FeeTokenArguments(
+                address=publisher_wallet.address,
+            ),
         ),
         consumer_wallet,
     )
