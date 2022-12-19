@@ -313,10 +313,13 @@ class Datatoken(ContractBase):
         service_index: int,
         provider_fees: dict,
         transaction_parameters: dict,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = 0,
+        consume_market_fees: Optional[Any],
     ) -> str:
+        if not consume_market_fees:
+            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
+            consume_market_fees = FeeTokenArguments()
+
         buyer_addr = (
             transaction_parameters["from"].address
             if hasattr(transaction_parameters["from"], "address")
@@ -343,17 +346,11 @@ class Datatoken(ContractBase):
                 self.address, "1 ether", buyer_addr, transaction_parameters
             )
 
-        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
-
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
-            consume_market_fees=FeeTokenArguments(
-                address=consume_market_order_fee_address,
-                token=consume_market_order_fee_token,
-                amount=consume_market_order_fee_amount,
-            ),
+            consume_market_fees=consume_market_fees,
             transaction_parameters=transaction_parameters,
         )
 
@@ -363,41 +360,36 @@ class Datatoken(ContractBase):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         exchange: Any,
         max_base_token_amount: int,
-        consume_market_swap_fee_amount: int,
-        consume_market_swap_fee_address: str,
         transaction_parameters: dict,
+        consume_market_fees: Optional[Any],
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
+        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
+        if not consume_market_fees:
+            consume_market_fees = FeeTokenArguments()
+
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)
 
         exchange.buy_DT(
             datatoken_amt=Web3.toWei(1, "ether"),
-            consume_market_fee_addr=consume_market_order_fee_address,
-            consume_market_fee=consume_market_order_fee_amount,
+            consume_market_fee_addr=consume_market_fees.address,
+            consume_market_fee=consume_market_fees.amount,
             tx_dict=transaction_parameters,
         )
-
-        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
 
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
-            consume_market_fees=FeeTokenArguments(
-                address=consume_market_order_fee_address,
-                token=consume_market_order_fee_token,
-                amount=consume_market_order_fee_amount,
-            ),
+            consume_market_fees=consume_market_fees,
             transaction_parameters=transaction_parameters,
         )
 

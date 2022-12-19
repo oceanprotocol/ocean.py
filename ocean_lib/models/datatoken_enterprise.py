@@ -8,7 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
@@ -23,14 +22,12 @@ class DatatokenEnterprise(Datatoken):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         exchange: Any,
         max_base_token_amount: int,
         consume_market_swap_fee_amount: int,
         consume_market_swap_fee_address: str,
         transaction_parameters: dict,
+        consume_market_fees: Optional[Any],
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 
@@ -39,6 +36,11 @@ class DatatokenEnterprise(Datatoken):
 
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)
+
+        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
+        if not consume_market_fees:
+            consume_market_fees = FeeTokenArguments()
 
         return self.contract.buyFromFreAndOrder(
             (
@@ -54,11 +56,7 @@ class DatatokenEnterprise(Datatoken):
                     provider_fees["validUntil"],
                     provider_fees["providerData"],
                 ),
-                (
-                    ContractBase.to_checksum_address(consume_market_order_fee_address),
-                    ContractBase.to_checksum_address(consume_market_order_fee_token),
-                    consume_market_order_fee_amount,
-                ),
+                consume_market_fees.to_tuple(),
             ),
             (
                 ContractBase.to_checksum_address(exchange.address),
@@ -77,10 +75,13 @@ class DatatokenEnterprise(Datatoken):
         service_index: int,
         provider_fees: dict,
         transaction_parameters: dict,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = 0,
+        consume_market_fees: Optional[Any],
     ) -> str:
+        if not consume_market_fees:
+            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
+            consume_market_fees = FeeTokenArguments()
+
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
         return self.contract.buyFromDispenserAndOrder(
             (
@@ -96,15 +97,7 @@ class DatatokenEnterprise(Datatoken):
                     provider_fees["validUntil"],
                     provider_fees["providerData"],
                 ),
-                (
-                    ContractBase.to_checksum_address(
-                        consume_market_order_fee_address or ZERO_ADDRESS
-                    ),
-                    ContractBase.to_checksum_address(
-                        consume_market_order_fee_token or ZERO_ADDRESS
-                    ),
-                    consume_market_order_fee_amount,
-                ),
+                consume_market_fees.to_tuple(),
             ),
             ContractBase.to_checksum_address(dispenser_address),
             transaction_parameters,
