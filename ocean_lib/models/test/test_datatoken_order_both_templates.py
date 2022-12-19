@@ -145,7 +145,7 @@ def test_dispense_and_order_with_defaults(
 
 @pytest.mark.unit
 @pytest.mark.parametrize("template_index", [1, 2])
-def test_buy_from_exchange_and_order(
+def test_buy_DT_and_order(
     config,
     publisher_wallet,
     consumer_wallet,
@@ -153,7 +153,7 @@ def test_buy_from_exchange_and_order(
     another_consumer_wallet,
     template_index,
 ):
-    """Tests buy_from_exchange_and_order function of the Datatoken Enterprise"""
+    """Tests buy_DT_and_order function of the Datatoken and DatatokenEnterprise"""
     _, DT = deploy_erc721_erc20(
         config, publisher_wallet, publisher_wallet, template_index
     )
@@ -220,7 +220,7 @@ def test_buy_from_exchange_and_order(
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
     provider_fee_bal1 = USDC.balanceOf(another_consumer_wallet.address)
 
-    _ = DT.buy_from_exchange_and_order(
+    tx = DT.buy_DT_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
@@ -233,6 +233,8 @@ def test_buy_from_exchange_and_order(
         consume_market_swap_fee_address=another_consumer_wallet.address,
         transaction_parameters={"from": publisher_wallet},
     )
+
+    assert tx
 
     if template_index == 2:
         assert DT.totalSupply() == to_wei(0)

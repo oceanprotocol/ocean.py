@@ -358,7 +358,7 @@ class Datatoken(ContractBase):
         )
 
     @enforce_types
-    def buy_from_exchange_and_order(
+    def buy_DT_and_order(
         self,
         consumer: str,
         service_index: int,
