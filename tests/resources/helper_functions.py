@@ -13,6 +13,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
+from brownie import network
 from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -26,7 +27,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import sign_with_key
+from ocean_lib.web3_internal.utils import sign_with_key, split_signature
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
@@ -350,3 +351,37 @@ def int_units(amount, num_decimals):
     unit_value = Decimal(10) ** num_decimals
 
     return int(decimal_amount * unit_value)
+
+
+@enforce_types
+def get_mock_provider_fees(mock_type, wallet, valid_until=0):
+    config = get_config_dict()
+    provider_fee_address = wallet.address
+    provider_fee_token = get_address_of_type(config, mock_type)
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            wallet.address,
+            provider_fee_token,
+            provider_fee_amount,
+            valid_until,
+        ],
+    )
+
+    signed = network.web3.eth.sign(wallet.address, data=message)
+    signature = split_signature(signed)
+
+    return {
+        "providerFeeAddress": provider_fee_address,
+        "providerFeeToken": provider_fee_token,
+        "providerFeeAmount": provider_fee_amount,
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
+        "validUntil": valid_until,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+    }

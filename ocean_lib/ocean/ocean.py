@@ -206,7 +206,7 @@ class Ocean:
     @enforce_types
     def retrieve_provider_fees(
         self, ddo: DDO, access_service: Service, publisher_wallet
-    ) -> tuple:
+    ) -> dict:
 
         initialize_response = DataServiceProvider.initialize(
             ddo.did, access_service, consumer_address=publisher_wallet.address
@@ -214,16 +214,7 @@ class Ocean:
         initialize_data = initialize_response.json()
         provider_fees = initialize_data["providerFee"]
 
-        return (
-            provider_fees["providerFeeAddress"],
-            provider_fees["providerFeeToken"],
-            provider_fees["providerFeeAmount"],
-            provider_fees["v"],
-            provider_fees["r"],
-            provider_fees["s"],
-            provider_fees["validUntil"],
-            provider_fees["providerData"],
-        )
+        return provider_fees
 
     @enforce_types
     def retrieve_provider_fees_for_compute(
@@ -233,7 +224,7 @@ class Ocean:
         consumer_address: str,
         compute_environment: str,
         valid_until: int,
-    ) -> tuple:
+    ) -> dict:
 
         initialize_compute_response = DataServiceProvider.initialize_compute(
             [x.as_dictionary() for x in datasets],
