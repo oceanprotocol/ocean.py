@@ -27,11 +27,10 @@ class FeeTokenArguments:
         token: Optional[str] = None,
         amount: Optional[int] = 0,
     ):
-        if not address:
-            self.address = ZERO_ADDRESS
-
-        if not token:
-            self.token = ZERO_ADDRESS
+        self.address = (
+            Web3.toChecksumAddress(address.lower()) if address else ZERO_ADDRESS
+        )
+        self.token = Web3.toChecksumAddress(token.lower()) if token else ZERO_ADDRESS
 
         self.amount = amount
 
