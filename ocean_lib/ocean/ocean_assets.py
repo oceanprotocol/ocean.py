@@ -509,21 +509,19 @@ class OceanAssets:
         ddo: DDO,
         wallet,
         service: Optional[Service] = None,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = None,
+        consume_market_fees: Optional[FeeTokenArguments] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
-        consume_market_order_fee_address = (
-            consume_market_order_fee_address or wallet.address
+        OCEAN_address = get_ocean_token_address(self._config_dict)
+
+        consume_market_fees = FeeTokenArguments(
+            address=consume_market_fees.address or wallet.address,
+            token=consume_market_fees.token or OCEAN_address,
         )
-        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
-        if consume_market_order_fee_token is None:
-            OCEAN_address = get_ocean_token_address(self._config_dict)
-            consume_market_order_fee_token = OCEAN_address
+
         consumer_address = consumer_address or wallet.address
 
         # main work...
@@ -561,11 +559,7 @@ class OceanAssets:
             consumer=consumer_address,
             service_index=ddo.get_index_of_service(service),
             provider_fees=provider_fees,
-            consume_market_fees=FeeTokenArguments(
-                address=consume_market_order_fee_address,
-                token=consume_market_order_fee_token,
-                amount=consume_market_order_fee_amount,
-            ),
+            consume_market_fees=consume_market_fees,
             transaction_parameters={"from": wallet},
         )
 

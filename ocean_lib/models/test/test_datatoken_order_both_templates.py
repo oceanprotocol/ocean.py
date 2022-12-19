@@ -6,12 +6,11 @@ from datetime import datetime
 
 import pytest
 
+from ocean_lib.models.arguments import FeeTokenArguments
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
-
-from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
 
@@ -227,9 +226,10 @@ def test_buy_DT_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
-        consume_market_order_fee_address=consume_fee_address,
-        consume_market_order_fee_token=DAI.address,
-        consume_market_order_fee_amount=0,
+        consume_market_fees=FeeTokenArguments(
+            address=consume_fee_address,
+            token=DAI.address,
+        ),
         exchange=exchange,
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%

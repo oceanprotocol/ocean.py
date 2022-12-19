@@ -8,6 +8,7 @@ import os
 import pytest
 from web3.main import Web3
 
+from ocean_lib.models.arguments import FeeTokenArguments
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
@@ -52,9 +53,7 @@ def test_market_flow(
             ddo,
             consumer_wallet,
             service=service,
-            consume_market_order_fee_address=consumer_wallet.address,
-            consume_market_order_fee_token=datatoken.address,
-            consume_market_order_fee_amount=0,
+            consume_market_fees=FeeTokenArguments(token=datatoken.address),
         )
         asset_folder = consumer_ocean.assets.download_asset(
             ddo,
@@ -68,9 +67,10 @@ def test_market_flow(
             ddo,
             consumer_wallet,
             service=service,
-            consume_market_order_fee_address=another_consumer_wallet.address,
-            consume_market_order_fee_token=datatoken.address,
-            consume_market_order_fee_amount=0,
+            consume_market_fees=FeeTokenArguments(
+                address=another_consumer_wallet.address,
+                token=datatoken.address,
+            ),
             consumer_address=another_consumer_wallet.address,
         )
         asset_folder = consumer_ocean.assets.download_asset(
