@@ -15,7 +15,6 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import SmartContractCall
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
@@ -71,9 +70,6 @@ def test_consume_simple_onchain_data(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
         transaction_parameters={"from": consumer_wallet},
     )
 
@@ -190,9 +186,6 @@ def test_consume_parametrized_onchain_data(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
         transaction_parameters={"from": consumer_wallet},
     )
 

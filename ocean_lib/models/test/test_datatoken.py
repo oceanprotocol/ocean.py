@@ -6,7 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DatatokenArguments
+from ocean_lib.models.arguments import DatatokenArguments, FeeTokenArguments
 from ocean_lib.models.datatoken import DatatokenRoles
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -127,9 +127,10 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
-        consume_market_order_fee_address=publisher_wallet.address,
-        consume_market_order_fee_token=datatoken.address,
-        consume_market_order_fee_amount=0,
+        consume_market_fees=FeeTokenArguments(
+            address=publisher_wallet.address,
+            token=datatoken.address,
+        ),
         transaction_parameters={"from": publisher_wallet},
     )
     # Check erc20 balances

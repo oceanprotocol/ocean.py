@@ -41,11 +41,15 @@ class Datatoken(ContractBase):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         transaction_parameters: dict,
+        consume_market_fees: Optional[Any] = None,
     ) -> str:
+
+        if not consume_market_fees:
+            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
+            consume_market_fees = FeeTokenArguments()
+
         return self.contract.startOrder(
             checksum_addr(consumer),
             service_index,
@@ -59,11 +63,7 @@ class Datatoken(ContractBase):
                 provider_fees["validUntil"],
                 provider_fees["providerData"],
             ),
-            (
-                checksum_addr(consume_market_order_fee_address),
-                checksum_addr(consume_market_order_fee_token),
-                consume_market_order_fee_amount,
-            ),
+            consume_market_fees.to_tuple(),
             transaction_parameters,
         )
 
@@ -343,17 +343,17 @@ class Datatoken(ContractBase):
                 self.address, "1 ether", buyer_addr, transaction_parameters
             )
 
+        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
-            consume_market_order_fee_address=(
-                consume_market_order_fee_address or ZERO_ADDRESS
+            consume_market_fees=FeeTokenArguments(
+                address=consume_market_order_fee_address,
+                token=consume_market_order_fee_token,
+                amount=consume_market_order_fee_amount,
             ),
-            consume_market_order_fee_token=(
-                consume_market_order_fee_token or ZERO_ADDRESS
-            ),
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
             transaction_parameters=transaction_parameters,
         )
 
@@ -387,13 +387,17 @@ class Datatoken(ContractBase):
             tx_dict=transaction_parameters,
         )
 
+        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            consume_market_fees=FeeTokenArguments(
+                address=consume_market_order_fee_address,
+                token=consume_market_order_fee_token,
+                amount=consume_market_order_fee_amount,
+            ),
             transaction_parameters=transaction_parameters,
         )
 

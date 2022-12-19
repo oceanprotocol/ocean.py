@@ -6,6 +6,8 @@ import logging
 import warnings
 from typing import Any, Dict, List, Optional
 
+from web3.main import Web3
+
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
@@ -164,3 +166,26 @@ class DatatokenArguments:
                     service.datatoken = datatoken.address
 
         return datatoken
+
+
+class FeeTokenArguments:
+    def __init__(
+        self,
+        address: Optional[str] = None,
+        token: Optional[str] = None,
+        amount: Optional[int] = 0,
+    ):
+        if not address:
+            self.address = ZERO_ADDRESS
+
+        if not token:
+            self.token = ZERO_ADDRESS
+
+        self.amount = amount
+
+    def to_tuple(self):
+        return (
+            Web3.toChecksumAddress(self.address.lower()),
+            Web3.toChecksumAddress(self.token.lower()),
+            self.amount,
+        )

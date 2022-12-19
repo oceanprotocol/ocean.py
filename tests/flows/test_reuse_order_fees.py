@@ -8,6 +8,7 @@ from time import sleep
 import pytest
 from web3.main import Web3
 
+from ocean_lib.models.arguments import FeeTokenArguments
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
@@ -111,9 +112,11 @@ def test_reuse_order_fees(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=consume_market_wallet.address,
-        consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=int_units("10", bt.decimals()),
+        consume_market_fees=FeeTokenArguments(
+            address=consume_market_wallet.address,
+            token=bt.address,
+            amount=int_units("10", bt.decimals()),
+        ),
         transaction_parameters={"from": consumer_wallet},
     )
 
