@@ -2,41 +2,35 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
+from datetime import datetime
 
 import pytest
-from brownie import network
-from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import get_address_of_type, to_wei, from_wei
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20
+from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
+from ocean_lib.web3_internal.constants import MAX_UINT256
+from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
+
+valid_until = int(datetime(2032, 12, 31).timestamp())
 
 
 @pytest.mark.unit
-def test_buy_from_dispenser_and_order(
+def test_dispense_and_order_with_non_defaults(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
 ):
-    """Tests buy_from_dispenser_and_order function of the Datatoken Enterprise"""
+    """Tests dispense_and_order function of the Datatoken Enterprise"""
     _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
-    FRE_addr = get_address_of_type(config, "Dispenser")
 
-    _ = DT.createDispenser(
-        FRE_addr,
-        to_wei(1),  # max_tokens
-        to_wei(1),  # max_balance
-        True,  # with_mint
-        ZERO_ADDRESS,  # allowed_swapper
-        {"from": publisher_wallet},
+    _ = DT.create_dispenser(
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        tx_dict={"from": publisher_wallet},
     )
 
     status = DT.dispenser_status()
@@ -87,48 +81,26 @@ def test_buy_from_dispenser_and_order(
         {"from": publisher_wallet},
     )
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = DAI.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
     balance_opf_consume_before = DAI.balanceOf(opf_collector_address)
     publish_bal_before = USDC.balanceOf(consumer_wallet.address)
 
-    _ = DT.buy_from_dispenser_and_order(
+    tx = DT.dispense_and_order(
         consumer=consume_fee_address,
         service_index=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_fees=provider_fees,
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        dispenser_address=FRE_addr,
         transaction_parameters={"from": publisher_wallet},
     )
 
+    assert tx
     assert DT.totalSupply() == to_wei(0)
 
     balance_opf_consume = DAI.balanceOf(opf_collector_address)
@@ -141,15 +113,50 @@ def test_buy_from_dispenser_and_order(
 
 
 @pytest.mark.unit
-def test_buy_from_fre_and_order(
+@pytest.mark.parametrize("template_index", [1, 2])
+def test_dispense_and_order_with_defaults(
+    config, publisher_wallet, consumer_wallet, factory_deployer_wallet, template_index
+):
+    """Tests dispense_and_order function of the Datatoken and DatatokenEnterprise"""
+    _, DT = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, template_index
+    )
+
+    _ = DT.create_dispenser(
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        tx_dict={"from": publisher_wallet},
+    )
+
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
+    )
+
+    tx = DT.dispense_and_order(
+        consumer=consumer_wallet.address,
+        service_index=1,
+        provider_fees=provider_fees,
+        transaction_parameters={"from": publisher_wallet},
+    )
+
+    assert tx
+    assert DT.totalSupply() == (to_wei(0) if template_index == 2 else to_wei(1))
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize("template_index", [1, 2])
+def test_buy_DT_and_order(
     config,
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
+    template_index,
 ):
-    """Tests buy_from_fre_and_order function of the Datatoken Enterprise"""
-    _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
+    """Tests buy_DT_and_order function of the Datatoken and DatatokenEnterprise"""
+    _, DT = deploy_erc721_erc20(
+        config, publisher_wallet, publisher_wallet, template_index
+    )
 
     USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
@@ -164,12 +171,13 @@ def test_buy_from_fre_and_order(
     assert exchange.details.active
     assert exchange.details.with_mint
 
-    with pytest.raises(Exception, match="This address is not allowed to swap"):
-        exchange.buy_DT(
-            datatoken_amt=to_wei(1),
-            max_basetoken_amt=to_wei(1),
-            tx_dict={"from": consumer_wallet},
-        )
+    if template_index == 2:
+        with pytest.raises(Exception, match="This address is not allowed to swap"):
+            exchange.buy_DT(
+                datatoken_amt=to_wei(1),
+                max_basetoken_amt=to_wei(1),
+                tx_dict={"from": consumer_wallet},
+            )
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -192,6 +200,11 @@ def test_buy_from_fre_and_order(
         MAX_UINT256,
         {"from": publisher_wallet},
     )
+    USDC.approve(
+        exchange.address,
+        MAX_UINT256,
+        {"from": publisher_wallet},
+    )
     DAI.transfer(
         publisher_wallet.address,
         consume_fee_amount,
@@ -199,52 +212,32 @@ def test_buy_from_fre_and_order(
     )
     DAI.approve(DT.address, consume_fee_amount, {"from": publisher_wallet})
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = DAI.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    provider_fees = get_mock_provider_fees(
+        "MockDAI", publisher_wallet, valid_until=valid_until
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
     consume_bal1 = DAI.balanceOf(consume_fee_address)
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
     provider_fee_bal1 = USDC.balanceOf(another_consumer_wallet.address)
 
-    _ = DT.buy_from_fre_and_order(
+    tx = DT.buy_DT_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
-        provider_fee_address=publisher_wallet.address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_fees=provider_fees,
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=DAI.address,
         consume_market_order_fee_amount=0,
-        exchange_contract=exchange.address,
-        exchange_id=exchange.exchange_id,
+        exchange=exchange,
         max_base_token_amount=to_wei(2.5),
         consume_market_swap_fee_amount=to_wei(0.001),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
         transaction_parameters={"from": publisher_wallet},
     )
 
-    assert DT.totalSupply() == to_wei(0)
+    assert tx
+
+    if template_index == 2:
+        assert DT.totalSupply() == to_wei(0)
 
     provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
@@ -254,4 +247,5 @@ def test_buy_from_fre_and_order(
 
     assert from_wei(publish_bal2) == from_wei(publish_bal1) + 2.0
 
-    assert from_wei(DT.balanceOf(DT.getPaymentCollector())) == 0
+    if template_index == 2:
+        assert from_wei(DT.balanceOf(DT.getPaymentCollector())) == 0

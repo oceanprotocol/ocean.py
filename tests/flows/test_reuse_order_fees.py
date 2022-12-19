@@ -110,14 +110,7 @@ def test_reuse_order_fees(
     start_order_receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
+        provider_fees=provider_fees,
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
         consume_market_order_fee_amount=int_units("10", bt.decimals()),
@@ -235,14 +228,7 @@ def reuse_order_with_mock_provider_fees(
     # Reuse order
     dt.reuse_order(
         order_tx_id=start_order_tx_id,
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
+        provider_fees=provider_fees,
         transaction_parameters={"from": consumer_wallet},
     )
 
