@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 Here, we do setup for local testing.
 
-We assume you've already installed Ocean, and configured brownie.
+We assume you've already [installed Ocean](install.md), and [configured brownie](brownie.md).
 
 ## 1. Download barge and run services
 
@@ -66,6 +66,8 @@ config = ExampleConfig.get_config("development")
 
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean(config)
+
+# Create OCEAN object. Barge auto-created OCEAN, and ocean instance knows
 OCEAN = ocean.OCEAN_token
 
 # Create Alice's wallet

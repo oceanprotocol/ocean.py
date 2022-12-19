@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D flow, using [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#goerli).
+This quickstart describes a C2D flow, using a remote setup on Mumbai testnet.
 
 Here are the steps:
 

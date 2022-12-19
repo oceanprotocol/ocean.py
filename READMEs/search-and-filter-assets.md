@@ -9,25 +9,6 @@ SPDX-License-Identifier: Apache-2.0
 This quickstart describes how assets can be found by their `tags` from Aquarius.
 
 
-Here are the steps:
-
-1.  Setup
-2.  Alice creates few assets for testing
-3.  Alice searches & filters assets by their `tags`
-
-Let's go through each step.
-
-## 1. Setup
-
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
-
 
 ## 2. Alice publishes datasets
 
