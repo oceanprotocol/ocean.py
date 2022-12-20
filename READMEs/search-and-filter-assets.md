@@ -9,10 +9,13 @@ SPDX-License-Identifier: Apache-2.0
 This quickstart describes how assets can be found by their `tags` from Aquarius.
 
 
+## 1. Setup
+
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes datasets
 
-Now, you're Alice. Using [publish-flow](publish-flow.md) model, do:
+Now, you're Alice. 
 
 ```python
 #data info
