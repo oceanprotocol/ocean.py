@@ -38,8 +38,16 @@ pip3 install --pre ocean-lib
 - Issue: if you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
 
+## ocean.py uses Brownie
+
+When you installed Ocean (`ocean-lib` pypi package) above, it included installation of Brownie (`eth-brownie` package).
+
+ocean.py uses Brownie to connect with deployed smart contracts.
+
+Thanks to Brownie, ocean.py treats each Ocean smart contract as a Python class, and each deployed smart contract as a Python object. We love this feature, because it means Python programmers can treat Solidity code as Python code! 🤯
+
 ## Next step
 
 You've now installed Ocean, great!
 
-Next up is for you to [configure Brownie](brownie.md), to connect with smart contracts.
+Your next step is to [setup locally](setup-local.md).

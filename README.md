@@ -16,7 +16,7 @@ With ocean.py, you can:
 
 - **Publish** data services: downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
 - **Sell** datatokens via for a fixed price. Sell data NFTs.
-- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io), [Brownie](https://eth-brownie.readthedocs.io/en/latest/), etc.
+- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io) or [Brownie](https://eth-brownie.readthedocs.io/en/latest/).
 
 ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
@@ -29,13 +29,14 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 ## 🏄 Quickstart
 
  1. **[Install Ocean](READMEs/install.md)**
- 2. **[Configure brownie](READMEs/brownie.md)**
- 3. **[Setup locally](READMEs/setup-local.md)** or **[remotely](READMEs/setup-remote.md)**
- 4. **[Walk through main flow](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 2. **[Setup locally](READMEs/setup-local.md)** 
+ 3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 4. **[Set up remotely](READMEs/setup-remote.md)**
+ 5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network.
+ 6. **[C2D](READMEs/c2d-flow.md)** - toxkenize & monetize AI algorithm via Compute-to-Data
 
 ### More types of data assets
 
-- **[C2D](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data
 - **[REST API](READMEs/publish-flow-restapi.md)** - publish & consume REST API data. Example on Binance ETH price feed
 - **[GraphQL](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data. Example on Ocean Data NFTs
 - **[On-chain data](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data. Example on Ocean swap fees.
@@ -45,9 +46,6 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 - [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
-
-### Key-value flows
-
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 

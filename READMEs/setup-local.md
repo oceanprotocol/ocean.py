@@ -7,7 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 
 Here, we do setup for local testing.
 
-We assume you've already [installed Ocean](install.md), and [configured brownie](brownie.md).
+We assume you've already [installed Ocean](install.md).
 
 ## 1. Download barge and run services
 
@@ -31,7 +31,15 @@ docker system prune -a --volumes
 
 Now that we have barge running, we can mostly ignore its console while it runs.
 
-## 2. Set envvars
+## 2. Brownie local network configuration
+
+(You don't need to do anything in this step, it's just useful to understand.)
+
+Brownie's network configuration file is at `~/.brownie/network-config.yaml`.
+
+When running locally, Brownie will use the chain listed under `development`, having id `development`. This refers to Ganache, which is running in Barge.
+
+## 3. Set envvars
 
 In a console different than barge (e.g. the console where you installed Ocean, or a new one):
 
@@ -48,7 +56,7 @@ export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 3. Setup in Python
+## 4. Setup in Python
 
 In the same console, run Python console:
 ```console
@@ -92,8 +100,7 @@ mint_fake_OCEAN(config)
 from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
-
-## Next step
+## 5. Next step
 
 You've now set up everything you need for local testing, congrats!
 

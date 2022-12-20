@@ -7,9 +7,14 @@ SPDX-License-Identifier: Apache-2.0
 
 This step is the fun one! In it, you'll publish a data asset, post for free / for sale, dispense it / buy it, and consume it.
 
-We assume you've already [installed Ocean](install.md), [configured brownie](brownie.md), and done either [local](setup-local.md) or [remote setup](setup-remote.md).
+We assume you've already (a) [installed Ocean](install.md), and (b) done [local setup](setup-local.md) or [remote setup](setup-remote.md). This flow works for either one, without any changes between them (!)
 
-This flow works for local _or_ remote setup, without any changes between them (!)
+Steps in the flow:
+1. Alice publishes dataset
+2. Bob gets access to the dataset (faucet, priced, etc)
+3. Bob consumes the dataset
+
+Let's go!
 
 ## 1. Alice publishes dataset
 
@@ -20,9 +25,22 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
-print(f"Just published asset, with did={ddo.did}")
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
+
+#print
+print("Just published asset:")
+print(f"  data_nft: symbol={data_nft.symbol}, address={data_nft.address}")
+print(f"  datatoken: symbol={datatoken.symbol}, address={datatoken.address}")
+print(f"  did={ddo.did}")
 ```
+
+You've now published an Ocean asset!
+- `data_nft` is the base (base IP)
+- `datatoken` for access by others (licensing)
+- `ddo` holding metadata
+
+
+(For more info, see [Appendix: Publish Details](#appendix-publish-details).)
 
 ## 2. Bob gets access to the dataset
 
@@ -34,15 +52,15 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 In the same Python console:
 ```python
 #Approach A: Alice mints datatokens to Bob
-datatoken.mint(bob, "1 ether", {"from": alice})
+datatoken.mint(bob, to_wei(1), {"from": alice})
 
 #Approach B: Alice mints for herself, and transfers to Bob
-datatoken.mint(alice, "1 ether", {"from": alice})
-datatoken.transfer(bob, "1 ether", {"from": alice})
+datatoken.mint(alice, to_wei(1), {"from": alice})
+datatoken.transfer(bob, to_wei(1), {"from": alice})
 
 #Approach C: Alice posts for free, via a faucet; Bob requests & gets
 datatoken.create_dispenser({"from": alice})
-datatoken.dispense("1 ether", {"from": bob})
+datatoken.dispense(to_wei(1), {"from": bob})
 
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
@@ -60,6 +78,8 @@ OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob_wallet})
 # D.4 Bob buys datatoken
 exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob_wallet})
 ````
+
+(For more info, see [Appendix: Faucet Details](#appendix-faucet-details) and [Exchange Details](#appendix-exchange-details).)
 
 ## 3. Bob consumes the dataset
 
@@ -81,34 +101,18 @@ cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
 
-The file is in ARFF format, used by some AI/ML tools. Our example has two input variables (x0, x1) and one output.
-
-```console
-% 1. Title: Branin Function
-% 3. Number of instances: 225
-% 6. Number of attributes: 2
-
-@relation branin
-
-@attribute 'x0' numeric
-@attribute 'x1' numeric
-@attribute 'y' numeric
-
-@data
--5.0000,0.0000,308.1291
--3.9286,0.0000,206.1783
-...
-```
+(For more info, see [Appendix: Consume Details](#appendix-consume-details).)
 
 ## Next step
 
-You're now done all the quickstart steps! There are many possible directions.
+If you did this readme with _local_ setup, then your next step is [remote setup](setup-remote.md).
 
-- You can review the appendices below to see repeat previous steps, but with further flexibility
-- And you can go back to the [main README](../README.md) to learn more yet
+If you did this readme with _remote_ setup, then your next step is [C2D](READMEs/c2d-flow.md), where you'll tokenize & monetize an AI algorithm via Compute-to-Data.
+
+Bonus: this README's appendices expand on the steps above with further flexibility.
 
 
-## Appendix: Publish Details
+<h2 id="appendix-publish-details">Appendix: Publish Details</h4>
 
 ### Publish Flexibility
 
@@ -141,12 +145,23 @@ _, _, ddo = ocean.assets.create(
     alice_wallet,
     datatoken_args=[DatatokenArguments(files=[url_file])],
 )
-print(f"Just published asset, with did={ddo.did}")
 ```
 
-### Metadata Encryption or Compression
+### DIDs and DDOs
 
-The asset metadata is stored on-chain. It's encrypted and compressed by default. Therefore it supports GDPR "right-to-be-forgotten" compliance rules by default.
+A DID Document (DDO) is a JSON blob that holds information about the DID. Given a DID, a resolver will return the DDO of that DID.
+
+An Ocean _asset_ has a DID and DDO. The DDO should include metadata about the asset, and define access in at least one service. Only owners or delegated users can modify the DDO.
+
+DDOs follow a schema - a pre-specified structure of possible metadata fields.
+
+Ocean Aquarius helps in reading, decrypting, and searching through encrypted DDO data from the chain.
+
+[Ocean docs](https://docs.oceanprotocol.com/core-concepts/did-ddo) have further info yet.
+
+### DDO Encryption or Compression
+
+The DDO is stored on-chain. It's encrypted and compressed by default. Therefore it supports GDPR "right-to-be-forgotten" compliance rules by default.
 
 You can control this during create():
 - To disable encryption, use `ocean.assets.create(..., encrypt_flag=False)`.
@@ -160,7 +175,6 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 ```python
 from ocean_lib.models.arguments import DataNFTArguments
 data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
-print(f"Created data NFT: address={data_nft.address}, name={data_nft.name}, symbol={data_nft.symbol()}")
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -172,7 +186,6 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 ```python
 from ocean_lib.models.arguments import DatatokenArguments
 datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
-print(f"Created datatoken: address={datatoken.address}, name={datatoken.name}, symbol={datatoken.symbol()}")
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:<List[Datatoken]` and it will use those datatokens during creation.
@@ -190,7 +203,7 @@ Datatoken templates:
 - `template_index` = 2 [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol). Main benefits: single tx for "dispense & order", and single tx for "buy and order"
 
 
-## Appendix: Faucet Details
+<h2 id="appendix-faucet-details">Appendix: Faucet Details</h4>
 
 ### Faucet Flexibility
 
@@ -225,7 +238,7 @@ DispenserStatus:
 ```
 
 
-## Appendix: Exchange Details
+<h2 id="appendix-exchange-details">Appendix: Exchange Details</h4>
 
 ### Exchange Flexibility
 
@@ -270,4 +283,28 @@ FeesInfo:
   publish_market_fee_collector = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
   opc_fee = 0.001 (1000000000000000 wei)
   ocean_fee_available (to opc) = 0.001 (1000000000000000 wei)
+```
+
+
+<h2 id="appendix-consume-details">Appendix: Consume Details</h4>
+
+### About ARFF format
+
+The file is in ARFF format, used by some AI/ML tools. Our example has two input variables (x0, x1) and one output.
+
+```console
+% 1. Title: Branin Function
+% 3. Number of instances: 225
+% 6. Number of attributes: 2
+
+@relation branin
+
+@attribute 'x0' numeric
+@attribute 'x1' numeric
+@attribute 'y' numeric
+
+@data
+-5.0000,0.0000,308.1291
+-3.9286,0.0000,206.1783
+...
 ```
