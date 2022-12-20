@@ -68,15 +68,15 @@ price = to_wei(100)
 exchange = datatoken.create_exchange(price, OCEAN.address, {"from": alice})
 
 # D.2 Alice makes 100 datatokens available on the exchange
-datatoken.mint(alice_wallet, to_wei(100), {"from": alice_wallet})
-datatoken.approve(exchange.address, to_wei(100), {"from": alice_wallet})
+datatoken.mint(alice, to_wei(100), {"from": alice_wallet})
+datatoken.approve(exchange.address, to_wei(100), {"from": alice})
 
 # D.3 Bob lets exchange pull the OCEAN needed 
 OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
-OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob_wallet})
+OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob})
 
 # D.4 Bob buys datatoken
-exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob_wallet})
+exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob})
 ````
 
 (For more info, see [Appendix: Faucet Details](#appendix-faucet-details) and [Exchange Details](#appendix-exchange-details).)
@@ -88,10 +88,10 @@ Bob now has the datatoken for the dataset! Time to download the dataset and use 
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
 
 # Bob downloads the file. If the connection breaks, Bob can try again
-file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
+file_name = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
 ```
 
 Let's check that the file is downloaded. In a new console:
@@ -142,7 +142,7 @@ url_file = UrlFile(
 from ocean_lib.ocean.ocean_assets import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
-    alice_wallet,
+    alice,
     datatoken_args=[DatatokenArguments(files=[url_file])],
 )
 ```
@@ -174,7 +174,7 @@ You can control this during create():
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
 from ocean_lib.models.arguments import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -185,7 +185,7 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 
 ```python
 from ocean_lib.models.arguments import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:<List[Datatoken]` and it will use those datatokens during creation.
@@ -211,7 +211,7 @@ Datatoken templates:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
 
-A call with both would look like `create_dispenser({"from": alice_wallet}, max_tokens=max_tokens, max_balance=max_balance)`
+A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`
 
 
 ### Faucet Tips & Tricks

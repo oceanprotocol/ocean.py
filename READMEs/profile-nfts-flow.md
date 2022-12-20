@@ -35,7 +35,7 @@ In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
 from ocean_lib.models.arguments import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), alice_wallet)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), alice)
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
@@ -67,14 +67,14 @@ prefix = "\x19Ethereum Signed Message:\n32"
 msg = Web3.solidityKeccak(
     ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
 )
-signed = sign_with_key(msg, alice_wallet.private_key)
+signed = sign_with_key(msg, alice.private_key)
 symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter
 profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
 
 # set
-data_nft.setNewData(profiledata_name_hash, profiledata_val_encr_hex, {"from": alice_wallet})
+data_nft.setNewData(profiledata_name_hash, profiledata_val_encr_hex, {"from": alice})
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -106,7 +106,7 @@ symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)  # bytes
 symkey_val_encr_hex = symkey_val_encr.hex()  # hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
-data_nft.setNewData(symkey_name_hash, symkey_val_encr_hex, {"from": alice_wallet})
+data_nft.setNewData(symkey_name_hash, symkey_val_encr_hex, {"from": alice})
 ```
 
 ## 6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'

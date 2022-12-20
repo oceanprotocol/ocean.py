@@ -35,12 +35,12 @@ import os
 from brownie.network import accounts
 accounts.clear()
 alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice_wallet = accounts.add(alice_private_key)
+alice = accounts.add(alice_private_key)
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = accounts.add(bob_private_key)
-assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
+bob = accounts.add(bob_private_key)
+assert accounts.at(bob.address).balance() > 0, "Bob needs ganache ETH"
 ```
 
 ## 2. Publish Data NFT & Datatoken
@@ -50,7 +50,7 @@ assert accounts.at(bob_wallet.address).balance() > 0, "Bob needs ganache ETH"
 In the same Python console:
 ```python
 from ocean_lib.models.arguments import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
 print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 
@@ -65,7 +65,7 @@ In the same Python console:
 ```python
 # Create datatoken related to the above NFT.
 from ocean_lib.models.arguments import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
 print(f"Created datatoken. Its address is {datatoken.address}")
 ```
 
@@ -82,7 +82,7 @@ print(f"config.metadata_cache_uri = {config['METADATA_CACHE_URI']}")
 print(f"config.provider_url = {config['PROVIDER_URL']}")
 
 # wallet
-print(f"alice_wallet.address = '{alice_wallet.address}'")
+print(f"alice.address = '{alice_wallet.address}'")
 
 # data NFT
 print(f"data NFT name: {data_nft.name()}")

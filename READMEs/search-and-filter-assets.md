@@ -30,12 +30,12 @@ tags = [
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
     print(f"Just published asset, with did={ddo.did}")
     
     # Update the metadata introducing `tags`
     ddo.metadata.update({"tags": tag})
-    ddo = ocean.assets.update(ddo, alice_wallet, config["PROVIDER_URL"])
+    ddo = ocean.assets.update(ddo, alice, config["PROVIDER_URL"])
     print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```
