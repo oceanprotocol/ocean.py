@@ -18,16 +18,7 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & installation
-
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes the API asset
 

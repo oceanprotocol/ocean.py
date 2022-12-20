@@ -21,13 +21,11 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & installation
+### 1.1 Install Ocean
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Install the library
+First, ensure that you've [installed Ocean](install.md)
 
-### Install matplotlib
+### 1.2 Install matplotlib
 
 This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it.
 
@@ -37,17 +35,12 @@ In the same console:
 source venv/bin/activate
 
 #install matplotlib
-pip install numpy matplotlib
+pip install matplotlib
 ```
 
-### Setup for remote
+### 1.3 Setup remotely
 
-From [simple-remote](simple-remote.md), do:
-- [x] Create Mumbai Accounts (One-Time)
-- [x] Create Config File for Services
-- [x] Set envvars
-- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
-
+Follow [setup-remote.md](setup-remote.md).
 
 ## 2. Alice publishes dataset
 

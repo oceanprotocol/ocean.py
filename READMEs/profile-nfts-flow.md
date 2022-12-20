@@ -18,18 +18,11 @@ Here are the steps:
 
 ## 1. Setup
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes data NFT
 
-We'll create a data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
+We publish a data NFT like elsewhere, except we set `transferable=False` (and skip print statements).
 
 In the Python console:
 ```python
