@@ -42,7 +42,6 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ### Key-value flows
 
-- [Just NFT & token](READMEs/data-nfts-and-datatokens-flow.md) - publish just a data NFT and datatoken
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 
