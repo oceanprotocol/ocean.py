@@ -28,18 +28,14 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ## 🏄 Quickstart
 
+Follow these steps in sequence to ramp into Ocean:
+
  1. **[Install Ocean](READMEs/install.md)**
  2. **[Setup locally](READMEs/setup-local.md)** 
  3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
  4. **[Set up remotely](READMEs/setup-remote.md)**
- 5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network.
- 6. **[C2D](READMEs/c2d-flow.md)** - toxkenize & monetize AI algorithm via Compute-to-Data
-
-### More types of data assets
-
-- **[REST API](READMEs/publish-flow-restapi.md)** - publish & consume REST API data. Example on Binance ETH price feed
-- **[GraphQL](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data. Example on Ocean Data NFTs
-- **[On-chain data](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data. Example on Ocean swap fees.
+ 5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network
+ 6. **[Walk through C2D flow](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data
 
 ### Use-case flows
 
@@ -48,6 +44,14 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 - [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
+
+
+### More types of data assets
+
+Each of the following shows how to publish & consume a particular type of data.
+- **[REST API](READMEs/publish-flow-restapi.md)** - Example on Binance ETH price feed
+- **[GraphQL](READMEs/publish-flow-graphql.md)** - Example on Ocean Data NFTs
+- **[On-chain data](READMEs/publish-flow-onchain.md)** - Example on Ocean swap fees.
 
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
