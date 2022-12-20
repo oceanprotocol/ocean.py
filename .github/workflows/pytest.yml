@@ -36,7 +36,7 @@ jobs:
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ACTION_TOKEN }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_dev.txt
