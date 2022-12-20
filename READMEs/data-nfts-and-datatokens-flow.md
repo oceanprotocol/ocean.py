@@ -66,10 +66,19 @@ In the same Python console:
 # Create datatoken related to the above NFT.
 from ocean_lib.models.arguments import DatatokenArguments
 datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
-print(f"Created datatoken. Its address is {datatoken.address}")
+datatoken_address = datatoken.address  # remember this if you want to retrieve your datatoken later
+print(f"Created datatoken. Its address is {datatoken_address}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋
+To recover your datatoken as an object in the future, use the address you wrote down previously:
+
+```python
+from ocean_lib.models import Datatoken
+# config like in readme, please use the same network where you created the datatoken
+datatoken = Datatoken(config, datatoken_address)
+```
+
 
 ## Appendix. Tips & Tricks
 
