@@ -31,7 +31,7 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
  1. **[Install Ocean](READMEs/install.md)**
  2. **[Configure brownie](READMEs/brownie.md)**
  3. **[Setup locally](READMEs/setup-local.md)** or **[remotely](READMEs/setup-remote.md)**
- 4. **[Walk through main flow](main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 4. **[Walk through main flow](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
 
 ### More types of data assets
 
@@ -42,7 +42,7 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ### Key-value flows
 
-- **[Just NFT & token](READMEs/data-nfts-and-datatokens-flow.md)** - publish just a data NFT and datatoken
+- [Just NFT & token](READMEs/data-nfts-and-datatokens-flow.md) - publish just a data NFT and datatoken
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 

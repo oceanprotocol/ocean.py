@@ -154,9 +154,40 @@ You can control this during create():
 - To disable both, use `ocean.assets.create(..., encrypt_flag=False, compress_flag=False)`.
 
 
-### Different Templates
+### Create _just_ a data NFT
 
-`ocean.assets.create(...)` creates a data NFT using ERC721Template, and datatoken using ERC20Template by default. For each, you can use a different template. In creating a datatoken, you can use an existing data NFT by adding the argument `data_nft_address=<data NFT address>`.
+Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
+```python
+from ocean_lib.models.arguments import DataNFTArguments
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice_wallet)
+print(f"Created data NFT: address={data_nft.address}, name={data_nft.name}, symbol={data_nft.symbol()}")
+```
+
+If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
+
+### Create a datatoken from a data NFT
+
+Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo object. However, we may want a second datatoken. Or, we may have started with _just_ the data NFT, and want to add a datatoken to it. Here's how:
+
+```python
+from ocean_lib.models.arguments import DatatokenArguments
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice_wallet)
+print(f"Created datatoken: address={datatoken.address}, name={datatoken.name}, symbol={datatoken.symbol()}")
+```
+
+If you call `create()` after this, you can pass in an argument `deployed_datatokens:<List[Datatoken]` and it will use those datatokens during creation.
+
+
+### Different Data NFT and Datatoken Templates
+
+Ocean allows different templates for data NFTs and datatokens. This gives flexibility going into the future.
+
+Data NFT templates:
+- [ERC721Template](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC721Template.sol). This is the sole template so far.
+
+Datatoken templates:
+- `template_index` = 1: [ERC20Template](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol). This is the default. Main benefit: faucets default dispensing to anyone
+- `template_index` = 2 [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol). Main benefits: single tx for "dispense & order", and single tx for "buy and order"
 
 
 ## Appendix: Faucet Details
