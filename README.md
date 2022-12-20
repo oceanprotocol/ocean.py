@@ -40,16 +40,16 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 - **[GraphQL](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data. Example on Ocean Data NFTs
 - **[On-chain data](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data. Example on Ocean swap fees.
 
+### Use-case flows
+
+- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
+- [Data Farming](READMEs/df.md) - curate data assets, earn rewards
+- [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
+
 ### Key-value flows
 
 - [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
 - [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
-
-### Use-case flows
-
-- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price
-- [Data Farming](READMEs/df.md) - curate data assets, earn rewards
-- [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
 
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
