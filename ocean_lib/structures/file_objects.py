@@ -105,6 +105,8 @@ def FilesTypeFactory(file_obj: dict) -> FilesType:
             method=file_obj.get("method", "GET"),
             headers=file_obj.get("headers"),
         )
+    elif file_obj["type"] == "arweave":
+        return ArweaveFile(file_obj["transactionId"])
     elif file_obj["type"] == "ipfs":
         return IpfsFile(file_obj["hash"])
     elif file_obj["type"] == "graphql":
