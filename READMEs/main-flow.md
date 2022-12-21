@@ -114,9 +114,81 @@ Bonus: this README's appendices expand on the steps above with further flexibili
 
 <h2 id="appendix-publish-details">Appendix: Publish Details</h4>
 
+### Reconstructing Data NFT & Datatoken
+
+Anytime in the future, you can reconstruct your data NFT as an object in Python, via:
+
+```python
+from ocean_lib.models.data_nft import DataNFT
+config = <like shown elsewhere in READMEs>
+data_nft_address = <what you wrote down previously>
+data_nft = DataNFT(config, datatoken_address)
+```
+
+It's similar for Datatokens. In Python:
+
+```python
+from ocean_lib.models.datatoken import Datatoken
+config = <like shown elsewhere in READMEs>
+datatoken_address = <what you wrote down previously>
+datatoken = Datatoken(config, datatoken_address)
+```
+
+### Data NFT Interface
+
+Data NFTs implement ERC721 functionality, and ERC725 which extends it.
+
+ERC721:
+- Basic spec of a non-fungible token (NFT) 
+- Official spec is at [erc721.org](https://erc721.org/)
+- Solidity interface is in Ocean contracts repo as [IERC721Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC721Template.sol)
+
+ERC725:
+- ERC725X is execution, and Y is key-value store
+- Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-725)
+- Solidity interface is in Ocean contracts repo as [IERC725X.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725X.sol) (execution) and [IERC725Y.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725Y.sol) (key-value store)
+
+Your Python `data_nft` object is of Python class [DataNFT class](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). Thanks to Brownie, the DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method! Thank you, Brownie :)
+
+Besides that, DataNFT implements other Python methods like `create_datatoken()` to improve developer experience. And, [ocean_assets.OceanAssets](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean_assets.py) and other higher-level Python classes / methods work with DataNFT.
+
+Ocean's architecture allows for >1 implementations of ERC721, each with its own Solidity template and Python class. Here are the templates:
+- [ERC721Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC721Template.sol), exposed as Python class `DataNFT`
+- (there's just one template so far; we can expect more in the future)
+
+### Datatoken Interface
+
+Datatokens implement ERC20 (fungible token standard) functionality:
+- Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-20)
+- Solidity interface is in Ocean contracts repo as [IERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC20Template.sol)
+
+Python `datatoken` objects are of Python class [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). Thanks to Brownie, these classes have a Python method for every Solidity method.
+
+Besides that, Datatoken class implements more methods like `start_order()`, `create_exchange()`, and `create_dispenser()` to enhance developer experience.
+
+Ocean's architecture allows for >1 implementations of ERC20, each with its own "template". Here are the templates:
+- Template 1: [ERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol), exposed as Python class [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py)
+- Template 2: [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol), exposed as Python class [DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken_enterprise.py). It inherits from template 1 in Solidity and in Python. It adds new methods: a single tx for "dispense & order", and single tx for "buy and order".
+- (we can expect more templates in the future)
+
+
+### DIDs and DDOs
+
+DDOs get returned in `create()` calls. Think of them as metadata, following a well-defined format.
+
+Let's get more specific. A [DID](https://w3c-ccg.github.io/did-spec/) is a decentralized identifier. A DID Document (DDO) is a JSON blob that holds information about the DID. Given a DID, a resolver will return the DDO of that DID.
+
+An Ocean _asset_ has a DID and DDO, alongside a data NFT and >=0 datatokens. The DDO should include metadata about the asset, and define access in at least one service. Only owners or delegated users can modify the DDO.
+
+DDOs follow a schema - a pre-specified structure of possible metadata fields.
+
+Ocean Aquarius helps in reading, decrypting, and searching through encrypted DDO data from the chain.
+
+[Ocean docs](https://docs.oceanprotocol.com/core-concepts/did-ddo) have further info yet.
+
 ### Publish Flexibility
 
-Here's an example similar to above, but exposes more fine-grained control.
+Here's an example similar to the `create()` step above, but exposes more fine-grained control.
 
 In the same python console:
 ```python
@@ -147,17 +219,6 @@ _, _, ddo = ocean.assets.create(
 )
 ```
 
-### DIDs and DDOs
-
-A DID Document (DDO) is a JSON blob that holds information about the DID. Given a DID, a resolver will return the DDO of that DID.
-
-An Ocean _asset_ has a DID and DDO. The DDO should include metadata about the asset, and define access in at least one service. Only owners or delegated users can modify the DDO.
-
-DDOs follow a schema - a pre-specified structure of possible metadata fields.
-
-Ocean Aquarius helps in reading, decrypting, and searching through encrypted DDO data from the chain.
-
-[Ocean docs](https://docs.oceanprotocol.com/core-concepts/did-ddo) have further info yet.
 
 ### DDO Encryption or Compression
 
@@ -189,19 +250,6 @@ datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), 
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:<List[Datatoken]` and it will use those datatokens during creation.
-
-
-### Different Data NFT and Datatoken Templates
-
-Ocean allows different templates for data NFTs and datatokens. This gives flexibility going into the future.
-
-Data NFT templates:
-- [ERC721Template](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC721Template.sol). This is the sole template so far.
-
-Datatoken templates:
-- `template_index` = 1: [ERC20Template](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol). This is the default. Main benefit: faucets default dispensing to anyone
-- `template_index` = 2 [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol). Main benefits: single tx for "dispense & order", and single tx for "buy and order"
-
 
 <h2 id="appendix-faucet-details">Appendix: Faucet Details</h4>
 
