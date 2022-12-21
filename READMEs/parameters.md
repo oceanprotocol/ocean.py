@@ -12,9 +12,9 @@ An `Ocean` instance will hold a `config_dict` that holds various config paramete
 1.  dict input: `Ocean({'METADATA_CACHE_URI':..})`
 2.  use boilerplate from example config
 
-Here are examples.
+## Example
 
-## 1. dict input, filled from envvars
+Here is an example for (1): dict input, filled from envvars
 
 ```python
 import os

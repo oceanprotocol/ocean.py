@@ -16,34 +16,8 @@ Let's go through each step.
 
 ## 1. Setup
 
-### 1.1 Setup from console
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md).
 
-From [installation-flow](install.md), do "Setup" section.
-
-We also need to set the factory envvar. In the console:
-```console
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-```
-
-### 2.2 Setup in Python
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do "Setup in Python" section. 
-
-Now, we're in the Python console.
-
-### 2.3 Fake OCEAN
-
-Alice needs (fake) OCEAN for later. In the same Python console:
-```python
-# mint OCEAN. Alice will get some
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
-# simpler variable names
-OCEAN = ocean.OCEAN_token
-veOCEAN = ocean.ve_ocean
-alice = alice_wallet
-```
 
 ## 2. Lock OCEAN for veOCEAN
 
@@ -158,9 +132,9 @@ print(f"Just claimed {OCEAN_after - OCEAN_before} OCEAN rewards")
 
 ## 7. Repeat steps 1-6, for Eth mainnet
 
-We leave this as an exercise to the reader:)
+First, you'll need to set up remotely. This will be like [setup-remote.md](setup-remote.md), but for Eth mainnet.
 
-Here's a hint to get started: initial setup is like the [simple-remote flow](simple-remote.md).
+We leave this as an exercise to the reader:)
 
 Happy Data Farming!
 
