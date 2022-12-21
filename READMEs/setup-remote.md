@@ -51,15 +51,26 @@ All the [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) 
 
 The config file's default RPCs point to Infura, which require you to have an Infura account with corresponding token `WEB3_INFURA_PROJECT_ID`.
 
-- If you _do_ have an infura account: in console, `export WEB3_INFURA_PROJECT_ID=<your infura ID>`
-- If not, one option is to get an Infura account.
-- If not, a simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. The command below replaces Infura RPCs with public ones in `network-config.yaml`:
+
+#### If you do have an Infura account
+
+- Linux & MacOS users: in console: `export WEB3_INFURA_PROJECT_ID=<your infura ID>`
+- Windows: in console: `set WEB3_INFURA_PROJECT_ID=<your infura ID>`
+
+
+#### If you do _not_ have an Infura account
+
+One option is to get an Infura account.
+
+A simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. The command below replaces Infura RPCs with public ones in `network-config.yaml`:
 
 `console
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 `
 
-Congrats, you've now configured your Brownie network file. You rarely need to worry about it from now on.
+#### RPCs wrapup
+
+Congrats, you've now configured your Brownie network file! You rarely need to worry about it from now on.
 
 
 ## 2. Create EVM Accounts (One-Time)
@@ -78,13 +89,11 @@ from eth_account.account import Account
 account1 = Account.create()
 account2 = Account.create()
 
-print(f"""
-export REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}
-export REMOTE_TEST_PRIVATE_KEY2={account2.key.hex()}
+print(f"REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}")
+print(f"REMOTE_TEST_PRIVATE_KEY2={account2.key.hex()}")
 
-export ADDRESS1={account1.address}
-export ADDRESS2={account2.address}
-""")
+print(f"ADDRESS1={account1.address}")
+print(f"ADDRESS2={account2.address}")
 ```
 
 Then, hit Ctrl-C to exit the Python console.
@@ -92,8 +101,6 @@ Then, hit Ctrl-C to exit the Python console.
 Now, you have two EVM accounts (address & private key). Save them somewhere safe, like a local file or a password manager. 
 
 These accounts will work on any EVM-based chain: production chains like Eth mainnet and Polygon, and testnets like Goerli and Mumbai. Here, we'll use them for Mumbai.
-
-The "export " is so that you can conveniently copy & paste them into a console, to set envvars for Ocean quickstarts or otherwise.
 
 
 ## 3. Get (fake) MATIC on Mumbai
@@ -123,11 +130,21 @@ You can confirm receiving funds by going to the following url, and seeing your r
 
 ## 5. Set envvars
 
-In the console:
+As usual, Linux/MacOS needs "`export`" and Windows needs "`set`". In the console:
+
+#### Linux & MacOS users:
 ```console
 # For accounts: set private keys
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+```
+
+
+#### Windows users:
+```console
+# For accounts: set private keys
+set REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
+set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 ```
 
 ## 6. Setup in Python

@@ -41,19 +41,35 @@ When running locally, Brownie will use the chain listed under `development`, hav
 
 ## 3. Set envvars
 
-In a console different than barge (e.g. the console where you installed Ocean, or a new one):
+From here on, go to a console different than Barge. (E.g. the console where you installed Ocean, or a new one.)
+
+First, ensure that you're in the working directory, with venv activated:
 
 ```console
-# ensure that you're in the working directory, with venv activated
 cd my_project
 source venv/bin/activate
+```
 
+Then, set keys in readmes. If you're a Linux or MacOS user, you'll use "`export`"; if Windows, you'll use "`set`". Let's make it explicit. In the same console:
+
+#### Linux & MacOS users:
+```console
 # set keys for alice and bob in readmes
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
 # set key for minting fake OCEAN
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+```
+
+#### Windows users:
+```console
+# set keys for alice and bob in readmes
+set TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
+set TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+
+# set key for minting fake OCEAN
+set FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
 ## 4. Setup in Python
