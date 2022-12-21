@@ -46,9 +46,9 @@ class Datatoken(ContractBase):
     ) -> str:
 
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
-            consume_market_fees = FeeTokenArguments()
+            consume_market_fees = FeeTokenInfo()
 
         return self.contract.startOrder(
             checksum_addr(consumer),
@@ -316,9 +316,9 @@ class Datatoken(ContractBase):
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
-            consume_market_fees = FeeTokenArguments()
+            consume_market_fees = FeeTokenInfo()
 
         buyer_addr = (
             transaction_parameters["from"].address
@@ -369,10 +369,10 @@ class Datatoken(ContractBase):
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
-        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
         if not consume_market_fees:
-            consume_market_fees = FeeTokenArguments()
+            consume_market_fees = FeeTokenInfo()
 
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)

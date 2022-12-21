@@ -83,12 +83,12 @@ In the same python console:
 service = ddo.services[0]
 
 # Bob sends a datatoken to the service, to get access
-from ocean_lib.models.arguments import FeeTokenArguments
+from ocean_lib.models.arguments import FeeTokenInfo
 order_tx_id = ocean.assets.pay_for_access_service(
     ddo,
     bob_wallet,
     service,
-    FeeTokenArguments(token=datatoken.address),
+    FeeTokenInfo(token=datatoken.address),
 )
 
 # Bob now has access! He downloads the asset.

@@ -26,7 +26,7 @@ from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.arguments import (
     DataNFTArguments,
     DatatokenArguments,
-    FeeTokenArguments,
+    FeeTokenInfo,
 )
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
@@ -509,7 +509,7 @@ class OceanAssets:
         ddo: DDO,
         wallet,
         service: Optional[Service] = None,
-        consume_market_fees: Optional[FeeTokenArguments] = None,
+        consume_market_fees: Optional[FeeTokenInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
@@ -588,7 +588,7 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 datasets[i],
                 item,
-                FeeTokenArguments(
+                FeeTokenInfo(
                     consume_market_order_fee_address,
                     datasets[i].consume_market_order_fee_token,
                     datasets[i].consume_market_order_fee_amount,
@@ -601,7 +601,7 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 algorithm_data,
                 result["algorithm"],
-                FeeTokenArguments(
+                FeeTokenInfo(
                     address=consume_market_order_fee_address,
                     token=algorithm_data.consume_market_order_fee_token,
                     amount=algorithm_data.consume_market_order_fee_amount,
@@ -619,7 +619,7 @@ class OceanAssets:
         self,
         asset_compute_input: ComputeInput,
         item: dict,
-        consume_market_fees: FeeTokenArguments,
+        consume_market_fees: FeeTokenInfo,
         wallet,
         consumer_address: Optional[str] = None,
     ):

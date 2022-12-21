@@ -11,7 +11,7 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.arguments import DatatokenArguments, FeeTokenArguments
+from ocean_lib.models.arguments import DatatokenArguments, FeeTokenInfo
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -91,7 +91,7 @@ def test_start_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fees=FeeTokenArguments(
+        publish_market_order_fees=FeeTokenInfo(
             address=publish_market_wallet.address,
             token=bt.address,
             amount=publish_market_order_fee,
@@ -150,7 +150,7 @@ def test_start_order_fees(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_fees=FeeTokenArguments(
+        consume_market_fees=FeeTokenInfo(
             address=consume_market_wallet.address,
             token=bt.address,
             amount=consume_market_order_fee,

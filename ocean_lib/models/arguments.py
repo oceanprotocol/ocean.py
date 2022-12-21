@@ -20,7 +20,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 logger = logging.getLogger("ocean")
 
 
-class FeeTokenArguments:
+class FeeTokenInfo:
     def __init__(
         self,
         address: Optional[str] = None,
@@ -108,7 +108,7 @@ class DatatokenArguments:
         template_index: Optional[int] = 1,
         minter: Optional[str] = None,
         fee_manager: Optional[str] = None,
-        publish_market_order_fees: Optional[FeeTokenArguments] = None,
+        publish_market_order_fees: Optional[FeeTokenInfo] = None,
         bytess: Optional[List[bytes]] = None,
         services: Optional[list] = None,
         files: Optional[List[FilesType]] = None,
@@ -129,9 +129,7 @@ class DatatokenArguments:
         self.services = services
         self.files = files
         self.consumer_parameters = consumer_parameters
-        self.publish_market_order_fees = (
-            publish_market_order_fees or FeeTokenArguments()
-        )
+        self.publish_market_order_fees = publish_market_order_fees or FeeTokenInfo()
         self.set_default_fees_at_deploy = not publish_market_order_fees
 
     def create_datatoken(self, data_nft, wallet, with_services=False):
@@ -140,7 +138,7 @@ class DatatokenArguments:
         initial_list = data_nft.getTokensList()
 
         if self.set_default_fees_at_deploy:
-            self.publish_market_order_fees = FeeTokenArguments(
+            self.publish_market_order_fees = FeeTokenInfo(
                 address=wallet.address, token=OCEAN_address
             )
 

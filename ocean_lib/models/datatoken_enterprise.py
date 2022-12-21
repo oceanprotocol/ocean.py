@@ -37,10 +37,10 @@ class DatatokenEnterprise(Datatoken):
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)
 
-        from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
         if not consume_market_fees:
-            consume_market_fees = FeeTokenArguments()
+            consume_market_fees = FeeTokenInfo()
 
         return self.contract.buyFromFreAndOrder(
             (
@@ -78,9 +78,9 @@ class DatatokenEnterprise(Datatoken):
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenArguments  # isort:skip
+            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
-            consume_market_fees = FeeTokenArguments()
+            consume_market_fees = FeeTokenInfo()
 
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
         return self.contract.buyFromDispenserAndOrder(

@@ -9,7 +9,7 @@ from web3.main import Web3
 from ocean_lib.models.arguments import (
     DataNFTArguments,
     DatatokenArguments,
-    FeeTokenArguments,
+    FeeTokenInfo,
 )
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
@@ -107,7 +107,7 @@ def test_combo_functions(
             "DT1P",
             "DT1SymbolP",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fees=FeeTokenArguments(
+            publish_market_order_fees=FeeTokenInfo(
                 address=publisher_wallet.address,
                 token=ZERO_ADDRESS,
                 amount=Web3.toWei("0.0005", "ether"),
