@@ -173,8 +173,7 @@ def test_start_order_fees(
     opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
-    publish_market_order_fee_amount = dt.getPublishingMarketFee()[2]
-    assert publish_market_order_fee_amount == publish_market_order_fee
+    assert dt.get_publish_market_order_fees().amount == publish_market_order_fee
 
     # Get Ocean community fee amount
     opc_order_fee = factory_router.getOPCConsumeFee()

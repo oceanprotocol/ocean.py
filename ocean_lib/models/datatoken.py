@@ -392,6 +392,11 @@ class Datatoken(ContractBase):
             transaction_parameters=transaction_parameters,
         )
 
+    def get_publish_market_order_fees(self):
+        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
+
+        return FeeTokenInfo.from_tuple(self.contract.getPublishingMarketFee())
+
 
 class MockERC20(Datatoken):
     CONTRACT_NAME = "MockERC20"

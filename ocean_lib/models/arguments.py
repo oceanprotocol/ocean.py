@@ -41,6 +41,11 @@ class FeeTokenInfo:
             self.amount,
         )
 
+    @classmethod
+    def from_tuple(cls, tup):
+        address, token, amount = tup
+        return cls(address, token, amount)
+
 
 class DataNFTArguments:
     def __init__(

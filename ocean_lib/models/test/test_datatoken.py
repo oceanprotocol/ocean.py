@@ -218,14 +218,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         {"from": publisher_wallet},
     )
 
-    publish_fees = datatoken.getPublishingMarketFee()
+    publish_fees = datatoken.get_publish_market_order_fees()
 
     # PublishMarketFeeAddress set previously
-    assert publish_fees[0] == publisher_wallet.address
+    assert publish_fees.address == publisher_wallet.address
     # PublishMarketFeeToken set previously
-    assert publish_fees[1] == get_address_of_type(config, "MockUSDC")
+    assert publish_fees.token == get_address_of_type(config, "MockUSDC")
     # PublishMarketFeeAmount set previously
-    assert publish_fees[2] == Web3.toWei("1.2", "ether")
+    assert publish_fees.amount == Web3.toWei("1.2", "ether")
     # Fee collector
     assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"

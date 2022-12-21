@@ -377,14 +377,10 @@ def test_create_datatoken_with_usdc_order_fee(
     )
 
     # Check publish fee info
-    (
-        publish_market_order_fee_address,
-        publish_market_order_fee_token,
-        publish_market_order_fee_amount,
-    ) = dt.getPublishingMarketFee()
-    assert publish_market_order_fee_address == publisher_wallet.address
-    assert publish_market_order_fee_token == usdc.address
-    assert publish_market_order_fee_amount == publish_market_order_fee_amount_in_wei
+    publish_market_fees = dt.getPublishingMarketFee()
+    assert publish_market_fees.address == publisher_wallet.address
+    assert publish_market_fees.token == usdc.address
+    assert publish_market_fees.amount == publish_market_order_fee_amount_in_wei
 
 
 @pytest.mark.unit
@@ -645,10 +641,10 @@ def test_transfer_nft(
     set_publishing_fee_event = receipt.events["PublishMarketFeeChanged"]
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
 
-    publish_fees = datatoken.getPublishingMarketFee()
-    assert publish_fees[0] == consumer_wallet.address
-    assert publish_fees[1] == OCEAN.address
-    assert publish_fees[2] == to_wei(1)
+    publish_fees = datatoken.get_publish_market_order_fees()
+    assert publish_fees.address == consumer_wallet.address
+    assert publish_fees.token == OCEAN.address
+    assert publish_fees.amount == to_wei(1)
 
 
 def test_nft_transfer_with_fre(

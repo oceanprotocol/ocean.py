@@ -56,11 +56,11 @@ def test_dispense_and_order_with_non_defaults(
         {"from": publisher_wallet},
     )
 
-    (publishMarketFeeAddress, _, publishMarketFeeAmount) = DT.getPublishingMarketFee()
+    publish_market_fees = DT.get_publish_market_order_fees()
 
     USDC.transfer(
         publisher_wallet.address,
-        publishMarketFeeAmount,
+        publish_market_fees.amount,
         {"from": factory_deployer_wallet},
     )
 
@@ -106,7 +106,7 @@ def test_dispense_and_order_with_non_defaults(
     assert DT.totalSupply() == to_wei(0)
 
     balance_opf_consume = DAI.balanceOf(opf_collector_address)
-    balance_publish = USDC.balanceOf(publishMarketFeeAddress)
+    balance_publish = USDC.balanceOf(publish_market_fees.address)
 
     assert balance_opf_consume - balance_opf_consume_before == 0
     assert balance_publish - publish_bal_before == to_wei(2)
@@ -190,11 +190,11 @@ def test_buy_DT_and_order(
         {"from": publisher_wallet},
     )
 
-    (publishMarketFeeAddress, _, publishMarketFeeAmount) = DT.getPublishingMarketFee()
+    publish_market_fees = DT.get_publish_market_order_fees()
 
     USDC.transfer(
         publisher_wallet.address,
-        publishMarketFeeAmount + to_wei(3),
+        publish_market_fees.amount + to_wei(3),
         {"from": factory_deployer_wallet},
     )
     USDC.approve(
@@ -248,7 +248,7 @@ def test_buy_DT_and_order(
 
     provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
-    publish_bal2 = USDC.balanceOf(publishMarketFeeAddress)
+    publish_bal2 = USDC.balanceOf(publish_market_fees.address)
 
     assert from_wei(consume_bal2) == from_wei(consume_bal1)
 
