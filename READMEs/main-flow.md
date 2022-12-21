@@ -148,7 +148,7 @@ ERC725:
 - Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-725)
 - Solidity interface is in Ocean contracts repo as [IERC725X.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725X.sol) (execution) and [IERC725Y.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725Y.sol) (key-value store)
 
-Your Python `data_nft` object is of Python class [DataNFT class](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). Thanks to Brownie, the DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method! Thank you, Brownie :)
+The `data_nft` is a Python object of class [DataNFT](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). Thanks to Brownie, the DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method! Thank you, Brownie :)
 
 Besides that, DataNFT implements other Python methods like `create_datatoken()` to improve developer experience. And, [ocean_assets.OceanAssets](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean_assets.py) and other higher-level Python classes / methods work with DataNFT.
 
@@ -249,7 +249,7 @@ from ocean_lib.models.arguments import DatatokenArguments
 datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
 ```
 
-If you call `create()` after this, you can pass in an argument `deployed_datatokens:<List[Datatoken]` and it will use those datatokens during creation.
+If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
 
 <h2 id="appendix-faucet-details">Appendix: Faucet Details</h4>
 
