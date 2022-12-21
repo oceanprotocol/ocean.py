@@ -32,10 +32,13 @@ pip3 install --pre ocean-lib
 
 ## Potential issues & workarounds
 
-- Issue: if you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due to dependency/compilation issues.
-- Workaround: install them individually: `pip3 install coincurve && pip3 install cryptography`
+Issue: M1 * `coincurve` or `cryptography`
+- If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
+- Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
 
-- Issue: if you run MacOS, you may encounter an "Unsupported Architecture" issue.
+
+Issue: MacOS "Unsupported Architecture" 
+- If you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
 
 ## ocean.py uses Brownie
