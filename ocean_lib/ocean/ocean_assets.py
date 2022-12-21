@@ -4,7 +4,6 @@
 #
 
 """Ocean module."""
-import glob
 import json
 import logging
 import lzma
@@ -28,16 +27,15 @@ from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import (
-    create_checksum,
-    get_address_of_type,
-    get_ocean_token_address,
-)
+from ocean_lib.ocean.util import create_checksum, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.structures.file_objects import (
+    ArweaveFile,
+    GraphqlQuery,
+    SmartContractCall,
+    UrlFile,
+)
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -185,6 +183,19 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, publisher_wallet)
         files = [UrlFile(url)]
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+
+    @enforce_types
+    def create_arweave_asset(
+        self,
+        name: str,
+        transaction_id: str,
+        publisher_wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        metadata = self._default_metadata(name, publisher_wallet)
+        files = [ArweaveFile(transaction_id)]
         return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types
