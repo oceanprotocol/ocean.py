@@ -377,7 +377,7 @@ def test_create_datatoken_with_usdc_order_fee(
     )
 
     # Check publish fee info
-    publish_market_fees = dt.getPublishingMarketFee()
+    publish_market_fees = dt.get_publish_market_order_fees()
     assert publish_market_fees.address == publisher_wallet.address
     assert publish_market_fees.token == usdc.address
     assert publish_market_fees.amount == publish_market_order_fee_amount_in_wei
