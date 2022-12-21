@@ -45,7 +45,7 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
         router_address = get_address_of_type(config, "Router")
 
         data_nft, dt, ddo = ocean_assets.create_onchain_asset(
-            "NFT", router_address, abi, publisher_wallet
+            "Data NFTs in Ocean", router_address, abi, publisher_wallet
         )
     else:
         url = "http://172.15.0.15:8000/subgraphs/name/oceanprotocol/ocean-subgraph"
