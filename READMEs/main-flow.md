@@ -122,7 +122,7 @@ Anytime in the future, you can reconstruct your data NFT as an object in Python,
 from ocean_lib.models.data_nft import DataNFT
 config = <like shown elsewhere in READMEs>
 data_nft_address = <what you wrote down previously>
-data_nft = DataNFT(config, datatoken_address)
+data_nft = DataNFT(config, data_nft_address)
 ```
 
 It's similar for Datatokens. In Python:
