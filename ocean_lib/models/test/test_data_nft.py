@@ -10,7 +10,7 @@ from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type, to_wei
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import DEFAULT_TOKEN_URI, ZERO_ADDRESS
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
@@ -34,7 +34,7 @@ def test_permissions(
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
-    assert data_nft.tokenURI(1) == "https://oceanprotocol.com/nft/"
+    assert data_nft.tokenURI(1) == DEFAULT_TOKEN_URI
 
     # Tests failing clearing permissions
     with pytest.raises(Exception, match="not NFTOwner"):

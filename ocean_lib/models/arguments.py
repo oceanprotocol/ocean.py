@@ -12,7 +12,11 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.structures.file_objects import FilesType
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import (
+    DEFAULT_TOKEN_URI,
+    MAX_UINT256,
+    ZERO_ADDRESS,
+)
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 logger = logging.getLogger("ocean")
@@ -45,7 +49,7 @@ class DataNFTArguments:
             additional_datatoken_deployer or ZERO_ADDRESS
         )
         self.additional_metadata_updater = additional_metadata_updater or ZERO_ADDRESS
-        self.uri = uri or "https://oceanprotocol.com/nft/"
+        self.uri = uri or DEFAULT_TOKEN_URI
         self.transferable = transferable or True
         self.owner = owner
 
