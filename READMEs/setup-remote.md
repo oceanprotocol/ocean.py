@@ -26,7 +26,7 @@ Brownie's network configuration file is at `~/.brownie/network-config.yaml`. It 
 
 Each network gets specifications for:
 - `host` - the RPC URL, i.e. what URL do we pass through to talk to the chain
-- `required_confs` - the number of confirmations before a tx is done
+- `required_confs` - the number of confirmations before a tx is done 
 - `id` - e.g. `polygon-main` (Polygon), `polygon-test` (Mumbai)
 
 [Here's](https://eth-brownie.readthedocs.io/en/v1.6.5/config.html) the `network-config.yaml` from Brownie docs. It can serve as a comparison to your local copy.
@@ -98,7 +98,7 @@ print(f"ADDRESS2={account2.address}")
 
 Then, hit Ctrl-C to exit the Python console.
 
-Now, you have two EVM accounts (address & private key). Save them somewhere safe, like a local file or a password manager.
+Now, you have two EVM accounts (address & private key). Save them somewhere safe, like a local file or a password manager. 
 
 These accounts will work on any EVM-based chain: production chains like Eth mainnet and Polygon, and testnets like Goerli and Mumbai. Here, we'll use them for Mumbai.
 
@@ -118,7 +118,7 @@ You can confirm receiving funds by going to the following url, and seeing your r
 
 [OCEAN](https://oceanprotocol.com/token) can be used as a data payment token, and locked into veOCEAN for Data Farming / curation. The READMEs show how to use OCEAN in both cases.
 - OCEAN is an ERC20 token with a finite supply, rooted in Ethereum mainnet at address [`0x967da4048cD07aB37855c090aAF366e4ce1b9F48`](https://etherscan.io/token/0x967da4048cD07aB37855c090aAF366e4ce1b9F48).
-- OCEAN on other production chains derives from the Ethereum mainnet OCEAN. OCEAN on Polygon (mOCEAN) is at [`0x282d8efce846a88b159800bd4130ad77443fa1a1`](https://polygonscan.com/token/0x282d8efce846a88b159800bd4130ad77443fa1a1).
+- OCEAN on other production chains derives from the Ethereum mainnet OCEAN. OCEAN on Polygon (mOCEAN) is at [`0x282d8efce846a88b159800bd4130ad77443fa1a1`](https://polygonscan.com/token/0x282d8efce846a88b159800bd4130ad77443fa1a1). 
 - (Fake) OCEAN is on each testnet. Fake OCEAN on Mumbai is at [`0xd8992Ed72C445c35Cb4A2be468568Ed1079357c8`](https://mumbai.polygonscan.com/token/0xd8992Ed72C445c35Cb4A2be468568Ed1079357c8).
 
 To get free (fake) OCEAN on Mumbai:
@@ -169,7 +169,7 @@ ocean = Ocean(config)
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean(config)
 
-# Create OCEAN object. ocean_lib knows where OCEAN is on all remote networks
+# Create OCEAN object. ocean_lib knows where OCEAN is on all remote networks 
 OCEAN = ocean.OCEAN_token
 
 # Create Alice's wallet
@@ -179,11 +179,13 @@ accounts.clear()
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice = accounts.add(alice_private_key)
 assert accounts.at(alice).balance() > 0, "Alice needs MATIC"
+assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 bob = accounts.add(bob_private_key)
 assert accounts.at(bob).balance() > 0, "Bob needs MATIC"
+assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
 ```
 
 If you get a gas-related error like `transaction underpriced`, you'll need to change the `priority_fee` or `max_fee`. See details in [brownie docs](https://eth-brownie.readthedocs.io/en/stable/core-gas.html).
