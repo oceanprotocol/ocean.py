@@ -89,11 +89,10 @@ from eth_account.account import Account
 account1 = Account.create()
 account2 = Account.create()
 
-print(f"REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}")
-print(f"REMOTE_TEST_PRIVATE_KEY2={account2.key.hex()}")
-
-print(f"ADDRESS1={account1.address}")
-print(f"ADDRESS2={account2.address}")
+print(f"""
+REMOTE_TEST_PRIVATE_KEY1={account1.key.hex()}, ADDRESS1={account1.address}
+REMOTE_TEST_PRIVATE_KEY2={account2.key.hex()}, ADDRESS2={account2.address}
+""")
 ```
 
 Then, hit Ctrl-C to exit the Python console.
