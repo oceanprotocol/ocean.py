@@ -15,11 +15,12 @@ jobs:
     steps:
       - name: Setup Ocean.py
         uses: actions/checkout@v2
+        with:
+          github-token: ${{ secrets.ACTION_TOKEN }}
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
         with:
           python-version: '3.8'
-          github-token: ${{ secrets.ACTION_TOKEN }}
       - uses: actions/checkout@v2
         name: Checkout Barge
         with:
