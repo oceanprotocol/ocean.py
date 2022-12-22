@@ -14,13 +14,9 @@ scripts = pathlib.Path(__file__, "..", "..", "generated-readmes").resolve().glob
 
 
 @pytest.mark.parametrize("script", scripts)
-def test_script_execution(script, monkeypatch):
+def test_script_execution(script):
     # README generation command:
     # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
-
-    # TODO: keep search-and-filter-assets, key-value-flow, profile-nfts-flow
-    # local setup + main-flow, remote setup + remote main-flow, c2d flow
-    # maybe with setup: publish-flow-graphql, same for onchain and REST API?
 
     skippable = [
         "c2d-flow-more-examples",
@@ -68,3 +64,31 @@ def test_script_execution(script, monkeypatch):
                 globs[key] = result[key]
 
     runpy.run_path(str(script), run_name="__main__", init_globals=globs)
+
+
+def test_remote_execution():
+    globs = {}
+    prerequisite = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "generated-readmes/test_setup-remote.py",
+    )
+    main_flow = pathlib.Path(
+        __file__,
+        "..",
+        "..",
+        "generated-readmes/test_main-flow.py",
+    )
+
+    result = runpy.run_path(str(prerequisite), run_name="__main__")
+    for key in [
+        "os",
+        "config",
+        "ocean",
+        "alice",
+        "bob",
+    ]:
+        globs[key] = result[key]
+
+    runpy.run_path(str(main_flow), run_name="__main__", init_globals=globs)
