@@ -6,8 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DatatokenArguments, FeeTokenInfo
-from ocean_lib.models.datatoken import DatatokenRoles
+from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, FeeTokenInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import get_mock_provider_fees

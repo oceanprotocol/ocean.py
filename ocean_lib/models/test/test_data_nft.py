@@ -5,14 +5,9 @@
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.arguments import (
-    DataNFTArguments,
-    DatatokenArguments,
-    FeeTokenInfo,
-)
-from ocean_lib.models.data_nft import DataNFTPermissions
+from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"

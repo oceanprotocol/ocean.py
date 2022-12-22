@@ -10,9 +10,9 @@ from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
+from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import GraphqlQuery
 from tests.resources.ddo_helpers import get_first_service_by_type
 

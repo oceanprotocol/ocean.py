@@ -19,10 +19,9 @@ from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
-from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesTypeFactory

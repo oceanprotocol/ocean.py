@@ -6,7 +6,7 @@ from typing import Any
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, FeeTokenInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -36,8 +36,6 @@ class DatatokenEnterprise(Datatoken):
 
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)
-
-        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
 
         if not consume_market_fees:
             consume_market_fees = FeeTokenInfo()
@@ -78,8 +76,6 @@ class DatatokenEnterprise(Datatoken):
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
-
             consume_market_fees = FeeTokenInfo()
 
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")

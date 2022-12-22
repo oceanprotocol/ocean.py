@@ -8,7 +8,7 @@ import os
 import pytest
 from web3.main import Web3
 
-from ocean_lib.models.arguments import FeeTokenInfo
+from ocean_lib.models.datatoken import FeeTokenInfo
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 

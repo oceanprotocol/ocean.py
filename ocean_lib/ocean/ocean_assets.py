@@ -23,14 +23,9 @@ from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
-from ocean_lib.models.arguments import (
-    DataNFTArguments,
-    DatatokenArguments,
-    FeeTokenInfo,
-)
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata

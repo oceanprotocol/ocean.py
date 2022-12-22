@@ -14,7 +14,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.arguments import FeeTokenInfo
+from ocean_lib.models.datatoken import FeeTokenInfo
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,

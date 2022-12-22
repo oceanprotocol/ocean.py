@@ -6,13 +6,8 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import (
-    DataNFTArguments,
-    DatatokenArguments,
-    FeeTokenInfo,
-)
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import create_checksum, get_address_of_type
 from ocean_lib.structures.abi_tuples import OrderData

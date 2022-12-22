@@ -8,8 +8,7 @@ from time import sleep
 import pytest
 from web3.main import Web3
 
-from ocean_lib.models.arguments import FeeTokenInfo
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, FeeTokenInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType

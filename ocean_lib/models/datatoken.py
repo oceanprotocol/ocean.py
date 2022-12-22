@@ -2,8 +2,9 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import logging
 from enum import IntEnum
-from typing import Any, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from brownie.network.state import Chain
 from enforce_typing import enforce_types
@@ -11,13 +12,141 @@ from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import (
+    get_address_of_type,
+    get_ocean_token_address,
+    str_with_wei,
+)
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
+logger = logging.getLogger("ocean")
+
+
+class FeeTokenInfo:
+    def __init__(
+        self,
+        address: Optional[str] = None,
+        token: Optional[str] = None,
+        amount: Optional[int] = 0,
+    ):
+        self.address = (
+            Web3.toChecksumAddress(address.lower()) if address else ZERO_ADDRESS
+        )
+        self.token = Web3.toChecksumAddress(token.lower()) if token else ZERO_ADDRESS
+
+        self.amount = amount
+
+    def to_tuple(self):
+        return (self.address, self.token, self.amount)
+
+    @classmethod
+    def from_tuple(cls, tup):
+        address, token, amount = tup
+        return cls(address, token, amount)
+
+    def __str__(self):
+        s = (
+            f"FeeTokenInfo: \n"
+            f"  address = {self.address}\n"
+            f"  token = {self.token}\n"
+            f"  amount = {str_with_wei(self.amount)}\n"
+        )
+        return s
+
+
+class DatatokenArguments:
+    def __init__(
+        self,
+        name: Optional[str] = "Datatoken 1",
+        symbol: Optional[str] = "DT1",
+        template_index: Optional[int] = 1,
+        minter: Optional[str] = None,
+        fee_manager: Optional[str] = None,
+        publish_market_order_fees: Optional = None,
+        bytess: Optional[List[bytes]] = None,
+        services: Optional[list] = None,
+        files: Optional[List[FilesType]] = None,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
+        cap: Optional[int] = None,
+    ):
+        if template_index == 2 and not cap:
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
+
+        self.cap = cap if template_index == 2 else MAX_UINT256
+
+        self.name = name
+        self.symbol = symbol
+        self.template_index = template_index
+        self.minter = minter
+        self.fee_manager = fee_manager
+        self.bytess = bytess or [b""]
+        self.services = services
+        self.files = files
+        self.consumer_parameters = consumer_parameters
+
+        self.publish_market_order_fees = publish_market_order_fees or FeeTokenInfo()
+        self.set_default_fees_at_deploy = not publish_market_order_fees
+
+    def create_datatoken(self, data_nft, wallet, with_services=False):
+        config_dict = data_nft.config_dict
+        OCEAN_address = get_ocean_token_address(config_dict)
+        initial_list = data_nft.getTokensList()
+
+        if self.set_default_fees_at_deploy:
+            self.publish_market_order_fees = FeeTokenInfo(
+                address=wallet.address, token=OCEAN_address
+            )
+
+        data_nft.contract.createERC20(
+            self.template_index,
+            [self.name, self.symbol],
+            [
+                ContractBase.to_checksum_address(self.minter or wallet.address),
+                ContractBase.to_checksum_address(self.fee_manager or wallet.address),
+                self.publish_market_order_fees.address,
+                self.publish_market_order_fees.token,
+            ],
+            [self.cap, self.publish_market_order_fees.amount],
+            self.bytess,
+            {"from": wallet},
+        )
+
+        new_elements = [
+            item for item in data_nft.getTokensList() if item not in initial_list
+        ]
+        assert len(new_elements) == 1, "new data token has no address"
+
+        from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
+
+        datatoken = (
+            Datatoken(config_dict, new_elements[0])
+            if self.template_index == 1
+            else DatatokenEnterprise(config_dict, new_elements[0])
+        )
+
+        logger.info(
+            f"Successfully created datatoken with address " f"{datatoken.address}."
+        )
+
+        if with_services:
+            if not self.services:
+                self.services = [
+                    datatoken.build_access_service(
+                        service_id="0",
+                        service_endpoint=config_dict.get("PROVIDER_URL"),
+                        files=self.files,
+                        consumer_parameters=self.consumer_parameters,
+                    )
+                ]
+            else:
+                for service in self.services:
+                    service.datatoken = datatoken.address
+
+        return datatoken
 
 
 class DatatokenRoles(IntEnum):
@@ -46,8 +175,6 @@ class Datatoken(ContractBase):
     ) -> str:
 
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
-
             consume_market_fees = FeeTokenInfo()
 
         return self.contract.startOrder(
@@ -316,8 +443,6 @@ class Datatoken(ContractBase):
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
-            from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
-
             consume_market_fees = FeeTokenInfo()
 
         buyer_addr = (
@@ -369,8 +494,6 @@ class Datatoken(ContractBase):
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
-        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
-
         if not consume_market_fees:
             consume_market_fees = FeeTokenInfo()
 
@@ -393,8 +516,6 @@ class Datatoken(ContractBase):
         )
 
     def get_publish_market_order_fees(self):
-        from ocean_lib.models.arguments import FeeTokenInfo  # isort:skip
-
         return FeeTokenInfo.from_tuple(self.contract.getPublishingMarketFee())
 
 
