@@ -18,6 +18,10 @@ def test_script_execution(script, monkeypatch):
     # README generation command:
     # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
+    # TODO: keep search-and-filter-assets, key-value-flow, profile-nfts-flow
+    # local setup + main-flow, remote setup + remote main-flow, c2d flow
+    # maybe with setup: publish-flow-graphql, same for onchain and REST API?
+
     if (
         "developers" in script.name
         or "df" in script.name
