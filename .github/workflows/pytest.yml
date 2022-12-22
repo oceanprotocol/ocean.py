@@ -40,6 +40,8 @@ jobs:
           pip install -r requirements_dev.txt
           brownie bake github-actions
           sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Test with pytest
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
