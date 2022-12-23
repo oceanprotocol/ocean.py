@@ -9,9 +9,9 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_allocate import VeAllocate
-from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
-from ocean_lib.models.ve_ocean import VeOcean
+from ocean_lib.models.ve.ve_allocate import VeAllocate
+from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.ve_ocean import VeOcean
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 

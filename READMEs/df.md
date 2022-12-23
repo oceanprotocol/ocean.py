@@ -46,7 +46,7 @@ chain.sleep(t1 - t0)
 chain.mine()
 
 #we're now at the beginning of the week. So, lock
-from ocean_lib.ocean.util import to_wei, from_wei
+veOCEAN = ocean.veOCEAN
 OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), {"from" : alice})
 veOCEAN.withdraw({"from": alice}) #withdraw old tokens first
 veOCEAN.create_lock(to_wei(amt_OCEAN_lock), t2, {"from": alice})
