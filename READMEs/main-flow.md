@@ -51,6 +51,8 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 
 In the same Python console:
 ```python
+from ocean_lib.ocean.util import to_wei
+
 #Approach A: Alice mints datatokens to Bob
 datatoken.mint(bob, to_wei(1), {"from": alice})
 
@@ -65,15 +67,15 @@ datatoken.dispense(to_wei(1), {"from": bob})
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
 price = to_wei(100)
-exchange = datatoken.create_exchange(price, OCEAN.address, {"from": alice})
+exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
 
 # D.2 Alice makes 100 datatokens available on the exchange
-datatoken.mint(alice, to_wei(100), {"from": alice_wallet})
+datatoken.mint(alice, to_wei(100), {"from": alice})
 datatoken.approve(exchange.address, to_wei(100), {"from": alice})
 
 # D.3 Bob lets exchange pull the OCEAN needed
 OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
-OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob})
+ocean.OCEAN_token.approve(exchange.address, OCEAN_needed, {"from":bob})
 
 # D.4 Bob buys datatoken
 exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob})
@@ -91,7 +93,10 @@ In the same Python console:
 order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
 
 # Bob downloads the file. If the connection breaks, Bob can try again
-file_name = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+
+import os
+file_name = os.path.join(asset_dir, "file0")
 ```
 
 Let's check that the file is downloaded. In a new console:
@@ -118,7 +123,7 @@ Bonus: this README's appendices expand on the steps above with further flexibili
 
 Anytime in the future, you can reconstruct your data NFT as an object in Python, via:
 
-```python
+```console
 from ocean_lib.models.data_nft import DataNFT
 config = <like shown elsewhere in READMEs>
 data_nft_address = <what you wrote down previously>
@@ -127,7 +132,7 @@ data_nft = DataNFT(config, data_nft_address)
 
 It's similar for Datatokens. In Python:
 
-```python
+```console
 from ocean_lib.models.datatoken import Datatoken
 config = <like shown elsewhere in READMEs>
 datatoken_address = <what you wrote down previously>

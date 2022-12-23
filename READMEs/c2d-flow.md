@@ -123,7 +123,7 @@ In the same Python console:
 ```python
 # Alice mints DATA datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
-from web3.main import Web3
+from ocean_lib.ocean.util import to_wei
 DATA_datatoken.mint(bob, to_wei(5), {"from": alice})
 ALGO_datatoken.mint(bob, to_wei(5), {"from": alice})
 ```

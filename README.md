@@ -28,11 +28,14 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 
 ## 🏄 Quickstart
 
-Follow these steps in sequence to ramp into Ocean:
+Follow these steps in sequence to ramp into Ocean.
 
  1. **[Install Ocean](READMEs/install.md)**
- 2. **[Setup locally](READMEs/setup-local.md)** 
+ 2. **[Set up locally](READMEs/setup-local.md)** 
  3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 
+Now let's do remote flows:
+
  4. **[Set up remotely](READMEs/setup-remote.md)**
  5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network
  6. **[Walk through C2D flow](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data

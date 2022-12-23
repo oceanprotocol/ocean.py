@@ -86,7 +86,7 @@ from ocean_lib.web3_internal.utils import connect_to_network
 connect_to_network("development")
 
 from ocean_lib.example_config import get_config_dict
-config = ExampleConfig.get_config("development")
+config = get_config_dict("development")
 
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean(config)
