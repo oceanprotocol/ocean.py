@@ -56,7 +56,10 @@ ddo_did = ddo.did
 # Bob gets a free datatoken, sends it to the service, and downloads
 datatoken.dispense("1 ether", {"from": bob})
 order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
-file_name = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+
+import os
+file_name = os.path.join(asset_dir, 'file0')
 ```
 
 Now, load the file and use its data.

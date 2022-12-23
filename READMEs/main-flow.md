@@ -51,6 +51,8 @@ Bob wants to consume the dataset that Alice just published. The first step is fo
 
 In the same Python console:
 ```python
+from ocean_lib.ocean.util import to_wei
+
 #Approach A: Alice mints datatokens to Bob
 datatoken.mint(bob, to_wei(1), {"from": alice})
 
@@ -65,15 +67,15 @@ datatoken.dispense(to_wei(1), {"from": bob})
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
 price = to_wei(100)
-exchange = datatoken.create_exchange(price, OCEAN.address, {"from": alice})
+exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
 
 # D.2 Alice makes 100 datatokens available on the exchange
-datatoken.mint(alice, to_wei(100), {"from": alice_wallet})
+datatoken.mint(alice, to_wei(100), {"from": alice})
 datatoken.approve(exchange.address, to_wei(100), {"from": alice})
 
-# D.3 Bob lets exchange pull the OCEAN needed 
+# D.3 Bob lets exchange pull the OCEAN needed
 OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
-OCEAN.approve(exchange.address, OCEAN_needed, {"from":bob})
+ocean.OCEAN_token.approve(exchange.address, OCEAN_needed, {"from":bob})
 
 # D.4 Bob buys datatoken
 exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob})
@@ -91,7 +93,10 @@ In the same Python console:
 order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
 
 # Bob downloads the file. If the connection breaks, Bob can try again
-file_name = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+
+import os
+file_name = os.path.join(asset_dir, "file0")
 ```
 
 Let's check that the file is downloaded. In a new console:
@@ -118,7 +123,7 @@ Bonus: this README's appendices expand on the steps above with further flexibili
 
 Anytime in the future, you can reconstruct your data NFT as an object in Python, via:
 
-```python
+```console
 from ocean_lib.models.data_nft import DataNFT
 config = <like shown elsewhere in READMEs>
 data_nft_address = <what you wrote down previously>
@@ -127,7 +132,7 @@ data_nft = DataNFT(config, data_nft_address)
 
 It's similar for Datatokens. In Python:
 
-```python
+```console
 from ocean_lib.models.datatoken import Datatoken
 config = <like shown elsewhere in READMEs>
 datatoken_address = <what you wrote down previously>
@@ -139,7 +144,7 @@ datatoken = Datatoken(config, datatoken_address)
 Data NFTs implement ERC721 functionality, and ERC725 which extends it.
 
 ERC721:
-- Basic spec of a non-fungible token (NFT) 
+- Basic spec of a non-fungible token (NFT)
 - Official spec is at [erc721.org](https://erc721.org/)
 - Solidity interface is in Ocean contracts repo as [IERC721Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC721Template.sol)
 
@@ -310,7 +315,7 @@ print(exchange.fees_info)
 It will output something like:
 ```text
 >>> print(exchange.details)
-ExchangeDetails: 
+ExchangeDetails:
   datatoken = 0xdA3cf7aE9b28E1A9B5F295201d9AcbEf14c43019
   base_token = 0x24f42342C7C171a66f2B7feB5c712471bED92A97
   fixed_rate (price) = 1.0 (1000000000000000000 wei)
@@ -325,7 +330,7 @@ ExchangeDetails:
   owner = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
 
 >>> print(exchange.fees_info)
-FeesInfo: 
+FeesInfo:
   publish_market_fee = 0.0 (0 wei)
   publish_market_fee_available = 0.0 (0 wei)
   publish_market_fee_collector = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
