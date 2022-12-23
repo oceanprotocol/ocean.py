@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from ocean_lib.models.datatoken import Datatoken, FeeTokenInfo
+from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
@@ -94,7 +94,7 @@ def test_dispense_and_order_with_non_defaults(
         consumer=consume_fee_address,
         service_index=1,
         provider_fees=provider_fees,
-        consume_market_fees=FeeTokenInfo(
+        consume_market_fees=TokenFeeInfo(
             address=consume_fee_address,
             token=DAI.address,
         ),
@@ -225,7 +225,7 @@ def test_buy_DT_and_order(
         "consumer": another_consumer_wallet.address,
         "service_index": 1,
         "provider_fees": provider_fees,
-        "consume_market_fees": FeeTokenInfo(
+        "consume_market_fees": TokenFeeInfo(
             address=consume_fee_address,
             token=DAI.address,
         ),

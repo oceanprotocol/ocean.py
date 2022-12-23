@@ -19,7 +19,7 @@ from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import DatatokenArguments, FeeTokenInfo
+from ocean_lib.models.datatoken import DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -351,7 +351,7 @@ def test_pay_for_access_service_insufficient_balance(
             ddo,
             empty_wallet,
             get_first_service_by_type(ddo, "access"),
-            FeeTokenInfo(address=empty_wallet.address, token=datatoken.address),
+            TokenFeeInfo(address=empty_wallet.address, token=datatoken.address),
         )
 
 

@@ -25,7 +25,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -504,7 +504,7 @@ class OceanAssets:
         ddo: DDO,
         wallet,
         service: Optional[Service] = None,
-        consume_market_fees: Optional[FeeTokenInfo] = None,
+        consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
@@ -583,7 +583,7 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 datasets[i],
                 item,
-                FeeTokenInfo(
+                TokenFeeInfo(
                     consume_market_order_fee_address,
                     datasets[i].consume_market_order_fee_token,
                     datasets[i].consume_market_order_fee_amount,
@@ -596,7 +596,7 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 algorithm_data,
                 result["algorithm"],
-                FeeTokenInfo(
+                TokenFeeInfo(
                     address=consume_market_order_fee_address,
                     token=algorithm_data.consume_market_order_fee_token,
                     amount=algorithm_data.consume_market_order_fee_amount,
@@ -614,7 +614,7 @@ class OceanAssets:
         self,
         asset_compute_input: ComputeInput,
         item: dict,
-        consume_market_fees: FeeTokenInfo,
+        consume_market_fees: TokenFeeInfo,
         wallet,
         consumer_address: Optional[str] = None,
     ):

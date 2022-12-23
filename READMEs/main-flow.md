@@ -330,7 +330,7 @@ ExchangeDetails:
   owner = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
 
 >>> print(exchange.fees_info)
-FeesInfo:
+ExchangeFeeInfo:
   publish_market_fee = 0.0 (0 wei)
   publish_market_fee_available = 0.0 (0 wei)
   publish_market_fee_collector = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7

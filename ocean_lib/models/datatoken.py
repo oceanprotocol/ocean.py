@@ -26,7 +26,7 @@ checksum_addr = ContractBase.to_checksum_address
 logger = logging.getLogger("ocean")
 
 
-class FeeTokenInfo:
+class TokenFeeInfo:
     def __init__(
         self,
         address: Optional[str] = None,
@@ -50,7 +50,7 @@ class FeeTokenInfo:
 
     def __str__(self):
         s = (
-            f"FeeTokenInfo: \n"
+            f"TokenFeeInfo: \n"
             f"  address = {self.address}\n"
             f"  token = {self.token}\n"
             f"  amount = {str_with_wei(self.amount)}\n"
@@ -88,7 +88,7 @@ class DatatokenArguments:
         self.files = files
         self.consumer_parameters = consumer_parameters
 
-        self.publish_market_order_fees = publish_market_order_fees or FeeTokenInfo()
+        self.publish_market_order_fees = publish_market_order_fees or TokenFeeInfo()
         self.set_default_fees_at_deploy = not publish_market_order_fees
 
     def create_datatoken(self, data_nft, wallet, with_services=False):
@@ -97,7 +97,7 @@ class DatatokenArguments:
         initial_list = data_nft.getTokensList()
 
         if self.set_default_fees_at_deploy:
-            self.publish_market_order_fees = FeeTokenInfo(
+            self.publish_market_order_fees = TokenFeeInfo(
                 address=wallet.address, token=OCEAN_address
             )
 
@@ -175,7 +175,7 @@ class Datatoken(ContractBase):
     ) -> str:
 
         if not consume_market_fees:
-            consume_market_fees = FeeTokenInfo()
+            consume_market_fees = TokenFeeInfo()
 
         return self.contract.startOrder(
             checksum_addr(consumer),
@@ -443,7 +443,7 @@ class Datatoken(ContractBase):
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
-            consume_market_fees = FeeTokenInfo()
+            consume_market_fees = TokenFeeInfo()
 
         buyer_addr = (
             transaction_parameters["from"].address
@@ -495,7 +495,7 @@ class Datatoken(ContractBase):
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         if not consume_market_fees:
-            consume_market_fees = FeeTokenInfo()
+            consume_market_fees = TokenFeeInfo()
 
         if not isinstance(exchange, OneExchange):
             exchange = OneExchange(fre_address, exchange)
@@ -516,7 +516,7 @@ class Datatoken(ContractBase):
         )
 
     def get_publish_market_order_fees(self):
-        return FeeTokenInfo.from_tuple(self.contract.getPublishingMarketFee())
+        return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
 
 class MockERC20(Datatoken):

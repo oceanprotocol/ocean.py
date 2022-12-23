@@ -7,7 +7,7 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.util import create_checksum, get_address_of_type
 from ocean_lib.structures.abi_tuples import OrderData
@@ -102,7 +102,7 @@ def test_combo_functions(
             "DT1P",
             "DT1SymbolP",
             fee_manager=consumer_wallet.address,
-            publish_market_order_fees=FeeTokenInfo(
+            publish_market_order_fees=TokenFeeInfo(
                 address=publisher_wallet.address,
                 token=ZERO_ADDRESS,
                 amount=Web3.toWei("0.0005", "ether"),

@@ -6,7 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, FeeTokenInfo
+from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import get_mock_provider_fees
@@ -126,7 +126,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
-        consume_market_fees=FeeTokenInfo(
+        consume_market_fees=TokenFeeInfo(
             address=publisher_wallet.address,
             token=datatoken.address,
         ),

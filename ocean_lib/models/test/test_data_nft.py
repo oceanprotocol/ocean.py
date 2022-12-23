@@ -7,7 +7,7 @@ from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, FeeTokenInfo
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
@@ -362,7 +362,7 @@ def test_create_datatoken_with_usdc_order_fee(
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
-            publish_market_order_fees=FeeTokenInfo(
+            publish_market_order_fees=TokenFeeInfo(
                 address=publisher_wallet.address,
                 token=usdc.address,
                 amount=publish_market_order_fee_amount_in_wei,
@@ -607,7 +607,7 @@ def test_transfer_nft(
         DatatokenArguments(
             "DT1",
             "DT1Symbol",
-            publish_market_order_fees=FeeTokenInfo(
+            publish_market_order_fees=TokenFeeInfo(
                 address=publisher_wallet.address,
             ),
         ),
