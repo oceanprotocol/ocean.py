@@ -177,14 +177,17 @@ accounts.clear()
 
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice = accounts.add(alice_private_key)
-assert accounts.at(alice).balance() > 0, "Alice needs MATIC"
+assert alice.balance() > 0, "Alice needs MATIC"
 assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
 bob = accounts.add(bob_private_key)
-assert accounts.at(bob).balance() > 0, "Bob needs MATIC"
+assert bob.balance() > 0, "Bob needs MATIC"
 assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
+
+# Compact wei <> eth conversion
+from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
 If you get a gas-related error like `transaction underpriced`, you'll need to change the `priority_fee` or `max_fee`. See details in [brownie docs](https://eth-brownie.readthedocs.io/en/stable/core-gas.html).
