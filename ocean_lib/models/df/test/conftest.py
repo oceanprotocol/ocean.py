@@ -6,7 +6,6 @@ import pytest
 
 from conftest_ganache import *
 
-
 @pytest.fixture
 def ocean(publisher_ocean):
     return publisher_ocean
