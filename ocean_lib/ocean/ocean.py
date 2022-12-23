@@ -304,7 +304,4 @@ class Ocean:
 
     @enforce_types
     def _addr(self, type_str: str) -> str:
-        config = self.config
-        addr = get_address_of_type(config, type_str)
-
         return get_address_of_type(self.config, type_str)
