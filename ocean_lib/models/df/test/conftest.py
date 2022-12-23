@@ -10,8 +10,3 @@ from conftest_ganache import *
 @pytest.fixture
 def ocean(publisher_ocean):
     return publisher_ocean
-
-
-@pytest.fixture
-def ve_allocate(ocean):
-    return ocean.ve_allocate
