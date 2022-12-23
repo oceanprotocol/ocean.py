@@ -24,7 +24,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import sign_with_key, split_signature
@@ -85,13 +85,11 @@ def generate_wallet():
 
     new_wallet = accounts.add(private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(new_wallet.address, "3 ether")
+    deployer_wallet.transfer(new_wallet, to_wei(3))
 
     ocean = Ocean(config)
     OCEAN = ocean.OCEAN_token
-    OCEAN.transfer(
-        new_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
-    )
+    OCEAN.transfer(new_wallet, to_wei(50), {"from": deployer_wallet})
     return new_wallet
 
 
@@ -173,7 +171,7 @@ def deploy_erc721_erc20(
     if not datatoken_minter:
         return data_nft
 
-    datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
+    datatoken_cap = to_wei(100) if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
         DatatokenArguments(
@@ -216,7 +214,7 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     mock_usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
-    if mock_usdc.balanceOf(factory_deployer.address) >= amount:
+    if mock_usdc.balanceOf(factory_deployer) >= amount:
         mock_usdc.transfer(recipient, amount, factory_deployer)
 
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
@@ -239,7 +237,7 @@ def transfer_bt_if_balance_lte(
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
-        and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
+        and base_token.balanceOf(from_wallet) >= amount_to_transfer
     ):
         base_token.transfer(recipient, amount_to_transfer, {"from": from_wallet})
 
