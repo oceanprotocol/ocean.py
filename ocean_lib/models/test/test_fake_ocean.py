@@ -9,7 +9,7 @@ from brownie.network import accounts
 
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import get_ocean_token_address
+from ocean_lib.ocean.util import get_ocean_token_address, to_wei
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 
 
@@ -37,7 +37,3 @@ def test_use_mint_fake_ocean(config, factory_deployer_wallet, ocean_token):
 
         w = accounts.add(key)
         assert ocean_token.balanceOf(w.address) >= expected_amt_distribute
-
-
-def to_wei(amt_eth) -> int:
-    return int(amt_eth * 1e18)

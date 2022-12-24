@@ -29,7 +29,12 @@ from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeIn
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import GraphqlQuery, SmartContractCall, UrlFile
+from ocean_lib.structures.file_objects import (
+    ArweaveFile,
+    GraphqlQuery,
+    SmartContractCall,
+    UrlFile,
+)
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -177,6 +182,19 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, publisher_wallet)
         files = [UrlFile(url)]
+        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+
+    @enforce_types
+    def create_arweave_asset(
+        self,
+        name: str,
+        transaction_id: str,
+        publisher_wallet,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        metadata = self._default_metadata(name, publisher_wallet)
+        files = [ArweaveFile(transaction_id)]
         return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
 
     @enforce_types

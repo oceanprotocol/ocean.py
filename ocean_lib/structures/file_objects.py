@@ -85,6 +85,17 @@ class SmartContractCall(FilesType):
         }
 
 
+class ArweaveFile(FilesType):
+    @enforce_types
+    def __init__(self, transaction_id: str) -> None:
+        self.transaction_id = transaction_id
+        self.type = "arweave"
+
+    @enforce_types
+    def to_dict(self) -> dict:
+        return {"type": self.type, "transactionId": self.transaction_id}
+
+
 @enforce_types
 def FilesTypeFactory(file_obj: dict) -> FilesType:
     """Factory Method"""
@@ -94,6 +105,8 @@ def FilesTypeFactory(file_obj: dict) -> FilesType:
             method=file_obj.get("method", "GET"),
             headers=file_obj.get("headers"),
         )
+    elif file_obj["type"] == "arweave":
+        return ArweaveFile(file_obj["transactionId"])
     elif file_obj["type"] == "ipfs":
         return IpfsFile(file_obj["hash"])
     elif file_obj["type"] == "graphql":

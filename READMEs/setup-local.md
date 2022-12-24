@@ -94,6 +94,10 @@ ocean = Ocean(config)
 # Create OCEAN object. Barge auto-created OCEAN, and ocean instance knows
 OCEAN = ocean.OCEAN_token
 
+# Mint fake OCEAN to Alice & Bob
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+
 # Create Alice's wallet
 import os
 from brownie.network import accounts
@@ -101,16 +105,14 @@ accounts.clear()
 
 alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
 alice = accounts.add(alice_private_key)
-assert accounts.at(alice).balance() > 0, "Alice needs ganache ETH"
+assert alice.balance() > 0, "Alice needs ETH"
+assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob = accounts.add(bob_private_key)
-assert accounts.at(bob).balance() > 0, "Bob needs ganache ETH"
-
-# Mint fake OCEAN to Alice & Bob
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
+assert bob.balance() > 0, "Bob needs ETH"
+assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
 
 # Compact wei <> eth conversion
 from ocean_lib.ocean.util import to_wei, from_wei

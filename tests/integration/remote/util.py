@@ -127,6 +127,7 @@ def error_is_skippable(error_s: str) -> bool:
         or "No contract deployed at" in error_s
         or "nonce too low" in error_s
         or "Internal error" in error_s
+        or "execution reverted" in error_s
         or "No data was returned - the call likely reverted" in error_s
     )
 

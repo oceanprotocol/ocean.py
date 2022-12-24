@@ -6,7 +6,7 @@ import brownie
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.ve_ocean import VeOcean
+from ocean_lib.models.ve.ve_ocean import VeOcean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import get_address_of_type
 
@@ -18,7 +18,10 @@ MAXTIME = 4 * 365 * 86400  # 4 years
 
 
 @pytest.mark.unit
-def test_ve_ocean1(config, factory_deployer_wallet, ocean_token, veOCEAN):
+def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
+    OCEAN = ocean.OCEAN_token
+    veOCEAN = ocean.veOCEAN
+
     # inspiration from df-py/util/test/veOcean/test_lock.py
     assert veOCEAN.symbol() == "veOCEAN"
 
