@@ -57,7 +57,7 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     assert not details.with_mint
 
     # Fees tests
-    fees = exchange.fees_info
+    fees = exchange.exchange_fees_info
     assert from_wei(fees.publish_market_fee) == 0  # publish mkt swap fee
     assert fees.publish_market_fee_collector == alice.address  # for publish mkt swaps
     assert (
@@ -141,8 +141,8 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
     assert exchange.details.owner == bob.address
     assert exchange.details.with_mint
 
-    assert exchange.fees_info.publish_market_fee == publish_market_fee
-    assert exchange.fees_info.publish_market_fee_collector == alice.address
+    assert exchange.exchange_fees_info.publish_market_fee == publish_market_fee
+    assert exchange.exchange_fees_info.publish_market_fee_collector == alice.address
 
     assert exchange.get_allowed_swapper() == carlos.address
 
@@ -232,7 +232,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     # ==========================================================================
     # As publish market fee collector, Alice collects fees
-    fees = exchange.fees_info
+    fees = exchange.exchange_fees_info
     assert fees.publish_market_fee > 0
     assert fees.publish_market_fee_available > 0
 

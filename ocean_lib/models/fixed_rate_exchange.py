@@ -58,7 +58,7 @@ class ExchangeFeeInfo:
     def __init__(self, fees_tup):
         """
         :param:details_tup
-          -- returned from FixedRateExchange.sol::getExchangeFeeInfo(exchange_id)
+          -- returned from FixedRateExchange.sol::getFeesInfo(exchange_id)
         which is {(publish)market(swap)Fee, ..., oceanFeeAvailable}
         """
         t = fees_tup
@@ -379,9 +379,9 @@ class OneExchange:
         return self._FRE.getAllowedSwapper(self._id)
 
     @property
-    def fees_info(self) -> ExchangeFeeInfo:
+    def exchange_fees_info(self) -> ExchangeFeeInfo:
         """Get fee information for this exchange, as an object"""
-        tup = self._FRE.getExchangeFeeInfo(self._id)
+        tup = self._FRE.getFeesInfo(self._id)
         return ExchangeFeeInfo(tup)
 
     @enforce_types
