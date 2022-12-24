@@ -167,15 +167,16 @@ def test_ocean_assets_download_destination_file(
     )
 
     provider_fees = initialize_response.json()["providerFee"]
+    consume_market_fees = TokenFeeInfo(
+        address=publisher_wallet.address,
+        token=datatoken.address,
+    )
 
     receipt = datatoken.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
         provider_fees=provider_fees,
-        consume_market_fees=TokenFeeInfo(
-            address=publisher_wallet.address,
-            token=datatoken.address,
-        ),
+        consume_market_fees=consume_market_fees,
         transaction_parameters={"from": publisher_wallet},
     )
 
