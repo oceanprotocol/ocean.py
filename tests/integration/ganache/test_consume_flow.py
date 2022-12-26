@@ -12,10 +12,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
 
-"""branin.arff dataset, permanently stored in Arweave"""
 ARWEAVE_TRANSACTION_ID = "a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
 
 
@@ -91,9 +89,6 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
         transaction_parameters={"from": consumer_wallet},
     )
 

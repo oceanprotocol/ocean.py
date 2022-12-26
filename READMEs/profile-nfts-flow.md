@@ -27,7 +27,7 @@ We publish a data NFT like elsewhere, except we set `transferable=False` (and sk
 In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.data_nft import DataNFTArguments
 data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), alice)
 ```
 

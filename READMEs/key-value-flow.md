@@ -24,7 +24,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 
 In Python console:
 ```python
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.data_nft import DataNFTArguments
 data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
 ```
 

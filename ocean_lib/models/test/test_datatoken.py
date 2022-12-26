@@ -6,8 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.arguments import DatatokenArguments
-from ocean_lib.models.datatoken import DatatokenRoles
+from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import get_mock_provider_fees
@@ -127,9 +126,10 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
-        consume_market_order_fee_address=publisher_wallet.address,
-        consume_market_order_fee_token=datatoken.address,
-        consume_market_order_fee_amount=0,
+        consume_market_fees=TokenFeeInfo(
+            address=publisher_wallet.address,
+            token=datatoken.address,
+        ),
         transaction_parameters={"from": publisher_wallet},
     )
     # Check erc20 balances
@@ -217,14 +217,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         {"from": publisher_wallet},
     )
 
-    publish_fees = datatoken.getPublishingMarketFee()
+    publish_fees = datatoken.get_publish_market_order_fees()
 
     # PublishMarketFeeAddress set previously
-    assert publish_fees[0] == publisher_wallet.address
+    assert publish_fees.address == publisher_wallet.address
     # PublishMarketFeeToken set previously
-    assert publish_fees[1] == get_address_of_type(config, "MockUSDC")
+    assert publish_fees.token == get_address_of_type(config, "MockUSDC")
     # PublishMarketFeeAmount set previously
-    assert publish_fees[2] == Web3.toWei("1.2", "ether")
+    assert publish_fees.amount == Web3.toWei("1.2", "ether")
     # Fee collector
     assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"

@@ -216,7 +216,7 @@ url_file = UrlFile(
 )
 
 # Publish data asset
-from ocean_lib.ocean.ocean_assets import DatatokenArguments
+from ocean_lib.models.datatoken import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
     alice,
@@ -239,7 +239,7 @@ You can control this during create():
 
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.data_nft import DataNFTArguments
 data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
 ```
 
@@ -250,7 +250,7 @@ If you call `create()` after this, you can pass in an argument `data_nft_address
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo object. However, we may want a second datatoken. Or, we may have started with _just_ the data NFT, and want to add a datatoken to it. Here's how:
 
 ```python
-from ocean_lib.models.arguments import DatatokenArguments
+from ocean_lib.models.datatoken import DatatokenArguments
 datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
 ```
 
@@ -309,7 +309,7 @@ To learn more about the exchange status:
 
 ```python
 print(exchange.details)
-print(exchange.fees_info)
+print(exchange.exchange_fees_info)
 ```
 
 It will output something like:
@@ -329,8 +329,8 @@ ExchangeDetails:
   bt_decimals = 18
   owner = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7
 
->>> print(exchange.fees_info)
-FeesInfo:
+>>> print(exchange.exchange_fees_info)
+ExchangeFeeInfo:
   publish_market_fee = 0.0 (0 wei)
   publish_market_fee_available = 0.0 (0 wei)
   publish_market_fee_collector = 0x02354A1F160A3fd7ac8b02ee91F04104440B28E7

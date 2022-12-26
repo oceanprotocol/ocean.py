@@ -23,11 +23,10 @@ from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
-from ocean_lib.models.arguments import DataNFTArguments, DatatokenArguments
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import create_checksum, get_ocean_token_address
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
@@ -523,21 +522,12 @@ class OceanAssets:
         ddo: DDO,
         wallet,
         service: Optional[Service] = None,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = None,
+        consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
-        consume_market_order_fee_address = (
-            consume_market_order_fee_address or wallet.address
-        )
-        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
-        if consume_market_order_fee_token is None:
-            OCEAN_address = get_ocean_token_address(self._config_dict)
-            consume_market_order_fee_token = OCEAN_address
         consumer_address = consumer_address or wallet.address
 
         # main work...
@@ -575,9 +565,7 @@ class OceanAssets:
             consumer=consumer_address,
             service_index=ddo.get_index_of_service(service),
             provider_fees=provider_fees,
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            consume_market_fees=consume_market_fees,
             transaction_parameters={"from": wallet},
         )
 
@@ -613,9 +601,11 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 datasets[i],
                 item,
-                consume_market_order_fee_address,
-                datasets[i].consume_market_order_fee_token,
-                datasets[i].consume_market_order_fee_amount,
+                TokenFeeInfo(
+                    consume_market_order_fee_address,
+                    datasets[i].consume_market_order_fee_token,
+                    datasets[i].consume_market_order_fee_amount,
+                ),
                 wallet,
                 consumer_address,
             )
@@ -624,9 +614,11 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 algorithm_data,
                 result["algorithm"],
-                consume_market_order_fee_address,
-                algorithm_data.consume_market_order_fee_token,
-                algorithm_data.consume_market_order_fee_amount,
+                TokenFeeInfo(
+                    address=consume_market_order_fee_address,
+                    token=algorithm_data.consume_market_order_fee_token,
+                    amount=algorithm_data.consume_market_order_fee_amount,
+                ),
                 wallet,
                 consumer_address,
             )
@@ -640,9 +632,7 @@ class OceanAssets:
         self,
         asset_compute_input: ComputeInput,
         item: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
+        consume_market_fees: TokenFeeInfo,
         wallet,
         consumer_address: Optional[str] = None,
     ):
@@ -668,8 +658,6 @@ class OceanAssets:
             consumer=consumer_address,
             service_index=asset_compute_input.ddo.get_index_of_service(service),
             provider_fees=provider_fees,
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            consume_market_fees=consume_market_fees,
             transaction_parameters={"from": wallet},
         ).txid

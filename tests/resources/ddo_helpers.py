@@ -12,11 +12,8 @@ import requests
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.datatoken import DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesTypeFactory, UrlFile

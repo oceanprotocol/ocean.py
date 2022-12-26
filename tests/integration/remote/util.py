@@ -12,7 +12,7 @@ from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachin
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
-from ocean_lib.models.arguments import DataNFTArguments
+from ocean_lib.models.data_nft import DataNFTArguments
 
 ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
 
