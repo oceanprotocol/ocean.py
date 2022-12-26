@@ -111,7 +111,7 @@ class Ocean:
     @property
     @enforce_types
     def OCEAN(self):  # alias for OCEAN_token
-        return self.OCEAN_ocean
+        return self.OCEAN_token
 
     # ======================================================================
     # objects for singleton smart contracts
