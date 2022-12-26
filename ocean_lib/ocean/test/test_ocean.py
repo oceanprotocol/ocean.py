@@ -21,6 +21,7 @@ from ocean_lib.models.ve.ve_ocean import VeOcean
 
 from tests.resources.helper_functions import deploy_erc721_erc20
 
+
 @pytest.mark.unit
 def test_nft_factory(config, publisher_ocean, publisher_wallet):
     data_nft, datatoken = deploy_erc721_erc20(
@@ -42,7 +43,7 @@ def test_contract_objects(publisher_ocean):
     assert isinstance(ocean.OCEAN, Datatoken)
     assert ocean.OCEAN_address == ocean.OCEAN_token.address
     assert ocean.OCEAN_address == ocean.OCEAN.address
-    
+
     assert isinstance(ocean.data_nft_factory, DataNFTFactoryContract)
     assert isinstance(ocean.dispenser, Dispenser)
     assert isinstance(ocean.fixed_rate_exchange, FixedRateExchange)
@@ -59,4 +60,4 @@ def test_contract_objects(publisher_ocean):
     assert isinstance(ocean.ve_ocean, VeOcean)
     assert isinstance(ocean.veOCEAN, VeOcean)
 
-    assert ocean.config == ocean.config_dict #test alias
+    assert ocean.config == ocean.config_dict  # test alias
