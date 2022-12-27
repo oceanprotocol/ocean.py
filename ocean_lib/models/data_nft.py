@@ -2,7 +2,9 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
 import warnings
+from base64 import b64encode
 from enum import IntEnum, IntFlag
 from typing import Optional
 
@@ -10,7 +12,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import DEFAULT_TOKEN_URI, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
@@ -73,9 +75,25 @@ class DataNFTArguments:
             additional_datatoken_deployer or ZERO_ADDRESS
         )
         self.additional_metadata_updater = additional_metadata_updater or ZERO_ADDRESS
-        self.uri = uri or DEFAULT_TOKEN_URI
+        self.uri = uri or self.get_default_token_uri()
         self.transferable = transferable or True
         self.owner = owner
+
+    def get_default_token_uri(self):
+        # TODO: add did?
+        # market_url = "https://market.oceanprotocol.com/asset/",
+        data = {
+            "name": self.name,
+            "symbol": self.symbol,
+            # "description": f"This NFT represents an asset in the Ocean Protocol v4 ecosystem.\n\nView on Ocean Market: {market_url}",
+            # "external_url": f"{market_url},
+            "background_color": "141414",
+            "image_data": "data:image/svg+xml,%3Csvg viewBox='0 0 99 99' fill='undefined' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23ff409277' d='M0,99L0,29C9,24 19,19 31,19C42,18 55,23 67,25C78,26 88,23 99,21L99,99Z'/%3E%3Cpath fill='%23ff4092bb' d='M0,99L0,43C9,45 18,47 30,48C41,48 54,46 66,45C77,43 88,43 99,43L99,99Z'%3E%3C/path%3E%3Cpath fill='%23ff4092ff' d='M0,99L0,78C10,75 20,72 31,71C41,69 53,69 65,70C76,70 87,72 99,74L99,99Z'%3E%3C/path%3E%3C/svg%3E",
+        }
+
+        return b"data:application/json;base64," + b64encode(
+            json.dumps(data, separators=(",", ":")).encode("utf-8")
+        )
 
     def deploy_contract(self, config_dict, wallet) -> DataNFT:
         from ocean_lib.models.data_nft_factory import (  # isort:skip

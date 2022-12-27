@@ -6,7 +6,7 @@
 import pytest
 
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.web3_internal.constants import DEFAULT_TOKEN_URI, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from tests.resources.helper_functions import get_wallet
 
@@ -34,7 +34,7 @@ def test_main(config):
         1,
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        DEFAULT_TOKEN_URI,
+        "http://someurl",
         True,
         alice_wallet.address,
         {"from": alice_wallet},
