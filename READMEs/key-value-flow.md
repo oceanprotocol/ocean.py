@@ -18,19 +18,15 @@ Here are the steps:
 
 ## 1. Setup
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Publish data NFT
 
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 2.1 Create a data NFT
+In Python console:
+```python
+from ocean_lib.models.data_nft import DataNFTArguments
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
+```
 
 ## 3. Add key-value pair to data NFT
 
@@ -44,7 +40,7 @@ from web3.main import Web3
 key_hash = Web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
 
 # set
-data_nft.setNewData(key_hash, value, {"from": alice_wallet})
+data_nft.setNewData(key_hash, value, {"from": alice})
 ```
 
 ## 4. Retrieve value from data NFT

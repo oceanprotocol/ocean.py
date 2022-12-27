@@ -9,29 +9,13 @@ SPDX-License-Identifier: Apache-2.0
 This quickstart describes how assets can be found by their `tags` from Aquarius.
 
 
-Here are the steps:
-
-1.  Setup
-2.  Alice creates few assets for testing
-3.  Alice searches & filters assets by their `tags`
-
-Let's go through each step.
-
 ## 1. Setup
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
-
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes datasets
 
-Now, you're Alice. Using [publish-flow](publish-flow.md) model, do:
+Now, you're Alice. 
 
 ```python
 #data info
@@ -46,12 +30,12 @@ tags = [
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
     print(f"Just published asset, with did={ddo.did}")
     
     # Update the metadata introducing `tags`
     ddo.metadata.update({"tags": tag})
-    ddo = ocean.assets.update(ddo, alice_wallet, config["PROVIDER_URL"])
+    ddo = ocean.assets.update(ddo, alice, config["PROVIDER_URL"])
     print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```

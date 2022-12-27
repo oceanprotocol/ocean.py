@@ -54,7 +54,7 @@ class ExchangeDetails:
 
 
 @enforce_types
-class FeesInfo:
+class ExchangeFeeInfo:
     def __init__(self, fees_tup):
         """
         :param:details_tup
@@ -70,7 +70,7 @@ class FeesInfo:
 
     def __str__(self):
         s = (
-            f"FeesInfo: \n"
+            f"ExchangeFeeInfo: \n"
             f"  publish_market_fee = {str_with_wei(self.publish_market_fee)}\n"
             f"  publish_market_fee_available"
             f" = {str_with_wei(self.publish_market_fee_available)}\n"
@@ -379,10 +379,10 @@ class OneExchange:
         return self._FRE.getAllowedSwapper(self._id)
 
     @property
-    def fees_info(self) -> FeesInfo:
+    def exchange_fees_info(self) -> ExchangeFeeInfo:
         """Get fee information for this exchange, as an object"""
         tup = self._FRE.getFeesInfo(self._id)
-        return FeesInfo(tup)
+        return ExchangeFeeInfo(tup)
 
     @enforce_types
     def is_active(self) -> bool:

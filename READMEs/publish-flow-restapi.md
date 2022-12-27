@@ -18,16 +18,7 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & installation
-
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes the API asset
 
@@ -42,7 +33,7 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
 print(f"Just published asset, with did={ddo.did}")
 ```
 
@@ -50,7 +41,7 @@ print(f"Just published asset, with did={ddo.did}")
 
 In the same Python console:
 ```python
-datatoken.create_dispenser({"from": alice_wallet})
+datatoken.create_dispenser({"from": alice})
 ```
 
 ### 4. Bob gets a free datatoken, then consumes it
@@ -63,9 +54,12 @@ In the same Python console:
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-datatoken.dispense("1 ether", {"from": bob_wallet})
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
-file_name = ocean.assets.download_asset(ddo, bob_wallet, './', order_tx_id)
+datatoken.dispense("1 ether", {"from": bob})
+order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+
+import os
+file_name = os.path.join(asset_dir, 'file0')
 ```
 
 Now, load the file and use its data.

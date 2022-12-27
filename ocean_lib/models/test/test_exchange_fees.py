@@ -2,8 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
 import time
+from decimal import Decimal
 
 import pytest
 from web3.main import Web3
@@ -18,8 +18,8 @@ from ocean_lib.models.test.test_factory_router import (
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from tests.resources.helper_functions import (
-    get_wallet,
     convert_bt_amt_to_dt,
+    get_wallet,
     int_units,
     transfer_bt_if_balance_lte,
 )
@@ -112,7 +112,7 @@ def test_exchange_swap_fees(
         allowed_swapper=ZERO_ADDRESS,
     )
 
-    fees = exchange.fees_info
+    fees = exchange.exchange_fees_info
 
     # Verify fee collectors are configured correctly
     assert fees.publish_market_fee_collector == alice.address
@@ -199,7 +199,7 @@ def test_exchange_swap_fees(
     # Update publish market swap fee
     new_publish_market_swap_fee = Web3.toWei(0.09, "ether")
     exchange.update_publish_market_fee(new_publish_market_swap_fee, {"from": alice})
-    assert exchange.fees_info.publish_market_fee == new_publish_market_swap_fee
+    assert exchange.exchange_fees_info.publish_market_fee == new_publish_market_swap_fee
 
     # Increase rate (base tokens per datatoken) by 1
     new_bt_per_dt_in_wei = bt_per_dt_in_wei + Web3.toWei("1", "ether")
@@ -258,8 +258,10 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     BT_exchange1 = details.bt_balance
     DT_exchange1 = details.dt_balance
 
-    BT_publish_market_fee_avail1 = exchange.fees_info.publish_market_fee_available
-    BT_opc_fee_avail1 = exchange.fees_info.ocean_fee_available
+    BT_publish_market_fee_avail1 = (
+        exchange.exchange_fees_info.publish_market_fee_available
+    )
+    BT_opc_fee_avail1 = exchange.exchange_fees_info.ocean_fee_available
     BT_consume_market_fee_avail1 = bt.balanceOf(consume_market_swap_fee_address)
 
     if action == "buy":
@@ -333,8 +335,10 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
 
     # Get current fee balances
     # Exchange fees are always base tokens
-    BT_publish_market_fee_avail2 = exchange.fees_info.publish_market_fee_available
-    BT_opc_fee_avail2 = exchange.fees_info.ocean_fee_available
+    BT_publish_market_fee_avail2 = (
+        exchange.exchange_fees_info.publish_market_fee_available
+    )
+    BT_opc_fee_avail2 = exchange.exchange_fees_info.ocean_fee_available
     BT_consume_market_fee_avail2 = bt.balanceOf(consume_market_swap_fee_address)
 
     # Check fees
@@ -399,11 +403,13 @@ def collect_fee_and_verify_balances(
     bt = Datatoken(config, exchange.details.base_token)
 
     if fee_type == "publish_market_fee":
-        BT_exchange_fee_avail1 = exchange.fees_info.publish_market_fee_available
+        BT_exchange_fee_avail1 = (
+            exchange.exchange_fees_info.publish_market_fee_available
+        )
         method = exchange.collect_publish_market_fee
-        fee_collector = exchange.fees_info.publish_market_fee_collector
+        fee_collector = exchange.exchange_fees_info.publish_market_fee_collector
     elif fee_type == "ocean_fee":
-        BT_exchange_fee_avail1 = exchange.fees_info.ocean_fee_available
+        BT_exchange_fee_avail1 = exchange.exchange_fees_info.ocean_fee_available
         method = exchange.collect_ocean_fee
         fee_collector = FRE.get_opc_collector()
     else:
@@ -416,9 +422,11 @@ def collect_fee_and_verify_balances(
     time.sleep(10)  # FIXME, we shouldn't need this!
 
     if fee_type == "publish_market_fee":
-        BT_exchange_fee_avail2 = exchange.fees_info.publish_market_fee_available
+        BT_exchange_fee_avail2 = (
+            exchange.exchange_fees_info.publish_market_fee_available
+        )
     else:
-        BT_exchange_fee_avail2 = exchange.fees_info.opc_fee_available
+        BT_exchange_fee_avail2 = exchange.exchange_fees_info.opc_fee_available
 
     BT_fee_collector2 = bt.balanceOf(fee_collector)
 

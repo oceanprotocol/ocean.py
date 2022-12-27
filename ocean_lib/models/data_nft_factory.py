@@ -12,7 +12,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -73,8 +73,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_args,
         wallet=None,
     ) -> str:
-        ocean_address = get_ocean_token_address(self.config_dict)
-
         receipt = self.contract.createNftWithErc20(
             (
                 data_nft_args.name,
@@ -95,13 +93,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                         datatoken_args.fee_manager or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_address
+                        datatoken_args.publish_market_order_fees.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_token or ocean_address
+                        datatoken_args.publish_market_order_fees.token
                     ),
                 ],
-                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
             {"from": wallet},
@@ -137,7 +135,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_with_mint: int,
         wallet=None,
     ) -> str:
-        ocean_address = get_ocean_token_address(self.config_dict)
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
 
         receipt = self.contract.createNftWithErc20WithFixedRate(
@@ -160,13 +157,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                         datatoken_args.fee_manager or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_address
+                        datatoken_args.publish_market_order_fees.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_token or ocean_address
+                        datatoken_args.publish_market_order_fees.token
                     ),
                 ],
-                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
             (
@@ -222,7 +219,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         dispenser_allowed_swapper: str,
         wallet,
     ) -> str:
-        ocean_address = get_ocean_token_address(self.config_dict)
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
 
         receipt = self.contract.createNftWithErc20WithDispenser(
@@ -245,13 +241,13 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                         datatoken_args.fee_manager or wallet.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_address
+                        datatoken_args.publish_market_order_fees.address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.publish_market_order_fee_token or ocean_address
+                        datatoken_args.publish_market_order_fees.token
                     ),
                 ],
-                [datatoken_args.cap, datatoken_args.publish_market_order_fee_amount],
+                [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
             (

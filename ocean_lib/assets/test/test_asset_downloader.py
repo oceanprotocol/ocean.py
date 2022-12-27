@@ -14,6 +14,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.datatoken import TokenFeeInfo
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
@@ -166,14 +167,16 @@ def test_ocean_assets_download_destination_file(
     )
 
     provider_fees = initialize_response.json()["providerFee"]
+    consume_market_fees = TokenFeeInfo(
+        address=publisher_wallet.address,
+        token=datatoken.address,
+    )
 
     receipt = datatoken.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=publisher_wallet.address,
-        consume_market_order_fee_token=datatoken.address,
-        consume_market_order_fee_amount=0,
+        consume_market_fees=consume_market_fees,
         transaction_parameters={"from": publisher_wallet},
     )
 

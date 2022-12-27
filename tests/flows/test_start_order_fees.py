@@ -11,9 +11,8 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.arguments import DatatokenArguments
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type
@@ -91,9 +90,11 @@ def test_start_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fee_address=publish_market_wallet.address,
-        publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=publish_market_order_fee,
+        publish_market_order_fees=TokenFeeInfo(
+            address=publish_market_wallet.address,
+            token=bt.address,
+            amount=publish_market_order_fee,
+        ),
         timeout=3600,
     )
 
@@ -148,9 +149,11 @@ def test_start_order_fees(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=consume_market_wallet.address,
-        consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=consume_market_order_fee,
+        consume_market_fees=TokenFeeInfo(
+            address=consume_market_wallet.address,
+            token=bt.address,
+            amount=consume_market_order_fee,
+        ),
         transaction_parameters={"from": consumer_wallet},
     )
 
@@ -169,8 +172,7 @@ def test_start_order_fees(
     opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
-    publish_market_order_fee_amount = dt.getPublishingMarketFee()[2]
-    assert publish_market_order_fee_amount == publish_market_order_fee
+    assert dt.get_publish_market_order_fees().amount == publish_market_order_fee
 
     # Get Ocean community fee amount
     opc_order_fee = factory_router.getOPCConsumeFee()
@@ -213,9 +215,7 @@ def create_asset_with_order_fee_and_timeout(
     file: FilesType,
     data_nft: DataNFT,
     publisher_wallet,
-    publish_market_order_fee_address: str,
-    publish_market_order_fee_token: str,
-    publish_market_order_fee_amount: int,
+    publish_market_order_fees,
     timeout: int,
 ) -> Tuple[DDO, Service, Datatoken]:
 
@@ -224,9 +224,7 @@ def create_asset_with_order_fee_and_timeout(
         DatatokenArguments(
             name="Datatoken 1",
             symbol="DT1",
-            publish_market_order_fee_address=publish_market_order_fee_address,
-            publish_market_order_fee_token=publish_market_order_fee_token,
-            publish_market_order_fee_amount=publish_market_order_fee_amount,
+            publish_market_order_fees=publish_market_order_fees,
         ),
         publisher_wallet,
     )

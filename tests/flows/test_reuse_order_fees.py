@@ -8,7 +8,7 @@ from time import sleep
 import pytest
 from web3.main import Web3
 
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.file_objects import FilesType
@@ -73,9 +73,11 @@ def test_reuse_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fee_address=publish_market_wallet.address,
-        publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=int_units("10", bt.decimals()),
+        publish_market_order_fees=TokenFeeInfo(
+            address=publish_market_wallet.address,
+            token=bt.address,
+            amount=int_units("10", bt.decimals()),
+        ),
         timeout=5,
     )
 
@@ -111,9 +113,11 @@ def test_reuse_order_fees(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        consume_market_order_fee_address=consume_market_wallet.address,
-        consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=int_units("10", bt.decimals()),
+        consume_market_fees=TokenFeeInfo(
+            address=consume_market_wallet.address,
+            token=bt.address,
+            amount=int_units("10", bt.decimals()),
+        ),
         transaction_parameters={"from": consumer_wallet},
     )
 
