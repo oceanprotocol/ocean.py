@@ -29,7 +29,7 @@ jobs:
         working-directory: ${{ github.workspace }}/barge
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
-          for i in $(seq 1 60); do
+          for i in $(seq 1 84); do
             sleep 5
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
             done
