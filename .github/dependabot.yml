@@ -10,7 +10,9 @@
 
 version: 2
 updates:
-  - package-ecosystem: "" # See documentation for possible values
-    directory: "/" # Location of package manifests
-    schedule:
-      interval: "weekly"
+- package-ecosystem: pip
+  directory: "/"
+  schedule:
+    interval: weekly
+    time: '03:00'
+    timezone: Europe/Berlin
