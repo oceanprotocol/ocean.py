@@ -63,7 +63,7 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8==5.0.4",
+    "flake8==6.0.0",
     "isort==5.10.1",
     "black",  # need to keep this up to date to brownie
     "pre-commit",
