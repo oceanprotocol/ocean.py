@@ -64,7 +64,7 @@ dev_requirements = [
     "twine",
     "watchdog",
     "flake8==5.0.4",
-    "isort==5.10.1",
+    "isort==5.11.4",
     "black",  # need to keep this up to date to brownie
     "pre-commit",
     # for the following: maybe needed, maybe not
