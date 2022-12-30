@@ -310,12 +310,11 @@ class OceanAssets:
         ddo = DDO()
 
         # Generate the did, add it to the ddo.
-        did = f"did:op:{create_checksum(data_nft.address + str(self._chain_id))}"
-        ddo.did = did
+        ddo.did = data_nft.calculate_did()
         # Check if it's already registered first!
-        if self._aquarius.ddo_exists(did):
+        if self._aquarius.ddo_exists(ddo.did):
             raise AquariusError(
-                f"Asset id {did} is already registered to another asset."
+                f"Asset id {ddo.did} is already registered to another asset."
             )
         ddo.chain_id = self._chain_id
         ddo.metadata = metadata
@@ -386,7 +385,7 @@ class OceanAssets:
 
         # Fetch the ddo on chain
         if wait_for_aqua:
-            ddo = self._aquarius.wait_for_ddo(did)
+            ddo = self._aquarius.wait_for_ddo(ddo.did)
 
         return (data_nft, datatokens, ddo)
 
