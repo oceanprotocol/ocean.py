@@ -6,12 +6,14 @@ import warnings
 from enum import IntEnum, IntFlag
 from typing import Optional
 
+from brownie import network
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import create_checksum, get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.utils import check_network
 
 
 class DataNFTPermissions(IntEnum):
@@ -44,6 +46,11 @@ class DataNFT(ContractBase):
 
     def create_datatoken(self, datatoken_args, wallet) -> Datatoken:
         return datatoken_args.create_datatoken(self, wallet)
+
+    def calculate_did(self):
+        check_network(self.network)
+        chain_id = network.chain.id
+        return f"did:op:{create_checksum(self.address + str(chain_id))}"
 
 
 class DataNFTArguments:
