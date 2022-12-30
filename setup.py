@@ -22,7 +22,7 @@ install_requirements = [
     "coloredlogs",
     "pyopenssl",
     "PyJWT",  # not jwt
-    "PyYAML==5.4.1",
+    "PyYAML==6.0",
     "requests>=2.21.0",
     "deprecated",
     "pycryptodomex",
