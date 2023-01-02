@@ -9,7 +9,7 @@ from web3.main import Web3
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import create_checksum, get_address_of_type
+from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
@@ -105,7 +105,7 @@ def test_combo_functions(
             publish_market_order_fees=TokenFeeInfo(
                 address=publisher_wallet.address,
                 token=ZERO_ADDRESS,
-                amount=Web3.toWei("0.0005", "ether"),
+                amount=to_wei(0.0005),
             ),
         ),
         publisher_wallet,
@@ -130,8 +130,8 @@ def test_combo_functions(
         fixed_price_allowed_swapper=ZERO_ADDRESS,
         fixed_price_base_token_decimals=18,
         fixed_price_datatoken_decimals=18,
-        fixed_price_rate=Web3.toWei("1", "ether"),
-        fixed_price_publish_market_swap_fee_amount=Web3.toWei("0.001", "ether"),
+        fixed_price_rate=to_wei(1),
+        fixed_price_publish_market_swap_fee_amount=to_wei(0.001),
         fixed_price_with_mint=0,
         wallet=publisher_wallet,
     )
@@ -152,8 +152,8 @@ def test_combo_functions(
             "DTP",
             fee_manager=consumer_wallet.address,
         ),
-        dispenser_max_tokens=Web3.toWei(1, "ether"),
-        dispenser_max_balance=Web3.toWei(1, "ether"),
+        dispenser_max_tokens=to_wei(1),
+        dispenser_max_balance=to_wei(1),
         dispenser_with_mint=True,
         dispenser_allowed_swapper=ZERO_ADDRESS,
         wallet=publisher_wallet,
@@ -241,7 +241,7 @@ def test_start_multiple_order(
 
     # Tests starting multiple token orders successfully
     datatoken = Datatoken(config, datatoken.address)
-    dt_amount = Web3.toWei("2", "ether")
+    dt_amount = to_wei(2)
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
 

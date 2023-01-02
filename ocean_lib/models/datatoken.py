@@ -13,9 +13,11 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import (
+    from_wei,
     get_address_of_type,
     get_ocean_token_address,
     str_with_wei,
+    to_wei,
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
@@ -451,7 +453,7 @@ class Datatoken(ContractBase):
             else transaction_parameters["from"]
         )
 
-        bal = Web3.fromWei(self.balanceOf(buyer_addr), "ether")
+        bal = from_wei(self.balanceOf(buyer_addr))
         if bal < 1.0:
             dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
             from ocean_lib.models.dispenser import Dispenser  # isort: skip
@@ -501,7 +503,7 @@ class Datatoken(ContractBase):
             exchange = OneExchange(fre_address, exchange)
 
         exchange.buy_DT(
-            datatoken_amt=Web3.toWei(1, "ether"),
+            datatoken_amt=to_wei(1),
             consume_market_fee_addr=consume_market_fees.address,
             consume_market_fee=consume_market_fees.amount,
             tx_dict=transaction_parameters,

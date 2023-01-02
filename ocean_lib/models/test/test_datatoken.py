@@ -7,7 +7,7 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import get_mock_provider_fees
 
@@ -107,12 +107,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     """Tests startOrder functionality without publish fees, consume fees."""
     data_nft, datatoken = data_NFT_and_DT
     # Mint datatokens to use
-    datatoken.mint(
-        consumer_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
-    )
-    datatoken.mint(
-        publisher_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
-    )
+    datatoken.mint(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
+    datatoken.mint(publisher_wallet.address, to_wei(10), {"from": publisher_wallet})
 
     # Set the fee collector address
     datatoken.setPaymentCollector(
@@ -133,10 +129,10 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         transaction_parameters={"from": publisher_wallet},
     )
     # Check erc20 balances
-    assert datatoken.balanceOf(publisher_wallet.address) == Web3.toWei("9", "ether")
+    assert datatoken.balanceOf(publisher_wallet.address) == to_wei(9)
     assert datatoken.balanceOf(
         get_address_of_type(config, "OPFCommunityFeeCollector")
-    ) == Web3.toWei("1", "ether")
+    ) == to_wei(1)
 
     provider_fee_address = publisher_wallet.address
     provider_data = provider_fees["providerData"]
@@ -213,7 +209,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     datatoken.setPublishingMarketFee(
         publisher_wallet.address,
         get_address_of_type(config, "MockUSDC"),
-        Web3.toWei("1.2", "ether"),
+        to_wei(1.2),
         {"from": publisher_wallet},
     )
 
@@ -224,7 +220,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     # PublishMarketFeeToken set previously
     assert publish_fees.token == get_address_of_type(config, "MockUSDC")
     # PublishMarketFeeAmount set previously
-    assert publish_fees.amount == Web3.toWei("1.2", "ether")
+    assert publish_fees.amount == to_wei(1.2)
     # Fee collector
     assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
@@ -235,48 +231,42 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
-    datatoken.approve(
-        publisher_wallet.address, Web3.toWei("10", "ether"), {"from": consumer_wallet}
-    )
+    datatoken.approve(publisher_wallet.address, to_wei(10), {"from": consumer_wallet})
 
     allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
-    assert allowance == Web3.toWei("10", "ether")
-    datatoken.burnFrom(
-        consumer_wallet.address, Web3.toWei("2", "ether"), {"from": publisher_wallet}
-    )
+    assert allowance == to_wei(10)
+    datatoken.burnFrom(consumer_wallet.address, to_wei(2), {"from": publisher_wallet})
 
-    assert datatoken.totalSupply() == initial_total_supply - Web3.toWei("2", "ether")
+    assert datatoken.totalSupply() == initial_total_supply - to_wei(2)
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("2", "ether")
+    ) == initial_consumer_balance - to_wei(2)
 
     # Test transterFrom too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
     datatoken.transferFrom(
         consumer_wallet.address,
         publisher_wallet.address,
-        Web3.toWei("1", "ether"),
+        to_wei(1),
         {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to burn his tokens too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.burn(Web3.toWei("1", "ether"), {"from": consumer_wallet})
+    datatoken.burn(to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to transfer too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.transfer(
-        publisher_wallet.address, Web3.toWei("1", "ether"), {"from": consumer_wallet}
-    )
+    datatoken.transfer(publisher_wallet.address, to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
 
 @pytest.mark.unit
@@ -288,7 +278,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             consumer_wallet.address,
-            Web3.toWei("1", "ether"),
+            to_wei(1),
             {"from": consumer_wallet},
         )
 

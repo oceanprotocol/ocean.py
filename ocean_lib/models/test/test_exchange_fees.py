@@ -6,7 +6,6 @@ import time
 from decimal import Decimal
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
@@ -15,7 +14,7 @@ from ocean_lib.models.test.test_factory_router import (
     OPC_SWAP_FEE_APPROVED,
     OPC_SWAP_FEE_NOT_APPROVED,
 )
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from tests.resources.helper_functions import (
     convert_bt_amt_to_dt,
@@ -97,10 +96,10 @@ def test_exchange_swap_fees(
         amount_to_transfer=int_units("1500", bt.decimals()),
     )
 
-    publish_market_swap_fee = Web3.toWei(publish_market_swap_fee, "ether")
-    consume_market_swap_fee = Web3.toWei(consume_market_swap_fee, "ether")
+    publish_market_swap_fee = to_wei(publish_market_swap_fee)
+    consume_market_swap_fee = to_wei(consume_market_swap_fee)
 
-    bt_per_dt_in_wei = Web3.toWei(bt_per_dt, "ether")
+    bt_per_dt_in_wei = to_wei(bt_per_dt)
     exchange = dt.create_exchange(
         rate=bt_per_dt_in_wei,
         base_token_addr=bt.address,
@@ -158,7 +157,7 @@ def test_exchange_swap_fees(
         dt.approve(exchange.address, MAX_UINT256, {"from": alice})
 
     one_base_token = int_units("1", bt.decimals())
-    dt_per_bt_in_wei = Web3.toWei(Decimal(1) / Decimal(bt_per_dt), "ether")
+    dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
@@ -197,17 +196,15 @@ def test_exchange_swap_fees(
     )
 
     # Update publish market swap fee
-    new_publish_market_swap_fee = Web3.toWei(0.09, "ether")
+    new_publish_market_swap_fee = to_wei(0.09)
     exchange.update_publish_market_fee(new_publish_market_swap_fee, {"from": alice})
     assert exchange.exchange_fees_info.publish_market_fee == new_publish_market_swap_fee
 
     # Increase rate (base tokens per datatoken) by 1
-    new_bt_per_dt_in_wei = bt_per_dt_in_wei + Web3.toWei("1", "ether")
+    new_bt_per_dt_in_wei = bt_per_dt_in_wei + to_wei(1)
     exchange.set_rate(new_bt_per_dt_in_wei, {"from": alice})
     assert exchange.get_rate() == new_bt_per_dt_in_wei
-    new_dt_per_bt_in_wei = Web3.toWei(
-        Decimal(1) / Web3.fromWei(new_bt_per_dt_in_wei, "ether"), "ether"
-    )
+    new_dt_per_bt_in_wei = to_wei(Decimal(1) / from_wei(new_bt_per_dt_in_wei))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
