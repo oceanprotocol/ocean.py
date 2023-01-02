@@ -6,7 +6,7 @@ import logging
 from enum import IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from brownie.network.state import Chain
+from brownie import network
 from enforce_typing import enforce_types
 from web3.main import Web3
 
@@ -21,6 +21,7 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.utils import check_network
 
 checksum_addr = ContractBase.to_checksum_address
 logger = logging.getLogger("ocean")
@@ -223,8 +224,9 @@ class Datatoken(ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        chain = Chain()
-        to_block = to_block if to_block != "latest" else chain[-1].number
+        if to_block == "latest":
+            check_network(self.network)
+            to_block = network.chain[1].number
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 
