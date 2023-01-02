@@ -4,15 +4,15 @@
 ##
 repos:
 -   repo: https://github.com/PyCQA/isort
-    rev: 5.10.1
+    rev: 5.11.4
     hooks:
     - id: isort
 -   repo: https://github.com/psf/black
     rev: 'refs/tags/22.6.0:refs/tags/22.6.0'
     hooks:
     -   id: black
--   repo: https://gitlab.com/pycqa/flake8
-    rev: 5.0.4
+-   repo: https://github.com/pycqa/flake8
+    rev: 6.0.0
     hooks:
     - id: flake8
 -   repo: https://github.com/johann-petrak/licenseheaders.git
