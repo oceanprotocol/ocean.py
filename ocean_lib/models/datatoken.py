@@ -337,8 +337,8 @@ class Datatoken(ContractBase):
     def create_dispenser(
         self,
         tx_dict: dict,
-        max_tokens: Optional[int] = None,
-        max_balance: Optional[int] = None,
+        max_tokens: Optional[Union[int, str]] = None,
+        max_balance: Optional[Union[int, str]] = None,
         with_mint: Optional[bool] = True,
     ):
         """
