@@ -91,28 +91,34 @@ class DatatokenArguments:
         self.publish_market_order_fees = publish_market_order_fees or TokenFeeInfo()
         self.set_default_fees_at_deploy = not publish_market_order_fees
 
-    def create_datatoken(self, data_nft, wallet, with_services=False):
+    def create_datatoken(self, data_nft, transaction_parameters, with_services=False):
         config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
 
+        wallet_address = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
+
         if self.set_default_fees_at_deploy:
             self.publish_market_order_fees = TokenFeeInfo(
-                address=wallet.address, token=OCEAN_address
+                address=wallet_address, token=OCEAN_address
             )
 
         data_nft.contract.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
-                ContractBase.to_checksum_address(self.minter or wallet.address),
-                ContractBase.to_checksum_address(self.fee_manager or wallet.address),
+                ContractBase.to_checksum_address(self.minter or wallet_address),
+                ContractBase.to_checksum_address(self.fee_manager or wallet_address),
                 self.publish_market_order_fees.address,
                 self.publish_market_order_fees.token,
             ],
             [self.cap, self.publish_market_order_fees.amount],
             self.bytess,
-            {"from": wallet},
+            transaction_parameters,
         )
 
         new_elements = [

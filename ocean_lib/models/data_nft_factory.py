@@ -30,8 +30,8 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         except BadFunctionCallOutput:
             return False
 
-    def create(self, data_nft_args, wallet):
-        return data_nft_args.deploy_contract(self.config_dict, wallet)
+    def create(self, data_nft_args, transaction_parameters):
+        return data_nft_args.deploy_contract(self.config_dict, transaction_parameters)
 
     @enforce_types
     def start_multiple_token_order(

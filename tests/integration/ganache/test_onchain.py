@@ -65,7 +65,7 @@ def test_consume_parametrized_onchain_data(
     dt_arg = DatatokenArguments(files=files, consumer_parameters=consumer_parameters)
     data_nft, _, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 

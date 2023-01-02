@@ -37,7 +37,7 @@ def test_consume_simple_graphql_query(
         """
 
     data_nft, dt, ddo = ocean.assets.create_graphql_asset(
-        "Data NFTs in Ocean", url, query, publisher_wallet
+        "Data NFTs in Ocean", url, query, {"from": publisher_wallet}
     )
 
     assert ddo, "The ddo is not created."
@@ -153,7 +153,7 @@ def test_consume_parametrized_graphql_query(
     )
     data_nft, datatoken, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 

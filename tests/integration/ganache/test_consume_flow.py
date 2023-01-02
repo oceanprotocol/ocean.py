@@ -26,11 +26,11 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
     if asset_type == "simple":
         url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
         data_nft, dt, ddo = ocean_assets.create_url_asset(
-            "Data NFTs in Ocean", url, publisher_wallet
+            "Data NFTs in Ocean", url, {"from": publisher_wallet}
         )
     elif asset_type == "arweave":
         data_nft, dt, ddo = ocean_assets.create_arweave_asset(
-            "Data NFTs in Ocean", ARWEAVE_TRANSACTION_ID, publisher_wallet
+            "Data NFTs in Ocean", ARWEAVE_TRANSACTION_ID, {"from": publisher_wallet}
         )
     elif asset_type == "onchain":
         abi = {
@@ -43,7 +43,7 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
         router_address = get_address_of_type(config, "Router")
 
         data_nft, dt, ddo = ocean_assets.create_onchain_asset(
-            "Data NFTs in Ocean", router_address, abi, publisher_wallet
+            "Data NFTs in Ocean", router_address, abi, {"from": publisher_wallet}
         )
     else:
         url = "http://172.15.0.15:8000/subgraphs/name/oceanprotocol/ocean-subgraph"
@@ -58,7 +58,7 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
             """
 
         data_nft, dt, ddo = ocean_assets.create_graphql_asset(
-            "Data NFTs in Ocean", url, query, publisher_wallet
+            "Data NFTs in Ocean", url, query, {"from": publisher_wallet}
         )
 
     assert ddo, "The ddo is not created."

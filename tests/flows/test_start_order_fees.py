@@ -226,7 +226,7 @@ def create_asset_with_order_fee_and_timeout(
             symbol="DT1",
             publish_market_order_fees=publish_market_order_fees,
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
 
     data_provider = DataServiceProvider
@@ -256,7 +256,7 @@ def create_asset_with_order_fee_and_timeout(
     # Publish asset
     data_nft, datatokens, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         services=[service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],

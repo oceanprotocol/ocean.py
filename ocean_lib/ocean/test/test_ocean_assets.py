@@ -362,7 +362,7 @@ def test_create_url_asset(publisher_ocean, publisher_wallet):
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
-        name, url, publisher_wallet
+        name, url, {"from": publisher_wallet}
     )
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
@@ -380,12 +380,12 @@ def test_plain_asset_with_one_datatoken(publisher_ocean, publisher_wallet, confi
 
     # Publisher deploys NFT contract
     data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFTSYMBOL"), publisher_wallet
+        DataNFTArguments("NFT1", "NFTSYMBOL"), {"from": publisher_wallet}
     )
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         datatoken_args=[DatatokenArguments(files=files)],
     )
@@ -409,12 +409,12 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
     files = get_default_files()
 
     data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT2", "NFT2SYMBOL"), publisher_wallet
+        DataNFTArguments("NFT2", "NFT2SYMBOL"), {"from": publisher_wallet}
     )
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         datatoken_args=[
             DatatokenArguments("Datatoken 2", "DT2", files=files),
@@ -482,7 +482,7 @@ def test_plain_asset_multiple_services(publisher_ocean, publisher_wallet, config
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         services=[access_service, compute_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -509,7 +509,7 @@ def test_encrypted_asset(publisher_ocean, publisher_wallet, config):
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         services=services,
@@ -535,7 +535,7 @@ def test_compressed_asset(publisher_ocean, publisher_wallet, config):
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -561,7 +561,7 @@ def test_compressed_and_encrypted_asset(publisher_ocean, publisher_wallet, confi
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        transaction_parameters={"from": publisher_wallet},
         services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -588,7 +588,7 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
     with pytest.raises(brownie.exceptions.ContractNotFound):
         publisher_ocean.assets.create(
             metadata=metadata,
-            publisher_wallet=publisher_wallet,
+            transaction_parameters={"from": publisher_wallet},
             services=[],
             data_nft_address=some_random_address,
             deployed_datatokens=[datatoken],
@@ -600,7 +600,7 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
         with pytest.raises(AquariusError):
             publisher_ocean.assets.create(
                 metadata=metadata,
-                publisher_wallet=publisher_wallet,
+                transaction_parameters={"from": publisher_wallet},
                 services=[],
                 data_nft_address=data_nft.address,
                 deployed_datatokens=[datatoken],
@@ -615,7 +615,7 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
     (data_nft, datatoken, ddo) = ocean.assets.create_algo_asset(
-        name, url, publisher_wallet
+        name, url, {"from": publisher_wallet}
     )
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly

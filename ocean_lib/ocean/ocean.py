@@ -18,17 +18,17 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.df.df_rewards import DFRewards
+from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.df.df_rewards import DFRewards
-from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
+from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_delegation import VeDelegation
 from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
-from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
-from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -182,23 +182,29 @@ class Ocean:
         base_token: Datatoken,
         amount: int,
         fixed_rate: int,
-        from_wallet,
+        transaction_parameters: dict,
     ) -> bytes:
         fixed_price_address = self._addr("FixedPrice")
-        datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
+        datatoken.approve(fixed_price_address, amount, transaction_parameters)
+
+        from_address = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
 
         receipt = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,
             base_token_address=base_token.address,
-            owner=from_wallet.address,
-            publish_market_swap_fee_collector=from_wallet.address,
+            owner=from_address,
+            publish_market_swap_fee_collector=from_address,
             allowed_swapper=ZERO_ADDRESS,
             base_token_decimals=base_token.decimals(),
             datatoken_decimals=datatoken.decimals(),
             fixed_rate=fixed_rate,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
-            transaction_parameters={"from": from_wallet},
+            transaction_parameters=transaction_parameters,
         )
 
         fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]

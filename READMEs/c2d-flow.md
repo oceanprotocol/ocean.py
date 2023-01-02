@@ -57,7 +57,7 @@ DATA_url_file = UrlFile(
 )
 
 name = "Branin dataset"
-(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, alice, wait_for_aqua=True)
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, {"from": alice}, wait_for_aqua=True)
 print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
@@ -100,7 +100,7 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, alice, wait_for_aqua=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, {"from": alice}, wait_for_aqua=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")

@@ -99,7 +99,7 @@ def test_main(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            another_consumer_wallet,
+            {"from": another_consumer_wallet},
         )
 
 

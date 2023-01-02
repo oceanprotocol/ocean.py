@@ -148,7 +148,7 @@ class OceanAssets:
         self,
         name: str,
         url: str,
-        publisher_wallet,
+        transaction_parameters: dict,
         image: str = "oceanprotocol/algo_dockers",
         tag: str = "python-branin",
         checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
@@ -159,7 +159,7 @@ class OceanAssets:
         if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
             assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
 
-        metadata = self._default_metadata(name, publisher_wallet, "algorithm")
+        metadata = self._default_metadata(name, transaction_parameters, "algorithm")
         metadata["algorithm"] = {
             "language": "python",
             "format": "docker-image",
@@ -173,29 +173,33 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
 
     @enforce_types
     def create_url_asset(
-        self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
+        self,
+        name: str,
+        url: str,
+        transaction_parameters: dict,
+        wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, publisher_wallet)
+        metadata = self._default_metadata(name, transaction_parameters)
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
 
     @enforce_types
     def create_arweave_asset(
         self,
         name: str,
         transaction_id: str,
-        publisher_wallet,
+        transaction_parameters: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, publisher_wallet)
+        metadata = self._default_metadata(name, transaction_parameters)
         files = [ArweaveFile(transaction_id)]
-        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -203,13 +207,13 @@ class OceanAssets:
         name: str,
         url: str,
         query: str,
-        publisher_wallet,
+        transaction_parameters: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
-        metadata = self._default_metadata(name, publisher_wallet)
+        metadata = self._default_metadata(name, transaction_parameters)
         files = [GraphqlQuery(url, query)]
-        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -217,18 +221,26 @@ class OceanAssets:
         name: str,
         contract_address: str,
         contract_abi: dict,
-        publisher_wallet,
+        transaction_parameters: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        metadata = self._default_metadata(name, publisher_wallet)
-        return self._create_1dt(metadata, files, publisher_wallet, wait_for_aqua)
+        metadata = self._default_metadata(name, transaction_parameters)
+        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
 
     @enforce_types
-    def _default_metadata(self, name: str, publisher_wallet, type="dataset") -> dict:
+    def _default_metadata(
+        self, name: str, transaction_parameters: dict, type="dataset"
+    ) -> dict:
+        address = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
+
         date_created = datetime.now().isoformat()
         metadata = {
             "created": date_created,
@@ -236,18 +248,18 @@ class OceanAssets:
             "description": name,
             "name": name,
             "type": type,
-            "author": publisher_wallet.address[:7],
+            "author": address[:7],
             "license": "CC0: PublicDomain",
         }
         return metadata
 
     @enforce_types
-    def _create_1dt(self, metadata, files, publisher_wallet, wait_for_aqua):
+    def _create_1dt(self, metadata, files, transaction_parameters, wait_for_aqua):
         """Call create(), focusing on just one datatoken"""
         name = metadata["name"]
         (data_nft, datatokens, ddo) = self.create(
             metadata,
-            publisher_wallet,
+            transaction_parameters,
             datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
             wait_for_aqua=wait_for_aqua,
         )
@@ -259,7 +271,7 @@ class OceanAssets:
     def create(
         self,
         metadata: dict,
-        publisher_wallet,
+        transaction_parameters: dict,
         credentials: Optional[dict] = None,
         data_nft_address: Optional[str] = None,
         data_nft_args: Optional[DataNFTArguments] = None,
@@ -296,7 +308,7 @@ class OceanAssets:
                 metadata["name"], metadata["name"]
             )
             data_nft = data_nft_args.deploy_contract(
-                self._config_dict, publisher_wallet
+                self._config_dict, transaction_parameters
             )
             # register on-chain
             if not data_nft:
@@ -328,7 +340,7 @@ class OceanAssets:
             services = []
             for datatoken_arg in datatoken_args:
                 new_dt = datatoken_arg.create_datatoken(
-                    data_nft, publisher_wallet, with_services=True
+                    data_nft, transaction_parameters, with_services=True
                 )
                 datatokens.append(new_dt)
 
@@ -372,15 +384,21 @@ class OceanAssets:
             ddo, provider_uri, encrypt_flag, compress_flag
         )
 
+        wallet_address = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
+
         data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            Web3.toChecksumAddress(wallet_address.lower()).encode("utf-8"),
             flags,
             document,
             ddo_hash,
             [proof],
-            {"from": publisher_wallet},
+            transaction_parameters,
         )
 
         # Fetch the ddo on chain
