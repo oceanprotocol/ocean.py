@@ -32,7 +32,11 @@ from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import (
+    get_address_of_type,
+    get_from_address,
+    get_ocean_token_address,
+)
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -187,11 +191,7 @@ class Ocean:
         fixed_price_address = self._addr("FixedPrice")
         datatoken.approve(fixed_price_address, amount, transaction_parameters)
 
-        from_address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        from_address = get_from_address(transaction_parameters)
 
         receipt = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,

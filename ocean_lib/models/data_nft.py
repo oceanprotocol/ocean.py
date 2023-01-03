@@ -10,7 +10,7 @@ from brownie import network
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import create_checksum, get_address_of_type
+from ocean_lib.ocean.util import create_checksum, get_address_of_type, get_from_address
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.utils import check_network
@@ -92,11 +92,7 @@ class DataNFTArguments:
         address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
         data_nft_factory = DataNFTFactoryContract(config_dict, address)
 
-        wallet_address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        wallet_address = get_from_address(transaction_parameters)
 
         receipt = data_nft_factory.deployERC721Contract(
             self.name,

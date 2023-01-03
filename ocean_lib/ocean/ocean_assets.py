@@ -26,7 +26,7 @@ from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.ocean.util import create_checksum
+from ocean_lib.ocean.util import create_checksum, get_from_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
@@ -235,11 +235,7 @@ class OceanAssets:
     def _default_metadata(
         self, name: str, transaction_parameters: dict, type="dataset"
     ) -> dict:
-        address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        address = get_from_address(transaction_parameters)
 
         date_created = datetime.now().isoformat()
         metadata = {
@@ -384,16 +380,12 @@ class OceanAssets:
             ddo, provider_uri, encrypt_flag, compress_flag
         )
 
-        wallet_address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        wallet_address = get_from_address(transaction_parameters)
 
         data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(wallet_address.lower()).encode("utf-8"),
+            wallet_address.encode("utf-8"),
             flags,
             document,
             ddo_hash,
@@ -456,16 +448,12 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
-        wallet_address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        wallet_address = get_from_address(transaction_parameters)
 
         tx_result = data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(wallet_address.lower()).encode("utf-8"),
+            wallet_address.encode("utf-8"),
             flags,
             document,
             ddo_hash,

@@ -14,6 +14,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import (
     get_address_of_type,
+    get_from_address,
     get_ocean_token_address,
     str_with_wei,
 )
@@ -96,11 +97,7 @@ class DatatokenArguments:
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
 
-        wallet_address = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        wallet_address = get_from_address(transaction_parameters)
 
         if self.set_default_fees_at_deploy:
             self.publish_market_order_fees = TokenFeeInfo(
@@ -111,8 +108,8 @@ class DatatokenArguments:
             self.template_index,
             [self.name, self.symbol],
             [
-                ContractBase.to_checksum_address(self.minter or wallet_address),
-                ContractBase.to_checksum_address(self.fee_manager or wallet_address),
+                ContractBase.to_checksum_address(self.minter) or wallet_address,
+                ContractBase.to_checksum_address(self.fee_manager) or wallet_address,
                 self.publish_market_order_fees.address,
                 self.publish_market_order_fees.token,
             ],
@@ -278,21 +275,19 @@ class Datatoken(ContractBase):
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = (
-            tx_dict["from"].address
-            if hasattr(tx_dict["from"], "address")
-            else tx_dict["from"]
-        )
+        from_addr = get_from_address(tx_dict)
         BT = Datatoken(self.config_dict, base_token_addr)
-        owner_addr = owner_addr or from_addr
-        publish_market_fee_collector = publish_market_fee_collector or from_addr
+        owner_addr = checksum_addr(owner_addr) or from_addr
+        publish_market_fee_collector = (
+            checksum_addr(publish_market_fee_collector) or from_addr
+        )
 
         tx = self.contract.createFixedRate(
             checksum_addr(FRE_addr),
             [
                 checksum_addr(BT.address),
-                checksum_addr(owner_addr),
-                checksum_addr(publish_market_fee_collector),
+                owner_addr,
+                publish_market_fee_collector,
                 checksum_addr(allowed_swapper),
             ],
             [
@@ -391,11 +386,7 @@ class Datatoken(ContractBase):
         """
         # args for contract tx
         datatoken_addr = self.address
-        from_addr = (
-            tx_dict["from"].address
-            if hasattr(tx_dict["from"], "address")
-            else tx_dict["from"]
-        )
+        from_addr = get_from_address(tx_dict)
 
         # do contract tx
         tx = self._ocean_dispenser().dispense(
@@ -451,11 +442,7 @@ class Datatoken(ContractBase):
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        buyer_addr = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        buyer_addr = get_from_address(transaction_parameters)
 
         bal = Web3.fromWei(self.balanceOf(buyer_addr), "ether")
         if bal < 1.0:
