@@ -411,7 +411,7 @@ class OceanAssets:
     def update(
         self,
         ddo: DDO,
-        publisher_wallet,
+        transaction_parameters: dict,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -456,15 +456,21 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
+        wallet_address = (
+            transaction_parameters["from"].address
+            if hasattr(transaction_parameters["from"], "address")
+            else transaction_parameters["from"]
+        )
+
         tx_result = data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            Web3.toChecksumAddress(wallet_address.lower()).encode("utf-8"),
             flags,
             document,
             ddo_hash,
             [proof],
-            {"from": publisher_wallet},
+            transaction_parameters,
         )
 
         ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)

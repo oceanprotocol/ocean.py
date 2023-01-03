@@ -503,7 +503,7 @@ def test_compute_update_trusted_algorithm(
     )
 
     updated_dataset = publisher_ocean.assets.update(
-        dataset_with_compute_service_generator, publisher_wallet
+        dataset_with_compute_service_generator, {"from": publisher_wallet}
     )
 
     # Expect to pass when trusted algorithm is used

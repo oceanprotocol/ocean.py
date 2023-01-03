@@ -86,7 +86,7 @@ DATA_compute_service = Service(
 
 # Add service and update asset
 DATA_ddo.add_service(DATA_compute_service)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
@@ -113,7 +113,7 @@ In the same Python console:
 ```python
 compute_service = DATA_ddo.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 ```
 

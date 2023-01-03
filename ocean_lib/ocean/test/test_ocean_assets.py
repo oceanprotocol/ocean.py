@@ -55,7 +55,7 @@ def test_update_metadata(publisher_ocean, publisher_wallet):
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
-    ddo2 = publisher_ocean.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean.assets.update(ddo, {"from": publisher_wallet})
 
     assert ddo2.datatokens == ddo.datatokens
     assert len(ddo2.services) == len(ddo.services)
@@ -79,7 +79,7 @@ def test_update_credentials(publisher_ocean, publisher_wallet):
 
     ddo.credentials = _new_credentials
 
-    ddo2 = publisher_ocean.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean.assets.update(ddo, {"from": publisher_wallet})
 
     assert ddo2.credentials == _new_credentials, "Credentials were not updated."
 
@@ -115,7 +115,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
 
     ddo.services.append(access_service)
 
-    ddo2 = publisher_ocean.assets.update(ddo, publisher_wallet)
+    ddo2 = publisher_ocean.assets.update(ddo, {"from": publisher_wallet})
 
     assert len(ddo2.datatokens) == len(ddo_orig.datatokens) + 1
     assert len(ddo2.services) == len(ddo_orig.services) + 1
@@ -141,7 +141,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
 
     ddo2_prev_datatokens = ddo2.datatokens
 
-    ddo4 = publisher_ocean.assets.update(ddo3, publisher_wallet)
+    ddo4 = publisher_ocean.assets.update(ddo3, {"from": publisher_wallet})
 
     assert ddo4, "Can't read ddo after update."
     assert len(ddo4.datatokens) == 1
@@ -169,7 +169,7 @@ def test_update_flags(publisher_ocean, publisher_wallet):
 
     ddo2 = publisher_ocean.assets.update(
         ddo,
-        publisher_wallet,
+        {"from": publisher_wallet},
         compress_flag=True,
         encrypt_flag=True,
     )
