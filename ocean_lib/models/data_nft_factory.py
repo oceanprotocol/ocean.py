@@ -130,9 +130,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_allowed_swapper: str,
         fixed_price_base_token_decimals: int,
         fixed_price_datatoken_decimals: int,
-        fixed_price_rate: int,
-        fixed_price_publish_market_swap_fee_amount: int,
-        fixed_price_with_mint: int,
+        fixed_price_rate: Union[int, str],
+        fixed_price_publish_market_swap_fee_amount: Union[int, str],
+        fixed_price_with_mint: Union[int, str],
         wallet=None,
     ) -> str:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")

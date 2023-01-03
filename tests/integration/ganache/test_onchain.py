@@ -7,13 +7,12 @@ import shutil
 
 import pytest
 from brownie import network
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import SmartContractCall
 from tests.resources.ddo_helpers import get_first_service_by_type
 
@@ -83,7 +82,7 @@ def test_consume_parametrized_onchain_data(
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
