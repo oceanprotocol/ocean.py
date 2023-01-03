@@ -8,7 +8,6 @@ from typing import List, Optional
 
 import pytest
 from attr import dataclass
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -16,6 +15,7 @@ from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import to_wei
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
@@ -148,7 +148,7 @@ def _mint_and_build_compute_input(
         if datatoken.isMinter(consumer_wallet.address)
         else publisher_wallet
     )
-    datatoken.mint(consumer_wallet.address, Web3.toWei(10, "ether"), {"from": minter})
+    datatoken.mint(consumer_wallet.address, to_wei(10), {"from": minter})
 
     return ComputeInput(
         dataset_and_userdata.ddo,

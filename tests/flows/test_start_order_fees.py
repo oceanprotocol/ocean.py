@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -15,7 +14,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -101,7 +100,7 @@ def test_start_order_fees(
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
@@ -176,9 +175,9 @@ def test_start_order_fees(
 
     # Get Ocean community fee amount
     opc_order_fee = factory_router.getOPCConsumeFee()
-    assert opc_order_fee == Web3.toWei("0.03", "ether")
+    assert opc_order_fee == to_wei(0.03)
 
-    one_datatoken = Web3.toWei(1, "ether")
+    one_datatoken = to_wei(1)
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after

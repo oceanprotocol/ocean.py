@@ -6,11 +6,10 @@ from datetime import datetime, timedelta
 from time import sleep
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
@@ -84,7 +83,7 @@ def test_reuse_order_fees(
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 

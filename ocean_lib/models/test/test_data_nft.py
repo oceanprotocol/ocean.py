@@ -335,7 +335,7 @@ def test_create_datatoken(
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             bytess=[b""],
-            cap=Web3.toWei("0.1", "ether"),
+            cap=to_wei(0.1),
         ),
         {"from": publisher_wallet},
     )
@@ -345,7 +345,7 @@ def test_create_datatoken(
         DatatokenArguments(
             name="DatatokenEnterpriseDT1",
             symbol="DatatokenEnterpriseDT1Symbol",
-            cap=Web3.toWei("0.1", "ether"),
+            cap=to_wei(0.1),
         ),
         {"from": publisher_wallet},
     )
@@ -357,7 +357,7 @@ def test_create_datatoken_with_usdc_order_fee(
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
-    publish_market_order_fee_amount_in_wei = Web3.toWei(5, "ether")
+    publish_market_order_fee_amount_in_wei = to_wei(5)
     dt = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -481,10 +481,10 @@ def test_erc721_datatoken_functions(
     # Tests transfer functions
     datatoken.mint(
         consumer_wallet.address,
-        Web3.toWei("0.2", "ether"),
+        to_wei(0.2),
         {"from": publisher_wallet},
     )
-    assert datatoken.balanceOf(consumer_wallet.address) == Web3.toWei("0.2", "ether")
+    assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.2)
     assert data_nft.ownerOf(1) == publisher_wallet.address
 
     data_nft.transferFrom(
@@ -509,17 +509,17 @@ def test_erc721_datatoken_functions(
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             consumer_wallet.address,
-            Web3.toWei("1", "ether"),
+            to_wei(1),
             {"from": consumer_wallet},
         )
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
         consumer_wallet.address,
-        Web3.toWei("0.2", "ether"),
+        to_wei(0.2),
         {"from": consumer_wallet},
     )
-    assert datatoken.balanceOf(consumer_wallet.address) == Web3.toWei("0.4", "ether")
+    assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.4)
 
 
 @pytest.mark.unit

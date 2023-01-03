@@ -26,7 +26,7 @@ from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.ocean.util import create_checksum, get_from_address
+from ocean_lib.ocean.util import create_checksum, get_from_address, to_wei
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
@@ -542,7 +542,7 @@ class OceanAssets:
         dt = Datatoken(self._config_dict, service.datatoken)
         balance = dt.balanceOf(wallet_address)
 
-        if balance < Web3.toWei(1, "ether"):
+        if balance < to_wei(1):
             raise InsufficientBalance(
                 f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
