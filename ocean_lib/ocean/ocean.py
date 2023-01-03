@@ -186,12 +186,12 @@ class Ocean:
         base_token: Datatoken,
         amount: int,
         fixed_rate: int,
-        transaction_parameters: dict,
+        tx_dict: dict,
     ) -> bytes:
         fixed_price_address = self._addr("FixedPrice")
-        datatoken.approve(fixed_price_address, amount, transaction_parameters)
+        datatoken.approve(fixed_price_address, amount, tx_dict)
 
-        from_address = get_from_address(transaction_parameters)
+        from_address = get_from_address(tx_dict)
 
         receipt = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,
@@ -204,7 +204,7 @@ class Ocean:
             fixed_rate=fixed_rate,
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
-            transaction_parameters=transaction_parameters,
+            tx_dict=tx_dict,
         )
 
         fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]

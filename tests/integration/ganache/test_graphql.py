@@ -68,7 +68,7 @@ def test_consume_simple_graphql_query(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file
@@ -153,7 +153,7 @@ def test_consume_parametrized_graphql_query(
     )
     data_nft, datatoken, ddo = ocean_assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 
@@ -188,7 +188,7 @@ def test_consume_parametrized_graphql_query(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file

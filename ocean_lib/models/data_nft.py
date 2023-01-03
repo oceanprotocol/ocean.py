@@ -44,8 +44,8 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    def create_datatoken(self, datatoken_args, transaction_parameters) -> Datatoken:
-        return datatoken_args.create_datatoken(self, transaction_parameters)
+    def create_datatoken(self, datatoken_args, tx_dict) -> Datatoken:
+        return datatoken_args.create_datatoken(self, tx_dict)
 
     def calculate_did(self):
         check_network(self.network)
@@ -84,7 +84,7 @@ class DataNFTArguments:
         self.transferable = transferable or True
         self.owner = owner
 
-    def deploy_contract(self, config_dict, transaction_parameters) -> DataNFT:
+    def deploy_contract(self, config_dict, tx_dict) -> DataNFT:
         from ocean_lib.models.data_nft_factory import (  # isort:skip
             DataNFTFactoryContract,
         )
@@ -92,7 +92,7 @@ class DataNFTArguments:
         address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
         data_nft_factory = DataNFTFactoryContract(config_dict, address)
 
-        wallet_address = get_from_address(transaction_parameters)
+        wallet_address = get_from_address(tx_dict)
 
         receipt = data_nft_factory.deployERC721Contract(
             self.name,
@@ -103,7 +103,7 @@ class DataNFTArguments:
             self.uri,
             self.transferable,
             self.owner or wallet_address,
-            transaction_parameters,
+            tx_dict,
         )
 
         with warnings.catch_warnings():

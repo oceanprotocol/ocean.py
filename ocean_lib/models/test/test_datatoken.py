@@ -130,7 +130,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
             address=publisher_wallet.address,
             token=datatoken.address,
         ),
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == Web3.toWei("9", "ether")
@@ -199,7 +199,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     receipt_interm = datatoken.reuse_order(
         receipt.txid,
         provider_fees=provider_fees,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
     reused_event = receipt_interm.events["OrderReused"]
     assert reused_event, "Cannot find OrderReused event"

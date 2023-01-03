@@ -177,7 +177,7 @@ def test_ocean_assets_download_destination_file(
         service_index=ddo.get_index_of_service(access_service),
         provider_fees=provider_fees,
         consume_market_fees=consume_market_fees,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
 
     orders = publisher_ocean.get_user_orders(

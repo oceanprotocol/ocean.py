@@ -148,7 +148,7 @@ class OceanAssets:
         self,
         name: str,
         url: str,
-        transaction_parameters: dict,
+        tx_dict: dict,
         image: str = "oceanprotocol/algo_dockers",
         tag: str = "python-branin",
         checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
@@ -159,7 +159,7 @@ class OceanAssets:
         if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
             assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
 
-        metadata = self._default_metadata(name, transaction_parameters, "algorithm")
+        metadata = self._default_metadata(name, tx_dict, "algorithm")
         metadata["algorithm"] = {
             "language": "python",
             "format": "docker-image",
@@ -173,33 +173,33 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_url_asset(
         self,
         name: str,
         url: str,
-        transaction_parameters: dict,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, transaction_parameters)
+        metadata = self._default_metadata(name, tx_dict)
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_arweave_asset(
         self,
         name: str,
         transaction_id: str,
-        transaction_parameters: dict,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, transaction_parameters)
+        metadata = self._default_metadata(name, tx_dict)
         files = [ArweaveFile(transaction_id)]
-        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -207,13 +207,13 @@ class OceanAssets:
         name: str,
         url: str,
         query: str,
-        transaction_parameters: dict,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
-        metadata = self._default_metadata(name, transaction_parameters)
+        metadata = self._default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
-        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -221,21 +221,19 @@ class OceanAssets:
         name: str,
         contract_address: str,
         contract_abi: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
         """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        metadata = self._default_metadata(name, transaction_parameters)
-        return self._create_1dt(metadata, files, transaction_parameters, wait_for_aqua)
+        metadata = self._default_metadata(name, tx_dict)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
-    def _default_metadata(
-        self, name: str, transaction_parameters: dict, type="dataset"
-    ) -> dict:
-        address = get_from_address(transaction_parameters)
+    def _default_metadata(self, name: str, tx_dict: dict, type="dataset") -> dict:
+        address = get_from_address(tx_dict)
 
         date_created = datetime.now().isoformat()
         metadata = {
@@ -250,12 +248,12 @@ class OceanAssets:
         return metadata
 
     @enforce_types
-    def _create_1dt(self, metadata, files, transaction_parameters, wait_for_aqua):
+    def _create_1dt(self, metadata, files, tx_dict, wait_for_aqua):
         """Call create(), focusing on just one datatoken"""
         name = metadata["name"]
         (data_nft, datatokens, ddo) = self.create(
             metadata,
-            transaction_parameters,
+            tx_dict,
             datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
             wait_for_aqua=wait_for_aqua,
         )
@@ -267,7 +265,7 @@ class OceanAssets:
     def create(
         self,
         metadata: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
         credentials: Optional[dict] = None,
         data_nft_address: Optional[str] = None,
         data_nft_args: Optional[DataNFTArguments] = None,
@@ -303,9 +301,7 @@ class OceanAssets:
             data_nft_args = data_nft_args or DataNFTArguments(
                 metadata["name"], metadata["name"]
             )
-            data_nft = data_nft_args.deploy_contract(
-                self._config_dict, transaction_parameters
-            )
+            data_nft = data_nft_args.deploy_contract(self._config_dict, tx_dict)
             # register on-chain
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
@@ -336,7 +332,7 @@ class OceanAssets:
             services = []
             for datatoken_arg in datatoken_args:
                 new_dt = datatoken_arg.create_datatoken(
-                    data_nft, transaction_parameters, with_services=True
+                    data_nft, tx_dict, with_services=True
                 )
                 datatokens.append(new_dt)
 
@@ -380,7 +376,7 @@ class OceanAssets:
             ddo, provider_uri, encrypt_flag, compress_flag
         )
 
-        wallet_address = get_from_address(transaction_parameters)
+        wallet_address = get_from_address(tx_dict)
 
         data_nft.setMetaData(
             0,
@@ -390,7 +386,7 @@ class OceanAssets:
             document,
             ddo_hash,
             [proof],
-            transaction_parameters,
+            tx_dict,
         )
 
         # Fetch the ddo on chain
@@ -403,7 +399,7 @@ class OceanAssets:
     def update(
         self,
         ddo: DDO,
-        transaction_parameters: dict,
+        tx_dict: dict,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -448,7 +444,7 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
-        wallet_address = get_from_address(transaction_parameters)
+        wallet_address = get_from_address(tx_dict)
 
         tx_result = data_nft.setMetaData(
             0,
@@ -458,7 +454,7 @@ class OceanAssets:
             document,
             ddo_hash,
             [proof],
-            transaction_parameters,
+            tx_dict,
         )
 
         ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
@@ -577,7 +573,7 @@ class OceanAssets:
             service_index=ddo.get_index_of_service(service),
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            transaction_parameters={"from": wallet},
+            tx_dict={"from": wallet},
         )
 
         return receipt.txid
@@ -661,7 +657,7 @@ class OceanAssets:
             asset_compute_input.transfer_tx_id = dt.reuse_order(
                 valid_order,
                 provider_fees=provider_fees,
-                transaction_parameters={"from": wallet},
+                tx_dict={"from": wallet},
             ).txid
             return
 
@@ -670,5 +666,5 @@ class OceanAssets:
             service_index=asset_compute_input.ddo.get_index_of_service(service),
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            transaction_parameters={"from": wallet},
+            tx_dict={"from": wallet},
         ).txid

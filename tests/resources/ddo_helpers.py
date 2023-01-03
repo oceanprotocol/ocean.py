@@ -175,7 +175,7 @@ def get_registered_asset_with_compute_service(
 
     return ocean_instance.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         services=[compute_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -215,7 +215,7 @@ def get_registered_algorithm_with_access_service(
 
     return ocean_instance.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[DatatokenArguments("Algo DT1", "DT1", files=[algorithm_file])],
     )
 

@@ -89,7 +89,7 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file

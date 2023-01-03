@@ -385,7 +385,7 @@ def test_plain_asset_with_one_datatoken(publisher_ocean, publisher_wallet, confi
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         datatoken_args=[DatatokenArguments(files=files)],
     )
@@ -414,7 +414,7 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         datatoken_args=[
             DatatokenArguments("Datatoken 2", "DT2", files=files),
@@ -482,7 +482,7 @@ def test_plain_asset_multiple_services(publisher_ocean, publisher_wallet, config
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         services=[access_service, compute_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -509,7 +509,7 @@ def test_encrypted_asset(publisher_ocean, publisher_wallet, config):
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         services=services,
@@ -535,7 +535,7 @@ def test_compressed_asset(publisher_ocean, publisher_wallet, config):
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -561,7 +561,7 @@ def test_compressed_and_encrypted_asset(publisher_ocean, publisher_wallet, confi
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
         services=services,
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -588,7 +588,7 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
     with pytest.raises(brownie.exceptions.ContractNotFound):
         publisher_ocean.assets.create(
             metadata=metadata,
-            transaction_parameters={"from": publisher_wallet},
+            tx_dict={"from": publisher_wallet},
             services=[],
             data_nft_address=some_random_address,
             deployed_datatokens=[datatoken],
@@ -600,7 +600,7 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
         with pytest.raises(AquariusError):
             publisher_ocean.assets.create(
                 metadata=metadata,
-                transaction_parameters={"from": publisher_wallet},
+                tx_dict={"from": publisher_wallet},
                 services=[],
                 data_nft_address=data_nft.address,
                 deployed_datatokens=[datatoken],
