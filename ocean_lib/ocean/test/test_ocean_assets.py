@@ -349,7 +349,7 @@ def test_pay_for_access_service_insufficient_balance(
     with pytest.raises(InsufficientBalance):
         publisher_ocean.assets.pay_for_access_service(
             ddo,
-            empty_wallet,
+            {"from": empty_wallet},
             get_first_service_by_type(ddo, "access"),
             TokenFeeInfo(address=empty_wallet.address, token=datatoken.address),
         )

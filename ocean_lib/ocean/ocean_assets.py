@@ -586,13 +586,14 @@ class OceanAssets:
         compute_environment: str,
         valid_until: int,
         consume_market_order_fee_address: str,
-        wallet,
+        tx_dict: dict,
         consumer_address: Optional[str] = None,
     ):
         data_provider = DataServiceProvider
+        wallet_address = get_from_address(tx_dict)
 
         if not consumer_address:
-            consumer_address = wallet.address
+            consumer_address = wallet_address
 
         initialize_response = data_provider.initialize_compute(
             [x.as_dictionary() for x in datasets],
@@ -613,7 +614,7 @@ class OceanAssets:
                     datasets[i].consume_market_order_fee_token,
                     datasets[i].consume_market_order_fee_amount,
                 ),
-                wallet,
+                tx_dict,
                 consumer_address,
             )
 
@@ -626,7 +627,7 @@ class OceanAssets:
                     token=algorithm_data.consume_market_order_fee_token,
                     amount=algorithm_data.consume_market_order_fee_amount,
                 ),
-                wallet,
+                tx_dict,
                 consumer_address,
             )
 
@@ -640,7 +641,7 @@ class OceanAssets:
         asset_compute_input: ComputeInput,
         item: dict,
         consume_market_fees: TokenFeeInfo,
-        wallet,
+        tx_dict: dict,
         consumer_address: Optional[str] = None,
     ):
         provider_fees = item.get("providerFee")
@@ -655,9 +656,7 @@ class OceanAssets:
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(
-                valid_order,
-                provider_fees=provider_fees,
-                tx_dict={"from": wallet},
+                valid_order, provider_fees=provider_fees, tx_dict=tx_dict
             ).txid
             return
 
@@ -666,5 +665,5 @@ class OceanAssets:
             service_index=asset_compute_input.ddo.get_index_of_service(service),
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            tx_dict={"from": wallet},
+            tx_dict=tx_dict,
         ).txid

@@ -90,7 +90,7 @@ Bob now has the datatoken for the dataset! Time to download the dataset and use 
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
 
 # Bob downloads the file. If the connection breaks, Bob can try again
 asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)

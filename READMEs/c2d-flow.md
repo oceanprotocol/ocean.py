@@ -158,7 +158,7 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob.address,
-    wallet=bob,
+    tx_dict={"from": bob},
     compute_environment=free_c2d_env["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     consumer_address=free_c2d_env["consumerAddress"],

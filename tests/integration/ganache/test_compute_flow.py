@@ -249,7 +249,7 @@ def run_compute_test(
         compute_environment=free_c2d_env["id"],
         valid_until=valid_until,
         consume_market_order_fee_address=consumer_wallet.address,
-        wallet=consumer_wallet,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Start compute job
@@ -314,7 +314,7 @@ def run_compute_test(
             compute_environment=free_c2d_env["id"],
             valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
-            wallet=consumer_wallet,
+            tx_dict={"from": consumer_wallet},
         )
 
         # transferTxId was not updated
@@ -335,7 +335,7 @@ def run_compute_test(
             compute_environment=free_c2d_env["id"],
             valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
-            wallet=consumer_wallet,
+            tx_dict={"from": consumer_wallet},
         )
 
         assert datasets[0].transfer_tx_id != prev_dt_tx_id
