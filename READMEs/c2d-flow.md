@@ -57,7 +57,7 @@ DATA_url_file = UrlFile(
 )
 
 name = "Branin dataset"
-(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, alice, wait_for_aqua=True)
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, {"from": alice}, wait_for_aqua=True)
 print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
@@ -86,7 +86,7 @@ DATA_compute_service = Service(
 
 # Add service and update asset
 DATA_ddo.add_service(DATA_compute_service)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
@@ -100,7 +100,7 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, alice, wait_for_aqua=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, {"from": alice}, wait_for_aqua=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
@@ -113,7 +113,7 @@ In the same Python console:
 ```python
 compute_service = DATA_ddo.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 ```
 
@@ -158,7 +158,7 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob.address,
-    wallet=bob,
+    tx_dict={"from": bob},
     compute_environment=free_c2d_env["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     consumer_address=free_c2d_env["consumerAddress"],

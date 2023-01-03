@@ -10,7 +10,7 @@ from brownie import network
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import create_checksum, get_address_of_type
+from ocean_lib.ocean.util import create_checksum, get_address_of_type, get_from_address
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.utils import check_network
@@ -44,8 +44,8 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    def create_datatoken(self, datatoken_args, wallet) -> Datatoken:
-        return datatoken_args.create_datatoken(self, wallet)
+    def create_datatoken(self, datatoken_args, tx_dict) -> Datatoken:
+        return datatoken_args.create_datatoken(self, tx_dict)
 
     def calculate_did(self):
         check_network(self.network)
@@ -84,13 +84,15 @@ class DataNFTArguments:
         self.transferable = transferable or True
         self.owner = owner
 
-    def deploy_contract(self, config_dict, wallet) -> DataNFT:
+    def deploy_contract(self, config_dict, tx_dict) -> DataNFT:
         from ocean_lib.models.data_nft_factory import (  # isort:skip
             DataNFTFactoryContract,
         )
 
         address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
         data_nft_factory = DataNFTFactoryContract(config_dict, address)
+
+        wallet_address = get_from_address(tx_dict)
 
         receipt = data_nft_factory.deployERC721Contract(
             self.name,
@@ -100,8 +102,8 @@ class DataNFTArguments:
             self.additional_datatoken_deployer,
             self.uri,
             self.transferable,
-            self.owner or wallet.address,
-            {"from": wallet},
+            self.owner or wallet_address,
+            tx_dict,
         )
 
         with warnings.catch_warnings():

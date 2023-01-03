@@ -106,7 +106,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     print("Call create() from data NFT, and wait for it to complete...")
     try:
         data_nft = ocean.data_nft_factory.create(
-            DataNFTArguments(symbol, symbol), alice_wallet
+            DataNFTArguments(symbol, symbol), {"from": alice_wallet}
         )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:
