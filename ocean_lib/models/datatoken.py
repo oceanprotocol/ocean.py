@@ -108,8 +108,8 @@ class DatatokenArguments:
             self.template_index,
             [self.name, self.symbol],
             [
-                ContractBase.to_checksum_address(self.minter) or wallet_address,
-                ContractBase.to_checksum_address(self.fee_manager) or wallet_address,
+                ContractBase.to_checksum_address(self.minter or wallet_address),
+                ContractBase.to_checksum_address(self.fee_manager or wallet_address),
                 self.publish_market_order_fees.address,
                 self.publish_market_order_fees.token,
             ],
@@ -277,17 +277,15 @@ class Datatoken(ContractBase):
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
         from_addr = get_from_address(tx_dict)
         BT = Datatoken(self.config_dict, base_token_addr)
-        owner_addr = checksum_addr(owner_addr) or from_addr
-        publish_market_fee_collector = (
-            checksum_addr(publish_market_fee_collector) or from_addr
-        )
+        owner_addr = owner_addr or from_addr
+        publish_market_fee_collector = publish_market_fee_collector or from_addr
 
         tx = self.contract.createFixedRate(
             checksum_addr(FRE_addr),
             [
                 checksum_addr(BT.address),
-                owner_addr,
-                publish_market_fee_collector,
+                checksum_addr(owner_addr),
+                checksum_addr(publish_market_fee_collector),
                 checksum_addr(allowed_swapper),
             ],
             [
