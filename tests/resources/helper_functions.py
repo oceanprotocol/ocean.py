@@ -164,7 +164,7 @@ def deploy_erc721_erc20(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
     data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT", "NFTSYMBOL"), data_nft_publisher
+        DataNFTArguments("NFT", "NFTSYMBOL"), {"from": data_nft_publisher}
     )
 
     if not datatoken_minter:
@@ -180,7 +180,7 @@ def deploy_erc721_erc20(
             symbol="DT1Symbol",
             minter=datatoken_minter.address,
         ),
-        data_nft_publisher,
+        {"from": data_nft_publisher},
     )
 
     return data_nft, datatoken

@@ -22,7 +22,7 @@ def test_aqua_functions_for_single_ddo(publisher_ocean, publisher_wallet, file1)
     aquarius = publisher_ocean.assets._aquarius
 
     _, _, ddo1 = publisher_ocean.assets.create_url_asset(
-        "Sample asset", file1.url, publisher_wallet
+        "Sample asset", file1.url, {"from": publisher_wallet}
     )
 
     metadata1 = ddo1.metadata

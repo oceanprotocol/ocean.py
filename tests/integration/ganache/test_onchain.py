@@ -64,7 +64,7 @@ def test_consume_parametrized_onchain_data(
     dt_arg = DatatokenArguments(files=files, consumer_parameters=consumer_parameters)
     data_nft, _, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 
@@ -100,7 +100,7 @@ def test_consume_parametrized_onchain_data(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=provider_fees,
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file

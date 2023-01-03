@@ -26,7 +26,7 @@ class DatatokenEnterprise(Datatoken):
         max_base_token_amount: Union[int, str],
         consume_market_swap_fee_amount: Union[int, str],
         consume_market_swap_fee_address: str,
-        transaction_parameters: dict,
+        tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
@@ -63,7 +63,7 @@ class DatatokenEnterprise(Datatoken):
                 consume_market_swap_fee_amount,
                 ContractBase.to_checksum_address(consume_market_swap_fee_address),
             ),
-            transaction_parameters,
+            tx_dict,
         )
 
     @enforce_types
@@ -72,7 +72,7 @@ class DatatokenEnterprise(Datatoken):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
@@ -96,5 +96,5 @@ class DatatokenEnterprise(Datatoken):
                 consume_market_fees.to_tuple(),
             ),
             ContractBase.to_checksum_address(dispenser_address),
-            transaction_parameters,
+            tx_dict,
         )

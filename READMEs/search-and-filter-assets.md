@@ -15,7 +15,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 
 ## 2. Alice publishes datasets
 
-Now, you're Alice. 
+Now, you're Alice.
 
 ```python
 #data info
@@ -30,12 +30,12 @@ tags = [
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
     print(f"Just published asset, with did={ddo.did}")
-    
+
     # Update the metadata introducing `tags`
     ddo.metadata.update({"tags": tag})
-    ddo = ocean.assets.update(ddo, alice, config["PROVIDER_URL"])
+    ddo = ocean.assets.update(ddo, {"from": alice}, config["PROVIDER_URL"])
     print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
 ```

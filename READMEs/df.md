@@ -1,3 +1,7 @@
+<!--
+Copyright 2022 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # Quickstart: Data Farming Flow
 
 This README shows how to do steps in Ocean Data Farming (DF), where you curate data assets to earn rewards. It also helps to democratize "wash consume" until it becomes unprofitable.
@@ -24,7 +28,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 First, let's set some key parameters for veOCEAN and DF. On Ganache, you can use these values as-is. But on Eth mainnet, you must choose your own. In the same Python console:
 ```python
 # On your asset, your DCV = DT_price * num_consumes
-# Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs. 
+# Your asset gets rewards pro-rata for its DCV compared to other assets' DCVs.
 DT_price = 100.0 # number of OCEAN needed to buy one datatoken
 num_consumes = 3
 
@@ -42,7 +46,7 @@ WEEK = 7 * 86400 # seconds in a week
 t0 = chain.time()
 t1 = t0 // WEEK * WEEK + WEEK #this is a Thursday, because Jan 1 1970 was
 t2 = t1 + WEEK
-chain.sleep(t1 - t0) 
+chain.sleep(t1 - t0)
 chain.mine()
 
 #we're now at the beginning of the week. So, lock
@@ -62,7 +66,7 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_NFT, DT, ddo) = ocean.assets.create_url_asset(name, url, alice, wait_for_aqua=False)
+(data_NFT, DT, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, wait_for_aqua=False)
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
 #create exchange
@@ -106,7 +110,7 @@ assert DT_bal >= num_consumes, \
 # Alice sends datatokens to the service, to get access. This is the "consume".
 for i in range(num_consumes):
     print(f"Consume #{i+1}/{num_consumes}...")
-    ocean.assets.pay_for_access_service(ddo, alice)
+    ocean.assets.pay_for_access_service(ddo, {"from": alice})
     #don't need to call e.g. ocean.assets.download_asset() since wash-consuming
 ```
 
@@ -120,14 +124,14 @@ WEEK = 7 * 86400 # seconds in a week
 t0 = chain.time()
 t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
-chain.sleep(t1 - t0) 
+chain.sleep(t1 - t0)
 chain.mine()
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 OCEAN_before = from_wei(OCEAN.balanceOf(alice))
 ocean.ve_fee_distributor.claim({"from": alice})
 OCEAN_after = from_wei(OCEAN.balanceOf(alice))
-print(f"Just claimed {OCEAN_after - OCEAN_before} OCEAN rewards") 
+print(f"Just claimed {OCEAN_after - OCEAN_before} OCEAN rewards")
 ```
 
 ## 7. Repeat steps 1-6, for Eth mainnet

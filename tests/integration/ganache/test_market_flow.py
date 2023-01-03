@@ -50,7 +50,7 @@ def test_market_flow(
     if consumer_type == "publisher":
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
             ddo,
-            consumer_wallet,
+            {"from": consumer_wallet},
             service=service,
             consume_market_fees=TokenFeeInfo(token=datatoken.address),
         )
@@ -64,7 +64,7 @@ def test_market_flow(
     else:
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
             ddo,
-            consumer_wallet,
+            {"from": consumer_wallet},
             service=service,
             consume_market_fees=TokenFeeInfo(
                 address=another_consumer_wallet.address,
@@ -113,7 +113,9 @@ def test_pay_for_access_service_good_default(
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args
-    order_tx_id = consumer_ocean.assets.pay_for_access_service(ddo, consumer_wallet)
+    order_tx_id = consumer_ocean.assets.pay_for_access_service(
+        ddo, {"from": consumer_wallet}
+    )
 
     asset_folder = consumer_ocean.assets.download_asset(
         ddo,

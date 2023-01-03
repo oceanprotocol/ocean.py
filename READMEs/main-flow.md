@@ -25,7 +25,7 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
 
 #print
 print("Just published asset:")
@@ -90,7 +90,7 @@ Bob now has the datatoken for the dataset! Time to download the dataset and use 
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
 
 # Bob downloads the file. If the connection breaks, Bob can try again
 asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
@@ -219,7 +219,7 @@ url_file = UrlFile(
 from ocean_lib.models.datatoken import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
-    alice,
+    {"from": alice},
     datatoken_args=[DatatokenArguments(files=[url_file])],
 )
 ```
@@ -240,7 +240,7 @@ You can control this during create():
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
 from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), {"from": alice})
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -251,7 +251,7 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 
 ```python
 from ocean_lib.models.datatoken import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), {"from": alice})
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
