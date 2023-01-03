@@ -8,6 +8,7 @@ from typing import Optional
 
 from brownie import network
 from enforce_typing import enforce_types
+from web3 import Web3
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import create_checksum, get_address_of_type
@@ -51,6 +52,33 @@ class DataNFT(ContractBase):
         check_network(self.network)
         chain_id = network.chain.id
         return f"did:op:{create_checksum(self.address + str(chain_id))}"
+
+    def set_data(self, key:str, value:str, tx_dict:dict):
+        """
+        Set key/value data directly on-chain via ERC725,
+          using key/value formats that are easy for developers to work with.
+
+        How: 
+        - converts key/value string args into formats acceptable for ERC725
+        """
+        value_bytes = value.encode() # convert to array of bytes
+        key_hash = Web3.keccak(text=key) # convert to keccak256 hash
+        tx = self.contract.setNewData(key_hash, value_bytes, tx_dict)
+        return tx
+
+    def get_data(self, key:str) -> str:
+        """
+        Get key/value data from the chain, via ERC725,
+          using key/value formats that are easy for developers to work with.
+
+        How: 
+        - converts the input key string arg into a format friendly for ERC725.
+        - converts the value into a string, before returning
+        """
+        key_hash = Web3.keccak(text=key) # convert to keccak256 hash
+        value_hex = self.contract.getData(key_hash)
+        value = value_hex.decode('ascii')
+        return value
 
 
 class DataNFTArguments:

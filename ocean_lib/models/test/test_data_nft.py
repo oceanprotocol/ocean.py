@@ -800,13 +800,10 @@ def test_erc725(data_nft, alice):
     value = "blue"
 
     # set data
-    value_bytes = value.encode() # string to array of bytes
-    key_hash = Web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
-    data_nft.setNewData(key_hash, value_bytes, {"from": alice})
+    data_nft.set_data(key, value, {"from": alice})
 
     # retrieve data
-    value2_hex = data_nft.getData(key_hash)
-    value2 = value2_hex.decode('ascii')
+    value2 = data_nft.get_data(key)
 
     # test
     assert value2 == value
