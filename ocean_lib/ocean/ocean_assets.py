@@ -527,7 +527,7 @@ class OceanAssets:
     def pay_for_access_service(
         self,
         ddo: DDO,
-        wallet,
+        tx_dict: dict,
         service: Optional[Service] = None,
         consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
@@ -535,11 +535,12 @@ class OceanAssets:
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
-        consumer_address = consumer_address or wallet.address
+        wallet_address = get_from_address(tx_dict)
+        consumer_address = consumer_address or wallet_address
 
         # main work...
         dt = Datatoken(self._config_dict, service.datatoken)
-        balance = dt.balanceOf(wallet.address)
+        balance = dt.balanceOf(wallet_address)
 
         if balance < Web3.toWei(1, "ether"):
             raise InsufficientBalance(
@@ -551,7 +552,7 @@ class OceanAssets:
         consumable_result = is_consumable(
             ddo,
             service,
-            {"type": "address", "value": wallet.address},
+            {"type": "address", "value": wallet_address},
             userdata=userdata,
         )
         if consumable_result != ConsumableCodes.OK:
@@ -573,7 +574,7 @@ class OceanAssets:
             service_index=ddo.get_index_of_service(service),
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            tx_dict={"from": wallet},
+            tx_dict=tx_dict,
         )
 
         return receipt.txid

@@ -57,7 +57,7 @@ def test_market_flow(
         )
         asset_folder = consumer_ocean.assets.download_asset(
             ddo,
-            {"from": consumer_wallet},
+            consumer_wallet,
             consumer_ocean.config_dict["DOWNLOADS_PATH"],
             order_tx_id,
             service,
