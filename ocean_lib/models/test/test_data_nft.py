@@ -793,3 +793,20 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20
+
+def test_erc725(data_nft, alice):
+    # Key-value pair
+    key = "fav_color"
+    value = "blue"
+
+    # set data
+    value_bytes = value.encode() # string to array of bytes
+    key_hash = Web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
+    data_nft.setNewData(key_hash, value_bytes, {"from": alice})
+
+    # retrieve data
+    value2_hex = data_nft.getData(key_hash)
+    value2 = value2_hex.decode('ascii')
+
+    # test
+    assert value2 == value
