@@ -2,25 +2,22 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-
 import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.datatoken import DatatokenRoles
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20
+from tests.resources.helper_functions import get_mock_provider_fees
 
 
 @pytest.mark.unit
-def test_main(publisher_wallet, consumer_wallet, config):
+def test_main(
+    publisher_wallet, consumer_wallet, another_consumer_wallet, data_NFT_and_DT
+):
     """Tests successful function calls"""
-    data_nft, datatoken = deploy_erc721_erc20(
-        config, publisher_wallet, publisher_wallet
-    )
+    data_nft, datatoken = data_NFT_and_DT
 
     # Check datatoken params
     assert datatoken.getId() == 1
@@ -96,19 +93,22 @@ def test_main(publisher_wallet, consumer_wallet, config):
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
+    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            {"from": another_consumer_wallet},
+        )
 
-def test_start_order(config, publisher_wallet, consumer_wallet):
+
+def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
     """Tests startOrder functionality without publish fees, consume fees."""
-    data_nft, datatoken = deploy_erc721_erc20(
-        config, publisher_wallet, publisher_wallet
-    )
+    data_nft, datatoken = data_NFT_and_DT
     # Mint datatokens to use
-    datatoken.mint(
-        consumer_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
-    )
-    datatoken.mint(
-        publisher_wallet.address, Web3.toWei("10", "ether"), {"from": publisher_wallet}
-    )
+    datatoken.mint(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
+    datatoken.mint(publisher_wallet.address, to_wei(10), {"from": publisher_wallet})
 
     # Set the fee collector address
     datatoken.setPaymentCollector(
@@ -116,51 +116,29 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
         {"from": publisher_wallet},
     )
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = get_address_of_type(config, "MockUSDC")
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            0,
-        ],
-    )
-
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+    provider_fees = get_mock_provider_fees("MockUSDC", publisher_wallet)
 
     receipt = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=0,
-        consume_market_order_fee_address=publisher_wallet.address,
-        consume_market_order_fee_token=datatoken.address,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": publisher_wallet},
+        provider_fees=provider_fees,
+        consume_market_fees=TokenFeeInfo(
+            address=publisher_wallet.address,
+            token=datatoken.address,
+        ),
+        tx_dict={"from": publisher_wallet},
     )
     # Check erc20 balances
-    assert datatoken.balanceOf(publisher_wallet.address) == Web3.toWei("9", "ether")
+    assert datatoken.balanceOf(publisher_wallet.address) == to_wei(9)
     assert datatoken.balanceOf(
         get_address_of_type(config, "OPFCommunityFeeCollector")
-    ) == Web3.toWei("1", "ether")
+    ) == to_wei(1)
 
+    provider_fee_address = publisher_wallet.address
+    provider_data = provider_fees["providerData"]
     provider_message = Web3.solidityKeccak(
         ["bytes32", "bytes"],
-        [receipt.txid, Web3.toHex(Web3.toBytes(text=provider_data))],
+        [receipt.txid, provider_data],
     )
     provider_signed = network.web3.eth.sign(provider_fee_address, data=provider_message)
 
@@ -172,7 +150,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
 
     receipt_interm = datatoken.orderExecuted(
         receipt.txid,
-        Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_data,
         provider_signed,
         Web3.toHex(Web3.toBytes(text="12345")),
         consumer_signed,
@@ -188,7 +166,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
     with pytest.raises(Exception, match="Consumer signature check failed"):
         datatoken.orderExecuted(
             receipt.txid,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_data,
             provider_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
@@ -205,8 +183,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
     with pytest.raises(Exception, match="Provider signature check failed"):
         datatoken.orderExecuted(
             receipt.txid,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            signed,
+            provider_data,
+            consumer_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
@@ -216,16 +194,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
         receipt.txid,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=0,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        transaction_parameters={"from": publisher_wallet},
+        provider_fees=provider_fees,
+        tx_dict={"from": publisher_wallet},
     )
     reused_event = receipt_interm.events["OrderReused"]
     assert reused_event, "Cannot find OrderReused event"
@@ -239,18 +209,18 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
     datatoken.setPublishingMarketFee(
         publisher_wallet.address,
         get_address_of_type(config, "MockUSDC"),
-        Web3.toWei("1.2", "ether"),
+        to_wei(1.2),
         {"from": publisher_wallet},
     )
 
-    publish_fees = datatoken.getPublishingMarketFee()
+    publish_fees = datatoken.get_publish_market_order_fees()
 
     # PublishMarketFeeAddress set previously
-    assert publish_fees[0] == publisher_wallet.address
+    assert publish_fees.address == publisher_wallet.address
     # PublishMarketFeeToken set previously
-    assert publish_fees[1] == get_address_of_type(config, "MockUSDC")
+    assert publish_fees.token == get_address_of_type(config, "MockUSDC")
     # PublishMarketFeeAmount set previously
-    assert publish_fees[2] == Web3.toWei("1.2", "ether")
+    assert publish_fees.amount == to_wei(1.2)
     # Fee collector
     assert datatoken.getPaymentCollector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
@@ -261,60 +231,54 @@ def test_start_order(config, publisher_wallet, consumer_wallet):
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
-    datatoken.approve(
-        publisher_wallet.address, Web3.toWei("10", "ether"), {"from": consumer_wallet}
-    )
+    datatoken.approve(publisher_wallet.address, to_wei(10), {"from": consumer_wallet})
 
     allowance = datatoken.allowance(consumer_wallet.address, publisher_wallet.address)
-    assert allowance == Web3.toWei("10", "ether")
-    datatoken.burnFrom(
-        consumer_wallet.address, Web3.toWei("2", "ether"), {"from": publisher_wallet}
-    )
+    assert allowance == to_wei(10)
+    datatoken.burnFrom(consumer_wallet.address, to_wei(2), {"from": publisher_wallet})
 
-    assert datatoken.totalSupply() == initial_total_supply - Web3.toWei("2", "ether")
+    assert datatoken.totalSupply() == initial_total_supply - to_wei(2)
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("2", "ether")
+    ) == initial_consumer_balance - to_wei(2)
 
     # Test transterFrom too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
     datatoken.transferFrom(
         consumer_wallet.address,
         publisher_wallet.address,
-        Web3.toWei("1", "ether"),
+        to_wei(1),
         {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to burn his tokens too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.burn(Web3.toWei("1", "ether"), {"from": consumer_wallet})
+    datatoken.burn(to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to transfer too
     initial_consumer_balance = datatoken.balanceOf(consumer_wallet.address)
-    datatoken.transfer(
-        publisher_wallet.address, Web3.toWei("1", "ether"), {"from": consumer_wallet}
-    )
+    datatoken.transfer(publisher_wallet.address, to_wei(1), {"from": consumer_wallet})
     assert datatoken.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - Web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
 
 @pytest.mark.unit
-def test_exceptions(consumer_wallet, config, publisher_wallet):
+def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     """Tests revert statements in contracts functions"""
-    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
+    datatoken = DT
 
     # Should fail to mint if wallet is not a minter
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             consumer_wallet.address,
-            Web3.toWei("1", "ether"),
+            to_wei(1),
             {"from": consumer_wallet},
         )
 

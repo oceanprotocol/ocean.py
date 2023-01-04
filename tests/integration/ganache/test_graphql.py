@@ -6,15 +6,14 @@ import os
 import shutil
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
+from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.util import to_wei
 from ocean_lib.structures.file_objects import GraphqlQuery
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
@@ -38,7 +37,7 @@ def test_consume_simple_graphql_query(
         """
 
     data_nft, dt, ddo = ocean.assets.create_graphql_asset(
-        "Data NFTs in Ocean", url, query, publisher_wallet
+        "Data NFTs in Ocean", url, query, {"from": publisher_wallet}
     )
 
     assert ddo, "The ddo is not created."
@@ -51,7 +50,7 @@ def test_consume_simple_graphql_query(
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
@@ -68,18 +67,8 @@ def test_consume_simple_graphql_query(
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": consumer_wallet},
+        provider_fees=provider_fees,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file
@@ -164,7 +153,7 @@ def test_consume_parametrized_graphql_query(
     )
     data_nft, datatoken, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 
@@ -181,7 +170,7 @@ def test_consume_parametrized_graphql_query(
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
@@ -198,18 +187,8 @@ def test_consume_parametrized_graphql_query(
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": consumer_wallet},
+        provider_fees=provider_fees,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file

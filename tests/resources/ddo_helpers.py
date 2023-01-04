@@ -12,11 +12,8 @@ import requests
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.datatoken import DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.ocean_assets import DatatokenArguments
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesTypeFactory, UrlFile
@@ -123,7 +120,7 @@ def get_registered_asset_with_access_service(
 
     data_nft, dts, ddo = ocean_instance.assets.create(
         metadata,
-        publisher_wallet,
+        {"from": publisher_wallet},
         datatoken_args=[DatatokenArguments("Branin: DT1", "DT1", files=files)],
     )
 
@@ -178,7 +175,7 @@ def get_registered_asset_with_compute_service(
 
     return ocean_instance.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         services=[compute_service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
@@ -218,7 +215,7 @@ def get_registered_algorithm_with_access_service(
 
     return ocean_instance.assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[DatatokenArguments("Algo DT1", "DT1", files=[algorithm_file])],
     )
 

@@ -4,13 +4,12 @@
 #
 from typing import Optional, Union
 
-from brownie import Wei
 from enforce_typing import enforce_types
 
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.util import str_with_wei
-from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.ocean.util import get_from_address, str_with_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 @enforce_types
@@ -55,7 +54,7 @@ class ExchangeDetails:
 
 
 @enforce_types
-class FeesInfo:
+class ExchangeFeeInfo:
     def __init__(self, fees_tup):
         """
         :param:details_tup
@@ -71,7 +70,7 @@ class FeesInfo:
 
     def __str__(self):
         s = (
-            f"FeesInfo: \n"
+            f"ExchangeFeeInfo: \n"
             f"  publish_market_fee = {str_with_wei(self.publish_market_fee)}\n"
             f"  publish_market_fee_available"
             f" = {str_with_wei(self.publish_market_fee_available)}\n"
@@ -83,9 +82,6 @@ class FeesInfo:
             f" = {str_with_wei(self.ocean_fee_available)}\n"
         )
         return s
-
-    # for attr in dir(obj):
-    #    print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
 
 @enforce_types
@@ -189,9 +185,9 @@ class OneExchange:
         self,
         datatoken_amt: Union[int, str],
         tx_dict: dict,
-        max_basetoken_amt: Optional[int] = MAX_UINT256,
+        max_basetoken_amt=MAX_UINT256,
         consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
-        consume_market_fee: Optional[int] = 0,
+        consume_market_fee: Optional[Union[int, str]] = 0,
     ):
         """
         Buy datatokens via fixed-rate exchange.
@@ -211,7 +207,7 @@ class OneExchange:
 
         details = self.details
         BT = Datatoken(self._FRE.config_dict, details.base_token)
-        buyer_addr = tx_dict["from"].address
+        buyer_addr = get_from_address(tx_dict)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
         assert BT.balanceOf(buyer_addr) >= BT_needed, "not enough funds"
@@ -376,10 +372,10 @@ class OneExchange:
         return self._FRE.getAllowedSwapper(self._id)
 
     @property
-    def fees_info(self) -> FeesInfo:
+    def exchange_fees_info(self) -> ExchangeFeeInfo:
         """Get fee information for this exchange, as an object"""
         tup = self._FRE.getFeesInfo(self._id)
-        return FeesInfo(tup)
+        return ExchangeFeeInfo(tup)
 
     @enforce_types
     def is_active(self) -> bool:

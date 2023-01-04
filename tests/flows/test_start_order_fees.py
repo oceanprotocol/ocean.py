@@ -6,16 +6,15 @@ from datetime import datetime, timedelta
 from typing import Tuple
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -90,16 +89,18 @@ def test_start_order_fees(
         file=file1,
         data_nft=data_nft,
         publisher_wallet=publisher_wallet,
-        publish_market_order_fee_address=publish_market_wallet.address,
-        publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=publish_market_order_fee,
+        publish_market_order_fees=TokenFeeInfo(
+            address=publish_market_wallet.address,
+            token=bt.address,
+            amount=publish_market_order_fee,
+        ),
         timeout=3600,
     )
 
     # Mint 50 datatokens in consumer wallet from publisher.
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
@@ -146,18 +147,13 @@ def test_start_order_fees(
     dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=consume_market_wallet.address,
-        consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=consume_market_order_fee,
-        transaction_parameters={"from": consumer_wallet},
+        provider_fees=provider_fees,
+        consume_market_fees=TokenFeeInfo(
+            address=consume_market_wallet.address,
+            token=bt.address,
+            amount=consume_market_order_fee,
+        ),
+        tx_dict={"from": consumer_wallet},
     )
 
     # Get balances
@@ -175,14 +171,13 @@ def test_start_order_fees(
     opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
-    publish_market_order_fee_amount = dt.getPublishingMarketFee()[2]
-    assert publish_market_order_fee_amount == publish_market_order_fee
+    assert dt.get_publish_market_order_fees().amount == publish_market_order_fee
 
     # Get Ocean community fee amount
     opc_order_fee = factory_router.getOPCConsumeFee()
-    assert opc_order_fee == Web3.toWei("0.03", "ether")
+    assert opc_order_fee == to_wei(0.03)
 
-    one_datatoken = Web3.toWei(1, "ether")
+    one_datatoken = to_wei(1)
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after
@@ -219,24 +214,18 @@ def create_asset_with_order_fee_and_timeout(
     file: FilesType,
     data_nft: DataNFT,
     publisher_wallet,
-    publish_market_order_fee_address: str,
-    publish_market_order_fee_token: str,
-    publish_market_order_fee_amount: int,
+    publish_market_order_fees,
     timeout: int,
 ) -> Tuple[DDO, Service, Datatoken]:
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
-        template_index=1,
-        name="Datatoken 1",
-        symbol="DT1",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publish_market_order_fee_address,
-        publish_market_order_fee_token=publish_market_order_fee_token,
-        publish_market_order_fee_amount=publish_market_order_fee_amount,
-        bytess=[b""],
-        transaction_parameters={"from": publisher_wallet},
+        DatatokenArguments(
+            name="Datatoken 1",
+            symbol="DT1",
+            publish_market_order_fees=publish_market_order_fees,
+        ),
+        {"from": publisher_wallet},
     )
 
     data_provider = DataServiceProvider
@@ -266,7 +255,7 @@ def create_asset_with_order_fee_and_timeout(
     # Publish asset
     data_nft, datatokens, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         services=[service],
         data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],

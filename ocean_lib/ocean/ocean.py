@@ -18,15 +18,25 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.df.df_rewards import DFRewards
+from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_ocean import VeOcean
-from ocean_lib.models.ve_allocate import VeAllocate
-from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
+from ocean_lib.models.ve.ve_allocate import VeAllocate
+from ocean_lib.models.ve.ve_delegation import VeDelegation
+from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
+from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
+from ocean_lib.models.ve.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
+from ocean_lib.ocean.util import (
+    get_address_of_type,
+    get_from_address,
+    get_ocean_token_address,
+)
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -90,81 +100,54 @@ class Ocean:
 
         logger.debug("Ocean instance initialized: ")
 
+    # ======================================================================
+    # OCEAN
     @property
     @enforce_types
     def OCEAN_address(self) -> str:
-        return get_ocean_token_address(self.config_dict)
+        return get_ocean_token_address(self.config)
 
     @property
     @enforce_types
     def OCEAN_token(self) -> Datatoken:
-        return Datatoken(self.config_dict, self.OCEAN_address)
+        return Datatoken(self.config, self.OCEAN_address)
 
+    @property
     @enforce_types
-    def create_data_nft(
-        self,
-        name: str,
-        symbol: str,
-        from_wallet,
-        token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
-        template_index: Optional[int] = 1,
-        additional_datatoken_deployer: Optional[str] = None,
-        additional_metadata_updater: Optional[str] = None,
-        transferable: bool = True,
-        owner: Optional[str] = None,
-    ) -> DataNFT:
-        """
-        This method deploys a ERC721 token contract on the blockchain.
-        Usage:
-        ```python
-            config = { ... }
-            ocean = Ocean(config)
-            wallet = accounts.add(...)
-            data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
-        ```
-        :param name: data NFT name, str
-        :param symbol: data NFT symbol, str
-        :param from_wallet instance, wallet
-        :param template_index: Template type of the token, int
-        :param additional_datatoken_deployer: Address of another ERC20 deployer, str
-        :param token_uri: URL for the data NFT, str
+    def OCEAN(self):  # alias for OCEAN_token
+        return self.OCEAN_token
 
-        :return: `DataNFT` instance
-        """
+    # ======================================================================
+    # objects for singleton smart contracts
+    @property
+    @enforce_types
+    def data_nft_factory(self) -> DataNFTFactoryContract:
+        return DataNFTFactoryContract(self.config, self._addr("ERC721Factory"))
 
-        if not additional_datatoken_deployer:
-            additional_datatoken_deployer = ZERO_ADDRESS
+    @property
+    @enforce_types
+    def dispenser(self) -> Dispenser:
+        return Dispenser(self.config, self._addr("Dispenser"))
 
-        if not additional_metadata_updater:
-            additional_metadata_updater = ZERO_ADDRESS
+    @property
+    @enforce_types
+    def fixed_rate_exchange(self) -> FixedRateExchange:
+        return FixedRateExchange(self.config, self._addr("FixedPrice"))
 
-        nft_factory = self.get_nft_factory()
+    @property
+    @enforce_types
+    def factory_router(self) -> FactoryRouter:
+        return FactoryRouter(self.config, self._addr("Router"))
 
-        receipt = nft_factory.deployERC721Contract(
-            name,
-            symbol,
-            template_index,
-            additional_metadata_updater,
-            additional_datatoken_deployer,
-            token_uri,
-            transferable,
-            owner if owner is not None else from_wallet.address,
-            {"from": from_wallet},
-        )
-
-        address = nft_factory.get_token_address(receipt)
-        assert address, "new NFT token has no address"
-        token = DataNFT(self.config_dict, address)
-        return token
-
+    # ======================================================================
+    # token getters
     @enforce_types
     def get_nft_token(self, token_address: str) -> DataNFT:
         """
         :param token_address: Token contract address, str
         :return: `DataNFT` instance
         """
-
-        return DataNFT(self.config_dict, token_address)
+        return DataNFT(self.config, token_address)
 
     @enforce_types
     def get_datatoken(self, token_address: str) -> Datatoken:
@@ -172,23 +155,10 @@ class Ocean:
         :param token_address: Token contract address, str
         :return: `Datatoken` instance
         """
+        return Datatoken(self.config, token_address)
 
-        return Datatoken(self.config_dict, token_address)
-
-    @enforce_types
-    def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
-        """
-        :param nft_factory_address: contract address, str
-
-        :return: `DataNFTFactoryContract` instance
-        """
-        if not nft_factory_address:
-            nft_factory_address = get_address_of_type(
-                self.config_dict, DataNFTFactoryContract.CONTRACT_NAME
-            )
-
-        return DataNFTFactoryContract(self.config_dict, nft_factory_address)
-
+    # ======================================================================
+    # orders
     @enforce_types
     def get_user_orders(self, address: str, datatoken: str) -> List[AttributeDict]:
         """
@@ -207,63 +177,12 @@ class Ocean:
 
         return _orders
 
-    @property
-    @enforce_types
-    def dispenser(self):
-        return Dispenser(
-            self.config_dict, get_address_of_type(self.config_dict, "Dispenser")
-        )
-
-    @property
-    @enforce_types
-    def fixed_rate_exchange(self):
-        return FixedRateExchange(
-            self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
-        )
-
-    @enforce_types
-    def create_fixed_rate(
-        self,
-        datatoken: Datatoken,
-        base_token: Datatoken,
-        amount: int,
-        fixed_rate: int,
-        from_wallet,
-    ) -> bytes:
-        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
-        datatoken.approve(fixed_price_address, amount, {"from": from_wallet})
-
-        receipt = datatoken.create_fixed_rate(
-            fixed_price_address=fixed_price_address,
-            base_token_address=base_token.address,
-            owner=from_wallet.address,
-            publish_market_swap_fee_collector=from_wallet.address,
-            allowed_swapper=ZERO_ADDRESS,
-            base_token_decimals=base_token.decimals(),
-            datatoken_decimals=datatoken.decimals(),
-            fixed_rate=fixed_rate,
-            publish_market_swap_fee_amount=int(1e15),
-            with_mint=0,
-            transaction_parameters={"from": from_wallet},
-        )
-
-        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
-
-        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
-
-        return exchange_id
-
-    @property
-    @enforce_types
-    def factory_router(self) -> FactoryRouter:
-        return FactoryRouter(
-            self.config_dict, get_address_of_type(self.config_dict, "Router")
-        )
-
+    # ======================================================================
+    # provider fees
     @enforce_types
     def retrieve_provider_fees(
         self, ddo: DDO, access_service: Service, publisher_wallet
-    ) -> tuple:
+    ) -> dict:
 
         initialize_response = DataServiceProvider.initialize(
             ddo.did, access_service, consumer_address=publisher_wallet.address
@@ -271,16 +190,7 @@ class Ocean:
         initialize_data = initialize_response.json()
         provider_fees = initialize_data["providerFee"]
 
-        return (
-            provider_fees["providerFeeAddress"],
-            provider_fees["providerFeeToken"],
-            provider_fees["providerFeeAmount"],
-            provider_fees["v"],
-            provider_fees["r"],
-            provider_fees["s"],
-            provider_fees["validUntil"],
-            provider_fees["providerData"],
-        )
+        return provider_fees
 
     @enforce_types
     def retrieve_provider_fees_for_compute(
@@ -290,7 +200,7 @@ class Ocean:
         consumer_address: str,
         compute_environment: str,
         valid_until: int,
-    ) -> tuple:
+    ) -> dict:
 
         initialize_compute_response = DataServiceProvider.initialize_compute(
             [x.as_dictionary() for x in datasets],
@@ -303,23 +213,65 @@ class Ocean:
 
         return initialize_compute_response.json()
 
+    # ======================================================================
+    # DF/VE properties (alphabetical)
     @property
     @enforce_types
-    def ve_ocean(self):
-        return VeOcean(
-            self.config_dict, get_address_of_type(self.config_dict, "veOCEAN")
-        )
+    def df_rewards(self) -> DFRewards:
+        return DFRewards(self.config, self._addr("DFRewards"))
 
     @property
     @enforce_types
-    def ve_allocate(self):
-        return VeAllocate(
-            self.config_dict, get_address_of_type(self.config_dict, "veAllocate")
-        )
+    def df_strategy_v1(self) -> DFStrategyV1:
+        return DFStrategyV1(self.config, self._addr("DFStrategyV1"))
 
     @property
     @enforce_types
-    def ve_fee_distributor(self):
-        return VeFeeDistributor(
-            self.config_dict, get_address_of_type(self.config_dict, "veFeeDistributor")
-        )
+    def smart_wallet_checker(self) -> SmartWalletChecker:
+        return SmartWalletChecker(self.config, self._addr("SmartWalletChecker"))
+
+    @property
+    @enforce_types
+    def ve_allocate(self) -> VeAllocate:
+        return VeAllocate(self.config, self._addr("veAllocate"))
+
+    @property
+    @enforce_types
+    def ve_delegation(self) -> VeDelegation:
+        return VeDelegation(self.config, self._addr("veDelegation"))
+
+    @property
+    @enforce_types
+    def ve_delegation_proxy(self) -> VeDelegationProxy:
+        return VeDelegationProxy(self.config, self._addr("veDelegationProxy"))
+
+    @property
+    @enforce_types
+    def ve_fee_distributor(self) -> VeFeeDistributor:
+        return VeFeeDistributor(self.config, self._addr("veFeeDistributor"))
+
+    @property
+    @enforce_types
+    def ve_fee_estimate(self) -> VeFeeEstimate:
+        return VeFeeEstimate(self.config, self._addr("veFeeEstimate"))
+
+    @property
+    @enforce_types
+    def ve_ocean(self) -> VeOcean:
+        return VeOcean(self.config, self._addr("veOCEAN"))
+
+    @property
+    @enforce_types
+    def veOCEAN(self) -> VeOcean:  # alias for ve_ocean
+        return self.ve_ocean
+
+    # ======================================================================
+    # helpers
+    @property
+    @enforce_types
+    def config(self) -> dict:  # alias for config_dict
+        return self.config_dict
+
+    @enforce_types
+    def _addr(self, type_str: str) -> str:
+        return get_address_of_type(self.config, type_str)

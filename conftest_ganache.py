@@ -6,7 +6,6 @@ from typing import Tuple
 
 import pytest
 from brownie.network import accounts
-from web3.main import Web3
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
@@ -14,7 +13,7 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
 from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
@@ -57,19 +56,17 @@ def setup_all(request, config, ocean_token):
         print("Can not find adddresses.")
         return
 
-    assert accounts.at(wallet.address).balance() >= Web3.toWei(
-        "10", "ether"
-    ), "Ether balance less than 10."
+    assert wallet.balance() >= to_wei(10), "Need more ETH"
 
-    amt_distribute = Web3.toWei("1000", "ether")
-    ocean_token.mint(wallet.address, Web3.toWei("20000", "ether"), {"from": wallet})
+    amt_distribute = to_wei(1000)
+    ocean_token.mint(wallet, to_wei(2000), {"from": wallet})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if accounts.at(w.address).balance() < Web3.toWei("2", "ether"):
-            wallet.transfer(w.address, "4 ether")
+        if w.balance() < to_wei(2):
+            wallet.transfer(w, to_wei(4))
 
-        if ocean_token.balanceOf(w.address) < Web3.toWei("100", "ether"):
-            ocean_token.mint(w.address, amt_distribute, {"from": wallet})
+        if ocean_token.balanceOf(w) < to_wei(100):
+            ocean_token.mint(w, amt_distribute, {"from": wallet})
 
 
 @pytest.fixture

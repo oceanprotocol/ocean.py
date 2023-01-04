@@ -3,22 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+
 import pytest
 
-
 from ocean_lib.models.fixed_rate_exchange import (
-    ExchangeDetails,
-    FeesInfo,
     BtNeeded,
     BtReceived,
-    FixedRateExchange,
-    OneExchange,
+    ExchangeDetails,
+    ExchangeFeeInfo,
 )
 from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
-from ocean_lib.ocean.util import to_wei, from_wei
+from ocean_lib.ocean.util import from_wei, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-
-from tests.resources.helper_functions import get_wallet
 
 
 @pytest.mark.unit
@@ -26,7 +22,7 @@ def test_with_defaults(OCEAN, DT, alice, bob):
 
     # =========================================================================
     # Create exchange
-    (exchange, tx) = DT.create_exchange(
+    exchange = DT.create_exchange(
         rate=to_wei(3), base_token_addr=OCEAN.address, tx_dict={"from": alice}
     )
 
@@ -35,12 +31,11 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     DT.approve(exchange.address, to_wei(100), {"from": alice})
 
     # Bob lets exchange pull the OCEAN needed
-    consume_market_fee = 0
     OCEAN.approve(exchange.address, MAX_UINT256, {"from": bob})
 
     # Bob buys 2 datatokens
     DT_bob1 = DT.balanceOf(bob)
-    tx = exchange.buy_DT(datatoken_amt=to_wei(2), tx_dict={"from": bob})
+    _ = exchange.buy_DT(datatoken_amt=to_wei(2), tx_dict={"from": bob})
     assert from_wei(DT.balanceOf(bob)) == from_wei(DT_bob1) + 2
 
     # all exchanges for this DT
@@ -62,7 +57,7 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     assert not details.with_mint
 
     # Fees tests
-    fees = exchange.fees_info
+    fees = exchange.exchange_fees_info
     assert from_wei(fees.publish_market_fee) == 0  # publish mkt swap fee
     assert fees.publish_market_fee_collector == alice.address  # for publish mkt swaps
     assert (
@@ -135,8 +130,10 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
         publish_market_fee=publish_market_fee,
         with_mint=True,
         allowed_swapper=carlos.address,
+        full_info=True,
         tx_dict={"from": alice},
     )
+    assert tx is not None
     assert FRE.getNumberOfExchanges() == (n_exchanges1 + 1)
     assert len(FRE.getExchanges()) == (n_exchanges1 + 1)
 
@@ -144,8 +141,8 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
     assert exchange.details.owner == bob.address
     assert exchange.details.with_mint
 
-    assert exchange.fees_info.publish_market_fee == publish_market_fee
-    assert exchange.fees_info.publish_market_fee_collector == alice.address
+    assert exchange.exchange_fees_info.publish_market_fee == publish_market_fee
+    assert exchange.exchange_fees_info.publish_market_fee_collector == alice.address
 
     assert exchange.get_allowed_swapper() == carlos.address
 
@@ -235,7 +232,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     # ==========================================================================
     # As publish market fee collector, Alice collects fees
-    fees = exchange.fees_info
+    fees = exchange.exchange_fees_info
     assert fees.publish_market_fee > 0
     assert fees.publish_market_fee_available > 0
 
@@ -299,11 +296,11 @@ def test_ExchangeDetails():
     s = str(details)
     assert "ExchangeDetails" in s
     assert f"datatoken = {datatoken}" in s
-    assert f"rate " in s
+    assert "rate " in s
 
 
 @pytest.mark.unit
-def test_FeesInfo():
+def test_ExchangeFeeInfo():
     mkt_fee = to_wei(0.03)
     mkt_fee_coll = "0xabc"
     opc_fee = to_wei(0.04)
@@ -311,7 +308,7 @@ def test_FeesInfo():
     opc_avail = to_wei(0.6)
 
     tup = [mkt_fee, mkt_fee_coll, opc_fee, mkt_avail, opc_avail]
-    fees = FeesInfo(tup)
+    fees = ExchangeFeeInfo(tup)
 
     assert fees.publish_market_fee == mkt_fee
     assert fees.publish_market_fee_collector == mkt_fee_coll
@@ -321,7 +318,7 @@ def test_FeesInfo():
 
     # Test str. Don't need to be thorough
     s = str(fees)
-    assert "FeesInfo" in s
+    assert "ExchangeFeeInfo" in s
     assert f"publish_market_fee_collector = {mkt_fee_coll}" in s
 
 

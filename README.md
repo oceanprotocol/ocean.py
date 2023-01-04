@@ -16,53 +16,47 @@ With ocean.py, you can:
 
 - **Publish** data services: downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
 - **Sell** datatokens via for a fixed price. Sell data NFTs.
-- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io), [Brownie](https://eth-brownie.readthedocs.io/en/latest/), etc.
+- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io) or [Brownie](https://eth-brownie.readthedocs.io/en/latest/).
 
 ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
 This is in beta state. If you run into problems, please open up a [new issue](/issues).
 
-- [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
+- [🏄 Quickstart](#-quickstart)
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 
 ## 🏄 Quickstart
 
-Here are flows to try out, from simple to specific detailed variants.
+Follow these steps in sequence to ramp into Ocean.
 
-- **[Installation](READMEs/install.md)** - need for each flow below
-- **[Simple flow](READMEs/data-nfts-and-datatokens-flow.md)** - publish a dataset's data NFT and datatoken
-- **[Publish flow](READMEs/publish-flow.md)** - publish a dataset's data NFT, datatoken _and_ metadata (DDO)
-- **[Consume flow](READMEs/consume-flow.md)** - download a dataset
-- **[Post priced data](READMEs/marketplace-flow.md)** - post a dataset for sale, having a fixed price
-- **[Post free data](READMEs/dispenser-flow.md)** - post a dataset for free, via a faucet
-- **[Search & filter data](READMEs/search-and-filter-assets.md)** - find assets by tag
+ 1. **[Install Ocean](READMEs/install.md)**
+ 2. **[Set up locally](READMEs/setup-local.md)** 
+ 3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 
+Now let's do remote flows:
 
-### Remote flows
-
-- **[Get test MATIC](READMEs/get-test-MATIC.md)** - from Mumbai network
-- **[Simple remote flow](READMEs/simple-remote.md)** - like the simple flow, but using _remote_ services
-- **[C2D flow](READMEs/c2d-flow.md)** - uses Compute-to-Data to build an AI model
-
-### More types of data assets
-
-- **[REST API flow](READMEs/publish-flow-restapi.md)** - publish & consume REST API data, showing Binance ETH price feed
-- **[GraphQL flow](READMEs/publish-flow-graphql.md)** - publish & consume GraphQL data
-- **[On-chain data flow](READMEs/publish-flow-onchain.md)** - publish & consume on-chain data
-
-### Key-value flows
-
-- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
-- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
+ 4. **[Set up remotely](READMEs/setup-remote.md)**
+ 5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network
+ 6. **[Walk through C2D flow](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data
 
 ### Use-case flows
 
-- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with $ to predict future ETH price
+- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
+- [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
+- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
+- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
+
+
+### More types of data assets
+
+Each of the following shows how to publish & consume a particular type of data.
+- **[REST API](READMEs/publish-flow-restapi.md)** - Example on Binance ETH price feed
+- **[GraphQL](READMEs/publish-flow-graphql.md)** - Example on Ocean Data NFTs
+- **[On-chain data](READMEs/publish-flow-onchain.md)** - Example on Ocean swap fees.
 
 ### Learn more
-
-- [Get test OCEAN](READMEs/get-test-OCEAN.md) - from Goerli
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 

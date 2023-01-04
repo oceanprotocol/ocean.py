@@ -6,44 +6,76 @@ import os
 import shutil
 
 import pytest
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.ddo_helpers import (
-    get_first_service_by_type,
-    get_registered_asset_with_access_service,
-)
+from ocean_lib.ocean.util import get_address_of_type, to_wei
+from tests.resources.ddo_helpers import get_first_service_by_type
+
+ARWEAVE_TRANSACTION_ID = "a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
 
 
 @pytest.mark.integration
-def test_consume_flow(
-    config: dict,
-    publisher_wallet,
-    consumer_wallet,
-):
-    ocean = Ocean(config)
+@pytest.mark.parametrize("asset_type", ["simple", "graphql", "onchain", "arweave"])
+def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_type):
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, data_provider)
 
-    # Publish a plain asset with one data token on chain
-    data_nft, dt, ddo = get_registered_asset_with_access_service(
-        ocean,
-        publisher_wallet,
-    )
+    if asset_type == "simple":
+        url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+        data_nft, dt, ddo = ocean_assets.create_url_asset(
+            "Data NFTs in Ocean", url, {"from": publisher_wallet}
+        )
+    elif asset_type == "arweave":
+        data_nft, dt, ddo = ocean_assets.create_arweave_asset(
+            "Data NFTs in Ocean", ARWEAVE_TRANSACTION_ID, {"from": publisher_wallet}
+        )
+    elif asset_type == "onchain":
+        abi = {
+            "inputs": [],
+            "name": "swapOceanFee",
+            "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
+            "stateMutability": "view",
+            "type": "function",
+        }
+        router_address = get_address_of_type(config, "Router")
+
+        data_nft, dt, ddo = ocean_assets.create_onchain_asset(
+            "Data NFTs in Ocean", router_address, abi, {"from": publisher_wallet}
+        )
+    else:
+        url = "http://172.15.0.15:8000/subgraphs/name/oceanprotocol/ocean-subgraph"
+        query = """
+            query{
+                nfts(orderby: createdtimestamp,orderdirection:desc){
+                    id
+                    symbol
+                    createdtimestamp
+                }
+            }
+            """
+
+        data_nft, dt, ddo = ocean_assets.create_graphql_asset(
+            "Data NFTs in Ocean", url, query, {"from": publisher_wallet}
+        )
+
+    assert ddo, "The ddo is not created."
+    assert ddo.nft["address"] == data_nft.address
+    assert ddo.nft["owner"] == publisher_wallet.address
+    assert ddo.datatokens[0]["name"] == "Data NFTs in Ocean: DT1"
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
     # Initialize service
-    response = DataServiceProvider.initialize(
+    response = data_provider.initialize(
         did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
@@ -55,18 +87,8 @@ def test_consume_flow(
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": consumer_wallet},
+        provider_fees=provider_fees,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file
@@ -87,35 +109,14 @@ def test_consume_flow(
 
     assert len(os.listdir(destination)) == 0
 
-    ocean.assets.download_asset(
-        ddo, consumer_wallet, destination, receipt.txid, service
+    ocean_assets.download_asset(
+        ddo,
+        consumer_wallet,
+        destination,
+        receipt.txid,
+        service,
     )
 
     assert (
         len(os.listdir(os.path.join(destination, os.listdir(destination)[0]))) == 1
     ), "The asset folder is empty."
-
-
-@pytest.mark.integration
-def test_compact_publish_and_consume(
-    config: dict,
-    publisher_wallet,
-    consumer_wallet,
-):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
-
-    # publish
-    name = "My asset"
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, ddo) = ocean_assets.create_url_asset(
-        name, url, publisher_wallet
-    )
-
-    # share access
-    datatoken.mint(
-        consumer_wallet.address, Web3.toWei(1, "ether"), {"from": publisher_wallet}
-    )
-
-    # consume
-    _ = ocean_assets.download_file(ddo.did, consumer_wallet)

@@ -4,15 +4,21 @@
 #
 import pytest
 
-from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.ve_allocate import VeAllocate
-from ocean_lib.models.ve_fee_distributor import VeFeeDistributor
-from ocean_lib.models.ve_ocean import VeOcean
+from ocean_lib.models.df.df_rewards import DFRewards
+from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
+from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
+from ocean_lib.models.ve.ve_delegation import VeDelegation
+from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
+from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
+from ocean_lib.models.ve.ve_allocate import VeAllocate
+from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.ve_ocean import VeOcean
+
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
@@ -21,37 +27,37 @@ def test_nft_factory(config, publisher_ocean, publisher_wallet):
     data_nft, datatoken = deploy_erc721_erc20(
         config, publisher_wallet, publisher_wallet
     )
-    ocn = publisher_ocean
-    assert ocn.get_nft_factory()
+    ocean = publisher_ocean
+    assert ocean.data_nft_factory
 
-    assert ocn.get_nft_token(data_nft.address).address == data_nft.address
-    assert ocn.get_datatoken(datatoken.address).address == datatoken.address
-
-    created_nft = ocn.create_data_nft(
-        name="TEST",
-        symbol="TEST2",
-        token_uri="http://oceanprotocol.com/nft",
-        from_wallet=publisher_wallet,
-    )
-    assert isinstance(created_nft, DataNFT)
-    assert created_nft.contract.name() == "TEST"
-    assert created_nft.symbol() == "TEST2"
-    assert created_nft.address
-    assert created_nft.tokenURI(1) == "http://oceanprotocol.com/nft"
+    assert ocean.get_nft_token(data_nft.address).address == data_nft.address
+    assert ocean.get_datatoken(datatoken.address).address == datatoken.address
 
 
 @pytest.mark.unit
 def test_contract_objects(publisher_ocean):
-    ocn = publisher_ocean
+    ocean = publisher_ocean
 
-    assert ocn.OCEAN_address[:2] == "0x"
-    assert isinstance(ocn.OCEAN_token, Datatoken)
-    assert isinstance(ocn.get_nft_factory(), DataNFTFactoryContract)
+    assert ocean.OCEAN_address[:2] == "0x"
+    assert isinstance(ocean.OCEAN_token, Datatoken)
+    assert isinstance(ocean.OCEAN, Datatoken)
+    assert ocean.OCEAN_address == ocean.OCEAN_token.address
+    assert ocean.OCEAN_address == ocean.OCEAN.address
 
-    assert isinstance(ocn.dispenser, Dispenser)
-    assert isinstance(ocn.fixed_rate_exchange, FixedRateExchange)
-    assert isinstance(ocn.factory_router, FactoryRouter)
+    assert isinstance(ocean.data_nft_factory, DataNFTFactoryContract)
+    assert isinstance(ocean.dispenser, Dispenser)
+    assert isinstance(ocean.fixed_rate_exchange, FixedRateExchange)
+    assert isinstance(ocean.factory_router, FactoryRouter)
 
-    assert isinstance(ocn.ve_ocean, VeOcean)
-    assert isinstance(ocn.ve_allocate, VeAllocate)
-    assert isinstance(ocn.ve_fee_distributor, VeFeeDistributor)
+    assert isinstance(ocean.df_rewards, DFRewards)
+    assert isinstance(ocean.df_strategy_v1, DFStrategyV1)
+    assert isinstance(ocean.smart_wallet_checker, SmartWalletChecker)
+    assert isinstance(ocean.ve_allocate, VeAllocate)
+    assert isinstance(ocean.ve_delegation, VeDelegation)
+    assert isinstance(ocean.ve_delegation_proxy, VeDelegationProxy)
+    assert isinstance(ocean.ve_fee_distributor, VeFeeDistributor)
+    assert isinstance(ocean.ve_fee_estimate, VeFeeEstimate)
+    assert isinstance(ocean.ve_ocean, VeOcean)
+    assert isinstance(ocean.veOCEAN, VeOcean)
+
+    assert ocean.config == ocean.config_dict  # test alias

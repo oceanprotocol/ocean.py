@@ -6,8 +6,8 @@ import os
 
 import pytest
 from brownie.network import accounts
-from web3.main import Web3
 
+from ocean_lib.ocean.util import to_wei
 from tests.resources.helper_functions import generate_wallet
 
 
@@ -15,9 +15,9 @@ from tests.resources.helper_functions import generate_wallet
 def test_generating_wallets(ocean_token):
     generated_wallet = generate_wallet()
     assert generated_wallet.address, "Wallet has not an address."
-    assert accounts.at(generated_wallet.address).balance() == Web3.toWei(3, "ether")
+    assert accounts.at(generated_wallet.address).balance() == to_wei(3)
 
-    assert ocean_token.balanceOf(generated_wallet.address) == Web3.toWei(50, "ether")
+    assert ocean_token.balanceOf(generated_wallet.address) == to_wei(50)
 
     env_key_labels = [
         "TEST_PRIVATE_KEY1",

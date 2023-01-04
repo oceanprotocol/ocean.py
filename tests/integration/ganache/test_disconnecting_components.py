@@ -53,7 +53,9 @@ def _create_ddo(ocean, publisher):
     global exception_flag
     time.sleep(5)
     try:
-        ocean.assets.create_url_asset("Sample asset", "https://foo.txt", publisher)
+        ocean.assets.create_url_asset(
+            "Sample asset", "https://foo.txt", {"from": publisher}
+        )
     except requests.exceptions.InvalidURL as err:
         exception_flag = 1
         assert err.args[0] == "InvalidURL http://foourl.com."

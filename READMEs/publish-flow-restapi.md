@@ -18,16 +18,7 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & installation
-
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [simple-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes the API asset
 
@@ -42,7 +33,7 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice_wallet)
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
 print(f"Just published asset, with did={ddo.did}")
 ```
 
@@ -50,7 +41,7 @@ print(f"Just published asset, with did={ddo.did}")
 
 In the same Python console:
 ```python
-datatoken.create_dispenser({"from": alice_wallet})
+datatoken.create_dispenser({"from": alice})
 ```
 
 ### 4. Bob gets a free datatoken, then consumes it
@@ -63,7 +54,12 @@ In the same Python console:
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-file_name = ocean.assets.download_file(ddo_did, bob_wallet)
+datatoken.dispense("1 ether", {"from": bob})
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
+asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
+
+import os
+file_name = os.path.join(asset_dir, 'file0')
 ```
 
 Now, load the file and use its data.
@@ -89,35 +85,3 @@ data = eval(data_str)
 close_prices = [float(data_at_day[4]) for data_at_day in data]
 ```
 
-## Appendix. Further Flexibility
-
-Step 4's `download_file()` did three things:
-
-- Checked if Bob has access tokens. He didn't, so the dispenser gave him some
-- Sent a datatoken to the service to get access
-- Downloaded the file
-
-Here are the three steps, un-bundled.
-
-In the same Python console:
-```python
-# Bob gets an access token from the faucet dispenser
-ddo = ocean.assets.resolve(ddo_did)
-datatoken_address = ddo.datatokens[0]["address"]
-datatoken = ocean.get_datatoken(datatoken_address)
-datatoken.dispense("1 ether", {"from": bob_wallet})
-
-# Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob_wallet)
-
-# Bob downloads the dataset
-# If the connection breaks, Bob can request again by showing order_tx_id.
-consumer_wallet = bob_wallet
-destination = './'
-file_path = ocean.assets.download_asset(
-    ddo, consumer_wallet, destination, order_tx_id
-)
-import glob
-file_name = glob.glob(file_path + "/*")[0]
-print(f"file_name: '{file_name}'")
-```

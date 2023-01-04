@@ -7,111 +7,14 @@ import shutil
 
 import pytest
 from brownie import network
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.ocean_assets import DatatokenArguments, OceanAssets
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
+from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import SmartContractCall
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
-
-
-@pytest.mark.integration
-def test_consume_simple_onchain_data(
-    config: dict,
-    publisher_wallet,
-    consumer_wallet,
-):
-    data_provider = DataServiceProvider
-    ocean_assets = OceanAssets(config, data_provider)
-    abi = {
-        "inputs": [],
-        "name": "swapOceanFee",
-        "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
-        "stateMutability": "view",
-        "type": "function",
-    }
-    router_address = get_address_of_type(config, "Router")
-
-    data_nft, dt, ddo = ocean_assets.create_onchain_asset(
-        "NFT", router_address, abi, publisher_wallet
-    )
-
-    assert ddo, "The ddo is not created."
-    assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["address"] == data_nft.address
-    assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "NFT: DT1"
-    assert ddo.datatokens[0]["symbol"] == "DT1"
-
-    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
-    dt = Datatoken(config, ddo.datatokens[0]["address"])
-
-    # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
-    dt.mint(
-        consumer_wallet.address,
-        Web3.toWei("50", "ether"),
-        {"from": publisher_wallet},
-    )
-
-    # Initialize service
-    response = data_provider.initialize(
-        did=ddo.did, service=service, consumer_address=consumer_wallet.address
-    )
-    assert response
-    assert response.status_code == 200
-    assert response.json()["providerFee"]
-    provider_fees = response.json()["providerFee"]
-
-    # Start order for consumer
-    receipt = dt.start_order(
-        consumer=consumer_wallet.address,
-        service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": consumer_wallet},
-    )
-
-    # Download file
-    destination = config["DOWNLOADS_PATH"]
-    if not os.path.isabs(destination):
-        destination = os.path.abspath(destination)
-
-    if os.path.exists(destination) and len(os.listdir(destination)) > 0:
-        list(
-            map(
-                lambda d: shutil.rmtree(os.path.join(destination, d)),
-                os.listdir(destination),
-            )
-        )
-
-    if not os.path.exists(destination):
-        os.makedirs(destination)
-
-    assert len(os.listdir(destination)) == 0
-
-    ocean_assets.download_asset(
-        ddo,
-        consumer_wallet,
-        destination,
-        receipt.txid,
-        service,
-    )
-
-    dir_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
-    assert len(dir_files) == 1, "The asset folder is empty."
 
 
 @pytest.mark.integration
@@ -161,7 +64,7 @@ def test_consume_parametrized_onchain_data(
     dt_arg = DatatokenArguments(files=files, consumer_parameters=consumer_parameters)
     data_nft, _, ddo = ocean_assets.create(
         metadata=metadata,
-        publisher_wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
         datatoken_args=[dt_arg],
     )
 
@@ -179,7 +82,7 @@ def test_consume_parametrized_onchain_data(
     # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         consumer_wallet.address,
-        Web3.toWei("50", "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
@@ -196,18 +99,8 @@ def test_consume_parametrized_onchain_data(
     receipt = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fee_address=provider_fees["providerFeeAddress"],
-        provider_fee_token=provider_fees["providerFeeToken"],
-        provider_fee_amount=provider_fees["providerFeeAmount"],
-        v=provider_fees["v"],
-        r=provider_fees["r"],
-        s=provider_fees["s"],
-        valid_until=provider_fees["validUntil"],
-        provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=ZERO_ADDRESS,
-        consume_market_order_fee_token=ZERO_ADDRESS,
-        consume_market_order_fee_amount=0,
-        transaction_parameters={"from": consumer_wallet},
+        provider_fees=provider_fees,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Download file

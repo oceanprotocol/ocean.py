@@ -18,23 +18,17 @@ Here are the steps:
 
 ## 1. Setup
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library
-- [x] Setup : Set envvars
-
-From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] Setup : Setup in Python
+Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up locally](setup-local.md) or [remotely](setup-remote.md).
 
 ## 2. Alice publishes data NFT
 
-We'll create a data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
+We publish a data NFT like elsewhere, except we set `transferable=False` (and skip print statements).
 
 In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
-data_nft = ocean.create_data_nft('NFT1', 'NFT1', alice_wallet, transferable=False)
+from ocean_lib.models.data_nft import DataNFTArguments
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), {"from": alice})
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
@@ -66,14 +60,14 @@ prefix = "\x19Ethereum Signed Message:\n32"
 msg = Web3.solidityKeccak(
     ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
 )
-signed = sign_with_key(msg, alice_wallet.private_key)
+signed = sign_with_key(msg, alice.private_key)
 symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter
 profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
 
 # set
-data_nft.setNewData(profiledata_name_hash, profiledata_val_encr_hex, {"from": alice_wallet})
+data_nft.setNewData(profiledata_name_hash, profiledata_val_encr_hex, {"from": alice})
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -105,7 +99,7 @@ symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)  # bytes
 symkey_val_encr_hex = symkey_val_encr.hex()  # hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
-data_nft.setNewData(symkey_name_hash, symkey_val_encr_hex, {"from": alice_wallet})
+data_nft.setNewData(symkey_name_hash, symkey_val_encr_hex, {"from": alice})
 ```
 
 ## 6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'

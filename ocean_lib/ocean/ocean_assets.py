@@ -4,14 +4,12 @@
 #
 
 """Ocean module."""
-import glob
 import json
 import logging
 import lzma
 import os
-import warnings
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from brownie import network
 from enforce_typing import enforce_types
@@ -26,24 +24,17 @@ from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.ocean.util import (
-    create_checksum,
-    get_address_of_type,
-    get_ocean_token_address,
-)
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.ocean.util import create_checksum, get_from_address, to_wei
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
-    FilesType,
+    ArweaveFile,
     GraphqlQuery,
     SmartContractCall,
     UrlFile,
 )
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -153,14 +144,62 @@ class OceanAssets:
         assert "name" in metadata, "Must have name in metadata."
 
     @enforce_types
-    def create_url_asset(
-        self, name: str, url: str, publisher_wallet, wait_for_aqua: bool = True
+    def create_algo_asset(
+        self,
+        name: str,
+        url: str,
+        tx_dict: dict,
+        image: str = "oceanprotocol/algo_dockers",
+        tag: str = "python-branin",
+        checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+        wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "UrlFile", with good defaults"""
+        """Create asset of type "algorithm", having UrlFiles, with good defaults"""
+
+        if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
+            assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
+
+        metadata = self._default_metadata(name, tx_dict, "algorithm")
+        metadata["algorithm"] = {
+            "language": "python",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "python $ALGO",
+                "image": image,
+                "tag": tag,
+                "checksum": checksum,
+            },
+        }
+
         files = [UrlFile(url)]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+
+    @enforce_types
+    def create_url_asset(
+        self,
+        name: str,
+        url: str,
+        tx_dict: dict,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        metadata = self._default_metadata(name, tx_dict)
+        files = [UrlFile(url)]
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+
+    @enforce_types
+    def create_arweave_asset(
+        self,
+        name: str,
+        transaction_id: str,
+        tx_dict: dict,
+        wait_for_aqua: bool = True,
+    ) -> tuple:
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        metadata = self._default_metadata(name, tx_dict)
+        files = [ArweaveFile(transaction_id)]
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -168,14 +207,13 @@ class OceanAssets:
         name: str,
         url: str,
         query: str,
-        publisher_wallet,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "GraphqlQuery", with good defaults"""
+        """Create asset of type "data", having GraphqlQuery files, w good defaults"""
+        metadata = self._default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -183,45 +221,39 @@ class OceanAssets:
         name: str,
         contract_address: str,
         contract_abi: dict,
-        publisher_wallet,
+        tx_dict: dict,
         wait_for_aqua: bool = True,
     ) -> tuple:
-        """Create an asset of type "SmartContractCall", with good defaults"""
+        """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        return self.create_with_default_metadata(
-            name, files, publisher_wallet, wait_for_aqua
-        )
+        metadata = self._default_metadata(name, tx_dict)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
 
     @enforce_types
-    def create_with_default_metadata(
-        self,
-        name: str,
-        files: list,
-        publisher_wallet,
-        wait_for_aqua: bool = True,
-    ) -> tuple:
-        """Thin wrapper for create(). Creates 1 datatoken, with good defaults.
+    def _default_metadata(self, name: str, tx_dict: dict, type="dataset") -> dict:
+        address = get_from_address(tx_dict)
 
-        If wait_for_aqua, then attempt to update aquarius within time constraints.
-
-        Returns (data_nft, datatoken, ddo)
-        """
         date_created = datetime.now().isoformat()
         metadata = {
             "created": date_created,
             "updated": date_created,
             "description": name,
             "name": name,
-            "type": "dataset",
-            "author": publisher_wallet.address[:7],
+            "type": type,
+            "author": address[:7],
             "license": "CC0: PublicDomain",
         }
+        return metadata
 
+    @enforce_types
+    def _create_1dt(self, metadata, files, tx_dict, wait_for_aqua):
+        """Call create(), focusing on just one datatoken"""
+        name = metadata["name"]
         (data_nft, datatokens, ddo) = self.create(
             metadata,
-            publisher_wallet,
+            tx_dict,
             datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
             wait_for_aqua=wait_for_aqua,
         )
@@ -233,10 +265,10 @@ class OceanAssets:
     def create(
         self,
         metadata: dict,
-        publisher_wallet,
+        tx_dict: dict,
         credentials: Optional[dict] = None,
         data_nft_address: Optional[str] = None,
-        data_nft_args: Optional["DataNFTArguments"] = None,
+        data_nft_args: Optional[DataNFTArguments] = None,
         deployed_datatokens: Optional[List[Datatoken]] = None,
         services: Optional[list] = None,
         datatoken_args: Optional[List["DatatokenArguments"]] = None,
@@ -269,9 +301,7 @@ class OceanAssets:
             data_nft_args = data_nft_args or DataNFTArguments(
                 metadata["name"], metadata["name"]
             )
-            data_nft = data_nft_args.deploy_contract(
-                self._config_dict, publisher_wallet
-            )
+            data_nft = data_nft_args.deploy_contract(self._config_dict, tx_dict)
             # register on-chain
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
@@ -284,12 +314,11 @@ class OceanAssets:
         ddo = DDO()
 
         # Generate the did, add it to the ddo.
-        did = f"did:op:{create_checksum(data_nft.address + str(self._chain_id))}"
-        ddo.did = did
+        ddo.did = data_nft.calculate_did()
         # Check if it's already registered first!
-        if self._aquarius.ddo_exists(did):
+        if self._aquarius.ddo_exists(ddo.did):
             raise AquariusError(
-                f"Asset id {did} is already registered to another asset."
+                f"Asset id {ddo.did} is already registered to another asset."
             )
         ddo.chain_id = self._chain_id
         ddo.metadata = metadata
@@ -303,7 +332,7 @@ class OceanAssets:
             services = []
             for datatoken_arg in datatoken_args:
                 new_dt = datatoken_arg.create_datatoken(
-                    self._config_dict, data_nft, publisher_wallet
+                    data_nft, tx_dict, with_services=True
                 )
                 datatokens.append(new_dt)
 
@@ -347,20 +376,22 @@ class OceanAssets:
             ddo, provider_uri, encrypt_flag, compress_flag
         )
 
+        wallet_address = get_from_address(tx_dict)
+
         data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            wallet_address.encode("utf-8"),
             flags,
             document,
             ddo_hash,
             [proof],
-            {"from": publisher_wallet},
+            tx_dict,
         )
 
         # Fetch the ddo on chain
         if wait_for_aqua:
-            ddo = self._aquarius.wait_for_ddo(did)
+            ddo = self._aquarius.wait_for_ddo(ddo.did)
 
         return (data_nft, datatokens, ddo)
 
@@ -368,7 +399,7 @@ class OceanAssets:
     def update(
         self,
         ddo: DDO,
-        publisher_wallet,
+        tx_dict: dict,
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -413,15 +444,17 @@ class OceanAssets:
             errors_or_proof["s"][0],
         )
 
+        wallet_address = get_from_address(tx_dict)
+
         tx_result = data_nft.setMetaData(
             0,
             provider_uri,
-            Web3.toChecksumAddress(publisher_wallet.address.lower()).encode("utf-8"),
+            wallet_address.encode("utf-8"),
             flags,
             document,
             ddo_hash,
             [proof],
-            {"from": publisher_wallet},
+            tx_dict,
         )
 
         ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
@@ -465,57 +498,6 @@ class OceanAssets:
         ]
 
     @enforce_types
-    def download_file(self, did: str, wallet) -> str:
-        """Helper method. Given a did, download file to "./". Returns filename.
-
-        Assumes that:
-        - wallet holds datatoken, or datatoken will freely dispense
-        - 0th datatoken of this did
-        - 0th service of the datatoken
-        - the service *is* a download service
-        """
-        # Retrieve the DDO and datatoken objects
-        print("Resolve did...")
-        ddo = self.resolve(did)
-        datatoken_address = ddo.datatokens[0]["address"]
-        datatoken = Datatoken(self._config_dict, datatoken_address)
-
-        # Ensure access token
-        bal = Web3.fromWei(datatoken.balanceOf(wallet.address), "ether")
-        if bal >= 1.0:  # we're good
-            pass
-        else:  # try to get freely-dispensed ddo
-            print("Dispense access token...")
-            amt_dispense_wei = Web3.toWei(1, "ether")
-            dispenser_addr = get_address_of_type(self._config_dict, "Dispenser")
-            dispenser = Dispenser(self._config_dict, dispenser_addr)
-
-            # catch key failure modes
-            st = dispenser.status(datatoken.address)
-            active, allowedSwapper = st[0], st[6]
-            if not active:
-                raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, wallet.address]:
-                raise ValueError("Not allowed. allowedSwapper={allowedSwapper}")
-
-            # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(
-                datatoken.address, amt_dispense_wei, wallet, {"from": wallet}
-            )
-
-        # send datatoken to the service, to get access
-        print("Order access...")
-        order_tx_id = self.pay_for_access_service(ddo, wallet)
-
-        # download
-        print("Download file...")
-        file_path = self.download_asset(ddo, wallet, "./", order_tx_id)
-        file_name = glob.glob(file_path + "/*")[0]
-        print(f"Done. File: {file_name}")
-
-        return file_name
-
-    @enforce_types
     def download_asset(
         self,
         ddo: DDO,
@@ -545,30 +527,22 @@ class OceanAssets:
     def pay_for_access_service(
         self,
         ddo: DDO,
-        wallet,
+        tx_dict: dict,
         service: Optional[Service] = None,
-        consume_market_order_fee_address: Optional[str] = None,
-        consume_market_order_fee_token: Optional[str] = None,
-        consume_market_order_fee_amount: Optional[int] = None,
+        consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
-        consume_market_order_fee_address = (
-            consume_market_order_fee_address or wallet.address
-        )
-        consume_market_order_fee_amount = consume_market_order_fee_amount or 0
-        if consume_market_order_fee_token is None:
-            OCEAN_address = get_ocean_token_address(self._config_dict)
-            consume_market_order_fee_token = OCEAN_address
-        consumer_address = consumer_address or wallet.address
+        wallet_address = get_from_address(tx_dict)
+        consumer_address = consumer_address or wallet_address
 
         # main work...
         dt = Datatoken(self._config_dict, service.datatoken)
-        balance = dt.balanceOf(wallet.address)
+        balance = dt.balanceOf(wallet_address)
 
-        if balance < Web3.toWei(1, "ether"):
+        if balance < to_wei(1):
             raise InsufficientBalance(
                 f"Your token balance {balance} {dt.symbol()} is not sufficient "
                 f"to execute the requested service. This service "
@@ -578,7 +552,7 @@ class OceanAssets:
         consumable_result = is_consumable(
             ddo,
             service,
-            {"type": "address", "value": wallet.address},
+            {"type": "address", "value": wallet_address},
             userdata=userdata,
         )
         if consumable_result != ConsumableCodes.OK:
@@ -598,18 +572,9 @@ class OceanAssets:
         receipt = dt.start_order(
             consumer=consumer_address,
             service_index=ddo.get_index_of_service(service),
-            provider_fee_address=provider_fees["providerFeeAddress"],
-            provider_fee_token=provider_fees["providerFeeToken"],
-            provider_fee_amount=provider_fees["providerFeeAmount"],
-            v=provider_fees["v"],
-            r=provider_fees["r"],
-            s=provider_fees["s"],
-            valid_until=provider_fees["validUntil"],
-            provider_data=provider_fees["providerData"],
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
-            transaction_parameters={"from": wallet},
+            provider_fees=provider_fees,
+            consume_market_fees=consume_market_fees,
+            tx_dict=tx_dict,
         )
 
         return receipt.txid
@@ -622,13 +587,14 @@ class OceanAssets:
         compute_environment: str,
         valid_until: int,
         consume_market_order_fee_address: str,
-        wallet,
+        tx_dict: dict,
         consumer_address: Optional[str] = None,
     ):
         data_provider = DataServiceProvider
+        wallet_address = get_from_address(tx_dict)
 
         if not consumer_address:
-            consumer_address = wallet.address
+            consumer_address = wallet_address
 
         initialize_response = data_provider.initialize_compute(
             [x.as_dictionary() for x in datasets],
@@ -644,10 +610,12 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 datasets[i],
                 item,
-                consume_market_order_fee_address,
-                datasets[i].consume_market_order_fee_token,
-                datasets[i].consume_market_order_fee_amount,
-                wallet,
+                TokenFeeInfo(
+                    consume_market_order_fee_address,
+                    datasets[i].consume_market_order_fee_token,
+                    datasets[i].consume_market_order_fee_amount,
+                ),
+                tx_dict,
                 consumer_address,
             )
 
@@ -655,10 +623,12 @@ class OceanAssets:
             self._start_or_reuse_order_based_on_initialize_response(
                 algorithm_data,
                 result["algorithm"],
-                consume_market_order_fee_address,
-                algorithm_data.consume_market_order_fee_token,
-                algorithm_data.consume_market_order_fee_amount,
-                wallet,
+                TokenFeeInfo(
+                    address=consume_market_order_fee_address,
+                    token=algorithm_data.consume_market_order_fee_token,
+                    amount=algorithm_data.consume_market_order_fee_amount,
+                ),
+                tx_dict,
                 consumer_address,
             )
 
@@ -671,10 +641,8 @@ class OceanAssets:
         self,
         asset_compute_input: ComputeInput,
         item: dict,
-        consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
-        wallet,
+        consume_market_fees: TokenFeeInfo,
+        tx_dict: dict,
         consumer_address: Optional[str] = None,
     ):
         provider_fees = item.get("providerFee")
@@ -689,157 +657,14 @@ class OceanAssets:
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(
-                valid_order,
-                provider_fee_address=provider_fees["providerFeeAddress"],
-                provider_fee_token=provider_fees["providerFeeToken"],
-                provider_fee_amount=provider_fees["providerFeeAmount"],
-                v=provider_fees["v"],
-                r=provider_fees["r"],
-                s=provider_fees["s"],
-                valid_until=provider_fees["validUntil"],
-                provider_data=provider_fees["providerData"],
-                transaction_parameters={"from": wallet},
+                valid_order, provider_fees=provider_fees, tx_dict=tx_dict
             ).txid
             return
 
         asset_compute_input.transfer_tx_id = dt.start_order(
             consumer=consumer_address,
             service_index=asset_compute_input.ddo.get_index_of_service(service),
-            provider_fee_address=provider_fees["providerFeeAddress"],
-            provider_fee_token=provider_fees["providerFeeToken"],
-            provider_fee_amount=provider_fees["providerFeeAmount"],
-            v=provider_fees["v"],
-            r=provider_fees["r"],
-            s=provider_fees["s"],
-            valid_until=provider_fees["validUntil"],
-            provider_data=provider_fees["providerData"],
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
-            transaction_parameters={"from": wallet},
+            provider_fees=provider_fees,
+            consume_market_fees=consume_market_fees,
+            tx_dict=tx_dict,
         ).txid
-
-
-class DataNFTArguments:
-    def __init__(
-        self,
-        name: str,
-        symbol: str,
-        template_index: Optional[int] = 1,
-        additional_datatoken_deployer: Optional[str] = None,
-        additional_metadata_updater: Optional[str] = None,
-        uri: Optional[str] = None,
-        transferable: Optional[bool] = None,
-        owner: Optional[str] = None,
-    ):
-        """
-        :param name: str name of data NFT if creating a new one
-        :param symbol: str symbol of data NFT  if creating a new one
-        :param template_index: int template index of the data NFT, by default is 1.
-        :param additional_datatoken_deployer: str address of an additional ERC20 deployer.
-        :param additional_metadata_updater: str address of an additional metadata updater.
-        :param uri: str URL of the data NFT.
-        """
-        self.name = name
-        self.symbol = symbol or name
-        self.template_index = template_index
-        self.additional_datatoken_deployer = (
-            additional_datatoken_deployer or ZERO_ADDRESS
-        )
-        self.additional_metadata_updater = additional_metadata_updater or ZERO_ADDRESS
-        self.uri = uri or "https://oceanprotocol.com/nft/"
-        self.transferable = transferable or True
-        self.owner = owner
-
-    def deploy_contract(self, config_dict, wallet) -> DataNFT:
-        address = get_address_of_type(config_dict, DataNFTFactoryContract.CONTRACT_NAME)
-        data_nft_factory = DataNFTFactoryContract(config_dict, address)
-
-        receipt = data_nft_factory.deployERC721Contract(
-            self.name,
-            self.symbol,
-            self.template_index,
-            self.additional_metadata_updater,
-            self.additional_datatoken_deployer,
-            self.uri,
-            self.transferable,
-            self.owner or wallet.address,
-            {"from": wallet},
-        )
-
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=".*Event log does not contain enough topics for the given ABI.*",
-            )
-            registered_event = receipt.events["NFTCreated"]
-
-        data_nft_address = registered_event["newTokenAddress"]
-        return DataNFT(config_dict, data_nft_address)
-
-
-class DatatokenArguments:
-    def __init__(
-        self,
-        name: Optional[str] = "Datatoken 1",
-        symbol: Optional[str] = "DT1",
-        template_index: Optional[int] = 1,
-        minter: Optional[str] = None,
-        fee_manager: Optional[str] = None,
-        publish_market_order_fee_address: Optional[str] = None,
-        publish_market_order_fee_token: Optional[str] = None,
-        publish_market_order_fee_amount: Optional[int] = 0,
-        bytess: Optional[List[bytes]] = None,
-        services: Optional[list] = None,
-        files: Optional[List[FilesType]] = None,
-        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
-    ):
-        self.name = name
-        self.symbol = symbol
-        self.template_index = template_index
-        self.minter = minter
-        self.fee_manager = fee_manager
-        self.publish_market_order_fee_address = (
-            publish_market_order_fee_address or ZERO_ADDRESS
-        )
-        self.publish_market_order_fee_token = publish_market_order_fee_token
-        self.publish_market_order_fee_amount = publish_market_order_fee_amount
-        self.bytess = bytess or [b""]
-        self.services = services
-        self.files = files
-        self.consumer_parameters = consumer_parameters
-
-    def create_datatoken(self, config_dict, data_nft, wallet):
-        OCEAN_address = get_ocean_token_address(config_dict)
-        temp_dt = data_nft.create_datatoken(
-            name=self.name,
-            symbol=self.symbol,
-            template_index=self.template_index,
-            minter=self.minter or wallet.address,
-            fee_manager=self.fee_manager or wallet.address,
-            publish_market_order_fee_address=self.publish_market_order_fee_address,
-            publish_market_order_fee_token=self.publish_market_order_fee_token
-            or OCEAN_address,
-            publish_market_order_fee_amount=self.publish_market_order_fee_amount,
-            bytess=self.bytess,
-            transaction_parameters={"from": wallet},
-        )
-
-        logger.info(
-            f"Successfully created datatoken with address " f"{temp_dt.address}."
-        )
-
-        if not self.services:
-            self.services = [
-                temp_dt.build_access_service(
-                    service_id="0",
-                    service_endpoint=config_dict.get("PROVIDER_URL"),
-                    files=self.files,
-                    consumer_parameters=self.consumer_parameters,
-                )
-            ]
-        else:
-            for service in self.services:
-                service.datatoken = temp_dt.address
-
-        return temp_dt

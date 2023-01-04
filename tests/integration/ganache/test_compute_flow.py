@@ -8,7 +8,6 @@ from typing import List, Optional
 
 import pytest
 from attr import dataclass
-from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -16,6 +15,7 @@ from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import to_wei
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
@@ -148,7 +148,7 @@ def _mint_and_build_compute_input(
         if datatoken.isMinter(consumer_wallet.address)
         else publisher_wallet
     )
-    datatoken.mint(consumer_wallet.address, Web3.toWei(10, "ether"), {"from": minter})
+    datatoken.mint(consumer_wallet.address, to_wei(10), {"from": minter})
 
     return ComputeInput(
         dataset_and_userdata.ddo,
@@ -249,7 +249,7 @@ def run_compute_test(
         compute_environment=free_c2d_env["id"],
         valid_until=valid_until,
         consume_market_order_fee_address=consumer_wallet.address,
-        wallet=consumer_wallet,
+        tx_dict={"from": consumer_wallet},
     )
 
     # Start compute job
@@ -314,7 +314,7 @@ def run_compute_test(
             compute_environment=free_c2d_env["id"],
             valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
-            wallet=consumer_wallet,
+            tx_dict={"from": consumer_wallet},
         )
 
         # transferTxId was not updated
@@ -335,7 +335,7 @@ def run_compute_test(
             compute_environment=free_c2d_env["id"],
             valid_until=valid_until,
             consume_market_order_fee_address=consumer_wallet.address,
-            wallet=consumer_wallet,
+            tx_dict={"from": consumer_wallet},
         )
 
         assert datasets[0].transfer_tx_id != prev_dt_tx_id
@@ -503,7 +503,7 @@ def test_compute_update_trusted_algorithm(
     )
 
     updated_dataset = publisher_ocean.assets.update(
-        dataset_with_compute_service_generator, publisher_wallet
+        dataset_with_compute_service_generator, {"from": publisher_wallet}
     )
 
     # Expect to pass when trusted algorithm is used

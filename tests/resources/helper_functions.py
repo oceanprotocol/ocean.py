@@ -13,19 +13,20 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
+from brownie import network
 from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import sign_with_key
+from ocean_lib.web3_internal.utils import sign_with_key, split_signature
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 _NETWORK = "ganache"
@@ -83,13 +84,11 @@ def generate_wallet():
 
     new_wallet = accounts.add(private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(new_wallet.address, "3 ether")
+    deployer_wallet.transfer(new_wallet, to_wei(3))
 
     ocean = Ocean(config)
     OCEAN = ocean.OCEAN_token
-    OCEAN.transfer(
-        new_wallet.address, Web3.toWei(50, "ether"), {"from": deployer_wallet}
-    )
+    OCEAN.transfer(new_wallet, to_wei(50), {"from": deployer_wallet})
     return new_wallet
 
 
@@ -164,36 +163,24 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    receipt = data_nft_factory.deployERC721Contract(
-        "NFT",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        True,
-        data_nft_publisher.address,
-        {"from": data_nft_publisher},
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("NFT", "NFTSYMBOL"), {"from": data_nft_publisher}
     )
-    token_address = data_nft_factory.get_token_address(receipt)
-    data_nft = DataNFT(config_dict, token_address)
+
     if not datatoken_minter:
         return data_nft
 
-    datatoken_cap = Web3.toWei(100, "ether") if template_index == 2 else None
+    datatoken_cap = to_wei(100) if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
-        template_index=template_index,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=datatoken_minter.address,
-        fee_manager=data_nft_publisher.address,
-        publish_market_order_fee_address=data_nft_publisher.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        datatoken_cap=datatoken_cap,
-        transaction_parameters={"from": data_nft_publisher},
+        DatatokenArguments(
+            template_index=template_index,
+            cap=datatoken_cap,
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=datatoken_minter.address,
+        ),
+        {"from": data_nft_publisher},
     )
 
     return data_nft, datatoken
@@ -224,7 +211,7 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     mock_usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
-    if mock_usdc.balanceOf(factory_deployer.address) >= amount:
+    if mock_usdc.balanceOf(factory_deployer) >= amount:
         mock_usdc.transfer(recipient, amount, factory_deployer)
 
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
@@ -247,7 +234,7 @@ def transfer_bt_if_balance_lte(
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
-        and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
+        and base_token.balanceOf(from_wallet) >= amount_to_transfer
     ):
         base_token.transfer(recipient, amount_to_transfer, {"from": from_wallet})
 
@@ -308,21 +295,20 @@ def convert_bt_amt_to_dt(
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
-
-    When creating a pool, the "rate" argument is the datatokens per base token,
-    and can be passed directly into this function.
-
-    When creating an exchange, the "rate" argument is the base tokens per datatoken,
-    so it needs to be inverted before passing into this function.
-
-    Datatokens always have 18 decimals, even when the base tokens don't.
+    dt_per_bt_in_wei = 1 / bt_per_dt = 1 / price
+    Datatokens always have 18 decimals, even if base tokens don't.
     """
-    unit_value = Decimal(10) ** 18  ## FIXME: SHOULDN'T `18` BE `bt_decimals` ??
-    amt_wei = Web3.toWei(
-        Decimal(bt_amount) / unit_value * Web3.fromWei(dt_per_bt_in_wei, "ether"),
-        "ether",
-    )
-    return amt_wei
+    bt_amount_wei = bt_amount
+
+    bt_amount_float = float(bt_amount_wei) / 10**bt_decimals
+
+    dt_per_bt_float = float(dt_per_bt_in_wei) / 10**18  # price always has 18 dec
+
+    dt_amount_float = bt_amount_float * dt_per_bt_float
+
+    dt_amount_wei = int(dt_amount_float * 10**18)
+
+    return dt_amount_wei
 
 
 def get_file1():
@@ -360,3 +346,37 @@ def int_units(amount, num_decimals):
     unit_value = Decimal(10) ** num_decimals
 
     return int(decimal_amount * unit_value)
+
+
+@enforce_types
+def get_mock_provider_fees(mock_type, wallet, valid_until=0):
+    config = get_config_dict()
+    provider_fee_address = wallet.address
+    provider_fee_token = get_address_of_type(config, mock_type)
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            wallet.address,
+            provider_fee_token,
+            provider_fee_amount,
+            valid_until,
+        ],
+    )
+
+    signed = network.web3.eth.sign(wallet.address, data=message)
+    signature = split_signature(signed)
+
+    return {
+        "providerFeeAddress": provider_fee_address,
+        "providerFeeToken": provider_fee_token,
+        "providerFeeAmount": provider_fee_amount,
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
+        "validUntil": valid_until,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+    }

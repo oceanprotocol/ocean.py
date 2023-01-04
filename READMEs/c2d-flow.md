@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D flow, using [remote services and Mumbai testnet](https://docs.oceanprotocol.com/core-concepts/networks#goerli).
+This quickstart describes a C2D flow, using a remote setup on Mumbai testnet.
 
 Here are the steps:
 
@@ -21,13 +21,11 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites & installation
+### 1.1 Install Ocean
 
-From [installation-flow](install.md), do:
-- [x] Setup : Prerequisites
-- [x] Setup : Install the library
+First, ensure that you've [installed Ocean](install.md)
 
-### Install matplotlib
+### 1.2 Install matplotlib
 
 This example uses C2D to create a regression model. We'll use the library `matplotlib` to visualize it.
 
@@ -37,17 +35,12 @@ In the same console:
 source venv/bin/activate
 
 #install matplotlib
-pip install numpy matplotlib
+pip install matplotlib
 ```
 
-### Setup for remote
+### 1.3 Setup remotely
 
-From [simple-remote](simple-remote.md), do:
-- [x] Create Mumbai Accounts (One-Time)
-- [x] Create Config File for Services
-- [x] Set envvars
-- [x] Setup in Python. Includes: Config, Alice's wallet, Bob's wallet
-
+Follow [setup-remote.md](setup-remote.md).
 
 ## 2. Alice publishes dataset
 
@@ -64,7 +57,7 @@ DATA_url_file = UrlFile(
 )
 
 name = "Branin dataset"
-(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, alice_wallet, wait_for_aqua=True)
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, {"from": alice}, wait_for_aqua=True)
 print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
@@ -93,7 +86,7 @@ DATA_compute_service = Service(
 
 # Add service and update asset
 DATA_ddo.add_service(DATA_compute_service)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
@@ -107,40 +100,10 @@ In the same Python console:
 ALGO_url = "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 
 name = "grp"
-(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_url_asset(name, ALGO_url, alice_wallet, wait_for_aqua=True)
+(ALGO_data_nft, ALGO_datatoken, ALGO_ddo) = ocean.assets.create_algo_asset(name, ALGO_url, {"from": alice}, wait_for_aqua=True)
 
 print(f"ALGO_data_nft address = '{ALGO_data_nft.address}'")
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
-
-# Specify metadata and services, using the Branin test dataset
-ALGO_date_created = "2021-12-28T10:55:11Z"
-ALGO_metadata = {
-    "created": ALGO_date_created,
-    "updated": ALGO_date_created,
-    "description": "gpr",
-    "name": "gpr",
-    "type": "algorithm",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
-    "algorithm": {
-        "language": "python",
-        "format": "docker-image",
-        "version": "0.1",
-        "container": {
-            "entrypoint": "python $ALGO",
-            "image": "oceanprotocol/algo_dockers",
-            "tag": "python-branin",
-            "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-        },
-    }
-}
-
-# update ALGO_Asset metadata
-ALGO_ddo.metadata.update(ALGO_metadata)
-ALGO_ddo = ocean.assets.update(
-    asset=ALGO_ddo, publisher_wallet=alice_wallet, provider_uri=config["PROVIDER_URL"])
-    
-
 print(f"ALGO_ddo did = '{ALGO_ddo.did}'")
 ```
 
@@ -150,7 +113,7 @@ In the same Python console:
 ```python
 compute_service = DATA_ddo.services[1]
 compute_service.add_publisher_trusted_algorithm(ALGO_ddo)
-DATA_ddo = ocean.assets.update(DATA_ddo, alice_wallet)
+DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 ```
 
@@ -160,9 +123,9 @@ In the same Python console:
 ```python
 # Alice mints DATA datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
-from web3.main import Web3
-DATA_datatoken.mint(bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet})
-ALGO_datatoken.mint(bob_wallet.address, Web3.toWei(5, "ether"), {"from": alice_wallet})
+from ocean_lib.ocean.util import to_wei
+DATA_datatoken.mint(bob, to_wei(5), {"from": alice})
+ALGO_datatoken.mint(bob, to_wei(5), {"from": alice})
 ```
 
 ## 6. Bob starts a compute job using a free C2D environment
@@ -194,8 +157,8 @@ ALGO_compute_input = ComputeInput(ALGO_ddo, algo_service)
 datasets, algorithm = ocean.assets.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
-    consume_market_order_fee_address=bob_wallet.address,
-    wallet=bob_wallet,
+    consume_market_order_fee_address=bob.address,
+    tx_dict={"from": bob},
     compute_environment=free_c2d_env["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     consumer_address=free_c2d_env["consumerAddress"],
@@ -205,7 +168,7 @@ assert algorithm, "pay for algorithm unsuccessful"
 
 # Start compute job
 job_id = ocean.compute.start(
-    consumer_wallet=bob_wallet,
+    consumer_wallet=bob,
     dataset=datasets[0],
     compute_environment=free_c2d_env["id"],
     algorithm=algorithm,
@@ -223,7 +186,7 @@ import time
 from decimal import Decimal
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATA_ddo, compute_service, job_id, bob_wallet)
+    status = ocean.compute.status(DATA_ddo, compute_service, job_id, bob)
     if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -239,7 +202,7 @@ For the purpose of this tutorial, let's choose the second option.
 ```python
 # Retrieve algorithm output and log files
 output = ocean.compute.compute_job_result_logs(
-    DATA_ddo, compute_service, job_id, bob_wallet
+    DATA_ddo, compute_service, job_id, bob
 )[0]
 
 import pickle
