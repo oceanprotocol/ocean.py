@@ -142,3 +142,20 @@ We leave this as an exercise to the reader:)
 
 Happy Data Farming!
 
+
+## Appendix.
+
+At the beginning of this flows, we created an `ocean` object, which is an instance of class [`Ocean`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py).
+
+It provides convenient access to [DF](https://github.com/oceanprotocol/ocean.py/tree/main/ocean_lib/models/df) & [VE](https://github.com/oceanprotocol/ocean.py/tree/main/ocean_lib/models/ve) Python objects that which wrap [DF](https://github.com/oceanprotocol/contracts/tree/main/contracts/df) & [VE](https://github.com/oceanprotocol/contracts/tree/main/contracts/ve) Solidity contracts:
+- `ocean.ve_ocean` or `ocean.veOCEAN -> VeOcean`
+- `ocean.df_rewards -> DFRewards`
+- `ocean.df_strategy_v1 -> DFStrategyV1`
+- `ocean.smart_wallet_checker -> SmartWalletChecker`
+- `ocean.ve_allocate -> VeAllocate`
+- `ocean.ve_delegation -> VeDelegation`
+- `ocean.ve_delegation_proxy -> VeDelegationProxy`
+- `ocean.ve_fee_distributor -> VeFeeDistributor`
+- `ocean.ve_fee_estimate(self) -> VeFeeEstimate`
+
+
