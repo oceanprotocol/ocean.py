@@ -178,42 +178,6 @@ class Ocean:
         return _orders
 
     # ======================================================================
-    # exchange
-    @enforce_types
-    def create_fixed_rate(
-        self,
-        datatoken: Datatoken,
-        base_token: Datatoken,
-        amount: int,
-        fixed_rate: int,
-        tx_dict: dict,
-    ) -> bytes:
-        fixed_price_address = self._addr("FixedPrice")
-        datatoken.approve(fixed_price_address, amount, tx_dict)
-
-        from_address = get_from_address(tx_dict)
-
-        receipt = datatoken.create_fixed_rate(
-            fixed_price_address=fixed_price_address,
-            base_token_address=base_token.address,
-            owner=from_address,
-            publish_market_swap_fee_collector=from_address,
-            allowed_swapper=ZERO_ADDRESS,
-            base_token_decimals=base_token.decimals(),
-            datatoken_decimals=datatoken.decimals(),
-            fixed_rate=fixed_rate,
-            publish_market_swap_fee_amount=int(1e15),
-            with_mint=0,
-            tx_dict=tx_dict,
-        )
-
-        fixed_price_address == receipt.events["NewFixedRate"]["exchangeContract"]
-
-        exchange_id = receipt.events["NewFixedRate"]["exchangeId"]
-
-        return exchange_id
-
-    # ======================================================================
     # provider fees
     @enforce_types
     def retrieve_provider_fees(
