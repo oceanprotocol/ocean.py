@@ -9,6 +9,7 @@ import pytest
 from web3.main import Web3
 
 from ocean_lib.models.datatoken import TokenFeeInfo
+from ocean_lib.ocean.util import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
@@ -38,20 +39,18 @@ def test_market_flow(
     # Mint data tokens and assign to publisher
     datatoken.mint(
         publisher_wallet.address,
-        Web3.toWei(50, "ether"),
+        to_wei(50),
         {"from": publisher_wallet},
     )
 
     # Give the consumer some datatokens so they can order the service
-    datatoken.transfer(
-        consumer_wallet.address, Web3.toWei(10, "ether"), {"from": publisher_wallet}
-    )
+    datatoken.transfer(consumer_wallet.address, to_wei(10), {"from": publisher_wallet})
 
     # Place order for the download service
     if consumer_type == "publisher":
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
             ddo,
-            consumer_wallet,
+            {"from": consumer_wallet},
             service=service,
             consume_market_fees=TokenFeeInfo(token=datatoken.address),
         )
@@ -65,7 +64,7 @@ def test_market_flow(
     else:
         order_tx_id = consumer_ocean.assets.pay_for_access_service(
             ddo,
-            consumer_wallet,
+            {"from": consumer_wallet},
             service=service,
             consume_market_fees=TokenFeeInfo(
                 address=another_consumer_wallet.address,
@@ -110,13 +109,13 @@ def test_pay_for_access_service_good_default(
     service = ddo.services[0]
 
     # Mint datatokens to consumer
-    datatoken.mint(
-        consumer_wallet.address, Web3.toWei(50, "ether"), {"from": publisher_wallet}
-    )
+    datatoken.mint(consumer_wallet.address, to_wei(50), {"from": publisher_wallet})
 
     # Place order for the download service
     # - Here, use good defaults for service, and fee-related args
-    order_tx_id = consumer_ocean.assets.pay_for_access_service(ddo, consumer_wallet)
+    order_tx_id = consumer_ocean.assets.pay_for_access_service(
+        ddo, {"from": consumer_wallet}
+    )
 
     asset_folder = consumer_ocean.assets.download_asset(
         ddo,

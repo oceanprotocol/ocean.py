@@ -33,7 +33,7 @@ start_datetime = end_datetime - timedelta(days=7) #the previous week
 url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
 
 #create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
 print(f"Just published asset, with did={ddo.did}")
 ```
 
@@ -55,7 +55,7 @@ ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
 datatoken.dispense("1 ether", {"from": bob})
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
 asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
 
 import os

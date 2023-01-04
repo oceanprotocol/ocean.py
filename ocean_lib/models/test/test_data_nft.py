@@ -332,7 +332,7 @@ def test_create_datatoken(
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert datatoken, "Could not create ERC20."
 
@@ -344,9 +344,9 @@ def test_create_datatoken(
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             bytess=[b""],
-            cap=Web3.toWei("0.1", "ether"),
+            cap=to_wei(0.1),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert dt_ent, "Could not create datatoken Enterprise with explicit parameters"
 
@@ -354,9 +354,9 @@ def test_create_datatoken(
         DatatokenArguments(
             name="DatatokenEnterpriseDT1",
             symbol="DatatokenEnterpriseDT1Symbol",
-            cap=Web3.toWei("0.1", "ether"),
+            cap=to_wei(0.1),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert dt_ent, "Could not create datatoken Enterprise with implicit parameters."
 
@@ -366,7 +366,7 @@ def test_create_datatoken_with_usdc_order_fee(
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
     usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
-    publish_market_order_fee_amount_in_wei = Web3.toWei(5, "ether")
+    publish_market_order_fee_amount_in_wei = to_wei(5)
     dt = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -377,7 +377,7 @@ def test_create_datatoken_with_usdc_order_fee(
                 amount=publish_market_order_fee_amount_in_wei,
             ),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
 
     # Check publish fee info
@@ -415,7 +415,7 @@ def test_create_datatoken_with_non_owner(
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     assert dt, "Failed to create ERC20 token."
 
@@ -448,7 +448,7 @@ def test_fail_creating_erc20(
                 symbol="DT1Symbol",
                 minter=publisher_wallet.address,
             ),
-            consumer_wallet,
+            {"from": consumer_wallet},
         )
 
 
@@ -490,10 +490,10 @@ def test_erc721_datatoken_functions(
     # Tests transfer functions
     datatoken.mint(
         consumer_wallet.address,
-        Web3.toWei("0.2", "ether"),
+        to_wei(0.2),
         {"from": publisher_wallet},
     )
-    assert datatoken.balanceOf(consumer_wallet.address) == Web3.toWei("0.2", "ether")
+    assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.2)
     assert data_nft.ownerOf(1) == publisher_wallet.address
 
     data_nft.transferFrom(
@@ -513,22 +513,22 @@ def test_erc721_datatoken_functions(
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
             consumer_wallet.address,
-            Web3.toWei("1", "ether"),
+            to_wei(1),
             {"from": consumer_wallet},
         )
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
         consumer_wallet.address,
-        Web3.toWei("0.2", "ether"),
+        to_wei(0.2),
         {"from": consumer_wallet},
     )
-    assert datatoken.balanceOf(consumer_wallet.address) == Web3.toWei("0.4", "ether")
+    assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.4)
 
 
 @pytest.mark.unit
@@ -574,7 +574,7 @@ def test_transfer_nft(
             "NFTtT",
             additional_datatoken_deployer=consumer_wallet.address,
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -596,7 +596,7 @@ def test_transfer_nft(
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
     data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFT"), publisher_wallet
+        DataNFTArguments("NFT1", "NFT"), {"from": publisher_wallet}
     )
 
     receipt = data_nft.safeTransferFrom(
@@ -620,7 +620,7 @@ def test_transfer_nft(
                 address=publisher_wallet.address,
             ),
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -710,7 +710,7 @@ def test_fail_create_datatoken(
 ):
     """Tests multiple failures for creating ERC20 token."""
     data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
+        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
     )
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
@@ -722,7 +722,7 @@ def test_fail_create_datatoken(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            consumer_wallet,
+            {"from": consumer_wallet},
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
@@ -733,7 +733,7 @@ def test_fail_create_datatoken(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            consumer_wallet,
+            {"from": consumer_wallet},
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
@@ -745,7 +745,7 @@ def test_fail_create_datatoken(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            another_consumer_wallet,
+            {"from": another_consumer_wallet},
         )
 
 
@@ -783,7 +783,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            publisher_wallet,
+            {"from": publisher_wallet},
         )
 
     with pytest.raises(Exception, match="NOT MINTER"):
@@ -795,7 +795,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
             name="DT1",
             symbol="DT1Symbol",
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 

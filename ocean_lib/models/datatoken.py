@@ -13,9 +13,12 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import (
+    from_wei,
     get_address_of_type,
+    get_from_address,
     get_ocean_token_address,
     str_with_wei,
+    to_wei,
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
@@ -91,28 +94,30 @@ class DatatokenArguments:
         self.publish_market_order_fees = publish_market_order_fees or TokenFeeInfo()
         self.set_default_fees_at_deploy = not publish_market_order_fees
 
-    def create_datatoken(self, data_nft, wallet, with_services=False):
+    def create_datatoken(self, data_nft, tx_dict, with_services=False):
         config_dict = data_nft.config_dict
         OCEAN_address = get_ocean_token_address(config_dict)
         initial_list = data_nft.getTokensList()
 
+        wallet_address = get_from_address(tx_dict)
+
         if self.set_default_fees_at_deploy:
             self.publish_market_order_fees = TokenFeeInfo(
-                address=wallet.address, token=OCEAN_address
+                address=wallet_address, token=OCEAN_address
             )
 
         data_nft.contract.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
-                ContractBase.to_checksum_address(self.minter or wallet.address),
-                ContractBase.to_checksum_address(self.fee_manager or wallet.address),
+                ContractBase.to_checksum_address(self.minter or wallet_address),
+                ContractBase.to_checksum_address(self.fee_manager or wallet_address),
                 self.publish_market_order_fees.address,
                 self.publish_market_order_fees.token,
             ],
             [self.cap, self.publish_market_order_fees.amount],
             self.bytess,
-            {"from": wallet},
+            tx_dict,
         )
 
         new_elements = [
@@ -170,7 +175,7 @@ class Datatoken(ContractBase):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
 
@@ -191,7 +196,7 @@ class Datatoken(ContractBase):
                 provider_fees["providerData"],
             ),
             consume_market_fees.to_tuple(),
-            transaction_parameters,
+            tx_dict,
         )
 
     @enforce_types
@@ -199,7 +204,7 @@ class Datatoken(ContractBase):
         self,
         order_tx_id: Union[str, bytes],
         provider_fees: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
     ) -> str:
         return self.contract.reuseOrder(
             order_tx_id,
@@ -213,7 +218,7 @@ class Datatoken(ContractBase):
                 provider_fees["validUntil"],
                 provider_fees["providerData"],
             ),
-            transaction_parameters,
+            tx_dict,
         )
 
     @enforce_types
@@ -272,11 +277,7 @@ class Datatoken(ContractBase):
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = (
-            tx_dict["from"].address
-            if hasattr(tx_dict["from"], "address")
-            else tx_dict["from"]
-        )
+        from_addr = get_from_address(tx_dict)
         BT = Datatoken(self.config_dict, base_token_addr)
         owner_addr = owner_addr or from_addr
         publish_market_fee_collector = publish_market_fee_collector or from_addr
@@ -335,8 +336,8 @@ class Datatoken(ContractBase):
     def create_dispenser(
         self,
         tx_dict: dict,
-        max_tokens: Optional[int] = None,
-        max_balance: Optional[int] = None,
+        max_tokens: Optional[Union[int, str]] = None,
+        max_balance: Optional[Union[int, str]] = None,
         with_mint: Optional[bool] = True,
     ):
         """
@@ -385,11 +386,7 @@ class Datatoken(ContractBase):
         """
         # args for contract tx
         datatoken_addr = self.address
-        from_addr = (
-            tx_dict["from"].address
-            if hasattr(tx_dict["from"], "address")
-            else tx_dict["from"]
-        )
+        from_addr = get_from_address(tx_dict)
 
         # do contract tx
         tx = self._ocean_dispenser().dispense(
@@ -439,19 +436,15 @@ class Datatoken(ContractBase):
         consumer: str,
         service_index: int,
         provider_fees: dict,
-        transaction_parameters: dict,
+        tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        buyer_addr = (
-            transaction_parameters["from"].address
-            if hasattr(transaction_parameters["from"], "address")
-            else transaction_parameters["from"]
-        )
+        buyer_addr = get_from_address(tx_dict)
 
-        bal = Web3.fromWei(self.balanceOf(buyer_addr), "ether")
+        bal = from_wei(self.balanceOf(buyer_addr))
         if bal < 1.0:
             dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
             from ocean_lib.models.dispenser import Dispenser  # isort: skip
@@ -467,16 +460,14 @@ class Datatoken(ContractBase):
                 raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
 
             # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(
-                self.address, "1 ether", buyer_addr, transaction_parameters
-            )
+            dispenser.dispense(self.address, "1 ether", buyer_addr, tx_dict)
 
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),
             service_index=service_index,
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            transaction_parameters=transaction_parameters,
+            tx_dict=tx_dict,
         )
 
     @enforce_types
@@ -486,7 +477,7 @@ class Datatoken(ContractBase):
         service_index: int,
         provider_fees: dict,
         exchange: Any,
-        transaction_parameters: dict,
+        tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
@@ -501,10 +492,10 @@ class Datatoken(ContractBase):
             exchange = OneExchange(fre_address, exchange)
 
         exchange.buy_DT(
-            datatoken_amt=Web3.toWei(1, "ether"),
+            datatoken_amt=to_wei(1),
             consume_market_fee_addr=consume_market_fees.address,
             consume_market_fee=consume_market_fees.amount,
-            tx_dict=transaction_parameters,
+            tx_dict=tx_dict,
         )
 
         return self.start_order(
@@ -512,7 +503,7 @@ class Datatoken(ContractBase):
             service_index=service_index,
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
-            transaction_parameters=transaction_parameters,
+            tx_dict=tx_dict,
         )
 
     def get_publish_market_order_fees(self):

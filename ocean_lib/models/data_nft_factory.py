@@ -30,13 +30,11 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         except BadFunctionCallOutput:
             return False
 
-    def create(self, data_nft_args, wallet):
-        return data_nft_args.deploy_contract(self.config_dict, wallet)
+    def create(self, data_nft_args, tx_dict):
+        return data_nft_args.deploy_contract(self.config_dict, tx_dict)
 
     @enforce_types
-    def start_multiple_token_order(
-        self, orders: List[OrderData], transaction_parameters: dict
-    ) -> str:
+    def start_multiple_token_order(self, orders: List[OrderData], tx_dict: dict) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -64,7 +62,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
             order._replace(consume_fees=tuple(consume_fees))
 
-        return self.contract.startMultipleTokenOrder(orders, transaction_parameters)
+        return self.contract.startMultipleTokenOrder(orders, tx_dict)
 
     @enforce_types
     def create_with_erc20(
@@ -130,9 +128,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         fixed_price_allowed_swapper: str,
         fixed_price_base_token_decimals: int,
         fixed_price_datatoken_decimals: int,
-        fixed_price_rate: int,
-        fixed_price_publish_market_swap_fee_amount: int,
-        fixed_price_with_mint: int,
+        fixed_price_rate: Union[int, str],
+        fixed_price_publish_market_swap_fee_amount: Union[int, str],
+        fixed_price_with_mint: Union[int, str],
         wallet=None,
     ) -> str:
         fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")

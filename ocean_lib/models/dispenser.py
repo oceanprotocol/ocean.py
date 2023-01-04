@@ -3,11 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
-from web3 import Web3
 
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.ocean.util import from_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 class Dispenser(ContractBase):
@@ -44,7 +43,7 @@ class DispenserStatus:
             f"  max_balance (of requester) = {_strWithWei(self.max_balance)}\n"
         )
         if self.allowed_swapper.lower() == ZERO_ADDRESS.lower():
-            s += f"  allowed_swapper = anyone can request\n"
+            s += "  allowed_swapper = anyone can request\n"
         else:
             s += f"  allowed_swapper = {self.allowed_swapper}\n"
         return s
@@ -52,4 +51,4 @@ class DispenserStatus:
 
 @enforce_types
 def _strWithWei(x_wei: int) -> str:
-    return f"{Web3.fromWei(x_wei, 'ether')} ({x_wei} wei)"
+    return f"{from_wei(x_wei)} ({x_wei} wei)"

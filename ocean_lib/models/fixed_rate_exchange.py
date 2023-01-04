@@ -7,7 +7,7 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.util import str_with_wei
+from ocean_lib.ocean.util import get_from_address, str_with_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -82,9 +82,6 @@ class ExchangeFeeInfo:
             f" = {str_with_wei(self.ocean_fee_available)}\n"
         )
         return s
-
-    # for attr in dir(obj):
-    #    print("obj.%s = %r" % (attr, getattr(obj, attr)))
 
 
 @enforce_types
@@ -188,9 +185,9 @@ class OneExchange:
         self,
         datatoken_amt: Union[int, str],
         tx_dict: dict,
-        max_basetoken_amt: Optional[int] = MAX_UINT256,
+        max_basetoken_amt=MAX_UINT256,
         consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
-        consume_market_fee: Optional[int] = 0,
+        consume_market_fee: Optional[Union[int, str]] = 0,
     ):
         """
         Buy datatokens via fixed-rate exchange.
@@ -210,11 +207,7 @@ class OneExchange:
 
         details = self.details
         BT = Datatoken(self._FRE.config_dict, details.base_token)
-        buyer_addr = (
-            tx_dict["from"].address
-            if hasattr(tx_dict["from"], "address")
-            else tx_dict["from"]
-        )
+        buyer_addr = get_from_address(tx_dict)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
         assert BT.balanceOf(buyer_addr) >= BT_needed, "not enough funds"
