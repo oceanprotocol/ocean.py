@@ -2,6 +2,9 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
+from base64 import b64decode
+
 import pytest
 from web3 import Web3
 
@@ -32,7 +35,13 @@ def test_permissions(
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
-    assert data_nft.tokenURI(1) == "https://oceanprotocol.com/nft/"
+    token_uri = data_nft.tokenURI(1).replace("data:application/json;base64,", "")
+    decoded_token_uri = json.loads(b64decode(token_uri))
+
+    assert decoded_token_uri["name"] == "NFT"
+    assert decoded_token_uri["symbol"] == "NFTSYMBOL"
+    assert decoded_token_uri["background_color"] == "141414"
+    assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
 
     # Tests failing clearing permissions
     with pytest.raises(Exception, match="not NFTOwner"):

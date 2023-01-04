@@ -34,7 +34,7 @@ def test_main(config):
         1,
         ZERO_ADDRESS,
         ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        "http://someurl",
         True,
         alice_wallet.address,
         {"from": alice_wallet},
