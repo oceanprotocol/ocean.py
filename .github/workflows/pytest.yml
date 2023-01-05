@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    environment: CC_REPORTER_ID
+    environment: [CC_REPORTER_ID, GITHUB_TOKEN]
     runs-on: ubuntu-latest
     steps:
       - name: Setup Ocean.py
