@@ -153,7 +153,7 @@ class DDO(AddressCredentialMixin):
 
         :param service: To add service, Service
         """
-        service.encrypt_files(self.nft_address)
+        service.encrypt_files(self.nft_address, self.chain_id)
 
         logger.debug(
             f"Adding service with service type {service.type} with did {self.did}"

@@ -77,7 +77,7 @@ def _iterative_encrypt(mock):
     global exception_flag
     for _ in range(5):
         try:
-            DataEncryptor.encrypt({}, mock["PROVIDER_URL"])
+            DataEncryptor.encrypt({}, mock["PROVIDER_URL"], 8996)
         except requests.exceptions.InvalidURL as err:
             exception_flag = 1
             assert err.args[0] == "InvalidURL http://foourl.com."

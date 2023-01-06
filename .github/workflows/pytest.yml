@@ -27,6 +27,8 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
+          env:
+            PROVIDER_VERSION: 'multichain'
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         run: |

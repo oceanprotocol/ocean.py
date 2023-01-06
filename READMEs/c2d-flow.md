@@ -145,7 +145,7 @@ ALGO_ddo = ocean.assets.resolve(ALGO_did)
 
 compute_service = DATA_ddo.services[1]
 algo_service = ALGO_ddo.services[0]
-free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
+free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint, DATA_ddo.chain_id)
 
 from datetime import datetime, timedelta
 from ocean_lib.models.compute_input import ComputeInput
@@ -254,5 +254,5 @@ It modifies the contents of the given ComputeInput as follows:
 This means you can reuse the same ComputeInput and you don't need to regenerate it everytime it is sent to `pay_for_compute_service`. This step makes sure you are not paying unnecessary or duplicated fees.
 
 If you wish to upgrade the compute resources, you can use any (paid) C2D environment.
-Inspect the results of `ocean.ocean_compute.get_c2d_environments(service.service_endpoint)` and `ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)` for a preview of what you will pay.
+Inspect the results of `ocean.ocean_compute.get_c2d_environments(service.service_endpoint, DATA_ddo.chain_id)` and `ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)` for a preview of what you will pay.
 Don't forget to handle any minting, allowance or approvals on the desired token to ensure transactions pass.
