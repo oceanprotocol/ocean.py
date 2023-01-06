@@ -27,7 +27,7 @@ def test_ddo_utils():
     context = ddo_dict["@context"]
     assert (
         ddo_dict["id"]
-        == "did:op:68a7f03e59c70d59607e3f0a536ed4d32e0599db07f587d66bd1221573d38c21"
+        == "did:op:d32696f71f3318c92bcf325e2e51e6e8299c0eb6d362ddcfa77d2a3e0c1237b5"
     )
     did = ddo_dict["id"]
     assert ddo_dict["version"] == "4.1.0"
@@ -71,7 +71,7 @@ def test_ddo_utils():
     credentials = ddo_dict["credentials"]
 
     assert ddo_dict["nft"] == {
-        "address": "0x000000",
+        "address": "0xCc708430E6a174BD4639A979F578A2176A0FA3fA",
         "name": "Ocean Protocol Asset v4",
         "symbol": "OCEAN-A-v4",
         "owner": "0x0000000",
@@ -111,7 +111,7 @@ def test_ddo_utils():
         services=services,
         credentials=credentials,
         nft=nft,
-        nft_address="0xabc",
+        nft_address="0xCc708430E6a174BD4639A979F578A2176A0FA3fA",
         datatokens=datatokens,
         event=event,
         stats=stats,
