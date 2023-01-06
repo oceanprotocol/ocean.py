@@ -319,7 +319,7 @@ class Service:
                 "files": files,
             },
             self.service_endpoint,
-            chain_id
+            chain_id,
         )
 
         self.files = encrypt_response.content.decode("utf-8")

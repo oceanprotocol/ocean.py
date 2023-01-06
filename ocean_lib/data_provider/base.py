@@ -101,7 +101,8 @@ class DataServiceProviderBase:
                 provider_uri, chain_id
             )
             environments = DataServiceProviderBase._http_method(
-                "get", envs_endpoint,
+                "get",
+                envs_endpoint,
             ).json()
 
             return environments[str(chain_id)]
@@ -174,7 +175,9 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def build_endpoint(service_name: str, provider_uri: str, params: Optional[dict]=None) -> Tuple[str, str]:
+    def build_endpoint(
+        service_name: str, provider_uri: str, params: Optional[dict] = None
+    ) -> Tuple[str, str]:
         provider_uri = DataServiceProviderBase.get_root_uri(provider_uri)
         service_endpoints = DataServiceProviderBase.get_service_endpoints(provider_uri)
 
@@ -191,7 +194,9 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def build_encrypt_endpoint(provider_uri: str, chain_id: int) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("encrypt", provider_uri, {"chainId": chain_id})
+        return DataServiceProviderBase.build_endpoint(
+            "encrypt", provider_uri, {"chainId": chain_id}
+        )
 
     @staticmethod
     @enforce_types
@@ -225,7 +230,9 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def build_c2d_environments_endpoint(provider_uri: str, chain_id: int) -> Tuple[str, str]:
+    def build_c2d_environments_endpoint(
+        provider_uri: str, chain_id: int
+    ) -> Tuple[str, str]:
         return DataServiceProviderBase.build_endpoint(
             "computeEnvironments", provider_uri, {"chainId": chain_id}
         )

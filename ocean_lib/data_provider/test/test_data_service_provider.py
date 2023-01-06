@@ -401,9 +401,10 @@ def test_build_specific_endpoints():
     assert DataSP.build_initialize_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["initializeCompute"][1]
     )
-    assert DataSP.build_encrypt_endpoint(provider_uri, 8996)[1] == urljoin(
-        base_uri, endpoints["encrypt"][1]
-    ) + '?chainId=8996'
+    assert (
+        DataSP.build_encrypt_endpoint(provider_uri, 8996)[1]
+        == urljoin(base_uri, endpoints["encrypt"][1]) + "?chainId=8996"
+    )
     assert DataSP.build_fileinfo(provider_uri)[1] == urljoin(
         base_uri, endpoints["fileinfo"][1]
     )
