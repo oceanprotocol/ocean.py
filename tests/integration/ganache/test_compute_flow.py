@@ -220,7 +220,7 @@ def run_compute_test(
     )
 
     free_c2d_env = ocean_instance.compute.get_free_c2d_environment(
-        service.service_endpoint
+        service.service_endpoint, 8996
     )
 
     time_difference = (
