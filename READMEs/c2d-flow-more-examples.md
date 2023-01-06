@@ -76,7 +76,7 @@ ALGO_url_file = UrlFile(
 
 Install dependencies:
 
-`pip install Pillow`
+`pip3 install Pillow`
 
 Display the image:
 
@@ -162,7 +162,7 @@ ALGO_url_file = UrlFile(
 
 Install dependencies:
 
-`pip install numpy, matplotlib`
+`pip3 install numpy, matplotlib`
 
 Display the result:
 

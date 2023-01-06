@@ -25,6 +25,9 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
+# Give permissions to the script
+sudo chmod +x start_ocean.sh
+
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
@@ -76,7 +79,7 @@ set FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019b
 
 In the same console, run Python console:
 ```console
-python
+python3
 ```
 
 In the Python console:

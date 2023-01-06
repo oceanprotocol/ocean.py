@@ -79,7 +79,7 @@ An EVM account is singularly defined by its private key. Its address is a functi
 
 In a new or existing console, run Python.
 ```console
-python
+python3
 ```
 
 In the Python console:
@@ -150,7 +150,7 @@ set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 
 In your working console, run Python:
 ```console
-python
+python3
 ```
 
 In the Python console:

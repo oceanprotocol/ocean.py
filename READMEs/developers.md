@@ -36,11 +36,11 @@ cd ocean.py
 sudo apt-get install -y python3-dev gcc python-pytest
 
 #Initialize virtual environment and activate it.
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 
 #Install modules in the environment.
-pip install -r requirements_dev.txt
+pip3 install -r requirements_dev.txt
 ```
 
 ## 2. Run barge services

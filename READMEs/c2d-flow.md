@@ -35,7 +35,7 @@ In the same console:
 source venv/bin/activate
 
 #install matplotlib
-pip install matplotlib
+pip3 install matplotlib
 ```
 
 ### 1.3 Setup remotely
