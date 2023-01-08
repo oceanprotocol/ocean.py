@@ -79,7 +79,7 @@ set FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019b
 
 In the same console, run Python console:
 ```console
-python3
+python
 ```
 
 In the Python console:
