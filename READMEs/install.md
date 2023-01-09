@@ -26,7 +26,7 @@ source venv/bin/activate
 # Avoid errors for the step that follows
 pip install wheel
 
-# Install Ocean library. Allow pre-releases to get the latest v4 version.
+# Install Ocean library.
 pip install ocean-lib
 ```
 
