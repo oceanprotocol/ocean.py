@@ -105,6 +105,12 @@ class DataServiceProviderBase:
                 envs_endpoint,
             ).json()
 
+            if str(chain_id) not in environments:
+                logger.warning(
+                    "You might be using an older provider. ocean.py can not verify the chain id."
+                )
+                return environments
+
             return environments[str(chain_id)]
         except (requests.exceptions.RequestException, KeyError):
             pass
@@ -121,6 +127,12 @@ class DataServiceProviderBase:
             provider_info = DataServiceProviderBase._http_method(
                 "get", provider_uri
             ).json()
+
+            if "providerAddress" in provider_info:
+                logger.warning(
+                    "You might be using an older provider. ocean.py can not verify the chain id."
+                )
+                return provider_info["providerAddress"]
 
             return provider_info["providerAddresses"][str(chain_id)]
         except requests.exceptions.RequestException:
@@ -156,9 +168,14 @@ class DataServiceProviderBase:
         except (requests.exceptions.RequestException, JSONDecodeError):
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
-        if "providerAddresses" not in response:
+        if "providerAddresses" not in response and "providerAddress" not in response:
             raise InvalidURL(
                 f"Invalid Provider URL {service_endpoint}, no providerAddresses."
+            )
+
+        if "providerAddress" in response:
+            logger.warning(
+                "You might be using an older provider. ocean.py can not verify the chain id."
             )
 
         return result

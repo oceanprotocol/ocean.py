@@ -1,0 +1,61 @@
+##
+## Copyright 2022 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
+name: Ocean.py tests
+
+on:
+  - push
+  - pull_request
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    environment: CC_REPORTER_ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Ocean.py
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - uses: actions/checkout@v2
+        name: Checkout Barge
+        with:
+          repository: "oceanprotocol/barge"
+          path: 'barge'
+      - name: Run Barge
+        working-directory: ${{ github.workspace }}/barge
+        run: |
+          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d --with-thegraph > start_ocean.log &
+          for i in $(seq 1 108); do
+            sleep 5
+            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
+            done
+          ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
+      - name: Install dependencies
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          brownie bake github-actions
+          sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
+      - name: Test with pytest
+        run: |
+          mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
+          coverage run --source ocean_lib -m py.test
+          coverage report
+          coverage xml
+        env:
+          REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
+          REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
+      - name:  docker logs
+        run: docker logs ocean_aquarius_1 && docker logs ocean_provider_1 && docker logs ocean_provider2_1 && docker logs ocean_computetodata_1
+        if: ${{ failure() }}
+      - name: Publish code coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
