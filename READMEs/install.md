@@ -20,6 +20,7 @@ mkdir my_project
 cd my_project
 
 # Initialize virtual environment and activate it. Install artifacts.
+# Make sure your Python version inside the venv is >=3.8.
 python3 -m venv venv
 source venv/bin/activate
 
