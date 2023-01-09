@@ -24,10 +24,10 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Avoid errors for the step that follows
-pip3 install wheel
+pip install wheel
 
 # Install Ocean library. Allow pre-releases to get the latest v4 version.
-pip3 install ocean-lib
+pip install ocean-lib
 ```
 
 ## Potential issues & workarounds
@@ -39,7 +39,7 @@ Issue: M1 * `coincurve` or `cryptography`
 
 Issue: MacOS "Unsupported Architecture" 
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
-- Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip3 install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
+- Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
 
 ## ocean.py uses Brownie
 

@@ -239,7 +239,6 @@ def test_ocean_assets_search(publisher_ocean, publisher_wallet):
     )
 
 
-@pytest.mark.skip(reason="Skip this until #1268 is merged.")
 @pytest.mark.integration
 def test_ocean_assets_validate(publisher_ocean):
     ddo_dict = get_sample_ddo()
