@@ -28,18 +28,19 @@ Steps:
 In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
-#clone the repo and enter into it
+# Clone the repo and enter into it
 git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
 
-#Install OS dependencies
+# Install OS dependencies
 sudo apt-get install -y python3-dev gcc python-pytest
 
-#Initialize virtual environment and activate it.
-python -m venv venv
+# Initialize virtual environment and activate it.
+# Make sure your Python version inside the venv is >=3.8.
+python3 -m venv venv
 source venv/bin/activate
 
-#Install modules in the environment.
+# Install modules in the environment.
 pip install -r requirements_dev.txt
 ```
 
