@@ -4,7 +4,7 @@
 #
 import copy
 import logging
-from typing import Optional
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 
@@ -12,6 +12,7 @@ from ocean_lib.assets.credentials import AddressCredentialMixin
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
+from ocean_lib.structures.file_objects import FilesType
 
 logger = logging.getLogger("ddo")
 
@@ -159,6 +160,34 @@ class DDO(AddressCredentialMixin):
             f"Adding service with service type {service.type} with did {self.did}"
         )
         self.services.append(service)
+
+    @enforce_types
+    def create_compute_service(
+        self,
+        service_id: str,
+        service_endpoint: str,
+        files: List[FilesType],
+        compute_values: Optional[dict] = None,
+    ) -> None:
+        if not compute_values:
+            compute_values = {
+                "allowRawAlgorithm": False,
+                "allowNetworkAccess": True,
+                "publisherTrustedAlgorithms": [],
+                "publisherTrustedAlgorithmPublishers": [],
+            }
+
+        compute_service = Service(
+            service_id=service_id,
+            service_type="compute",
+            service_endpoint=service_endpoint,
+            datatoken=self.nft_address,
+            files=files,
+            timeout=3600,
+            compute_values=compute_values,
+        )
+
+        self.add_service(compute_service)
 
     @enforce_types
     def get_service_by_id(self, service_id: str) -> Service:

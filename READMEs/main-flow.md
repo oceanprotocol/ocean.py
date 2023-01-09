@@ -273,7 +273,7 @@ We access dispenser (faucet) functionality from two complementary places: datato
 
 A given datatoken can create exactly one dispenser for that datatoken.
 
-**Interface via datatokens:** 
+**Interface via datatokens:**
 - [`datatoken.create_dispenser()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L337) - implemented in Datatoken, inherited by DatatokenEnterprise
 - [`datatoken.dispense()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L380) - ""
 - [`datatoken.dispense_and_order()` - implemented in Datatoken](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L439) and [in DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). The latter only needs one tx to dispense and order.
@@ -294,7 +294,7 @@ A given datatoken can create exactly one dispenser for that datatoken.
 A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
-### Dispenser Status 
+### Dispenser Status
 
 To learn about dispenser status:
 
@@ -322,7 +322,7 @@ DispenserStatus:
 Template 1 (`Datatoken`):
 - Anyone can call `datatoken.dispense()` to request tokens.
 
-Template 2 (`DatatokenEnterprise`): 
+Template 2 (`DatatokenEnterprise`):
 - Option A. Anyone can `datatoken.dispense_and_order()` to request tokens, and order.
 - Option B. Not anyone can call `datatoken.dispense()` by default. To allow anyone, the publisher does: `ocean.dispenser.setAllowedSwapper(datatoken_address, ZERO_ADDRESS, {"from" : publisher_wallet})`, where `ZERO_ADDRESS` is `0x00..00`.
 
@@ -436,7 +436,7 @@ The file is in ARFF format, used by some AI/ML tools. Our example has two input 
 At the beginning of most flows, we create an `ocean` object, which is an instance of class [`Ocean`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py). It exposes useful information, including the following.
 
 Config dict attribute:
-- `ocean.config_dict` or `ocean.config -> dict` 
+- `ocean.config_dict` or `ocean.config -> dict`
 
 OCEAN token:
 - `ocean.OCEAN_address -> str`
@@ -453,4 +453,4 @@ Simple getters:
 - `ocean.def get_user_orders(self, address: str, datatoken: str)`
 - (and some others that are more complex)
 
-It also provides Python wrappers to veOCEAN and Data Farming contracts. See [df.md](df.md) for details. 
+It also provides Python wrappers to veOCEAN and Data Farming contracts. See [df.md](df.md) for details.
