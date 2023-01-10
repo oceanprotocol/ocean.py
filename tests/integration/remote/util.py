@@ -8,13 +8,20 @@ import string
 import time
 import warnings
 
+import web3.exceptions
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from brownie.network import accounts, chain, priority_fee
 from enforce_typing import enforce_types
 
 from ocean_lib.models.data_nft import DataNFTArguments
 
-ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
+ERRORS_TO_CATCH = (
+    ContractNotFound,
+    TransactionError,
+    ValueError,
+    VirtualMachineError,
+    web3.exceptions.ExtraDataLengthError,
+)
 
 
 @enforce_types
