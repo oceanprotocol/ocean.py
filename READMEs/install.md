@@ -20,14 +20,15 @@ mkdir my_project
 cd my_project
 
 # Initialize virtual environment and activate it. Install artifacts.
+# Make sure your Python version inside the venv is >=3.8.
 python3 -m venv venv
 source venv/bin/activate
 
 # Avoid errors for the step that follows
-pip3 install wheel
+pip install wheel
 
-# Install Ocean library. Allow pre-releases to get the latest v4 version.
-pip3 install --pre ocean-lib
+# Install Ocean library.
+pip install ocean-lib
 ```
 
 ## Potential issues & workarounds

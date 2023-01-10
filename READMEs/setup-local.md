@@ -25,6 +25,9 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
+# Give permissions to the script
+sudo chmod +x start_ocean.sh
+
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
