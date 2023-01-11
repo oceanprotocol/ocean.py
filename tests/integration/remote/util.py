@@ -107,12 +107,10 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create() from data NFT, and wait for it to complete...")
     try:
-        tx_dict = {"from": alice_wallet}
         gas_strategy = GasNowScalingStrategy("rapid")
-        tx_dict["gas_price"] = gas_strategy.max_gas_price
-
         data_nft = ocean.data_nft_factory.create(
-            DataNFTArguments(symbol, symbol), tx_dict
+            DataNFTArguments(symbol, symbol),
+            {"from": alice_wallet, "gas_price": gas_strategy.max_gas_price},
         )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:
