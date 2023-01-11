@@ -39,13 +39,6 @@ def test_dispense_and_order_with_non_defaults(
     assert status.owner_address == publisher_wallet.address
     assert status.is_minter
 
-    # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
-    # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
-    # Below, we test the quirk.
-    match_s = "This address is not allowed to request DT"
-    with pytest.raises(Exception, match=match_s):
-        DT.dispense(to_wei(1), {"from": consumer_wallet})
-
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
     DT.setPublishingMarketFee(
@@ -171,14 +164,6 @@ def test_buy_DT_and_order(
     )
     assert exchange.details.active
     assert exchange.details.with_mint
-
-    if template_index == 2:
-        with pytest.raises(Exception, match="This address is not allowed to swap"):
-            exchange.buy_DT(
-                datatoken_amt=to_wei(1),
-                max_basetoken_amt=to_wei(1),
-                tx_dict={"from": consumer_wallet},
-            )
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address

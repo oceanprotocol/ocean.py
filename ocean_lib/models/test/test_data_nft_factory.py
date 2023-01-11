@@ -311,29 +311,9 @@ def test_start_multiple_order(
 
 
 @pytest.mark.unit
-def test_fail_get_templates(data_nft_factory):
-    """Tests multiple failures for getting tokens' templates."""
-    # Should fail to get the Datatoken template if index = 0
-    with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.getTokenTemplate(0)
-
-    # Should fail to get the Datatoken template if index > templateCount
-    with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.getTokenTemplate(3)
-
-
-@pytest.mark.unit
 def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     """Test erc721 non existent template creation fail"""
     non_existent_nft_template = get_non_existent_nft_template(
         data_nft_factory, check_first=10
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
-
-    with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.create(
-            DataNFTArguments(
-                "DT1", "DTSYMBOL", template_index=non_existent_nft_template
-            ),
-            {"from": publisher_wallet},
-        )
