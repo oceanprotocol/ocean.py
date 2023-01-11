@@ -46,8 +46,8 @@ jobs:
       - name: Test with pytest
         run: |
 #          mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
-          coverage run --source tests/integration/remote/test_polygon.py -m py.test
-#          pytest tests/integration/remote/test_polygon.py::test_ocean_tx__create
+#          coverage run --source tests/integration/remote/test_polygon.py -m py.test
+          py.test tests/integration/remote/test_polygon.py::test_ocean_tx__create
 #          coverage report
 #          coverage xml
         env:
