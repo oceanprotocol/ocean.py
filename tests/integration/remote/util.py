@@ -7,9 +7,11 @@ import random
 import string
 import time
 import warnings
+from typing import Optional
 
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from brownie.network import accounts, chain, priority_fee
+from brownie.network.gas.strategies import GasNowScalingStrategy
 from enforce_typing import enforce_types
 
 from ocean_lib.models.data_nft import DataNFTArguments
@@ -61,12 +63,6 @@ def get_wallets():
 
 
 @enforce_types
-def set_aggressive_gas_fees():
-    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    priority_fee(chain.priority_fee)
-
-
-@enforce_types
 def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     """Call wallet.transfer(), but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
@@ -93,7 +89,9 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
 
 @enforce_types
-def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
+def do_ocean_tx_and_handle_gotchas(
+    ocean, alice_wallet, gas_strategy: Optional[GasNowScalingStrategy] = None
+):
     """Call create() from data NFT, but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
     - if there are insufficient funds, since they're hard to replace
@@ -105,8 +103,12 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create() from data NFT, and wait for it to complete...")
     try:
+        tx_dict = {"from": alice_wallet}
+        if gas_strategy:
+            tx_dict["gas_price"] = gas_strategy.max_gas_price
+
         data_nft = ocean.data_nft_factory.create(
-            DataNFTArguments(symbol, symbol), {"from": alice_wallet}
+            DataNFTArguments(symbol, symbol), tx_dict
         )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:
