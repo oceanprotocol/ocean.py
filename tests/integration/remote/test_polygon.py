@@ -4,7 +4,7 @@
 #
 import pytest
 from brownie.network import accounts
-from brownie.network.gas.strategies import GasNowScalingStrategy
+
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.utils import connect_to_network
