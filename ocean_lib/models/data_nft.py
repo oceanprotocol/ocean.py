@@ -18,6 +18,62 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.utils import check_network
 
 
+"""
+addMinter
+addPaymentManager
+allowance
+approve
+authERC20
+balance
+balanceOf
+burn
+burnFrom
+cap
+cleanFrom721
+cleanPermissions
+createDispenser
+createFixedRate
+decimals
+decode_input
+decreaseAllowance
+deployPool
+events
+getDispensers
+getERC721Address
+getFixedRates
+getId
+getPaymentCollector
+getPermissions
+getPools
+getPublishingMarketFee
+increaseAllowance
+info ???
+isERC20Deployer
+isInitialized
+isMinter
+mint
+name
+nonces
+orderExecuted
+permissions
+permit
+removeMinter
+removePaymentManager
+reuseOrder
+router
+setData
+setPaymentCollector
+setPublishingMarketFee
+startOrder
+symbol
+topics
+totalSupply
+transfer
+transferFrom
+withdrawETH
+"""
+
+
 class DataNFTPermissions(IntEnum):
     MANAGER = 0
     DEPLOY_DATATOKEN = 1

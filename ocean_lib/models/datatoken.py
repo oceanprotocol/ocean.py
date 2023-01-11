@@ -28,6 +28,52 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 checksum_addr = ContractBase.to_checksum_address
 logger = logging.getLogger("ocean")
 
+"""
+addMinter
+addPaymentManager
+allowance
+approve
+authERC20
+balance
+balanceOf
+burn
+burnFrom
+cap
+cleanFrom721
+cleanPermissions
+decimals
+decreaseAllowance
+deployPool
+events
+getERC721Address
+getId
+getPaymentCollector
+getPermissions
+getPools
+increaseAllowance
+info ??
+isERC20Deployer
+isInitialized
+isMinter
+mint
+name
+nonces
+orderExecuted
+permissions
+permit
+removeMinter
+removePaymentManager
+router
+setData
+setPaymentCollector
+setPublishingMarketFee
+symbol
+topics
+totalSupply
+transfer
+transferFrom
+withdrawETH
+"""
 
 class TokenFeeInfo:
     def __init__(

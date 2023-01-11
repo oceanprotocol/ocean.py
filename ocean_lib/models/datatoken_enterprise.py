@@ -13,6 +13,56 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 checksum_addr = ContractBase.to_checksum_address
 
 
+"""
+inherited from Datatoken (all, except see in getPools):
+addMinter
+addPaymentManager
+allowance
+approve
+authERC20
+balance
+balanceOf
+burn
+burnFrom
+cap
+cleanFrom721
+cleanPermissions
+decimals
+decreaseAllowance
+events
+getERC721Address
+getId
+getPaymentCollector
+getPermissions
+# TODO: getPools is missing here, but should it even be in plain Datatoken?
+increaseAllowance
+info ???
+isERC20Deployer
+isInitialized
+isMinter
+mint
+name
+nonces
+orderExecuted
+permissions
+permit
+removeMinter
+removePaymentManager
+router
+setData
+setPaymentCollector
+setPublishingMarketFee
+symbol
+topics
+totalSupply
+transfer
+transferFrom
+withdrawETH
+
++:
+buyFromDispenserAndOrder
+buyFromFreAndOrder
+"""
 class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
