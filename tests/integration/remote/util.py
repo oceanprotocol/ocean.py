@@ -63,6 +63,12 @@ def get_wallets():
 
 
 @enforce_types
+def set_aggressive_gas_fees():
+    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+    priority_fee(chain.priority_fee)
+
+
+@enforce_types
 def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     """Call wallet.transfer(), but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
@@ -89,9 +95,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
 
 @enforce_types
-def do_ocean_tx_and_handle_gotchas(
-    ocean, alice_wallet, gas_strategy: Optional[GasNowScalingStrategy] = None
-):
+def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     """Call create() from data NFT, but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
     - if there are insufficient funds, since they're hard to replace
@@ -104,8 +108,8 @@ def do_ocean_tx_and_handle_gotchas(
     print("Call create() from data NFT, and wait for it to complete...")
     try:
         tx_dict = {"from": alice_wallet}
-        if gas_strategy:
-            tx_dict["gas_price"] = gas_strategy.max_gas_price
+        gas_strategy = GasNowScalingStrategy("rapid")
+        tx_dict["gas_price"] = gas_strategy.max_gas_price
 
         data_nft = ocean.data_nft_factory.create(
             DataNFTArguments(symbol, symbol), tx_dict

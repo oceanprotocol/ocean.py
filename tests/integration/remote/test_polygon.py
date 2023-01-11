@@ -18,7 +18,7 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
     connect_to_network("polygon-main")
-    gas_strategy = GasNowScalingStrategy("rapid")
+    util.set_aggressive_gas_fees()
 
     config = get_config_dict("polygon-main")
     ocean = Ocean(config)
@@ -27,4 +27,4 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     (alice_wallet, _) = util.get_wallets()
 
     # Do a simple-as-possible test that uses ocean stack, while accounting for gotchas
-    util.do_ocean_tx_and_handle_gotchas(ocean, alice_wallet, gas_strategy=gas_strategy)
+    util.do_ocean_tx_and_handle_gotchas(ocean, alice_wallet)
