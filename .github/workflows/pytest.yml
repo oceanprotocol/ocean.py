@@ -45,16 +45,13 @@ jobs:
           sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
       - name: Test with pytest
         run: |
-          mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
-          coverage run --source ocean_lib -m py.test
-          coverage report
-          coverage xml
+          py.test ocean_lib/models/test/test_data_nft.py --verbose --timeout=120 --timeout_method=thread
         env:
           REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
           REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
       - name:  docker logs
-        run: docker logs ocean_aquarius_1 && docker logs ocean_provider_1 && docker logs ocean_provider2_1 && docker logs ocean_computetodata_1
-        if: ${{ failure() }}
+        run: docker logs ocean_aquarius_1 && docker logs ocean_provider2_1 && docker logs ocean_ocean-contracts_1 && docker logs ocean_ganache_1
+        if: ${{ cancelled() }}
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:

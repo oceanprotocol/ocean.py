@@ -6,6 +6,7 @@ import json
 from base64 import b64decode
 
 import pytest
+from brownie.exceptions import VirtualMachineError
 from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
@@ -646,3 +647,16 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20
+
+@pytest.mark.unit
+def test_fail_create_datatoken(
+    config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
+):
+    """Tests multiple failures for creating ERC20 token."""
+    data_nft = data_nft_factory.create(
+        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
+    )
+    data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
+    with pytest.raises(VirtualMachineError, match="Template index doesnt exist"):
+        data_nft_factory.getTokenTemplate(0)
+
