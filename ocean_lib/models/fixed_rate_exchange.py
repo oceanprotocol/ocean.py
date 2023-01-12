@@ -19,14 +19,10 @@ MIN_RATE
 
 balance
 createWithDecimals
-events
 generateExchangeId
 getExchanges # TODO: maybe modify this like getExchange?
 getId
 getNumberOfExchanges
-info ??
-router
-topics
 """
 
 

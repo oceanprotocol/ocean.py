@@ -14,52 +14,9 @@ checksum_addr = ContractBase.to_checksum_address
 
 
 """
-inherited from Datatoken (all, except see in getPools):
-addMinter
-addPaymentManager
-allowance
-approve
-authERC20
-balance
-balanceOf
-burn
-burnFrom
-cap
-cleanFrom721
-cleanPermissions
-decimals
-decreaseAllowance
-events
-getERC721Address
-getId
-getPaymentCollector
-getPermissions
-# TODO: getPools is missing here, but should it even be in plain Datatoken?
-increaseAllowance
-info ???
-isERC20Deployer
-isInitialized
-isMinter
-mint
-name
-nonces
-orderExecuted
-permissions
-permit
-removeMinter
-removePaymentManager
-router
-setData
-setPaymentCollector
-setPublishingMarketFee
-symbol
-topics
-totalSupply
-transfer
-transferFrom
-withdrawETH
+all the functions from Datatoken model, plus a few different:
 
-+:
++: either way, redundant
 buyFromDispenserAndOrder
 buyFromFreAndOrder
 """

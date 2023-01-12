@@ -67,7 +67,6 @@ def cleanPermissions() -> None:
 addMultipleUsersToRoles
 auth
 
-events
 executeCall
 getApproved
 getData
@@ -76,7 +75,6 @@ getMetaData
 getPermissions
 getTokensList
 hasMetaData
-info
 isApprovedForAll
 isDeployed
 isERC20Deployer
@@ -104,7 +102,6 @@ symbol
 tokenByIndex
 tokenOfOwnerByIndex
 tokenURI
-topics
 totalSupply
 transferFrom
 transferable

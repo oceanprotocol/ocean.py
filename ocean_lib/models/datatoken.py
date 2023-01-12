@@ -43,15 +43,11 @@ cleanFrom721
 cleanPermissions
 decimals
 decreaseAllowance
-deployPool # TODO: should it be here?
-events
 getERC721Address
 getId
 getPaymentCollector
 getPermissions
-getPools
 increaseAllowance
-info ??
 isERC20Deployer
 isInitialized
 isMinter
@@ -63,12 +59,10 @@ permissions
 permit
 removeMinter
 removePaymentManager
-router
 setData
 setPaymentCollector
 setPublishingMarketFee
 symbol
-topics
 totalSupply
 transfer
 transferFrom

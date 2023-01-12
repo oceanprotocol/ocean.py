@@ -18,33 +18,22 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 """
-add721TokenTemplate # TODO: I think these are internal and shouldn't be in ocean.py (everything related to templates?)
-addTokenTemplate
 balance
-createNftWithErc20WithPool  # TODO: there is no helper for this, should it still be used?
-createToken
-disable721TokenTemplate
-disableTokenTemplate
+createToken -> abstracted?
 erc20List
 erc721List
-events
 getCurrentNFTCount
 getCurrentNFTTemplateCount
 getCurrentTemplateCount
 getCurrentTokenCount
 getNFTTemplate
 getTokenTemplate
-info ??
 nftTemplateList
 owner
-reactivate721TokenTemplate
-reactivateTokenTemplate
 renounceOwnership
 reuseMultipleTokenOrder
-router
 templateCount
 templateList
-topics
 transferOwnership
 """
 
