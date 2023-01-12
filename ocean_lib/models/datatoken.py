@@ -43,7 +43,7 @@ cleanFrom721
 cleanPermissions
 decimals
 decreaseAllowance
-deployPool
+deployPool # TODO: should it be here?
 events
 getERC721Address
 getId

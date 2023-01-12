@@ -12,6 +12,24 @@ from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
+"""
+MAX_FEE
+MIN_FEE
+MIN_RATE
+
+balance
+createWithDecimals
+events
+generateExchangeId
+getExchanges # TODO: maybe modify this like getExchange?
+getId
+getNumberOfExchanges
+info ??
+router
+topics
+"""
+
+
 @enforce_types
 class ExchangeDetails:
     def __init__(self, details_tup):

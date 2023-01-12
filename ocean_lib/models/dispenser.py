@@ -9,6 +9,24 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
+"""
+activate
+balance
+create
+datatokensList
+deactivate
+dispense
+events
+getId
+info ??
+ownerWithdraw
+router
+setAllowedSwapper
+status
+topics
+"""
+
+
 class Dispenser(ContractBase):
     CONTRACT_NAME = "Dispenser"
 
