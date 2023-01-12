@@ -19,57 +19,95 @@ from ocean_lib.web3_internal.utils import check_network
 
 
 """
-addMinter
-addPaymentManager
-allowance
-approve
-authERC20
-balance
-balanceOf
-burn
-burnFrom
-cap
-cleanFrom721
-cleanPermissions
-createDispenser
-createFixedRate
-decimals
-decode_input
-decreaseAllowance
-deployPool
+def addManager(address: str) -> None:
+    add a manager role to the address provided as a parameter
+    :param address: address of interest
+    :return: None
+
+def addTo725StoreList(address: str) -> None:
+    add a role for storing datatokens to the address provided as a parameter
+    :param address: address of interest
+    :return: None
+
+def addToCreateERC20List(address: str) -> None:
+    add a role for deploying datatokens to the address provided as a parameter
+    :param address: address of interest
+    :return: None
+
+def addToMetadataList(address: str) -> None:
+    add a role for updating metadata to the address provided as a parameter
+    :param address: address of interest
+    :return: None
+
+def approve(dst: str, tokenId: int) -> None:
+    approve a token transfer
+    :param address: destination address
+    :param tokenId: token Id
+    :return: None
+
+def balance() -> int:
+    get token balance
+    :return: int
+
+def balanceOf(address: str) -> int:
+    get token balance for specific address
+    :param address: address of interest
+    :return: int
+
+def baseURI() -> str:
+    get token baseURI
+    :return: str
+
+def cleanPermissions() -> None:
+    reset all permissions on token,
+    must include the tx_dict with the publisher as transaction sender
+    :return: None
+
+# TODO
+addMultipleUsersToRoles
+auth
+
 events
-getDispensers
-getERC721Address
-getFixedRates
+executeCall
+getApproved
+getData
 getId
-getPaymentCollector
+getMetaData
 getPermissions
-getPools
-getPublishingMarketFee
-increaseAllowance
-info ???
+getTokensList
+hasMetaData
+info
+isApprovedForAll
+isDeployed
 isERC20Deployer
 isInitialized
-isMinter
-mint
+metaDataDecryptorAddress
+metaDataDecryptorUrl
+metaDataState
 name
-nonces
-orderExecuted
-permissions
-permit
-removeMinter
-removePaymentManager
-reuseOrder
-router
-setData
-setPaymentCollector
-setPublishingMarketFee
-startOrder
+ownerOf
+removeFrom725StoreList
+removeFromCreateERC20List
+removeFromMetadataList
+removeManager
+safeTransferFrom
+setApprovalForAll
+setBaseURI
+setDataERC20
+setMetaData
+setMetaDataAndTokenURI
+setMetaDataState
+setNewData
+setTokenURI
+supportsInterface
 symbol
+tokenByIndex
+tokenOfOwnerByIndex
+tokenURI
 topics
 totalSupply
-transfer
 transferFrom
+transferable
 withdrawETH
 """
 
