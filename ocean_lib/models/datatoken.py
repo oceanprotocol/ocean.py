@@ -29,44 +29,179 @@ checksum_addr = ContractBase.to_checksum_address
 logger = logging.getLogger("ocean")
 
 """
-addMinter
-addPaymentManager
-allowance
-approve
+def addMinter(address: str) -> None:
+    add a minter for the datatoken
+    :param address: address of interest
+    :return: None
+
+def addPaymentManager(address: str) -> None:
+    add a payment manager for the datatoken
+    :param address: address of interest
+    :return: None
+
+def allowance(owner_addr: str, spender_addr: str) -> int:
+    get token allowance for spender from owner
+    :param owner_addr: address of owner
+    :param spender_addr: address of owner
+    :return: int allowance
+
+def approve(address: str, amount: int) -> None:
+    approve tokens for a specific address in the given amount
+    :param address: address of interest
+    :param amount: amount in int
+    :return: None
+
+def balance() -> int:
+    get token balance
+    :return: int
+
+def balanceOf(address: str) -> int:
+    get token balance for specific address
+    :param address: address of interest
+    :return: int
+
+def burn(amount: int) -> None:
+    burn a specific amount of tokens
+    :param amount: amount in int
+    :return: None
+
+def burnFrom(address: str, amount: int) -> None:
+    burn a specific amount of tokens from an account
+    :param address: address of the burner account
+    :param amount: amount in int
+    :return: None
+
+def cap() -> int:
+    get token cap
+    :return: int
+
+def cleanPermissions() -> None:
+    reset all permissions on token,
+    must include the tx_dict with the publisher as transaction sender
+    :return: None
+
+def decimals() -> int:
+    get token decimals
+    :return: int
+
+def decreaseAllowance(address: str, amount: int) -> None:
+    decrease the allowance for an address by a specific amount
+    :param address: address of the account
+    :param amount: amount to subtract in int
+    :return: None
+
+def getERC721Address() -> str:
+    get address of ERC721 token
+    :return: str
+
+def getId() -> int:
+    get token Id
+    :return: id
+
+def getPaymentCollector() -> str:
+    get payment collector address
+    :return: address of payment collector
+
+def getPermissions(user: str) -> tuple:
+    get user permissions
+    :param user: account address of interest
+    :return: tuple of boolean values for minter role, payment manager role
+
+def increaseAllowance(address: str, amount: int) -> None:
+    increase the allowance for an address by a specific amount
+    :param address: address of the account
+    :param amount: amount to add in int
+    :return: None
+
+def isERC20Deployer(address: str) -> bool:
+    returns whether an address has ERC20 Deployer role
+    :param address: address of interest
+    :return: bool
+
+def isMinter(address: str) -> bool:
+    returns whether an address has minter role
+    :param address: address of interest
+    :return: bool
+
+def mint(address: str, amount: int) -> None:
+    mints am amount of tokens for the given address,
+    requires tx_dict with a datatoken minter as the sender
+    returns whether an address has minter role
+    :param address: address of interest
+    :param amount: amount to mint
+    :return: None
+
+def name() -> str:
+    :return: name of token
+
+def removeMinter(address: str) -> None:
+    remove minter role for the datatoken
+    :param address: address of interest
+    :return: None
+
+def removePaymentManager(address: str) -> None:
+    remove payment manager role for the datatoken
+    :param address: address of interest
+    :return: None
+
+def setData(key: bytes, value: bytes) -> None:
+    set a key, value pair on the token
+    :param key:
+    :param bytes:
+    :return: None
+
+def setPaymentCollector(address: str) -> None:
+    set payment collector address
+    :param address: address of payment collector
+    :return: None
+
+def setPublishingMarketFee(address: str, token: str, amount: int) -> None:
+    set publishing market fee
+    :param address: address of the intended receiver
+    :param token: address of the token to receive fees in
+    :param amount: amount of intended fee
+    :return: None
+
+def symbol() -> str:
+    :return: symbol of token
+
+def totalSupply() -> int:
+    :return: total supply of token
+
+def transfer(to: str, amount: int) -> None:
+    transfer an amount of tokens from transaction sender to address,
+    requires tx_dict with a datatoken minter as the sender
+    :param to: address of destination account
+    :param amount: amount to transfer
+    :return: None
+
+def transferFrom(from: str, to: str, amount: int) -> None:
+    transfer an amount of tokens from one address to another,
+    requires tx_dict with a datatoken minter as the sender
+    :param from: address of current owner account
+    :param to: address of destination account
+    :param amount: amount to transfer
+    :return: None
+
+def withdrawETH() -> None:
+    withdraws all available ETH into the owner account
+    :return: None
+
+TODO:
 authERC20
-balance
-balanceOf
-burn
-burnFrom
-cap
 cleanFrom721
-cleanPermissions
-decimals
-decreaseAllowance
-getERC721Address
-getId
-getPaymentCollector
-getPermissions
-increaseAllowance
-isERC20Deployer
-isInitialized
-isMinter
-mint
-name
 nonces
 orderExecuted
-permissions
 permit
-removeMinter
-removePaymentManager
-setData
-setPaymentCollector
-setPublishingMarketFee
-symbol
-totalSupply
-transfer
-transferFrom
-withdrawETH
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+createDispenser
+createFixedRate
+getDispensers
+getFixedRates
+getPublishingMarketFee
+reuseOrder
+startOrder
 """
 
 class TokenFeeInfo:
