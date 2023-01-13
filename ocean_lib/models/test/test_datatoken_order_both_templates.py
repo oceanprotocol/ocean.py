@@ -7,6 +7,7 @@ from datetime import datetime
 import pytest
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
+from ocean_lib.models.test.helpers import interrogate_blockchain_for_reverts
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
@@ -43,8 +44,16 @@ def test_dispense_and_order_with_non_defaults(
     # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
     # Below, we test the quirk.
     match_s = "This address is not allowed to request DT"
-    with pytest.raises(Exception, match=match_s):
-        DT.dispense(to_wei(1), {"from": consumer_wallet})
+    with pytest.raises(ValueError, match=match_s):
+        tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
+        tx.wait(1)
+        interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -173,11 +182,19 @@ def test_buy_DT_and_order(
     assert exchange.details.with_mint
 
     if template_index == 2:
-        with pytest.raises(Exception, match="This address is not allowed to swap"):
-            exchange.buy_DT(
+        with pytest.raises(ValueError, match="This address is not allowed to swap"):
+            tx = exchange.buy_DT(
                 datatoken_amt=to_wei(1),
                 max_basetoken_amt=to_wei(1),
-                tx_dict={"from": consumer_wallet},
+                tx_dict={"from": consumer_wallet, "required_confs": 0},
+            )
+            tx.wait(1)
+            interrogate_blockchain_for_reverts(
+                receiver=tx.receiver,
+                sender=tx.sender.address,
+                value=tx.value,
+                input=tx.input,
+                previous_block=tx.block_number - 1,
             )
 
     consume_fee_amount = to_wei(2)

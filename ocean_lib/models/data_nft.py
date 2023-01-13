@@ -6,9 +6,10 @@ import json
 import warnings
 from base64 import b64encode
 from enum import IntEnum, IntFlag
-from typing import Optional
+from typing import Optional, Union
 
 from brownie import network
+from brownie.network.transaction import TransactionReceipt
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
@@ -46,7 +47,9 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    def create_datatoken(self, datatoken_args, tx_dict) -> Datatoken:
+    def create_datatoken(
+        self, datatoken_args, tx_dict
+    ) -> Union[Datatoken, TransactionReceipt]:
         return datatoken_args.create_datatoken(self, tx_dict)
 
     def calculate_did(self):
@@ -98,7 +101,9 @@ class DataNFTArguments:
             json.dumps(data, separators=(",", ":")).encode("utf-8")
         )
 
-    def deploy_contract(self, config_dict, tx_dict) -> DataNFT:
+    def deploy_contract(
+        self, config_dict, tx_dict
+    ) -> Union[DataNFT, TransactionReceipt]:
         from ocean_lib.models.data_nft_factory import (  # isort:skip
             DataNFTFactoryContract,
         )
@@ -119,6 +124,8 @@ class DataNFTArguments:
             self.owner or wallet_address,
             tx_dict,
         )
+        if "required_confs" in tx_dict.keys():
+            return receipt
 
         with warnings.catch_warnings():
             warnings.filterwarnings(
