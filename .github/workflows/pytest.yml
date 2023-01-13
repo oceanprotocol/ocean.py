@@ -51,7 +51,7 @@ jobs:
           REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
       - name:  docker logs
         run: docker logs ocean_aquarius_1 && docker logs ocean_provider2_1 && docker logs ocean_ocean-contracts_1 && docker logs ocean_ganache_1
-        if: ${{ cancelled() }}
+        if: ${{ failure() }}
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:
