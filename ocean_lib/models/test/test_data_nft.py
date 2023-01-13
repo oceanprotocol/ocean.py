@@ -206,6 +206,7 @@ def test_permissions(
     assert data_nft.getData(b"ARBITRARY_KEY").hex() == b"SomeData".hex()
 
     # Tests failing setting new data if user has not STORE UPDATER role.
+    time.sleep(5)
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.STORE
@@ -226,7 +227,7 @@ def test_permissions(
             previous_block=tx.block_number - 1,
         )
     # Wait a bit to avoid TypeError: int() can't convert non-string with explicit base
-    time.sleep(10)
+    time.sleep(5)
 
     # Tests failing setting ERC20 data
     with pytest.raises(ValueError, match="NOT ERC20 Contract"):
