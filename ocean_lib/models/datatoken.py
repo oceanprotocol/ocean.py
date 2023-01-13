@@ -106,7 +106,7 @@ class DatatokenArguments:
                 address=wallet_address, token=OCEAN_address
             )
 
-        data_nft.contract.createERC20(
+        tx = data_nft.contract.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
@@ -120,6 +120,8 @@ class DatatokenArguments:
             tx_dict,
         )
 
+        if "required_confs" in tx_dict.keys():
+            return tx
         new_elements = [
             item for item in data_nft.getTokensList() if item not in initial_list
         ]

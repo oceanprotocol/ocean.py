@@ -71,7 +71,6 @@ dev_requirements = [
     "pytest",
     "licenseheaders==0.8.8",
     "pytest-env",
-    "pytest-timeout"
 ]
 
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
