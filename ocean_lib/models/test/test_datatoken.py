@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
+
 import pytest
 from brownie import network
 from web3.main import Web3
@@ -190,6 +192,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -314,6 +317,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    # Wait a bit to avoid TypeError: int() can't convert non-string with explicit base
+    time.sleep(5)
 
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(ValueError, match="NOT PAYMENT MANAGER or OWNER"):
@@ -329,6 +334,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(ValueError, match="NOT DEPLOYER ROLE"):
@@ -343,6 +349,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     #  Should fail to removeMinter even if it's minter
     with pytest.raises(ValueError, match="NOT DEPLOYER ROLE"):
@@ -357,6 +364,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(ValueError, match="NOT DEPLOYER ROLE"):
@@ -371,6 +379,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     with pytest.raises(ValueError, match="NOT DEPLOYER ROLE"):
@@ -385,6 +394,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(ValueError, match="NOT DEPLOYER ROLE"):
@@ -399,6 +409,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     with pytest.raises(ValueError, match="not NFTOwner"):
@@ -411,6 +422,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    time.sleep(5)
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     with pytest.raises(ValueError, match="NOT 721 Contract"):

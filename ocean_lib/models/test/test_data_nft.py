@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+import time
 from base64 import b64decode
 
 import pytest
@@ -224,6 +225,8 @@ def test_permissions(
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    # Wait a bit to avoid TypeError: int() can't convert non-string with explicit base
+    time.sleep(10)
 
     # Tests failing setting ERC20 data
     with pytest.raises(ValueError, match="NOT ERC20 Contract"):
