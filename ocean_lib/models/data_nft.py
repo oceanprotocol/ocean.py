@@ -249,6 +249,10 @@ def transferable() -> bool:
 def withdrawETH() -> None:
     withdraws all available ETH into the owner account
     :return: None
+
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+createERC20
 """
 
 

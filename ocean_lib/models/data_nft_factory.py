@@ -53,6 +53,19 @@ def getTokenTemplate(index: int) -> tuple:
 def owner() -> str:
     get owner address of the contract
     :return: str
+
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+createNftWithErc20
+createNftWithErc20WithDispenser
+createNftWithErc20WithFixedRate
+createNftWithMetaData
+createToken
+deployERC721Contract
+erc20List
+erc721List
+reuseMultipleTokenOrder  # TODO: https://github.com/oceanprotocol/ocean.py/issues/1275
+startMultipleTokenOrder
 """
 
 
