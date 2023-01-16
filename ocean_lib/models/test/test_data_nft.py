@@ -871,7 +871,8 @@ def test_fail_create_datatoken(
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     tx = data_nft.create_datatoken(
@@ -895,7 +896,8 @@ def test_fail_create_datatoken(
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False

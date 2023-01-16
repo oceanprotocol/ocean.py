@@ -142,6 +142,11 @@ def test_main_flow_via_contract_directly(
     assert dispenser_status[1] == publisher_wallet.address
     assert dispenser_status[2] is True
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+
     # Tests consumer requests more datatokens then allowed transaction reverts
     tx = dispenser.dispense(
         datatoken.address,
@@ -211,7 +216,8 @@ def test_main_flow_via_contract_directly(
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
     tx = dispenser.activate(
@@ -245,6 +251,11 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
         to_wei(1),
         with_mint=False,
     )
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Tests consumer requests data tokens but they are not minted
     tx = dispenser.dispense(
