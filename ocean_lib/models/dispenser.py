@@ -10,16 +10,48 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 """
-activate
-balance
-create
+def activate(dt_addr: str, max_tokens: int, max_balance: int) -> None:
+    activate dispenser after deactivation
+    :param dt_addr: datatoken address of ERC20
+    :param max_tokens: maximum amount of tokens
+    :param max_balance: maximum token balance
+    :return: None
+
+def balance() -> int:
+    get dispenser balance
+    :return: balance in int
+
+def deactivate(dt_addr: str) -> None:
+    deactivate dispenser
+    :param dt_addr: datatoken address of ERC20
+    :return: None
+
+def dispense(dt_addr: str, amount: int, destination: str) -> None:
+    dispense an amount of tokens to a given destination address,
+    requires tx_dict with a sender that can dispense
+    :param dt_addr: address of the ERC20 token
+    :param amount: amount to dispense
+    :param destination: address of the account to receive dispensed tokens
+    :return: None
+
+def getId() -> int:
+    get dispenser id
+    :return: dispenser id
+
+def ownerWithdraw(dt_addr: str) -> None:
+    withdraw datatokens from dispenser,
+    requires tx_dict with a sender that can dispense
+    :param dt_addr: address of the ERC20 token. If missing, will withdraw all.
+    :return: None
+
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+status -> you can use the datatoken.dispenser_status() function as a better shorthand
+create -> you can use the datatoken.create_dispenser() function as a better shorthand
+
+TODO:
 datatokensList
-deactivate
-dispense
-getId
-ownerWithdraw
 setAllowedSwapper
-status
 """
 
 

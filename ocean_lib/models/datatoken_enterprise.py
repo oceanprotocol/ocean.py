@@ -12,14 +12,15 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
 
-
 """
-all the functions from Datatoken model, plus a few different:
+DatatokenEnterprise retains all the functions from Datatoken model.
 
-+: either way, redundant
+The different functions are redundant (wrapped by ocean.py in helpers):
 buyFromDispenserAndOrder
 buyFromFreAndOrder
 """
+
+
 class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
