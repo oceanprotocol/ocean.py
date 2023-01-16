@@ -21,3 +21,7 @@ def interrogate_blockchain_for_reverts(
         web3.eth.call(replay_tx, previous_block)
     except ValueError as err:
         return err.args[0]["data"]["0x"]["error"], err.args[0]["data"]["0x"]["reason"]
+
+
+def send_dummy_tx(sender, receiver):
+    sender.transfer(receiver.address, "0.001 ether")

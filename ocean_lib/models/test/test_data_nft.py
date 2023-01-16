@@ -11,7 +11,10 @@ from web3 import Web3
 from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.models.test.helpers import interrogate_blockchain_for_reverts
+from ocean_lib.models.test.helpers import (
+    interrogate_blockchain_for_reverts,
+    send_dummy_tx,
+)
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
@@ -871,26 +874,19 @@ def test_fail_create_datatoken(
         {"from": consumer_wallet, "required_confs": 0},
     )
     tx.wait(1)
-    try:
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
-    except TypeError:
-        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-        # It happens between consecutive reverted txs,because tx params are not fully fetched.
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     tx = data_nft.create_datatoken(
@@ -902,26 +898,19 @@ def test_fail_create_datatoken(
         {"from": consumer_wallet, "required_confs": 0},
     )
     tx.wait(1)
-    try:
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
-    except TypeError:
-        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-        # It happens between consecutive reverted txs,because tx params are not fully fetched.
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
@@ -935,24 +924,13 @@ def test_fail_create_datatoken(
         {"from": another_consumer_wallet, "required_confs": 0},
     )
     tx.wait(1)
-    try:
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
-    except TypeError:
-        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-        # It happens between consecutive reverted txs,because tx params are not fully fetched.
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
 

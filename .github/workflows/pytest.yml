@@ -45,7 +45,6 @@ jobs:
           sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
       - name: Test with pytest
         run: |
-          py.test ocean_lib/models/test/test_data_nft.py::test_permissions
           py.test ocean_lib/models/test/test_data_nft.py::test_fail_create_datatoken
         env:
           REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
