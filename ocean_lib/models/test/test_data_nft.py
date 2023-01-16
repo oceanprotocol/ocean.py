@@ -225,26 +225,19 @@ def test_permissions(
         {"from": another_consumer_wallet, "required_confs": 0},
     )
     tx.wait(1)
-    try:
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
-    except TypeError:
-        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-        # It happens between consecutive reverted txs,because tx params are not fully fetched.
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
     assert err == "revert"
     assert "NOT STORE UPDATER" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
 
     # Tests failing setting ERC20 data
     tx = data_nft.setDataERC20(
@@ -253,24 +246,13 @@ def test_permissions(
         {"from": consumer_wallet, "required_confs": 0},
     )
     tx.wait(1)
-    try:
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
-    except TypeError:
-        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-        # It happens between consecutive reverted txs,because tx params are not fully fetched.
-        err, err_msg = interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
     assert err == "revert"
     assert "NOT ERC20 Contract" in err_msg
 
@@ -551,23 +533,24 @@ def test_fail_creating_erc20(
             DataNFTPermissions.DEPLOY_DATATOKEN
         ]
     )
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
-        tx = data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-                minter=publisher_wallet.address,
-            ),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.create_datatoken(
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=publisher_wallet.address,
+        ),
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT ERC20DEPLOYER_ROLE" in err_msg
 
 
 @pytest.mark.unit
@@ -598,20 +581,21 @@ def test_erc721_datatoken_functions(
     assert data_nft.tokenURI(1) == registered_event["tokenURI"]
 
     # Tests failing setting token URI by another user
-    with pytest.raises(ValueError, match="not NFTOwner"):
-        tx = data_nft.setTokenURI(
-            1,
-            "https://foourl.com/nft/",
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.setTokenURI(
+        1,
+        "https://foourl.com/nft/",
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "not NFTOwner" in err_msg
 
     # Tests transfer functions
     datatoken.mint(
@@ -641,20 +625,21 @@ def test_erc721_datatoken_functions(
         ),
         {"from": consumer_wallet},
     )
-    with pytest.raises(ValueError, match="NOT MINTER"):
-        tx = datatoken.mint(
-            consumer_wallet.address,
-            to_wei(1),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = datatoken.mint(
+        consumer_wallet.address,
+        to_wei(1),
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT MINTER" in err_msg
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
@@ -668,44 +653,44 @@ def test_erc721_datatoken_functions(
 @pytest.mark.unit
 def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of using the transfer functions."""
-    with pytest.raises(
-        ValueError,
-        match="transfer caller is not owner nor approved",
-    ):
-        tx = data_nft.transferFrom(
-            publisher_wallet.address,
-            consumer_wallet.address,
-            1,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.transferFrom(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        1,
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "transfer caller is not owner nor approved" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests for safe transfer as well
-    with pytest.raises(
-        ValueError,
-        match="transfer caller is not owner nor approved",
-    ):
-        tx = data_nft.safeTransferFrom(
-            publisher_wallet.address,
-            consumer_wallet.address,
-            1,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.safeTransferFrom(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        1,
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "transfer caller is not owner nor approved" in err_msg
 
 
 def test_transfer_nft(
@@ -949,21 +934,22 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
     assert data_nft.ownerOf(1) == publisher_wallet.address
 
-    with pytest.raises(ValueError, match="transfer of token that is not own"):
-        tx = data_nft.transferFrom(
-            consumer_wallet.address,
-            publisher_wallet.address,
-            1,
-            {"from": publisher_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.transferFrom(
+        consumer_wallet.address,
+        publisher_wallet.address,
+        1,
+        {"from": publisher_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "transfer of token that is not own" in err_msg
 
     data_nft.transferFrom(
         publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
@@ -972,37 +958,43 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     assert data_nft.balanceOf(publisher_wallet.address) == 0
     assert data_nft.ownerOf(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
-        tx = data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            {"from": publisher_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.create_datatoken(
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+        ),
+        {"from": publisher_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT ERC20DEPLOYER_ROLE" in err_msg
 
-    with pytest.raises(ValueError, match="NOT MINTER"):
-        tx = datatoken.mint(
-            publisher_wallet.address,
-            10,
-            {"from": publisher_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+
+    tx = datatoken.mint(
+        publisher_wallet.address,
+        10,
+        {"from": publisher_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT MINTER" in err_msg
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(

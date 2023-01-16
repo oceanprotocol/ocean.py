@@ -44,16 +44,17 @@ def test_dispense_and_order_with_non_defaults(
     # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
     # Below, we test the quirk.
     match_s = "This address is not allowed to request DT"
-    with pytest.raises(ValueError, match=match_s):
-        tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert match_s in err_msg
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -182,20 +183,21 @@ def test_buy_DT_and_order(
     assert exchange.details.with_mint
 
     if template_index == 2:
-        with pytest.raises(ValueError, match="This address is not allowed to swap"):
-            tx = exchange.buy_DT(
-                datatoken_amt=to_wei(1),
-                max_basetoken_amt=to_wei(1),
-                tx_dict={"from": consumer_wallet, "required_confs": 0},
-            )
-            tx.wait(1)
-            interrogate_blockchain_for_reverts(
-                receiver=tx.receiver,
-                sender=tx.sender.address,
-                value=tx.value,
-                input=tx.input,
-                previous_block=tx.block_number - 1,
-            )
+        tx = exchange.buy_DT(
+            datatoken_amt=to_wei(1),
+            max_basetoken_amt=to_wei(1),
+            tx_dict={"from": consumer_wallet, "required_confs": 0},
+        )
+        tx.wait(1)
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+        assert err == "revert"
+        assert "This address is not allowed to swap" in err_msg
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address

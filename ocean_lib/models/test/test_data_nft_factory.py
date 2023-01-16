@@ -325,24 +325,23 @@ def test_fail_get_templates(data_nft_factory):
 
 @pytest.mark.unit
 def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
-    """Test erc721 non existent template creation fail"""
+    """Test ERC721 non existent template creation fail"""
     non_existent_nft_template = get_non_existent_nft_template(
         data_nft_factory, check_first=10
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(ValueError, match="Template index doesnt exist"):
-        tx = data_nft_factory.create(
-            DataNFTArguments(
-                "DT1", "DTSYMBOL", template_index=non_existent_nft_template
-            ),
-            {"from": publisher_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft_factory.create(
+        DataNFTArguments("DT1", "DTSYMBOL", template_index=non_existent_nft_template),
+        {"from": publisher_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "Template index doesnt exist" in err_msg
