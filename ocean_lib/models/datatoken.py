@@ -51,6 +51,11 @@ def approve(address: str, amount: int) -> None:
     :param amount: amount in int
     :return: None
 
+def authERC20(index: int) -> tuple:
+    get user permissions on ERC20 for specific index
+    :param index: index of interest
+    :return: tuple of tuples of boolean values for minter role, payment manager role
+
 def balance() -> int:
     get token balance
     :return: int
@@ -187,12 +192,6 @@ def withdrawETH() -> None:
     withdraws all available ETH into the owner account
     :return: None
 
-TODO:
-authERC20
-cleanFrom721
-nonces
-orderExecuted
-permit
 
 The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
 createDispenser

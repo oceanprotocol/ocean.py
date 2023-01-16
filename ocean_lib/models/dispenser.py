@@ -44,14 +44,17 @@ def ownerWithdraw(dt_addr: str) -> None:
     :param dt_addr: address of the ERC20 token. If missing, will withdraw all.
     :return: None
 
+def setAllowedSwapper(dt_addr: str, new_swapper_addr: str) -> None:
+    set allowed swapper to a new address
+    :param dt_addr: address of the ERC20 token
+    :param new_swapper_addr: address of the account to be set as swapper
+    :return: None
+
 
 The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
 status -> you can use the datatoken.dispenser_status() function as a better shorthand
 create -> you can use the datatoken.create_dispenser() function as a better shorthand
-
-TODO:
-datatokensList
-setAllowedSwapper
+datatokensList -> a list of datatokens served by this dispenser, but we recommend retrieving each dispenser from its datatoken object
 """
 
 
