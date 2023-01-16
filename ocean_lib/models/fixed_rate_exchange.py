@@ -13,16 +13,61 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 """
+Attributes:
 MAX_FEE
 MIN_FEE
 MIN_RATE
 
-balance
-createWithDecimals
-generateExchangeId
-getExchanges # TODO: maybe modify this like getExchange?
-getId
-getNumberOfExchanges
+Functions:
+
+def balance() -> int:
+    returns FRE balance
+    :return: balance
+
+def getExchanges() -> tuple:
+    get list of exchange contracts addresses
+    :return: tuple of contract addresses for each exchange
+
+def generateExchangeId(bt_addr: str, dt_addr) -> str:
+    retrieve exchange id based on a pair of basetoken-datatoken address pair
+    :param bt_addr: address of base token
+    :param dt_addr: address of datatoken
+    :return: exchange id
+
+def getId() -> int:
+    get exchange id
+    :return: id
+
+def getNumberOfExchanges() -> int:
+    get number of exchange contracts
+    :return: number of exchanges
+
+
+The following functions are wrapped with ocean.py helpers, especially in the OneExchange class, but you can use the raw form if needed.
+buyDT
+calcBaseInGivenOutDT
+calcBaseOutGivenInDT
+collectBT
+collectDT
+collectMarketFee
+collectOceanFee
+createWithDecimals -> raw creation of the exchange contract, much easier to use from datatoken.create_exchange()
+getAllowedSwapper
+getBTSupply
+getDTSupply
+getExchange
+getFeesInfo
+getMarketFee
+getOPCFee
+getRate
+isActive
+sellDT
+setAllowedSwapper
+setRate
+toggleExchangeState
+toggleMintState
+updateMarketFee
+updateMarketFeeCollector
 """
 
 
