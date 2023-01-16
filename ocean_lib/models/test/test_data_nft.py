@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import time
 from base64 import b64decode
 
 import pytest
@@ -46,21 +45,19 @@ def test_permissions(
     assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
 
     # Tests failing clearing permissions
-    with pytest.raises(
-        ValueError,
-        match="not NFTOwner",
-    ):
-        tx = data_nft.cleanPermissions(
-            {"from": another_consumer_wallet, "required_confs": 0}
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.cleanPermissions(
+        {"from": another_consumer_wallet, "required_confs": 0}
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "not NFTOwner" in err_msg
 
     # Tests clearing permissions
     data_nft.addToCreateERC20List(publisher_wallet.address, {"from": publisher_wallet})
@@ -74,18 +71,19 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    with pytest.raises(ValueError, match="not NFTOwner"):
-        tx = data_nft.cleanPermissions(
-            {"from": another_consumer_wallet, "required_confs": 0}
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.cleanPermissions(
+        {"from": another_consumer_wallet, "required_confs": 0}
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "not NFTOwner" in err_msg
 
     data_nft.cleanPermissions({"from": publisher_wallet})
 
@@ -109,19 +107,20 @@ def test_permissions(
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(ValueError, match="not NFTOwner"):
-        tx = data_nft.addManager(
-            another_consumer_wallet.address,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.addManager(
+        another_consumer_wallet.address,
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "not NFTOwner" in err_msg
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.MANAGER
@@ -139,18 +138,20 @@ def test_permissions(
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
-    with pytest.raises(ValueError, match="not NFTOwner"):
-        tx = data_nft.removeManager(
-            publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.removeManager(
+        publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+
+    assert err == "revert"
+    assert "not NFTOwner" in err_msg
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -167,22 +168,24 @@ def test_permissions(
             DataNFTPermissions.MANAGER
         ]
     )
-    with pytest.raises(ValueError, match="NOT MANAGER"):
-        tx = data_nft.executeCall(
-            0,
-            consumer_wallet.address,
-            10,
-            Web3.toHex(text="SomeData"),
-            {"from": another_consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+
+    tx = data_nft.executeCall(
+        0,
+        consumer_wallet.address,
+        10,
+        Web3.toHex(text="SomeData"),
+        {"from": another_consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT MANAGER" in err_msg
 
     # Tests calling execute_call with a manager role
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
@@ -206,51 +209,74 @@ def test_permissions(
     assert data_nft.getData(b"ARBITRARY_KEY").hex() == b"SomeData".hex()
 
     # Tests failing setting new data if user has not STORE UPDATER role.
-    time.sleep(5)
+
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.STORE
         ]
     )
-    with pytest.raises(ValueError, match="NOT STORE UPDATER"):
-        tx = data_nft.setNewData(
-            b"ARBITRARY_KEY",
-            b"SomeData",
-            {"from": another_consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
+
+    tx = data_nft.setNewData(
+        b"ARBITRARY_KEY",
+        b"SomeData",
+        {"from": another_consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    try:
+        err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
-    # Wait a bit to avoid TypeError: int() can't convert non-string with explicit base
-    time.sleep(5)
+    except TypeError:
+        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+        # It happens between consecutive reverted txs,because tx params are not fully fetched.
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+    assert err == "revert"
+    assert "NOT STORE UPDATER" in err_msg
 
     # Tests failing setting ERC20 data
-    with pytest.raises(ValueError, match="NOT ERC20 Contract"):
-        tx = data_nft.setDataERC20(
-            b"FOO_KEY",
-            b"SomeData",
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
+    tx = data_nft.setDataERC20(
+        b"FOO_KEY",
+        b"SomeData",
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    try:
+        err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    except TypeError:
+        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+        # It happens between consecutive reverted txs,because tx params are not fully fetched.
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+    assert err == "revert"
+    assert "NOT ERC20 Contract" in err_msg
+
     assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
 
 def test_add_and_remove_permissions(
     publisher_wallet, consumer_wallet, config, data_nft
 ):
-
     # Assert consumer has no permissions
     permissions = data_nft.getPermissions(consumer_wallet.address)
     assert not permissions[DataNFTPermissions.MANAGER]
@@ -372,26 +398,26 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
             DataNFTPermissions.UPDATE_METADATA
         ]
     )
-
-    with pytest.raises(ValueError, match="NOT METADATA_ROLE"):
-        tx = data_nft.setMetaData(
-            1,
-            "http://myprovider:8030",
-            b"0x123",
-            BLOB.encode("utf-8"),
-            BLOB,
-            BLOB,
-            [],
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
-            receiver=tx.receiver,
-            sender=tx.sender.address,
-            value=tx.value,
-            input=tx.input,
-            previous_block=tx.block_number - 1,
-        )
+    tx = data_nft.setMetaData(
+        1,
+        "http://myprovider:8030",
+        b"0x123",
+        BLOB.encode("utf-8"),
+        BLOB,
+        BLOB,
+        [],
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    err, err_msg = interrogate_blockchain_for_reverts(
+        receiver=tx.receiver,
+        sender=tx.sender.address,
+        value=tx.value,
+        input=tx.input,
+        previous_block=tx.block_number - 1,
+    )
+    assert err == "revert"
+    assert "NOT METADATA_ROLE" in err_msg
 
 
 @pytest.mark.unit
@@ -836,62 +862,99 @@ def test_fail_create_datatoken(
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    with pytest.raises(ValueError, match="Template index doesnt exist"):
-        tx = data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=0,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
+    tx = data_nft.create_datatoken(
+        DatatokenArguments(
+            template_index=0,
+            name="DT1",
+            symbol="DT1Symbol",
+        ),
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    try:
+        err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    except TypeError:
+        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+        # It happens between consecutive reverted txs,because tx params are not fully fetched.
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+    assert err == "revert"
+    assert "Template index doesnt exist" in err_msg
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    with pytest.raises(ValueError, match="Template index doesnt exist"):
-        tx = data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=3,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
+    tx = data_nft.create_datatoken(
+        DatatokenArguments(
+            template_index=3,
+            name="DT1",
+            symbol="DT1Symbol",
+        ),
+        {"from": consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    try:
+        err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    except TypeError:
+        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+        # It happens between consecutive reverted txs,because tx params are not fully fetched.
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+    assert err == "revert"
+    assert "Template index doesnt exist" in err_msg
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
-    with pytest.raises(ValueError, match="NOT ERC20DEPLOYER_ROLE"):
-        tx = data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=1,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            {"from": another_consumer_wallet, "required_confs": 0},
-        )
-        tx.wait(1)
-        interrogate_blockchain_for_reverts(
+
+    tx = data_nft.create_datatoken(
+        DatatokenArguments(
+            template_index=1,
+            name="DT1",
+            symbol="DT1Symbol",
+        ),
+        {"from": another_consumer_wallet, "required_confs": 0},
+    )
+    tx.wait(1)
+    try:
+        err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
             previous_block=tx.block_number - 1,
         )
+    except TypeError:
+        # Try again to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+        # It happens between consecutive reverted txs,because tx params are not fully fetched.
+        err, err_msg = interrogate_blockchain_for_reverts(
+            receiver=tx.receiver,
+            sender=tx.sender.address,
+            value=tx.value,
+            input=tx.input,
+            previous_block=tx.block_number - 1,
+        )
+    assert err == "revert"
+    assert "NOT ERC20DEPLOYER_ROLE" in err_msg
 
 
 @pytest.mark.unit
