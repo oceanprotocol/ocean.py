@@ -99,6 +99,11 @@ def test_main(
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     tx = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -176,6 +181,11 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     assert executed_event["orderTxId"] == receipt.txid
     assert executed_event["providerAddress"] == provider_fee_address
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     tx = datatoken.orderExecuted(
@@ -200,7 +210,8 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -227,6 +238,11 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     assert err == "revert"
     assert "Provider signature check failed" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
@@ -330,7 +346,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     #  Should fail to set new FeeCollector if not NFTOwner
     tx = datatoken.setPaymentCollector(
@@ -350,7 +367,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addMinter(
@@ -369,7 +387,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     #  Should fail to removeMinter even if it's minter
     tx = datatoken.removeMinter(
@@ -388,7 +407,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addPaymentManager(
@@ -407,7 +427,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     tx = datatoken.removePaymentManager(
@@ -426,7 +447,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to setData if NOT erc20Deployer
     tx = datatoken.setData(
@@ -445,7 +467,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
@@ -462,7 +485,8 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})

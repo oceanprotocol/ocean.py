@@ -47,6 +47,11 @@ def test_permissions(
     assert decoded_token_uri["background_color"] == "141414"
     assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests failing clearing permissions
     tx = data_nft.cleanPermissions(
         {"from": another_consumer_wallet, "required_confs": 0}
@@ -62,6 +67,11 @@ def test_permissions(
     assert err == "revert"
     assert "not NFTOwner" in err_msg
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests clearing permissions
     data_nft.addToCreateERC20List(publisher_wallet.address, {"from": publisher_wallet})
     data_nft.addToCreateERC20List(
@@ -74,6 +84,10 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     tx = data_nft.cleanPermissions(
         {"from": another_consumer_wallet, "required_confs": 0}
     )
@@ -87,6 +101,10 @@ def test_permissions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     data_nft.cleanPermissions({"from": publisher_wallet})
 
@@ -110,6 +128,10 @@ def test_permissions(
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     tx = data_nft.addManager(
         another_consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
@@ -124,6 +146,10 @@ def test_permissions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.MANAGER
@@ -140,6 +166,10 @@ def test_permissions(
 
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
     tx = data_nft.removeManager(
         publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
@@ -155,6 +185,10 @@ def test_permissions(
 
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -171,6 +205,10 @@ def test_permissions(
             DataNFTPermissions.MANAGER
         ]
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     tx = data_nft.executeCall(
         0,
@@ -189,6 +227,11 @@ def test_permissions(
     )
     assert err == "revert"
     assert "NOT MANAGER" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests calling execute_call with a manager role
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
@@ -218,6 +261,10 @@ def test_permissions(
             DataNFTPermissions.STORE
         ]
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     tx = data_nft.setNewData(
         b"ARBITRARY_KEY",
@@ -237,7 +284,8 @@ def test_permissions(
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests failing setting ERC20 data
     tx = data_nft.setDataERC20(
@@ -255,6 +303,11 @@ def test_permissions(
     )
     assert err == "revert"
     assert "NOT ERC20 Contract" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
@@ -383,6 +436,10 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
             DataNFTPermissions.UPDATE_METADATA
         ]
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     tx = data_nft.setMetaData(
         1,
         "http://myprovider:8030",
@@ -533,6 +590,10 @@ def test_fail_creating_erc20(
             DataNFTPermissions.DEPLOY_DATATOKEN
         ]
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     tx = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -579,6 +640,11 @@ def test_erc721_datatoken_functions(
     assert registered_event["blockNumber"] == receipt.block_number
     assert data_nft.tokenURI(1) == "https://newurl.com/nft/"
     assert data_nft.tokenURI(1) == registered_event["tokenURI"]
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests failing setting token URI by another user
     tx = data_nft.setTokenURI(
@@ -687,7 +753,8 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(publisher_wallet, consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests for safe transfer as well
     tx = data_nft.safeTransferFrom(
@@ -863,6 +930,10 @@ def test_fail_create_datatoken(
         DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
     )
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
     tx = data_nft.create_datatoken(
@@ -917,6 +988,11 @@ def test_fail_create_datatoken(
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     tx = data_nft.create_datatoken(
         DatatokenArguments(
             template_index=1,
@@ -950,6 +1026,10 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     data_nft, datatoken = data_NFT_and_DT
 
     assert data_nft.ownerOf(1) == publisher_wallet.address
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     tx = data_nft.transferFrom(
         consumer_wallet.address,
@@ -967,6 +1047,10 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     assert err == "revert"
     assert "transfer of token that is not own" in err_msg
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     data_nft.transferFrom(
         publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
@@ -975,6 +1059,10 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     assert data_nft.balanceOf(publisher_wallet.address) == 0
     assert data_nft.ownerOf(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
     tx = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -995,7 +1083,8 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
     # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
     # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    send_dummy_tx(sender=publisher_wallet, receiver=consumer_wallet)
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     tx = datatoken.mint(
         publisher_wallet.address,
@@ -1012,6 +1101,10 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(

@@ -165,6 +165,11 @@ def test_main_flow_via_contract_directly(
     assert err == "revert"
     assert "Amount too high" in err_msg
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests consumer requests data tokens
     _ = dispenser.dispense(
         datatoken.address,
@@ -172,6 +177,10 @@ def test_main_flow_via_contract_directly(
         consumer_wallet.address,
         {"from": consumer_wallet},
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests consumer requests more datatokens then exceeds maxBalance
     tx = dispenser.dispense(
@@ -191,10 +200,20 @@ def test_main_flow_via_contract_directly(
     assert err == "revert"
     assert "Caller balance too high" in err_msg
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests publisher deactivates the dispenser
     dispenser.deactivate(datatoken.address, {"from": publisher_wallet})
     status = dispenser.status(datatoken.address)
     assert status[0] is False
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests factory deployer should fail to get data tokens
     tx = dispenser.dispense(
@@ -274,6 +293,11 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     )
     assert err == "revert"
     assert "Not enough reserves" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests publisher mints tokens and transfer them to the dispenser.
     datatoken.mint(
