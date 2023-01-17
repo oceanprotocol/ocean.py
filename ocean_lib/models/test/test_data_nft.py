@@ -625,6 +625,11 @@ def test_erc721_datatoken_functions(
         ),
         {"from": consumer_wallet},
     )
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     tx = datatoken.mint(
         consumer_wallet.address,
         to_wei(1),
