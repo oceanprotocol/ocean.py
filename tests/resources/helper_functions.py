@@ -380,3 +380,7 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         "validUntil": valid_until,
         "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
     }
+
+def delay_and_confirm_failed(tx):
+    get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
+    assert tx.status == 0
