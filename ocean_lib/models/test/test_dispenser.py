@@ -7,7 +7,10 @@ import pytest
 from ocean_lib.models.dispenser import Dispenser, DispenserStatus
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from tests.resources.helper_functions import deploy_erc721_erc20, delay_and_confirm_failed
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    delay_and_confirm_failed,
+)
 
 
 @pytest.mark.unit

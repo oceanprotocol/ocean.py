@@ -45,7 +45,9 @@ def test_permissions(
     assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
 
     # Tests failing clearing permissions: not the owner
-    tx = data_nft.cleanPermissions({"from": another_consumer_wallet, "required_confs": 0})
+    tx = data_nft.cleanPermissions(
+        {"from": another_consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     # Tests clearing permissions
@@ -60,7 +62,9 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    tx = data_nft.cleanPermissions({"from": another_consumer_wallet, "required_confs": 0})
+    tx = data_nft.cleanPermissions(
+        {"from": another_consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     data_nft.cleanPermissions({"from": publisher_wallet})
@@ -86,7 +90,9 @@ def test_permissions(
         data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
     )
     # not the owner
-    tx = data_nft.addManager(another_consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0})
+    tx = data_nft.addManager(
+        another_consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
@@ -107,7 +113,9 @@ def test_permissions(
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
     # not the owner
-    tx = data_nft.removeManager(publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0})
+    tx = data_nft.removeManager(
+        publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
@@ -796,7 +804,9 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
         )
 
     # not minter
-    tx = datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet, "required_confs": 0})
+    tx = datatoken.mint(
+        publisher_wallet.address, 10, {"from": publisher_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles

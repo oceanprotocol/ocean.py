@@ -9,7 +9,10 @@ from web3.main import Web3
 from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.helper_functions import get_mock_provider_fees, delay_and_confirm_failed
+from tests.resources.helper_functions import (
+    get_mock_provider_fees,
+    delay_and_confirm_failed,
+)
 
 
 @pytest.mark.unit
@@ -293,15 +296,21 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     delay_and_confirm_failed(tx)
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    tx = datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0})
+    tx = datatoken.addMinter(
+        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     #  Should fail to removeMinter even if it's minter
-    tx = datatoken.removeMinter(consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0})
+    tx = datatoken.removeMinter(
+        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    tx = datatoken.addPaymentManager(consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0})
+    tx = datatoken.addPaymentManager(
+        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     # Should fail to removeFeeManager if NOT erc20Deployer
@@ -311,7 +320,9 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     delay_and_confirm_failed(tx)
 
     # Should fail to setData if NOT erc20Deployer
-    tx = datatoken.setData(Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0})
+    tx = datatoken.setData(
+        Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
+    )
     delay_and_confirm_failed(tx)
 
     # Should fail to call cleanPermissions if NOT NFTOwner

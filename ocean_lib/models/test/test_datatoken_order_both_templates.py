@@ -9,7 +9,11 @@ import pytest
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees, delay_and_confirm_failed
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_mock_provider_fees,
+    delay_and_confirm_failed,
+)
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
 
