@@ -45,13 +45,13 @@ def test_dispense_and_order_with_non_defaults(
     # Below, we test the quirk.
     match_s = "This address is not allowed to request DT"
     tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert match_s in err_msg
@@ -188,13 +188,13 @@ def test_buy_DT_and_order(
             max_basetoken_amt=to_wei(1),
             tx_dict={"from": consumer_wallet, "required_confs": 0},
         )
-        tx.wait(1)
+        tx.wait(3)
         err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
-            previous_block=tx.block_number - 1,
+            previous_block=tx.block_number - 3,
         )
         assert err == "revert"
         assert "This address is not allowed to swap" in err_msg

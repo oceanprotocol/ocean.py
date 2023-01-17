@@ -99,11 +99,6 @@ def test_main(
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
-
     tx = data_nft.create_datatoken(
         DatatokenArguments(
             name="DT1",
@@ -111,13 +106,13 @@ def test_main(
         ),
         {"from": another_consumer_wallet, "required_confs": 0},
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
@@ -181,11 +176,6 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     assert executed_event["orderTxId"] == receipt.txid
     assert executed_event["providerAddress"] == provider_fee_address
 
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
-
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     tx = datatoken.orderExecuted(
@@ -197,21 +187,16 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer_wallet.address,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "Consumer signature check failed" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -228,21 +213,16 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer_wallet.address,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "Provider signature check failed" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
@@ -333,170 +313,130 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
         to_wei(1),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     #  Should fail to set new FeeCollector if not NFTOwner
     tx = datatoken.setPaymentCollector(
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT PAYMENT MANAGER or OWNER" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addMinter(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     #  Should fail to removeMinter even if it's minter
     tx = datatoken.removeMinter(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addPaymentManager(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     tx = datatoken.removePaymentManager(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
-
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     # Should fail to setData if NOT erc20Deployer
     tx = datatoken.setData(
         Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
 
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
-
     # Should fail to call cleanPermissions if NOT NFTOwner
     tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
 
-    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
-    # It happens between consecutive reverted txs,because tx params are not fully fetched.
-    for _ in range(2):
-        send_dummy_tx(publisher_wallet, consumer_wallet)
-
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
-    tx.wait(1)
+    tx.wait(3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 1,
+        previous_block=tx.block_number - 3,
     )
     assert err == "revert"
     assert "NOT 721 Contract" in err_msg
