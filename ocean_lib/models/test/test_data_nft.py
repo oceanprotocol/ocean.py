@@ -597,6 +597,11 @@ def test_erc721_datatoken_functions(
     assert err == "revert"
     assert "not NFTOwner" in err_msg
 
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
+
     # Tests transfer functions
     datatoken.mint(
         consumer_wallet.address,
@@ -645,6 +650,11 @@ def test_erc721_datatoken_functions(
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
+
+    # Send dummy tx to avoid TypeError: int() can't convert non-string with explicit base. Sleep avoided.
+    # It happens between consecutive reverted txs,because tx params are not fully fetched.
+    for _ in range(2):
+        send_dummy_tx(publisher_wallet, consumer_wallet)
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
