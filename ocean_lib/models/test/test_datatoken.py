@@ -11,7 +11,8 @@ from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
     get_mock_provider_fees,
-    delay_and_confirm_failed,
+    delay_transaction,
+    confirm_failed
 )
 
 
@@ -168,16 +169,17 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     # bad consumer signature
-    tx = datatoken.orderExecuted(
-        receipt.txid,
-        provider_data,
-        provider_signed,
-        Web3.toHex(Web3.toBytes(text="12345")),
-        consumer_signed,
-        consumer_wallet.address,
-        {"from": publisher_wallet, "required_confs": 0},
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.orderExecuted(
+            receipt.txid,
+            provider_data,
+            provider_signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet, "required_confs": 0},
+        )
+    confirm_failed(tx, "Consumer signature check failed")
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -186,16 +188,17 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     # bad provider signature
-    tx = datatoken.orderExecuted(
-        receipt.txid,
-        provider_data,
-        consumer_signed,
-        Web3.toHex(Web3.toBytes(text="12345")),
-        consumer_signed,
-        consumer_wallet.address,
-        {"from": publisher_wallet, "required_confs": 0},
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.orderExecuted(
+            receipt.txid,
+            provider_data,
+            consumer_signed,
+            Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signed,
+            consumer_wallet.address,
+            {"from": publisher_wallet, "required_confs": 0},
+        )
+    confirm_failed(tx, "Provider signature check failed")
 
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
@@ -281,54 +284,63 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     datatoken = DT
 
     # Should fail to mint if wallet is not a minter
-    tx = datatoken.mint(
-        consumer_wallet.address,
-        to_wei(1),
-        {"from": consumer_wallet, "required_confs": 0},
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.mint(
+            consumer_wallet.address,
+            to_wei(1),
+            {"from": consumer_wallet, "required_confs": 0},
+        )
+    confirm_failed(tx, "NOT MINTER")
 
     #  Should fail to set new FeeCollector if not NFTOwner
-    tx = datatoken.setPaymentCollector(
-        consumer_wallet.address,
-        {"from": consumer_wallet, "required_confs": 0},
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.setPaymentCollector(
+            consumer_wallet.address,
+            {"from": consumer_wallet, "required_confs": 0},
+        )
+    confirm_failed(tx, "NOT PAYMENT MANAGER or OWNER")
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    tx = datatoken.addMinter(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.addMinter(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
-    tx = datatoken.removeMinter(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.removeMinter(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    tx = datatoken.addPaymentManager(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.addPaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    tx = datatoken.removePaymentManager(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.removePaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to setData if NOT erc20Deployer
-    tx = datatoken.setData(
-        Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
-    )
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.setData(
+            Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "NOT 721 Contract")

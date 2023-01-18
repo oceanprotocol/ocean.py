@@ -396,11 +396,6 @@ def confirm_failed(tx, message):
     assert message in chain_message
 
 
-def delay_and_confirm_failed(tx):
-    get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
-    assert tx.status == 0
-
-
 @enforce_types
 def interrogate_blockchain_for_reverts(tx) -> tuple:
     """Interrogates the blockchain from previous block for reverts messages.

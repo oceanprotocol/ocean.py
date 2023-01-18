@@ -12,7 +12,8 @@ from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_mock_provider_fees,
-    delay_and_confirm_failed,
+    delay_transaction,
+    confirm_failed
 )
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
@@ -46,8 +47,9 @@ def test_dispense_and_order_with_non_defaults(
     # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
     # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
     # Below, we test the quirk.
-    tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
-    delay_and_confirm_failed(tx)
+    with delay_transaction():
+        tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "This address is not allowed to request DT")
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -176,12 +178,13 @@ def test_buy_DT_and_order(
     assert exchange.details.with_mint
 
     if template_index == 2:
-        tx = exchange.buy_DT(
-            datatoken_amt=to_wei(1),
-            max_basetoken_amt=to_wei(1),
-            tx_dict={"from": consumer_wallet, "required_confs": 0},
-        )
-        delay_and_confirm_failed(tx)
+        with delay_transaction():
+            tx = exchange.buy_DT(
+                datatoken_amt=to_wei(1),
+                max_basetoken_amt=to_wei(1),
+                tx_dict={"from": consumer_wallet, "required_confs": 0},
+            )
+        confirm_failed(tx, "This address is not allowed to swap")
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
