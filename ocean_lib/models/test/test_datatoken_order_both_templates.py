@@ -13,7 +13,7 @@ from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_mock_provider_fees,
     delay_transaction,
-    confirm_failed
+    confirm_failed,
 )
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
