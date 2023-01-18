@@ -109,7 +109,7 @@ def test_main(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -192,7 +192,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -220,7 +220,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -322,7 +322,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -340,7 +340,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -357,7 +357,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -374,7 +374,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -391,7 +391,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -408,7 +408,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -425,7 +425,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -440,7 +440,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -455,7 +455,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=3)
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
