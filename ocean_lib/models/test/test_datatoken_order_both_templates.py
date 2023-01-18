@@ -192,13 +192,15 @@ def test_buy_DT_and_order(
             max_basetoken_amt=to_wei(1),
             tx_dict={"from": consumer_wallet, "required_confs": 0},
         )
-        tx.wait(3)
+        tx.wait(1)
+        assert tx.txid, "tx id has not been fetched."
+        chain.mine(timedelta=3)
         err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
             value=tx.value,
             input=tx.input,
-            previous_block=tx.block_number - 3,
+            previous_block=tx.block_number - 1,
         )
         assert err == "revert"
         assert "This address is not allowed to swap" in err_msg
