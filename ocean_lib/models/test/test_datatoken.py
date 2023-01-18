@@ -4,6 +4,7 @@
 #
 import time
 
+import brownie
 import pytest
 from brownie import network
 from web3.main import Web3
@@ -106,13 +107,15 @@ def test_main(
         ),
         {"from": another_consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
@@ -187,13 +190,15 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer_wallet.address,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "Consumer signature check failed" in err_msg
@@ -213,13 +218,15 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         consumer_wallet.address,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "Provider signature check failed" in err_msg
@@ -313,13 +320,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
         to_wei(1),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
@@ -329,13 +338,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT PAYMENT MANAGER or OWNER" in err_msg
@@ -344,13 +355,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.addMinter(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
@@ -359,13 +372,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.removeMinter(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
@@ -374,13 +389,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.addPaymentManager(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
@@ -389,13 +406,15 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.removePaymentManager(
         consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
@@ -404,39 +423,45 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     tx = datatoken.setData(
         Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT 721 Contract" in err_msg

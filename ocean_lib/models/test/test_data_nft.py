@@ -5,6 +5,7 @@
 import json
 from base64 import b64decode
 
+import brownie
 import pytest
 from web3 import Web3
 
@@ -48,13 +49,15 @@ def test_permissions(
     tx = data_nft.cleanPermissions(
         {"from": another_consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
@@ -74,13 +77,15 @@ def test_permissions(
     tx = data_nft.cleanPermissions(
         {"from": another_consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
@@ -111,13 +116,15 @@ def test_permissions(
         another_consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
@@ -142,13 +149,15 @@ def test_permissions(
     tx = data_nft.removeManager(
         publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
 
     assert err == "revert"
@@ -177,13 +186,15 @@ def test_permissions(
         Web3.toHex(text="SomeData"),
         {"from": another_consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT MANAGER" in err_msg
@@ -222,13 +233,15 @@ def test_permissions(
         b"SomeData",
         {"from": another_consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT STORE UPDATER" in err_msg
@@ -239,13 +252,15 @@ def test_permissions(
         b"SomeData",
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT ERC20 Contract" in err_msg
@@ -388,13 +403,15 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
         [],
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT METADATA_ROLE" in err_msg
@@ -537,13 +554,15 @@ def test_fail_creating_erc20(
         ),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
@@ -582,13 +601,15 @@ def test_erc721_datatoken_functions(
         "https://foourl.com/nft/",
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
@@ -627,13 +648,15 @@ def test_erc721_datatoken_functions(
         to_wei(1),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
@@ -656,13 +679,15 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
         1,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "transfer caller is not owner nor approved" in err_msg
@@ -674,13 +699,15 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
         1,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "transfer caller is not owner nor approved" in err_msg
@@ -851,13 +878,15 @@ def test_fail_create_datatoken(
         ),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
@@ -871,13 +900,15 @@ def test_fail_create_datatoken(
         ),
         {"from": consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
@@ -893,13 +924,15 @@ def test_fail_create_datatoken(
         ),
         {"from": another_consumer_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
@@ -925,13 +958,15 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
         1,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "transfer of token that is not own" in err_msg
@@ -951,13 +986,15 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
         ),
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
@@ -967,13 +1004,15 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
         10,
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg

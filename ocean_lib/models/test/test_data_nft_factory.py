@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import brownie
 import pytest
 from brownie import network
 from web3.main import Web3
@@ -335,13 +336,15 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
         DataNFTArguments("DT1", "DTSYMBOL", template_index=non_existent_nft_template),
         {"from": publisher_wallet, "required_confs": 0},
     )
-    tx.wait(3)
+    tx.wait(1)
+    assert tx.txid, "tx id has not been fetched."
+    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
         value=tx.value,
         input=tx.input,
-        previous_block=tx.block_number - 3,
+        previous_block=tx.block_number - 1,
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
