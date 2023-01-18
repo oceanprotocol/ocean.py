@@ -6,6 +6,7 @@ from datetime import datetime
 
 import brownie
 import pytest
+from brownie import chain
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.models.test.helpers import interrogate_blockchain_for_reverts
@@ -48,7 +49,7 @@ def test_dispense_and_order_with_non_defaults(
     tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,

@@ -4,6 +4,7 @@
 #
 import brownie
 import pytest
+from brownie import chain
 
 from ocean_lib.models.dispenser import Dispenser, DispenserStatus
 from ocean_lib.models.test.helpers import interrogate_blockchain_for_reverts
@@ -149,7 +150,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -177,7 +178,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -202,7 +203,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -222,7 +223,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -257,7 +258,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,

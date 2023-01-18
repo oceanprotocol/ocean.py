@@ -4,7 +4,7 @@
 #
 import brownie
 import pytest
-from brownie import network
+from brownie import network, chain
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
@@ -338,7 +338,7 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    brownie.web3.eth.wait_for_transaction_receipt(tx.txid)
+    chain.mine(timedelta=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
