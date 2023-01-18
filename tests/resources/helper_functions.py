@@ -15,7 +15,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from brownie import network
-from brownie.network import accounts
+from brownie.network import accounts, web3
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -390,6 +390,33 @@ def delay_transaction():
     get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
 
 
+def confirm_failed(tx, message):
+    chain_message = interrogate_blockchain_for_reverts(tx)
+    assert tx.status == 0
+    assert message in chain_message
+
+
 def delay_and_confirm_failed(tx):
     get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
     assert tx.status == 0
+
+
+@enforce_types
+def interrogate_blockchain_for_reverts(tx) -> tuple:
+    """Interrogates the blockchain from previous block for reverts messages.
+    This approach is used due to the fact that reverted transaction do not come
+    with a specific reason of failure that can be caught.
+    """
+    previous_block = tx.block_number - 1
+
+    replay_tx = {
+        "to": tx.receiver,
+        "from": tx.sender.address,
+        "value": tx.value,
+        "data": tx.input,
+    }
+
+    try:
+        web3.eth.call(replay_tx, previous_block)
+    except ValueError as err:
+        return err.args[0]["message"]

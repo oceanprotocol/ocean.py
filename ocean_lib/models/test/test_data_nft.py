@@ -12,7 +12,7 @@ from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
-from tests.resources.helper_functions import delay_transaction
+from tests.resources.helper_functions import delay_transaction, confirm_failed
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
@@ -50,7 +50,7 @@ def test_permissions(
             {"from": another_consumer_wallet, "required_confs": 0}
         )
 
-    assert tx.status == 0
+    confirm_failed(tx, "not NFTOwner")
 
     # Tests clearing permissions
     data_nft.addToCreateERC20List(publisher_wallet.address, {"from": publisher_wallet})
@@ -69,7 +69,7 @@ def test_permissions(
             {"from": another_consumer_wallet, "required_confs": 0}
         )
 
-    assert tx.status == 0
+    confirm_failed(tx, "not NFTOwner")
 
     data_nft.cleanPermissions({"from": publisher_wallet})
 
@@ -96,10 +96,11 @@ def test_permissions(
     # not the owner
     with delay_transaction():
         tx = data_nft.addManager(
-            another_consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+            another_consumer_wallet.address,
+            {"from": consumer_wallet, "required_confs": 0},
         )
 
-    assert tx.status == 0
+    confirm_failed(tx, "not NFTOwner")
 
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
@@ -124,7 +125,7 @@ def test_permissions(
         tx = data_nft.removeManager(
             publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
         )
-    assert tx.status == 0
+    confirm_failed(tx, "not NFTOwner")
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -151,7 +152,7 @@ def test_permissions(
             Web3.toHex(text="SomeData"),
             {"from": another_consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "NOT MANAGER")
 
     # Tests calling execute_call with a manager role
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
@@ -188,7 +189,7 @@ def test_permissions(
             b"SomeData",
             {"from": another_consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "NOT STORE UPDATER")
 
     # Tests failing setting ERC20 data
     with delay_transaction():
@@ -197,7 +198,8 @@ def test_permissions(
             b"SomeData",
             {"from": consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "NOT ERC20 Contract")
+
     assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
 
@@ -339,7 +341,7 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
             [],
             {"from": consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "NOT METADATA_ROLE")
 
 
 @pytest.mark.unit
@@ -516,7 +518,7 @@ def test_erc721_datatoken_functions(
             "https://foourl.com/nft/",
             {"from": consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "not NFTOwner")
 
     # Tests transfer functions
     datatoken.mint(
@@ -574,7 +576,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
             1,
             {"from": consumer_wallet, "required_confs": 0},
         )
-    assert tx.status == 0
+    confirm_failed(tx, "transfer caller is not owner nor approved")
 
     # Tests for safe transfer as well
     with delay_transaction():
@@ -584,8 +586,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
             1,
             {"from": consumer_wallet, "required_confs": 0},
         )
-
-    assert tx.status == 0
+    confirm_failed(tx, "transfer caller is not owner nor approved")
 
 
 def test_transfer_nft(
@@ -802,7 +803,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
             {"from": publisher_wallet, "required_confs": 0},
         )
 
-    assert tx.status == 0
+    confirm_failed(tx, "transfer of token that is not own")
 
     data_nft.transferFrom(
         publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
@@ -823,10 +824,12 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     # not minter
     with delay_transaction():
         tx = datatoken.mint(
-            publisher_wallet.address, 10, {"from": publisher_wallet, "required_confs": 0}
+            publisher_wallet.address,
+            10,
+            {"from": publisher_wallet, "required_confs": 0},
         )
 
-    assert tx.status == 0
+    confirm_failed(tx, "NOT MINTER")
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(
