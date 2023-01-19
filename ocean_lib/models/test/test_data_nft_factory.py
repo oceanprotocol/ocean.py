@@ -338,7 +338,7 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=6)
+    chain.mine(timedelta=10)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
