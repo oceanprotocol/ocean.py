@@ -385,23 +385,14 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
 
 @contextlib.contextmanager
 def delay_transaction():
-    get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
-    try:
-        yield
-    except TypeError:
-        pass
-    get_publisher_wallet().transfer(get_consumer_wallet().address, "0.0000001 ether")
+    yield
+    network.chain.mine(blocks=1)
 
 
 def confirm_failed(tx, message):
-    if not tx:
-        # allow delays on chain
-        return
-
     chain_message = interrogate_blockchain_for_reverts(tx)
     assert tx.status == 0
-    if chain_message:
-        assert message in chain_message
+    assert message in chain_message
 
 
 @enforce_types
@@ -410,9 +401,6 @@ def interrogate_blockchain_for_reverts(tx) -> tuple:
     This approach is used due to the fact that reverted transaction do not come
     with a specific reason of failure that can be caught.
     """
-    if not hasattr(tx, "block_number"):
-        return None
-
     previous_block = tx.block_number - 1
 
     replay_tx = {
