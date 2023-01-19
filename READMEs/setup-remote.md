@@ -64,9 +64,17 @@ One option is to get an Infura account.
 
 A simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. The command below replaces Infura RPCs with public ones in `network-config.yaml`:
 
-`console
+* Linux users: 
+```console
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
-`
+```
+
+* MacOS users: 
+```console
+brew install gnu-sed
+
+gsed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
+```
 
 #### RPCs wrapup
 
