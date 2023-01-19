@@ -883,6 +883,7 @@ def test_fail_create_datatoken(
     )
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
+    chain.mine(blocks=3)
     # Should fail to create a specific ERC20 Template if the index is ZERO
     tx = data_nft.create_datatoken(
         DatatokenArguments(
