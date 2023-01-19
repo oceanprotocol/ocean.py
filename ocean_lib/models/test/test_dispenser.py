@@ -150,7 +150,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -160,6 +160,7 @@ def test_main_flow_via_contract_directly(
     )
     assert err == "revert"
     assert "Amount too high" in err_msg
+    chain.mine(blocks=3)
 
     # Tests consumer requests data tokens
     _ = dispenser.dispense(
@@ -178,7 +179,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -188,6 +189,7 @@ def test_main_flow_via_contract_directly(
     )
     assert err == "revert"
     assert "Caller balance too high" in err_msg
+    chain.mine(blocks=3)
 
     # Tests publisher deactivates the dispenser
     dispenser.deactivate(datatoken.address, {"from": publisher_wallet})
@@ -203,7 +205,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -213,6 +215,7 @@ def test_main_flow_via_contract_directly(
     )
     assert err == "revert"
     assert "Dispenser not active" in err_msg
+    chain.mine(blocks=3)
 
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
     tx = dispenser.activate(
@@ -223,7 +226,7 @@ def test_main_flow_via_contract_directly(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -233,6 +236,7 @@ def test_main_flow_via_contract_directly(
     )
     assert err == "revert"
     assert "Invalid owner" in err_msg
+    chain.mine(blocks=3)
 
 
 def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wallet):
@@ -258,7 +262,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -268,6 +272,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     )
     assert err == "revert"
     assert "Not enough reserves" in err_msg
+    chain.mine(blocks=3)
 
     # Tests publisher mints tokens and transfer them to the dispenser.
     datatoken.mint(

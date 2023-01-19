@@ -338,7 +338,7 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -348,3 +348,4 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
+    chain.mine(blocks=3)

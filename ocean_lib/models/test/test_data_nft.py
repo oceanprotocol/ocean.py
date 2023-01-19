@@ -52,7 +52,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -62,6 +62,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
 
     # Tests clearing permissions
     data_nft.addToCreateERC20List(publisher_wallet.address, {"from": publisher_wallet})
@@ -80,7 +81,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -90,6 +91,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
 
     data_nft.cleanPermissions({"from": publisher_wallet})
 
@@ -119,7 +121,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -129,6 +131,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.MANAGER
@@ -152,7 +155,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -163,6 +166,7 @@ def test_permissions(
 
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -189,7 +193,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -199,6 +203,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "NOT MANAGER" in err_msg
+    chain.mine(blocks=3)
 
     # Tests calling execute_call with a manager role
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
@@ -236,7 +241,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -246,6 +251,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "NOT STORE UPDATER" in err_msg
+    chain.mine(blocks=3)
 
     # Tests failing setting ERC20 data
     tx = data_nft.setDataERC20(
@@ -255,7 +261,7 @@ def test_permissions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -265,6 +271,7 @@ def test_permissions(
     )
     assert err == "revert"
     assert "NOT ERC20 Contract" in err_msg
+    chain.mine(blocks=3)
 
     assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
@@ -406,7 +413,7 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -416,6 +423,7 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
     )
     assert err == "revert"
     assert "NOT METADATA_ROLE" in err_msg
+    chain.mine(blocks=3)
 
 
 @pytest.mark.unit
@@ -557,7 +565,7 @@ def test_fail_creating_erc20(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -567,6 +575,7 @@ def test_fail_creating_erc20(
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
+    chain.mine(blocks=3)
 
 
 @pytest.mark.unit
@@ -604,7 +613,7 @@ def test_erc721_datatoken_functions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -614,6 +623,7 @@ def test_erc721_datatoken_functions(
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
 
     # Tests transfer functions
     datatoken.mint(
@@ -651,7 +661,7 @@ def test_erc721_datatoken_functions(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -661,6 +671,7 @@ def test_erc721_datatoken_functions(
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
+    chain.mine(blocks=3)
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
@@ -682,7 +693,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -692,6 +703,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
     )
     assert err == "revert"
     assert "transfer caller is not owner nor approved" in err_msg
+    chain.mine(blocks=3)
 
     # Tests for safe transfer as well
     tx = data_nft.safeTransferFrom(
@@ -702,7 +714,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -712,6 +724,7 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
     )
     assert err == "revert"
     assert "transfer caller is not owner nor approved" in err_msg
+    chain.mine(blocks=3)
 
 
 def test_transfer_nft(
@@ -881,7 +894,7 @@ def test_fail_create_datatoken(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -891,6 +904,7 @@ def test_fail_create_datatoken(
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     tx = data_nft.create_datatoken(
@@ -903,7 +917,7 @@ def test_fail_create_datatoken(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -913,6 +927,7 @@ def test_fail_create_datatoken(
     )
     assert err == "revert"
     assert "Template index doesnt exist" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
@@ -927,7 +942,7 @@ def test_fail_create_datatoken(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -937,6 +952,7 @@ def test_fail_create_datatoken(
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
+    chain.mine(blocks=3)
 
 
 @pytest.mark.unit
@@ -961,7 +977,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -971,6 +987,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     assert err == "revert"
     assert "transfer of token that is not own" in err_msg
+    chain.mine(blocks=3)
 
     data_nft.transferFrom(
         publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
@@ -989,7 +1006,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -999,6 +1016,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
+    chain.mine(blocks=3)
 
     tx = datatoken.mint(
         publisher_wallet.address,
@@ -1007,7 +1025,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -1017,6 +1035,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
+    chain.mine(blocks=3)
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(

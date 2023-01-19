@@ -109,7 +109,7 @@ def test_main(
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -119,6 +119,7 @@ def test_main(
     )
     assert err == "revert"
     assert "NOT ERC20DEPLOYER_ROLE" in err_msg
+    chain.mine(blocks=3)
 
 
 def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
@@ -192,7 +193,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -202,6 +203,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     assert err == "revert"
     assert "Consumer signature check failed" in err_msg
+    chain.mine(blocks=3)
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -220,7 +222,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -230,6 +232,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     assert err == "revert"
     assert "Provider signature check failed" in err_msg
+    chain.mine(blocks=3)
 
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
@@ -322,7 +325,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -332,6 +335,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT MINTER" in err_msg
+    chain.mine(blocks=3)
 
     #  Should fail to set new FeeCollector if not NFTOwner
     tx = datatoken.setPaymentCollector(
@@ -340,7 +344,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -350,6 +354,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT PAYMENT MANAGER or OWNER" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addMinter(
@@ -357,7 +362,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -367,6 +372,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
+    chain.mine(blocks=3)
 
     #  Should fail to removeMinter even if it's minter
     tx = datatoken.removeMinter(
@@ -374,7 +380,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -384,6 +390,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     tx = datatoken.addPaymentManager(
@@ -391,7 +398,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -401,6 +408,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     tx = datatoken.removePaymentManager(
@@ -408,7 +416,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -418,6 +426,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to setData if NOT erc20Deployer
     tx = datatoken.setData(
@@ -425,7 +434,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -435,12 +444,13 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT DEPLOYER ROLE" in err_msg
+    chain.mine(blocks=3)
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -450,12 +460,13 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "not NFTOwner" in err_msg
+    chain.mine(blocks=3)
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -465,3 +476,4 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     )
     assert err == "revert"
     assert "NOT 721 Contract" in err_msg
+    chain.mine(blocks=3)

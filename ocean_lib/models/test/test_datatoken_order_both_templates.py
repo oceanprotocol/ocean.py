@@ -49,7 +49,7 @@ def test_dispense_and_order_with_non_defaults(
     tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
     tx.wait(1)
     assert tx.txid, "tx id has not been fetched."
-    chain.mine(timedelta=10)
+    chain.mine(blocks=3)
     err, err_msg = interrogate_blockchain_for_reverts(
         receiver=tx.receiver,
         sender=tx.sender.address,
@@ -59,6 +59,7 @@ def test_dispense_and_order_with_non_defaults(
     )
     assert err == "revert"
     assert match_s in err_msg
+    chain.mine(blocks=3)
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -194,7 +195,7 @@ def test_buy_DT_and_order(
         )
         tx.wait(1)
         assert tx.txid, "tx id has not been fetched."
-        chain.mine(timedelta=10)
+        chain.mine(blocks=3)
         err, err_msg = interrogate_blockchain_for_reverts(
             receiver=tx.receiver,
             sender=tx.sender.address,
@@ -204,6 +205,7 @@ def test_buy_DT_and_order(
         )
         assert err == "revert"
         assert "This address is not allowed to swap" in err_msg
+        chain.mine(blocks=3)
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
