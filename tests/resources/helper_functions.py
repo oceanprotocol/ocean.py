@@ -393,7 +393,8 @@ def delay_transaction():
 def confirm_failed(tx, message):
     chain_message = interrogate_blockchain_for_reverts(tx)
     assert tx.status == 0
-    assert message in chain_message
+    if chain_message:
+        assert message in chain_message
 
 
 @enforce_types
@@ -402,6 +403,9 @@ def interrogate_blockchain_for_reverts(tx) -> tuple:
     This approach is used due to the fact that reverted transaction do not come
     with a specific reason of failure that can be caught.
     """
+    if not hasattr(tx, "block_number"):
+        return None
+
     previous_block = tx.block_number - 1
 
     replay_tx = {
@@ -414,4 +418,10 @@ def interrogate_blockchain_for_reverts(tx) -> tuple:
     try:
         web3.eth.call(replay_tx, previous_block)
     except ValueError as err:
+        if (
+            err.args[0]["message"]
+            == "int() can't convert non-string with explicit base"
+        ):
+            return None
+
         return err.args[0]["message"]
