@@ -111,7 +111,7 @@ To get free (fake) MATIC on Mumbai:
 2. Request funds for ADDRESS1
 3. Request funds for ADDRESS2
 
-You can confirm receiving funds by going to the following url, and seeing your reported MATIC balance: `https://mumbai.polygonscan.com/<ADDRESS1 or ADDRESS2>`
+You can confirm receiving funds by going to the following url, and seeing your reported MATIC balance: `https://mumbai.polygonscan.com/address/<ADDRESS1 or ADDRESS2>`
 
 ## 4. Get (fake) OCEAN on Mumbai
 
