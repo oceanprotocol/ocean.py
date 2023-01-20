@@ -128,7 +128,6 @@ def test_add_service():
 
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
-    ddo.nft_address = "0x124"
 
     compute_values = {
         "namespace": "ocean-compute",
@@ -156,6 +155,7 @@ def test_add_service():
     ddo.create_compute_service(
         service_id="2",
         service_endpoint="https://myprovider.com",
+        datatoken_address="0x124",
         files="0x0001",
         compute_values=compute_values,
     )

@@ -69,6 +69,7 @@ DATA_files = [DATA_url_file]
 DATA_ddo.create_compute_service(
     service_id="2",
     service_endpoint=ocean.config_dict["PROVIDER_URL"],
+    datatoken_address=DATA_datatoken.address,
     files=DATA_files,
 )
 
