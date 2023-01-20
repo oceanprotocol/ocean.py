@@ -55,6 +55,7 @@ test_requirements = [
     "Pillow",
     "matplotlib",
     "mkcodes==0.1.1",
+    "pytest-sugar",
 ]
 
 # Possibly required by developers of ocean-lib:

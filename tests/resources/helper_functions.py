@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import contextlib
 import json
 import logging
 import logging.config
@@ -9,12 +10,13 @@ import os
 import secrets
 from datetime import datetime
 from decimal import Decimal
+import time
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
 from brownie import network
-from brownie.network import accounts
+from brownie.network import accounts, web3
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -380,3 +382,36 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         "validUntil": valid_until,
         "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
     }
+
+
+@contextlib.contextmanager
+def delay_transaction():
+    yield
+    time.sleep(2)
+
+
+def confirm_failed(tx, message):
+    chain_message = interrogate_blockchain_for_reverts(tx)
+    assert tx.status == 0
+    assert message in chain_message
+
+
+@enforce_types
+def interrogate_blockchain_for_reverts(tx) -> tuple:
+    """Interrogates the blockchain from previous block for reverts messages.
+    This approach is used due to the fact that reverted transaction do not come
+    with a specific reason of failure that can be caught.
+    """
+    previous_block = tx.block_number - 1
+
+    replay_tx = {
+        "to": tx.receiver,
+        "from": tx.sender.address,
+        "value": tx.value,
+        "data": tx.input,
+    }
+
+    try:
+        web3.eth.call(replay_tx, previous_block)
+    except ValueError as err:
+        return err.args[0]["message"]
