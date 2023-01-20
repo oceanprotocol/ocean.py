@@ -363,6 +363,7 @@ class DataNFTArguments:
                 "ignore",
                 message=".*Event log does not contain enough topics for the given ABI.*",
             )
+            assert receipt.events, "Missing NFTCreated event"
             registered_event = receipt.events["NFTCreated"]
 
         data_nft_address = registered_event["newTokenAddress"]

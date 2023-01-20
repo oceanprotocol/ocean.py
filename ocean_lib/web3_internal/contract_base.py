@@ -42,10 +42,6 @@ class ContractBase(object):
         for function in transferable:
             setattr(self, function, getattr(self.contract, function))
 
-        import pdb
-
-        pdb.set_trace()
-
     @enforce_types
     def __str__(self) -> str:
         """Returns contract `name @ address.`"""
