@@ -10,6 +10,7 @@ import os
 import secrets
 from datetime import datetime
 from decimal import Decimal
+import time
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
@@ -386,7 +387,7 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
 @contextlib.contextmanager
 def delay_transaction():
     yield
-    network.chain.mine(blocks=1)
+    time.sleep(2)
 
 
 def confirm_failed(tx, message):
@@ -413,10 +414,4 @@ def interrogate_blockchain_for_reverts(tx) -> tuple:
     try:
         web3.eth.call(replay_tx, previous_block)
     except ValueError as err:
-        if (
-            err.args[0]["message"]
-            == "int() can't convert non-string with explicit base"
-        ):
-            return None
-
         return err.args[0]["message"]
