@@ -8,8 +8,10 @@ import string
 import time
 import warnings
 
+import requests
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from brownie.network import accounts, chain, priority_fee
+from brownie.network.web3 import Web3
 from enforce_typing import enforce_types
 
 from ocean_lib.models.data_nft import DataNFTArguments
@@ -61,12 +63,6 @@ def get_wallets():
 
 
 @enforce_types
-def set_aggressive_gas_fees():
-    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    priority_fee(chain.priority_fee)
-
-
-@enforce_types
 def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     """Call wallet.transfer(), but handle several gotchas for this test use case:
     - if the test has to repeat, there are nonce errors. Avoid via unique
@@ -80,7 +76,13 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
     print("Do a send-Ether tx...")
     try:
-        alice_wallet.transfer(bob_wallet.address, f"{amt_send:.15f} ether")
+        # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+        gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
+        alice_wallet.transfer(
+            bob_wallet.address,
+            f"{amt_send:.15f} ether",
+            priority_fee=Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"),
+        )
         bob_eth_after = accounts.at(bob_wallet.address).balance()
     except ERRORS_TO_CATCH as e:
         if error_is_skippable(str(e)):
@@ -105,8 +107,15 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create() from data NFT, and wait for it to complete...")
     try:
+        # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+        gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
         data_nft = ocean.data_nft_factory.create(
-            DataNFTArguments(symbol, symbol), {"from": alice_wallet}
+            DataNFTArguments(symbol, symbol),
+            {
+                "from": alice_wallet,
+                "priority_fee": Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"),
+                "max_fee": Web3.toWei(gas_fees["fast"]["maxFee"], "gwei"),
+            },
         )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:

@@ -18,7 +18,6 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
     connect_to_network("polygon-main")
-    util.set_aggressive_gas_fees()
 
     config = get_config_dict("polygon-main")
     ocean = Ocean(config)
