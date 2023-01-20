@@ -387,7 +387,7 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
 @contextlib.contextmanager
 def delay_transaction():
     yield
-    time.sleep(2)
+    time.sleep(3)
 
 
 def confirm_failed(tx, message):
