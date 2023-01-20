@@ -4,7 +4,7 @@
 #
 import copy
 import logging
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 
@@ -166,8 +166,9 @@ class DDO(AddressCredentialMixin):
         self,
         service_id: str,
         service_endpoint: str,
-        files: List[FilesType],
+        files,
         compute_values: Optional[dict] = None,
+        timeout: Optional[int] = 3600,
     ) -> None:
         if not compute_values:
             compute_values = {
@@ -183,7 +184,7 @@ class DDO(AddressCredentialMixin):
             service_endpoint=service_endpoint,
             datatoken=self.nft_address,
             files=files,
-            timeout=3600,
+            timeout=timeout,
             compute_values=compute_values,
         )
 
