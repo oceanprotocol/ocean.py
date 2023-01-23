@@ -4,6 +4,7 @@
 #
 import pytest
 
+from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.models.dispenser import Dispenser, DispenserStatus
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
@@ -11,6 +12,7 @@ from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     delay_transaction,
     confirm_failed,
+    retry_failed_transaction,
 )
 
 
@@ -143,13 +145,18 @@ def test_main_flow_via_contract_directly(
     assert dispenser_status[2] is True
 
     # Tests consumer requests more datatokens then allowed transaction reverts
-    with delay_transaction():
-        tx = dispenser.dispense(
-            datatoken.address,
-            to_wei(20),
-            consumer_wallet.address,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "dispense",
+        dispenser,
+        datatoken.address,
+        to_wei(20),
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Amount too high")
 
     # Tests consumer requests data tokens
@@ -161,13 +168,18 @@ def test_main_flow_via_contract_directly(
     )
 
     # Tests consumer requests more datatokens then exceeds maxBalance
-    with delay_transaction():
-        tx = dispenser.dispense(
-            datatoken.address,
-            to_wei(1),
-            consumer_wallet.address,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "dispense",
+        dispenser,
+        datatoken.address,
+        to_wei(1),
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Caller balance too high")
 
     # Tests publisher deactivates the dispenser
@@ -176,23 +188,33 @@ def test_main_flow_via_contract_directly(
     assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
-    with delay_transaction():
-        tx = dispenser.dispense(
-            datatoken.address,
-            to_wei(0.00001),
-            factory_deployer_wallet.address,
-            {"from": factory_deployer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "dispense",
+        dispenser,
+        datatoken.address,
+        to_wei(0.00001),
+        factory_deployer_wallet.address,
+        wallet=factory_deployer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Dispenser not active")
 
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
-    with delay_transaction():
-        tx = dispenser.activate(
-            datatoken.address,
-            to_wei(1),
-            to_wei(1),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "activate",
+        dispenser,
+        datatoken.address,
+        to_wei(1),
+        to_wei(1),
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Invalid owner")
 
 
@@ -211,13 +233,18 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     )
 
     # Tests consumer requests data tokens but they are not minted
-    with delay_transaction():
-        tx = dispenser.dispense(
-            datatoken.address,
-            to_wei(1),
-            consumer_wallet.address,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "dispense",
+        dispenser,
+        datatoken.address,
+        to_wei(1),
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Not enough reserves")
 
     # Tests publisher mints tokens and transfer them to the dispenser.

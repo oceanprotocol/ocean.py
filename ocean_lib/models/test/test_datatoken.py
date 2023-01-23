@@ -6,6 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
+from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -13,6 +14,7 @@ from tests.resources.helper_functions import (
     get_mock_provider_fees,
     delay_transaction,
     confirm_failed,
+    retry_failed_transaction,
 )
 
 
@@ -169,16 +171,21 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
     # bad consumer signature
-    with delay_transaction():
-        tx = datatoken.orderExecuted(
-            receipt.txid,
-            provider_data,
-            provider_signed,
-            Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signed,
-            consumer_wallet.address,
-            {"from": publisher_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "orderExecuted",
+        datatoken,
+        receipt.txid,
+        provider_data,
+        provider_signed,
+        Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signed,
+        consumer_wallet.address,
+        wallet=publisher_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Consumer signature check failed")
 
     message = Web3.solidityKeccak(
@@ -188,16 +195,21 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
     # bad provider signature
-    with delay_transaction():
-        tx = datatoken.orderExecuted(
-            receipt.txid,
-            provider_data,
-            consumer_signed,
-            Web3.toHex(Web3.toBytes(text="12345")),
-            consumer_signed,
-            consumer_wallet.address,
-            {"from": publisher_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "orderExecuted",
+        datatoken,
+        receipt.txid,
+        provider_data,
+        consumer_signed,
+        Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signed,
+        consumer_wallet.address,
+        wallet=publisher_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "Provider signature check failed")
 
     # Tests reuses order
@@ -284,63 +296,111 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     datatoken = DT
 
     # Should fail to mint if wallet is not a minter
-    with delay_transaction():
-        tx = datatoken.mint(
-            consumer_wallet.address,
-            to_wei(1),
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "mint",
+        datatoken,
+        consumer_wallet.address,
+        to_wei(1),
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT MINTER")
 
     #  Should fail to set new FeeCollector if not NFTOwner
-    with delay_transaction():
-        tx = datatoken.setPaymentCollector(
-            consumer_wallet.address,
-            {"from": consumer_wallet, "required_confs": 0},
-        )
+    tx = retry_failed_transaction(
+        "setPaymentCollector",
+        datatoken,
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT PAYMENT MANAGER or OWNER")
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with delay_transaction():
-        tx = datatoken.addMinter(
-            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-        )
+    tx = retry_failed_transaction(
+        "addMinter",
+        datatoken,
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
-    with delay_transaction():
-        tx = datatoken.removeMinter(
-            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-        )
+    tx = retry_failed_transaction(
+        "removeMinter",
+        datatoken,
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with delay_transaction():
-        tx = datatoken.addPaymentManager(
-            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-        )
+    tx = retry_failed_transaction(
+        "addPaymentManager",
+        datatoken,
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    with delay_transaction():
-        tx = datatoken.removePaymentManager(
-            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-        )
+    tx = retry_failed_transaction(
+        "removePaymentManager",
+        datatoken,
+        consumer_wallet.address,
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to setData if NOT erc20Deployer
-    with delay_transaction():
-        tx = datatoken.setData(
-            Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
-        )
+    tx = retry_failed_transaction(
+        "setData",
+        datatoken,
+        Web3.toHex(text="SomeData"),
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    with delay_transaction():
-        tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
+    tx = retry_failed_transaction(
+        "cleanPermissions", datatoken, wallet=consumer_wallet, required_confs=0
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    with delay_transaction():
-        tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
+    tx = retry_failed_transaction(
+        "cleanFrom721", datatoken, wallet=consumer_wallet, required_confs=0
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "NOT 721 Contract")

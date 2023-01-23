@@ -384,10 +384,26 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
     }
 
 
-@contextlib.contextmanager
-def delay_transaction():
-    yield
-    time.sleep(2)
+def retry_failed_transaction(func_name, contract, *args, **kwargs):
+    expires_in = 1  # in seconds
+    while expires_in <= 10:
+        try:
+            func = getattr(contract, func_name)
+            kwargs["from"] = kwargs.pop("wallet")
+            tx = func(*args, dict(**kwargs))
+            tx.wait(1)
+
+            return tx
+        except TypeError as err:
+            assert (
+                "int() can't convert non-string with explicit base"
+                in err.args[0]["message"]
+            )
+            time.sleep(expires_in)
+            expires_in += 5
+            continue
+
+    return None
 
 
 def confirm_failed(tx, message):
@@ -397,7 +413,7 @@ def confirm_failed(tx, message):
 
 
 @enforce_types
-def interrogate_blockchain_for_reverts(tx) -> tuple:
+def interrogate_blockchain_for_reverts(tx) -> str:
     """Interrogates the blockchain from previous block for reverts messages.
     This approach is used due to the fact that reverted transaction do not come
     with a specific reason of failure that can be caught.

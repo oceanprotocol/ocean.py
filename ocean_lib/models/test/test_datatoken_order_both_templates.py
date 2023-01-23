@@ -6,6 +6,7 @@ from datetime import datetime
 
 import pytest
 
+from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -14,6 +15,7 @@ from tests.resources.helper_functions import (
     get_mock_provider_fees,
     delay_transaction,
     confirm_failed,
+    retry_failed_transaction,
 )
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
@@ -47,8 +49,16 @@ def test_dispense_and_order_with_non_defaults(
     # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
     # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
     # Below, we test the quirk.
-    with delay_transaction():
-        tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
+    tx = retry_failed_transaction(
+        "dispense",
+        DT,
+        to_wei(1),
+        wallet=consumer_wallet,
+        required_confs=0,
+    )
+    if not tx:
+        raise TransactionFailed("Transaction could not fetch properly after retry.")
+
     confirm_failed(tx, "This address is not allowed to request DT")
 
     consume_fee_amount = to_wei(2)
@@ -178,12 +188,17 @@ def test_buy_DT_and_order(
     assert exchange.details.with_mint
 
     if template_index == 2:
-        with delay_transaction():
-            tx = exchange.buy_DT(
-                datatoken_amt=to_wei(1),
-                max_basetoken_amt=to_wei(1),
-                tx_dict={"from": consumer_wallet, "required_confs": 0},
-            )
+        tx = retry_failed_transaction(
+            "buy_DT",
+            exchange,
+            to_wei(1),
+            to_wei(1),
+            wallet=consumer_wallet,
+            required_confs=0,
+        )
+        if not tx:
+            raise TransactionFailed("Transaction could not fetch properly after retry.")
+
         confirm_failed(tx, "This address is not allowed to swap")
 
     consume_fee_amount = to_wei(2)
