@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import contextlib
 import json
 import logging
 import logging.config
@@ -11,6 +10,7 @@ import secrets
 from datetime import datetime
 from decimal import Decimal
 import time
+from threading import Lock
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
@@ -386,7 +386,9 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
 
 def retry_failed_transaction(func_name, contract, *args, **kwargs):
     expires_in = 1  # in seconds
+    mutex = Lock()
     while expires_in <= 10:
+        mutex.acquire()
         try:
             func = getattr(contract, func_name)
             kwargs["from"] = kwargs.pop("wallet")
@@ -401,6 +403,7 @@ def retry_failed_transaction(func_name, contract, *args, **kwargs):
             )
             time.sleep(expires_in)
             expires_in += 5
+            mutex.release()
             continue
 
     return None
