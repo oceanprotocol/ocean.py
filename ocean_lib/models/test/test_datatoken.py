@@ -12,7 +12,6 @@ from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
     get_mock_provider_fees,
-    delay_transaction,
     confirm_failed,
     retry_failed_transaction,
 )

@@ -13,7 +13,6 @@ from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_mock_provider_fees,
-    delay_transaction,
     confirm_failed,
     retry_failed_transaction,
 )
