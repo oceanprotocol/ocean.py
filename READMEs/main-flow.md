@@ -78,7 +78,7 @@ OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
 ocean.OCEAN_token.approve(exchange.address, OCEAN_needed, {"from":bob})
 
 # D.4 Bob buys datatoken
-exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob})
+exchange.buy_DT(to_wei(1), consume_market_fee=0, **{"from": bob})
 ````
 
 (For more info, see [Appendix: Dispenser / Faucet Details](#appendix-faucet-details) and [Exchange Details](#appendix-exchange-details).)

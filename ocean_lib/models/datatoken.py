@@ -497,7 +497,7 @@ class Datatoken(ContractBase):
             datatoken_amt=to_wei(1),
             consume_market_fee_addr=consume_market_fees.address,
             consume_market_fee=consume_market_fees.amount,
-            tx_dict=tx_dict,
+            **tx_dict,
         )
 
         return self.start_order(

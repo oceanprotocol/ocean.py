@@ -4,6 +4,7 @@
 #
 import json
 import logging
+from inspect import signature
 import logging.config
 import os
 import secrets
@@ -392,15 +393,18 @@ def retry_failed_transaction(func_name, contract, *args, **kwargs):
         try:
             func = getattr(contract, func_name)
             kwargs["from"] = kwargs.pop("wallet")
-            tx = func(*args, dict(**kwargs))
+
+            func_params = signature(func).parameters
+            if func_params.get("kwargs"):
+                tx = func(*args, **kwargs)
+            else:
+                tx = func(*args, dict(**kwargs))
             tx.wait(1)
 
             return tx
         except TypeError as err:
-            assert (
-                "int() can't convert non-string with explicit base"
-                in err.args[0]["message"]
-            )
+            print(err)
+            assert "int() can't convert non-string with explicit base" in err.args[0]
             time.sleep(expires_in)
             expires_in += 5
             mutex.release()

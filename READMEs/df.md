@@ -101,7 +101,7 @@ OCEAN_alice = from_wei(OCEAN.balanceOf(alice))
 assert OCEAN_alice >= OCEAN_pay, f"Have just {OCEAN_alice} OCEAN"
 
 OCEAN.approve(exchange.address, to_wei(OCEAN_alice), {"from": alice})
-exchange.buy_DT(to_wei(num_consumes), {"from": alice})
+exchange.buy_DT(to_wei(num_consumes), **{"from": alice})
 
 DT_bal = from_wei(DT.balanceOf(alice))
 assert DT_bal >= num_consumes, \

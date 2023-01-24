@@ -35,7 +35,7 @@ def test_with_defaults(OCEAN, DT, alice, bob):
 
     # Bob buys 2 datatokens
     DT_bob1 = DT.balanceOf(bob)
-    _ = exchange.buy_DT(datatoken_amt=to_wei(2), tx_dict={"from": bob})
+    _ = exchange.buy_DT(datatoken_amt=to_wei(2), **{"from": bob})
     assert from_wei(DT.balanceOf(bob)) == from_wei(DT_bob1) + 2
 
     # all exchanges for this DT
@@ -166,7 +166,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
         max_basetoken_amt=MAX_UINT256,
         consume_market_fee_addr=consume_market_fee_addr,
         consume_market_fee=consume_market_fee,
-        tx_dict={"from": carlos},
+        **{"from": carlos},
     )
 
     assert DT.balanceOf(carlos) == (DT_carlos1 + DT_buy)

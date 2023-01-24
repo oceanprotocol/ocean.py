@@ -261,20 +261,25 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     if action == "buy":
         method = exchange.buy_DT
         min_or_max_bt = MAX_UINT256
+        tx = method(
+            dt_amount,
+            min_or_max_bt,
+            consume_market_swap_fee_address,
+            consume_market_swap_fee,
+            **{"from": bob},
+        )
     elif action == "sell":
         method = exchange.sell_DT
         min_or_max_bt = 0
+        tx = method(
+            dt_amount,
+            {"from": bob},
+            min_or_max_bt,
+            consume_market_swap_fee_address,
+            consume_market_swap_fee,
+        )
     else:
         raise ValueError(action)
-
-    # buy_DT() or sell_DT()
-    tx = method(
-        dt_amount,
-        {"from": bob},
-        min_or_max_bt,
-        consume_market_swap_fee_address,
-        consume_market_swap_fee,
-    )
 
     # Get balances after swap
     details = exchange.details

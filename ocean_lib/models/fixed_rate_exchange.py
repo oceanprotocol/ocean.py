@@ -184,10 +184,10 @@ class OneExchange:
     def buy_DT(
         self,
         datatoken_amt: Union[int, str],
-        tx_dict: dict,
         max_basetoken_amt=MAX_UINT256,
         consume_market_fee_addr: Optional[str] = ZERO_ADDRESS,
         consume_market_fee: Optional[Union[int, str]] = 0,
+        **kwargs,
     ):
         """
         Buy datatokens via fixed-rate exchange.
@@ -207,7 +207,8 @@ class OneExchange:
 
         details = self.details
         BT = Datatoken(self._FRE.config_dict, details.base_token)
-        buyer_addr = get_from_address(tx_dict)
+        assert isinstance(kwargs, dict)
+        buyer_addr = get_from_address(kwargs)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
         assert BT.balanceOf(buyer_addr) >= BT_needed, "not enough funds"
@@ -218,7 +219,7 @@ class OneExchange:
             max_basetoken_amt,
             consume_market_fee_addr,
             consume_market_fee,
-            tx_dict,
+            kwargs,
         )
         return tx
 
