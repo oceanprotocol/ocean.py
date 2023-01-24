@@ -387,12 +387,12 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
 
 def retry_failed_transaction(func_name, contract, *args, **kwargs):
     expires_in = 1  # in seconds
+    kwargs["from"] = kwargs.pop("wallet")
     mutex = Lock()
     while expires_in <= 10:
         mutex.acquire()
         try:
             func = getattr(contract, func_name)
-            kwargs["from"] = kwargs.pop("wallet")
 
             func_params = signature(func).parameters
             if func_params.get("kwargs"):
