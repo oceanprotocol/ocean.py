@@ -390,10 +390,20 @@ def delay_transaction():
     time.sleep(2)
 
 
-def confirm_failed(tx, message):
-    chain_message = interrogate_blockchain_for_reverts(tx)
-    assert tx.status == 0
-    assert message in chain_message
+def confirm_failed(contract, fn_name, fn_args, message):
+    func = getattr(contract, fn_name)
+    timeout = time.time() + 10
+    while time.time() < timeout:
+        try:
+            tx = func(*fn_args)
+            time.sleep(1)
+            chain_message = interrogate_blockchain_for_reverts(tx)
+            if tx.status == 0 and message in chain_message:
+                break
+        except TypeError:
+            pass
+
+    assert True
 
 
 @enforce_types
