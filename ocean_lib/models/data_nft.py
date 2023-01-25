@@ -58,20 +58,18 @@ class DataNFT(ContractBase):
         chain_id = network.chain.id
         return f"did:op:{create_checksum(self.address + str(chain_id))}"
 
-    def set_data(self, field_label:str, field_value:str, tx_dict:dict):
+    def set_data(self, field_label: str, field_value: str, tx_dict: dict):
         """Set key/value data via ERC725, with strings for key/value"""
-        field_label_hash = Web3.keccak(text=field_label) # to keccak256 hash
-        field_value_bytes = field_value.encode() # to array of bytes
-        tx = self.contract.setNewData(
-            field_label_hash, field_value_bytes, tx_dict
-        )
+        field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
+        field_value_bytes = field_value.encode()  # to array of bytes
+        tx = self.contract.setNewData(field_label_hash, field_value_bytes, tx_dict)
         return tx
 
-    def get_data(self, field_label:str) -> str:
+    def get_data(self, field_label: str) -> str:
         """Get key/value data via ERC725, with strings for key/value"""
-        field_label_hash = Web3.keccak(text=field_label) # to keccak256 hash
+        field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
         field_value_hex = self.contract.getData(field_label_hash)
-        field_value = field_value_hex.decode('ascii')
+        field_value = field_value_hex.decode("ascii")
         return field_value
 
 

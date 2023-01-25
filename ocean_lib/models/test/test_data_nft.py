@@ -794,6 +794,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20
 
+
 def test_set_get_data(data_nft, alice):
     # Key-value pair
     key = "fav_color"
