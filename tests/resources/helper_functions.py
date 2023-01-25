@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import contextlib
 import json
 import logging
 import logging.config
@@ -382,12 +381,6 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         "validUntil": valid_until,
         "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
     }
-
-
-@contextlib.contextmanager
-def delay_transaction():
-    yield
-    time.sleep(2)
 
 
 def confirm_failed(contract, fn_name, fn_args, message):
