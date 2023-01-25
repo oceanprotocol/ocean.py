@@ -796,29 +796,14 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
 def test_set_get_data(data_nft, alice):
     # Key-value pair
-    field_label = "fav_color"
-    field_value = "blue"
+    key = "fav_color"
+    value = "blue"
 
     # set data
-    data_nft.set_data(field_label, field_value, {"from": alice})
+    data_nft.set_data(key, value, {"from": alice})
 
     # retrieve data
-    field_value2 = data_nft.get_data(field_label)
+    value2 = data_nft.get_data(key)
 
     # test
-    assert field_value2 == field_value
-
-def test_set_get_encrypted_data(data_nft, alice):
-    # Key-value pair
-    field_label = "fav_color"
-    field_value = "blue"
-
-    # set data
-    data_nft.set_encrypted_data(field_label, field_value, {"from": alice})
-
-    # retrieve data
-    symkey = data_nft.get_symkey("fav_color", alice)
-    field_value2 = data_nft.get_encrypted_data(field_label, symkey)
-
-    # test
-    assert field_value2 == field_value
+    assert value2 == value

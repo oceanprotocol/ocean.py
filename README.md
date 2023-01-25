@@ -45,9 +45,11 @@ Now let's do remote flows:
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 - [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
-- [Key-value database](READMEs/key-value-flow.md) - use data NFTs to store arbitrary key-value pairs on-chain, following ERC725
-- [Profile NFTs](READMEs/profile-nfts-flow.md) - enable "login with Web3" where Dapp can access private user profile data
 
+### On-chain key-value store via data NFTs
+
+- [Sharing public data on-chain](READMEs/key-value-public.md) - e.g. public AI models
+- [Sharing private data on-chain](READMEs/key-value-private.md) - e.g. private AI models
 
 ### More types of data assets
 
