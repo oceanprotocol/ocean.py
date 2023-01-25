@@ -293,42 +293,50 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    confirm_failed(datatoken, "setPaymentCollector", args, "NOT PAYMENT MANAGER or OWNER")
+    confirm_failed(
+        datatoken, "setPaymentCollector", args, "NOT PAYMENT MANAGER or OWNER"
+    )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     args = (
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0},
+        consumer_wallet.address,
+        {"from": consumer_wallet, "required_confs": 0},
     )
     confirm_failed(datatoken, "addMinter", args, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
     args = datatoken.removeMinter(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0},
+        consumer_wallet.address,
+        {"from": consumer_wallet, "required_confs": 0},
     )
     confirm_failed(datatoken, "removeMinter", args, "NOT DEPLOYER ROLE")
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     args = (
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0},
+        consumer_wallet.address,
+        {"from": consumer_wallet, "required_confs": 0},
     )
     confirm_failed(datatoken, "addPaymentManager", args, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     args = datatoken.removePaymentManager(
-        consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0},
+        consumer_wallet.address,
+        {"from": consumer_wallet, "required_confs": 0},
     )
     confirm_failed(datatoken, "removePaymentManager", args, "NOT DEPLOYER ROLE")
 
     # Should fail to setData if NOT erc20Deployer
-    args = (
-        Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
-    )
+    args = (Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0})
     confirm_failed(datatoken, "setData", args, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    args = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0},)
+    args = datatoken.cleanPermissions(
+        {"from": consumer_wallet, "required_confs": 0},
+    )
     confirm_failed(datatoken, "cleanPermissions", args, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    args = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0},)
+    args = datatoken.cleanFrom721(
+        {"from": consumer_wallet, "required_confs": 0},
+    )
     confirm_failed(datatoken, "cleanFrom721", args, "NOT 721 Contract")

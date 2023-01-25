@@ -45,9 +45,7 @@ def test_permissions(
     assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
 
     # Tests failing clearing permissions: not the owner
-    args = (
-        {"from": another_consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": another_consumer_wallet, "required_confs": 0},)
 
     confirm_failed(data_nft, "cleanPermissions", args, "not NFTOwner")
 
@@ -63,9 +61,7 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    args = (
-        {"from": another_consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": another_consumer_wallet, "required_confs": 0},)
 
     confirm_failed(data_nft, "cleanPermissions", args, "not NFTOwner")
 
@@ -118,9 +114,7 @@ def test_permissions(
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
     # not the owner
-    args = (
-        publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
-    )
+    args = (publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0})
     confirm_failed(data_nft, "removeManager", args, "not NFTOwner")
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
@@ -567,7 +561,9 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
         1,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    confirm_failed(data_nft, "transferFrom", args, "transfer caller is not owner nor approved")
+    confirm_failed(
+        data_nft, "transferFrom", args, "transfer caller is not owner nor approved"
+    )
 
     # Tests for safe transfer as well
     args = (
@@ -576,7 +572,9 @@ def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_
         1,
         {"from": consumer_wallet, "required_confs": 0},
     )
-    confirm_failed(data_nft, "safeTransferFrom", args, "transfer caller is not owner nor approved")
+    confirm_failed(
+        data_nft, "safeTransferFrom", args, "transfer caller is not owner nor approved"
+    )
 
 
 def test_transfer_nft(
@@ -814,7 +812,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     args = (
         publisher_wallet.address,
         10,
-        {"from": publisher_wallet, "required_confs": 0}
+        {"from": publisher_wallet, "required_confs": 0},
     )
 
     confirm_failed(datatoken, "mint", args, "NOT MINTER")
