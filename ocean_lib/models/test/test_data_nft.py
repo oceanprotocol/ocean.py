@@ -509,7 +509,7 @@ def test_erc721_datatoken_functions(
     datatoken.mint(
         consumer_wallet.address,
         to_wei(0.2),
-        {"from": publisher_wallet, "required_confs": 0},
+        {"from": publisher_wallet},
     )
     assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.2)
     assert data_nft.ownerOf(1) == publisher_wallet.address
