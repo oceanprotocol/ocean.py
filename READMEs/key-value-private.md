@@ -46,7 +46,7 @@ In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
 from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), alice)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), {"from": alice})
 ```
 
 ## 3. Encrypt & store on-chain AI model
@@ -68,7 +68,7 @@ symkey = crypto.calc_symkey(data_nft.address + model_label + alice.private_key)
 model_value_symenc = crypto.sym_encrypt(model_value, symkey)
 
 # Save model to chain
-data_nft.set_data(model_label, model_value_symenc, tx_dict={"from": alice})
+data_nft.set_data(model_label, model_value_symenc, {"from": alice})
 ```
 
 ## 4. Share encryption key via chain

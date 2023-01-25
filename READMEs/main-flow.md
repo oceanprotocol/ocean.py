@@ -25,7 +25,7 @@ name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 #create data asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, alice)
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
 
 #print
 print("Just published asset:")
@@ -60,7 +60,7 @@ datatoken.mint(bob, to_wei(1), {"from": alice})
 datatoken.mint(alice, to_wei(1), {"from": alice})
 datatoken.transfer(bob, to_wei(1), {"from": alice})
 
-#Approach C: Alice posts for free, via a faucet; Bob requests & gets
+#Approach C: Alice posts for free, via a dispenser / faucet; Bob requests & gets
 datatoken.create_dispenser({"from": alice})
 datatoken.dispense(to_wei(1), {"from": bob})
 
@@ -81,7 +81,7 @@ ocean.OCEAN_token.approve(exchange.address, OCEAN_needed, {"from":bob})
 exchange.buy_DT(to_wei(1), consume_market_fee=0, tx_dict={"from": bob})
 ````
 
-(For more info, see [Appendix: Faucet Details](#appendix-faucet-details) and [Exchange Details](#appendix-exchange-details).)
+(For more info, see [Appendix: Dispenser / Faucet Details](#appendix-faucet-details) and [Exchange Details](#appendix-exchange-details).)
 
 ## 3. Bob consumes the dataset
 
@@ -90,7 +90,7 @@ Bob now has the datatoken for the dataset! Time to download the dataset and use 
 In the same Python console:
 ```python
 # Bob sends a datatoken to the service to get access
-order_tx_id = ocean.assets.pay_for_access_service(ddo, bob)
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
 
 # Bob downloads the file. If the connection breaks, Bob can try again
 asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
@@ -141,17 +141,17 @@ datatoken = Datatoken(config, datatoken_address)
 
 ### Data NFT Interface
 
-Data NFTs implement ERC721 functionality, and ERC725 which extends it.
+Data NFTs implement ERC721 functionality, ERC725 which extends it, and data management functionality on top.
 
 ERC721:
 - Basic spec of a non-fungible token (NFT)
 - Official spec is at [erc721.org](https://erc721.org/)
-- Solidity interface is in Ocean contracts repo as [IERC721Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC721Template.sol)
+- Solidity interface: [IERC721Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC721Template.sol)
 
 ERC725:
 - ERC725X is execution, and Y is key-value store
 - Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-725)
-- Solidity interface is in Ocean contracts repo as [IERC725X.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725X.sol) (execution) and [IERC725Y.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725Y.sol) (key-value store)
+- Solidity interface: [IERC725X.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725X.sol) (execution) and [IERC725Y.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725Y.sol) (key-value store)
 
 The `data_nft` is a Python object of class [DataNFT](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). Thanks to Brownie, the DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method! Thank you, Brownie :)
 
@@ -163,18 +163,26 @@ Ocean's architecture allows for >1 implementations of ERC721, each with its own 
 
 ### Datatoken Interface
 
-Datatokens implement ERC20 (fungible token standard) functionality:
+Datatokens implement ERC20 functionality, and data management functionality on top.
+
+ERC20:
+- Basic spec of a fungible token standard
 - Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-20)
-- Solidity interface is in Ocean contracts repo as [IERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC20Template.sol)
+- Solidity interface: [IERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC20Template.sol)
 
-Python `datatoken` objects are of Python class [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). Thanks to Brownie, these classes have a Python method for every Solidity method.
+Ocean's architecture allows for >1 implementations of ERC20, each with its own "template". Here are the templates so far (we can expect more over time).
 
-Besides that, Datatoken class implements more methods like `start_order()`, `create_exchange()`, and `create_dispenser()` to enhance developer experience.
+Template 1:
+- Solidity: [ERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol)
+- Python wrapper: [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). It has a Python method for every Solidity method, via Brownie.
+- Implements methods like `start_order()`, `create_exchange()`, and `create_dispenser()` to enhance developer experience.
 
-Ocean's architecture allows for >1 implementations of ERC20, each with its own "template". Here are the templates:
-- Template 1: [ERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol), exposed as Python class [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py)
-- Template 2: [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol), exposed as Python class [DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken_enterprise.py). It inherits from template 1 in Solidity and in Python. It adds new methods: a single tx for "dispense & order", and single tx for "buy and order".
-- (we can expect more templates in the future)
+Template 2:
+- Inherits from template 1 in both Solidity and Python.
+- Solidity: [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol)
+- Python wrapper: [DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken_enterprise.py)
+- New method: [`buy_DT_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L20). This uses just 1 tx to do both actions at once (versus 2 txs for template 1).
+- New method: [`dispense_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). Similarly, uses just 1 tx.
 
 
 ### DIDs and DDOs
@@ -219,7 +227,7 @@ url_file = UrlFile(
 from ocean_lib.models.datatoken import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
-    alice,
+    {"from": alice},
     datatoken_args=[DatatokenArguments(files=[url_file])],
 )
 ```
@@ -240,7 +248,7 @@ You can control this during create():
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
 from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), alice)
+data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), {"from": alice})
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -251,23 +259,42 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 
 ```python
 from ocean_lib.models.datatoken import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), alice)
+datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), {"from": alice})
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
 
-<h2 id="appendix-faucet-details">Appendix: Faucet Details</h4>
+<h2 id="appendix-faucet-details">Appendix: Dispenser / Faucet Details</h4>
 
-### Faucet Flexibility
 
-`create_dispenser()` can take these optional arguments:
+### Dispenser Interface
+
+We access dispenser (faucet) functionality from two complementary places: datatokens, and `Dispenser` object.
+
+A given datatoken can create exactly one dispenser for that datatoken.
+
+**Interface via datatokens:** 
+- [`datatoken.create_dispenser()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L337) - implemented in Datatoken, inherited by DatatokenEnterprise
+- [`datatoken.dispense()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L380) - ""
+- [`datatoken.dispense_and_order()` - implemented in Datatoken](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L439) and [in DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). The latter only needs one tx to dispense and order.
+- [`datatoken.dispenser_status()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L403) - returns a [`DispenserStatus`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/dispenser.py#L16) object
+
+**Interface via [`Dispenser`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/dispenser.py) Python class:**
+- You can access its instance via `ocean.dispenser`.
+- `Dispenser` wraps [Dispenser.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/dispenser/Dispenser.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods (via Brownie).
+- Note that `Dispenser` is _global_ across all datatokens. Therefore calls to the Solidity contract - or Python calls that pass through - provide the datatoken address as an argument.
+- Example call: `ocean.dispenser.setAllowedSwapper(datatoken_addr, ZERO_ADDRESS, {"from": alice})`
+
+### Flexibility in Creating a Dispenser
+
+`datatoken.create_dispenser()` can take these optional arguments:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
 
-A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`
+A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
-### Faucet Tips & Tricks
+### Dispenser Status 
 
 To learn about dispenser status:
 
@@ -290,15 +317,51 @@ DispenserStatus:
   allowed_swapper = anyone can request
 ```
 
+### Who can request tokens from a faucet
+
+Template 1 (`Datatoken`):
+- Anyone can call `datatoken.dispense()` to request tokens.
+
+Template 2 (`DatatokenEnterprise`): 
+- Option A. Anyone can `datatoken.dispense_and_order()` to request tokens, and order.
+- Option B. Not anyone can call `datatoken.dispense()` by default. To allow anyone, the publisher does: `ocean.dispenser.setAllowedSwapper(datatoken_address, ZERO_ADDRESS, {"from" : publisher_wallet})`, where `ZERO_ADDRESS` is `0x00..00`.
+
+Details: `Dispenser.sol` has an attribute `allowed_swapper` to govern who can call `dispense()`. A value of `0x00...0` allows anyone. Template 1 has `ZERO_ADDRESS` as a default value; template 2 does not. However, template 2 allows anyone to call `dispense_and_order()`, independent of the value of `allowed_swapper`.
 
 <h2 id="appendix-exchange-details">Appendix: Exchange Details</h4>
 
-### Exchange Flexibility
+### Exchange Interface
+
+We access exchange functionality from three complementary places: datatokens, [`OneExchange`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L117) object, and (if needed) [`FixedRateExchange`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L106) object.
+
+A given datatoken can create one or more `OneExchange` objects.
+
+**Interface via datatokens:**
+- [`datatoken.create_exchange()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L237) - Returns a `OneExchange` object.
+- [`datatoken.get_Exchanges()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L312) - Returns a list of `OneExchange` objects.
+
+Once you've got a `OneExchange` object, most interactions are with it.
+
+**Interface via [`OneExchange`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L117) Python class:**
+- [`BT_needed()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L150) - # basetokens (BTs) needed, to buy target # datatokens (DTs)
+- [`BT_received()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L167) - # BTs you receive, in selling given # DTs
+- [`buy_DT()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L184) - spend BTs to buy DTs
+- [`sell_DT()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L230) - sell DTs, receive back BTs
+- and more, including get/set rate (price), toggle on/off, get/set fees, update balances
+
+While most interactions are with `OneExchange` described above, sometimes we may want to access the `FixedRateExchange` object.
+
+**Interface via [`FixedRateExchange`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L106) Python class:**
+- You can access its instance via `ocean.fixed_rate_exchange`.
+- `FixedRateExchange` wraps [FixedRateExchange.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/fixedRate/FixedRateExchange.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods (via Brownie).
+- Note that `FixedRateExchange` is _global_ across all datatokens. Therefore calls to the Solidity contract - or Python calls that pass through - provide the exchange id address as an argument. It's exchange id, and not datatoken, because there may be >1 exchange for a given datatoken.
+- Example call: `ocean.fixed_rate_exchange.getRate(exchange_id)` returns rate (price).
+
+### Flexibility in Creating an Exchange
 
 When Alice posted the dataset for sale via `create_exchange()`, she used OCEAN. Alternatively, she could have used H2O, the OCEAN-backed stable asset. Or, she could have used USDC, DAI, RAI, WETH, or other, for a slightly higher fee (0.2% vs 0.1%).
 
-
-### Exchange Tips & Tricks
+### Exchange Status
 
 Here's how to see all the exchanges that list the datatoken. In the Python console:
 ```python
@@ -341,6 +404,12 @@ ExchangeFeeInfo:
 
 <h2 id="appendix-consume-details">Appendix: Consume Details</h4>
 
+### Consume General
+
+To "consume" an asset typically means placing an "order", where you pass in 1.0 datatokens and get back a url. Then, you typically download the asset from the url.
+
+For more information, search for "order" in this README or related code.
+
 ### About ARFF format
 
 The file is in ARFF format, used by some AI/ML tools. Our example has two input variables (x0, x1) and one output.
@@ -361,3 +430,27 @@ The file is in ARFF format, used by some AI/ML tools. Our example has two input 
 -3.9286,0.0000,206.1783
 ...
 ```
+
+<h2 id="appendix-consume-details">Appendix: Ocean Instance</h4>
+
+At the beginning of most flows, we create an `ocean` object, which is an instance of class [`Ocean`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py). It exposes useful information, including the following.
+
+Config dict attribute:
+- `ocean.config_dict` or `ocean.config -> dict` 
+
+OCEAN token:
+- `ocean.OCEAN_address -> str`
+- `ocean.OCEAN_token` or `ocean.OCEAN -> Datatoken`
+
+Ocean smart contracts:
+- `ocean.data_nft_factory -> DataNFTFactoryContract`
+- `ocean.dispenser -> Dispenser` - faucets for free data
+- `ocean.fixed_rate_exchange -> FixedRateExchange` - exchanges for priced data
+
+Simple getters:
+- `ocean.get_nft_token(self, token_address: str) -> DataNFT`
+- `ocean.get_datatoken(self, token_address: str) -> Datatoken`
+- `ocean.def get_user_orders(self, address: str, datatoken: str)`
+- (and some others that are more complex)
+
+It also provides Python wrappers to veOCEAN and Data Farming contracts. See [df.md](df.md) for details. 

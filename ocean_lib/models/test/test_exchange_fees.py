@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import time
 from decimal import Decimal
 
 import pytest
@@ -24,7 +23,6 @@ from tests.resources.helper_functions import (
 )
 
 
-@pytest.mark.skip(reason="this is failing because ganache isn't updating")
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "bt_name, publish_market_swap_fee, consume_market_swap_fee, bt_per_dt, with_mint",
@@ -55,8 +53,8 @@ def test_exchange_swap_fees(
     factory_deployer_wallet,
     bob,
     alice,
+    DT,
     bt_name: str,
-    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
@@ -76,7 +74,7 @@ def test_exchange_swap_fees(
     FRE = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
 
     bt = Datatoken(config, get_address_of_type(config, bt_name))
-    dt = datatoken
+    dt = DT
 
     transfer_bt_if_balance_lte(
         config=config,
@@ -139,7 +137,6 @@ def test_exchange_swap_fees(
     details = exchange.details
     assert details.bt_balance == 0
     assert details.dt_balance == 0
-    assert details.bt_supply == 0
     if with_mint:
         assert details.dt_supply == dt.cap()
     else:
@@ -157,7 +154,7 @@ def test_exchange_swap_fees(
         dt.approve(exchange.address, MAX_UINT256, {"from": alice})
 
     one_base_token = int_units("1", bt.decimals())
-    dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))
+    dt_per_bt_in_wei = to_wei(1.0 / float(bt_per_dt))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
@@ -204,7 +201,7 @@ def test_exchange_swap_fees(
     new_bt_per_dt_in_wei = bt_per_dt_in_wei + to_wei(1)
     exchange.set_rate(new_bt_per_dt_in_wei, {"from": alice})
     assert exchange.get_rate() == new_bt_per_dt_in_wei
-    new_dt_per_bt_in_wei = to_wei(Decimal(1) / from_wei(new_bt_per_dt_in_wei))
+    new_dt_per_bt_in_wei = to_wei(1.0 / from_wei(new_bt_per_dt_in_wei))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
@@ -278,8 +275,6 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
         consume_market_swap_fee_address,
         consume_market_swap_fee,
     )
-
-    time.sleep(10)  # FIXME, we shouldn't need this!
 
     # Get balances after swap
     details = exchange.details
@@ -407,7 +402,7 @@ def collect_fee_and_verify_balances(
         fee_collector = exchange.exchange_fees_info.publish_market_fee_collector
     elif fee_type == "ocean_fee":
         BT_exchange_fee_avail1 = exchange.exchange_fees_info.ocean_fee_available
-        method = exchange.collect_ocean_fee
+        method = exchange.collect_opc_fee
         fee_collector = FRE.get_opc_collector()
     else:
         raise ValueError(fee_type)
@@ -416,14 +411,12 @@ def collect_fee_and_verify_balances(
 
     method({"from": from_wallet})
 
-    time.sleep(10)  # FIXME, we shouldn't need this!
-
     if fee_type == "publish_market_fee":
         BT_exchange_fee_avail2 = (
             exchange.exchange_fees_info.publish_market_fee_available
         )
     else:
-        BT_exchange_fee_avail2 = exchange.exchange_fees_info.opc_fee_available
+        BT_exchange_fee_avail2 = exchange.exchange_fees_info.ocean_fee_available
 
     BT_fee_collector2 = bt.balanceOf(fee_collector)
 

@@ -9,7 +9,11 @@ from web3.main import Web3
 from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.helper_functions import get_mock_provider_fees
+from tests.resources.helper_functions import (
+    get_mock_provider_fees,
+    delay_transaction,
+    confirm_failed,
+)
 
 
 @pytest.mark.unit
@@ -93,13 +97,14 @@ def test_main(
     assert not permissions[DatatokenRoles.MINTER]
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+    # not erc20 deployer role
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            another_consumer_wallet,
+            {"from": another_consumer_wallet, "required_confs": 0},
         )
 
 
@@ -126,7 +131,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
             address=publisher_wallet.address,
             token=datatoken.address,
         ),
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
     # Check erc20 balances
     assert datatoken.balanceOf(publisher_wallet.address) == to_wei(9)
@@ -163,16 +168,18 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
 
     # Tests exceptions for order_executed
     consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
-    with pytest.raises(Exception, match="Consumer signature check failed"):
-        datatoken.orderExecuted(
+    # bad consumer signature
+    with delay_transaction():
+        tx = datatoken.orderExecuted(
             receipt.txid,
             provider_data,
             provider_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
-            {"from": publisher_wallet},
+            {"from": publisher_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "Consumer signature check failed")
 
     message = Web3.solidityKeccak(
         ["bytes"],
@@ -180,22 +187,24 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     )
     consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
 
-    with pytest.raises(Exception, match="Provider signature check failed"):
-        datatoken.orderExecuted(
+    # bad provider signature
+    with delay_transaction():
+        tx = datatoken.orderExecuted(
             receipt.txid,
             provider_data,
             consumer_signed,
             Web3.toHex(Web3.toBytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
-            {"from": publisher_wallet},
+            {"from": publisher_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "Provider signature check failed")
 
     # Tests reuses order
     receipt_interm = datatoken.reuse_order(
         receipt.txid,
         provider_fees=provider_fees,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
     reused_event = receipt_interm.events["OrderReused"]
     assert reused_event, "Cannot find OrderReused event"
@@ -275,46 +284,63 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     datatoken = DT
 
     # Should fail to mint if wallet is not a minter
-    with pytest.raises(Exception, match="NOT MINTER"):
-        datatoken.mint(
+    with delay_transaction():
+        tx = datatoken.mint(
             consumer_wallet.address,
             to_wei(1),
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT MINTER")
 
     #  Should fail to set new FeeCollector if not NFTOwner
-    with pytest.raises(Exception, match="NOT PAYMENT MANAGER or OWNER"):
-        datatoken.setPaymentCollector(
+    with delay_transaction():
+        tx = datatoken.setPaymentCollector(
             consumer_wallet.address,
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT PAYMENT MANAGER or OWNER")
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.addMinter(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.removeMinter(consumer_wallet.address, {"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.removeMinter(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.addPaymentManager(consumer_wallet.address, {"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.addPaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.removePaymentManager(
-            consumer_wallet.address, {"from": consumer_wallet}
+    with delay_transaction():
+        tx = datatoken.removePaymentManager(
+            consumer_wallet.address, {"from": consumer_wallet, "required_confs": 0}
         )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to setData if NOT erc20Deployer
-    with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.setData(Web3.toHex(text="SomeData"), {"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.setData(
+            Web3.toHex(text="SomeData"), {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    with pytest.raises(Exception, match="not NFTOwner"):
-        datatoken.cleanPermissions({"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.cleanPermissions({"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    with pytest.raises(Exception, match="NOT 721 Contract"):
-        datatoken.cleanFrom721({"from": consumer_wallet})
+    with delay_transaction():
+        tx = datatoken.cleanFrom721({"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "NOT 721 Contract")

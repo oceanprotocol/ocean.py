@@ -37,7 +37,7 @@ contract_abi = {
 		}
 
 #create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, alice)
+(data_nft, datatoken, ddo) = ocean.assets.create_onchain_asset(name, contract_address, contract_abi, {"from": alice})
 print(f"Just published asset, with did={ddo.did}")
 ```
 

@@ -2,6 +2,9 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
+from base64 import b64decode
+
 import pytest
 from web3 import Web3
 
@@ -9,6 +12,7 @@ from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
+from tests.resources.helper_functions import delay_transaction, confirm_failed
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
@@ -32,11 +36,21 @@ def test_permissions(
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
-    assert data_nft.tokenURI(1) == "https://oceanprotocol.com/nft/"
+    token_uri = data_nft.tokenURI(1).replace("data:application/json;base64,", "")
+    decoded_token_uri = json.loads(b64decode(token_uri))
 
-    # Tests failing clearing permissions
-    with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.cleanPermissions({"from": another_consumer_wallet})
+    assert decoded_token_uri["name"] == "NFT"
+    assert decoded_token_uri["symbol"] == "NFTSYMBOL"
+    assert decoded_token_uri["background_color"] == "141414"
+    assert decoded_token_uri["image_data"].startswith("data:image/svg+xm")
+
+    # Tests failing clearing permissions: not the owner
+    with delay_transaction():
+        tx = data_nft.cleanPermissions(
+            {"from": another_consumer_wallet, "required_confs": 0}
+        )
+
+    confirm_failed(tx, "not NFTOwner")
 
     # Tests clearing permissions
     data_nft.addToCreateERC20List(publisher_wallet.address, {"from": publisher_wallet})
@@ -50,8 +64,12 @@ def test_permissions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
-    with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.cleanPermissions({"from": another_consumer_wallet})
+    with delay_transaction():
+        tx = data_nft.cleanPermissions(
+            {"from": another_consumer_wallet, "required_confs": 0}
+        )
+
+    confirm_failed(tx, "not NFTOwner")
 
     data_nft.cleanPermissions({"from": publisher_wallet})
 
@@ -75,8 +93,15 @@ def test_permissions(
     assert not (
         data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
     )
-    with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.addManager(another_consumer_wallet.address, {"from": consumer_wallet})
+    # not the owner
+    with delay_transaction():
+        tx = data_nft.addManager(
+            another_consumer_wallet.address,
+            {"from": consumer_wallet, "required_confs": 0},
+        )
+
+    confirm_failed(tx, "not NFTOwner")
+
     assert not (
         data_nft.getPermissions(another_consumer_wallet.address)[
             DataNFTPermissions.MANAGER
@@ -94,8 +119,13 @@ def test_permissions(
     # Tests failing removing a manager if it has not the NFT owner role
     data_nft.addManager(consumer_wallet.address, {"from": publisher_wallet})
     assert data_nft.getPermissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
-    with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.removeManager(publisher_wallet.address, {"from": consumer_wallet})
+
+    # not the owner
+    with delay_transaction():
+        tx = data_nft.removeManager(
+            publisher_wallet.address, {"from": consumer_wallet, "required_confs": 0}
+        )
+    confirm_failed(tx, "not NFTOwner")
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Tests removing the NFT owner from the manager role
@@ -112,14 +142,17 @@ def test_permissions(
             DataNFTPermissions.MANAGER
         ]
     )
-    with pytest.raises(Exception, match="NOT MANAGER"):
-        data_nft.executeCall(
+
+    # not manager
+    with delay_transaction():
+        tx = data_nft.executeCall(
             0,
             consumer_wallet.address,
             10,
             Web3.toHex(text="SomeData"),
-            {"from": another_consumer_wallet},
+            {"from": another_consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT MANAGER")
 
     # Tests calling execute_call with a manager role
     assert data_nft.getPermissions(publisher_wallet.address)[DataNFTPermissions.MANAGER]
@@ -148,20 +181,25 @@ def test_permissions(
             DataNFTPermissions.STORE
         ]
     )
-    with pytest.raises(Exception, match="NOT STORE UPDATER"):
-        data_nft.setNewData(
+
+    # not store updater
+    with delay_transaction():
+        tx = data_nft.setNewData(
             b"ARBITRARY_KEY",
             b"SomeData",
-            {"from": another_consumer_wallet},
+            {"from": another_consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT STORE UPDATER")
 
     # Tests failing setting ERC20 data
-    with pytest.raises(Exception, match="NOT ERC20 Contract"):
-        data_nft.setDataERC20(
+    with delay_transaction():
+        tx = data_nft.setDataERC20(
             b"FOO_KEY",
             b"SomeData",
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT ERC20 Contract")
+
     assert data_nft.getData(b"FOO_KEY").hex() == b"".hex()
 
 
@@ -291,8 +329,9 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
         ]
     )
 
-    with pytest.raises(Exception, match="NOT METADATA_ROLE"):
-        data_nft.setMetaData(
+    # not metadata role
+    with delay_transaction():
+        tx = data_nft.setMetaData(
             1,
             "http://myprovider:8030",
             b"0x123",
@@ -300,8 +339,9 @@ def test_fails_update_metadata(consumer_wallet, publisher_wallet, config, data_n
             BLOB,
             BLOB,
             [],
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "NOT METADATA_ROLE")
 
 
 @pytest.mark.unit
@@ -323,7 +363,7 @@ def test_create_datatoken(
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert datatoken, "Could not create ERC20."
 
@@ -337,7 +377,7 @@ def test_create_datatoken(
             bytess=[b""],
             cap=to_wei(0.1),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert dt_ent, "Could not create datatoken Enterprise with explicit parameters"
 
@@ -347,7 +387,7 @@ def test_create_datatoken(
             symbol="DatatokenEnterpriseDT1Symbol",
             cap=to_wei(0.1),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert dt_ent, "Could not create datatoken Enterprise with implicit parameters."
 
@@ -368,7 +408,7 @@ def test_create_datatoken_with_usdc_order_fee(
                 amount=publish_market_order_fee_amount_in_wei,
             ),
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
 
     # Check publish fee info
@@ -406,7 +446,7 @@ def test_create_datatoken_with_non_owner(
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     assert dt, "Failed to create ERC20 token."
 
@@ -432,14 +472,15 @@ def test_fail_creating_erc20(
             DataNFTPermissions.DEPLOY_DATATOKEN
         ]
     )
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+    # not erc deployer role
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 name="DT1",
                 symbol="DT1Symbol",
                 minter=publisher_wallet.address,
             ),
-            consumer_wallet,
+            {"from": consumer_wallet, "required_confs": 0},
         )
 
 
@@ -471,18 +512,19 @@ def test_erc721_datatoken_functions(
     assert data_nft.tokenURI(1) == registered_event["tokenURI"]
 
     # Tests failing setting token URI by another user
-    with pytest.raises(Exception, match="not NFTOwner"):
-        data_nft.setTokenURI(
+    with delay_transaction():
+        tx = data_nft.setTokenURI(
             1,
             "https://foourl.com/nft/",
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "not NFTOwner")
 
     # Tests transfer functions
     datatoken.mint(
         consumer_wallet.address,
         to_wei(0.2),
-        {"from": publisher_wallet},
+        {"from": publisher_wallet, "required_confs": 0},
     )
     assert datatoken.balanceOf(consumer_wallet.address) == to_wei(0.2)
     assert data_nft.ownerOf(1) == publisher_wallet.address
@@ -504,14 +546,15 @@ def test_erc721_datatoken_functions(
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
-    with pytest.raises(Exception, match="NOT MINTER"):
-        datatoken.mint(
-            consumer_wallet.address,
-            to_wei(1),
-            {"from": consumer_wallet},
-        )
+
+    # not minter
+    tx = datatoken.mint(
+        consumer_wallet.address,
+        to_wei(1),
+        {"from": consumer_wallet, "required_confs": 0},
+    )
 
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
     datatoken.mint(
@@ -525,28 +568,25 @@ def test_erc721_datatoken_functions(
 @pytest.mark.unit
 def test_fail_transfer_function(consumer_wallet, publisher_wallet, config, data_nft):
     """Tests failure of using the transfer functions."""
-    with pytest.raises(
-        Exception,
-        match="transfer caller is not owner nor approved",
-    ):
-        data_nft.transferFrom(
+    # transfer caller is not owner nor approved
+    with delay_transaction():
+        tx = data_nft.transferFrom(
             publisher_wallet.address,
             consumer_wallet.address,
             1,
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "transfer caller is not owner nor approved")
 
     # Tests for safe transfer as well
-    with pytest.raises(
-        Exception,
-        match="transfer caller is not owner nor approved",
-    ):
-        data_nft.safeTransferFrom(
+    with delay_transaction():
+        tx = data_nft.safeTransferFrom(
             publisher_wallet.address,
             consumer_wallet.address,
             1,
-            {"from": consumer_wallet},
+            {"from": consumer_wallet, "required_confs": 0},
         )
+    confirm_failed(tx, "transfer caller is not owner nor approved")
 
 
 def test_transfer_nft(
@@ -565,7 +605,7 @@ def test_transfer_nft(
             "NFTtT",
             additional_datatoken_deployer=consumer_wallet.address,
         ),
-        publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -587,7 +627,7 @@ def test_transfer_nft(
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
     data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFT"), publisher_wallet
+        DataNFTArguments("NFT1", "NFT"), {"from": publisher_wallet}
     )
 
     receipt = data_nft.safeTransferFrom(
@@ -611,7 +651,7 @@ def test_transfer_nft(
                 address=publisher_wallet.address,
             ),
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -701,42 +741,42 @@ def test_fail_create_datatoken(
 ):
     """Tests multiple failures for creating ERC20 token."""
     data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), publisher_wallet
+        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
     )
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    with pytest.raises(Exception, match="Template index doesnt exist"):
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 template_index=0,
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            consumer_wallet,
+            {"from": consumer_wallet, "required_confs": 0},
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    with pytest.raises(Exception, match="Template index doesnt exist"):
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 template_index=3,
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            consumer_wallet,
+            {"from": consumer_wallet, "required_confs": 0},
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 template_index=1,
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            another_consumer_wallet,
+            {"from": another_consumer_wallet, "required_confs": 0},
         )
 
 
@@ -754,13 +794,17 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
     assert data_nft.ownerOf(1) == publisher_wallet.address
 
-    with pytest.raises(Exception, match="transfer of token that is not own"):
-        data_nft.transferFrom(
+    # transfer of token that is not own
+    with delay_transaction() as tx:
+        tx = data_nft.transferFrom(
             consumer_wallet.address,
             publisher_wallet.address,
             1,
-            {"from": publisher_wallet},
+            {"from": publisher_wallet, "required_confs": 0},
         )
+
+    confirm_failed(tx, "transfer of token that is not own")
+
     data_nft.transferFrom(
         publisher_wallet.address, consumer_wallet.address, 1, {"from": publisher_wallet}
     )
@@ -768,17 +812,24 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     assert data_nft.balanceOf(publisher_wallet.address) == 0
     assert data_nft.ownerOf(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
-    with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
+    with pytest.raises(Exception, match="new data token has no address"):
         data_nft.create_datatoken(
             DatatokenArguments(
                 name="DT1",
                 symbol="DT1Symbol",
             ),
-            publisher_wallet,
+            {"from": publisher_wallet, "required_confs": 0},
         )
 
-    with pytest.raises(Exception, match="NOT MINTER"):
-        datatoken.mint(publisher_wallet.address, 10, {"from": publisher_wallet})
+    # not minter
+    with delay_transaction():
+        tx = datatoken.mint(
+            publisher_wallet.address,
+            10,
+            {"from": publisher_wallet, "required_confs": 0},
+        )
+
+    confirm_failed(tx, "NOT MINTER")
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(
@@ -786,7 +837,7 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
             name="DT1",
             symbol="DT1Symbol",
         ),
-        consumer_wallet,
+        {"from": consumer_wallet},
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 

@@ -9,7 +9,12 @@ import pytest
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_mock_provider_fees,
+    delay_transaction,
+    confirm_failed,
+)
 
 valid_until = int(datetime(2032, 12, 31).timestamp())
 
@@ -42,9 +47,9 @@ def test_dispense_and_order_with_non_defaults(
     # ALLOWED_SWAPPER == ZERO means anyone should be able to request dispense
     # However, ERC20TemplateEnterprise.sol has a quirk where this isn't allowed
     # Below, we test the quirk.
-    match_s = "This address is not allowed to request DT"
-    with pytest.raises(Exception, match=match_s):
-        DT.dispense(to_wei(1), {"from": consumer_wallet})
+    with delay_transaction():
+        tx = DT.dispense(to_wei(1), {"from": consumer_wallet, "required_confs": 0})
+    confirm_failed(tx, "This address is not allowed to request DT")
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -98,7 +103,7 @@ def test_dispense_and_order_with_non_defaults(
             address=consume_fee_address,
             token=DAI.address,
         ),
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
 
     assert tx
@@ -137,7 +142,7 @@ def test_dispense_and_order_with_defaults(
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fees,
-        transaction_parameters={"from": publisher_wallet},
+        tx_dict={"from": publisher_wallet},
     )
 
     assert tx
@@ -173,12 +178,13 @@ def test_buy_DT_and_order(
     assert exchange.details.with_mint
 
     if template_index == 2:
-        with pytest.raises(Exception, match="This address is not allowed to swap"):
-            exchange.buy_DT(
+        with delay_transaction():
+            tx = exchange.buy_DT(
                 datatoken_amt=to_wei(1),
                 max_basetoken_amt=to_wei(1),
-                tx_dict={"from": consumer_wallet},
+                tx_dict={"from": consumer_wallet, "required_confs": 0},
             )
+        confirm_failed(tx, "This address is not allowed to swap")
 
     consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
@@ -219,7 +225,6 @@ def test_buy_DT_and_order(
 
     consume_bal1 = DAI.balanceOf(consume_fee_address)
     publish_bal1 = USDC.balanceOf(consumer_wallet.address)
-    provider_fee_bal1 = USDC.balanceOf(another_consumer_wallet.address)
 
     args = {
         "consumer": another_consumer_wallet.address,
@@ -230,7 +235,7 @@ def test_buy_DT_and_order(
             token=DAI.address,
         ),
         "exchange": exchange,
-        "transaction_parameters": {"from": publisher_wallet},
+        "tx_dict": {"from": publisher_wallet},
     }
 
     if template_index == 2:
@@ -245,7 +250,6 @@ def test_buy_DT_and_order(
     if template_index == 2:
         assert DT.totalSupply() == to_wei(0)
 
-    provider_fee_bal2 = USDC.balanceOf(another_consumer_wallet.address)
     consume_bal2 = DAI.balanceOf(consume_fee_address)
     publish_bal2 = USDC.balanceOf(publish_market_fees.address)
 

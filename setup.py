@@ -55,6 +55,7 @@ test_requirements = [
     "Pillow",
     "matplotlib",
     "mkcodes==0.1.1",
+    "pytest-sugar",
 ]
 
 # Possibly required by developers of ocean-lib:
@@ -104,7 +105,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='2.0.0-alpha.8',
+    version='2.0.1',
     # fmt: on
     zip_safe=False,
 )

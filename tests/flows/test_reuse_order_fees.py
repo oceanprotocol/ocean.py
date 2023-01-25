@@ -117,7 +117,7 @@ def test_reuse_order_fees(
             token=bt.address,
             amount=int_units("10", bt.decimals()),
         ),
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Reuse order where:
@@ -232,7 +232,7 @@ def reuse_order_with_mock_provider_fees(
     dt.reuse_order(
         order_tx_id=start_order_tx_id,
         provider_fees=provider_fees,
-        transaction_parameters={"from": consumer_wallet},
+        tx_dict={"from": consumer_wallet},
     )
 
     # Get balances after reuse_order
