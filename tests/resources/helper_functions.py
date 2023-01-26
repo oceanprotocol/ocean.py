@@ -389,13 +389,16 @@ def confirm_failed(contract, fn_name, fn_args, message):
     while time.time() < timeout:
         try:
             tx = func(*fn_args)
-            time.sleep(1)
             chain_message = interrogate_blockchain_for_reverts(tx)
-            if tx.status == 0 and message in chain_message:
-                break
+            if tx.status == 0 and chain_message:
+                assert message in chain_message
+                return
         except TypeError:
             pass
 
+        time.sleep(1)
+
+    # transaction or chain message could not be loaded during the allowed time
     assert True
 
 
