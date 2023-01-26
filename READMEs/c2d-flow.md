@@ -62,34 +62,26 @@ print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 
-# Set the compute values for compute service
-DATA_compute_values = {
-    "allowRawAlgorithm": False,
-    "allowNetworkAccess": True,
-    "publisherTrustedAlgorithms": [],
-    "publisherTrustedAlgorithmPublishers": [],
-}
-
-# Create the Service
-
-from ocean_lib.services.service import Service
+# Create and attach the Service
 DATA_files = [DATA_url_file]
-DATA_compute_service = Service(
-    service_id="2",
-    service_type="compute",
-    service_endpoint=ocean.config_dict["PROVIDER_URL"],
-    datatoken=DATA_datatoken.address,
-    files=DATA_files,
-    timeout=3600,
-    compute_values=DATA_compute_values,
-)
 
 # Add service and update asset
-DATA_ddo.add_service(DATA_compute_service)
+DATA_ddo.create_compute_service(
+    service_id="2",
+    service_endpoint=ocean.config_dict["PROVIDER_URL"],
+    datatoken_address=DATA_datatoken.address,
+    files=DATA_files,
+)
+
+# Update the asset
 DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
+
+To customise the privacy and accessibility of your compute service, use the `compute_values` argument in
+`create_compute_service` to set values according to the [DDO specs](https://docs.oceanprotocol.com/core-concepts/did-ddo).
+The function assumes the documented defaults.
 
 ## 3. Alice publishes an algorithm
 
