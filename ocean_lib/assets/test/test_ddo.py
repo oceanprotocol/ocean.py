@@ -128,6 +128,7 @@ def test_add_service():
 
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
+
     compute_values = {
         "namespace": "ocean-compute",
         "cpus": 2,
@@ -151,18 +152,13 @@ def test_add_service():
             },
         ],
     }
-    new_service = Service(
+    ddo.create_compute_service(
         service_id="2",
-        service_type="compute",
         service_endpoint="https://myprovider.com",
-        datatoken="0x124",
+        datatoken_address="0x124",
         files="0x0001",
-        timeout=3600,
         compute_values=compute_values,
-        name="Compute service",
-        description="Compute service",
     )
-    ddo.add_service(new_service)
     assert len(ddo.as_dictionary()["services"]) > 1
 
     expected_access_service = get_key_from_v4_sample_ddo(
