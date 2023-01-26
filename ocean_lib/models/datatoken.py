@@ -106,21 +106,26 @@ class DatatokenArguments:
                 address=wallet_address, token=OCEAN_address
             )
 
-        tx = data_nft.contract.createERC20(
-            self.template_index,
-            [self.name, self.symbol],
-            [
-                ContractBase.to_checksum_address(self.minter or wallet_address),
-                ContractBase.to_checksum_address(self.fee_manager or wallet_address),
-                self.publish_market_order_fees.address,
-                self.publish_market_order_fees.token,
-            ],
-            [self.cap, self.publish_market_order_fees.amount],
-            self.bytess,
-            tx_dict,
-        )
+        try:
+            tx = data_nft.contract.createERC20(
+                self.template_index,
+                [self.name, self.symbol],
+                [
+                    ContractBase.to_checksum_address(self.minter or wallet_address),
+                    ContractBase.to_checksum_address(
+                        self.fee_manager or wallet_address
+                    ),
+                    self.publish_market_order_fees.address,
+                    self.publish_market_order_fees.token,
+                ],
+                [self.cap, self.publish_market_order_fees.amount],
+                self.bytess,
+                tx_dict,
+            )
+        except TypeError:
+            tx = None
 
-        assert tx.status, "new data token has no address"
+        assert tx and tx.status, "new data token has no address"
 
         new_elements = [
             item for item in data_nft.getTokensList() if item not in initial_list
