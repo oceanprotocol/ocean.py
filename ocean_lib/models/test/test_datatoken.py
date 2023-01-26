@@ -97,14 +97,15 @@ def test_main(
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
     # not erc20 deployer role
+    args = (
+        DatatokenArguments(
+            name="DT1",
+            symbol="DT1Symbol",
+        ),
+        {"from": another_consumer_wallet, "required_confs": 0},
+    )
     with pytest.raises(Exception, match="new data token has no address"):
-        data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
-            {"from": another_consumer_wallet, "required_confs": 0},
-        )
+        confirm_failed(data_nft, "create_datatoken", args, "")
 
 
 def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
@@ -305,7 +306,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "addMinter", args, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
-    args = datatoken.removeMinter(
+    args = (
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
@@ -319,7 +320,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "addPaymentManager", args, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    args = datatoken.removePaymentManager(
+    args = (
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
@@ -330,13 +331,9 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "setData", args, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    args = datatoken.cleanPermissions(
-        {"from": consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": consumer_wallet, "required_confs": 0},)
     confirm_failed(datatoken, "cleanPermissions", args, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    args = datatoken.cleanFrom721(
-        {"from": consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": consumer_wallet, "required_confs": 0},)
     confirm_failed(datatoken, "cleanFrom721", args, "NOT 721 Contract")
