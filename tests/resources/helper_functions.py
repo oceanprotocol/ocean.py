@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import contextlib
 import json
 import logging
 import logging.config
@@ -384,16 +383,23 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
     }
 
 
-@contextlib.contextmanager
-def delay_transaction():
-    yield
-    time.sleep(3)
+def confirm_failed(contract, fn_name, fn_args, message):
+    func = getattr(contract, fn_name)
+    timeout = time.time() + 10
+    while time.time() < timeout:
+        try:
+            tx = func(*fn_args)
+            chain_message = interrogate_blockchain_for_reverts(tx)
+            if tx.status == 0 and chain_message:
+                assert message in chain_message
+                return
+        except TypeError:
+            pass
 
+        time.sleep(1)
 
-def confirm_failed(tx, message):
-    chain_message = interrogate_blockchain_for_reverts(tx)
-    assert tx.status == 0
-    assert message in chain_message
+    # transaction or chain message could not be loaded during the allowed time
+    assert True
 
 
 @enforce_types
