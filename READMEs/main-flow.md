@@ -287,11 +287,13 @@ A given datatoken can create exactly one dispenser for that datatoken.
 
 ### Flexibility in Creating a Dispenser
 
-`datatoken.create_dispenser()` can take these optional arguments:
+`datatoken.create_dispenser()` can take an optional parameter describing its arguments:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
+- `with_mint` - allow datatoken minting. The default is a large number.
+- `allowed_swapper` - allowed swapper address. The default is empty.
 
-A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
+A call would look like `create_dispenser({"from": alice}, DispenserArguments(max_tokens=max_tokens, max_balance=max_balance))`.
 
 
 ### Dispenser Status

@@ -4,13 +4,10 @@
 #
 import pytest
 
-from ocean_lib.models.dispenser import Dispenser, DispenserStatus
+from ocean_lib.models.dispenser import Dispenser, DispenserArguments, DispenserStatus
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from tests.resources.helper_functions import (
-    deploy_erc721_erc20,
-    confirm_failed,
-)
+from tests.resources.helper_functions import confirm_failed, deploy_erc721_erc20
 
 
 @pytest.mark.unit
@@ -101,7 +98,9 @@ def test_main_flow_via_simple_ux_and_setting_token_counts(
     max_balance = to_wei(789)  # max balance of requester
 
     # basic steps
-    datatoken.create_dispenser({"from": publisher_wallet}, max_tokens, max_balance)
+    datatoken.create_dispenser(
+        {"from": publisher_wallet}, DispenserArguments(max_tokens, max_balance)
+    )
     datatoken.dispense("3 ether", {"from": consumer_wallet})
 
     # check status
@@ -129,9 +128,7 @@ def test_main_flow_via_contract_directly(
 
     # Tests publisher creates a dispenser with minter role
     _ = datatoken.create_dispenser(
-        {"from": publisher_wallet},
-        to_wei(1),
-        to_wei(1),
+        {"from": publisher_wallet}, DispenserArguments(to_wei(1), to_wei(1))
     )
 
     # Tests publisher gets the dispenser status
@@ -200,9 +197,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
 
     datatoken.create_dispenser(
         {"from": publisher_wallet},
-        to_wei(1),
-        to_wei(1),
-        with_mint=False,
+        DispenserArguments(to_wei(1), to_wei(1), with_mint=False),
     )
 
     # Tests consumer requests data tokens but they are not minted

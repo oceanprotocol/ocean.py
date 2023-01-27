@@ -8,7 +8,7 @@ from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.dispenser import Dispenser, DispenserArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -152,10 +152,7 @@ def test_combo_functions(
             "DTP",
             fee_manager=consumer_wallet.address,
         ),
-        dispenser_max_tokens=to_wei(1),
-        dispenser_max_balance=to_wei(1),
-        dispenser_with_mint=True,
-        dispenser_allowed_swapper=ZERO_ADDRESS,
+        DispenserArguments(to_wei(1), to_wei(1)),
         tx_dict={"from": publisher_wallet},
     )
     assert data_nft_token5.contract.name() == "72120Bundle"

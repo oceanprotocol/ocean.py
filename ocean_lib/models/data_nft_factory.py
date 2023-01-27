@@ -213,10 +213,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        dispenser_max_tokens: int,
-        dispenser_max_balance: int,
-        dispenser_with_mint: bool,
-        dispenser_allowed_swapper: str,
+        dispenser_args,
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
@@ -253,10 +250,10 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             ),
             (
                 ContractBase.to_checksum_address(dispenser_address),
-                dispenser_max_tokens,
-                dispenser_max_balance,
-                dispenser_with_mint,
-                ContractBase.to_checksum_address(dispenser_allowed_swapper),
+                dispenser_args.max_tokens,
+                dispenser_args.max_balance,
+                dispenser_args.with_mint,
+                dispenser_args.allowed_swapper,
             ),
             tx_dict,
         )
