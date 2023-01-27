@@ -10,7 +10,7 @@ import warnings
 
 import requests
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
-from brownie.network import accounts, chain, priority_fee
+from brownie.network import accounts, chain
 from brownie.network.web3 import Web3
 from enforce_typing import enforce_types
 
@@ -46,9 +46,17 @@ def remote_config_polygon(tmp_path):
 @enforce_types
 def get_gas_fees_for_remote() -> tuple:
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
-    return Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"), Web3.toWei(
-        gas_fees["fast"]["maxFee"], "gwei"
+    gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
+
+    if not gas_resp or gas_resp.status_code != 200:
+        print(
+            f"Invalid response from Polygon gas station. Retry with brownie values..."
+        )
+
+        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
+
+    return Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"), Web3.toWei(
+        gas_resp.json()["fast"]["maxFee"], "gwei"
     )
 
 
