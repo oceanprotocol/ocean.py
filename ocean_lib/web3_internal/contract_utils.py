@@ -40,6 +40,7 @@ def load_contract(contract_name: str, address: Optional[str]) -> Contract:
 def get_contracts_addresses_all_networks(config: dict):
     """Get addresses, across *all* networks, from info in ADDRESS_FILE"""
     address_file = config.get("ADDRESS_FILE")
+    address_file = os.path.expanduser(address_file) if address_file else None
 
     if not address_file or not os.path.exists(address_file):
         raise Exception(f"Could not find address_file={address_file}.")
