@@ -305,7 +305,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "addMinter", args, "NOT DEPLOYER ROLE")
 
     #  Should fail to removeMinter even if it's minter
-    args = datatoken.removeMinter(
+    args = (
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
@@ -319,7 +319,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "addPaymentManager", args, "NOT DEPLOYER ROLE")
 
     # Should fail to removeFeeManager if NOT erc20Deployer
-    args = datatoken.removePaymentManager(
+    args = (
         consumer_wallet.address,
         {"from": consumer_wallet, "required_confs": 0},
     )
@@ -330,13 +330,9 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
     confirm_failed(datatoken, "setData", args, "NOT DEPLOYER ROLE")
 
     # Should fail to call cleanPermissions if NOT NFTOwner
-    args = datatoken.cleanPermissions(
-        {"from": consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": consumer_wallet, "required_confs": 0},)
     confirm_failed(datatoken, "cleanPermissions", args, "not NFTOwner")
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    args = datatoken.cleanFrom721(
-        {"from": consumer_wallet, "required_confs": 0},
-    )
+    args = ({"from": consumer_wallet, "required_confs": 0},)
     confirm_failed(datatoken, "cleanFrom721", args, "NOT 721 Contract")
