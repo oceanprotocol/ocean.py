@@ -12,7 +12,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, get_from_address
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -69,8 +69,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        wallet=None,
+        tx_dict: dict,
     ) -> str:
+        wallet_address = get_from_address(tx_dict)
         receipt = self.contract.createNftWithErc20(
             (
                 data_nft_args.name,
@@ -78,17 +79,17 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 data_nft_args.template_index,
                 data_nft_args.uri,
                 data_nft_args.transferable,
-                ContractBase.to_checksum_address(data_nft_args.owner or wallet.address),
+                ContractBase.to_checksum_address(data_nft_args.owner or wallet_address),
             ),
             (
                 datatoken_args.template_index,
                 [datatoken_args.name, datatoken_args.symbol],
                 [
                     ContractBase.to_checksum_address(
-                        datatoken_args.minter or wallet.address
+                        datatoken_args.minter or wallet_address
                     ),
                     ContractBase.to_checksum_address(
-                        datatoken_args.fee_manager or wallet.address
+                        datatoken_args.fee_manager or wallet_address
                     ),
                     ContractBase.to_checksum_address(
                         datatoken_args.publish_market_order_fees.address
@@ -100,7 +101,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
-            {"from": wallet},
+            tx_dict,
         )
 
         registered_nft_event = receipt.events["NFTCreated"]

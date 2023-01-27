@@ -13,7 +13,6 @@ from typing import List, Optional, Tuple, Type, Union
 
 from brownie import network
 from enforce_typing import enforce_types
-from web3 import Web3
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -25,12 +24,19 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.ocean.util import create_checksum, get_from_address, to_wei
+from ocean_lib.ocean.util import (
+    create_checksum,
+    get_address_of_type,
+    get_from_address,
+    to_wei,
+)
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import (
     ArweaveFile,
+    FilesType,
     GraphqlQuery,
     SmartContractCall,
     UrlFile,
@@ -58,6 +64,10 @@ class OceanAssets:
         downloads_path = os.path.join(os.getcwd(), "downloads")
         self._downloads_path = config_dict.get("DOWNLOADS_PATH", downloads_path)
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
+
+        self.data_nft_factory = DataNFTFactoryContract(
+            self._config_dict, get_address_of_type(config_dict, "ERC721Factory")
+        )
 
     @enforce_types
     def validate(self, ddo: DDO) -> Tuple[bool, list]:
@@ -173,7 +183,7 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
 
     @enforce_types
     def create_url_asset(
@@ -186,7 +196,7 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
 
     @enforce_types
     def create_arweave_asset(
@@ -199,7 +209,7 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [ArweaveFile(transaction_id)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
 
     @enforce_types
     def create_graphql_asset(
@@ -213,7 +223,7 @@ class OceanAssets:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
 
     @enforce_types
     def create_onchain_asset(
@@ -229,7 +239,7 @@ class OceanAssets:
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         metadata = self._default_metadata(name, tx_dict)
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua)
+        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
 
     @enforce_types
     def _default_metadata(self, name: str, tx_dict: dict, type="dataset") -> dict:
@@ -248,16 +258,73 @@ class OceanAssets:
         return metadata
 
     @enforce_types
-    def _create_1dt(self, metadata, files, tx_dict, wait_for_aqua):
-        """Call create(), focusing on just one datatoken"""
+    def _create_1dt(
+        self,
+        metadata: dict,
+        files: List[FilesType],
+        tx_dict: dict,
+        credentials: Optional[dict] = None,
+        wait_for_aqua: Optional[bool] = True,
+    ):
+        provider_uri = DataServiceProvider.get_url(self._config_dict)
+
+        self._assert_ddo_metadata(metadata)
         name = metadata["name"]
-        (data_nft, datatokens, ddo) = self.create(
-            metadata,
-            tx_dict,
-            datatoken_args=[DatatokenArguments(f"{name}: DT1", files=files)],
-            wait_for_aqua=wait_for_aqua,
+        data_nft_args = DataNFTArguments(name, name)
+        datatoken_args = DatatokenArguments(f"{name}: DT1", files=files)
+        data_nft, datatoken = self.data_nft_factory.create_with_erc20(
+            data_nft_args, datatoken_args, tx_dict
         )
-        datatoken = None if datatokens is None else datatokens[0]
+
+        ddo = DDO()
+        # Generate the did, add it to the ddo.
+        ddo.did = data_nft.calculate_did()
+        # Check if it's already registered first!
+        if self._aquarius.ddo_exists(ddo.did):
+            raise AquariusError(
+                f"Asset id {ddo.did} is already registered to another asset."
+            )
+
+        ddo.chain_id = self._chain_id
+        ddo.metadata = metadata
+        ddo.credentials = credentials if credentials else {"allow": [], "deny": []}
+        ddo.nft_address = data_nft.address
+
+        access_service = datatoken.build_access_service(
+            service_id="0",
+            service_endpoint=provider_uri,
+            files=files,
+        )
+        ddo.add_service(access_service)
+
+        # Validation by Aquarius
+        _, proof = self.validate(ddo)
+        proof = (
+            proof["publicKey"],
+            proof["v"],
+            proof["r"][0],
+            proof["s"][0],
+        )
+
+        document, flags, ddo_hash = self._encrypt_ddo(ddo, provider_uri, True, True)
+
+        wallet_address = get_from_address(tx_dict)
+
+        data_nft.setMetaData(
+            0,
+            provider_uri,
+            wallet_address.encode("utf-8"),
+            flags,
+            document,
+            ddo_hash,
+            [proof],
+            tx_dict,
+        )
+
+        # Fetch the ddo on chain
+        if wait_for_aqua:
+            ddo = self._aquarius.wait_for_ddo(ddo.did)
+
         return (data_nft, datatoken, ddo)
 
     # Don't enforce types due to error:

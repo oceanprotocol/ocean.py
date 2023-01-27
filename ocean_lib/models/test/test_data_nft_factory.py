@@ -86,7 +86,7 @@ def test_combo_functions(
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        wallet=publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
