@@ -44,6 +44,15 @@ def remote_config_polygon(tmp_path):
 
 
 @enforce_types
+def get_gas_fees_for_remote() -> tuple:
+    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+    gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
+    return Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"), Web3.toWei(
+        gas_fees["fast"]["maxFee"], "gwei"
+    )
+
+
+@enforce_types
 def get_wallets():
     alice_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY1")
     bob_private_key = os.getenv("REMOTE_TEST_PRIVATE_KEY2")
@@ -76,12 +85,12 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
     print("Do a send-Ether tx...")
     try:
-        # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-        gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
+
+        priority_fee, _ = get_gas_fees_for_remote()
         alice_wallet.transfer(
             bob_wallet.address,
             f"{amt_send:.15f} ether",
-            priority_fee=Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"),
+            priority_fee=priority_fee,
         )
         bob_eth_after = accounts.at(bob_wallet.address).balance()
     except ERRORS_TO_CATCH as e:
@@ -107,14 +116,13 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create() from data NFT, and wait for it to complete...")
     try:
-        # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-        gas_fees = requests.get("https://gasstation-mainnet.matic.network/v2").json()
+        priority_fee, max_fee = get_gas_fees_for_remote()
         data_nft = ocean.data_nft_factory.create(
             DataNFTArguments(symbol, symbol),
             {
                 "from": alice_wallet,
-                "priority_fee": Web3.toWei(gas_fees["fast"]["maxPriorityFee"], "gwei"),
-                "max_fee": Web3.toWei(gas_fees["fast"]["maxFee"], "gwei"),
+                "priority_fee": priority_fee,
+                "max_fee": max_fee,
             },
         )
         data_nft_symbol = data_nft.symbol()
