@@ -97,15 +97,14 @@ def test_main(
     assert not permissions[DatatokenRoles.PAYMENT_MANAGER]
 
     # not erc20 deployer role
-    args = (
-        DatatokenArguments(
-            name="DT1",
-            symbol="DT1Symbol",
-        ),
-        {"from": another_consumer_wallet, "required_confs": 0},
-    )
     with pytest.raises(Exception, match="new data token has no address"):
-        confirm_failed(data_nft, "create_datatoken", args, "")
+        data_nft.create_datatoken(
+            DatatokenArguments(
+                name="DT1",
+                symbol="DT1Symbol",
+            ),
+            {"from": another_consumer_wallet, "required_confs": 0},
+        )
 
 
 def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT):
