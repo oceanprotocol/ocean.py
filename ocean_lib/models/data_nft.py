@@ -108,24 +108,27 @@ class DataNFTArguments:
 
         wallet_address = get_from_address(tx_dict)
 
-        receipt = data_nft_factory.deployERC721Contract(
-            self.name,
-            self.symbol,
-            self.template_index,
-            self.additional_metadata_updater,
-            self.additional_datatoken_deployer,
-            self.uri,
-            self.transferable,
-            self.owner or wallet_address,
-            tx_dict,
-        )
+        try:
+            receipt = data_nft_factory.deployERC721Contract(
+                self.name,
+                self.symbol,
+                self.template_index,
+                self.additional_metadata_updater,
+                self.additional_datatoken_deployer,
+                self.uri,
+                self.transferable,
+                self.owner or wallet_address,
+                tx_dict,
+            )
+        except TypeError:
+            receipt = None
 
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore",
                 message=".*Event log does not contain enough topics for the given ABI.*",
             )
-            assert receipt.events, "Missing NFTCreated event"
+            assert receipt and receipt.events, "Missing NFTCreated event"
             registered_event = receipt.events["NFTCreated"]
 
         data_nft_address = registered_event["newTokenAddress"]
