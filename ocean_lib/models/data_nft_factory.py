@@ -127,6 +127,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
+
         receipt = self.contract.createNftWithErc20WithFixedRate(
             (
                 data_nft_args.name,
@@ -190,7 +191,6 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
-        dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
 
         receipt = self.contract.createNftWithErc20WithDispenser(
             (
@@ -221,13 +221,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
-            (
-                ContractBase.to_checksum_address(dispenser_address),
-                dispenser_args.max_tokens,
-                dispenser_args.max_balance,
-                dispenser_args.with_mint,
-                dispenser_args.allowed_swapper,
-            ),
+            dispenser_args.to_tuple(self.config_dict),
             tx_dict,
         )
 

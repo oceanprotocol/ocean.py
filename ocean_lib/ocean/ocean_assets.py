@@ -188,6 +188,7 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
+
         return self.create_bundled(
             metadata,
             files,
@@ -210,6 +211,7 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [UrlFile(url)]
+
         return self.create_bundled(
             metadata,
             files,
@@ -232,6 +234,7 @@ class OceanAssets:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [ArweaveFile(transaction_id)]
+
         return self.create_bundled(
             metadata,
             files,
@@ -255,6 +258,7 @@ class OceanAssets:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
+
         return self.create_bundled(
             metadata,
             files,
@@ -280,6 +284,7 @@ class OceanAssets:
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         metadata = self._default_metadata(name, tx_dict)
+
         return self.create_bundled(
             metadata,
             files,
