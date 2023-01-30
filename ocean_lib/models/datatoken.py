@@ -106,7 +106,7 @@ class DatatokenArguments:
                 address=wallet_address, token=OCEAN_address
             )
 
-        tx = data_nft.contract.createERC20(
+        data_nft.contract.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
@@ -119,8 +119,6 @@ class DatatokenArguments:
             self.bytess,
             tx_dict,
         )
-
-        assert tx.status, "new data token has no address"
 
         new_elements = [
             item for item in data_nft.getTokensList() if item not in initial_list
