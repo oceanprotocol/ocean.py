@@ -246,16 +246,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def create_exchange(
-        self,
-        rate: Union[int, str],
-        base_token_addr: str,
-        tx_dict: dict,
-        owner_addr: Optional[str] = None,
-        publish_market_fee_collector: Optional[str] = None,
-        publish_market_fee: Union[int, str] = 0,
-        with_mint: bool = False,
-        allowed_swapper: str = ZERO_ADDRESS,
-        full_info: bool = False,
+        self, exchange_args, tx_dict: dict, full_info: bool = False
     ) -> Union[OneExchange, tuple]:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
@@ -281,39 +272,22 @@ class Datatoken(ContractBase):
         - exchange - OneExchange
         - (maybe) tx_receipt
         """
-        # import now, to avoid circular import
-        from ocean_lib.models.fixed_rate_exchange import OneExchange
-
-        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = get_from_address(tx_dict)
-        BT = Datatoken(self.config_dict, base_token_addr)
-        owner_addr = owner_addr or from_addr
-        publish_market_fee_collector = publish_market_fee_collector or from_addr
+        exchange_args_tup = exchange_args.to_tuple(
+            self.config_dict, tx_dict, self.decimals()
+        )
 
         tx = self.contract.createFixedRate(
-            checksum_addr(FRE_addr),
-            [
-                checksum_addr(BT.address),
-                checksum_addr(owner_addr),
-                checksum_addr(publish_market_fee_collector),
-                checksum_addr(allowed_swapper),
-            ],
-            [
-                BT.decimals(),
-                self.decimals(),
-                rate,
-                publish_market_fee,
-                with_mint,
-            ],
+            exchange_args_tup[0],
+            exchange_args_tup[1],
+            exchange_args_tup[2],
             tx_dict,
         )
 
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
-        if full_info:
-            return (exchange, tx)
-        return exchange
+
+        return (exchange, tx) if full_info else exchange
 
     @enforce_types
     def get_exchanges(self) -> list:

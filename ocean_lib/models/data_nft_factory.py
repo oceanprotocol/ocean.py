@@ -123,14 +123,10 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        fixed_price_args,
+        exchange_args,
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
-        fixed_price_address = get_address_of_type(self.config_dict, "FixedPrice")
-        # TODO: crass hardcoding until I ask some questions :)
-        fixed_price_arguments = fixed_price_args.to_args(self.config_dict, 18, tx_dict)
-
         receipt = self.contract.createNftWithErc20WithFixedRate(
             (
                 data_nft_args.name,
@@ -160,11 +156,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
-            (
-                ContractBase.to_checksum_address(fixed_price_address),
-                fixed_price_arguments[0],
-                fixed_price_arguments[1],
-            ),
+            exchange_args.to_tuple(self.config_dict, tx_dict),
             tx_dict,
         )
 

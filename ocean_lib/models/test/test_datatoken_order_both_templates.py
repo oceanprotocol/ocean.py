@@ -8,6 +8,7 @@ import pytest
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.models.dispenser import DispenserArguments
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
@@ -165,11 +166,13 @@ def test_buy_DT_and_order(
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
 
     exchange = DT.create_exchange(
-        rate=to_wei(1),
-        base_token_addr=USDC.address,
+        ExchangeArguments(
+            rate=to_wei(1),
+            base_token_addr=USDC.address,
+            publish_market_fee=to_wei(0.1),
+            with_mint=True,
+        ),
         tx_dict={"from": publisher_wallet},
-        publish_market_fee=to_wei(0.1),
-        with_mint=True,
     )
     assert exchange.details.active
     assert exchange.details.with_mint

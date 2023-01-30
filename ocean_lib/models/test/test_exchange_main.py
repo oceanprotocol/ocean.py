@@ -9,6 +9,7 @@ import pytest
 from ocean_lib.models.fixed_rate_exchange import (
     BtNeeded,
     BtReceived,
+    ExchangeArguments,
     ExchangeDetails,
     ExchangeFeeInfo,
 )
@@ -23,7 +24,8 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     # =========================================================================
     # Create exchange
     exchange = DT.create_exchange(
-        rate=to_wei(3), base_token_addr=OCEAN.address, tx_dict={"from": alice}
+        ExchangeArguments(rate=to_wei(3), base_token_addr=OCEAN.address),
+        tx_dict={"from": alice},
     )
 
     # Alice makes 100 datatokens available on the exchange
@@ -123,15 +125,17 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     n_exchanges1 = FRE.getNumberOfExchanges()
     exchange, tx = DT.create_exchange(
-        rate=rate,
-        base_token_addr=OCEAN.address,
-        owner_addr=bob.address,
-        publish_market_fee_collector=publish_market_fee_collector,
-        publish_market_fee=publish_market_fee,
-        with_mint=True,
-        allowed_swapper=carlos.address,
-        full_info=True,
+        ExchangeArguments(
+            rate=rate,
+            base_token_addr=OCEAN.address,
+            owner_addr=bob.address,
+            publish_market_fee_collector=publish_market_fee_collector,
+            publish_market_fee=publish_market_fee,
+            with_mint=True,
+            allowed_swapper=carlos.address,
+        ),
         tx_dict={"from": alice},
+        full_info=True,
     )
     assert tx is not None
     assert FRE.getNumberOfExchanges() == (n_exchanges1 + 1)

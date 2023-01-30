@@ -2,19 +2,21 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
-
 import pytest
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
+from ocean_lib.models.fixed_rate_exchange import (
+    ExchangeArguments,
+    FixedRateExchange,
+    OneExchange,
+)
 from ocean_lib.models.test.test_factory_router import (
     OPC_SWAP_FEE_APPROVED,
     OPC_SWAP_FEE_NOT_APPROVED,
 )
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import (
     convert_bt_amt_to_dt,
     get_wallet,
@@ -99,14 +101,13 @@ def test_exchange_swap_fees(
 
     bt_per_dt_in_wei = to_wei(bt_per_dt)
     exchange = dt.create_exchange(
-        rate=bt_per_dt_in_wei,
-        base_token_addr=bt.address,
+        ExchangeArguments(
+            rate=bt_per_dt_in_wei,
+            base_token_addr=bt.address,
+            publish_market_fee=publish_market_swap_fee,
+            with_mint=with_mint,
+        ),
         tx_dict={"from": alice},
-        owner_addr=alice.address,
-        publish_market_fee_collector=alice.address,
-        publish_market_fee=publish_market_swap_fee,
-        with_mint=with_mint,
-        allowed_swapper=ZERO_ADDRESS,
     )
 
     fees = exchange.exchange_fees_info
