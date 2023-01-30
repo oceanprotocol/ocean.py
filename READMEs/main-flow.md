@@ -258,8 +258,7 @@ If you call `create()` after this, you can pass in an argument `data_nft_address
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo object. However, we may want a second datatoken. Or, we may have started with _just_ the data NFT, and want to add a datatoken to it. Here's how:
 
 ```python
-from ocean_lib.models.datatoken import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), {"from": alice})
+datatoken = data_nft.create_datatoken({"from": alice}, "Datatoken 1", "DT1")
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.

@@ -10,18 +10,13 @@ from typing import Optional
 
 from brownie import network
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
-from hashlib import sha256
 from web3 import Web3
 
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, get_from_address
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.utils import check_network
-
-
-from ecies import decrypt as asymmetric_decrypt
 
 
 class DataNFTPermissions(IntEnum):
@@ -52,7 +47,19 @@ class Flags(IntFlag):
 class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
-    def create_datatoken(self, datatoken_args, tx_dict) -> Datatoken:
+    def create_datatoken(self, tx_dict, *args, **kwargs) -> Datatoken:
+        datatoken_args = None
+        if args and isinstance(args[0], DatatokenArguments):
+            datatoken_args = args[0]
+        elif kwargs:
+            for key, value in kwargs.items():
+                if isinstance(value, DatatokenArguments):
+                    datatoken_args = value
+                    break
+
+        if not datatoken_args:
+            datatoken_args = DatatokenArguments(*args, **kwargs)
+
         return datatoken_args.create_datatoken(self, tx_dict)
 
     def calculate_did(self):

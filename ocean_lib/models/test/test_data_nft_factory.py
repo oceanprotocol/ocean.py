@@ -46,12 +46,12 @@ def test_nft_creation(
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     datatoken = data_nft.create_datatoken(
+        {"from": publisher_wallet},
         DatatokenArguments(
             "DT1P",
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        {"from": publisher_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -98,6 +98,7 @@ def test_combo_functions(
 
     # Create ERC20 data token for fees.
     datatoken = data_nft_token2.create_datatoken(
+        {"from": publisher_wallet},
         DatatokenArguments(
             "DT1P",
             "DT1SymbolP",
@@ -108,7 +109,6 @@ def test_combo_functions(
                 amount=to_wei(0.0005),
             ),
         ),
-        {"from": publisher_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
     fee_datatoken_address = datatoken.address
@@ -213,12 +213,12 @@ def test_start_multiple_order(
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     datatoken = data_nft.create_datatoken(
+        {"from": consumer_wallet},
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
         ),
-        {"from": consumer_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
