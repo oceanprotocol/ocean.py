@@ -130,6 +130,7 @@ def test_combo_functions(
             publish_market_fee_collector=consumer_wallet.address,
             rate=to_wei(1),
             publish_market_fee=to_wei(0.001),
+            dt_decimals=18,
         ),
         tx_dict={"from": publisher_wallet},
     )

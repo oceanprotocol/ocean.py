@@ -157,7 +157,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
-            fixed_price_args.to_tuple(self.config_dict),
+            fixed_price_args.to_tuple(self.config_dict, tx_dict),
             tx_dict,
         )
 
