@@ -86,7 +86,7 @@ def test_combo_functions(
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        wallet=publisher_wallet,
+        {"from": publisher_wallet},
     )
     assert data_nft_token2.contract.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
@@ -133,7 +133,7 @@ def test_combo_functions(
         fixed_price_rate=to_wei(1),
         fixed_price_publish_market_swap_fee_amount=to_wei(0.001),
         fixed_price_with_mint=0,
-        wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
     )
 
     assert data_nft_token4.contract.name() == "72120Bundle"
@@ -156,7 +156,7 @@ def test_combo_functions(
         dispenser_max_balance=to_wei(1),
         dispenser_with_mint=True,
         dispenser_allowed_swapper=ZERO_ADDRESS,
-        wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
     )
     assert data_nft_token5.contract.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
@@ -175,7 +175,7 @@ def test_combo_functions(
         metadata_data=Web3.toHex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),
         metadata_proofs=[],
-        wallet=publisher_wallet,
+        tx_dict={"from": publisher_wallet},
     )
     assert (
         data_nft.name() == "72120Bundle"
@@ -330,10 +330,10 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(Exception, match="Template index doesnt exist"):
+    with pytest.raises(Exception, match="Missing NFTCreated event"):
         data_nft_factory.create(
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
-            {"from": publisher_wallet},
+            {"from": publisher_wallet, "required_confs": 0},
         )

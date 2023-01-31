@@ -55,6 +55,7 @@ test_requirements = [
     "Pillow",
     "matplotlib",
     "mkcodes==0.1.1",
+    "pytest-sugar",
 ]
 
 # Possibly required by developers of ocean-lib:
@@ -63,7 +64,7 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "isort==5.11.4",
+    "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
     "pre-commit",
