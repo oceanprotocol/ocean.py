@@ -123,7 +123,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         self,
         data_nft_args,
         datatoken_args,
-        exchange_args,
+        fixed_price_args,
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
@@ -157,7 +157,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
                 [datatoken_args.cap, datatoken_args.publish_market_order_fees.amount],
                 datatoken_args.bytess,
             ),
-            exchange_args.to_tuple(self.config_dict, tx_dict),
+            fixed_price_args.to_tuple(self.config_dict),
             tx_dict,
         )
 

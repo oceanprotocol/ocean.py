@@ -11,7 +11,6 @@ from web3 import Web3
 from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
@@ -666,11 +665,9 @@ def test_nft_transfer_with_fre(
 
     # The NFT owner (publisher) has ERC20 deployer role & can deploy an exchange
     exchange = datatoken.create_exchange(
-        ExchangeArguments(
-            rate=to_wei(1),
-            base_token_addr=OCEAN.address,
-            publish_market_fee=to_wei(0.01),
-        ),
+        rate=to_wei(1),
+        base_token_addr=OCEAN.address,
+        publish_market_fee=to_wei(0.01),
         tx_dict={"from": publisher_wallet},
     )
 

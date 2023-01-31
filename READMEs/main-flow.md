@@ -66,9 +66,8 @@ datatoken.dispense(to_wei(1), {"from": bob})
 
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
-from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 price = to_wei(100)
-exchange = datatoken.create_exchange(ExchangeArguments(price, ocean.OCEAN_address), {"from": alice})
+exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
 
 # D.2 Alice makes 100 datatokens available on the exchange
 datatoken.mint(alice, to_wei(100), {"from": alice})

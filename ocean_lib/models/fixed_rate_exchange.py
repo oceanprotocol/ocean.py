@@ -26,7 +26,6 @@ class ExchangeArguments:
         with_mint: bool = False,
         allowed_swapper: str = ZERO_ADDRESS,
         full_info: bool = False,
-        dt_decimals: Optional[int] = None,
     ):
         self.rate = rate
         self.base_token_addr = base_token_addr
@@ -36,7 +35,6 @@ class ExchangeArguments:
         self.rate = rate
         self.publish_market_fee = publish_market_fee
         self.with_mint = with_mint
-        self.dt_decimals = dt_decimals
 
     def to_tuple(self, config_dict, tx_dict, dt_decimals=None):
         FRE_addr = get_address_of_type(config_dict, "FixedPrice")
