@@ -108,20 +108,17 @@ class DataNFTArguments:
 
         wallet_address = get_from_address(tx_dict)
 
-        try:
-            receipt = data_nft_factory.deployERC721Contract(
-                self.name,
-                self.symbol,
-                self.template_index,
-                self.additional_metadata_updater,
-                self.additional_datatoken_deployer,
-                self.uri,
-                self.transferable,
-                self.owner or wallet_address,
-                tx_dict,
-            )
-        except TypeError:
-            receipt = None
+        receipt = data_nft_factory.deployERC721Contract(
+            self.name,
+            self.symbol,
+            self.template_index,
+            self.additional_metadata_updater,
+            self.additional_datatoken_deployer,
+            self.uri,
+            self.transferable,
+            self.owner or wallet_address,
+            tx_dict,
+        )
 
         with warnings.catch_warnings():
             warnings.filterwarnings(
