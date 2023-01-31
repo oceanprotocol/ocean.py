@@ -9,6 +9,7 @@ from enum import IntEnum, IntFlag
 from typing import Optional
 
 from brownie import network
+from brownie.exceptions import VirtualMachineError
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken
@@ -120,6 +121,8 @@ class DataNFTArguments:
                 self.owner or wallet_address,
                 tx_dict,
             )
+        except (ValueError, VirtualMachineError) as err:
+            raise err
         except Exception:
             receipt = None
 
