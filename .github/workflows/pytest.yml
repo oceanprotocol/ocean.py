@@ -37,9 +37,12 @@ jobs:
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
       - name: "Read address.json contents"
+        working-directory: ${{ github.workspace }}
         uses: andstor/file-reader-action@v1
         with:
           path: "$HOME/.ocean/ocean-contracts/artifacts/address.json"
+      - name: File contents
+        run: echo "${ steps.read_file.outputs.contents }"
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
