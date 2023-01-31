@@ -11,7 +11,6 @@ from enforce_typing import enforce_types
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import (
     from_wei,
@@ -337,7 +336,9 @@ class Datatoken(ContractBase):
     def create_dispenser(
         self,
         tx_dict: dict,
-        dispenser_arguments: Optional[DispenserArguments] = None,
+        max_tokens: Optional[Union[int, str]] = None,
+        max_balance: Optional[Union[int, str]] = None,
+        with_mint: Optional[bool] = True,
     ):
         """
         For this datataken, create a dispenser faucet for free tokens.
@@ -345,7 +346,8 @@ class Datatoken(ContractBase):
         This wraps the smart contract method Datatoken.createDispenser()
           with a simpler interface.
 
-        :param: dispenser_arguments
+        :param: max_tokens - max # tokens to dispense, in wei
+        :param: max_balance - max balance of requester
         :tx_dict: e.g. {"from": alice_wallet}
         :return: tx
         """
@@ -353,18 +355,22 @@ class Datatoken(ContractBase):
         if self.dispenser_status().active:
             return
 
+        # set max_tokens, max_balance if needed
+        max_tokens = max_tokens or MAX_UINT256
+        max_balance = max_balance or MAX_UINT256
+
         # args for contract tx
         dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-        if not dispenser_arguments:
-            dispenser_arguments = DispenserArguments()
+        with_mint = with_mint  # True -> can always mint more
+        allowed_swapper = ZERO_ADDRESS  # 0 -> so anyone can call dispense
 
         # do contract tx
         tx = self.createDispenser(
             dispenser_addr,
-            dispenser_arguments.max_tokens,
-            dispenser_arguments.max_balance,
-            dispenser_arguments.with_mint,
-            dispenser_arguments.allowed_swapper,
+            max_tokens,
+            max_balance,
+            with_mint,
+            allowed_swapper,
             tx_dict,
         )
         return tx

@@ -7,7 +7,6 @@ from datetime import datetime
 import pytest
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
-from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
@@ -29,8 +28,7 @@ def test_dispense_and_order_with_non_defaults(
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
 
     _ = DT.create_dispenser(
-        {"from": publisher_wallet},
-        DispenserArguments(to_wei(1), to_wei(1)),
+        max_tokens=to_wei(1), max_balance=to_wei(1), tx_dict={"from": publisher_wallet}
     )
 
     status = DT.dispenser_status()
@@ -124,8 +122,9 @@ def test_dispense_and_order_with_defaults(
     )
 
     _ = DT.create_dispenser(
-        {"from": publisher_wallet},
-        DispenserArguments(to_wei(1), to_wei(1)),
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        tx_dict={"from": publisher_wallet},
     )
 
     provider_fees = get_mock_provider_fees(

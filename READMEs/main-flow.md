@@ -293,7 +293,7 @@ A given datatoken can create exactly one dispenser for that datatoken.
 - `with_mint` - allow datatoken minting. The default is a large number.
 - `allowed_swapper` - allowed swapper address. The default is empty.
 
-A call would look like `create_dispenser({"from": alice}, DispenserArguments(max_tokens=max_tokens, max_balance=max_balance))`.
+A call would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
 ### Dispenser Status
