@@ -802,3 +802,18 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20
+
+
+def test_set_get_data(data_nft, alice):
+    # Key-value pair
+    key = "fav_color"
+    value = "blue"
+
+    # set data
+    data_nft.set_data(key, value, {"from": alice})
+
+    # retrieve data
+    value2 = data_nft.get_data(key)
+
+    # test
+    assert value2 == value
