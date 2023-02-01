@@ -10,8 +10,8 @@ jobs:
   black:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - uses: psf/black@stable
         with:
           options: "--check --verbose"
           version: "22.10.0"
-          src: "."
