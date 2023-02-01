@@ -38,9 +38,12 @@ Issue: M1 * `coincurve` or `cryptography`
 - Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
 
 
-Issue: MacOS "Unsupported Architecture" 
+Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
+
+To install ocean-lib using Python 3.11, run `pip install vyper==0.3.7 --ignore-requires-python` before installing ocean-lib.
+This is a temporary fix until Vyper has a release declaring dependencies for Python 3.11. We do not directly use Vyper in ocean-lib.
 
 ## ocean.py uses Brownie
 
