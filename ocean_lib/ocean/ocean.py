@@ -18,6 +18,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.df.df_rewards import DFRewards
 from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.dispenser import Dispenser
@@ -153,9 +154,13 @@ class Ocean:
     def get_datatoken(self, token_address: str) -> Datatoken:
         """
         :param token_address: Token contract address, str
-        :return: `Datatoken` instance
+        :return: `Datatoken` or `DatatokenEnterprise` instance
         """
-        return Datatoken(self.config, token_address)
+        return (
+            Datatoken(self.config, token_address)
+            if Datatoken(self.config, token_address).contract.getId() == 1
+            else DatatokenEnterprise(self.config, token_address)
+        )
 
     # ======================================================================
     # orders
