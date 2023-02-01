@@ -35,8 +35,5 @@ def test_simple_remote_readme(monkeypatch):
     # make sure that the script used REMOTE_TEST_PRIVATE_KEY1 wallet, like reference wallet
     assert alice.address == ref_alice_wallet.address
 
-    # ensure we pay enough
-    util.set_aggressive_gas_fees()
-
     # besides what the readme script does, is it actually able to do more?
     util.do_ocean_tx_and_handle_gotchas(ocean, alice)

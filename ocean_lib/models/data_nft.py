@@ -10,12 +10,18 @@ from typing import Optional
 
 from brownie import network
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
+from hashlib import sha256
+from web3 import Web3
 
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, get_from_address
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.utils import check_network
+
+
+from ecies import decrypt as asymmetric_decrypt
 
 
 class DataNFTPermissions(IntEnum):
@@ -53,6 +59,20 @@ class DataNFT(ContractBase):
         check_network(self.network)
         chain_id = network.chain.id
         return f"did:op:{create_checksum(self.address + str(chain_id))}"
+
+    def set_data(self, field_label: str, field_value: str, tx_dict: dict):
+        """Set key/value data via ERC725, with strings for key/value"""
+        field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
+        field_value_bytes = field_value.encode()  # to array of bytes
+        tx = self.contract.setNewData(field_label_hash, field_value_bytes, tx_dict)
+        return tx
+
+    def get_data(self, field_label: str) -> str:
+        """Get key/value data via ERC725, with strings for key/value"""
+        field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
+        field_value_hex = self.contract.getData(field_label_hash)
+        field_value = field_value_hex.decode("ascii")
+        return field_value
 
 
 class DataNFTArguments:
@@ -125,7 +145,7 @@ class DataNFTArguments:
                 "ignore",
                 message=".*Event log does not contain enough topics for the given ABI.*",
             )
-            assert receipt.events, "Missing NFTCreated event"
+            assert receipt and receipt.events, "Missing NFTCreated event"
             registered_event = receipt.events["NFTCreated"]
 
         data_nft_address = registered_event["newTokenAddress"]
