@@ -151,7 +151,9 @@ class Ocean:
         return DataNFT(self.config, token_address)
 
     @enforce_types
-    def get_datatoken(self, token_address: str) -> Datatoken:
+    def get_datatoken(
+        self, token_address: str
+    ) -> Union[Datatoken, DatatokenEnterprise]:
         """
         :param token_address: Token contract address, str
         :return: `Datatoken` or `DatatokenEnterprise` instance
