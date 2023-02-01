@@ -7,12 +7,12 @@ from typing import List, Optional, Union
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
-from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
-from ocean_lib.ocean.util import get_address_of_type, get_from_address
+from ocean_lib.ocean.util import get_address_of_type, get_args_object, get_from_address
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -30,7 +30,9 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         except BadFunctionCallOutput:
             return False
 
-    def create(self, data_nft_args, tx_dict):
+    def create(self, tx_dict, *args, **kwargs):
+        data_nft_args = get_args_object(args, kwargs, DataNFTArguments)
+
         return data_nft_args.deploy_contract(self.config_dict, tx_dict)
 
     @enforce_types

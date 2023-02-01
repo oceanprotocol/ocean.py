@@ -17,7 +17,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
-from ocean_lib.models.data_nft import DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type
@@ -379,9 +378,7 @@ def test_plain_asset_with_one_datatoken(publisher_ocean, publisher_wallet, confi
     files = get_default_files()
 
     # Publisher deploys NFT contract
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "NFT1", "NFTSYMBOL")
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,
@@ -408,9 +405,7 @@ def test_plain_asset_multiple_datatokens(publisher_ocean, publisher_wallet, conf
     metadata = get_default_metadata()
     files = get_default_files()
 
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT2", "NFT2SYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "NFT2", "NFT2SYMBOL")
 
     _, _, ddo = publisher_ocean.assets.create(
         metadata=metadata,

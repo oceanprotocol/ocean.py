@@ -19,7 +19,7 @@ from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
@@ -163,9 +163,7 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT", "NFTSYMBOL"), {"from": data_nft_publisher}
-    )
+    data_nft = data_nft_factory.create({"from": data_nft_publisher}, "NFT", "NFTSYMBOL")
 
     if not datatoken_minter:
         return data_nft

@@ -8,7 +8,7 @@ from base64 import b64decode
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
+from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
@@ -562,12 +562,10 @@ def test_transfer_nft(
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
     data_nft = data_nft_factory.create(
-        DataNFTArguments(
-            "NFT to TRANSFER",
-            "NFTtT",
-            additional_datatoken_deployer=consumer_wallet.address,
-        ),
         {"from": publisher_wallet},
+        "NFT to TRANSFER",
+        "NFTtT",
+        additional_datatoken_deployer=consumer_wallet.address,
     )
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -588,9 +586,7 @@ def test_transfer_nft(
     assert data_nft.ownerOf(1) == consumer_wallet.address
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFT"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "NFT1", "NFT")
 
     receipt = data_nft.safeTransferFrom(
         publisher_wallet.address,
@@ -700,9 +696,7 @@ def test_fail_create_datatoken(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests multiple failures for creating ERC20 token."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO

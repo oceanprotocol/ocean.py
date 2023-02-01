@@ -24,17 +24,13 @@ def test_nft_creation(
     data_nft_factory,
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT2", "DTSYMBOL1"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT2", "DTSYMBOL1")
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -190,9 +186,7 @@ def test_start_multiple_order(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
     assert data_nft_factory.check_nft(data_nft.address)
@@ -200,8 +194,9 @@ def test_start_multiple_order(
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
     data_nft = data_nft_factory.create(
-        DataNFTArguments("DT2", "DTSYMBOL1"), {"from": publisher_wallet}
+        {"from": publisher_wallet}, DataNFTArguments("DT2", "DTSYMBOL1")
     )
+    assert data_nft.contract.name() == "DT2"
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -332,8 +327,8 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
 
     with pytest.raises(Exception, match="Missing NFTCreated event"):
         data_nft_factory.create(
+            {"from": publisher_wallet, "required_confs": 0},
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
-            {"from": publisher_wallet, "required_confs": 0},
         )
