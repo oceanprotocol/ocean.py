@@ -125,11 +125,7 @@ def test_main_flow_via_contract_directly(
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     # Tests publisher creates a dispenser with minter role
-    _ = datatoken.create_dispenser(
-        {"from": publisher_wallet},
-        to_wei(1),
-        to_wei(1),
-    )
+    _ = datatoken.create_dispenser({"from": publisher_wallet}, to_wei(1), to_wei(1))
 
     # Tests publisher gets the dispenser status
 
@@ -196,10 +192,7 @@ def test_dispenser_creation_without_minter(config, publisher_wallet, consumer_wa
     dispenser = Dispenser(config, get_address_of_type(config, "Dispenser"))
 
     datatoken.create_dispenser(
-        {"from": publisher_wallet},
-        to_wei(1),
-        to_wei(1),
-        with_mint=False,
+        {"from": publisher_wallet}, to_wei(1), to_wei(1), with_mint=False
     )
 
     # Tests consumer requests data tokens but they are not minted

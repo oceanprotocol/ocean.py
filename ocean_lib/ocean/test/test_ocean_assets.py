@@ -15,11 +15,15 @@ from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import DatatokenArguments, TokenFeeInfo
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.models.dispenser import DispenserArguments
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
+from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
@@ -615,3 +619,42 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1
+
+
+@pytest.mark.integration
+def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, data_provider)
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+
+    # No pricing schema
+    data_nft, dt, ddo = ocean_assets.create_url_asset(
+        "Data NFTs in Ocean",
+        url,
+        {"from": publisher_wallet},
+    )
+    assert not dt.dispenser_status().active
+    assert dt.get_exchanges() == []
+
+    data_nft, dt, ddo = ocean_assets.create_url_asset(
+        "Data NFTs in Ocean",
+        url,
+        {"from": publisher_wallet},
+        pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)),
+    )
+
+    assert dt.dispenser_status().active
+    assert dt.get_exchanges() == []
+
+    data_nft, dt, ddo = ocean_assets.create_url_asset(
+        "Data NFTs in Ocean",
+        url,
+        {"from": publisher_wallet},
+        pricing_schema_args=ExchangeArguments(
+            rate=to_wei(3), base_token_addr=OCEAN.address, dt_decimals=18
+        ),
+    )
+
+    assert not dt.dispenser_status().active
+    assert len(dt.get_exchanges()) == 1
+    assert dt.get_exchanges()[0].details.base_token == OCEAN.address
