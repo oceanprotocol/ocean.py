@@ -67,7 +67,7 @@ datatoken.dispense(to_wei(1), {"from": bob})
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
 price = to_wei(100)
-exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
+exchange = datatoken.create_exchange({"from": alice}, price, ocean.OCEAN_address)
 
 # D.2 Alice makes 100 datatokens available on the exchange
 datatoken.mint(alice, to_wei(100), {"from": alice})
@@ -288,8 +288,10 @@ A given datatoken can create exactly one dispenser for that datatoken.
 `datatoken.create_dispenser()` can take these optional arguments:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
+- `with_mint` - allow minting
+- `allowed_swapper` - swapper user address
 
-A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
+A call would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
 ### Dispenser Status

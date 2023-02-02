@@ -70,9 +70,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 print(f"Just published asset, with data_NFT.address={data_NFT.address}")
 
 #create exchange
-exchange = DT.create_exchange(
-    to_wei(DT_price), OCEAN.address, {"from": alice}
-)
+exchange = DT.create_exchange({"from": alice}, to_wei(DT_price), OCEAN.address)
 
 #make datatokens available on the exchange
 DT.mint(alice, to_wei(num_consumes), {"from": alice})
