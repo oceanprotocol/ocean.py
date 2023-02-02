@@ -239,7 +239,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def create_exchange(
-        self, tx_dict: dict, full_info: bool = False, *args, **kwargs
+        self, tx_dict: dict, *args, **kwargs
     ) -> Union[OneExchange, tuple]:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
@@ -277,7 +277,7 @@ class Datatoken(ContractBase):
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
 
-        return (exchange, tx) if full_info else exchange
+        return (exchange, tx) if kwargs.get("full_info") else exchange
 
     @enforce_types
     def get_exchanges(self) -> list:
