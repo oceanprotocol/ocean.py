@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
-
 import pytest
 
 from ocean_lib.models.datatoken import Datatoken

@@ -8,7 +8,8 @@ from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
-from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.dispenser import Dispenser, DispenserArguments
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -124,15 +125,13 @@ def test_combo_functions(
             "DTP",
             fee_manager=consumer_wallet.address,
         ),
-        fixed_price_base_token=fee_datatoken_address,
-        fixed_price_owner=publisher_wallet.address,
-        fixed_price_publish_market_swap_fee_collector=consumer_wallet.address,
-        fixed_price_allowed_swapper=ZERO_ADDRESS,
-        fixed_price_base_token_decimals=18,
-        fixed_price_datatoken_decimals=18,
-        fixed_price_rate=to_wei(1),
-        fixed_price_publish_market_swap_fee_amount=to_wei(0.001),
-        fixed_price_with_mint=0,
+        ExchangeArguments(
+            base_token_addr=fee_datatoken_address,
+            publish_market_fee_collector=consumer_wallet.address,
+            rate=to_wei(1),
+            publish_market_fee=to_wei(0.001),
+            dt_decimals=18,
+        ),
         tx_dict={"from": publisher_wallet},
     )
 
@@ -152,10 +151,7 @@ def test_combo_functions(
             "DTP",
             fee_manager=consumer_wallet.address,
         ),
-        dispenser_max_tokens=to_wei(1),
-        dispenser_max_balance=to_wei(1),
-        dispenser_with_mint=True,
-        dispenser_allowed_swapper=ZERO_ADDRESS,
+        DispenserArguments(to_wei(1), to_wei(1)),
         tx_dict={"from": publisher_wallet},
     )
     assert data_nft_token5.contract.name() == "72120Bundle"
