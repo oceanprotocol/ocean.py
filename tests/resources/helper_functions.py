@@ -9,13 +9,12 @@ import os
 import secrets
 from datetime import datetime
 from decimal import Decimal
-import time
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
 from brownie import network
-from brownie.network import accounts, web3
+from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -259,7 +258,7 @@ def get_provider_fees(
     provider_fee_address = provider_wallet.address
 
     provider_data = json.dumps(
-        {"environment": compute_env, "timestamp": datetime.utcnow().timestamp()},
+        {"environment": compute_env, "timestamp": datetime.now().timestamp()},
         separators=(",", ":"),
     )
     message_hash = Web3.solidityKeccak(

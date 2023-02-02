@@ -89,7 +89,7 @@ def test_reuse_order_fees(
 
     # Mock non-zero provider fees (simulate first time paying provider fees)
     provider_fee = int_units(provider_fee_in_unit, bt.decimals())
-    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    valid_until = int((datetime.now() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
         bt.address,
@@ -220,7 +220,7 @@ def reuse_order_with_mock_provider_fees(
 
     # Mock provider fees
     provider_fee = int_units(provider_fee_in_unit, bt.decimals())
-    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    valid_until = int((datetime.now() + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
         bt.address,

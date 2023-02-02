@@ -129,7 +129,7 @@ def test_start_order_fees(
 
     # Get provider fees
     provider_fee = int_units(provider_fee_in_unit, bt.decimals())
-    valid_for_two_hours = int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+    valid_for_two_hours = int((datetime.now() + timedelta(hours=2)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
         bt.address,

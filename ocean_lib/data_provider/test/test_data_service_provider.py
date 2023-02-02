@@ -510,7 +510,7 @@ def test_initialize_compute_failure():
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
-    valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
+    valid_until = int((datetime.now() + timedelta(days=1)).timestamp())
 
     with pytest.raises(
         DataProviderException, match="request failed at the initializeComputeEndpoint"

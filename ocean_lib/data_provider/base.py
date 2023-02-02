@@ -4,7 +4,6 @@
 #
 
 """Provider module."""
-import json
 import logging
 import os
 import re
@@ -48,7 +47,7 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.utcnow().timestamp())
+        nonce = str(datetime.now().timestamp() * 1000)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         message_hash = Web3.solidityKeccak(
             ["bytes"],

@@ -152,7 +152,7 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     consume_market_order_fee_address=bob.address,
     tx_dict={"from": bob},
     compute_environment=free_c2d_env["id"],
-    valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
+    valid_until=int((datetime.now() + timedelta(days=1)).timestamp()),
     consumer_address=free_c2d_env["consumerAddress"],
 )
 assert datasets, "pay for dataset unsuccessful"
