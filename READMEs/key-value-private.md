@@ -6,11 +6,11 @@ SPDX-License-Identifier: Apache-2.0
 # Quickstart: Private Sharing of On-Chain Data
 
 ## Introduction
-This quickstart describes how to use Ocean data NFTs to publish data on-chain, then privately share it to multiple parties. 
+This quickstart describes how to use Ocean data NFTs to publish data on-chain, then privately share it to multiple parties.
 
 It can be used for:
-1. **Sharing AI models** of small to medium size, to specified parties. 
-2. **Sharing AI model predictions** to specified parties. 
+1. **Sharing AI models** of small to medium size, to specified parties.
+2. **Sharing AI model predictions** to specified parties.
 3. **["Soulbound Tokens"](https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID4105763_code1186331.pdf?abstractid=4105763&mirid=1)** approach to Web3 identity, where an individual's attributes are fields in one (or more) data NFTs.
 4. **Profile NFTs / "Login with Web3"** where a Dapp accesses userdata. In this case, the code would be running in the browser via [pyscript](https://www.pyscript.org); or it would be an equivalent flow using JS not Python. This can be viewed as a special case of (2).
 
@@ -45,8 +45,7 @@ bound token (SBT). we set `transferable=False`.
 In the Python console:
 ```python
 # Publish an NFT token. Note "transferable=False"
-from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1', transferable=False), {"from": alice})
+data_nft = ocean.data_nft_factory.create({"from": alice}, 'NFT1', 'NFT1', transferable=False)
 ```
 
 ## 3. Encrypt & store on-chain AI model
@@ -64,7 +63,7 @@ model_value = "<insert MLP weights here>"
 from ocean_lib.ocean import crypto
 symkey = crypto.calc_symkey(data_nft.address + model_label + alice.private_key)
 
-# Symmetrically encrypt AI model 
+# Symmetrically encrypt AI model
 model_value_symenc = crypto.sym_encrypt(model_value, symkey)
 
 # Save model to chain

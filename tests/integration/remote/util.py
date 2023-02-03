@@ -14,8 +14,6 @@ from brownie.network import accounts, chain
 from brownie.network.web3 import Web3
 from enforce_typing import enforce_types
 
-from ocean_lib.models.data_nft import DataNFTArguments
-
 ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
 
 
@@ -49,9 +47,7 @@ def get_gas_fees_for_remote() -> tuple:
     gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
 
     if not gas_resp or gas_resp.status_code != 200:
-        print(
-            f"Invalid response from Polygon gas station. Retry with brownie values..."
-        )
+        print("Invalid response from Polygon gas station. Retry with brownie values...")
 
         return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
 
@@ -126,12 +122,13 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     try:
         priority_fee, max_fee = get_gas_fees_for_remote()
         data_nft = ocean.data_nft_factory.create(
-            DataNFTArguments(symbol, symbol),
             {
                 "from": alice_wallet,
                 "priority_fee": priority_fee,
                 "max_fee": max_fee,
             },
+            symbol,
+            symbol,
         )
         data_nft_symbol = data_nft.symbol()
     except ERRORS_TO_CATCH as e:

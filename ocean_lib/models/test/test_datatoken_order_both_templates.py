@@ -28,9 +28,7 @@ def test_dispense_and_order_with_non_defaults(
     DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
 
     _ = DT.create_dispenser(
-        max_tokens=to_wei(1),
-        max_balance=to_wei(1),
-        tx_dict={"from": publisher_wallet},
+        max_tokens=to_wei(1), max_balance=to_wei(1), tx_dict={"from": publisher_wallet}
     )
 
     status = DT.dispenser_status()
@@ -167,7 +165,6 @@ def test_buy_DT_and_order(
         base_token_addr=USDC.address,
         tx_dict={"from": publisher_wallet},
         publish_market_fee=to_wei(0.1),
-        with_mint=True,
     )
     assert exchange.details.active
     assert exchange.details.with_mint

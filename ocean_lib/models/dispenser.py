@@ -2,15 +2,41 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Optional, Union
+
 from enforce_typing import enforce_types
 
-from ocean_lib.ocean.util import from_wei
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.ocean.util import from_wei, get_address_of_type
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
 class Dispenser(ContractBase):
     CONTRACT_NAME = "Dispenser"
+
+
+class DispenserArguments:
+    def __init__(
+        self,
+        max_tokens: Optional[Union[int, str]] = MAX_UINT256,
+        max_balance: Optional[Union[int, str]] = MAX_UINT256,
+        with_mint: Optional[bool] = True,
+        allowed_swapper: Optional[str] = ZERO_ADDRESS,
+    ):
+        self.max_tokens = max_tokens
+        self.max_balance = max_balance
+        self.with_mint = with_mint
+        self.allowed_swapper = ContractBase.to_checksum_address(allowed_swapper)
+
+    def to_tuple(self, config_dict):
+        dispenser_address = get_address_of_type(config_dict, "Dispenser")
+        return (
+            ContractBase.to_checksum_address(dispenser_address),
+            self.max_tokens,
+            self.max_balance,
+            self.with_mint,
+            self.allowed_swapper,
+        )
 
 
 class DispenserStatus:

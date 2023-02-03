@@ -67,7 +67,7 @@ datatoken.dispense(to_wei(1), {"from": bob})
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
 price = to_wei(100)
-exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
+exchange = datatoken.create_exchange({"from": alice}, price, ocean.OCEAN_address)
 
 # D.2 Alice makes 100 datatokens available on the exchange
 datatoken.mint(alice, to_wei(100), {"from": alice})
@@ -247,8 +247,7 @@ You can control this during create():
 
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
-from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), {"from": alice})
+data_nft = ocean.data_nft_factory.create({"from": alice}, 'NFT1', 'NFT1')
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -258,8 +257,7 @@ If you call `create()` after this, you can pass in an argument `data_nft_address
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo object. However, we may want a second datatoken. Or, we may have started with _just_ the data NFT, and want to add a datatoken to it. Here's how:
 
 ```python
-from ocean_lib.models.datatoken import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), {"from": alice})
+datatoken = data_nft.create_datatoken({"from": alice}, "Datatoken 1", "DT1")
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
@@ -290,8 +288,10 @@ A given datatoken can create exactly one dispenser for that datatoken.
 `datatoken.create_dispenser()` can take these optional arguments:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
+- `with_mint` - allow minting
+- `allowed_swapper` - swapper user address
 
-A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
+A call would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
 ### Dispenser Status

@@ -7,9 +7,74 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.util import get_from_address, str_with_wei
+from ocean_lib.ocean.util import get_address_of_type, get_from_address, str_with_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
+
+checksum_addr = ContractBase.to_checksum_address
+
+
+@enforce_types
+class ExchangeArguments:
+    def __init__(
+        self,
+        rate: Union[int, str],
+        base_token_addr: str,
+        owner_addr: Optional[str] = None,
+        publish_market_fee_collector: Optional[str] = None,
+        publish_market_fee: Union[int, str] = 0,
+        with_mint: bool = True,
+        allowed_swapper: str = ZERO_ADDRESS,
+        full_info: bool = False,
+        dt_decimals: Optional[int] = None,
+    ):
+        self.rate = rate
+        self.base_token_addr = base_token_addr
+        self.owner_addr = owner_addr
+        self.publish_market_fee_collector = publish_market_fee_collector
+        self.allowed_swapper = checksum_addr(allowed_swapper)
+        self.rate = rate
+        self.publish_market_fee = publish_market_fee
+        self.with_mint = with_mint
+        self.dt_decimals = dt_decimals
+
+    def to_tuple(self, config_dict, tx_dict, dt_decimals=None):
+        FRE_addr = get_address_of_type(config_dict, "FixedPrice")
+
+        if not self.owner_addr:
+            self.owner_addr = get_from_address(tx_dict)
+
+        if not self.publish_market_fee_collector:
+            self.publish_market_fee_collector = get_from_address(tx_dict)
+
+        if not self.dt_decimals:
+            if not dt_decimals:
+                raise Exception(
+                    "Must configure dt decimals either on arg creation or usage."
+                )
+
+            self.dt_decimals = dt_decimals
+
+        from ocean_lib.models.datatoken import Datatoken  # isort:skip
+
+        self.BT = Datatoken(config_dict, self.base_token_addr)
+
+        return (
+            FRE_addr,
+            [
+                checksum_addr(self.BT.address),
+                checksum_addr(self.owner_addr),
+                self.publish_market_fee_collector,
+                self.allowed_swapper,
+            ],
+            [
+                self.BT.decimals(),
+                self.dt_decimals,
+                self.rate,
+                self.publish_market_fee,
+                self.with_mint,
+            ],
+        )
 
 
 @enforce_types
