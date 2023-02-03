@@ -475,9 +475,10 @@ class Datatoken(ContractBase):
         exchange = self.get_exchanges()[0]
         kwargs["exchange"] = exchange
 
-        # TODO: change the default logic for with_mint when using create_exchange w/o ExchangeArguments
         wallet_address = get_from_address(kwargs["tx_dict"])
-        amt_needed = exchange.BT_needed(Web3.toWei(1, "ether"), 0)
+        amt_needed = exchange.BT_needed(
+            Web3.toWei(1, "ether"), 0
+        )  # TODO: consumer fees? who sets this?
         base_token = Datatoken(exchange._FRE.config_dict, exchange.details.base_token)
         base_token_balance = base_token.balanceOf(wallet_address)
 
@@ -494,6 +495,12 @@ class Datatoken(ContractBase):
             amt_needed,
             {"from": wallet_address},
         )
+
+        # TODO: same here, who defines these?
+        if self.getId() == 2:
+            kwargs["max_base_token_amount"] = amt_needed
+            kwargs["consume_market_swap_fee_amount"] = 0
+            kwargs["consume_market_swap_fee_address"] = ZERO_ADDRESS
 
         return self.buy_DT_and_order(*args, **kwargs)
 
