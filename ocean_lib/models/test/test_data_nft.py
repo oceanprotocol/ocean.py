@@ -656,6 +656,7 @@ def test_nft_transfer_with_fre(
         base_token_addr=OCEAN.address,
         publish_market_fee=to_wei(0.01),
         tx_dict={"from": publisher_wallet},
+        with_mint=False,
     )
 
     # Exchange should have supply and fees setup
