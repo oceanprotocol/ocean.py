@@ -627,7 +627,9 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
+def test_create_pricing_schemas(
+    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN
+):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
@@ -650,6 +652,7 @@ def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
 
     assert dt.dispenser_status().active
     assert dt.get_exchanges() == []
+    _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})
 
     data_nft, dt, ddo = ocean_assets.create_url_asset(
         "Data NFTs in Ocean",
@@ -663,3 +666,4 @@ def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
     assert not dt.dispenser_status().active
     assert len(dt.get_exchanges()) == 1
     assert dt.get_exchanges()[0].details.base_token == OCEAN.address
+    _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})

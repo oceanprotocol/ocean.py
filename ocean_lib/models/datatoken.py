@@ -506,6 +506,41 @@ class Datatoken(ContractBase):
             tx_dict=tx_dict,
         )
 
+    def buy_1dt_from_pricing_schema(self, *args, **kwargs):
+        dispensers = self.dispenser_status().active
+        exchanges = self.get_exchanges()
+
+        if not dispensers and not exchanges:
+            raise ValueError("No pricing schemas found")
+
+        if dispensers:
+            return self.dispense_and_order(*args, **kwargs)
+
+        exchange = self.get_exchanges()[0]
+        kwargs["exchange"] = exchange
+
+        # TODO: change the default logic for with_mint when using create_exchange w/o ExchangeArguments
+        wallet_address = get_from_address(kwargs["tx_dict"])
+        amt_needed = exchange.BT_needed(Web3.toWei(1, "ether"), 0)
+        base_token = Datatoken(exchange._FRE.config_dict, exchange.details.base_token)
+        base_token_balance = base_token.balanceOf(wallet_address)
+
+        if base_token_balance < amt_needed:
+            raise ValueError(
+                f"Your token balance {base_token_balance} {base_token.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires {amt_needed} {base_token.symbol()}."
+            )
+
+        approve_address = exchange.address if self.getId() == 1 else self.address
+        base_token.approve(
+            approve_address,
+            amt_needed,
+            {"from": wallet_address},
+        )
+
+        return self.buy_DT_and_order(*args, **kwargs)
+
     def get_publish_market_order_fees(self):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 

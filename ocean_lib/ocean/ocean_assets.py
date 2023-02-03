@@ -26,6 +26,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import (
@@ -676,26 +677,6 @@ class OceanAssets:
         wallet_address = get_from_address(tx_dict)
         consumer_address = consumer_address or wallet_address
 
-        # main work...
-        dt = Datatoken(self._config_dict, service.datatoken)
-        balance = dt.balanceOf(wallet_address)
-
-        if balance < to_wei(1):
-            raise InsufficientBalance(
-                f"Your token balance {balance} {dt.symbol()} is not sufficient "
-                f"to execute the requested service. This service "
-                f"requires 1 wei."
-            )
-
-        consumable_result = is_consumable(
-            ddo,
-            service,
-            {"type": "address", "value": wallet_address},
-            userdata=userdata,
-        )
-        if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
-
         data_provider = DataServiceProvider
 
         initialize_args = {
@@ -707,13 +688,45 @@ class OceanAssets:
         initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
-        receipt = dt.start_order(
-            consumer=consumer_address,
-            service_index=ddo.get_index_of_service(service),
-            provider_fees=provider_fees,
-            consume_market_fees=consume_market_fees,
-            tx_dict=tx_dict,
+        params = {
+            "consumer": consumer_address,
+            "service_index": ddo.get_index_of_service(service),
+            "provider_fees": provider_fees,
+            "consume_market_fees": consume_market_fees,
+            "tx_dict": tx_dict,
+        }
+
+        consumable_result = is_consumable(
+            ddo,
+            service,
+            {"type": "address", "value": wallet_address},
+            userdata=userdata,
         )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
+
+        # main work...
+        dt = Datatoken(self._config_dict, service.datatoken)
+        if dt.getId() == 2:
+            dt = DatatokenEnterprise(self._config_dict, service.datatoken)
+        balance = dt.balanceOf(wallet_address)
+
+        if balance < to_wei(1):
+            try:
+                receipt = dt.buy_1dt_from_pricing_schema(**params)
+            except Exception:
+                receipt = None
+
+            if receipt:
+                return receipt
+
+            raise InsufficientBalance(
+                f"Your token balance {balance} {dt.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires 1 wei."
+            )
+
+        receipt = dt.start_order(**params)
 
         return receipt.txid
 
