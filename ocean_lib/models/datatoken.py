@@ -475,10 +475,14 @@ class Datatoken(ContractBase):
         exchange = self.get_exchanges()[0]
         kwargs["exchange"] = exchange
 
+        consume_market_fees = kwargs.get("consume_market_fees")
+        if not consume_market_fees:
+            consume_market_fees = TokenFeeInfo()
+
         wallet_address = get_from_address(kwargs["tx_dict"])
         amt_needed = exchange.BT_needed(
-            Web3.toWei(1, "ether"), 0
-        )  # TODO: consumer fees? who sets this?
+            Web3.toWei(1, "ether"), consume_market_fees.amount
+        )
         base_token = Datatoken(exchange._FRE.config_dict, exchange.details.base_token)
         base_token_balance = base_token.balanceOf(wallet_address)
 
@@ -496,7 +500,7 @@ class Datatoken(ContractBase):
             {"from": wallet_address},
         )
 
-        # TODO: same here, who defines these?
+        # TODO: still pending exact values
         if self.getId() == 2:
             kwargs["max_base_token_amount"] = amt_needed
             kwargs["consume_market_swap_fee_amount"] = 0
