@@ -470,6 +470,9 @@ class Datatoken(ContractBase):
             raise ValueError("No pricing schemas found")
 
         if dispensers:
+            kwargs.pop("consume_market_swap_fee_amount", None)
+            kwargs.pop("consume_market_swap_fee_address", None)
+
             return self.dispense_and_order(*args, **kwargs)
 
         exchange = self.get_exchanges()[0]
@@ -493,18 +496,19 @@ class Datatoken(ContractBase):
                 f"requires {amt_needed} {base_token.symbol()}."
             )
 
-        approve_address = exchange.address if self.getId() == 1 else self.address
+        if self.getId() == 1:
+            approve_address = exchange.address
+            kwargs.pop("consume_market_swap_fee_amount", None)
+            kwargs.pop("consume_market_swap_fee_address", None)
+        else:
+            approve_address = self.address
+            kwargs["max_base_token_amount"] = amt_needed
+
         base_token.approve(
             approve_address,
             amt_needed,
             {"from": wallet_address},
         )
-
-        # TODO: still pending exact values
-        if self.getId() == 2:
-            kwargs["max_base_token_amount"] = amt_needed
-            kwargs["consume_market_swap_fee_amount"] = 0
-            kwargs["consume_market_swap_fee_address"] = ZERO_ADDRESS
 
         return self.buy_DT_and_order(*args, **kwargs)
 

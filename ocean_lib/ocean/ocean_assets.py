@@ -44,6 +44,7 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -688,6 +689,8 @@ class OceanAssets:
         consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
+        consume_market_swap_fee_amount: Optional[int] = 0,
+        consume_market_swap_fee_address: Optional[str] = ZERO_ADDRESS,
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
@@ -730,6 +733,12 @@ class OceanAssets:
 
         if balance < to_wei(1):
             try:
+                params[
+                    "consume_market_swap_fee_amount"
+                ] = consume_market_swap_fee_amount
+                params[
+                    "consume_market_swap_fee_address"
+                ] = consume_market_swap_fee_address
                 receipt = dt.buy_1dt_from_pricing_schema(**params)
             except Exception:
                 receipt = None
