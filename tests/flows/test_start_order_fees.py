@@ -11,7 +11,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type, to_wei
@@ -220,12 +220,10 @@ def create_asset_with_order_fee_and_timeout(
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
-        DatatokenArguments(
-            name="Datatoken 1",
-            symbol="DT1",
-            publish_market_order_fees=publish_market_order_fees,
-        ),
         {"from": publisher_wallet},
+        name="Datatoken 1",
+        symbol="DT1",
+        publish_market_order_fees=publish_market_order_fees,
     )
 
     data_provider = DataServiceProvider

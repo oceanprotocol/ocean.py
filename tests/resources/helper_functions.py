@@ -9,20 +9,19 @@ import os
 import secrets
 from datetime import datetime
 from decimal import Decimal
-import time
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
 from brownie import network
-from brownie.network import accounts, web3
+from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesTypeFactory
@@ -164,9 +163,7 @@ def deploy_erc721_erc20(
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT", "NFTSYMBOL"), {"from": data_nft_publisher}
-    )
+    data_nft = data_nft_factory.create({"from": data_nft_publisher}, "NFT", "NFTSYMBOL")
 
     if not datatoken_minter:
         return data_nft
@@ -174,14 +171,12 @@ def deploy_erc721_erc20(
     datatoken_cap = to_wei(100) if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
-        DatatokenArguments(
-            template_index=template_index,
-            cap=datatoken_cap,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=datatoken_minter.address,
-        ),
         {"from": data_nft_publisher},
+        template_index=template_index,
+        cap=datatoken_cap,
+        name="DT1",
+        symbol="DT1Symbol",
+        minter=datatoken_minter.address,
     )
 
     return data_nft, datatoken

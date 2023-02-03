@@ -6,7 +6,7 @@ import pytest
 from brownie import network
 from web3.main import Web3
 
-from ocean_lib.models.datatoken import DatatokenArguments, DatatokenRoles, TokenFeeInfo
+from ocean_lib.models.datatoken import DatatokenRoles, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import get_mock_provider_fees
@@ -95,11 +95,9 @@ def test_main(
 
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
             {"from": another_consumer_wallet},
+            name="DT1",
+            symbol="DT1Symbol",
         )
 
 

@@ -25,17 +25,13 @@ def test_nft_creation(
     data_nft_factory,
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT2", "DTSYMBOL1"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT2", "DTSYMBOL1")
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -47,12 +43,12 @@ def test_nft_creation(
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     datatoken = data_nft.create_datatoken(
+        {"from": publisher_wallet},
         DatatokenArguments(
             "DT1P",
             "DT1Symbol",
             fee_manager=consumer_wallet.address,
         ),
-        {"from": publisher_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -99,6 +95,7 @@ def test_combo_functions(
 
     # Create ERC20 data token for fees.
     datatoken = data_nft_token2.create_datatoken(
+        {"from": publisher_wallet},
         DatatokenArguments(
             "DT1P",
             "DT1SymbolP",
@@ -109,7 +106,6 @@ def test_combo_functions(
                 amount=to_wei(0.0005),
             ),
         ),
-        {"from": publisher_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
     fee_datatoken_address = datatoken.address
@@ -186,9 +182,7 @@ def test_start_multiple_order(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests the utils functions."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     assert data_nft.contract.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
     assert data_nft_factory.check_nft(data_nft.address)
@@ -196,8 +190,9 @@ def test_start_multiple_order(
     # Tests current NFT count
     current_nft_count = data_nft_factory.getCurrentNFTCount()
     data_nft = data_nft_factory.create(
-        DataNFTArguments("DT2", "DTSYMBOL1"), {"from": publisher_wallet}
+        {"from": publisher_wallet}, DataNFTArguments("DT2", "DTSYMBOL1")
     )
+    assert data_nft.contract.name() == "DT2"
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -209,12 +204,12 @@ def test_start_multiple_order(
     # Tests creating successfully an ERC20 token
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
     datatoken = data_nft.create_datatoken(
+        {"from": consumer_wallet},
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
         ),
-        {"from": consumer_wallet},
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -328,8 +323,8 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
 
     with pytest.raises(Exception, match="Missing NFTCreated event"):
         data_nft_factory.create(
+            {"from": publisher_wallet, "required_confs": 0},
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
-            {"from": publisher_wallet, "required_confs": 0},
         )

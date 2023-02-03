@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: On-Chain Key-Value Store for Public Sharing
 
-Data NFTs can store arbitrary key-value pairs, to be an on-chain key-value store. 
+Data NFTs can store arbitrary key-value pairs, to be an on-chain key-value store.
 
 They can be used for:
 1. **Publicly sharing AI models** of small to medium size
@@ -32,8 +32,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 
 In Python console:
 ```python
-from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), {"from": alice})
+data_nft = ocean.data_nft_factory.create({"from": alice}, 'NFT1', 'NFT1')
 ```
 
 ## 3. Add key-value pair to data NFT
