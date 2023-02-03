@@ -23,7 +23,7 @@ class ExchangeArguments:
         owner_addr: Optional[str] = None,
         publish_market_fee_collector: Optional[str] = None,
         publish_market_fee: Union[int, str] = 0,
-        with_mint: bool = False,
+        with_mint: bool = True,
         allowed_swapper: str = ZERO_ADDRESS,
         full_info: bool = False,
         dt_decimals: Optional[int] = None,
