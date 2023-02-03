@@ -23,7 +23,10 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     # =========================================================================
     # Create exchange
     exchange = DT.create_exchange(
-        rate=to_wei(3), base_token_addr=OCEAN.address, tx_dict={"from": alice}
+        rate=to_wei(3),
+        base_token_addr=OCEAN.address,
+        tx_dict={"from": alice},
+        with_mint=False,
     )
 
     # Alice makes 100 datatokens available on the exchange
@@ -128,7 +131,6 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
         owner_addr=bob.address,
         publish_market_fee_collector=publish_market_fee_collector,
         publish_market_fee=publish_market_fee,
-        with_mint=True,
         allowed_swapper=carlos.address,
         full_info=True,
         tx_dict={"from": alice},

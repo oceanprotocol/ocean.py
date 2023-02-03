@@ -165,7 +165,6 @@ def test_buy_DT_and_order(
         base_token_addr=USDC.address,
         tx_dict={"from": publisher_wallet},
         publish_market_fee=to_wei(0.1),
-        with_mint=True,
     )
     assert exchange.details.active
     assert exchange.details.with_mint
