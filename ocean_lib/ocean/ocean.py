@@ -158,9 +158,11 @@ class Ocean:
         :param token_address: Token contract address, str
         :return: `Datatoken` or `DatatokenEnterprise` instance
         """
+        datatoken = Datatoken(self.config, token_address)
+
         return (
-            Datatoken(self.config, token_address)
-            if Datatoken(self.config, token_address).contract.getId() == 1
+            datatoken
+            if datatoken.getId() == 1
             else DatatokenEnterprise(self.config, token_address)
         )
 
