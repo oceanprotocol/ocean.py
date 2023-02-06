@@ -25,12 +25,14 @@ install_requirements = [
     "PyYAML==5.4.1",
     "requests>=2.21.0",
     "deprecated",
-    "tqdm==4.64.1",
-    "pytz==2022.2.1",
-    "cryptography==3.3.2",
+    "pycryptodomex",
+    "tqdm",
+    "pytz",
+    "cryptography",
+    "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
-    "eciespy==0.3.0",
+    "eciespy",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
@@ -42,11 +44,15 @@ install_requirements = [
 setup_requirements = ["pytest-runner"]
 
 test_requirements = [
-    "codacy-coverage==1.3.11",
-    "coverage==6.4.4",
-    "mccabe==0.7.0",
+    "codacy-coverage",
+    "coverage",
+    "docker",
+    "mccabe",
+    "pylint",
+    "pytest",
+    "pytest-watch",
+    "pytest-env",
     "mkcodes==0.1.1",
-    "pytest==6.2.5",
     "pytest-sugar==0.9.6",
 ]
 
