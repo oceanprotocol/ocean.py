@@ -697,6 +697,16 @@ class OceanAssets:
         wallet_address = get_from_address(tx_dict)
         consumer_address = consumer_address or wallet_address
 
+        consumable_result = is_consumable(
+            ddo,
+            service,
+            {"type": "address", "value": wallet_address},
+            userdata=userdata,
+        )
+
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
+
         data_provider = DataServiceProvider
 
         initialize_args = {
@@ -715,15 +725,6 @@ class OceanAssets:
             "consume_market_fees": consume_market_fees,
             "tx_dict": tx_dict,
         }
-
-        consumable_result = is_consumable(
-            ddo,
-            service,
-            {"type": "address", "value": wallet_address},
-            userdata=userdata,
-        )
-        if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
 
         # main work...
         dt = Datatoken(self._config_dict, service.datatoken)

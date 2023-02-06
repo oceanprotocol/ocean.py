@@ -337,27 +337,6 @@ def test_create_bad_metadata(publisher_ocean, publisher_wallet):
         )
 
 
-@pytest.mark.unit
-def test_pay_for_access_service_insufficient_balance(
-    publisher_ocean, config, publisher_wallet
-):
-    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
-
-    ddo_dict = copy.deepcopy(get_sample_ddo())
-    ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
-    ddo = DDO.from_dict(ddo_dict)
-
-    empty_wallet = accounts.add()
-
-    with pytest.raises(InsufficientBalance):
-        publisher_ocean.assets.pay_for_access_service(
-            ddo,
-            {"from": empty_wallet},
-            get_first_service_by_type(ddo, "access"),
-            TokenFeeInfo(address=empty_wallet.address, token=datatoken.address),
-        )
-
-
 @pytest.mark.integration
 def test_create_url_asset(publisher_ocean, publisher_wallet):
     ocean = publisher_ocean
@@ -640,6 +619,17 @@ def test_create_pricing_schemas(
     assert not dt.dispenser_status().active
     assert dt.get_exchanges() == []
 
+    # pay_for_access service has insufficient balance and can't buy or dispense
+    empty_wallet = accounts.add()
+
+    with pytest.raises(InsufficientBalance):
+        ocean_assets.pay_for_access_service(
+            ddo,
+            {"from": empty_wallet},
+            get_first_service_by_type(ddo, "access"),
+            TokenFeeInfo(address=empty_wallet.address, token=dt.address),
+        )
+
     data_nft, dt, ddo = ocean_assets.create_url_asset(
         "Data NFTs in Ocean",
         url,
@@ -650,6 +640,7 @@ def test_create_pricing_schemas(
 
     assert dt.dispenser_status().active
     assert dt.get_exchanges() == []
+    # pay_for_access service has insufficient balance but dispenses automatically
     _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})
 
     data_nft, dt, ddo = ocean_assets.create_url_asset(
@@ -665,4 +656,5 @@ def test_create_pricing_schemas(
     assert not dt.dispenser_status().active
     assert len(dt.get_exchanges()) == 1
     assert dt.get_exchanges()[0].details.base_token == OCEAN.address
+    # pay_for_access service has insufficient balance but buys 1 datatoken automatically from the exchange
     _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})

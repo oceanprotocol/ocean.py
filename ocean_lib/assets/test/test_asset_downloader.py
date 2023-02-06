@@ -72,6 +72,7 @@ def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
+    ddo.services[0].service_endpoint = "http://nothing-here.com"
 
     with pytest.raises(InvalidURL):
         download_asset_files(
