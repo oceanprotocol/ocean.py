@@ -20,17 +20,14 @@ with open("README.md", encoding="utf8") as readme_file:
 install_requirements = [
     "ocean-contracts==1.1.8",
     "coloredlogs==15.0.1",
-    # "PyJWT",  # not jwt
-    "PyYAML==5.4.1",
+    "PyYAML",  # used minimally and unlikely to change
     "requests>=2.21.0",
-    # "pycryptodomex",
-    "tqdm",
-    "pytz",
-    "cryptography",
+    "pytz==2022.2.1",
+    "cryptography==3.3.2",
     "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
-    "eciespy",
+    "eciespy==0.3.0",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
