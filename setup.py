@@ -20,12 +20,10 @@ with open("README.md", encoding="utf8") as readme_file:
 install_requirements = [
     "ocean-contracts==1.1.8",
     "coloredlogs==15.0.1",
-    # "pyopenssl",
-    "PyJWT",  # not jwt
+    # "PyJWT",  # not jwt
     "PyYAML==5.4.1",
     "requests>=2.21.0",
-    # "deprecated",
-    "pycryptodomex",
+    # "pycryptodomex",
     "tqdm",
     "pytz",
     "cryptography",
