@@ -19,11 +19,12 @@ with open("README.md", encoding="utf8") as readme_file:
 # or pip install -e .
 install_requirements = [
     "ocean-contracts==1.1.8",
-    "pyopenssl",
+    "coloredlogs==15.0.1",
+    # "pyopenssl",
     "PyJWT",  # not jwt
     "PyYAML==5.4.1",
     "requests>=2.21.0",
-    "deprecated",
+    # "deprecated",
     "pycryptodomex",
     "tqdm",
     "pytz",
