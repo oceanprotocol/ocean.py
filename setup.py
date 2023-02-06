@@ -44,33 +44,25 @@ install_requirements = [
 setup_requirements = ["pytest-runner"]
 
 test_requirements = [
-    "codacy-coverage",
-    "coverage",
-    "docker",
-    "mccabe",
-    "pylint",
-    "pytest",
-    "pytest-watch",
-    "Pillow",
-    "matplotlib",
+    "codacy-coverage==1.3.11",
+    "coverage==6.4.4",
+    "mccabe==0.7.0",
     "mkcodes==0.1.1",
-    "pytest-sugar",
+    "pytest==6.2.5",
+    "pytest-sugar==0.9.6",
 ]
 
 # Possibly required by developers of ocean-lib:
 dev_requirements = [
-    "bumpversion",
-    "pkginfo",
-    "twine",
-    "watchdog",
+    "bumpversion==0.6.0",
+    "pkginfo==1.8.3",
+    "twine==3.7.1",
+    "watchdog==2.1.9",
     "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
-    "pre-commit",
-    # for the following: maybe needed, maybe not
-    "pytest",
+    "pre-commit==2.20.0",
     "licenseheaders==0.8.8",
-    "pytest-env",
 ]
 
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
