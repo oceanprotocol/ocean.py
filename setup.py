@@ -52,6 +52,7 @@ test_requirements = [
     "pytest",
     "pytest-watch",
     "pytest-env",
+    "matplotlib",
     "mkcodes==0.1.1",
     "pytest-sugar==0.9.6",
 ]
