@@ -20,17 +20,17 @@ with open("README.md", encoding="utf8") as readme_file:
 install_requirements = [
     "ocean-contracts==1.1.8",
     "coloredlogs==15.0.1",
-    "PyYAML",  # used minimally and unlikely to change
+    "PyYAML",  # used minimally and unlikely to change, common dependency
     "requests>=2.21.0",
-    "pytz==2022.2.1",
-    "cryptography==3.3.2",
+    "pytz",  # used minimally and unlikely to change, common dependency
+    "cryptography",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
-    "eciespy==0.3.0",
+    "eciespy",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
-    # brownie requires web3py, eth-abi and more,
+    # brownie requires web3.py, eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
 ]
@@ -44,7 +44,7 @@ test_requirements = [
     "pytest==6.2.5",
     "pytest-watch==4.2.0",
     "pytest-env==0.6.2",
-    "matplotlib",  # just used in a readme test and unlikely to change
+    "matplotlib",  # just used in a readme test and unlikely to change, common dependency
     "mkcodes==0.1.1",
     "pytest-sugar==0.9.6",
 ]
