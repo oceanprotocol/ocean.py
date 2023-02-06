@@ -24,7 +24,6 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz==2022.2.1",
     "cryptography==3.3.2",
-    "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
     "eciespy==0.3.0",
