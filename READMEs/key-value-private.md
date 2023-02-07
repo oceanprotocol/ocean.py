@@ -38,9 +38,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 
 ## 2. Publish data NFT
 
-Here, we publish a data NFT like elsewhere. To make it a soul
-
-bound token (SBT). we set `transferable=False`.
+Here, we publish a data NFT like elsewhere. To make it a soulbound token (SBT). we set `transferable=False`.
 
 In the Python console:
 ```python
