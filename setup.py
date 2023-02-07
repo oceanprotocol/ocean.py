@@ -20,7 +20,6 @@ with open("README.md", encoding="utf8") as readme_file:
 install_requirements = [
     "ocean-contracts==1.1.8",
     "coloredlogs==15.0.1",
-    "PyYAML",  # used minimally and unlikely to change, common dependency
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
