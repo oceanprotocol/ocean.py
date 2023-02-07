@@ -48,11 +48,22 @@ def get_gas_fees_for_remote() -> tuple:
 
     if not gas_resp or gas_resp.status_code != 200:
         print("Invalid response from Polygon gas station. Retry with brownie values...")
+        if chain.id == 80001:
+            return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee, 4
 
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
+        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee, 20
 
-    return Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"), Web3.toWei(
-        gas_resp.json()["fast"]["maxFee"], "gwei"
+    if chain.id == 80001:
+        return (
+            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+            4,
+        )
+
+    return (
+        Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+        Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+        20,
     )
 
 
@@ -90,7 +101,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     print("Do a send-Ether tx...")
     try:
 
-        priority_fee, _ = get_gas_fees_for_remote()
+        priority_fee, _, _ = get_gas_fees_for_remote()
         alice_wallet.transfer(
             bob_wallet.address,
             f"{amt_send:.15f} ether",
@@ -120,12 +131,13 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
 
     print("Call create() from data NFT, and wait for it to complete...")
     try:
-        priority_fee, max_fee = get_gas_fees_for_remote()
+        priority_fee, max_fee, required_confs = get_gas_fees_for_remote()
         data_nft = ocean.data_nft_factory.create(
             {
                 "from": alice_wallet,
                 "priority_fee": priority_fee,
                 "max_fee": max_fee,
+                "required_confs": required_confs,
             },
             symbol,
             symbol,
