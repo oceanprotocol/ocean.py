@@ -11,6 +11,55 @@ from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
+"""
+def activate(dt_addr: str, max_tokens: int, max_balance: int) -> None:
+    activate dispenser after deactivation
+    :param dt_addr: datatoken address of ERC20
+    :param max_tokens: maximum amount of tokens
+    :param max_balance: maximum token balance
+    :return: None
+
+def balance() -> int:
+    get dispenser balance
+    :return: balance in int
+
+def deactivate(dt_addr: str) -> None:
+    deactivate dispenser
+    :param dt_addr: datatoken address of ERC20
+    :return: None
+
+def dispense(dt_addr: str, amount: int, destination: str) -> None:
+    dispense an amount of tokens to a given destination address,
+    requires tx_dict with a sender that can dispense
+    :param dt_addr: address of the ERC20 token
+    :param amount: amount to dispense
+    :param destination: address of the account to receive dispensed tokens
+    :return: None
+
+def getId() -> int:
+    get dispenser id
+    :return: dispenser id
+
+def ownerWithdraw(dt_addr: str) -> None:
+    withdraw datatokens from dispenser,
+    requires tx_dict with a sender that can dispense
+    :param dt_addr: address of the ERC20 token. If missing, will withdraw all.
+    :return: None
+
+def setAllowedSwapper(dt_addr: str, new_swapper_addr: str) -> None:
+    set allowed swapper to a new address
+    :param dt_addr: address of the ERC20 token
+    :param new_swapper_addr: address of the account to be set as swapper
+    :return: None
+
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+status -> you can use the datatoken.dispenser_status() function as a better shorthand
+create -> you can use the datatoken.create_dispenser() function as a better shorthand
+datatokensList -> a list of datatokens served by this dispenser, but we recommend retrieving each dispenser from its datatoken object
+"""
+
+
 class Dispenser(ContractBase):
     CONTRACT_NAME = "Dispenser"
 
