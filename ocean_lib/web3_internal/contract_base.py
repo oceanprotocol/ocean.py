@@ -36,10 +36,11 @@ class ContractBase(object):
         check_network(self.network)
 
         self.contract = load_contract(self.contract_name, address)
-        assert not address or (
-            self.contract.address.lower() == address.lower()
-            and self.address.lower() == address.lower()
-        )
+        assert not address or (self.contract.address.lower() == address.lower())
+
+        transferable = [x for x in dir(self.contract) if not x.startswith("_")]
+        for function in transferable:
+            setattr(self, function, getattr(self.contract, function))
 
     @enforce_types
     def __str__(self) -> str:
@@ -62,9 +63,3 @@ class ContractBase(object):
         :return: address, hex str
         """
         return Web3.toChecksumAddress(address.lower())
-
-    def __getattribute__(self, attr):
-        try:
-            return object.__getattribute__(self, attr)
-        except AttributeError:
-            return object.__getattribute__(self.contract, attr)

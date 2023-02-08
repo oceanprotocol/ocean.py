@@ -17,6 +17,58 @@ from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
+"""
+def balance() -> int:
+    get token balance
+    :return: int
+
+def getCurrentNFTCount() -> int:
+    get current NFT count
+    :return: int
+
+def getCurrentNFTTemplateCount() -> int:
+    get current NFT template count (should be always 1 in current ocean.py)
+    :return: int
+
+def getCurrentTemplateCount() -> int:
+    get current ERC20 template count (should be always 2 in current ocean.py)
+    :return: int
+
+def getCurrentTokenCount() -> int:
+    get current ERC20 token count
+    :return: int
+
+def getNFTTemplate(index: int) -> tuple:
+    get NFT template details for specific index
+    :param index: index of the NFT template
+    :return: tuple of the form (address, valid), where address is the
+    template address and valid is a boolean value indicating template existence
+
+def getTokenTemplate(index: int) -> tuple:
+    get ERC20 template details for specific index
+    :param index: index of the ERC20 template
+    :return: if template exists, tuple of the form (address, True), where
+    address is the template address; otherwise throws an exception
+
+def owner() -> str:
+    get owner address of the contract
+    :return: str
+
+
+The following functions are wrapped with ocean.py helpers, but you can use the raw form if needed:
+createNftWithErc20
+createNftWithErc20WithDispenser
+createNftWithErc20WithFixedRate
+createNftWithMetaData
+createToken
+deployERC721Contract
+erc20List
+erc721List
+reuseMultipleTokenOrder  # TODO: https://github.com/oceanprotocol/ocean.py/issues/1275
+startMultipleTokenOrder
+"""
+
+
 class DataNFTFactoryContract(ERC721TokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
 
