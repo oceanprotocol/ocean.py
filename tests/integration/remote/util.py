@@ -48,22 +48,25 @@ def get_gas_fees_for_remote() -> tuple:
 
     if not gas_resp or gas_resp.status_code != 200:
         print("Invalid response from Polygon gas station. Retry with brownie values...")
+        required_confs = 20
         if chain.id == 80001:
-            return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee, 4
+            required_confs = 4
 
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee, 20
+        return (
+            chain.priority_fee,
+            chain.base_fee + 2 * chain.priority_fee,
+            required_confs,
+        )
+
+    required_confs = 20
 
     if chain.id == 80001:
-        return (
-            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
-            4,
-        )
+        required_confs = 4
 
     return (
         Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
         Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
-        20,
+        required_confs,
     )
 
 
