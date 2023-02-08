@@ -13,7 +13,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import to_wei
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -142,7 +142,7 @@ def _mint_and_build_compute_input(
     ocean_instance: Ocean,
 ) -> ComputeInput:
     service = get_first_service_by_type(dataset_and_userdata.ddo, service_type)
-    datatoken = Datatoken(ocean_instance.config_dict, service.datatoken)
+    datatoken = DatatokenBase.get_typed(ocean_instance.config_dict, service.datatoken)
     minter = (
         consumer_wallet
         if datatoken.isMinter(consumer_wallet.address)

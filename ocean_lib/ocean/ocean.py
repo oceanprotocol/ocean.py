@@ -17,8 +17,7 @@ from ocean_lib.example_config import config_defaults
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
+from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.models.df.df_rewards import DFRewards
 from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.dispenser import Dispenser
@@ -33,14 +32,9 @@ from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from ocean_lib.ocean.util import (
-    get_address_of_type,
-    get_from_address,
-    get_ocean_token_address,
-)
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -110,8 +104,8 @@ class Ocean:
 
     @property
     @enforce_types
-    def OCEAN_token(self) -> Datatoken:
-        return Datatoken(self.config, self.OCEAN_address)
+    def OCEAN_token(self) -> DatatokenBase:
+        return DatatokenBase.get_typed(self.config, self.OCEAN_address)
 
     @property
     @enforce_types
@@ -151,20 +145,12 @@ class Ocean:
         return DataNFT(self.config, token_address)
 
     @enforce_types
-    def get_datatoken(
-        self, token_address: str
-    ) -> Union[Datatoken, DatatokenEnterprise]:
+    def get_datatoken(self, token_address: str) -> DatatokenBase:
         """
         :param token_address: Token contract address, str
         :return: `Datatoken` or `DatatokenEnterprise` instance
         """
-        datatoken = Datatoken(self.config, token_address)
-
-        return (
-            datatoken
-            if datatoken.getId() == 1
-            else DatatokenEnterprise(self.config, token_address)
-        )
+        return DatatokenBase.get_typed(self.config, token_address)
 
     # ======================================================================
     # orders
@@ -173,7 +159,7 @@ class Ocean:
         """
         :return: List of orders `[Order]`
         """
-        dt = Datatoken(self.config_dict, datatoken)
+        dt = DatatokenBase.get_typed(self.config_dict, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
