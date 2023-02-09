@@ -204,9 +204,9 @@ class Datatoken(DatatokenBase):
     def dispense_and_order(
         self,
         consumer: str,
-        service_index: int,
         provider_fees: dict,
         tx_dict: dict,
+        service_index: int = 1,
         consume_market_fees=None,
     ) -> str:
         if not consume_market_fees:
@@ -244,10 +244,10 @@ class Datatoken(DatatokenBase):
     def buy_DT_and_order(
         self,
         consumer: str,
-        service_index: int,
         provider_fees: dict,
         exchange: Any,
         tx_dict: dict,
+        service_index: int = 1,
         consume_market_fees=None,
     ) -> str:
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
