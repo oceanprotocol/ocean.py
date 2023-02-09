@@ -8,6 +8,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type, get_from_address
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
@@ -29,13 +30,13 @@ class DatatokenEnterprise(Datatoken):
         self,
         provider_fees: dict,
         exchange: Any,
-        max_base_token_amount: Union[int, str],
-        consume_market_swap_fee_amount: Union[int, str],
-        consume_market_swap_fee_address: str,
         tx_dict: dict,
+        max_base_token_amount: Optional[Union[int, str]] = None,
         consumer: Optional[str] = None,
         service_index: int = 1,
         consume_market_fees=None,
+        consume_market_swap_fee_amount: Optional[Union[int, str]] = 0,
+        consume_market_swap_fee_address: Optional[str] = ZERO_ADDRESS,
     ) -> str:
         if not consumer:
             consumer = get_from_address(tx_dict)
