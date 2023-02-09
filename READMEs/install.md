@@ -12,6 +12,8 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Install ocean.py library
 
+Ocean.py requires some basic system dependencies which are standard to development images. If you encounter trouble during installation, please make sure you have autoconf, pkg-config and build-essential or their equivalents installed.
+
 In a new console:
 
 ```console
@@ -36,7 +38,6 @@ pip install ocean-lib
 Issue: M1 * `coincurve` or `cryptography`
 - If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
 - Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
-
 
 Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
