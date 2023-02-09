@@ -11,7 +11,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
+from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type, to_wei
@@ -65,7 +65,7 @@ def test_start_order_fees(
     consume_market_order_fee_in_unit: str,
     provider_fee_in_unit: str,
 ):
-    bt = Datatoken(config, get_address_of_type(config, base_token_name))
+    bt = DatatokenBase.get_typed(config, get_address_of_type(config, base_token_name))
     data_nft = deploy_erc721_erc20(config, publisher_wallet)
     publish_market_wallet = get_wallet(4)
     consume_market_wallet = get_wallet(5)
@@ -216,7 +216,7 @@ def create_asset_with_order_fee_and_timeout(
     publisher_wallet,
     publish_market_order_fees,
     timeout: int,
-) -> Tuple[DDO, Service, Datatoken]:
+) -> Tuple[DDO, Service, DatatokenBase]:
 
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(

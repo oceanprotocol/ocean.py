@@ -10,7 +10,11 @@ from web3 import Web3
 
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_base import (
+    DatatokenArguments,
+    DatatokenBase,
+    TokenFeeInfo,
+)
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
@@ -362,7 +366,7 @@ def test_create_datatoken_with_usdc_order_fee(
     config: dict, publisher_wallet, data_nft_factory: DataNFTFactoryContract, data_nft
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
-    usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
+    usdc = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
     publish_market_order_fee_amount_in_wei = to_wei(5)
     dt = data_nft.create_datatoken(
         {"from": publisher_wallet},
