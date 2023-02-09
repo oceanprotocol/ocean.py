@@ -25,7 +25,11 @@ from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_base import (
+    DatatokenArguments,
+    DatatokenBase,
+    TokenFeeInfo,
+)
 from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import (
@@ -421,7 +425,7 @@ class OceanAssets:
         credentials: Optional[dict] = None,
         data_nft_address: Optional[str] = None,
         data_nft_args: Optional[DataNFTArguments] = None,
-        deployed_datatokens: Optional[List[Datatoken]] = None,
+        deployed_datatokens: Optional[List[DatatokenBase]] = None,
         services: Optional[list] = None,
         datatoken_args: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
@@ -691,7 +695,7 @@ class OceanAssets:
         consumer_address = consumer_address or wallet_address
 
         # main work...
-        dt = Datatoken(self._config_dict, service.datatoken)
+        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
         balance = dt.balanceOf(wallet_address)
 
         if balance < to_wei(1):
@@ -805,7 +809,7 @@ class OceanAssets:
             return
 
         service = asset_compute_input.service
-        dt = Datatoken(self._config_dict, service.datatoken)
+        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(

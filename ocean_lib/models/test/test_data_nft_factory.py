@@ -7,7 +7,12 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_base import (
+    DatatokenArguments,
+    DatatokenBase,
+    TokenFeeInfo,
+)
 from ocean_lib.models.dispenser import Dispenser, DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
@@ -231,7 +236,7 @@ def test_start_multiple_order(
     assert data_nft_factory.check_datatoken(datatoken.address)
 
     # Tests starting multiple token orders successfully
-    datatoken = Datatoken(config, datatoken.address)
+    datatoken = DatatokenBase.get_typed(config, datatoken.address)
     dt_amount = to_wei(2)
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0

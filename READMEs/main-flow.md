@@ -133,10 +133,10 @@ data_nft = DataNFT(config, data_nft_address)
 It's similar for Datatokens. In Python:
 
 ```console
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_base import DatatokenBase
 config = <like shown elsewhere in READMEs>
 datatoken_address = <what you wrote down previously>
-datatoken = Datatoken(config, datatoken_address)
+datatoken = DatatokenBase.get_typed(config, datatoken_address)
 ```
 
 ### Data NFT Interface
@@ -224,7 +224,7 @@ url_file = UrlFile(
 )
 
 # Publish data asset
-from ocean_lib.models.datatoken import DatatokenArguments
+from ocean_lib.models.datatoken_base import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
     {"from": alice},

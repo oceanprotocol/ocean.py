@@ -8,14 +8,12 @@ from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
+from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
 from ocean_lib.ocean.util import get_address_of_type, get_args_object, get_from_address
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
-
 
 """
 def balance() -> int:
@@ -164,11 +162,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
         registered_token_event = receipt.events["TokenCreated"]
         datatoken_address = registered_token_event["newTokenAddress"]
-        datatoken = (
-            Datatoken(self.config_dict, datatoken_address)
-            if datatoken_args.template_index == 1
-            else DatatokenEnterprise(self.config_dict, datatoken_address)
-        )
+        datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
         return data_nft_token, datatoken
 
@@ -221,11 +215,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
         registered_token_event = receipt.events["TokenCreated"]
         datatoken_address = registered_token_event["newTokenAddress"]
-        datatoken = (
-            Datatoken(self.config_dict, datatoken_address)
-            if datatoken_args.template_index == 1
-            else DatatokenEnterprise(self.config_dict, datatoken_address)
-        )
+        datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
         registered_fixed_rate_event = receipt.events["NewFixedRate"]
         exchange_id = registered_fixed_rate_event["exchangeId"]
@@ -285,11 +275,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
         registered_token_event = receipt.events["TokenCreated"]
         datatoken_address = registered_token_event["newTokenAddress"]
-        datatoken = (
-            Datatoken(self.config_dict, datatoken_address)
-            if datatoken_args.template_index == 1
-            else DatatokenEnterprise(self.config_dict, datatoken_address)
-        )
+        datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
         registered_dispenser_event = receipt.events["DispenserCreated"]
         assert registered_dispenser_event["datatokenAddress"] == datatoken_address
@@ -344,7 +330,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        datatoken_contract = Datatoken(self.config_dict, datatoken)
+        datatoken_contract = DatatokenBase.get_typed(self.config_dict, datatoken)
         exchange_addresses_and_ids = datatoken_contract.getFixedRates()
         return (
             exchange_addresses_and_ids

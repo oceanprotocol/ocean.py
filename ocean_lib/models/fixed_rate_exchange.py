@@ -55,9 +55,10 @@ class ExchangeArguments:
 
             self.dt_decimals = dt_decimals
 
-        from ocean_lib.models.datatoken import Datatoken  # isort:skip
+        # TODO: move to top now?
+        from ocean_lib.models.datatoken_base import DatatokenBase  # isort:skip
 
-        self.BT = Datatoken(config_dict, self.base_token_addr)
+        self.BT = DatatokenBase.get_typed(config_dict, self.base_token_addr)
 
         return (
             FRE_addr,
@@ -327,10 +328,11 @@ class OneExchange:
         - tx_dict - e.g. {"from": alice_wallet}
         """
         # import now, to avoid circular import
-        from ocean_lib.models.datatoken import Datatoken
+        # TODO: maybe we can move it now?
+        from ocean_lib.models.datatoken_base import DatatokenBase
 
         details = self.details
-        BT = Datatoken(self._FRE.config_dict, details.base_token)
+        BT = DatatokenBase.get_typed(self._FRE.config_dict, details.base_token)
         buyer_addr = get_from_address(tx_dict)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
