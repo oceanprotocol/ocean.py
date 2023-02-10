@@ -63,19 +63,15 @@ The config file's default RPCs point to Infura, which require you to have an Inf
 
 One option is to get an Infura account.
 
-A simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. The command below replaces Infura RPCs with public ones in `network-config.yaml`:
+A simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. You can do that manually by editing your brownie network config file, depending on where is placed in your system.
+Here is a sample command replacing Infura RPCs with public ones in `network-config.yaml`, for Linux users:
 
 * Linux users:
 ```console
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 ```
 
-* MacOS users:
-```console
-brew install gnu-sed
-
-gsed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
-```
+For MacOS, you can achieve the same thing with `gnu-sed` and the `gsed` command. For Windows, you might need something similar to [powershell](https://www.marek.tokyo/2020/01/remove-string-from-file-in-windows-10.html).
 
 #### RPCs wrapup
 
