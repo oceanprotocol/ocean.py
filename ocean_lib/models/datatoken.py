@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Any
+from typing import Any, Optional
 
 from enforce_typing import enforce_types
 
@@ -203,12 +203,15 @@ class Datatoken(DatatokenBase):
 
     def dispense_and_order(
         self,
-        consumer: str,
-        service_index: int,
         provider_fees: dict,
         tx_dict: dict,
+        consumer: Optional[str] = None,
+        service_index: int = 1,
         consume_market_fees=None,
     ) -> str:
+        if not consumer:
+            consumer = get_from_address(tx_dict)
+
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
@@ -243,13 +246,16 @@ class Datatoken(DatatokenBase):
     @enforce_types
     def buy_DT_and_order(
         self,
-        consumer: str,
-        service_index: int,
         provider_fees: dict,
         exchange: Any,
         tx_dict: dict,
+        consumer: Optional[str] = None,
+        service_index: int = 1,
         consume_market_fees=None,
     ) -> str:
+        if not consumer:
+            consumer = get_from_address(tx_dict)
+
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
 
         # import now, to avoid circular import
