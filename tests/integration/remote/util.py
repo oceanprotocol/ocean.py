@@ -64,8 +64,14 @@ def get_gas_fees_for_remote() -> tuple:
         required_confs = 20
 
     return (
-        Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-        Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+            chain.priority_fee,
+        ),
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+            chain.base_fee + 2 * chain.priority_fee,
+        ),
         required_confs,
     )
 
