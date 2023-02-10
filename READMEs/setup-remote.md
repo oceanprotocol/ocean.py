@@ -53,7 +53,7 @@ All the [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) 
 
 ### 1.3 RPCs and Infura
 
-The config file's default RPCs points to Infura, which require you to have an Infura account with corresponding token `WEB3_INFURA_PROJECT_ID`.
+The config file's default RPCs point to Infura, which require you to have an Infura account with corresponding token `WEB3_INFURA_PROJECT_ID`.
 
 
 #### If you do have an Infura account
