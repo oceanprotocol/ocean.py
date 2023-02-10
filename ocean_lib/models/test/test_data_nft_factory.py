@@ -16,7 +16,7 @@ from ocean_lib.models.datatoken_base import (
 from ocean_lib.models.dispenser import Dispenser, DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
-from ocean_lib.structures.abi_tuples import OrderData
+from ocean_lib.structures.abi_tuples import OrderData, ReuseOrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_non_existent_nft_template
@@ -304,6 +304,26 @@ def test_start_multiple_order(
 
     assert datatoken.balanceOf(consumer_wallet.address) == 0
     assert datatoken.balanceOf(datatoken.getPaymentCollector()) == (dt_amount * 0.97)
+
+    reuse_order = ReuseOrderData(
+        order_data.token_address,
+        receipt.txid,
+        (
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            0,
+            provider_data,
+        ),
+    )
+    receipt = data_nft_factory.reuse_multiple_token_order(
+        [reuse_order], {"from": consumer_wallet}
+    )
+
+    # registered_erc20_start_order_event = receipt.events["OrderStarted"]
 
 
 @pytest.mark.unit
