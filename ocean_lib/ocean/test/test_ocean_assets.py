@@ -19,7 +19,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import DEFAULT_PROVIDER_URL
 from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_base import DatatokenArguments, TokenFeeInfo
 from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.ocean_assets import OceanAssets

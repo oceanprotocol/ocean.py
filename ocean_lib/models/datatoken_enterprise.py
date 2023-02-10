@@ -6,14 +6,22 @@ from typing import Any, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
+from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 checksum_addr = ContractBase.to_checksum_address
 
+"""
+DatatokenEnterprise retains all the functions from Datatoken model.
 
-class DatatokenEnterprise(Datatoken):
+The different functions are redundant (wrapped by ocean.py in helpers):
+buyFromDispenserAndOrder
+buyFromFreAndOrder
+"""
+
+
+class DatatokenEnterprise(DatatokenBase):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
     @enforce_types

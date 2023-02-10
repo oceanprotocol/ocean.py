@@ -12,6 +12,8 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Install ocean.py library
 
+Ocean.py requires some basic system dependencies which are standard to development images. If you encounter trouble during installation, please make sure you have autoconf, pkg-config and build-essential or their equivalents installed.
+
 In a new console:
 
 ```console
@@ -21,6 +23,7 @@ cd my_project
 
 # Initialize virtual environment and activate it. Install artifacts.
 # Make sure your Python version inside the venv is >=3.8.
+# Anaconda is not fully supported for now, please use venv
 python3 -m venv venv
 source venv/bin/activate
 
@@ -37,13 +40,13 @@ Issue: M1 * `coincurve` or `cryptography`
 - If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
 - Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
 
-
 Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
 
-To install ocean-lib using Python 3.11, run `pip install vyper==0.3.7 --ignore-requires-python` before installing ocean-lib.
-This is a temporary fix until Vyper has a release declaring dependencies for Python 3.11. We do not directly use Vyper in ocean-lib.
+To install ocean-lib using Python 3.11, run `pip install vyper==0.3.7 --ignore-requires-python` and `sudo apt-get install python3.11-dev` before installing ocean-lib.
+Since the parsimonious dependency does not support Python 3.11, you need to edit the `parsimonious/expressions.py` to `import getfullargspec as getargsspec` instead of the regular import.
+These are temporary fixes until all dependencies are fully supported in Python 3.11. We do not directly use Vyper in ocean-lib.
 
 ## ocean.py uses Brownie
 

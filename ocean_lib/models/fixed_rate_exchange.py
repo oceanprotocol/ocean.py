@@ -55,9 +55,10 @@ class ExchangeArguments:
 
             self.dt_decimals = dt_decimals
 
-        from ocean_lib.models.datatoken import Datatoken  # isort:skip
+        # TODO: move to top now?
+        from ocean_lib.models.datatoken_base import DatatokenBase  # isort:skip
 
-        self.BT = Datatoken(config_dict, self.base_token_addr)
+        self.BT = DatatokenBase.get_typed(config_dict, self.base_token_addr)
 
         return (
             FRE_addr,
@@ -75,6 +76,65 @@ class ExchangeArguments:
                 self.with_mint,
             ],
         )
+
+
+"""
+Attributes:
+MAX_FEE
+MIN_FEE
+MIN_RATE
+
+Functions:
+
+def balance() -> int:
+    returns FRE balance
+    :return: balance
+
+def getExchanges() -> tuple:
+    get list of exchange contracts addresses
+    :return: tuple of contract addresses for each exchange
+
+def generateExchangeId(bt_addr: str, dt_addr) -> str:
+    retrieve exchange id based on a pair of basetoken-datatoken address pair
+    :param bt_addr: address of base token
+    :param dt_addr: address of datatoken
+    :return: exchange id
+
+def getId() -> int:
+    get exchange id
+    :return: id
+
+def getNumberOfExchanges() -> int:
+    get number of exchange contracts
+    :return: number of exchanges
+
+
+The following functions are wrapped with ocean.py helpers, especially in the OneExchange class, but you can use the raw form if needed.
+buyDT
+calcBaseInGivenOutDT
+calcBaseOutGivenInDT
+collectBT
+collectDT
+collectMarketFee
+collectOceanFee
+createWithDecimals -> raw creation of the exchange contract, much easier to use from datatoken.create_exchange()
+getAllowedSwapper
+getBTSupply
+getDTSupply
+getExchange
+getFeesInfo
+getMarketFee
+getOPCFee
+getRate
+isActive
+sellDT
+setAllowedSwapper
+setRate
+toggleExchangeState
+toggleMintState
+updateMarketFee
+updateMarketFeeCollector
+"""
 
 
 @enforce_types
@@ -268,10 +328,11 @@ class OneExchange:
         - tx_dict - e.g. {"from": alice_wallet}
         """
         # import now, to avoid circular import
-        from ocean_lib.models.datatoken import Datatoken
+        # TODO: maybe we can move it now?
+        from ocean_lib.models.datatoken_base import DatatokenBase
 
         details = self.details
-        BT = Datatoken(self._FRE.config_dict, details.base_token)
+        BT = DatatokenBase.get_typed(self._FRE.config_dict, details.base_token)
         buyer_addr = get_from_address(tx_dict)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)
