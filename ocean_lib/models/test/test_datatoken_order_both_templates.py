@@ -90,7 +90,6 @@ def test_dispense_and_order_with_non_defaults(
 
     tx = DT.dispense_and_order(
         consumer=consume_fee_address,
-        service_index=1,
         provider_fees=provider_fees,
         consume_market_fees=TokenFeeInfo(
             address=consume_fee_address,
@@ -133,7 +132,6 @@ def test_dispense_and_order_with_defaults(
 
     tx = DT.dispense_and_order(
         consumer=consumer_wallet.address,
-        service_index=1,
         provider_fees=provider_fees,
         tx_dict={"from": publisher_wallet},
     )
@@ -219,7 +217,6 @@ def test_buy_DT_and_order(
 
     args = {
         "consumer": another_consumer_wallet.address,
-        "service_index": 1,
         "provider_fees": provider_fees,
         "consume_market_fees": TokenFeeInfo(
             address=consume_fee_address,
