@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
-from ocean_lib.ocean.util import get_address_of_type, get_from_address
+from ocean_lib.ocean.util import get_address_of_type, get_from_address, to_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -31,10 +31,10 @@ class DatatokenEnterprise(Datatoken):
         provider_fees: dict,
         exchange: Any,
         tx_dict: dict,
-        max_base_token_amount: Optional[Union[int, str]] = None,
         consumer: Optional[str] = None,
         service_index: int = 1,
         consume_market_fees=None,
+        max_base_token_amount: Optional[Union[int, str]] = None,
         consume_market_swap_fee_amount: Optional[Union[int, str]] = 0,
         consume_market_swap_fee_address: Optional[str] = ZERO_ADDRESS,
     ) -> str:
@@ -51,6 +51,10 @@ class DatatokenEnterprise(Datatoken):
 
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
+
+        if not max_base_token_amount:
+            amt_needed = exchange.BT_needed(to_wei(1), consume_market_fees.amount)
+            max_base_token_amount = amt_needed
 
         return self.contract.buyFromFreAndOrder(
             (
