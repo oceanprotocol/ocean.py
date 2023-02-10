@@ -22,7 +22,7 @@ Let's go!
 
 ### 1.1 Configuration File
 
-Brownie's network configuration file is at `~/.brownie/network-config.yaml`. If you have no prior brownie installation, in order to create this file you need to call any brownie function from a console, beforehand.
+Brownie's network configuration file is in your home folder, at `~/.brownie/network-config.yaml` on Linux/MacOS systems. For Windows users, that means `C:\Users<user_name>\.brownie`. If you have no prior brownie installation, in order to create this file you need to call any brownie function from a console, beforehand.
 It has settings for each network, e.g. development (ganache), Ethereum mainnet, Polygon, and Mumbai.
 
 Each network gets specifications for:
