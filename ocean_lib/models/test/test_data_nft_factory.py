@@ -326,11 +326,9 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(
-        Exception, match="revert: ERC721DTFactory: Template index doesnt exist"
-    ):
+    with pytest.raises(Exception, match="Missing NFTCreated event"):
         data_nft_factory.create(
-            {"from": publisher_wallet, "required_confs": 0},
+            {"from": publisher_wallet},
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
