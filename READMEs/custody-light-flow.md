@@ -5,9 +5,9 @@ It allows orgs to buy & consume data without having custody of assets.
 
 We assume you've already (a) [installed Ocean](install.md), and (b) done [local setup](setup-local.md) or [remote setup](setup-remote.md). This flow works for either one, without any changes between them (!)
 
-This flow will be split in two sections:
-- free steps: publish free asset with a Datatoken 2, then consume;
-- priced steps: publish a priced asset attached to a Datatoken 2, then buy / consume.
+This flow is split in two sections:
+- free steps: publish free asset with a Datatoken 2 (enterprise template), then consume;
+- priced steps: publish a priced asset attached to a Datatoken 2 (enterprise template), then buy / consume.
 
 Let's go!
 
