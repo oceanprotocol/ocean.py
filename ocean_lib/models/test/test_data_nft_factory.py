@@ -323,7 +323,7 @@ def test_start_multiple_order(
         [reuse_order], {"from": consumer_wallet}
     )
 
-    # registered_erc20_start_order_event = receipt.events["OrderStarted"]
+    assert receipt.events["OrderReused"]
 
 
 @pytest.mark.unit
