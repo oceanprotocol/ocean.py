@@ -6,8 +6,8 @@ It allows orgs to buy & consume data without having custody of assets.
 We assume you've already (a) [installed Ocean](install.md), and (b) done [local setup](setup-local.md) or [remote setup](setup-remote.md). This flow works for either one, without any changes between them (!)
 
 This flow will be split in two sections:
-- free steps: publish free asset, then consume;
-- priced steps: publish with a price, then buy / consume.
+- free steps: publish free asset with a Datatoken 2, then consume;
+- priced steps: publish a priced asset attached to a Datatoken 2, then buy / consume.
 
 Let's go!
 
@@ -32,7 +32,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.ocean.util import to_wei
 
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)))
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, use_enterprise=True, pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)))
 
 #print
 print("Just published a free asset:")
@@ -98,7 +98,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import to_wei
 
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, pricing_schema_args=ExchangeArguments(
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, use_enterprise=True, pricing_schema_args=ExchangeArguments(
             rate=to_wei(3), base_token_addr=ocean.OCEAN_address, dt_decimals=18
         ),)
 
