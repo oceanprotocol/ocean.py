@@ -14,7 +14,8 @@ Here, we will:
 2. Create two accounts - `REMOTE_TEST_PRIVATE_KEY1` and `2`
 3. Get fake MATIC on Mumbai
 4. Get fake OCEAN on Mumbai
-5. Set up Alice and Bob wallets in Python
+5. Set envvars
+6. Set up Alice and Bob wallets in Python
 
 Let's go!
 
