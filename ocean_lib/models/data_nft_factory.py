@@ -12,7 +12,7 @@ from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
 from ocean_lib.ocean.util import get_address_of_type, get_args_object, get_from_address
-from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
+from ocean_lib.structures.abi_tuples import MetadataProof, OrderData, ReuseOrderData
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 """
@@ -62,7 +62,7 @@ createToken
 deployERC721Contract
 erc20List
 erc721List
-reuseMultipleTokenOrder  # TODO: https://github.com/oceanprotocol/ocean.py/issues/1275
+reuseMultipleTokenOrder
 startMultipleTokenOrder
 """
 
@@ -115,6 +115,20 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             order._replace(consume_fees=tuple(consume_fees))
 
         return self.contract.startMultipleTokenOrder(orders, tx_dict)
+
+    @enforce_types
+    def reuse_multiple_token_order(
+        self, reuse_orders: List[ReuseOrderData], tx_dict: dict
+    ) -> str:
+        for order in reuse_orders:
+            order._replace(
+                token_address=ContractBase.to_checksum_address(order.token_address)
+            )
+            provider_fees = list(order.provider_fees)
+            provider_fees[0] = ContractBase.to_checksum_address(order.provider_fees[0])
+            provider_fees[1] = ContractBase.to_checksum_address(order.provider_fees[1])
+
+        return self.contract.reuseMultipleTokenOrder(reuse_orders, tx_dict)
 
     @enforce_types
     def create_with_erc20(
