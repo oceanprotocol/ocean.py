@@ -402,7 +402,28 @@ ExchangeFeeInfo:
 ```
 
 
-<h2 id="appendix-consume-details">Appendix: Consume Details</h4>
+<h2 id="appendix-create-bundled">Create asset and pricing schema simultaneously </h2>
+Ocean Assets allows you to bundle several common scenarios as a single transaction, thus lowering gas fees.
+
+Any of the `ocean.assets.create_<type>_asset()` functions can also take an optional parameter that describes a bundled pricing schema (Dispenser or Fixed Rate Exchange).
+This can be either a DispenserArguments or an ExchangeArguments object. The parameters for these Arguments classes are identical to those for creating the object itself.
+E.g. adding `pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1))` to the `create` function is equivalent to performing the creation and creating a dispenser later using `dt.create_dispenser(to_wei(1), to_wei(1))`.
+
+Here is an example involving an exchange:
+
+```python
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
+    name,
+    url,
+    {"from": alice},
+    pricing_schema_args=ExchangeArguments(rate=to_wei(3), base_token_addr=ocean.OCEAN_address, dt_decimals=18)
+)
+
+assert len(datatoken.get_exchanges()) == 1
+```
+
+<h2 id="appendix-consume-details">Appendix: Consume Details</h2>
 
 ### Consume General
 
@@ -431,7 +452,7 @@ The file is in ARFF format, used by some AI/ML tools. Our example has two input 
 ...
 ```
 
-<h2 id="appendix-consume-details">Appendix: Ocean Instance</h4>
+<h2 id="appendix-consume-details">Appendix: Ocean Instance</h2>
 
 At the beginning of most flows, we create an `ocean` object, which is an instance of class [`Ocean`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py). It exposes useful information, including the following.
 
