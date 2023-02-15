@@ -342,12 +342,11 @@ class OceanAssets:
         self._assert_ddo_metadata(metadata)
         name = metadata["name"]
         template_index = 2 if use_enterprise else 1
+        cap = MAX_UINT256
         data_nft_args = DataNFTArguments(name, name)
         datatoken_args = DatatokenArguments(
-            f"{name}: DT1", files=files, template_index=template_index
+            f"{name}: DT1", files=files, template_index=template_index, cap=cap
         )
-        if template_index == 2:
-            datatoken_args.cap = MAX_UINT256
 
         if not pricing_schema_args:
             data_nft, datatoken = self.data_nft_factory.create_with_erc20(
