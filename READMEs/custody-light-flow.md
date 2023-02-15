@@ -52,7 +52,7 @@ provider_fees = ocean.retrieve_provider_fees(
     ddo, ddo.services[0], publisher_wallet=bob
 )
 
-tx = datatoken.dispense_and_order(bob.address, 0, provider_fees, {"from": bob})
+tx = datatoken.dispense_and_order(provider_fees, {"from": bob}, consumer=bob.address)
 
 ```
 
