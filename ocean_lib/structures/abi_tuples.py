@@ -51,6 +51,15 @@ OrderData = NamedTuple(
     ],
 )
 
+ReuseOrderData = NamedTuple(
+    "ReuseOrderData",
+    [
+        ("token_address", str),
+        ("order_tx_id", str),
+        ("provider_fees", tuple),
+    ],
+)
+
 
 MetadataProof = NamedTuple(
     "MetadataProof",
