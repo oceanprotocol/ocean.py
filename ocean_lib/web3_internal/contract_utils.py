@@ -51,7 +51,7 @@ def get_contracts_addresses_all_networks(config: dict):
 
 
 @enforce_types
-def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
+def get_contracts_addresses(config: dict, retries: int = 2) -> Optional[Dict[str, str]]:
     """Get addresses for given NETWORK_NAME, from info in ADDRESS_FILE"""
     network_name = config["NETWORK_NAME"]
     if network_name == "polygon-test":
@@ -59,16 +59,18 @@ def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
 
     if network_name == "polygon-main":
         network_name = "polygon"
+
+    if retries == 0:
+        address_file = config.get("ADDRESS_FILE")
+        raise ValueError(
+            f"Failed to retrieved addresses for network={network_name} after retrying. Please check your address_file={address_file}."
+        )
     addresses = get_contracts_addresses_all_networks(config)
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]
 
     if not network_addresses:
-        address_file = config.get("ADDRESS_FILE")
-        raise Exception(
-            f"Address not found for network_name={network_name}."
-            f" Please check your address_file={address_file}."
-        )
+        get_contracts_addresses(config, retries=retries - 1)
 
     return _checksum_contract_addresses(network_addresses=network_addresses[0])
 
