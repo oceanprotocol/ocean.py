@@ -120,6 +120,17 @@ provider_fees = ocean.retrieve_provider_fees(
     ddo, ddo.services[0], publisher_wallet=bob
 )
 exchange = datatoken.get_exchanges()[0]
+OCEAN = ocean.OCEAN_token
+OCEAN.approve(
+        datatoken.address,
+        to_wei(10),
+        {"from": bob},
+)
+OCEAN.approve(
+    exchange.address,
+    to_wei(10),
+    {"from": bob},
+)
 tx = datatoken.buy_DT_and_order(provider_fees, exchange, {"from": bob}, consumer=bob.address, service_index=0)
 
 ```
