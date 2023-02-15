@@ -47,6 +47,7 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -342,8 +343,17 @@ class OceanAssets:
         name = metadata["name"]
         template_index = 2 if use_enterprise else 1
         data_nft_args = DataNFTArguments(name, name)
-        datatoken_args = DatatokenArguments(
-            f"{name}: DT1", files=files, template_index=template_index
+        datatoken_args = (
+            DatatokenArguments(
+                f"{name}: DT1",
+                files=files,
+                template_index=template_index,
+                cap=MAX_UINT256,
+            )
+            if template_index == 2
+            else DatatokenArguments(
+                f"{name}: DT1", files=files, template_index=template_index
+            )
         )
 
         if not pricing_schema_args:
