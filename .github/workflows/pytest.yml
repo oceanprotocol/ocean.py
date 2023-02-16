@@ -36,6 +36,9 @@ jobs:
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
+      - name: "Read address.json contents"
+        working-directory: ${{ github.workspace }}
+        run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |

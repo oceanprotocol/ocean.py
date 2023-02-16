@@ -67,7 +67,7 @@ datatoken.dispense(to_wei(1), {"from": bob})
 #Approach D: Alice posts for sale; Bob buys
 # D.1 Alice creates exchange
 price = to_wei(100)
-exchange = datatoken.create_exchange(price, ocean.OCEAN_address, {"from": alice})
+exchange = datatoken.create_exchange({"from": alice}, price, ocean.OCEAN_address)
 
 # D.2 Alice makes 100 datatokens available on the exchange
 datatoken.mint(alice, to_wei(100), {"from": alice})
@@ -133,10 +133,10 @@ data_nft = DataNFT(config, data_nft_address)
 It's similar for Datatokens. In Python:
 
 ```console
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_base import DatatokenBase
 config = <like shown elsewhere in READMEs>
 datatoken_address = <what you wrote down previously>
-datatoken = Datatoken(config, datatoken_address)
+datatoken = DatatokenBase.get_typed(config, datatoken_address)
 ```
 
 ### Data NFT Interface
@@ -224,7 +224,7 @@ url_file = UrlFile(
 )
 
 # Publish data asset
-from ocean_lib.models.datatoken import DatatokenArguments
+from ocean_lib.models.datatoken_base import DatatokenArguments
 _, _, ddo = ocean.assets.create(
     metadata,
     {"from": alice},
@@ -247,8 +247,7 @@ You can control this during create():
 
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo. This is the most common case. However, sometimes you may want _just_ the data NFT, e.g. if using a data NFT as a simple key-value store. Here's how:
 ```python
-from ocean_lib.models.data_nft import DataNFTArguments
-data_nft = ocean.data_nft_factory.create(DataNFTArguments('NFT1', 'NFT1'), {"from": alice})
+data_nft = ocean.data_nft_factory.create({"from": alice}, 'NFT1', 'NFT1')
 ```
 
 If you call `create()` after this, you can pass in an argument `data_nft_address:string` and it will use that NFT rather than creating a new one.
@@ -258,8 +257,7 @@ If you call `create()` after this, you can pass in an argument `data_nft_address
 Calling `create()` like above generates a data NFT, a datatoken for that NFT, and a ddo object. However, we may want a second datatoken. Or, we may have started with _just_ the data NFT, and want to add a datatoken to it. Here's how:
 
 ```python
-from ocean_lib.models.datatoken import DatatokenArguments
-datatoken = data_nft.create_datatoken(DatatokenArguments("Datatoken 1", "DT1"), {"from": alice})
+datatoken = data_nft.create_datatoken({"from": alice}, "Datatoken 1", "DT1")
 ```
 
 If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
@@ -290,8 +288,10 @@ A given datatoken can create exactly one dispenser for that datatoken.
 `datatoken.create_dispenser()` can take these optional arguments:
 - `max_tokens` - maximum number of tokens to dispense. The default is a large number.
 - `max_balance` - maximum balance of requester. The default is a large number.
+- `with_mint` - allow minting
+- `allowed_swapper` - swapper user address
 
-A call with both would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
+A call would look like `create_dispenser({"from": alice}, max_tokens=max_tokens, max_balance=max_balance)`.
 
 
 ### Dispenser Status
@@ -338,7 +338,7 @@ A given datatoken can create one or more `OneExchange` objects.
 
 **Interface via datatokens:**
 - [`datatoken.create_exchange()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L237) - Returns a `OneExchange` object.
-- [`datatoken.get_Exchanges()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L312) - Returns a list of `OneExchange` objects.
+- [`datatoken.get_exchanges()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L312) - Returns a list of `OneExchange` objects.
 
 Once you've got a `OneExchange` object, most interactions are with it.
 
@@ -402,7 +402,28 @@ ExchangeFeeInfo:
 ```
 
 
-<h2 id="appendix-consume-details">Appendix: Consume Details</h4>
+<h2 id="appendix-create-bundled">Create asset and pricing schema simultaneously </h2>
+Ocean Assets allows you to bundle several common scenarios as a single transaction, thus lowering gas fees.
+
+Any of the `ocean.assets.create_<type>_asset()` functions can also take an optional parameter that describes a bundled pricing schema (Dispenser or Fixed Rate Exchange).
+This can be either a DispenserArguments or an ExchangeArguments object. The parameters for these Arguments classes are identical to those for creating the object itself.
+E.g. adding `pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1))` to the `create` function is equivalent to performing the creation and creating a dispenser later using `dt.create_dispenser(to_wei(1), to_wei(1))`.
+
+Here is an example involving an exchange:
+
+```python
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
+    name,
+    url,
+    {"from": alice},
+    pricing_schema_args=ExchangeArguments(rate=to_wei(3), base_token_addr=ocean.OCEAN_address, dt_decimals=18)
+)
+
+assert len(datatoken.get_exchanges()) == 1
+```
+
+<h2 id="appendix-consume-details">Appendix: Consume Details</h2>
 
 ### Consume General
 
@@ -431,7 +452,7 @@ The file is in ARFF format, used by some AI/ML tools. Our example has two input 
 ...
 ```
 
-<h2 id="appendix-consume-details">Appendix: Ocean Instance</h4>
+<h2 id="appendix-consume-details">Appendix: Ocean Instance</h2>
 
 At the beginning of most flows, we create an `ocean` object, which is an instance of class [`Ocean`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py). It exposes useful information, including the following.
 

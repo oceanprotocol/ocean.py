@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytest
 
-from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
+from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
 from ocean_lib.ocean.util import from_wei, get_address_of_type, to_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from tests.resources.helper_functions import deploy_erc721_erc20, get_mock_provider_fees
@@ -24,13 +24,11 @@ def test_dispense_and_order_with_non_defaults(
     """Tests dispense_and_order function of the Datatoken Enterprise"""
     _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
 
-    USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
-    DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
+    USDC = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
+    DAI = DatatokenBase.get_typed(config, get_address_of_type(config, "MockDAI"))
 
     _ = DT.create_dispenser(
-        max_tokens=to_wei(1),
-        max_balance=to_wei(1),
-        tx_dict={"from": publisher_wallet},
+        max_tokens=to_wei(1), max_balance=to_wei(1), tx_dict={"from": publisher_wallet}
     )
 
     status = DT.dispenser_status()
@@ -92,7 +90,6 @@ def test_dispense_and_order_with_non_defaults(
 
     tx = DT.dispense_and_order(
         consumer=consume_fee_address,
-        service_index=1,
         provider_fees=provider_fees,
         consume_market_fees=TokenFeeInfo(
             address=consume_fee_address,
@@ -135,7 +132,6 @@ def test_dispense_and_order_with_defaults(
 
     tx = DT.dispense_and_order(
         consumer=consumer_wallet.address,
-        service_index=1,
         provider_fees=provider_fees,
         tx_dict={"from": publisher_wallet},
     )
@@ -159,15 +155,14 @@ def test_buy_DT_and_order(
         config, publisher_wallet, publisher_wallet, template_index
     )
 
-    USDC = Datatoken(config, get_address_of_type(config, "MockUSDC"))
-    DAI = Datatoken(config, get_address_of_type(config, "MockDAI"))
+    USDC = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
+    DAI = DatatokenBase.get_typed(config, get_address_of_type(config, "MockDAI"))
 
     exchange = DT.create_exchange(
         rate=to_wei(1),
         base_token_addr=USDC.address,
         tx_dict={"from": publisher_wallet},
         publish_market_fee=to_wei(0.1),
-        with_mint=True,
     )
     assert exchange.details.active
     assert exchange.details.with_mint
@@ -222,7 +217,6 @@ def test_buy_DT_and_order(
 
     args = {
         "consumer": another_consumer_wallet.address,
-        "service_index": 1,
         "provider_fees": provider_fees,
         "consume_market_fees": TokenFeeInfo(
             address=consume_fee_address,
