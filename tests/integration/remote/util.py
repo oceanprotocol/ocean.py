@@ -49,10 +49,17 @@ def get_gas_fees_for_remote() -> tuple:
     if not gas_resp or gas_resp.status_code != 200:
         print("Invalid response from Polygon gas station. Retry with brownie values...")
 
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
+        return (chain.priority_fee, chain.base_fee + 2 * chain.priority_fee)
 
-    return Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"), Web3.toWei(
-        gas_resp.json()["fast"]["maxFee"], "gwei"
+    return (
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+            chain.priority_fee,
+        ),
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+            chain.base_fee + 2 * chain.priority_fee,
+        ),
     )
 
 
@@ -119,23 +126,32 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     symbol = random_chars()
 
     print("Call create() from data NFT, and wait for it to complete...")
-    try:
-        priority_fee, max_fee = get_gas_fees_for_remote()
-        data_nft = ocean.data_nft_factory.create(
-            {
-                "from": alice_wallet,
-                "priority_fee": priority_fee,
-                "max_fee": max_fee,
-            },
-            symbol,
-            symbol,
-        )
-        data_nft_symbol = data_nft.symbol()
-    except ERRORS_TO_CATCH as e:
-        if error_is_skippable(str(e)):
-            warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
-            return
-        raise (e)
+    num_retries = 2
+    while num_retries != 0:
+        try:
+            priority_fee, max_fee = get_gas_fees_for_remote()
+            data_nft = ocean.data_nft_factory.create(
+                {
+                    "from": alice_wallet,
+                    "priority_fee": priority_fee,
+                    "max_fee": max_fee,
+                },
+                symbol,
+                symbol,
+            )
+            data_nft_symbol = data_nft.symbol()
+            break
+        except ERRORS_TO_CATCH as e:
+            if error_is_skippable(str(e)):
+                warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
+                return
+            if "Tx dropped" in str(e):
+                num_retries -= 1
+                warnings.warn(
+                    UserWarning(f"Warning: EVM reported error: {e}\n Retrying...")
+                )
+                continue
+            raise (e)
 
     assert data_nft_symbol == symbol
     print("Success")

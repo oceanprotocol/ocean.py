@@ -5,20 +5,19 @@
 import pytest
 
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken1 import Datatoken1
+from ocean_lib.models.df.df_rewards import DFRewards
+from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.df.df_rewards import DFRewards
-from ocean_lib.models.df.df_strategy_v1 import DFStrategyV1
 from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
+from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_delegation import VeDelegation
 from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
-from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
-from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
+from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
-
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
@@ -39,8 +38,8 @@ def test_contract_objects(publisher_ocean):
     ocean = publisher_ocean
 
     assert ocean.OCEAN_address[:2] == "0x"
-    assert isinstance(ocean.OCEAN_token, Datatoken)
-    assert isinstance(ocean.OCEAN, Datatoken)
+    assert isinstance(ocean.OCEAN_token, Datatoken1)
+    assert isinstance(ocean.OCEAN, Datatoken1)
     assert ocean.OCEAN_address == ocean.OCEAN_token.address
     assert ocean.OCEAN_address == ocean.OCEAN.address
 

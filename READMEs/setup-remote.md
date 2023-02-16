@@ -14,7 +14,8 @@ Here, we will:
 2. Create two accounts - `REMOTE_TEST_PRIVATE_KEY1` and `2`
 3. Get fake MATIC on Mumbai
 4. Get fake OCEAN on Mumbai
-5. Set up Alice and Bob wallets in Python
+5. Set envvars
+6. Set up Alice and Bob wallets in Python
 
 Let's go!
 
@@ -22,15 +23,18 @@ Let's go!
 
 ### 1.1 Configuration File
 
-Brownie's network configuration file is at `~/.brownie/network-config.yaml`. If you have no prior brownie installation, in order to create this file you need to call any brownie function from a console, beforehand.
-It has settings for each network, e.g. development (ganache), Ethereum mainnet, Polygon, and Mumbai.
+Brownie's network configuration file is in your home folder, at `~/.brownie/network-config.yaml` on Linux/MacOS systems. For Windows users, that means `C:\Users\<user_name>\.brownie\network-config.yaml`. If you have no prior brownie installation on your computer, in order to create this file, you need to call any brownie function from a python console, beforehand (e.g., run ```from ocean_lib.example_config import get_config_dict```).
+
+The network configuration file has settings for each network, e.g. development (ganache), Ethereum mainnet, Polygon, and Mumbai.
 
 Each network gets specifications for:
 - `host` - the RPC URL, i.e. what URL do we pass through to talk to the chain
 - `required_confs` - the number of confirmations before a tx is done
 - `id` - e.g. `polygon-main` (Polygon), `polygon-test` (Mumbai)
 
-[Here's](https://eth-brownie.readthedocs.io/en/v1.6.5/config.html) the `network-config.yaml` from Brownie docs. It can serve as a comparison to your local copy.
+[Here's](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml) the `network-config.yaml` from Brownie's GitHub repository. It can serve as a comparison to your local copy. 
+
+For Windows OS deployments, it is possible that the network-config.yaml does not include all the network entries. In this case, you can replace the content of the network-config.yaml file on your computer with the content from this [link](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml).
 
 `development` chains run locally; `live` chains run remotely.
 
@@ -63,19 +67,17 @@ The config file's default RPCs point to Infura, which require you to have an Inf
 
 One option is to get an Infura account.
 
-A simpler option is to bypass the need for an account! Just change to RPCs that don't need Infura. The command below replaces Infura RPCs with public ones in `network-config.yaml`:
+A simpler option is to bypass the need for an account. Just change to RPCs that don't need Infura. You can do that manually, by editing your brownie network config file, depending on where is placed in your system.
+Here is a sample command replacing Infura RPCs with public ones in `network-config.yaml`, for Linux users:
 
 * Linux users:
 ```console
 sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
 ```
 
-* MacOS users:
-```console
-brew install gnu-sed
+For MacOS, you can achieve the same thing with `gnu-sed` and the `gsed` command. 
 
-gsed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
-```
+For Windows, you might need something similar to [powershell](https://www.marek.tokyo/2020/01/remove-string-from-file-in-windows-10.html).
 
 #### RPCs wrapup
 

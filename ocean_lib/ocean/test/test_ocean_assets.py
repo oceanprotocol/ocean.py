@@ -601,9 +601,9 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("use_enterprise", [True, False])
+@pytest.mark.parametrize("dt_template_index", [2, 1])
 def test_create_pricing_schemas(
-    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN, use_enterprise
+    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN, dt_template_index
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
@@ -614,7 +614,7 @@ def test_create_pricing_schemas(
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
-        use_enterprise=use_enterprise,
+        dt_template_index=dt_template_index,
     )
     assert not dt.dispenser_status().active
     assert dt.get_exchanges() == []
@@ -634,7 +634,7 @@ def test_create_pricing_schemas(
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
-        use_enterprise=use_enterprise,
+        dt_template_index=dt_template_index,
         pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)),
     )
 
@@ -647,7 +647,7 @@ def test_create_pricing_schemas(
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
-        use_enterprise=use_enterprise,
+        dt_template_index=dt_template_index,
         pricing_schema_args=ExchangeArguments(
             rate=to_wei(3), base_token_addr=OCEAN.address, dt_decimals=18
         ),

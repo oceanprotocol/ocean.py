@@ -7,7 +7,7 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.datatoken_base import (
     DatatokenArguments,
     DatatokenBase,
@@ -16,7 +16,7 @@ from ocean_lib.models.datatoken_base import (
 from ocean_lib.models.dispenser import Dispenser, DispenserArguments
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import create_checksum, get_address_of_type, to_wei
-from ocean_lib.structures.abi_tuples import OrderData
+from ocean_lib.structures.abi_tuples import OrderData, ReuseOrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_non_existent_nft_template
@@ -62,7 +62,7 @@ def test_nft_creation(
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
-        config, Datatoken.CONTRACT_NAME, "1"
+        config, Datatoken1.CONTRACT_NAME, "1"
     )
     template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address
@@ -223,7 +223,7 @@ def test_start_multiple_order(
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
-        config, Datatoken.CONTRACT_NAME, "1"
+        config, Datatoken1.CONTRACT_NAME, "1"
     )
     template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address
@@ -305,6 +305,26 @@ def test_start_multiple_order(
     assert datatoken.balanceOf(consumer_wallet.address) == 0
     assert datatoken.balanceOf(datatoken.getPaymentCollector()) == (dt_amount * 0.97)
 
+    reuse_order = ReuseOrderData(
+        order_data.token_address,
+        receipt.txid,
+        (
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            0,
+            provider_data,
+        ),
+    )
+    receipt = data_nft_factory.reuse_multiple_token_order(
+        [reuse_order], {"from": consumer_wallet}
+    )
+
+    assert receipt.events["OrderReused"]
+
 
 @pytest.mark.unit
 def test_fail_get_templates(data_nft_factory):
@@ -326,9 +346,11 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(Exception, match="Missing NFTCreated event"):
+    with pytest.raises(
+        Exception, match="revert: ERC721DTFactory: Template index doesnt exist"
+    ):
         data_nft_factory.create(
-            {"from": publisher_wallet, "required_confs": 0},
+            {"from": publisher_wallet},
             DataNFTArguments(
                 "DT1", "DTSYMBOL", template_index=non_existent_nft_template
             ),
