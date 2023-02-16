@@ -184,6 +184,13 @@ Template 2:
 - New method: [`buy_DT_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken2.py#L20). This uses just 1 tx to do both actions at once (versus 2 txs for template 1).
 - New method: [`dispense_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken2.py#L70). Similarly, uses just 1 tx.
 
+Below you can find an explanatory table describing the template attributes:
+
+Template # | Class Label | Allows dispense by default? | Allows non-custody of datatokens? | Combines txs? | Allows non-custody of url?
+:----: | :----: | :----: | :----: | :----: | :----:
+1 | Datatoken1 | Y | N | N | N
+2 | Datatoken2 | N | Y | Y | N
+
 
 ### DIDs and DDOs
 
