@@ -7,7 +7,7 @@ from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.datatoken_base import (
     DatatokenArguments,
     DatatokenBase,
@@ -62,7 +62,7 @@ def test_nft_creation(
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
-        config, Datatoken.CONTRACT_NAME, "1"
+        config, Datatoken1.CONTRACT_NAME, "1"
     )
     template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address
@@ -223,7 +223,7 @@ def test_start_multiple_order(
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
-        config, Datatoken.CONTRACT_NAME, "1"
+        config, Datatoken1.CONTRACT_NAME, "1"
     )
     template = data_nft_factory.getTokenTemplate(1)
     assert template[0] == datatoken_template_address

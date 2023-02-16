@@ -174,15 +174,15 @@ Ocean's architecture allows for >1 implementations of ERC20, each with its own "
 
 Template 1:
 - Solidity: [ERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol)
-- Python wrapper: [Datatoken](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). It has a Python method for every Solidity method, via Brownie.
+- Python wrapper: [Datatoken1](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). It has a Python method for every Solidity method, via Brownie.
 - Implements methods like `start_order()`, `create_exchange()`, and `create_dispenser()` to enhance developer experience.
 
 Template 2:
 - Inherits from template 1 in both Solidity and Python.
 - Solidity: [ERC20TemplateEnterprise.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20TemplateEnterprise.sol)
-- Python wrapper: [DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken_enterprise.py)
-- New method: [`buy_DT_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L20). This uses just 1 tx to do both actions at once (versus 2 txs for template 1).
-- New method: [`dispense_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). Similarly, uses just 1 tx.
+- Python wrapper: [Datatoken2](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken2.py)
+- New method: [`buy_DT_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken2.py#L20). This uses just 1 tx to do both actions at once (versus 2 txs for template 1).
+- New method: [`dispense_and_order()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken2.py#L70). Similarly, uses just 1 tx.
 
 
 ### DIDs and DDOs
@@ -260,7 +260,7 @@ Calling `create()` like above generates a data NFT, a datatoken for that NFT, an
 datatoken = data_nft.create_datatoken({"from": alice}, "Datatoken 1", "DT1")
 ```
 
-If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken]` and it will use those datatokens during creation.
+If you call `create()` after this, you can pass in an argument `deployed_datatokens:List[Datatoken1]` and it will use those datatokens during creation.
 
 <h2 id="appendix-faucet-details">Appendix: Dispenser / Faucet Details</h4>
 
@@ -272,9 +272,9 @@ We access dispenser (faucet) functionality from two complementary places: datato
 A given datatoken can create exactly one dispenser for that datatoken.
 
 **Interface via datatokens:**
-- [`datatoken.create_dispenser()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L337) - implemented in Datatoken, inherited by DatatokenEnterprise
+- [`datatoken.create_dispenser()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L337) - implemented in DatatokenBase, inherited by Datatoken2
 - [`datatoken.dispense()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L380) - ""
-- [`datatoken.dispense_and_order()` - implemented in Datatoken](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L439) and [in DatatokenEnterprise](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). The latter only needs one tx to dispense and order.
+- [`datatoken.dispense_and_order()` - implemented in Datatoken1](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L439) and [in Datatoken2](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken_enterprise.py#L70). The latter only needs one tx to dispense and order.
 - [`datatoken.dispenser_status()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L403) - returns a [`DispenserStatus`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/dispenser.py#L16) object
 
 **Interface via [`Dispenser`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/dispenser.py) Python class:**
@@ -319,10 +319,10 @@ DispenserStatus:
 
 ### Who can request tokens from a faucet
 
-Template 1 (`Datatoken`):
+Template 1 (`Datatoken1`):
 - Anyone can call `datatoken.dispense()` to request tokens.
 
-Template 2 (`DatatokenEnterprise`):
+Template 2 (`Datatoken2`):
 - Option A. Anyone can `datatoken.dispense_and_order()` to request tokens, and order.
 - Option B. Not anyone can call `datatoken.dispense()` by default. To allow anyone, the publisher does: `ocean.dispenser.setAllowedSwapper(datatoken_address, ZERO_ADDRESS, {"from" : publisher_wallet})`, where `ZERO_ADDRESS` is `0x00..00`.
 

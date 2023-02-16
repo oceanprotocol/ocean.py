@@ -191,7 +191,7 @@ startOrder
 """
 
 
-class Datatoken(DatatokenBase):
+class Datatoken1(DatatokenBase):
     CONTRACT_NAME = "ERC20Template"
 
     BASE = 10**18
