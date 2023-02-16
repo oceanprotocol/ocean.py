@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Prerequisites
 
--   Linux/MacOS
+-   Linux, MacOS, or Windows
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5 - Python 3.10.4, Python 3.11 with some manual alterations
 
