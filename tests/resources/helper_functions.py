@@ -12,7 +12,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
-import yaml
 from brownie import network
 from brownie.network import accounts
 from enforce_typing import enforce_types
@@ -121,30 +120,11 @@ def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocea
 
 @enforce_types
 def setup_logging(
-    default_path: str = "logging.yaml",
     default_level=logging.INFO,
-    env_key: str = "LOG_CFG",
 ):
     """Logging setup."""
-    path = default_path
-    value = os.getenv(env_key, None)
-    if value:
-        path = value
-    if os.path.exists(path):
-        with open(path, "rt") as file:
-            try:
-                config = yaml.safe_load(file.read())
-                logging.config.dictConfig(config)
-                coloredlogs.install()
-                logging.info(f"Logging configuration loaded from file: {path}")
-            except Exception as ex:
-                print(ex)
-                print("Error in Logging Configuration. Using default configs")
-                logging.basicConfig(level=default_level)
-                coloredlogs.install(level=default_level)
-    else:
-        logging.basicConfig(level=default_level)
-        coloredlogs.install(level=default_level)
+    logging.basicConfig(level=default_level)
+    coloredlogs.install(level=default_level)
 
 
 @enforce_types
