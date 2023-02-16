@@ -63,10 +63,10 @@ dev_requirements = [
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
 
 setup(
-    author="leucothia",
+    author="ocean-core-team",
     author_email="devops@oceanprotocol.com",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
