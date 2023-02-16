@@ -338,7 +338,7 @@ A given datatoken can create one or more `OneExchange` objects.
 
 **Interface via datatokens:**
 - [`datatoken.create_exchange()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L237) - Returns a `OneExchange` object.
-- [`datatoken.get_Exchanges()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L312) - Returns a list of `OneExchange` objects.
+- [`datatoken.get_exchanges()`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/datatoken.py#L312) - Returns a list of `OneExchange` objects.
 
 Once you've got a `OneExchange` object, most interactions are with it.
 
