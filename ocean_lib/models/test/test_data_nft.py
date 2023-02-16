@@ -343,23 +343,23 @@ def test_create_datatoken(
         {"from": publisher_wallet},
         datatoken_args=DatatokenArguments(
             template_index=2,
-            name="DatatokenEnterpriseDT1",
-            symbol="DatatokenEnterpriseDT1Symbol",
+            name="Datatoken2DT1",
+            symbol="Datatoken2DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             bytess=[b""],
             cap=to_wei(0.1),
         ),
     )
-    assert dt_ent, "Could not create datatoken Enterprise with explicit parameters"
+    assert dt_ent, "Could not create datatoken template 2 with explicit parameters"
 
     dt_ent = data_nft.create_datatoken(
         {"from": publisher_wallet},
-        name="DatatokenEnterpriseDT1",
-        symbol="DatatokenEnterpriseDT1Symbol",
+        name="Datatoken2DT1",
+        symbol="Datatoken2DT1Symbol",
         cap=to_wei(0.1),
     )
-    assert dt_ent, "Could not create datatoken Enterprise with implicit parameters."
+    assert dt_ent, "Could not create datatoken template 2 with implicit parameters."
 
 
 def test_create_datatoken_with_usdc_order_fee(
@@ -736,7 +736,7 @@ def test_fail_create_datatoken(
 @pytest.mark.unit
 def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Template 2"):
         DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")
 
 

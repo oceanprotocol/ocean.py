@@ -4,7 +4,7 @@
 #
 import pytest
 
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
 from ocean_lib.models.test.test_factory_router import (
@@ -71,7 +71,7 @@ def test_exchange_swap_fees(
     router = FactoryRouter(config, get_address_of_type(config, "Router"))
     FRE = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
 
-    bt = Datatoken(config, get_address_of_type(config, bt_name))
+    bt = Datatoken1(config, get_address_of_type(config, bt_name))
     dt = DT
 
     transfer_bt_if_balance_lte(
@@ -241,8 +241,8 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     bob,
 ):
     details = exchange.details
-    bt = Datatoken(config, details.base_token)
-    dt = Datatoken(config, details.datatoken)
+    bt = Datatoken1(config, details.base_token)
+    dt = Datatoken1(config, details.datatoken)
 
     # Get balances before swap
     BT_bob1 = bt.balanceOf(bob)
@@ -351,8 +351,8 @@ def collect_bt_or_dt_and_verify_balances(
 ):
     """Collet BT or Collect DT and verify balances"""
     details = exchange.details
-    dt = Datatoken(config, details.datatoken)
-    bt = Datatoken(config, details.base_token)
+    dt = Datatoken1(config, details.datatoken)
+    bt = Datatoken1(config, details.base_token)
     publish_market = dt.getPaymentCollector()
 
     if token_address == dt.address:
@@ -390,7 +390,7 @@ def collect_fee_and_verify_balances(
 ):
     """Collect publish_market  or opc fees, and verify balances"""
     FRE = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))
-    bt = Datatoken(config, exchange.details.base_token)
+    bt = Datatoken1(config, exchange.details.base_token)
 
     if fee_type == "publish_market_fee":
         BT_exchange_fee_avail1 = (

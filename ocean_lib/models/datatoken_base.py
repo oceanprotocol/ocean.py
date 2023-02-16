@@ -77,7 +77,7 @@ class DatatokenArguments:
         cap: Optional[int] = None,
     ):
         if template_index == 2 and not cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Template 2 token deployment.")
 
         self.cap = cap if template_index == 2 else MAX_UINT256
 
@@ -165,17 +165,17 @@ class DatatokenBase(ABC, ContractBase):
 
     @staticmethod
     def get_typed(config, address):
-        from ocean_lib.models.datatoken import Datatoken
-        from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
+        from ocean_lib.models.datatoken1 import Datatoken1
+        from ocean_lib.models.datatoken2 import Datatoken2
 
-        datatoken = Datatoken(config, address)
+        datatoken = Datatoken1(config, address)
 
         try:
             template_id = datatoken.getId()
         except Exception:
             template_id = 1
 
-        return datatoken if template_id == 1 else DatatokenEnterprise(config, address)
+        return datatoken if template_id == 1 else Datatoken2(config, address)
 
     @enforce_types
     def start_order(

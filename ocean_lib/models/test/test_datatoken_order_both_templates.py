@@ -21,7 +21,7 @@ def test_dispense_and_order_with_non_defaults(
     consumer_wallet,
     factory_deployer_wallet,
 ):
-    """Tests dispense_and_order function of the Datatoken Enterprise"""
+    """Tests dispense_and_order function of the Datatoken Template 2"""
     _, DT = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet, 2)
 
     USDC = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
@@ -115,7 +115,7 @@ def test_dispense_and_order_with_non_defaults(
 def test_dispense_and_order_with_defaults(
     config, publisher_wallet, consumer_wallet, factory_deployer_wallet, template_index
 ):
-    """Tests dispense_and_order function of the Datatoken and DatatokenEnterprise"""
+    """Tests dispense_and_order function of the Datatoken1 and Datatoken2"""
     _, DT = deploy_erc721_erc20(
         config, publisher_wallet, publisher_wallet, template_index
     )
@@ -150,7 +150,7 @@ def test_buy_DT_and_order(
     another_consumer_wallet,
     template_index,
 ):
-    """Tests buy_DT_and_order function of the Datatoken and DatatokenEnterprise"""
+    """Tests buy_DT_and_order function of the Datatoken1 and Datatoken2"""
     _, DT = deploy_erc721_erc20(
         config, publisher_wallet, publisher_wallet, template_index
     )
