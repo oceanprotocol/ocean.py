@@ -9,20 +9,18 @@ import os
 import secrets
 from datetime import datetime
 from decimal import Decimal
-import time
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
-import yaml
 from brownie import network
-from brownie.network import accounts, web3
+from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments
+from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesTypeFactory
@@ -122,30 +120,11 @@ def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocea
 
 @enforce_types
 def setup_logging(
-    default_path: str = "logging.yaml",
     default_level=logging.INFO,
-    env_key: str = "LOG_CFG",
 ):
     """Logging setup."""
-    path = default_path
-    value = os.getenv(env_key, None)
-    if value:
-        path = value
-    if os.path.exists(path):
-        with open(path, "rt") as file:
-            try:
-                config = yaml.safe_load(file.read())
-                logging.config.dictConfig(config)
-                coloredlogs.install()
-                logging.info(f"Logging configuration loaded from file: {path}")
-            except Exception as ex:
-                print(ex)
-                print("Error in Logging Configuration. Using default configs")
-                logging.basicConfig(level=default_level)
-                coloredlogs.install(level=default_level)
-    else:
-        logging.basicConfig(level=default_level)
-        coloredlogs.install(level=default_level)
+    logging.basicConfig(level=default_level)
+    coloredlogs.install(level=default_level)
 
 
 @enforce_types
@@ -154,19 +133,17 @@ def deploy_erc721_erc20(
     data_nft_publisher,
     datatoken_minter: Optional = None,
     template_index: Optional[int] = 1,
-) -> Union[DataNFT, Tuple[DataNFT, Datatoken]]:
+) -> Union[DataNFT, Tuple[DataNFT, DatatokenBase]]:
     """Helper function to deploy an DataNFT using data_nft_publisher Wallet
     and an Datatoken data token with the newly DataNFT using datatoken_minter Wallet
     if the wallet is provided.
-    :rtype: Union[DataNFT, Tuple[DataNFT, Datatoken]]
+    :rtype: Union[DataNFT, Tuple[DataNFT, DatatokenBase]]
     """
 
     data_nft_factory = DataNFTFactoryContract(
         config_dict, get_address_of_type(config_dict, "ERC721Factory")
     )
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT", "NFTSYMBOL"), {"from": data_nft_publisher}
-    )
+    data_nft = data_nft_factory.create({"from": data_nft_publisher}, "NFT", "NFTSYMBOL")
 
     if not datatoken_minter:
         return data_nft
@@ -174,14 +151,12 @@ def deploy_erc721_erc20(
     datatoken_cap = to_wei(100) if template_index == 2 else None
 
     datatoken = data_nft.create_datatoken(
-        DatatokenArguments(
-            template_index=template_index,
-            cap=datatoken_cap,
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=datatoken_minter.address,
-        ),
         {"from": data_nft_publisher},
+        template_index=template_index,
+        cap=datatoken_cap,
+        name="DT1",
+        symbol="DT1Symbol",
+        minter=datatoken_minter.address,
     )
 
     return data_nft, datatoken
@@ -209,7 +184,7 @@ def send_mock_usdc_to_address(config: dict, recipient: str, amount: int) -> int:
     """
     factory_deployer = get_factory_deployer_wallet(config)
 
-    mock_usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
+    mock_usdc = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
     if mock_usdc.balanceOf(factory_deployer) >= amount:
@@ -231,7 +206,7 @@ def transfer_bt_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = Datatoken(config, bt_address)
+    base_token = DatatokenBase.get_typed(config, bt_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance

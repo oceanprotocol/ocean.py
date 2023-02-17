@@ -7,9 +7,134 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.ocean.util import get_from_address, str_with_wei
+from ocean_lib.ocean.util import get_address_of_type, get_from_address, str_with_wei
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
+
+checksum_addr = ContractBase.to_checksum_address
+
+
+@enforce_types
+class ExchangeArguments:
+    def __init__(
+        self,
+        rate: Union[int, str],
+        base_token_addr: str,
+        owner_addr: Optional[str] = None,
+        publish_market_fee_collector: Optional[str] = None,
+        publish_market_fee: Union[int, str] = 0,
+        with_mint: bool = True,
+        allowed_swapper: str = ZERO_ADDRESS,
+        full_info: bool = False,
+        dt_decimals: Optional[int] = None,
+    ):
+        self.rate = rate
+        self.base_token_addr = base_token_addr
+        self.owner_addr = owner_addr
+        self.publish_market_fee_collector = publish_market_fee_collector
+        self.allowed_swapper = checksum_addr(allowed_swapper)
+        self.rate = rate
+        self.publish_market_fee = publish_market_fee
+        self.with_mint = with_mint
+        self.dt_decimals = dt_decimals
+
+    def to_tuple(self, config_dict, tx_dict, dt_decimals=None):
+        FRE_addr = get_address_of_type(config_dict, "FixedPrice")
+
+        if not self.owner_addr:
+            self.owner_addr = get_from_address(tx_dict)
+
+        if not self.publish_market_fee_collector:
+            self.publish_market_fee_collector = get_from_address(tx_dict)
+
+        if not self.dt_decimals:
+            if not dt_decimals:
+                raise Exception(
+                    "Must configure dt decimals either on arg creation or usage."
+                )
+
+            self.dt_decimals = dt_decimals
+
+        # TODO: move to top now?
+        from ocean_lib.models.datatoken_base import DatatokenBase  # isort:skip
+
+        self.BT = DatatokenBase.get_typed(config_dict, self.base_token_addr)
+
+        return (
+            FRE_addr,
+            [
+                checksum_addr(self.BT.address),
+                checksum_addr(self.owner_addr),
+                self.publish_market_fee_collector,
+                self.allowed_swapper,
+            ],
+            [
+                self.BT.decimals(),
+                self.dt_decimals,
+                self.rate,
+                self.publish_market_fee,
+                self.with_mint,
+            ],
+        )
+
+
+"""
+Attributes:
+MAX_FEE
+MIN_FEE
+MIN_RATE
+
+Functions:
+
+def balance() -> int:
+    returns FRE balance
+    :return: balance
+
+def getExchanges() -> tuple:
+    get list of exchange contracts addresses
+    :return: tuple of contract addresses for each exchange
+
+def generateExchangeId(bt_addr: str, dt_addr) -> str:
+    retrieve exchange id based on a pair of basetoken-datatoken address pair
+    :param bt_addr: address of base token
+    :param dt_addr: address of datatoken
+    :return: exchange id
+
+def getId() -> int:
+    get exchange id
+    :return: id
+
+def getNumberOfExchanges() -> int:
+    get number of exchange contracts
+    :return: number of exchanges
+
+
+The following functions are wrapped with ocean.py helpers, especially in the OneExchange class, but you can use the raw form if needed.
+buyDT
+calcBaseInGivenOutDT
+calcBaseOutGivenInDT
+collectBT
+collectDT
+collectMarketFee
+collectOceanFee
+createWithDecimals -> raw creation of the exchange contract, much easier to use from datatoken.create_exchange()
+getAllowedSwapper
+getBTSupply
+getDTSupply
+getExchange
+getFeesInfo
+getMarketFee
+getOPCFee
+getRate
+isActive
+sellDT
+setAllowedSwapper
+setRate
+toggleExchangeState
+toggleMintState
+updateMarketFee
+updateMarketFeeCollector
+"""
 
 
 @enforce_types
@@ -203,10 +328,11 @@ class OneExchange:
         - tx_dict - e.g. {"from": alice_wallet}
         """
         # import now, to avoid circular import
-        from ocean_lib.models.datatoken import Datatoken
+        # TODO: maybe we can move it now?
+        from ocean_lib.models.datatoken_base import DatatokenBase
 
         details = self.details
-        BT = Datatoken(self._FRE.config_dict, details.base_token)
+        BT = DatatokenBase.get_typed(self._FRE.config_dict, details.base_token)
         buyer_addr = get_from_address(tx_dict)
 
         BT_needed = self.BT_needed(datatoken_amt, consume_market_fee)

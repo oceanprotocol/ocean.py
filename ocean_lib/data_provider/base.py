@@ -4,13 +4,12 @@
 #
 
 """Provider module."""
-import json
 import logging
 import os
 import re
 from datetime import datetime
 from json import JSONDecodeError
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
 from requests.models import PreparedRequest
 
@@ -318,7 +317,7 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def check_response(
-        response: Any,
+        response,
         endpoint_name: str,
         endpoint: str,
         payload: Union[Dict, bytes],

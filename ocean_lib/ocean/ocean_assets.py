@@ -25,7 +25,13 @@ from ocean_lib.exceptions import AquariusError, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_base import (
+    DatatokenArguments,
+    DatatokenBase,
+    TokenFeeInfo,
+)
+from ocean_lib.models.dispenser import DispenserArguments
+from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import (
     create_checksum,
     get_address_of_type,
@@ -167,6 +173,10 @@ class OceanAssets:
         tag: str = "python-branin",
         checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
         wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ) -> tuple:
         """Create asset of type "algorithm", having UrlFiles, with good defaults"""
 
@@ -187,7 +197,15 @@ class OceanAssets:
         }
 
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
+
+        return self.create_bundled(
+            metadata,
+            files,
+            tx_dict,
+            wait_for_aqua=wait_for_aqua,
+            dt_template_index=dt_template_index,
+            pricing_schema_args=pricing_schema_args,
+        )
 
     @enforce_types
     def create_url_asset(
@@ -196,11 +214,23 @@ class OceanAssets:
         url: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [UrlFile(url)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
+
+        return self.create_bundled(
+            metadata,
+            files,
+            tx_dict,
+            wait_for_aqua=wait_for_aqua,
+            dt_template_index=dt_template_index,
+            pricing_schema_args=pricing_schema_args,
+        )
 
     @enforce_types
     def create_arweave_asset(
@@ -209,11 +239,23 @@ class OceanAssets:
         transaction_id: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [ArweaveFile(transaction_id)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
+
+        return self.create_bundled(
+            metadata,
+            files,
+            tx_dict,
+            wait_for_aqua=wait_for_aqua,
+            dt_template_index=dt_template_index,
+            pricing_schema_args=pricing_schema_args,
+        )
 
     @enforce_types
     def create_graphql_asset(
@@ -223,11 +265,23 @@ class OceanAssets:
         query: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
         metadata = self._default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
+
+        return self.create_bundled(
+            metadata,
+            files,
+            tx_dict,
+            wait_for_aqua=wait_for_aqua,
+            dt_template_index=dt_template_index,
+            pricing_schema_args=pricing_schema_args,
+        )
 
     @enforce_types
     def create_onchain_asset(
@@ -237,13 +291,25 @@ class OceanAssets:
         contract_abi: dict,
         tx_dict: dict,
         wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ) -> tuple:
         """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
         metadata = self._default_metadata(name, tx_dict)
-        return self._create_1dt(metadata, files, tx_dict, wait_for_aqua=wait_for_aqua)
+
+        return self.create_bundled(
+            metadata,
+            files,
+            tx_dict,
+            wait_for_aqua=wait_for_aqua,
+            dt_template_index=dt_template_index,
+            pricing_schema_args=pricing_schema_args,
+        )
 
     @enforce_types
     def _default_metadata(self, name: str, tx_dict: dict, type="dataset") -> dict:
@@ -262,23 +328,45 @@ class OceanAssets:
         return metadata
 
     @enforce_types
-    def _create_1dt(
+    def create_bundled(
         self,
         metadata: dict,
         files: List[FilesType],
         tx_dict: dict,
         credentials: Optional[dict] = None,
-        wait_for_aqua: Optional[bool] = True,
+        wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
     ):
         provider_uri = DataServiceProvider.get_url(self._config_dict)
 
         self._assert_ddo_metadata(metadata)
         name = metadata["name"]
         data_nft_args = DataNFTArguments(name, name)
-        datatoken_args = DatatokenArguments(f"{name}: DT1", files=files)
-        data_nft, datatoken = self.data_nft_factory.create_with_erc20(
-            data_nft_args, datatoken_args, tx_dict
+        datatoken_args = DatatokenArguments(
+            f"{name}: DT1", files=files, template_index=dt_template_index
         )
+
+        if not pricing_schema_args:
+            data_nft, datatoken = self.data_nft_factory.create_with_erc20(
+                data_nft_args, datatoken_args, tx_dict
+            )
+
+        if isinstance(pricing_schema_args, DispenserArguments):
+            data_nft, datatoken = self.data_nft_factory.create_with_erc20_and_dispenser(
+                data_nft_args, datatoken_args, pricing_schema_args, tx_dict
+            )
+
+        if isinstance(pricing_schema_args, ExchangeArguments):
+            (
+                data_nft,
+                datatoken,
+                _,
+            ) = self.data_nft_factory.create_with_erc20_and_fixed_rate(
+                data_nft_args, datatoken_args, pricing_schema_args, tx_dict
+            )
 
         ddo = DDO()
         # Generate the did, add it to the ddo.
@@ -340,7 +428,7 @@ class OceanAssets:
         credentials: Optional[dict] = None,
         data_nft_address: Optional[str] = None,
         data_nft_args: Optional[DataNFTArguments] = None,
-        deployed_datatokens: Optional[List[Datatoken]] = None,
+        deployed_datatokens: Optional[List[DatatokenBase]] = None,
         services: Optional[list] = None,
         datatoken_args: Optional[List["DatatokenArguments"]] = None,
         encrypt_flag: Optional[bool] = True,
@@ -610,7 +698,7 @@ class OceanAssets:
         consumer_address = consumer_address or wallet_address
 
         # main work...
-        dt = Datatoken(self._config_dict, service.datatoken)
+        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
         balance = dt.balanceOf(wallet_address)
 
         if balance < to_wei(1):
@@ -724,7 +812,7 @@ class OceanAssets:
             return
 
         service = asset_compute_input.service
-        dt = Datatoken(self._config_dict, service.datatoken)
+        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(

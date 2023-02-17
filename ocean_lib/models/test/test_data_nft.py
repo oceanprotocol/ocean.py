@@ -8,9 +8,13 @@ from base64 import b64decode
 import pytest
 from web3 import Web3
 
-from ocean_lib.models.data_nft import DataNFTArguments, DataNFTPermissions
+from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken, DatatokenArguments, TokenFeeInfo
+from ocean_lib.models.datatoken_base import (
+    DatatokenArguments,
+    DatatokenBase,
+    TokenFeeInfo,
+)
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 
 BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
@@ -327,47 +331,45 @@ def test_create_datatoken(
     ]
 
     datatoken = data_nft.create_datatoken(
-        DatatokenArguments(
-            "DT1",
-            "DT1Symbol",
-            fee_manager=consumer_wallet.address,
-        ),
         {"from": publisher_wallet},
+        "DT1",
+        "DT1Symbol",
+        fee_manager=consumer_wallet.address,
     )
+
     assert datatoken, "Could not create ERC20."
 
     dt_ent = data_nft.create_datatoken(
-        DatatokenArguments(
+        {"from": publisher_wallet},
+        datatoken_args=DatatokenArguments(
             template_index=2,
-            name="DatatokenEnterpriseDT1",
-            symbol="DatatokenEnterpriseDT1Symbol",
+            name="Datatoken2DT1",
+            symbol="Datatoken2DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             bytess=[b""],
             cap=to_wei(0.1),
         ),
-        {"from": publisher_wallet},
     )
-    assert dt_ent, "Could not create datatoken Enterprise with explicit parameters"
+    assert dt_ent, "Could not create datatoken template 2 with explicit parameters"
 
     dt_ent = data_nft.create_datatoken(
-        DatatokenArguments(
-            name="DatatokenEnterpriseDT1",
-            symbol="DatatokenEnterpriseDT1Symbol",
-            cap=to_wei(0.1),
-        ),
         {"from": publisher_wallet},
+        name="Datatoken2DT1",
+        symbol="Datatoken2DT1Symbol",
+        cap=to_wei(0.1),
     )
-    assert dt_ent, "Could not create datatoken Enterprise with implicit parameters."
+    assert dt_ent, "Could not create datatoken template 2 with implicit parameters."
 
 
 def test_create_datatoken_with_usdc_order_fee(
     config: dict, publisher_wallet, data_nft_factory: DataNFTFactoryContract, data_nft
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
-    usdc = Datatoken(config, get_address_of_type(config, "MockUSDC"))
+    usdc = DatatokenBase.get_typed(config, get_address_of_type(config, "MockUSDC"))
     publish_market_order_fee_amount_in_wei = to_wei(5)
     dt = data_nft.create_datatoken(
+        {"from": publisher_wallet},
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
@@ -377,7 +379,6 @@ def test_create_datatoken_with_usdc_order_fee(
                 amount=publish_market_order_fee_amount_in_wei,
             ),
         ),
-        {"from": publisher_wallet},
     )
 
     # Check publish fee info
@@ -409,13 +410,13 @@ def test_create_datatoken_with_non_owner(
 
     # Consumer creates ERC20
     dt = data_nft.create_datatoken(
+        {"from": consumer_wallet},
         DatatokenArguments(
             name="DT1",
             symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
         ),
-        {"from": consumer_wallet},
     )
     assert dt, "Failed to create ERC20 token."
 
@@ -443,12 +444,10 @@ def test_fail_creating_erc20(
     )
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-                minter=publisher_wallet.address,
-            ),
             {"from": consumer_wallet},
+            name="DT1",
+            symbol="DT1Symbol",
+            minter=publisher_wallet.address,
         )
 
 
@@ -508,12 +507,10 @@ def test_erc721_datatoken_functions(
         DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     data_nft.create_datatoken(
-        DatatokenArguments(
-            name="DT1",
-            symbol="DT1Symbol",
-            minter=publisher_wallet.address,
-        ),
         {"from": consumer_wallet},
+        name="DT1",
+        symbol="DT1Symbol",
+        minter=publisher_wallet.address,
     )
     with pytest.raises(Exception, match="NOT MINTER"):
         datatoken.mint(
@@ -569,12 +566,10 @@ def test_transfer_nft(
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
     data_nft = data_nft_factory.create(
-        DataNFTArguments(
-            "NFT to TRANSFER",
-            "NFTtT",
-            additional_datatoken_deployer=consumer_wallet.address,
-        ),
         {"from": publisher_wallet},
+        "NFT to TRANSFER",
+        "NFTtT",
+        additional_datatoken_deployer=consumer_wallet.address,
     )
     assert data_nft.contract.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
@@ -595,9 +590,7 @@ def test_transfer_nft(
     assert data_nft.ownerOf(1) == consumer_wallet.address
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("NFT1", "NFT"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "NFT1", "NFT")
 
     receipt = data_nft.safeTransferFrom(
         publisher_wallet.address,
@@ -613,14 +606,12 @@ def test_transfer_nft(
 
     # Creates an ERC20
     datatoken = data_nft.create_datatoken(
-        DatatokenArguments(
-            "DT1",
-            "DT1Symbol",
-            publish_market_order_fees=TokenFeeInfo(
-                address=publisher_wallet.address,
-            ),
-        ),
         {"from": consumer_wallet},
+        "DT1",
+        "DT1Symbol",
+        publish_market_order_fees=TokenFeeInfo(
+            address=publisher_wallet.address,
+        ),
     )
     assert datatoken, "Failed to create ERC20 token."
 
@@ -669,6 +660,7 @@ def test_nft_transfer_with_fre(
         base_token_addr=OCEAN.address,
         publish_market_fee=to_wei(0.01),
         tx_dict={"from": publisher_wallet},
+        with_mint=False,
     )
 
     # Exchange should have supply and fees setup
@@ -709,50 +701,42 @@ def test_fail_create_datatoken(
     config, publisher_wallet, consumer_wallet, another_consumer_wallet, data_nft_factory
 ):
     """Tests multiple failures for creating ERC20 token."""
-    data_nft = data_nft_factory.create(
-        DataNFTArguments("DT1", "DTSYMBOL"), {"from": publisher_wallet}
-    )
+    data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
     data_nft.addToCreateERC20List(consumer_wallet.address, {"from": publisher_wallet})
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=0,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
             {"from": consumer_wallet},
+            template_index=0,
+            name="DT1",
+            symbol="DT1Symbol",
         )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=3,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
             {"from": consumer_wallet},
+            template_index=3,
+            name="DT1",
+            symbol="DT1Symbol",
         )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert data_nft.getPermissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                template_index=1,
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
             {"from": another_consumer_wallet},
+            template_index=1,
+            name="DT1",
+            symbol="DT1Symbol",
         )
 
 
 @pytest.mark.unit
 def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Template 2"):
         DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")
 
 
@@ -779,11 +763,9 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
     # Owner is not NFT owner anymore, nor has any other role, neither older users
     with pytest.raises(Exception, match="NOT ERC20DEPLOYER_ROLE"):
         data_nft.create_datatoken(
-            DatatokenArguments(
-                name="DT1",
-                symbol="DT1Symbol",
-            ),
             {"from": publisher_wallet},
+            name="DT1",
+            symbol="DT1Symbol",
         )
 
     with pytest.raises(Exception, match="NOT MINTER"):
@@ -791,14 +773,27 @@ def test_nft_owner_transfer(config, publisher_wallet, consumer_wallet, data_NFT_
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_datatoken(
-        DatatokenArguments(
-            name="DT1",
-            symbol="DT1Symbol",
-        ),
         {"from": consumer_wallet},
+        name="DT1",
+        symbol="DT1Symbol",
     )
     datatoken.addMinter(consumer_wallet.address, {"from": consumer_wallet})
 
     datatoken.mint(consumer_wallet.address, 20, {"from": consumer_wallet})
 
     assert datatoken.balanceOf(consumer_wallet.address) == 20
+
+
+def test_set_get_data(data_nft, alice):
+    # Key-value pair
+    key = "fav_color"
+    value = "blue"
+
+    # set data
+    data_nft.set_data(key, value, {"from": alice})
+
+    # retrieve data
+    value2 = data_nft.get_data(key)
+
+    # test
+    assert value2 == value

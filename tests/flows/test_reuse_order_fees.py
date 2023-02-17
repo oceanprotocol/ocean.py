@@ -7,7 +7,7 @@ from time import sleep
 
 import pytest
 
-from ocean_lib.models.datatoken import Datatoken, TokenFeeInfo
+from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.structures.file_objects import FilesType
@@ -51,7 +51,7 @@ def test_reuse_order_fees(
     base_token_name: str,
     provider_fee_in_unit: str,
 ):
-    bt = Datatoken(config, get_address_of_type(config, base_token_name))
+    bt = DatatokenBase.get_typed(config, get_address_of_type(config, base_token_name))
     data_nft = deploy_erc721_erc20(config, publisher_wallet)
     publish_market_wallet = get_wallet(4)
     consume_market_wallet = get_wallet(5)
@@ -191,8 +191,8 @@ def test_reuse_order_fees(
 def reuse_order_with_mock_provider_fees(
     provider_fee_in_unit: str,
     start_order_tx_id: str,
-    bt: Datatoken,
-    dt: Datatoken,
+    bt: DatatokenBase,
+    dt: DatatokenBase,
     publisher_wallet,
     publish_market_wallet,
     consume_market_wallet,

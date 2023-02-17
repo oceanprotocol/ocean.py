@@ -36,7 +36,8 @@ def test_script_execution(script):
 
     runs_with_local_setup = [
         "profile-nfts-flow",
-        "key-value-flow",
+        "key-value-public",
+        "key-value-private",
         "search-and-filter-assets",
         "main-flow",
         "c2d-flow",
