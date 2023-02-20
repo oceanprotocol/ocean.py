@@ -70,3 +70,20 @@ def get_from_address(tx_dict: dict) -> str:
     )
 
     return Web3.toChecksumAddress(address.lower())
+
+
+@enforce_types
+def get_args_object(args, kwargs, args_class):
+    args_to_use = None
+    if args and isinstance(args[0], args_class):
+        args_to_use = args[0]
+    elif kwargs:
+        for key, value in kwargs.items():
+            if isinstance(value, args_class):
+                args_to_use = value
+                break
+
+    if not args_to_use:
+        args_to_use = args_class(*args, **kwargs)
+
+    return args_to_use

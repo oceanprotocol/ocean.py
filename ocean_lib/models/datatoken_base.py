@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from abc import ABC
 from enum import IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -13,12 +14,11 @@ from web3.main import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import (
-    from_wei,
     get_address_of_type,
+    get_args_object,
     get_from_address,
     get_ocean_token_address,
     str_with_wei,
-    to_wei,
 )
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
@@ -77,7 +77,7 @@ class DatatokenArguments:
         cap: Optional[int] = None,
     ):
         if template_index == 2 and not cap:
-            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Template 2 token deployment.")
 
         self.cap = cap if template_index == 2 else MAX_UINT256
 
@@ -125,13 +125,7 @@ class DatatokenArguments:
         ]
         assert len(new_elements) == 1, "new data token has no address"
 
-        from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
-
-        datatoken = (
-            Datatoken(config_dict, new_elements[0])
-            if self.template_index == 1
-            else DatatokenEnterprise(config_dict, new_elements[0])
-        )
+        datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
 
         logger.info(
             f"Successfully created datatoken with address " f"{datatoken.address}."
@@ -159,7 +153,7 @@ class DatatokenRoles(IntEnum):
     PAYMENT_MANAGER = 1
 
 
-class Datatoken(ContractBase):
+class DatatokenBase(ABC, ContractBase):
     CONTRACT_NAME = "ERC20Template"
 
     BASE = 10**18
@@ -168,6 +162,20 @@ class Datatoken(ContractBase):
 
     # ===========================================================================
     # consume
+
+    @staticmethod
+    def get_typed(config, address):
+        from ocean_lib.models.datatoken1 import Datatoken1
+        from ocean_lib.models.datatoken2 import Datatoken2
+
+        datatoken = Datatoken1(config, address)
+
+        try:
+            template_id = datatoken.getId()
+        except Exception:
+            template_id = 1
+
+        return datatoken if template_id == 1 else Datatoken2(config, address)
 
     @enforce_types
     def start_order(
@@ -238,16 +246,7 @@ class Datatoken(ContractBase):
 
     @enforce_types
     def create_exchange(
-        self,
-        rate: Union[int, str],
-        base_token_addr: str,
-        tx_dict: dict,
-        owner_addr: Optional[str] = None,
-        publish_market_fee_collector: Optional[str] = None,
-        publish_market_fee: Union[int, str] = 0,
-        with_mint: bool = False,
-        allowed_swapper: str = ZERO_ADDRESS,
-        full_info: bool = False,
+        self, tx_dict: dict, *args, **kwargs
     ) -> Union[OneExchange, tuple]:
         """
         For this datatoken, create a single fixed-rate exchange (OneExchange).
@@ -274,38 +273,18 @@ class Datatoken(ContractBase):
         - (maybe) tx_receipt
         """
         # import now, to avoid circular import
-        from ocean_lib.models.fixed_rate_exchange import OneExchange
+        from ocean_lib.models.fixed_rate_exchange import ExchangeArguments, OneExchange
 
-        FRE_addr = get_address_of_type(self.config_dict, "FixedPrice")
-        from_addr = get_from_address(tx_dict)
-        BT = Datatoken(self.config_dict, base_token_addr)
-        owner_addr = owner_addr or from_addr
-        publish_market_fee_collector = publish_market_fee_collector or from_addr
+        exchange_args = get_args_object(args, kwargs, ExchangeArguments)
+        args_tup = exchange_args.to_tuple(self.config_dict, tx_dict, self.decimals())
 
-        tx = self.contract.createFixedRate(
-            checksum_addr(FRE_addr),
-            [
-                checksum_addr(BT.address),
-                checksum_addr(owner_addr),
-                checksum_addr(publish_market_fee_collector),
-                checksum_addr(allowed_swapper),
-            ],
-            [
-                BT.decimals(),
-                self.decimals(),
-                rate,
-                publish_market_fee,
-                with_mint,
-            ],
-            tx_dict,
-        )
+        tx = self.contract.createFixedRate(*(args_tup + (tx_dict,)))
 
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
-        if full_info:
-            return (exchange, tx)
-        return exchange
+
+        return (exchange, tx) if kwargs.get("full_info") else exchange
 
     @enforce_types
     def get_exchanges(self) -> list:
@@ -333,13 +312,7 @@ class Datatoken(ContractBase):
     # Free data: dispenser faucet
 
     @enforce_types
-    def create_dispenser(
-        self,
-        tx_dict: dict,
-        max_tokens: Optional[Union[int, str]] = None,
-        max_balance: Optional[Union[int, str]] = None,
-        with_mint: Optional[bool] = True,
-    ):
+    def create_dispenser(self, tx_dict: dict, *args, **kwargs):
         """
         For this datataken, create a dispenser faucet for free tokens.
 
@@ -355,24 +328,14 @@ class Datatoken(ContractBase):
         if self.dispenser_status().active:
             return
 
-        # set max_tokens, max_balance if needed
-        max_tokens = max_tokens or MAX_UINT256
-        max_balance = max_balance or MAX_UINT256
+        from ocean_lib.models.dispenser import DispenserArguments  # isort:skip
 
-        # args for contract tx
-        dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-        with_mint = with_mint  # True -> can always mint more
-        allowed_swapper = ZERO_ADDRESS  # 0 -> so anyone can call dispense
+        dispenser_args = get_args_object(args, kwargs, DispenserArguments)
+        args_tup = dispenser_args.to_tuple(self.config_dict)
 
         # do contract tx
-        tx = self.createDispenser(
-            dispenser_addr,
-            max_tokens,
-            max_balance,
-            with_mint,
-            allowed_swapper,
-            tx_dict,
-        )
+        tx = self.createDispenser(*(args_tup + (tx_dict,)))
+
         return tx
 
     @enforce_types
@@ -431,88 +394,19 @@ class Datatoken(ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
-    def dispense_and_order(
-        self,
-        consumer: str,
-        service_index: int,
-        provider_fees: dict,
-        tx_dict: dict,
-        consume_market_fees=None,
-    ) -> str:
-        if not consume_market_fees:
-            consume_market_fees = TokenFeeInfo()
-
-        buyer_addr = get_from_address(tx_dict)
-
-        bal = from_wei(self.balanceOf(buyer_addr))
-        if bal < 1.0:
-            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-            from ocean_lib.models.dispenser import Dispenser  # isort: skip
-
-            dispenser = Dispenser(self.config_dict, dispenser_addr)
-
-            # catch key failure modes
-            st = dispenser.status(self.address)
-            active, allowedSwapper = st[0], st[6]
-            if not active:
-                raise ValueError("No active dispenser for datatoken")
-            if allowedSwapper not in [ZERO_ADDRESS, buyer_addr]:
-                raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
-
-            # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(self.address, "1 ether", buyer_addr, tx_dict)
-
-        return self.start_order(
-            consumer=ContractBase.to_checksum_address(consumer),
-            service_index=service_index,
-            provider_fees=provider_fees,
-            consume_market_fees=consume_market_fees,
-            tx_dict=tx_dict,
-        )
-
-    @enforce_types
-    def buy_DT_and_order(
-        self,
-        consumer: str,
-        service_index: int,
-        provider_fees: dict,
-        exchange: Any,
-        tx_dict: dict,
-        consume_market_fees=None,
-    ) -> str:
-        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
-
-        # import now, to avoid circular import
-        from ocean_lib.models.fixed_rate_exchange import OneExchange
-
-        if not consume_market_fees:
-            consume_market_fees = TokenFeeInfo()
-
-        if not isinstance(exchange, OneExchange):
-            exchange = OneExchange(fre_address, exchange)
-
-        exchange.buy_DT(
-            datatoken_amt=to_wei(1),
-            consume_market_fee_addr=consume_market_fees.address,
-            consume_market_fee=consume_market_fees.amount,
-            tx_dict=tx_dict,
-        )
-
-        return self.start_order(
-            consumer=ContractBase.to_checksum_address(consumer),
-            service_index=service_index,
-            provider_fees=provider_fees,
-            consume_market_fees=consume_market_fees,
-            tx_dict=tx_dict,
-        )
-
     def get_publish_market_order_fees(self):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
 
-class MockERC20(Datatoken):
+class MockERC20(DatatokenBase):
     CONTRACT_NAME = "MockERC20"
 
+    def getId(self):
+        return 1
 
-class MockOcean(Datatoken):
+
+class MockOcean(DatatokenBase):
     CONTRACT_NAME = "MockOcean"
+
+    def getId(self):
+        return 1

@@ -36,6 +36,7 @@ class DataEncryptor(DataServiceProviderBase):
         _, encrypt_endpoint = DataServiceProviderBase.build_encrypt_endpoint(
             provider_uri
         )
+
         response = DataServiceProviderBase._http_method(
             "post",
             encrypt_endpoint,

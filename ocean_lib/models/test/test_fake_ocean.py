@@ -7,10 +7,8 @@ import os
 import pytest
 from brownie.network import accounts
 
-
-from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.ocean.util import get_ocean_token_address, to_wei
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+from ocean_lib.ocean.util import to_wei
 
 
 @pytest.mark.unit
