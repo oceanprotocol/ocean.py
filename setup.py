@@ -52,7 +52,7 @@ dev_requirements = [
     "bumpversion==0.6.0",
     "pkginfo==1.8.3",
     "twine==3.7.1",
-    "watchdog==2.1.9",
+    "watchdog==2.2.1",
     "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
