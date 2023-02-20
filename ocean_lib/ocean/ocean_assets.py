@@ -170,7 +170,7 @@ class OceanAssets:
         tag: str = "python-branin",
         checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -200,7 +200,7 @@ class OceanAssets:
             files,
             tx_dict,
             wait_for_aqua=wait_for_aqua,
-            use_enterprise=use_enterprise,
+            dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
         )
 
@@ -211,7 +211,7 @@ class OceanAssets:
         url: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -225,7 +225,7 @@ class OceanAssets:
             files,
             tx_dict,
             wait_for_aqua=wait_for_aqua,
-            use_enterprise=use_enterprise,
+            dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
         )
 
@@ -236,7 +236,7 @@ class OceanAssets:
         transaction_id: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -250,7 +250,7 @@ class OceanAssets:
             files,
             tx_dict,
             wait_for_aqua=wait_for_aqua,
-            use_enterprise=use_enterprise,
+            dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
         )
 
@@ -262,7 +262,7 @@ class OceanAssets:
         query: str,
         tx_dict: dict,
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -276,7 +276,7 @@ class OceanAssets:
             files,
             tx_dict,
             wait_for_aqua=wait_for_aqua,
-            use_enterprise=use_enterprise,
+            dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
         )
 
@@ -288,7 +288,7 @@ class OceanAssets:
         contract_abi: dict,
         tx_dict: dict,
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -304,7 +304,7 @@ class OceanAssets:
             files,
             tx_dict,
             wait_for_aqua=wait_for_aqua,
-            use_enterprise=use_enterprise,
+            dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
         )
 
@@ -332,7 +332,7 @@ class OceanAssets:
         tx_dict: dict,
         credentials: Optional[dict] = None,
         wait_for_aqua: bool = True,
-        use_enterprise: bool = False,
+        dt_template_index: Optional[int] = 1,
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
@@ -341,11 +341,10 @@ class OceanAssets:
 
         self._assert_ddo_metadata(metadata)
         name = metadata["name"]
-        template_index = 2 if use_enterprise else 1
         cap = MAX_UINT256
         data_nft_args = DataNFTArguments(name, name)
         datatoken_args = DatatokenArguments(
-            f"{name}: DT1", files=files, template_index=template_index, cap=cap
+            f"{name}: DT1", files=files, template_index=dt_template_index, cap=cap
         )
 
         if not pricing_schema_args:

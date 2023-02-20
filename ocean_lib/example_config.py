@@ -8,8 +8,7 @@ import logging
 import os
 from pathlib import Path
 
-from jsonsempai import magic  # noqa: F401
-from addresses import address as contract_addresses  # noqa: F401
+import addresses
 
 logging.basicConfig(level=logging.INFO)
 
@@ -64,7 +63,11 @@ def get_config_dict(network_name=None) -> dict:
     else:
         # `contract_addresses` comes from "ocean-contracts" pypi library,
         # a JSON blob holding addresses of contract deployments, per network
-        address_file = Path(contract_addresses.__file__).expanduser().resolve()
+        address_file = (
+            Path(os.path.join(addresses.__file__, "..", "address.json"))
+            .expanduser()
+            .resolve()
+        )
     assert os.path.exists(address_file), f"Could not find address_file={address_file}."
 
     config_dict["ADDRESS_FILE"] = address_file

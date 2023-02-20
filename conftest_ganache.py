@@ -10,7 +10,7 @@ from brownie.network import accounts
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
-from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type, to_wei
@@ -110,9 +110,9 @@ def ocean_address(config) -> str:
 
 
 @pytest.fixture
-def ocean_token(config, ocean_address) -> Datatoken:
+def ocean_token(config, ocean_address) -> Datatoken1:
     connect_to_network("development")
-    return Datatoken(config, ocean_address)
+    return Datatoken1(config, ocean_address)
 
 
 @pytest.fixture
@@ -156,19 +156,19 @@ def data_nft(config, publisher_wallet) -> DataNFT:
 
 
 @pytest.fixture
-def data_NFT_and_DT(config, publisher_wallet) -> Tuple[DataNFT, Datatoken]:
+def data_NFT_and_DT(config, publisher_wallet) -> Tuple[DataNFT, Datatoken1]:
     return deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
 
 
 @pytest.fixture
-def DT(data_NFT_and_DT) -> Datatoken:
+def DT(data_NFT_and_DT) -> Datatoken1:
     (_, DT) = data_NFT_and_DT
     return DT
 
 
 # aliases
 @pytest.fixture
-def OCEAN(ocean_token) -> Datatoken:
+def OCEAN(ocean_token) -> Datatoken1:
     return ocean_token
 
 

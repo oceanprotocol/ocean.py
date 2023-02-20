@@ -148,7 +148,7 @@ class Ocean:
     def get_datatoken(self, token_address: str) -> DatatokenBase:
         """
         :param token_address: Token contract address, str
-        :return: `Datatoken` or `DatatokenEnterprise` instance
+        :return: `Datatoken1` or `Datatoken2` instance
         """
         return DatatokenBase.get_typed(self.config, token_address)
 
