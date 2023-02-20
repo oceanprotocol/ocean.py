@@ -41,7 +41,7 @@ test_requirements = [
     "mccabe==0.7.0",
     "pytest==6.2.5",
     "pytest-watch==4.2.0",
-    "pytest-env==0.6.2",
+    "pytest-env==0.8.1",
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
     "mkcodes==0.1.1",
     "pytest-sugar==0.9.6",
