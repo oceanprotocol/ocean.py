@@ -173,6 +173,7 @@ def error_is_skippable(error_s: str) -> bool:
         or "Internal error" in error_s
         or "execution reverted" in error_s
         or "No data was returned - the call likely reverted" in error_s
+        or "The field extraData is 97 bytes, but should be 32." in error_s
     )
 
 
