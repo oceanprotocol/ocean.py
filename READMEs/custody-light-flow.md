@@ -32,7 +32,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 from ocean_lib.models.dispenser import DispenserArguments
 from ocean_lib.ocean.util import to_wei
 
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, use_enterprise=True, pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)))
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, dt_template_index=2, pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)))
 
 #print
 print("Just published a free asset:")
@@ -98,7 +98,7 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import to_wei
 
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, use_enterprise=True, pricing_schema_args=ExchangeArguments(
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice}, dt_template_index=2, pricing_schema_args=ExchangeArguments(
             rate=to_wei(3), base_token_addr=ocean.OCEAN_address, dt_decimals=18
         ),)
 
