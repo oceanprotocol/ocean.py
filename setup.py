@@ -23,7 +23,7 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
-    "eciespy==0.3.11",
+    "eciespy==0.3.13",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
