@@ -397,6 +397,58 @@ class DatatokenBase(ABC, ContractBase):
     def get_publish_market_order_fees(self):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
+    def get_from_pricing_schema_and_order(self, *args, **kwargs):
+        dispensers = self.dispenser_status().active
+        exchanges = self.get_exchanges()
+
+        if not dispensers and not exchanges:
+            raise ValueError("No pricing schemas found")
+
+        if dispensers:
+            kwargs.pop("consume_market_swap_fee_amount", None)
+            kwargs.pop("consume_market_swap_fee_address", None)
+
+            return self.dispense_and_order(*args, **kwargs)
+
+        exchange = self.get_exchanges()[0]
+        kwargs["exchange"] = exchange
+
+        consume_market_fees = kwargs.get("consume_market_fees")
+        if not consume_market_fees:
+            consume_market_fees = TokenFeeInfo()
+
+        wallet_address = get_from_address(kwargs["tx_dict"])
+        amt_needed = exchange.BT_needed(
+            Web3.toWei(1, "ether"), consume_market_fees.amount
+        )
+        base_token = DatatokenBase.get_typed(
+            exchange._FRE.config_dict, exchange.details.base_token
+        )
+        base_token_balance = base_token.balanceOf(wallet_address)
+
+        if base_token_balance < amt_needed:
+            raise ValueError(
+                f"Your token balance {base_token_balance} {base_token.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires {amt_needed} {base_token.symbol()}."
+            )
+
+        if self.getId() == 1:
+            approve_address = exchange.address
+            kwargs.pop("consume_market_swap_fee_amount", None)
+            kwargs.pop("consume_market_swap_fee_address", None)
+        else:
+            approve_address = self.address
+            kwargs["max_base_token_amount"] = amt_needed
+
+        base_token.approve(
+            approve_address,
+            amt_needed,
+            {"from": wallet_address},
+        )
+
+        return self.buy_DT_and_order(*args, **kwargs)
+
 
 class MockERC20(DatatokenBase):
     CONTRACT_NAME = "MockERC20"
