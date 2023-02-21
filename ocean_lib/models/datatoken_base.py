@@ -397,7 +397,7 @@ class DatatokenBase(ABC, ContractBase):
     def get_publish_market_order_fees(self):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
-    def buy_1dt_from_pricing_schema(self, *args, **kwargs):
+    def get_from_pricing_schema_and_order(self, *args, **kwargs):
         dispensers = self.dispenser_status().active
         exchanges = self.get_exchanges()
 

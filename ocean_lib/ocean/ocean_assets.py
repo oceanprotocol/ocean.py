@@ -741,7 +741,7 @@ class OceanAssets:
                 params[
                     "consume_market_swap_fee_address"
                 ] = consume_market_swap_fee_address
-                receipt = dt.buy_1dt_from_pricing_schema(**params)
+                receipt = dt.get_from_pricing_schema_and_order(**params)
             except Exception:
                 receipt = None
 
