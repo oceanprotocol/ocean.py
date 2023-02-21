@@ -45,6 +45,7 @@ Now let's do remote flows:
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 - [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
+- [Custody-light flow](READMEs/custody-light-flow.md) - consume a free & a priced asset without custody
 
 ### On-chain key-value store via data NFTs
 

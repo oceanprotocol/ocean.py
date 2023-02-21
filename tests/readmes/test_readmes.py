@@ -43,6 +43,7 @@ def test_script_execution(script):
         "c2d-flow",
         "publish-flow-graphql",
         "publish-flow-onchain",
+        "custody-light-flow",
     ]
 
     globs = {}
