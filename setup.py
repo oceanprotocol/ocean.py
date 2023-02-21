@@ -23,7 +23,6 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
-    "json-sempai==0.4.0",
     "eciespy==0.3.11",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
@@ -51,12 +50,12 @@ test_requirements = [
 dev_requirements = [
     "bumpversion==0.6.0",
     "pkginfo==1.8.3",
-    "twine==3.7.1",
-    "watchdog==2.1.9",
+    "twine==4.0.2",
+    "watchdog==2.2.1",
     "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
-    "pre-commit==2.20.0",
+    "pre-commit==3.0.4",
     "licenseheaders==0.8.8",
 ]
 

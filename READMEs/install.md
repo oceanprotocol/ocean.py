@@ -6,7 +6,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Prerequisites
 
--   Linux/MacOS
+-   Linux, MacOS, or Windows
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5 - Python 3.10.4, Python 3.11 with some manual alterations
 
@@ -38,7 +38,7 @@ pip install ocean-lib
 
 Issue: M1 * `coincurve` or `cryptography`
 - If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
-- Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
+- Workaround: ensure you have `autoconf`, `automake`, `libtool` and `pkg-config` installed, e.g. using Homebrew or MacPorts.
 
 Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
