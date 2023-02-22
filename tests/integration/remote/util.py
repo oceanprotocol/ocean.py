@@ -9,11 +9,11 @@ import time
 import warnings
 
 import requests
-from web3.exceptions import ExtraDataLengthError
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from brownie.network import accounts, chain
 from brownie.network.web3 import Web3
 from enforce_typing import enforce_types
+from web3.exceptions import ExtraDataLengthError
 
 ERRORS_TO_CATCH = (
     ContractNotFound,

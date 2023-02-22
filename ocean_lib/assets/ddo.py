@@ -4,7 +4,7 @@
 #
 import copy
 import logging
-from typing import List, Optional, Union
+from typing import Optional
 
 from enforce_typing import enforce_types
 
@@ -12,7 +12,6 @@ from ocean_lib.assets.credentials import AddressCredentialMixin
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
 from ocean_lib.ocean.util import create_checksum
 from ocean_lib.services.service import Service
-from ocean_lib.structures.file_objects import FilesType
 
 logger = logging.getLogger("ddo")
 

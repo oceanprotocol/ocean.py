@@ -8,11 +8,11 @@ from web3 import Web3
 
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import (
+    from_wei,
     get_address_of_type,
     get_ocean_token_address,
-    from_wei,
-    to_wei,
     str_with_wei,
+    to_wei,
 )
 
 

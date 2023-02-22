@@ -47,7 +47,7 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -341,7 +341,6 @@ class OceanAssets:
 
         self._assert_ddo_metadata(metadata)
         name = metadata["name"]
-        cap = MAX_UINT256
         data_nft_args = DataNFTArguments(name, name)
 
         if dt_template_index == 2:

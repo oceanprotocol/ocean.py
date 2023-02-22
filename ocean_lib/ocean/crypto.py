@@ -1,14 +1,17 @@
+#
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 from base64 import b64encode
+from hashlib import sha256
+
 from cryptography.fernet import Fernet
-from ecies import encrypt as asymmetric_encrypt, decrypt as asymmetric_decrypt
+from ecies import decrypt as asymmetric_decrypt
+from ecies import encrypt as asymmetric_encrypt
 from enforce_typing import enforce_types
 from eth_keys import keys
 from eth_utils import decode_hex
-from hashlib import sha256
 
 
 @enforce_types

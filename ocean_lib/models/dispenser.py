@@ -10,7 +10,6 @@ from ocean_lib.ocean.util import from_wei, get_address_of_type
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
-
 """
 def activate(dt_addr: str, max_tokens: int, max_balance: int) -> None:
     activate dispenser after deactivation
