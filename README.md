@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0
 -->
 
 <h1 align="center">
-<img src="READMEs/splash-image.png" width="300"/>
+<img src="https://github.com/oceanprotocol/art/blob/main/splashes/ocean_py.png?raw=true" width="300"/>
 </h1>
 
 > ocean.py: a Python library to privately & securely publish, exchange, and consume data.
@@ -31,9 +31,9 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 Follow these steps in sequence to ramp into Ocean.
 
  1. **[Install Ocean](READMEs/install.md)**
- 2. **[Set up locally](READMEs/setup-local.md)** 
+ 2. **[Set up locally](READMEs/setup-local.md)**
  3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
- 
+
 Now let's do remote flows:
 
  4. **[Set up remotely](READMEs/setup-remote.md)**
