@@ -3,11 +3,11 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-[![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
+<h1 align="center">
+<img src="READMEs/splash-image.png" width="300"/>
+</h1>
 
-<h1 align="center">ocean.py</h1>
-
-> Python library to privately & securely publish, exchange, and consume data.
+> ocean.py: a Python library to privately & securely publish, exchange, and consume data.
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
