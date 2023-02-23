@@ -31,9 +31,6 @@ jobs:
         working-directory: ${{ github.workspace }}/barge
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d --with-thegraph > start_ocean.log &
-      - name: "Read address.json contents"
-        working-directory: ${{ github.workspace }}
-        run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
@@ -51,6 +48,9 @@ jobs:
         with:
           url: "http://172.15.0.5:5000/"
           timeout: 600
+      - name: "Read address.json contents"
+        working-directory: ${{ github.workspace }}
+        run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
       - name: Test with pytest
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
