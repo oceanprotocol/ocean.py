@@ -31,11 +31,6 @@ jobs:
         working-directory: ${{ github.workspace }}/barge
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d --with-thegraph > start_ocean.log &
-          for i in $(seq 1 108); do
-            sleep 5
-            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
-            done
-          ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
       - name: "Read address.json contents"
         working-directory: ${{ github.workspace }}
         run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
@@ -46,6 +41,16 @@ jobs:
           pip install -r requirements_dev.txt
           brownie bake github-actions
           sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' $HOME/.brownie/network-config.yaml
+      - name: Wait for c2d to be ready
+        uses: mydea/action-wait-for-api@v1
+        with:
+          url: "http://172.15.0.13:31000/"
+          timeout: 600
+      - name: Wait for Aquarius to be ready
+        uses: mydea/action-wait-for-api@v1
+        with:
+          url: "http://172.15.0.5:5000/"
+          timeout: 600
       - name: Test with pytest
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
