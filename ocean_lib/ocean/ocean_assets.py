@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -47,6 +47,7 @@ from ocean_lib.structures.file_objects import (
     SmartContractCall,
     UrlFile,
 )
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
@@ -345,9 +346,13 @@ class OceanAssets:
         self._assert_ddo_metadata(metadata)
         name = metadata["name"]
         data_nft_args = DataNFTArguments(name, name)
-        datatoken_args = DatatokenArguments(
-            f"{name}: DT1", files=files, template_index=dt_template_index
-        )
+
+        if dt_template_index == 2:
+            datatoken_args = DatatokenArguments(
+                f"{name}: DT1", files=files, template_index=2, cap=to_wei(100)
+            )
+        else:
+            datatoken_args = DatatokenArguments(f"{name}: DT1", files=files)
 
         if not pricing_schema_args:
             data_nft, datatoken = self.data_nft_factory.create_with_erc20(
@@ -691,22 +696,13 @@ class OceanAssets:
         consume_market_fees: Optional[TokenFeeInfo] = None,
         consumer_address: Optional[str] = None,
         userdata: Optional[dict] = None,
+        consume_market_swap_fee_amount: Optional[int] = 0,
+        consume_market_swap_fee_address: Optional[str] = ZERO_ADDRESS,
     ):
         # fill in good defaults as needed
         service = service or ddo.services[0]
         wallet_address = get_from_address(tx_dict)
         consumer_address = consumer_address or wallet_address
-
-        # main work...
-        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
-        balance = dt.balanceOf(wallet_address)
-
-        if balance < to_wei(1):
-            raise InsufficientBalance(
-                f"Your token balance {balance} {dt.symbol()} is not sufficient "
-                f"to execute the requested service. This service "
-                f"requires 1 wei."
-            )
 
         consumable_result = is_consumable(
             ddo,
@@ -714,6 +710,7 @@ class OceanAssets:
             {"type": "address", "value": wallet_address},
             userdata=userdata,
         )
+
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
 
@@ -728,13 +725,40 @@ class OceanAssets:
         initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
-        receipt = dt.start_order(
-            consumer=consumer_address,
-            service_index=ddo.get_index_of_service(service),
-            provider_fees=provider_fees,
-            consume_market_fees=consume_market_fees,
-            tx_dict=tx_dict,
-        )
+        params = {
+            "consumer": consumer_address,
+            "service_index": ddo.get_index_of_service(service),
+            "provider_fees": provider_fees,
+            "consume_market_fees": consume_market_fees,
+            "tx_dict": tx_dict,
+        }
+
+        # main work...
+        dt = DatatokenBase.get_typed(self._config_dict, service.datatoken)
+        balance = dt.balanceOf(wallet_address)
+
+        if balance < to_wei(1):
+            try:
+                params[
+                    "consume_market_swap_fee_amount"
+                ] = consume_market_swap_fee_amount
+                params[
+                    "consume_market_swap_fee_address"
+                ] = consume_market_swap_fee_address
+                receipt = dt.get_from_pricing_schema_and_order(**params)
+            except Exception:
+                receipt = None
+
+            if receipt:
+                return receipt
+
+            raise InsufficientBalance(
+                f"Your token balance {balance} {dt.symbol()} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires 1 wei."
+            )
+
+        receipt = dt.start_order(**params)
 
         return receipt.txid
 

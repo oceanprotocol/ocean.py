@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
@@ -337,27 +337,6 @@ def test_create_bad_metadata(publisher_ocean, publisher_wallet):
         )
 
 
-@pytest.mark.unit
-def test_pay_for_access_service_insufficient_balance(
-    publisher_ocean, config, publisher_wallet
-):
-    _, datatoken = deploy_erc721_erc20(config, publisher_wallet, publisher_wallet)
-
-    ddo_dict = copy.deepcopy(get_sample_ddo())
-    ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
-    ddo = DDO.from_dict(ddo_dict)
-
-    empty_wallet = accounts.add()
-
-    with pytest.raises(InsufficientBalance):
-        publisher_ocean.assets.pay_for_access_service(
-            ddo,
-            {"from": empty_wallet},
-            get_first_service_by_type(ddo, "access"),
-            TokenFeeInfo(address=empty_wallet.address, token=datatoken.address),
-        )
-
-
 @pytest.mark.integration
 def test_create_url_asset(publisher_ocean, publisher_wallet):
     ocean = publisher_ocean
@@ -622,7 +601,10 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
+@pytest.mark.parametrize("dt_template_index", [2, 1])
+def test_create_pricing_schemas(
+    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN, dt_template_index
+):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
@@ -632,24 +614,40 @@ def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
+        dt_template_index=dt_template_index,
     )
     assert not dt.dispenser_status().active
     assert dt.get_exchanges() == []
+
+    # pay_for_access service has insufficient balance and can't buy or dispense
+    empty_wallet = accounts.add()
+
+    with pytest.raises(InsufficientBalance):
+        ocean_assets.pay_for_access_service(
+            ddo,
+            {"from": empty_wallet},
+            get_first_service_by_type(ddo, "access"),
+            TokenFeeInfo(address=empty_wallet.address, token=dt.address),
+        )
 
     data_nft, dt, ddo = ocean_assets.create_url_asset(
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
+        dt_template_index=dt_template_index,
         pricing_schema_args=DispenserArguments(to_wei(1), to_wei(1)),
     )
 
     assert dt.dispenser_status().active
     assert dt.get_exchanges() == []
+    # pay_for_access service has insufficient balance but dispenses automatically
+    _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})
 
     data_nft, dt, ddo = ocean_assets.create_url_asset(
         "Data NFTs in Ocean",
         url,
         {"from": publisher_wallet},
+        dt_template_index=dt_template_index,
         pricing_schema_args=ExchangeArguments(
             rate=to_wei(3), base_token_addr=OCEAN.address, dt_decimals=18
         ),
@@ -658,3 +656,5 @@ def test_create_pricing_schemas(config, publisher_wallet, OCEAN):
     assert not dt.dispenser_status().active
     assert len(dt.get_exchanges()) == 1
     assert dt.get_exchanges()[0].details.base_token == OCEAN.address
+    # pay_for_access service has insufficient balance but buys 1 datatoken automatically from the exchange
+    _ = consumer_ocean.assets.pay_for_access_service(ddo, {"from": consumer_wallet})

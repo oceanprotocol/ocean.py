@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -23,7 +23,6 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
-    "json-sempai==0.4.0",
     "eciespy==0.3.11",
     "eth-brownie==1.19.3",
     "yarl==1.8.1",
@@ -37,7 +36,7 @@ setup_requirements = ["pytest-runner"]
 
 test_requirements = [
     "codacy-coverage==1.3.11",
-    "coverage==6.4.4",
+    "coverage==7.2.1",
     "mccabe==0.7.0",
     "pytest==6.2.5",
     "pytest-watch==4.2.0",
@@ -50,13 +49,13 @@ test_requirements = [
 # Possibly required by developers of ocean-lib:
 dev_requirements = [
     "bumpversion==0.6.0",
-    "pkginfo==1.8.3",
-    "twine==3.7.1",
-    "watchdog==2.1.9",
+    "pkginfo==1.9.6",
+    "twine==4.0.2",
+    "watchdog==2.3.0",
     "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
-    "pre-commit==2.20.0",
+    "pre-commit==3.1.0",
     "licenseheaders==0.8.8",
 ]
 

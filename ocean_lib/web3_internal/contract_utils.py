@@ -1,11 +1,11 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import importlib
 import json
 import logging
 import os
+from pathlib import Path
 from typing import Any, Dict, Optional
 
 from brownie import Contract
@@ -21,10 +21,14 @@ GANACHE_URL = "http://127.0.0.1:8545"
 @enforce_types
 def get_contract_definition(contract_name: str) -> Dict[str, Any]:
     """Returns the abi JSON for a contract name."""
-    try:
-        return importlib.import_module("artifacts." + contract_name).__dict__
-    except ModuleNotFoundError:
+    path = os.path.join(artifacts.__file__, "..", f"{contract_name}.json")
+    path = Path(path).expanduser().resolve()
+
+    if not path.exists():
         raise TypeError("Contract name does not exist in artifacts.")
+
+    with open(path) as f:
+        return json.load(f)
 
 
 @enforce_types

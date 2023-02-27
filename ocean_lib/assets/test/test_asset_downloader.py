@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
@@ -72,6 +72,7 @@ def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
     ddo_dict = get_sample_ddo()
     ddo = DDO.from_dict(ddo_dict)
+    ddo.services[0].service_endpoint = "http://nothing-here.com"
 
     with pytest.raises(InvalidURL):
         download_asset_files(

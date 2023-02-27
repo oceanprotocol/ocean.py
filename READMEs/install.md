@@ -1,5 +1,5 @@
 <!--
-Copyright 2022 Ocean Protocol Foundation
+Copyright 2023 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 # Install Ocean
@@ -38,7 +38,7 @@ pip install ocean-lib
 
 Issue: M1 * `coincurve` or `cryptography`
 - If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
-- Workaround: ensure you have `autoconf`, `automake` and `libtool` installed, e.g. using Homebrew or MacPorts.
+- Workaround: ensure you have `autoconf`, `automake`, `libtool` and `pkg-config` installed, e.g. using Homebrew or MacPorts.
 
 Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.

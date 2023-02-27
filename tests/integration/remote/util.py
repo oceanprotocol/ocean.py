@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
@@ -13,8 +13,15 @@ from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachin
 from brownie.network import accounts, chain
 from brownie.network.web3 import Web3
 from enforce_typing import enforce_types
+from web3.exceptions import ExtraDataLengthError
 
-ERRORS_TO_CATCH = (ContractNotFound, TransactionError, ValueError, VirtualMachineError)
+ERRORS_TO_CATCH = (
+    ContractNotFound,
+    TransactionError,
+    ValueError,
+    VirtualMachineError,
+    ExtraDataLengthError,
+)
 
 
 @enforce_types
@@ -49,7 +56,7 @@ def get_gas_fees_for_remote() -> tuple:
     if not gas_resp or gas_resp.status_code != 200:
         print("Invalid response from Polygon gas station. Retry with brownie values...")
 
-        return (chain.priority_fee, chain.base_fee + 2 * chain.priority_fee)
+        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
 
     return (
         max(
@@ -167,6 +174,7 @@ def error_is_skippable(error_s: str) -> bool:
         or "Internal error" in error_s
         or "execution reverted" in error_s
         or "No data was returned - the call likely reverted" in error_s
+        or "The field extraData is 97 bytes, but should be 32." in error_s
     )
 
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
@@ -53,7 +53,7 @@ def test_ddo_utils():
             "name": "Download service",
             "description": "Download service",
             "datatokenAddress": "0x123",
-            "serviceEndpoint": "https://myprovider.com",
+            "serviceEndpoint": "http://172.15.0.4:8030",
             "timeout": 0,
         }
     ]
@@ -154,7 +154,7 @@ def test_add_service():
     }
     ddo.create_compute_service(
         service_id="2",
-        service_endpoint="https://myprovider.com",
+        service_endpoint="http://172.15.0.4:8030",
         datatoken_address="0x124",
         files="0x0001",
         compute_values=compute_values,

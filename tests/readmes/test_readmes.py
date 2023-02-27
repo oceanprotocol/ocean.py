@@ -1,5 +1,5 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pathlib
@@ -43,6 +43,7 @@ def test_script_execution(script):
         "c2d-flow",
         "publish-flow-graphql",
         "publish-flow-onchain",
+        "custody-light-flow",
     ]
 
     globs = {}

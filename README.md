@@ -1,13 +1,13 @@
 <!--
-Copyright 2022 Ocean Protocol Foundation
+Copyright 2023 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-[![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
+<h1 align="center">
+<img src="https://github.com/oceanprotocol/art/blob/main/splashes/ocean_py.png?raw=true" width="300"/>
+</h1>
 
-<h1 align="center">ocean.py</h1>
-
-> Python library to privately & securely publish, exchange, and consume data.
+> ocean.py: a Python library to privately & securely publish, exchange, and consume data.
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
@@ -31,9 +31,9 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 Follow these steps in sequence to ramp into Ocean.
 
  1. **[Install Ocean](READMEs/install.md)**
- 2. **[Set up locally](READMEs/setup-local.md)** 
+ 2. **[Set up locally](READMEs/setup-local.md)**
  3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
- 
+
 Now let's do remote flows:
 
  4. **[Set up remotely](READMEs/setup-remote.md)**
@@ -45,6 +45,7 @@ Now let's do remote flows:
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 - [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
+- [Custody-light flow](READMEs/custody-light-flow.md) - consume a free & a priced asset without custody
 
 ### On-chain key-value store via data NFTs
 
