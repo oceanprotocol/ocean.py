@@ -1,12 +1,9 @@
 #
-# Copyright 2022 Ocean Protocol Foundation
+# Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
-
 import brownie
 import pytest
-
 
 accounts = None
 
@@ -50,7 +47,7 @@ def test_batch_allocation(ve_allocate):
     nftaddr1 = accounts[0].address
     nftaddr2 = accounts[1].address
 
-    tx = ve_allocate.setBatchAllocation(
+    ve_allocate.setBatchAllocation(
         [50, 50], [nftaddr1, nftaddr2], [1, 1], {"from": accounts[0]}
     )
     assert ve_allocate.getveAllocation(accounts[0], nftaddr1, 1) == 50
