@@ -49,7 +49,7 @@ test_requirements = [
 # Possibly required by developers of ocean-lib:
 dev_requirements = [
     "bumpversion==0.6.0",
-    "pkginfo==1.8.3",
+    "pkginfo==1.9.6",
     "twine==4.0.2",
     "watchdog==2.2.1",
     "isort==5.12.0",
