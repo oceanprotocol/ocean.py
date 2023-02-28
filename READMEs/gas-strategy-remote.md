@@ -25,27 +25,31 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up re
 Fees are defined for `polygon-main` & `polygon-test` networks.
 
 ```python
-from tests.integration.remote.util import get_gas_fees_for_remote
+from ocean_lib.web3_internal.utils import get_gas_fees_for_remote
 
 priority_fee, max_fee = get_gas_fees_for_remote()
 ```
 
 ## 3. Alice publishes the asset using gas strategy
 
+The gas strategy can be added to any `tx_dict`, and this is just an example of usage.
 ```python
 #data info
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-
-#create data asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
-    name,
-    url,
+tx_dict = (
     {
         "from": alice,
         "priority_fee": priority_fee,
         "max_fee": max_fee,
     },
+)
+
+#create data asset
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
+    name,
+    url,
+    tx_dict=tx_dict
 )
 
 #print
