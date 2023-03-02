@@ -13,7 +13,7 @@ from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3.exceptions import ExtraDataLengthError
 
-from ocean_lib.web3_internal.utils import get_gas_fees_for_remote
+from ocean_lib.web3_internal.utils import get_gas_fees
 
 ERRORS_TO_CATCH = (
     ContractNotFound,
@@ -82,7 +82,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     print("Do a send-Ether tx...")
     try:
 
-        priority_fee, _ = get_gas_fees_for_remote()
+        priority_fee, _ = get_gas_fees()
         alice_wallet.transfer(
             bob_wallet.address,
             f"{amt_send:.15f} ether",
@@ -114,7 +114,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     num_retries = 2
     while num_retries != 0:
         try:
-            priority_fee, max_fee = get_gas_fees_for_remote()
+            priority_fee, max_fee = get_gas_fees()
             data_nft = ocean.data_nft_factory.create(
                 {
                     "from": alice_wallet,

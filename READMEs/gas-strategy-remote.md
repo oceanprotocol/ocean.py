@@ -25,9 +25,9 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up re
 Fees are defined for `polygon-main` & `polygon-test` networks.
 
 ```python
-from ocean_lib.web3_internal.utils import get_gas_fees_for_remote
+from ocean_lib.web3_internal.utils import get_gas_fees
 
-priority_fee, max_fee = get_gas_fees_for_remote()
+priority_fee, max_fee = get_gas_fees()
 ```
 
 ## 3. Alice publishes the asset using gas strategy

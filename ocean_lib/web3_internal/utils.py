@@ -87,7 +87,7 @@ def check_network(network_name: str):
 
 
 @enforce_types
-def get_gas_fees_for_remote() -> tuple:
+def get_gas_fees() -> tuple:
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
     gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
 
