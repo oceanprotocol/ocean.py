@@ -15,6 +15,8 @@ Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aqua
 
 Barge helps you quickly become familiar with Ocean, because the local blockchain has low latency and no transaction fees. Accordingly, many READMEs use it. However, if you plan to only use Ocean with remote services, you don't need barge.
 
+Note: if you are running MacOS or Windows, we recommend to go directly to [Remote Setup](setup-remote.md). Why: Barge uses Docker, which behaves badly on MacOS and Windows. We're working to address this [here](https://github.com/oceanprotocol/ocean.py/issues/1313).
+
 In a new console:
 
 ```console
