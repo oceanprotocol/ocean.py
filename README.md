@@ -39,7 +39,7 @@ Now let's do remote flows:
  4. **[Set up remotely](READMEs/setup-remote.md)**
  5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network
  6. **[Walk through C2D flow](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data
-
+ 7. **[Define gas strategy](READMEs/gas-strategy-remote.md)** - define & use gas strategies
 ### Use-case flows
 
 - [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price

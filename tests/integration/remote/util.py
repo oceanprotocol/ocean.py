@@ -8,12 +8,12 @@ import string
 import time
 import warnings
 
-import requests
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
-from brownie.network import accounts, chain
-from brownie.network.web3 import Web3
+from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3.exceptions import ExtraDataLengthError
+
+from ocean_lib.web3_internal.utils import get_gas_fees
 
 ERRORS_TO_CATCH = (
     ContractNotFound,
@@ -46,28 +46,6 @@ def remote_config_polygon(tmp_path):
     }
 
     return config
-
-
-@enforce_types
-def get_gas_fees_for_remote() -> tuple:
-    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
-
-    if not gas_resp or gas_resp.status_code != 200:
-        print("Invalid response from Polygon gas station. Retry with brownie values...")
-
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
-
-    return (
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-            chain.priority_fee,
-        ),
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
-            chain.base_fee + 2 * chain.priority_fee,
-        ),
-    )
 
 
 @enforce_types
@@ -104,7 +82,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     print("Do a send-Ether tx...")
     try:
 
-        priority_fee, _ = get_gas_fees_for_remote()
+        priority_fee, _ = get_gas_fees()
         alice_wallet.transfer(
             bob_wallet.address,
             f"{amt_send:.15f} ether",
@@ -136,7 +114,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
     num_retries = 2
     while num_retries != 0:
         try:
-            priority_fee, max_fee = get_gas_fees_for_remote()
+            priority_fee, max_fee = get_gas_fees()
             data_nft = ocean.data_nft_factory.create(
                 {
                     "from": alice_wallet,

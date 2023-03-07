@@ -29,6 +29,7 @@ def test_script_execution(script):
         "setup-local",
         "setup-remote",
         "publish-flow-restapi",  # TODO: fix and restore
+        "gas-strategy-remote",
     ]
 
     if script.name.replace("test_", "").replace(".py", "") in skippable:
