@@ -60,4 +60,7 @@ Thanks to Brownie, ocean.py treats each Ocean smart contract as a Python class, 
 
 You've now installed Ocean, great!
 
-Your next step is to [setup locally](setup-local.md).
+As a MacOS or Windows user, your next step is to [setup remotely](setup-remote.md).
+
+As a Linux user, your next step is to [setup locally](setup-local.md).
+
