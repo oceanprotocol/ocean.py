@@ -9,6 +9,7 @@ from typing import List, Optional
 import pytest
 from attr import dataclass
 
+import ocean_lib
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.exceptions import DataProviderException
@@ -483,7 +484,7 @@ def test_compute_trusted_algorithm(
 
 
 @pytest.mark.integration
-@skip_on(TypeError, reason="Fix provider issue #606")
+@skip_on(ocean_lib.exceptions.DataProviderException, reason="Fix provider issue #606")
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean,
