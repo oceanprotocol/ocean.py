@@ -6,7 +6,9 @@ import logging
 from collections import namedtuple
 from typing import Any
 
+import requests
 from brownie import network
+from brownie.network import chain
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -82,3 +84,25 @@ def check_network(network_name: str):
         raise Exception(
             'Brownie network is connected to {active_network}. Please call network.connect("{network_name}")'
         )
+
+
+@enforce_types
+def get_gas_fees() -> tuple:
+    # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
+    gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
+
+    if not gas_resp or gas_resp.status_code != 200:
+        print("Invalid response from Polygon gas station. Retry with brownie values...")
+
+        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
+
+    return (
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+            chain.priority_fee,
+        ),
+        max(
+            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+            chain.base_fee + 2 * chain.priority_fee,
+        ),
+    )
