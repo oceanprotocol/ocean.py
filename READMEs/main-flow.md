@@ -110,11 +110,11 @@ ls branin.arff
 
 ## Next step
 
-If you did this readme with _local_ setup, then your next step is [remote setup](setup-remote.md).
+You've now gone through the main flow for Ocean, congrats!
 
-If you did this readme with _remote_ setup, then your next step is [C2D](READMEs/c2d-flow.md), where you'll tokenize & monetize an AI algorithm via Compute-to-Data.
-
-Bonus: this README's appendices expand on the steps above with further flexibility.
+Where you want to go next is up to you! Some possibilities:
+- Go back to the [top-level README](../README.md) to explore advanced flows like Compute-to-Data, Predict-ETH, and Data Farming
+- Review this README's appendices, which expand on the steps above with further flexibility.
 
 
 <h2 id="appendix-publish-details">Appendix: Publish Details</h4>
