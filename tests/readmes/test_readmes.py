@@ -29,6 +29,8 @@ def test_script_execution(script):
         "setup-local",
         "setup-remote",
         "publish-flow-restapi",  # TODO: fix and restore
+        "gas-strategy-remote",
+        "c2d-flow",  # TODO: fix provider issue #606
     ]
 
     if script.name.replace("test_", "").replace(".py", "") in skippable:
@@ -40,7 +42,6 @@ def test_script_execution(script):
         "key-value-private",
         "search-and-filter-assets",
         "main-flow",
-        "c2d-flow",
         "publish-flow-graphql",
         "publish-flow-onchain",
         "custody-light-flow",

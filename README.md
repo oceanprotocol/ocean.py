@@ -31,21 +31,21 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 Follow these steps in sequence to ramp into Ocean.
 
  1. **[Install Ocean](READMEs/install.md)**
- 2. **[Set up locally](READMEs/setup-local.md)**
- 3. **[Walk through main flow (local setup)](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
+ 2. **Setup:**
+    - **[Remote](READMEs/setup-remote.md)** (Win, MacOS, Linux)
+    - *or* **[Local](READMEs/setup-local.md)** (Linux only)
+ 3. **[Walk through main flow](READMEs/main-flow.md)**: publish asset, post for free / for sale, dispense it / buy it, and consume it
 
-Now let's do remote flows:
+### Tools
 
- 4. **[Set up remotely](READMEs/setup-remote.md)**
- 5. **[Walk through main flow (remote setup)](READMEs/main-flow.md)**. Like step 3, but on wholly remote network
- 6. **[Walk through C2D flow](READMEs/c2d-flow.md)** - tokenize & monetize AI algorithm via Compute-to-Data
+- [Define gas strategy](READMEs/gas-strategy-remote.md) - auto-determine gas fee for remote networks
+- [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
+- [Custody-light flow](READMEs/custody-light-flow.md) - consume a free & a priced asset without custody
 
 ### Use-case flows
 
-- [Predict-eth](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
+- [Predict ETH](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
-- [Search & filter data](READMEs/search-and-filter-assets.md) - find assets by tag
-- [Custody-light flow](READMEs/custody-light-flow.md) - consume a free & a priced asset without custody
 
 ### On-chain key-value store via data NFTs
 
@@ -55,9 +55,10 @@ Now let's do remote flows:
 ### More types of data assets
 
 Each of the following shows how to publish & consume a particular type of data.
-- **[REST API](READMEs/publish-flow-restapi.md)** - Example on Binance ETH price feed
-- **[GraphQL](READMEs/publish-flow-graphql.md)** - Example on Ocean Data NFTs
-- **[On-chain data](READMEs/publish-flow-onchain.md)** - Example on Ocean swap fees.
+- [C2D](READMEs/c2d-flow.md) - tokenize & monetize AI algorithms via Compute-to-Data
+- [REST API](READMEs/publish-flow-restapi.md) - Example on Binance ETH price feed
+- [GraphQL](READMEs/publish-flow-graphql.md) - Example on Ocean Data NFTs
+- [On-chain data](READMEs/publish-flow-onchain.md) - Example on Ocean swap fees
 
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
