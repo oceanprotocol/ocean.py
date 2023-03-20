@@ -29,8 +29,6 @@ jobs:
           path: 'barge'
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
-        env:
-          PROVIDER_VERSION: 'multichain'
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d --with-thegraph > start_ocean.log &
       - name: Install dependencies
