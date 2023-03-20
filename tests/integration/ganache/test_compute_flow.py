@@ -221,9 +221,12 @@ def run_compute_test(
         dataset_and_userdata.ddo, ServiceTypes.CLOUD_COMPUTE
     )
 
-    free_c2d_env = ocean_instance.compute.get_free_c2d_environment(
-        service.service_endpoint, 8996
-    )
+    try:
+        free_c2d_env = ocean_instance.compute.get_free_c2d_environment(
+            service.service_endpoint, 8996
+        )
+    except StopIteration:
+        assert False, "No free c2d environment found."
 
     time_difference = (
         timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
