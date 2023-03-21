@@ -200,7 +200,7 @@ def test_encrypt(provider_wallet, file1, file2):
     key = provider_wallet.private_key
     # Encrypt file objects
     res = {"files": [file1.to_dict(), file2.to_dict()]}
-    result = DataEncryptor.encrypt(res, DEFAULT_PROVIDER_URL)
+    result = DataEncryptor.encrypt(res, DEFAULT_PROVIDER_URL, 8996)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -214,7 +214,7 @@ def test_encrypt(provider_wallet, file1, file2):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataEncryptor.encrypt(test_string, DEFAULT_PROVIDER_URL)
+    encrypt_result = DataEncryptor.encrypt(test_string, DEFAULT_PROVIDER_URL, 8996)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -285,7 +285,7 @@ def test_expose_endpoints():
 def test_c2d_environments():
     """Tests that the test ocean-compute env exists on the DataServiceProvider."""
     provider_uri = DEFAULT_PROVIDER_URL
-    c2d_envs = DataSP.get_c2d_environments(provider_uri)
+    c2d_envs = DataSP.get_c2d_environments(provider_uri, 8996)
     c2d_env_ids = [elem["id"] for elem in c2d_envs]
     assert "ocean-compute" in c2d_env_ids, "ocean-compute env not found."
 
@@ -294,7 +294,7 @@ def test_c2d_environments():
 def test_provider_address():
     """Tests that a provider address exists on the DataServiceProvider."""
     provider_uri = DEFAULT_PROVIDER_URL
-    provider_address = DataSP.get_provider_address(provider_uri)
+    provider_address = DataSP.get_provider_address(provider_uri, 8996)
     assert provider_address, "Failed to get provider address."
 
 
@@ -303,10 +303,10 @@ def test_provider_address_with_url():
     """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
     provider_address = DataSP.get_provider_address(
-        DataSP.get_url(p_ocean_instance.config_dict)
+        DataSP.get_url(p_ocean_instance.config_dict), 8996
     )
     assert provider_address, "Failed to get provider address."
-    assert DataSP.get_provider_address("not a url") is None
+    assert DataSP.get_provider_address("not a url", 8996) is None
 
 
 @pytest.mark.integration
@@ -401,8 +401,9 @@ def test_build_specific_endpoints():
     assert DataSP.build_initialize_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["initializeCompute"][1]
     )
-    assert DataSP.build_encrypt_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["encrypt"][1]
+    assert (
+        DataSP.build_encrypt_endpoint(provider_uri, 8996)[1]
+        == urljoin(base_uri, endpoints["encrypt"][1]) + "?chainId=8996"
     )
     assert DataSP.build_fileinfo(provider_uri)[1] == urljoin(
         base_uri, endpoints["fileinfo"][1]
@@ -442,13 +443,13 @@ def test_encrypt_failure():
     DataEncryptor.set_http_client(http_client)
 
     with pytest.raises(OceanEncryptAssetUrlsError):
-        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL)
+        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL, 8996)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL)
+        DataEncryptor.encrypt({}, DEFAULT_PROVIDER_URL, 8996)
 
     DataSP.set_http_client(get_requests_session())
 

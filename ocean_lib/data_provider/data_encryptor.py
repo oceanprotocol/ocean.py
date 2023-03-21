@@ -23,7 +23,9 @@ class DataEncryptor(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str, bytes, dict], provider_uri: str
+        objects_to_encrypt: Union[list, str, bytes, dict],
+        provider_uri: str,
+        chain_id: int,
     ) -> Response:
         if isinstance(objects_to_encrypt, dict):
             data = json.dumps(objects_to_encrypt, separators=(",", ":"))
@@ -34,7 +36,7 @@ class DataEncryptor(DataServiceProviderBase):
             payload = objects_to_encrypt
 
         _, encrypt_endpoint = DataServiceProviderBase.build_encrypt_endpoint(
-            provider_uri
+            provider_uri, chain_id
         )
 
         response = DataServiceProviderBase._http_method(

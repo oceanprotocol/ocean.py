@@ -11,6 +11,7 @@ from datetime import datetime
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
+from requests.models import PreparedRequest
 
 import requests
 from enforce_typing import enforce_types
@@ -90,27 +91,34 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def get_c2d_environments(provider_uri: str) -> Optional[str]:
+    def get_c2d_environments(provider_uri: str, chain_id: int) -> Optional[str]:
         """
         Return the provider address
         """
         try:
             _, envs_endpoint = DataServiceProviderBase.build_c2d_environments_endpoint(
-                provider_uri
+                provider_uri, chain_id
             )
             environments = DataServiceProviderBase._http_method(
-                "get", envs_endpoint
+                "get",
+                envs_endpoint,
             ).json()
 
-            return environments
-        except requests.exceptions.RequestException:
+            if str(chain_id) not in environments:
+                logger.warning(
+                    "You might be using an older provider. ocean.py can not verify the chain id."
+                )
+                return environments
+
+            return environments[str(chain_id)]
+        except (requests.exceptions.RequestException, KeyError):
             pass
 
         return []
 
     @staticmethod
     @enforce_types
-    def get_provider_address(provider_uri: str) -> Optional[str]:
+    def get_provider_address(provider_uri: str, chain_id: int) -> Optional[str]:
         """
         Return the provider address
         """
@@ -119,7 +127,13 @@ class DataServiceProviderBase:
                 "get", provider_uri
             ).json()
 
-            return provider_info["providerAddress"]
+            if "providerAddress" in provider_info:
+                logger.warning(
+                    "You might be using an older provider. ocean.py can not verify the chain id."
+                )
+                return provider_info["providerAddress"]
+
+            return provider_info["providerAddresses"][str(chain_id)]
         except requests.exceptions.RequestException:
             pass
 
@@ -153,9 +167,14 @@ class DataServiceProviderBase:
         except (requests.exceptions.RequestException, JSONDecodeError):
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
-        if "providerAddress" not in response:
+        if "providerAddresses" not in response and "providerAddress" not in response:
             raise InvalidURL(
-                f"Invalid Provider URL {service_endpoint}, no providerAddress."
+                f"Invalid Provider URL {service_endpoint}, no providerAddresses."
+            )
+
+        if "providerAddress" in response:
+            logger.warning(
+                "You might be using an older provider. ocean.py can not verify the chain id."
             )
 
         return result
@@ -172,17 +191,28 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def build_endpoint(service_name: str, provider_uri: str) -> Tuple[str, str]:
+    def build_endpoint(
+        service_name: str, provider_uri: str, params: Optional[dict] = None
+    ) -> Tuple[str, str]:
         provider_uri = DataServiceProviderBase.get_root_uri(provider_uri)
         service_endpoints = DataServiceProviderBase.get_service_endpoints(provider_uri)
 
         method, url = service_endpoints[service_name]
-        return method, urljoin(provider_uri, url)
+        url = urljoin(provider_uri, url)
+
+        if params:
+            req = PreparedRequest()
+            req.prepare_url(url, params)
+            url = req.url
+
+        return method, url
 
     @staticmethod
     @enforce_types
-    def build_encrypt_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("encrypt", provider_uri)
+    def build_encrypt_endpoint(provider_uri: str, chain_id: int) -> Tuple[str, str]:
+        return DataServiceProviderBase.build_endpoint(
+            "encrypt", provider_uri, {"chainId": chain_id}
+        )
 
     @staticmethod
     @enforce_types
@@ -216,9 +246,11 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def build_c2d_environments_endpoint(provider_uri: str) -> Tuple[str, str]:
+    def build_c2d_environments_endpoint(
+        provider_uri: str, chain_id: int
+    ) -> Tuple[str, str]:
         return DataServiceProviderBase.build_endpoint(
-            "computeEnvironments", provider_uri
+            "computeEnvironments", provider_uri, {"chainId": chain_id}
         )
 
     @staticmethod
