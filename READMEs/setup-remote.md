@@ -19,11 +19,34 @@ Here, we will:
 
 Let's go!
 
-## 1. Brownie Network Configuration (One-Time)
+## 1. Configure Brownie Networks (One-Time)
 
-### 1.1 Configuration File
+### 1.1 Network config file
 
-Brownie's network configuration file is in your home folder, at `~/.brownie/network-config.yaml` on Linux/MacOS systems. For Windows users, that means `C:\Users\<user_name>\.brownie\network-config.yaml`. If you have no prior brownie installation on your computer, in order to create this file, you need to call any brownie function from a python console, beforehand (e.g., run ```from ocean_lib.example_config import get_config_dict```).
+Brownie's network config file is `network-config.yaml`. It is located in the `.brownie/` subfolder of your home folder.
+- For Linux & MacOS, it's: `~/.brownie/network-config.yaml`
+- For Windows users, it's: `C:\Users\<user_name>\.brownie\network-config.yaml`
+
+### 1.2 Generate network config file (if needed)
+
+If you already see the config file, skip this section.
+
+If you don't, you need to auto-generate by calling any brownie function from a Python console. Here's an example.
+
+First, in a new or existing console, run Python:
+
+```console
+python
+```
+
+In the Python console:
+```
+from ocean_lib.example_config import get_config_dict
+```
+
+It will generate the file in the target location. You can check the target location to confirm.
+
+### 1.3 Contents of network config file
 
 The network configuration file has settings for each network, e.g. development (ganache), Ethereum mainnet, Polygon, and Mumbai.
 
@@ -32,17 +55,20 @@ Each network gets specifications for:
 - `required_confs` - the number of confirmations before a tx is done
 - `id` - e.g. `polygon-main` (Polygon), `polygon-test` (Mumbai)
 
-[Here's](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml) the `network-config.yaml` from Brownie's GitHub repository. It can serve as a comparison to your local copy. 
+`development chains` run locally; `live` chains run remotely.
 
-For Windows OS deployments, it is possible that the network-config.yaml does not include all the network entries. In this case, you can replace the content of the network-config.yaml file on your computer with the content from this [link](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml).
-
-`development` chains run locally; `live` chains run remotely.
+The example `network-config.yaml` in Brownie's GitHub repo is [here](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml). It can serve as a comparison to your local copy.
 
 Ocean.py follows the exact `id` name for the network's name from the default Brownie configuration file. Therefore, you need to ensure that your target network name matches the corresponding Brownie `id`.
 
-### 1.2 Networks Supported
+### 1.4 Networks Supported
 
-All the [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains are in Brownie's default `network-config.yaml`. The sole exception is Energy Web Chain (EWC). To use EWC, add the following to `network-config.yaml`:
+All [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains (Eth mainnet, Polygon, etc) should be in Brownie's default `network-config.yaml` except Energy Web Chain (EWC).
+
+For Windows users: it's possible that your `network-config.yaml` doesn't  have all the network entries. In this case, just replace your local file's content with the `network-config.yaml` in Brownie's GitHub repo, [here](https://github.com/eth-brownie/brownie/blob/master/brownie/data/network-config.yaml).
+
+For all users: to use EWC, add the following to network-config.yaml:
+
 ```yaml
 - name: energyweb
   networks:
@@ -52,7 +78,7 @@ All the [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) 
     name: energyweb
 ```
 
-### 1.3 RPCs and Infura
+### 1.5 RPCs and Infura
 
 The config file's default RPCs point to Infura, which require you to have an Infura account with corresponding token `WEB3_INFURA_PROJECT_ID`.
 
@@ -65,21 +91,20 @@ The config file's default RPCs point to Infura, which require you to have an Inf
 
 #### If you do _not_ have an Infura account
 
-One option is to get an Infura account.
+One option is to get an Infura account. A simpler option is to *bypass the need* for an Infura account: just change to RPCs that don't need Infura.
 
-A simpler option is to bypass the need for an account. Just change to RPCs that don't need Infura. You can do that manually, by editing your brownie network config file, depending on where is placed in your system.
-Here is a sample command replacing Infura RPCs with public ones in `network-config.yaml`, for Linux users:
+You can bypass manually: just edit your brownie network config file.
 
-* Linux users:
-```console
-sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml
-```
+Or you can bypass via the command line. The following command replaces Infura RPCs with public ones in `network-config.yaml`:
 
-For MacOS, you can achieve the same thing with `gnu-sed` and the `gsed` command. 
 
-For Windows, you might need something similar to [powershell](https://www.marek.tokyo/2020/01/remove-string-from-file-in-windows-10.html).
+* Linux users: in the console: `sed -i 's#https://polygon-mainnet.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://polygon-rpc.com/#g; s#https://polygon-mumbai.infura.io/v3/$WEB3_INFURA_PROJECT_ID#https://rpc-mumbai.maticvigil.com#g' ~/.brownie/network-config.yaml`
 
-#### RPCs wrapup
+- MacOS users: you can achieve the same thing with `gnu-sed` and the `gsed` command. (Or just manually edit the file.)
+
+- For Windows: you might need something similar to [powershell](https://www.marek.tokyo/2020/01/remove-string-from-file-in-windows-10.html). (Or just manually edit the file.)
+
+#### 1.6 Network config file wrapup
 
 Congrats, you've now configured your Brownie network file! You rarely need to worry about it from now on.
 
