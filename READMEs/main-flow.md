@@ -103,9 +103,9 @@ Let's check that the file is downloaded. In a new console:
 
 ```console
 cd my_project/datafile.did:op:*
-vi file0
+cat file0
 ```
-The beginning of the file should contain the following contents:
+The *beginning* of the file should contain the following contents:
 ```
 % 1. Title: Branin Function
 % 3. Number of instances: 225
