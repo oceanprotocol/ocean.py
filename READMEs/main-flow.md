@@ -102,8 +102,25 @@ file_name = os.path.join(asset_dir, "file0")
 Let's check that the file is downloaded. In a new console:
 
 ```console
-cd my_project/datafile.did:op:0xAf07...
-ls branin.arff
+cd my_project/datafile.did:op:*
+cat file0
+```
+The *beginning* of the file should contain the following contents:
+```
+% 1. Title: Branin Function
+% 3. Number of instances: 225
+% 6. Number of attributes: 2
+
+@relation branin
+
+@attribute 'x0' numeric
+@attribute 'x1' numeric
+@attribute 'y' numeric
+
+@data
+-5.0000,0.0000,308.1291
+-3.9286,0.0000,206.1783
+...
 ```
 
 (For more info, see [Appendix: Consume Details](#appendix-consume-details).)
