@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish & Consume Flow for REST API-style URIs
 
-This quickstart describes a flow to publish Binance REST API of ETH price feed, to make it available as free data asset on Ocean, and to consume it.
+This quickstart describes a flow to publish Kraken REST API of basic retrieve the Server Time, to make it available as free data asset on Ocean, and to consume it.
 
 Here are the steps:
 
@@ -25,12 +25,9 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 In the same Python console:
 ```python
 #data info
-name = "Binance API v3 klines"
+name = "Kraken Time Data"
 
-from datetime import datetime, timedelta
-end_datetime = datetime.now()
-start_datetime = end_datetime - timedelta(days=7) #the previous week
-url = f"https://api.binance.com/api/v3/klines?symbol=ETHUSDT&interval=1d&startTime={int(start_datetime.timestamp())*1000}&endTime={int(end_datetime.timestamp())*1000}"
+url = "https://api.kraken.com/0/public/Time"
 
 #create asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
@@ -64,7 +61,7 @@ file_name = os.path.join(asset_dir, 'file0')
 
 Now, load the file and use its data.
 
-The data follows the Binance docs specs for Kline/Candlestick Data, [here](https://binance-docs.github.io/apidocs/spot/en/#kline-candlestick-data).
+The data follows the Kraken docs specs for Data, [here](https://docs.kraken.com/rest/#section/Example-API-Clients).
 
 In the same Python console:
 ```python
