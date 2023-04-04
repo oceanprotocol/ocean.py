@@ -68,17 +68,10 @@ In the same Python console:
 
 #load from file into memory
 with open(file_name, "r") as file:
-    #data_str is a string holding a list of lists '[[1663113600000,"1574.40000000", ..]]'
-    data_str = file.read().rstrip().replace('"', '')
+    #data is a string with the result inside.
+    data= file.read().rstrip().replace('"', '')
 
-
-data = eval(data_str)
-
-#data is a list of lists
-# -Outer list has one 7 entries; one entry per day.
-# -Inner lists have 12 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
-
-#get close prices
-close_prices = [float(data_at_day[4]) for data_at_day in data]
+#print the details about server creation time
+print(f"data: {data}")
 ```
 
