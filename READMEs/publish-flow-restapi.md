@@ -24,10 +24,16 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 
 In the same Python console:
 ```python
-#data info
+# Data info
 name = "Kraken API OCEAN-USD price feed"
+pair = 'OCEANUSD' # Choose the trading pair
+interval = '1440' # Choose the time interval in minutes (1440 for daily)
 
-url = "https://api.kraken.com/0/public/Ticker?pair=OCEANUSD"
+from datetime import datetime, timedelta
+end_datetime = datetime.now()
+start_datetime = end_datetime - timedelta(days=7) # The previous week
+since = int(start_datetime.timestamp() * 1000) # Choose the start time in Unix timestamp
+url = f'https://api.kraken.com/0/public/OHLC?pair={pair}&interval={interval}&since={since}'
 
 #create asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
@@ -61,24 +67,24 @@ file_name = os.path.join(asset_dir, 'file0')
 
 Now, load the file and use its data.
 
-The data follows the Kraken docs specs for Data, [here](https://docs.kraken.com/rest/#tag/Market-Data/operation/getTickerInformation).
+The data follows the Kraken docs specs for Data, [here](https://docs.kraken.com/rest/#tag/Market-Data/operation/getOHLCData).
 
 In the same Python console:
 ```python
 
-#load from file into memory
+# Load from file into memory
 with open(file_name, "r") as file:
-    #data is a string with the result inside.
+    # Data is a string with the result inside.
     data_str = file.read().rstrip().replace("'", '"')
 
 import json
 data = json.loads(data_str)
 
-#data is a list of lists
+# Data is a list of lists
 # -Outer dictionary contains 2 keys, one for errors and one for the result with the pair.
 # -Inner dictionary have 9 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
-#get close price
-close_price = float(data['result']['OCEANUSD']['c'][0])
-print(f"last close price: {close_price}")
+# Get close price
+close_prices = [float(item[4]) for item in data['result'][pair]]
+print(f"close prices: {close_prices}")
 ```
 
