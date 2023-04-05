@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish & Consume Flow for REST API-style URIs
 
-This quickstart describes a flow to publish Kraken REST API of basic retrieve the Server Time, to make it available as free data asset on Ocean, and to consume it.
+This quickstart describes a flow to publish Kraken REST API of OCEAN-USD pair price feed, to make it available as free data asset on Ocean, and to consume it.
 
 Here are the steps:
 
@@ -25,9 +25,9 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 In the same Python console:
 ```python
 #data info
-name = "Kraken Time Data"
+name = "Kraken API OCEAN-USD price feed"
 
-url = "https://api.kraken.com/0/public/Time"
+url = "https://api.kraken.com/0/public/Ticker?pair=OCEANUSD"
 
 #create asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
@@ -61,7 +61,7 @@ file_name = os.path.join(asset_dir, 'file0')
 
 Now, load the file and use its data.
 
-The data follows the Kraken docs specs for Data, [here](https://docs.kraken.com/rest/#section/Example-API-Clients).
+The data follows the Kraken docs specs for Data, [here](https://docs.kraken.com/rest/#tag/Market-Data/operation/getTickerInformation).
 
 In the same Python console:
 ```python
@@ -69,9 +69,16 @@ In the same Python console:
 #load from file into memory
 with open(file_name, "r") as file:
     #data is a string with the result inside.
-    data= file.read().rstrip().replace('"', '')
+    data_str = file.read().rstrip().replace("'", '"')
 
-#print the details about server creation time
-print(f"data: {data}")
+import json
+data = json.loads(data_str)
+
+#data is a list of lists
+# -Outer dictionary contains 2 keys, one for errors and one for the result with the pair.
+# -Inner dictionary have 9 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
+#get close price
+close_price = float(data['result']['OCEANUSD']['c'][0])
+print(f"last close price: {close_price}")
 ```
 
