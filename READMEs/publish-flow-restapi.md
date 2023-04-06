@@ -84,7 +84,7 @@ data = json.loads(data_str)
 # -Outer dictionary contains 2 keys, one for errors and one for the result with the pair.
 # -Inner dictionary have 9 entries each: Kline open time, Open price, High price, Low price, close Price, Vol, ..
 # Get close price
-close_prices = [float(item[4]) for item in data['result'][pair]]
+close_prices = [float(data_at_day[4]) for data_at_day in data['result'][pair]]
 print(f"close prices: {close_prices}")
 ```
 
