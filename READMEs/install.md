@@ -43,7 +43,7 @@ Issue: M1 * `coincurve` or `cryptography`
 Issue: Could not build wheels for coincurve
 - Reasons for this happening are usually missing dependencies.
 - Workaround:
-  - make sure you have the OS-level develoment libraries for building Python packages: `python3-dev` and `build-essential` (install e.g. using apt-get)
+  - make sure you have the OS-level development libraries for building Python packages: `python3-dev` and `build-essential` (install e.g. using apt-get)
   - install the OS-level `libsecp256k1-dev` library (e.g. using apt-get)
   - install pyproject.toml separately, e.g. `pip install pyproject-toml`
   - if ocean-lib installation still fails, install coincurve separately e.g. `pip install coincurve`, then retry
