@@ -81,7 +81,6 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
 
     print("Do a send-Ether tx...")
     try:
-
         priority_fee, _ = get_gas_fees()
         alice_wallet.transfer(
             bob_wallet.address,
