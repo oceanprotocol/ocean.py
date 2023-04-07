@@ -7,5 +7,5 @@
 
 __author__ = """OceanProtocol"""
 # fmt: off
-__version__ = '2.2.1'
+__version__ = '2.2.2'
 # fmt: on
