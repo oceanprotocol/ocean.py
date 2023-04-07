@@ -40,6 +40,14 @@ Issue: M1 * `coincurve` or `cryptography`
 - If you have an Apple M1 processor, `coincurve` and `cryptography` installation may fail due missing packages, which come pre-packaged in other operating systems.
 - Workaround: ensure you have `autoconf`, `automake`, `libtool` and `pkg-config` installed, e.g. using Homebrew or MacPorts.
 
+Issue: Could not build wheels for coincurve
+- Reasons for this happening are usually missing dependencies.
+- Workaround:
+  - make sure you have the OS-level develoment libraries for building Python packages: `python3-dev` and `build-essential` (install e.g. using apt-get)
+  - install the OS-level `libsecp256k1-dev` library (e.g. using apt-get)
+  - install pyproject.toml separately, e.g. `pip install pyproject-toml`
+  - if ocean-lib installation still fails, install coincurve separately e.g. `pip install coincurve`, then retry
+
 Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
