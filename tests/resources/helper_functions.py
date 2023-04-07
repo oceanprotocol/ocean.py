@@ -358,19 +358,3 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         "validUntil": valid_until,
         "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
     }
-
-
-def skip_on(exception, reason="Default reason"):
-    """Decorator for skipping test in case of known issue."""
-
-    def decorator_func(f):
-        @wraps(f)
-        def wrapper(*args, **kwargs):
-            try:
-                return f(*args, **kwargs)
-            except exception:
-                pytest.skip(reason)
-
-        return wrapper
-
-    return decorator_func

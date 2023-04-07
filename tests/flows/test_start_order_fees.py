@@ -217,7 +217,6 @@ def create_asset_with_order_fee_and_timeout(
     publish_market_order_fees,
     timeout: int,
 ) -> Tuple[DDO, Service, DatatokenBase]:
-
     # Create datatoken with order fee
     datatoken = data_nft.create_datatoken(
         {"from": publisher_wallet},

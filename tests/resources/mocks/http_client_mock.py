@@ -36,7 +36,7 @@ class HttpClientMockBase(Session):
     def get(cls, *args, **kwargs):
         """Handles the base case of service endpoints."""
         is_get_endpoints_request = False
-        for (_, _, _, fn, _, _) in inspect.getouterframes(inspect.currentframe()):
+        for _, _, _, fn, _, _ in inspect.getouterframes(inspect.currentframe()):
             if fn == "get_service_endpoints":
                 is_get_endpoints_request = True
 

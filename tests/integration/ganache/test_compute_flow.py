@@ -26,7 +26,6 @@ from tests.resources.ddo_helpers import (
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
 )
-from tests.resources.helper_functions import skip_on
 
 
 @pytest.fixture
@@ -488,15 +487,6 @@ def test_compute_trusted_algorithm(
 
 
 @pytest.mark.integration
-@skip_on(
-    (
-        ocean_lib.exceptions.DataProviderException,
-        requests.exceptions.ConnectionError,
-        TypeError,
-        AssertionError,
-    ),
-    reason="Fix provider issue #606",
-)
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean,
@@ -549,7 +539,6 @@ def test_compute_update_trusted_algorithm(
 
 
 @pytest.mark.integration
-@skip_on((TypeError, AssertionError), reason="Fix provider issue #606")
 def test_compute_trusted_publisher(
     publisher_wallet,
     publisher_ocean,
@@ -585,7 +574,6 @@ def test_compute_trusted_publisher(
 
 
 @pytest.mark.integration
-@skip_on((TypeError, AssertionError), reason="Fix provider issue #606")
 def test_compute_just_provider_fees(
     publisher_wallet,
     publisher_ocean,
