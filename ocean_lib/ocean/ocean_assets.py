@@ -178,13 +178,20 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ) -> tuple:
         """Create asset of type "algorithm", having UrlFiles, with good defaults"""
 
         if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
             assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
 
-        metadata = self._default_metadata(name, tx_dict, "algorithm")
+        if kwargs.get("metadata"):
+            metadata = kwargs["metadata"]
+            kwargs.pop("metadata")
+        else:
+            metadata = OceanAssets.default_metadata(name, tx_dict, "algorithm")
+
         metadata["algorithm"] = {
             "language": "python",
             "format": "docker-image",
@@ -219,9 +226,15 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, tx_dict)
+        if kwargs.get("metadata"):
+            metadata = kwargs["metadata"]
+            kwargs.pop("metadata")
+        else:
+            metadata = OceanAssets.default_metadata(name, tx_dict)
         files = [UrlFile(url)]
 
         return self.create_bundled(
@@ -231,6 +244,8 @@ class OceanAssets:
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
+            *args,
+            **kwargs,
         )
 
     @enforce_types
@@ -244,9 +259,15 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        metadata = self._default_metadata(name, tx_dict)
+        if kwargs.get("metadata"):
+            metadata = kwargs["metadata"]
+            kwargs.pop("metadata")
+        else:
+            metadata = OceanAssets.default_metadata(name, tx_dict)
         files = [ArweaveFile(transaction_id)]
 
         return self.create_bundled(
@@ -270,9 +291,15 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
-        metadata = self._default_metadata(name, tx_dict)
+        if kwargs.get("metadata"):
+            metadata = kwargs["metadata"]
+            kwargs.pop("metadata")
+        else:
+            metadata = OceanAssets.default_metadata(name, tx_dict)
         files = [GraphqlQuery(url, query)]
 
         return self.create_bundled(
@@ -296,12 +323,18 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ) -> tuple:
         """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        metadata = self._default_metadata(name, tx_dict)
+        if kwargs.get("metadata"):
+            metadata = kwargs["metadata"]
+            kwargs.pop("metadata")
+        else:
+            metadata = OceanAssets.default_metadata(name, tx_dict)
 
         return self.create_bundled(
             metadata,
@@ -312,8 +345,9 @@ class OceanAssets:
             pricing_schema_args=pricing_schema_args,
         )
 
+    @classmethod
     @enforce_types
-    def _default_metadata(self, name: str, tx_dict: dict, type="dataset") -> dict:
+    def default_metadata(cls, name: str, tx_dict: dict, type="dataset") -> dict:
         address = get_from_address(tx_dict)
 
         date_created = datetime.now().isoformat()
@@ -340,6 +374,8 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        *args,
+        **kwargs,
     ):
         provider_uri = DataServiceProvider.get_url(self._config_dict)
 
@@ -393,6 +429,15 @@ class OceanAssets:
             files=files,
         )
         ddo.add_service(access_service)
+
+        if "with_compute" in kwargs or "compute_values" in kwargs:
+            ddo.create_compute_service(
+                "1",
+                provider_uri,
+                datatoken.address,
+                files,
+                kwargs.get("compute_values"),
+            )
 
         # Validation by Aquarius
         _, proof = self.validate(ddo)

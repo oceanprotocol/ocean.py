@@ -7,14 +7,12 @@ import os
 import pathlib
 from typing import List
 
-from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken_base import DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
-from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
+from tests.resources.helper_functions import get_file1, get_file2
 
 
 def get_resource_path(dir_name, file_name):
@@ -111,53 +109,19 @@ def get_registered_asset_with_compute_service(
     trusted_algorithms: List[DDO] = [],
     trusted_algorithm_publishers: List[str] = [],
 ):
-    data_nft, datatoken = deploy_erc721_erc20(
-        ocean_instance.config_dict,
-        publisher_wallet,
-        publisher_wallet,
-    )
-
-    config = ocean_instance.config_dict
-    data_provider = DataServiceProvider
-
-    arff_file = UrlFile(
-        url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
-    )
-
-    metadata = get_default_metadata()
-    files = [arff_file]
-
     # Set the compute values for compute service
     compute_values = {
         "allowRawAlgorithm": allow_raw_algorithms,
         "allowNetworkAccess": True,
-        "publisherTrustedAlgorithms": [],
-        "publisherTrustedAlgorithmPublishers": [],
+        "publisherTrustedAlgorithms": trusted_algorithms,
+        "publisherTrustedAlgorithmPublishers": trusted_algorithm_publishers,
     }
-    compute_service = Service(
-        service_id="2",
-        service_type=ServiceTypes.CLOUD_COMPUTE,
-        service_endpoint=data_provider.get_url(config),
-        datatoken=datatoken.address,
-        files=files,
-        timeout=3600,
-        compute_values=compute_values,
-    )
 
-    for algorithm in trusted_algorithms:
-        compute_service.add_publisher_trusted_algorithm(algorithm)
-
-    for publisher in trusted_algorithm_publishers:
-        compute_service.add_publisher_trusted_algorithm_publisher(publisher)
-
-    return ocean_instance.assets.create(
-        metadata=metadata,
+    return ocean_instance.assets.create_url_asset(
+        "Branin",
+        "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
         tx_dict={"from": publisher_wallet},
-        services=[compute_service],
-        data_nft_address=data_nft.address,
-        deployed_datatokens=[datatoken],
-        encrypt_flag=True,
-        compress_flag=True,
+        compute_values=compute_values,
     )
 
 

@@ -29,14 +29,13 @@ tags = [
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(tag[0], url, {"from": alice})
+    name = tag[0]
+    tx_dict = {"from": alice}
+    from ocean_lib.ocean.ocean_assets import OceanAssets
+    metadata = ocean.assets.__class__.default_metadata(name, tx_dict)
+    metadata.update({"tags": tag[1:]})
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, tx_dict, metadata=metadata)
     print(f"Just published asset, with did={ddo.did}")
-
-    # Update the metadata introducing `tags`
-    ddo.metadata.update({"tags": tag[1:]})
-    ddo = ocean.assets.update(ddo, {"from": alice}, config["PROVIDER_URL"])
-    print(f"Just updated the metadata of the asset with did={ddo.did}.")
-
 ```
 ## 3. Alice filters assets by their `tags`
 

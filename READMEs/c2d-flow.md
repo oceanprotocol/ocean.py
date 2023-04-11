@@ -57,30 +57,15 @@ DATA_url_file = UrlFile(
 )
 
 name = "Branin dataset"
-(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, {"from": alice}, wait_for_aqua=True)
+(DATA_data_nft, DATA_datatoken, DATA_ddo) = ocean.assets.create_url_asset(name, DATA_url_file.url, {"from": alice}, with_compute=True, wait_for_aqua=True)
 print(f"DATA_data_nft address = '{DATA_data_nft.address}'")
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
-
-
-# Create and attach the Service
-DATA_files = [DATA_url_file]
-
-# Add service and update asset
-DATA_ddo.create_compute_service(
-    service_id="2",
-    service_endpoint=ocean.config_dict["PROVIDER_URL"],
-    datatoken_address=DATA_datatoken.address,
-    files=DATA_files,
-)
-
-# Update the asset
-DATA_ddo = ocean.assets.update(DATA_ddo, {"from": alice})
 
 print(f"DATA_ddo did = '{DATA_ddo.did}'")
 ```
 
-To customise the privacy and accessibility of your compute service, use the `compute_values` argument in
-`create_compute_service` to set values according to the [DDO specs](https://docs.oceanprotocol.com/core-concepts/did-ddo).
+To customise the privacy and accessibility of your compute service, add the `compute_values` argument to
+`create_url_asset` to set values according to the [DDO specs](https://docs.oceanprotocol.com/core-concepts/did-ddo).
 The function assumes the documented defaults.
 
 ## 3. Alice publishes an algorithm
