@@ -7,16 +7,13 @@ import os
 import pathlib
 from typing import List
 
-import requests
-
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken_base import DatatokenArguments
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
-from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesTypeFactory, UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
 
 
@@ -72,9 +69,7 @@ def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
     return DDO.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
-def get_default_metadata(
-    asset_type: str = "dataset",
-):
+def get_default_metadata():
     """Helper for asset creation, based on ddo_sa_sample.json
 
     Optional arguments:
@@ -86,7 +81,7 @@ def get_default_metadata(
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
         "name": "Sample asset",
-        "type": asset_type,
+        "type": "dataset",
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
@@ -181,62 +176,6 @@ def get_registered_asset_with_compute_service(
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,
-    )
-
-
-def get_registered_algorithm_with_access_service(
-    ocean_instance: Ocean, publisher_wallet
-):
-    metadata = get_default_metadata(asset_type="algorithm")
-
-    # Update metadata to include algorithm info
-    algorithm_values = {
-        "algorithm": {
-            "language": "Node.js",
-            "format": "docker-image",
-            "version": "0.1",
-            "container": {
-                "entrypoint": "python $ALGO",
-                "image": "oceanprotocol/algo_dockers",
-                "tag": "python-branin",
-                "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-            },
-        }
-    }
-    metadata.update(algorithm_values)
-
-    algorithm_file = FilesTypeFactory(
-        {
-            "type": "url",
-            "url": "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
-            "method": "GET",
-        }
-    )
-
-    return ocean_instance.assets.create(
-        metadata=metadata,
-        tx_dict={"from": publisher_wallet},
-        datatoken_args=[DatatokenArguments("Algo DT1", "DT1", files=[algorithm_file])],
-    )
-
-
-def get_raw_algorithm() -> str:
-    req = requests.get(
-        "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js"
-    )
-    return AlgorithmMetadata(
-        {
-            "rawcode": req.text,
-            "language": "Node.js",
-            "format": "docker-image",
-            "version": "0.1",
-            "container": {
-                "entrypoint": "python $ALGO",
-                "image": "oceanprotocol/algo_dockers",
-                "tag": "python-branin",
-                "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-            },
-        }
     )
 
 

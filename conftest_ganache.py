@@ -83,9 +83,15 @@ def publisher_ocean():
 def basic_asset(publisher_ocean, publisher_wallet):
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    return publisher_ocean.assets.create_url_asset(
+
+    (data_nft, datatoken, ddo) = publisher_ocean.assets.create_url_asset(
         name, url, {"from": publisher_wallet}
     )
+
+    assert ddo.nft["name"] == name
+    assert len(ddo.datatokens) == 1
+
+    return (data_nft, datatoken, ddo)
 
 
 @pytest.fixture

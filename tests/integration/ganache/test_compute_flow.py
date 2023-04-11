@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import pytest
+import requests
 from attr import dataclass
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -19,8 +20,6 @@ from ocean_lib.ocean.util import to_wei
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
-    get_raw_algorithm,
-    get_registered_algorithm_with_access_service,
     get_registered_asset_with_compute_service,
 )
 
@@ -64,19 +63,6 @@ def dataset_with_compute_service_allow_raw_algo(publisher_wallet, publisher_ocea
 
 
 @pytest.fixture
-def dataset_with_compute_service_and_trusted_algorithm(
-    publisher_wallet, publisher_ocean, algorithm
-):
-    # Setup algorithm meta to run raw algorithm
-    _, _, ddo = get_registered_asset_with_compute_service(
-        publisher_ocean, publisher_wallet, trusted_algorithms=[algorithm]
-    )
-    # verify the ddo is available in Aquarius
-    publisher_ocean.assets.resolve(ddo.did)
-    return ddo
-
-
-@pytest.fixture
 def dataset_with_compute_service_and_trusted_publisher(
     publisher_wallet, publisher_ocean
 ):
@@ -91,13 +77,18 @@ def dataset_with_compute_service_and_trusted_publisher(
     return ddo
 
 
-def get_algorithm(publisher_wallet, publisher_ocean):
+def get_algorithm(wallet, ocean_instance):
     # Setup algorithm meta to run raw algorithm
-    _, _, ddo = get_registered_algorithm_with_access_service(
-        publisher_ocean, publisher_wallet
+    _, _, ddo = ocean_instance.assets.create_algo_asset(
+        name="Sample asset",
+        url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
+        tx_dict={"from": wallet},
+        image="oceanprotocol/algo_dockers",
+        tag="python-branin",
+        checksum="sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
     )
     # verify the asset is available in Aquarius
-    publisher_ocean.assets.resolve(ddo.did)
+    ocean_instance.assets.resolve(ddo.did)
     return ddo
 
 
@@ -113,7 +104,23 @@ def algorithm_with_different_publisher(consumer_wallet, publisher_ocean):
 
 @pytest.fixture
 def raw_algorithm():
-    return get_raw_algorithm()
+    req = requests.get(
+        "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js"
+    )
+    return AlgorithmMetadata(
+        {
+            "rawcode": req.text,
+            "language": "Node.js",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "python $ALGO",
+                "image": "oceanprotocol/algo_dockers",
+                "tag": "python-branin",
+                "checksum": "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
+            },
+        }
+    )
 
 
 @dataclass
@@ -437,41 +444,9 @@ def test_compute_multi_inputs(
 
 
 @pytest.mark.integration
-def test_compute_trusted_algorithm(
-    publisher_wallet,
-    publisher_ocean,
-    consumer_wallet,
-    dataset_with_compute_service_and_trusted_algorithm,
-    algorithm,
-    algorithm_with_different_publisher,
-):
-    # Expect to pass when trusted algorithm is used
-    run_compute_test(
-        ocean_instance=publisher_ocean,
-        publisher_wallet=publisher_wallet,
-        consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
-            dataset_with_compute_service_and_trusted_algorithm, None
-        ),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-    )
-
-    # Expect to fail when non-trusted algorithm is used
-    with pytest.raises(
-        DataProviderException,
-        match="not_trusted_algo",
-    ):
-        run_compute_test(
-            ocean_instance=publisher_ocean,
-            publisher_wallet=publisher_wallet,
-            consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(
-                dataset_with_compute_service_and_trusted_algorithm, None
-            ),
-            algorithm_and_userdata=AssetAndUserdata(
-                algorithm_with_different_publisher, None
-            ),
-        )
+def test_compute_trusted_algorithm():
+    # functionality covered in test_compute_update_trusted_algorithm
+    assert True
 
 
 @pytest.mark.integration
