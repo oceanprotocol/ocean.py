@@ -11,59 +11,52 @@ import pytest
 # For tests of READMEs on remote chains, see tests/integration/remote/
 
 scripts = pathlib.Path(__file__, "..", "..", "generated-readmes").resolve().glob("*.py")
+script_names = [script.name for script in scripts if script.name != "__init__.py"]
 
 
-@pytest.mark.parametrize("script", scripts)
-def test_script_execution(script):
-    # README generation command:
-    # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
+class TestReadmes(object):
+    @classmethod
+    def setup_class(self):
+        globs = {}
+        prerequisite = pathlib.Path(
+            __file__,
+            "..",
+            "..",
+            "generated-readmes/test_setup-local.py",
+        )
+        result = runpy.run_path(str(prerequisite), run_name="__main__")
+        for key in [
+            "os",
+            "config",
+            "ocean",
+            "alice",
+            "bob",
+        ]:
+            globs[key] = result[key]
 
-    skippable = [
-        "c2d-flow-more-examples",
-        "developers",
-        "df",
-        "install",
-        "parameters",
-        "predict-eth",
-        "services",
-        "setup-local",
-        "setup-remote",
-        "publish-flow-restapi",  # TODO: fix and restore
-        "gas-strategy-remote",
-        "c2d-flow",  # TODO: fix provider issue #606
-    ]
+        self.globs = globs
 
-    if script.name.replace("test_", "").replace(".py", "") in skippable:
-        return
+    @pytest.mark.parametrize("script_name", script_names)
+    def test_script_execution(self, script_name):
+        # README generation command:
+        # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
-    runs_with_local_setup = [
-        "profile-nfts-flow",
-        "key-value-public",
-        "key-value-private",
-        "search-and-filter-assets",
-        "main-flow",
-        "publish-flow-graphql",
-        "publish-flow-onchain",
-        "custody-light-flow",
-    ]
+        skippable = [
+            "c2d-flow-more-examples",
+            "developers",
+            "df",
+            "install",
+            "parameters",
+            "predict-eth",
+            "services",
+            "setup-local",
+            "setup-remote",
+            "publish-flow-restapi",  # TODO: fix and restore
+            "gas-strategy-remote",
+        ]
 
-    globs = {}
-    for item in runs_with_local_setup:
-        if item in script.name:
-            prerequisite = pathlib.Path(
-                __file__,
-                "..",
-                "..",
-                "generated-readmes/test_setup-local.py",
-            )
-            result = runpy.run_path(str(prerequisite), run_name="__main__")
-            for key in [
-                "os",
-                "config",
-                "ocean",
-                "alice",
-                "bob",
-            ]:
-                globs[key] = result[key]
+        if script_name.replace("test_", "").replace(".py", "") in skippable:
+            return
 
-    runpy.run_path(str(script), run_name="__main__", init_globals=globs)
+        script = pathlib.Path(__file__, "..", "..", "generated-readmes", script_name)
+        runpy.run_path(str(script), run_name="__main__", init_globals=self.globs)

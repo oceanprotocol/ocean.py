@@ -19,22 +19,21 @@ Now, you're Alice.
 
 ```python
 #data info
-name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
 # Created a list of tags for the following assets
 tags = [
-    ["test", "ganache", "best asset"],
-    ["test", "ocean"],
-    ["AI", "dataset", "testing"],
+    ["Branin dataset 1", "test", "ganache", "best asset"],
+    ["Branin dataset 2", "test", "ocean"],
+    ["Branin dataset 3", "AI", "dataset", "testing"],
 ]
 # Publish few assets for testing
 for tag in tags:
-    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": alice})
+    (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(tag[0], url, {"from": alice})
     print(f"Just published asset, with did={ddo.did}")
 
     # Update the metadata introducing `tags`
-    ddo.metadata.update({"tags": tag})
+    ddo.metadata.update({"tags": tag[1:]})
     ddo = ocean.assets.update(ddo, {"from": alice}, config["PROVIDER_URL"])
     print(f"Just updated the metadata of the asset with did={ddo.did}.")
 
@@ -67,4 +66,20 @@ for ddo in filtered_ddos:
     print(f"ddo.metadata :{ddo.metadata}")
     print(f"ddo.nft :{ddo.nft}")
     print(f"ddo.datatokens :{ddo.datatokens}")
+```
+
+## Running custom queries
+You can run any custom ES query using OceanAssets. For example:
+```python
+results = ocean.assets.query(
+    {
+        "query": {
+            "query_string": {
+                "query": "Branin dataset 3",
+                "fields": ["metadata.name"],
+            }
+        }
+    }
+)
+assert results[0].metadata["name"] == "Branin dataset 3"
 ```

@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
-import time
-import uuid
 from datetime import datetime
 from unittest.mock import patch
 
@@ -166,59 +164,9 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
 
 
 @pytest.mark.integration
-def test_ocean_assets_search(publisher_ocean, publisher_wallet):
-    identifier = str(uuid.uuid1()).replace("-", "")
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": identifier,
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    assert len(publisher_ocean.assets.search(identifier)) == 0, "DDO search failed."
-
-    get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet, metadata
-    )
-
-    time.sleep(1)  # apparently changes are not instantaneous
-    assert (
-        len(publisher_ocean.assets.search(identifier)) == 1
-    ), "Searched for the occurrences of the identifier failed. "
-
-    assert (
-        len(
-            publisher_ocean.assets.query(
-                {
-                    "query": {
-                        "query_string": {
-                            "query": identifier,
-                            "fields": ["metadata.name"],
-                        }
-                    }
-                }
-            )
-        )
-        == 1
-    ), "Query failed.The identifier was not found in the name."
-    assert (
-        len(
-            publisher_ocean.assets.query(
-                {
-                    "query": {
-                        "query_string": {
-                            "query": "Gorilla",
-                            "fields": ["metadata.name"],
-                        }
-                    }
-                }
-            )
-        )
-        == 0
-    )
+def test_ocean_assets_search():
+    # skipping as tested by the search-and-filter readme
+    assert True
 
 
 @pytest.mark.integration
