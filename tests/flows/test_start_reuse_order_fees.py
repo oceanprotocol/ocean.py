@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from datetime import datetime, timedelta
+from time import sleep
 from typing import Tuple
 
 import pytest
@@ -53,12 +54,13 @@ fee_parametrisation = [
 ]
 
 
-class TestStartOrderFees(object):
+class TestStartReuseOrderFees(object):
     @classmethod
     def setup_class(self):
         self.ddos = []
         self.dts = []
         self.services = []
+        self.start_order_receipts = []
         config = get_config_dict()
         publisher_wallet = get_publisher_wallet()
         file1 = get_file1()
@@ -183,7 +185,7 @@ class TestStartOrderFees(object):
         consume_market_order_fee = int_units(
             consume_market_order_fee_in_unit, bt.decimals()
         )
-        dt.start_order(
+        start_order_receipt = dt.start_order(
             consumer=consumer_wallet.address,
             service_index=ddo.get_index_of_service(self.services[param_index]),
             provider_fees=provider_fees,
@@ -194,6 +196,8 @@ class TestStartOrderFees(object):
             ),
             tx_dict={"from": consumer_wallet},
         )
+
+        self.start_order_receipts.append(start_order_receipt)
 
         # Get balances
         publisher_bt_balance_after = bt.balanceOf(publisher_wallet.address)
@@ -247,6 +251,97 @@ class TestStartOrderFees(object):
         assert opc_bt_balance_before == opc_bt_balance_after
         assert opc_dt_balance_before + opc_order_fee == opc_dt_balance_after
 
+    @pytest.mark.unit
+    @pytest.mark.parametrize(
+        "param_index",
+        range(9),
+    )
+    def test_reuse_order_fees(
+        self,
+        config: dict,
+        publisher_wallet,
+        consumer_wallet,
+        provider_wallet,
+        param_index,
+    ):
+        publish_market_wallet = get_wallet(4)
+        consume_market_wallet = get_wallet(5)
+
+        base_token_name = fee_parametrisation[param_index][1]
+        provider_fee_in_unit = fee_parametrisation[param_index][4]
+        bt = DatatokenBase.get_typed(
+            config, get_address_of_type(config, base_token_name)
+        )
+        dt = self.dts[param_index]
+        start_order_receipt = self.start_order_receipts[param_index]
+
+        # Reuse order where:
+        #     Order: valid
+        #     Provider fees: valid
+        # Simulate valid provider fees by setting them to 0
+        reuse_order_with_mock_provider_fees(
+            provider_fee_in_unit="0",
+            start_order_tx_id=start_order_receipt.txid,
+            bt=bt,
+            dt=dt,
+            publisher_wallet=publisher_wallet,
+            publish_market_wallet=publish_market_wallet,
+            consume_market_wallet=consume_market_wallet,
+            consumer_wallet=consumer_wallet,
+            provider_wallet=provider_wallet,
+        )
+
+        # Reuse order where:
+        #     Order: valid
+        #     Provider fees: expired
+        # Simulate expired provider fees by setting them to non-zero
+        reuse_order_with_mock_provider_fees(
+            provider_fee_in_unit=provider_fee_in_unit,
+            start_order_tx_id=start_order_receipt.txid,
+            bt=bt,
+            dt=dt,
+            publisher_wallet=publisher_wallet,
+            publish_market_wallet=publish_market_wallet,
+            consume_market_wallet=consume_market_wallet,
+            consumer_wallet=consumer_wallet,
+            provider_wallet=provider_wallet,
+        )
+
+        # Sleep for 6 seconds, long enough for order to expire
+        sleep(6)
+
+        # Reuse order where:
+        #     Order: expired
+        #     Provider fees: valid
+        # Simulate valid provider fees by setting them to 0
+        reuse_order_with_mock_provider_fees(
+            provider_fee_in_unit="0",
+            start_order_tx_id=start_order_receipt.txid,
+            bt=bt,
+            dt=dt,
+            publisher_wallet=publisher_wallet,
+            publish_market_wallet=publish_market_wallet,
+            consume_market_wallet=consume_market_wallet,
+            consumer_wallet=consumer_wallet,
+            provider_wallet=provider_wallet,
+        )
+
+        # Reuse order where:
+        #     Order: expired
+        #     Provider fees: expired
+        # Simulate expired provider fees by setting them to non-zero
+        reuse_order_with_mock_provider_fees(
+            provider_fee_in_unit=provider_fee_in_unit,
+            start_order_tx_id=start_order_receipt.txid,
+            bt=bt,
+            dt=dt,
+            publisher_wallet=publisher_wallet,
+            publish_market_wallet=publish_market_wallet,
+            consume_market_wallet=consume_market_wallet,
+            consumer_wallet=consumer_wallet,
+            provider_wallet=provider_wallet,
+        )
+
 
 def create_asset_with_order_fee_and_timeout(
     config: dict,
@@ -293,3 +388,79 @@ def create_asset_with_order_fee_and_timeout(
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     return ddo, service, datatokens[0]
+
+
+def reuse_order_with_mock_provider_fees(
+    provider_fee_in_unit: str,
+    start_order_tx_id: str,
+    bt: DatatokenBase,
+    dt: DatatokenBase,
+    publisher_wallet,
+    publish_market_wallet,
+    consume_market_wallet,
+    consumer_wallet,
+    provider_wallet,
+):
+    """Call reuse_order, and verify the balances/fees are correct"""
+
+    router = FactoryRouter(bt.config_dict, dt.router())
+    opc_collector_address = router.getOPCCollector()
+
+    # Get balances before reuse_order
+    publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance_before = dt.balanceOf(publisher_wallet.address)
+    publish_market_bt_balance_before = bt.balanceOf(publish_market_wallet.address)
+    publish_market_dt_balance_before = dt.balanceOf(publish_market_wallet.address)
+    consume_market_bt_balance_before = bt.balanceOf(consume_market_wallet.address)
+    consume_market_dt_balance_before = dt.balanceOf(consume_market_wallet.address)
+    consumer_bt_balance_before = bt.balanceOf(consumer_wallet.address)
+    consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
+    provider_bt_balance_before = bt.balanceOf(provider_wallet.address)
+    provider_dt_balance_before = dt.balanceOf(provider_wallet.address)
+    opc_bt_balance_before = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_before = dt.balanceOf(opc_collector_address)
+
+    # Mock provider fees
+    provider_fee = int_units(provider_fee_in_unit, bt.decimals())
+    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    provider_fees = get_provider_fees(
+        provider_wallet,
+        bt.address,
+        provider_fee,
+        valid_until,
+    )
+
+    # Reuse order
+    dt.reuse_order(
+        order_tx_id=start_order_tx_id,
+        provider_fees=provider_fees,
+        tx_dict={"from": consumer_wallet},
+    )
+
+    # Get balances after reuse_order
+    publisher_bt_balance_after = bt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance_after = dt.balanceOf(publisher_wallet.address)
+    publish_market_bt_balance_after = bt.balanceOf(publish_market_wallet.address)
+    publish_market_dt_balance_after = dt.balanceOf(publish_market_wallet.address)
+    consume_market_bt_balance_after = bt.balanceOf(consume_market_wallet.address)
+    consume_market_dt_balance_after = dt.balanceOf(consume_market_wallet.address)
+    consumer_bt_balance_after = bt.balanceOf(consumer_wallet.address)
+    consumer_dt_balance_after = dt.balanceOf(consumer_wallet.address)
+    provider_bt_balance_after = bt.balanceOf(provider_wallet.address)
+    provider_dt_balance_after = dt.balanceOf(provider_wallet.address)
+    opc_bt_balance_after = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_after = dt.balanceOf(opc_collector_address)
+
+    # Check balances
+    assert publisher_bt_balance_before == publisher_bt_balance_after
+    assert publisher_dt_balance_before == publisher_dt_balance_after
+    assert publish_market_bt_balance_before == publish_market_bt_balance_after
+    assert publish_market_dt_balance_before == publish_market_dt_balance_after
+    assert consume_market_bt_balance_before == consume_market_bt_balance_after
+    assert consume_market_dt_balance_before == consume_market_dt_balance_after
+    assert consumer_bt_balance_before - provider_fee == consumer_bt_balance_after
+    assert consumer_dt_balance_before == consumer_dt_balance_after
+    assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
+    assert provider_dt_balance_before == provider_dt_balance_after
+    assert opc_bt_balance_before == opc_bt_balance_after
+    assert opc_dt_balance_before == opc_dt_balance_after
