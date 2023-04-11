@@ -25,14 +25,6 @@ def get_resource_path(dir_name, file_name):
         return pathlib.Path(os.path.join(os.path.sep, *base, file_name))
 
 
-def get_metadata() -> dict:
-    path = get_resource_path("ddo", "valid_metadata.json")
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
-
-
 def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
     path = get_resource_path("ddo", file_name)
     with open(path, "r") as file_handle:
@@ -57,34 +49,19 @@ def get_sample_ddo_with_compute_service(
     return json.loads(ddo)
 
 
-def get_sample_algorithm_ddo_dict(filename="ddo_algorithm.json") -> dict:
+def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
     path = get_resource_path("ddo", filename)
     assert path.exists(), f"{path} does not exist!"
+
     with open(path, "r") as file_handle:
         metadata = file_handle.read()
-    return json.loads(metadata)
+    alg_dict = json.loads(metadata)
 
-
-def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> DDO:
-    return DDO.from_dict(get_sample_algorithm_ddo_dict(filename))
+    return DDO.from_dict(alg_dict)
 
 
 def get_default_metadata():
-    """Helper for asset creation, based on ddo_sa_sample.json
-
-    Optional arguments:
-    :param asset_type: used to populate metadata.type, optionally set to "algorithm"
-    :param files: list of file objects creates with FilesTypeFactory
-    """
-    return {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
+    return get_key_from_v4_sample_ddo("metadata")
 
 
 def get_default_files():
@@ -102,6 +79,11 @@ def build_default_services(config, datatoken):
     ]
 
     return services
+
+
+def build_credentials_dict() -> dict:
+    """Build a credentials dict, used for testing."""
+    return {"allow": [], "deny": []}
 
 
 def get_registered_asset_with_access_service(
@@ -177,11 +159,6 @@ def get_registered_asset_with_compute_service(
         encrypt_flag=True,
         compress_flag=True,
     )
-
-
-def build_credentials_dict() -> dict:
-    """Build a credentials dict, used for testing."""
-    return {"allow": [], "deny": []}
 
 
 def get_first_service_by_type(ddo, service_type: str) -> Service:
