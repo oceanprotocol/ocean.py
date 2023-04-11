@@ -31,7 +31,6 @@ tags = [
 for tag in tags:
     name = tag[0]
     tx_dict = {"from": alice}
-    from ocean_lib.ocean.ocean_assets import OceanAssets
     metadata = ocean.assets.__class__.default_metadata(name, tx_dict)
     metadata.update({"tags": tag[1:]})
     (data_NFT, datatoken, ddo) = ocean.assets.create_url_asset(name, url, tx_dict, metadata=metadata)
@@ -74,11 +73,11 @@ results = ocean.assets.query(
     {
         "query": {
             "query_string": {
-                "query": "Branin dataset 3",
+                "query": "Branin dataset 1",
                 "fields": ["metadata.name"],
             }
         }
     }
 )
-assert results[0].metadata["name"] == "Branin dataset 3"
+assert results[0].metadata["name"] == "Branin dataset 1"
 ```
