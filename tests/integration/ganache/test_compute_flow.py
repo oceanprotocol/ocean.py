@@ -7,10 +7,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 
 import pytest
-import requests
 from attr import dataclass
 
-import ocean_lib
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
 from ocean_lib.exceptions import DataProviderException
@@ -23,7 +21,6 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_raw_algorithm,
     get_registered_algorithm_with_access_service,
-    get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
 )
 
@@ -117,17 +114,6 @@ def algorithm_with_different_publisher(consumer_wallet, publisher_ocean):
 @pytest.fixture
 def raw_algorithm():
     return get_raw_algorithm()
-
-
-@pytest.fixture
-def dataset_with_access_service(publisher_wallet, publisher_ocean):
-    # Dataset with access service
-    _, _, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    publisher_ocean.assets.resolve(ddo.did)
-    return ddo
 
 
 @dataclass
@@ -433,9 +419,11 @@ def test_compute_multi_inputs(
     consumer_wallet,
     dataset_with_compute_service,
     algorithm,
-    dataset_with_access_service,
+    basic_asset,
 ):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
+    _, _, dataset_with_access_service = basic_asset
+
     run_compute_test(
         ocean_instance=publisher_ocean,
         publisher_wallet=publisher_wallet,

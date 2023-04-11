@@ -338,14 +338,9 @@ def test_create_bad_metadata(publisher_ocean, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_url_asset(publisher_ocean, publisher_wallet):
-    ocean = publisher_ocean
-
+def test_create_url_asset(publisher_ocean, publisher_wallet, basic_asset):
     name = "Branin dataset"
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
-        name, url, {"from": publisher_wallet}
-    )
+    (data_nft, datatoken, ddo) = basic_asset
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1

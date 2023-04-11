@@ -80,6 +80,15 @@ def publisher_ocean():
 
 
 @pytest.fixture
+def basic_asset(publisher_ocean, publisher_wallet):
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    return publisher_ocean.assets.create_url_asset(
+        name, url, {"from": publisher_wallet}
+    )
+
+
+@pytest.fixture
 def consumer_ocean():
     return get_consumer_ocean_instance()
 
