@@ -35,6 +35,7 @@ from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import (
     create_checksum,
     get_address_of_type,
+    get_args_object,
     get_from_address,
     to_wei,
 )
@@ -51,6 +52,28 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
+
+
+class AssetArguments:
+    def __init__(
+        self,
+        wait_for_aqua: bool = True,
+        dt_template_index: Optional[int] = 1,
+        pricing_schema_args: Optional[
+            Union[DispenserArguments, ExchangeArguments]
+        ] = None,
+        metadata: Optional[dict] = None,
+        with_compute: Optional[bool] = False,
+        compute_values: Optional[dict] = None,
+        credentials: Optional[dict] = None,
+    ):
+        self.wait_for_aqua = wait_for_aqua
+        self.dt_template_index = dt_template_index
+        self.pricing_schema_args = pricing_schema_args
+        self.metadata = metadata
+        self.with_compute = with_compute
+        self.compute_values = compute_values
+        self.credentials = credentials if credentials else {"allow": [], "deny": []}
 
 
 class OceanAssets:
@@ -173,11 +196,6 @@ class OceanAssets:
         image: str = "oceanprotocol/algo_dockers",
         tag: str = "python-branin",
         checksum: str = "sha256:8221d20c1c16491d7d56b9657ea09082c0ee4a8ab1a6621fa720da58b09580e4",
-        wait_for_aqua: bool = True,
-        dt_template_index: Optional[int] = 1,
-        pricing_schema_args: Optional[
-            Union[DispenserArguments, ExchangeArguments]
-        ] = None,
         *args,
         **kwargs,
     ) -> tuple:
@@ -186,11 +204,8 @@ class OceanAssets:
         if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
             assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
 
-        if kwargs.get("metadata"):
-            metadata = kwargs["metadata"]
-            kwargs.pop("metadata")
-        else:
-            metadata = OceanAssets.default_metadata(name, tx_dict, "algorithm")
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        metadata = OceanAssets.default_metadata(name, tx_dict, "algorithm")
 
         metadata["algorithm"] = {
             "language": "python",
@@ -204,16 +219,14 @@ class OceanAssets:
             },
         }
 
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(
+                name, tx_dict, "algorithm"
+            )
+
         files = [UrlFile(url)]
 
-        return self.create_bundled(
-            metadata,
-            files,
-            tx_dict,
-            wait_for_aqua=wait_for_aqua,
-            dt_template_index=dt_template_index,
-            pricing_schema_args=pricing_schema_args,
-        )
+        return self.create_bundled(files, tx_dict, asset_args)
 
     @enforce_types
     def create_url_asset(
@@ -221,95 +234,43 @@ class OceanAssets:
         name: str,
         url: str,
         tx_dict: dict,
-        wait_for_aqua: bool = True,
-        dt_template_index: Optional[int] = 1,
-        pricing_schema_args: Optional[
-            Union[DispenserArguments, ExchangeArguments]
-        ] = None,
         *args,
         **kwargs,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        if kwargs.get("metadata"):
-            metadata = kwargs["metadata"]
-            kwargs.pop("metadata")
-        else:
-            metadata = OceanAssets.default_metadata(name, tx_dict)
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(name, tx_dict)
+
         files = [UrlFile(url)]
 
-        return self.create_bundled(
-            metadata,
-            files,
-            tx_dict,
-            wait_for_aqua=wait_for_aqua,
-            dt_template_index=dt_template_index,
-            pricing_schema_args=pricing_schema_args,
-            *args,
-            **kwargs,
-        )
+        return self.create_bundled(files, tx_dict, asset_args)
 
     @enforce_types
     def create_arweave_asset(
-        self,
-        name: str,
-        transaction_id: str,
-        tx_dict: dict,
-        wait_for_aqua: bool = True,
-        dt_template_index: Optional[int] = 1,
-        pricing_schema_args: Optional[
-            Union[DispenserArguments, ExchangeArguments]
-        ] = None,
-        *args,
-        **kwargs,
+        self, name: str, transaction_id: str, tx_dict: dict, *args, **kwargs
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
-        if kwargs.get("metadata"):
-            metadata = kwargs["metadata"]
-            kwargs.pop("metadata")
-        else:
-            metadata = OceanAssets.default_metadata(name, tx_dict)
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(name, tx_dict)
+
         files = [ArweaveFile(transaction_id)]
 
-        return self.create_bundled(
-            metadata,
-            files,
-            tx_dict,
-            wait_for_aqua=wait_for_aqua,
-            dt_template_index=dt_template_index,
-            pricing_schema_args=pricing_schema_args,
-        )
+        return self.create_bundled(files, tx_dict, asset_args)
 
     @enforce_types
     def create_graphql_asset(
-        self,
-        name: str,
-        url: str,
-        query: str,
-        tx_dict: dict,
-        wait_for_aqua: bool = True,
-        dt_template_index: Optional[int] = 1,
-        pricing_schema_args: Optional[
-            Union[DispenserArguments, ExchangeArguments]
-        ] = None,
-        *args,
-        **kwargs,
+        self, name: str, url: str, query: str, tx_dict: dict, *args, **kwargs
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
-        if kwargs.get("metadata"):
-            metadata = kwargs["metadata"]
-            kwargs.pop("metadata")
-        else:
-            metadata = OceanAssets.default_metadata(name, tx_dict)
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(name, tx_dict)
+
         files = [GraphqlQuery(url, query)]
 
-        return self.create_bundled(
-            metadata,
-            files,
-            tx_dict,
-            wait_for_aqua=wait_for_aqua,
-            dt_template_index=dt_template_index,
-            pricing_schema_args=pricing_schema_args,
-        )
+        return self.create_bundled(files, tx_dict, asset_args)
 
     @enforce_types
     def create_onchain_asset(
@@ -330,20 +291,12 @@ class OceanAssets:
         chain_id = self._chain_id
         onchain_data = SmartContractCall(contract_address, chain_id, contract_abi)
         files = [onchain_data]
-        if kwargs.get("metadata"):
-            metadata = kwargs["metadata"]
-            kwargs.pop("metadata")
-        else:
-            metadata = OceanAssets.default_metadata(name, tx_dict)
 
-        return self.create_bundled(
-            metadata,
-            files,
-            tx_dict,
-            wait_for_aqua=wait_for_aqua,
-            dt_template_index=dt_template_index,
-            pricing_schema_args=pricing_schema_args,
-        )
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(name, tx_dict)
+
+        return self.create_bundled(files, tx_dict, asset_args)
 
     @classmethod
     @enforce_types
@@ -364,49 +317,38 @@ class OceanAssets:
 
     @enforce_types
     def create_bundled(
-        self,
-        metadata: dict,
-        files: List[FilesType],
-        tx_dict: dict,
-        credentials: Optional[dict] = None,
-        wait_for_aqua: bool = True,
-        dt_template_index: Optional[int] = 1,
-        pricing_schema_args: Optional[
-            Union[DispenserArguments, ExchangeArguments]
-        ] = None,
-        *args,
-        **kwargs,
+        self, files: List[FilesType], tx_dict: dict, asset_args: AssetArguments
     ):
         provider_uri = DataServiceProvider.get_url(self._config_dict)
 
-        self._assert_ddo_metadata(metadata)
-        name = metadata["name"]
+        self._assert_ddo_metadata(asset_args.metadata)
+        name = asset_args.metadata["name"]
         data_nft_args = DataNFTArguments(name, name)
 
-        if dt_template_index == 2:
+        if asset_args.dt_template_index == 2:
             datatoken_args = DatatokenArguments(
                 f"{name}: DT1", files=files, template_index=2, cap=to_wei(100)
             )
         else:
             datatoken_args = DatatokenArguments(f"{name}: DT1", files=files)
 
-        if not pricing_schema_args:
+        if not asset_args.pricing_schema_args:
             data_nft, datatoken = self.data_nft_factory.create_with_erc20(
                 data_nft_args, datatoken_args, tx_dict
             )
 
-        if isinstance(pricing_schema_args, DispenserArguments):
+        if isinstance(asset_args.pricing_schema_args, DispenserArguments):
             data_nft, datatoken = self.data_nft_factory.create_with_erc20_and_dispenser(
-                data_nft_args, datatoken_args, pricing_schema_args, tx_dict
+                data_nft_args, datatoken_args, asset_args.pricing_schema_args, tx_dict
             )
 
-        if isinstance(pricing_schema_args, ExchangeArguments):
+        if isinstance(asset_args.pricing_schema_args, ExchangeArguments):
             (
                 data_nft,
                 datatoken,
                 _,
             ) = self.data_nft_factory.create_with_erc20_and_fixed_rate(
-                data_nft_args, datatoken_args, pricing_schema_args, tx_dict
+                data_nft_args, datatoken_args, asset_args.pricing_schema_args, tx_dict
             )
 
         ddo = DDO()
@@ -419,8 +361,8 @@ class OceanAssets:
             )
 
         ddo.chain_id = self._chain_id
-        ddo.metadata = metadata
-        ddo.credentials = credentials if credentials else {"allow": [], "deny": []}
+        ddo.metadata = asset_args.metadata
+        ddo.credentials = asset_args.credentials
         ddo.nft_address = data_nft.address
 
         access_service = datatoken.build_access_service(
@@ -430,13 +372,13 @@ class OceanAssets:
         )
         ddo.add_service(access_service)
 
-        if "with_compute" in kwargs or "compute_values" in kwargs:
+        if asset_args.with_compute or asset_args.compute_values:
             ddo.create_compute_service(
                 "1",
                 provider_uri,
                 datatoken.address,
                 files,
-                kwargs.get("compute_values"),
+                asset_args.compute_values,
             )
 
         # Validation by Aquarius
@@ -464,7 +406,7 @@ class OceanAssets:
         )
 
         # Fetch the ddo on chain
-        if wait_for_aqua:
+        if asset_args.wait_for_aqua:
             ddo = self._aquarius.wait_for_ddo(ddo.did)
 
         return (data_nft, datatoken, ddo)
