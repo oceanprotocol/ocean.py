@@ -44,6 +44,7 @@ def test_script_execution(script):
         "main-flow",
         "publish-flow-graphql",
         "publish-flow-onchain",
+        "publish-flow-credentials",
         "custody-light-flow",
     ]
 
@@ -63,6 +64,7 @@ def test_script_execution(script):
                 "ocean",
                 "alice",
                 "bob",
+                "carlos",
             ]:
                 globs[key] = result[key]
 
