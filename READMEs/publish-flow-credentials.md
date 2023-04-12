@@ -27,7 +27,7 @@ credentials = {
         "deny": [],
 }
 #create asset
-(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, credentials=credentials,{"from": david})
+(data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": david},credentials=credentials)
 print(f"Just published asset, with did={ddo.did}")
 ```
 
