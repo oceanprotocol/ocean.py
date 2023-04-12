@@ -205,24 +205,23 @@ class OceanAssets:
             assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
 
         asset_args = get_args_object(args, kwargs, AssetArguments)
-        metadata = OceanAssets.default_metadata(name, tx_dict, "algorithm")
-
-        metadata["algorithm"] = {
-            "language": "python",
-            "format": "docker-image",
-            "version": "0.1",
-            "container": {
-                "entrypoint": "python $ALGO",
-                "image": image,
-                "tag": tag,
-                "checksum": checksum,
-            },
-        }
 
         if not asset_args.metadata:
-            asset_args.metadata = OceanAssets.default_metadata(
-                name, tx_dict, "algorithm"
-            )
+            metadata = OceanAssets.default_metadata(name, tx_dict, "algorithm")
+
+            metadata["algorithm"] = {
+                "language": "python",
+                "format": "docker-image",
+                "version": "0.1",
+                "container": {
+                    "entrypoint": "python $ALGO",
+                    "image": image,
+                    "tag": tag,
+                    "checksum": checksum,
+                },
+            }
+
+            asset_args.metadata = metadata
 
         files = [UrlFile(url)]
 
