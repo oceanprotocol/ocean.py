@@ -178,6 +178,7 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        credentials: Optional[dict] = None,
     ) -> tuple:
         """Create asset of type "algorithm", having UrlFiles, with good defaults"""
 
@@ -203,6 +204,7 @@ class OceanAssets:
             metadata,
             files,
             tx_dict,
+            credentials,
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
@@ -219,6 +221,7 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        credentials: Optional[dict] = None,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
@@ -228,6 +231,7 @@ class OceanAssets:
             metadata,
             files,
             tx_dict,
+            credentials,
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
@@ -244,6 +248,7 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        credentials: Optional[dict] = None,
     ) -> tuple:
         """Create asset of type "data", having UrlFiles, with good defaults"""
         metadata = self._default_metadata(name, tx_dict)
@@ -253,6 +258,7 @@ class OceanAssets:
             metadata,
             files,
             tx_dict,
+            credentials,
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
@@ -270,6 +276,7 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        credentials: Optional[dict] = None,
     ) -> tuple:
         """Create asset of type "data", having GraphqlQuery files, w good defaults"""
         metadata = self._default_metadata(name, tx_dict)
@@ -279,6 +286,7 @@ class OceanAssets:
             metadata,
             files,
             tx_dict,
+            credentials,
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
@@ -296,6 +304,7 @@ class OceanAssets:
         pricing_schema_args: Optional[
             Union[DispenserArguments, ExchangeArguments]
         ] = None,
+        credentials: Optional[dict] = None,
     ) -> tuple:
         """Create asset of type "data", having SmartContractCall files, w defaults"""
         chain_id = self._chain_id
@@ -307,6 +316,7 @@ class OceanAssets:
             metadata,
             files,
             tx_dict,
+            credentials,
             wait_for_aqua=wait_for_aqua,
             dt_template_index=dt_template_index,
             pricing_schema_args=pricing_schema_args,
