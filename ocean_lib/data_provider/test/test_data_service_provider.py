@@ -87,9 +87,12 @@ def test_initialize_fails():
         )
 
     mock_service.service_endpoint = DEFAULT_PROVIDER_URL
+    match_message = DataSP.build_endpoint("initialize", mock_service.service_endpoint)[
+        1
+    ]
     with pytest.raises(
         DataProviderException,
-        match=f"Failed to get a response for request: initializeEndpoint={DataSP.build_initialize_endpoint(mock_service.service_endpoint)[1]}",
+        match=f"Failed to get a response for request: initializeEndpoint={match_message}",
     ) as err:
         DataSP.initialize(
             "some_did",
@@ -382,34 +385,25 @@ def test_build_specific_endpoints():
 
     provider_uri = DEFAULT_PROVIDER_URL
     base_uri = DataSP.get_root_uri(DEFAULT_PROVIDER_URL)
-    assert DataSP.build_download_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["download"][1]
-    )
-    assert DataSP.build_initialize_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["initialize"][1]
-    )
-    assert DataSP.build_initialize_compute_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["initializeCompute"][1]
-    )
+
     assert (
-        DataSP.build_encrypt_endpoint(provider_uri, 8996)[1]
+        DataSP.build_endpoint("encrypt", provider_uri, {"chainId": 8996})[1]
         == urljoin(base_uri, endpoints["encrypt"][1]) + "?chainId=8996"
     )
-    assert DataSP.build_fileinfo(provider_uri)[1] == urljoin(
-        base_uri, endpoints["fileinfo"][1]
-    )
-    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["computeStatus"][1]
-    )
-    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["computeStart"][1]
-    )
-    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["computeStop"][1]
-    )
-    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
-        base_uri, endpoints["computeDelete"][1]
-    )
+
+    for key in [
+        "fileinfo",
+        "download",
+        "initialize",
+        "initializeCompute",
+        "computeStatus",
+        "computeStart",
+        "computeStop",
+        "computeDelete",
+    ]:
+        assert DataSP.build_endpoint(key, provider_uri)[1] == urljoin(
+            base_uri, endpoints[key][1]
+        )
 
     DataSP.get_service_endpoints = original_func
 

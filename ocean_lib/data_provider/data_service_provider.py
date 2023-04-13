@@ -45,8 +45,8 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> Response:
 
-        _, initialize_endpoint = DataServiceProvider.build_initialize_endpoint(
-            service.service_endpoint
+        _, initialize_endpoint = DataServiceProvider.build_endpoint(
+            "initialize", service.service_endpoint
         )
 
         payload = {
@@ -100,7 +100,7 @@ class DataServiceProvider(DataServiceProviderBase):
         (
             _,
             initialize_compute_endpoint,
-        ) = DataServiceProvider.build_initialize_compute_endpoint(service_endpoint)
+        ) = DataServiceProvider.build_endpoint("initializeCompute", service_endpoint)
 
         payload = {
             "datasets": datasets,
@@ -154,8 +154,8 @@ class DataServiceProvider(DataServiceProviderBase):
             )
             indexes = [index]
 
-        _, download_endpoint = DataServiceProvider.build_download_endpoint(
-            service_endpoint
+        _, download_endpoint = DataServiceProvider.build_endpoint(
+            "download", service_endpoint
         )
 
         payload = {
@@ -234,8 +234,8 @@ class DataServiceProvider(DataServiceProviderBase):
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
-        _, compute_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_endpoint = DataServiceProvider.build_endpoint(
+            "computeStart", dataset_compute_service.service_endpoint
         )
         response = DataServiceProvider._http_method(
             "post",
@@ -280,8 +280,8 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: bool whether the job was stopped successfully
         """
-        _, compute_stop_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_stop_endpoint = DataServiceProvider.build_endpoint(
+            "computeStop", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "put", did, job_id, compute_stop_endpoint, consumer
@@ -304,8 +304,8 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: bool whether the job was deleted successfully
         """
-        _, compute_delete_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_delete_endpoint = DataServiceProvider.build_endpoint(
+            "computeDelete", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "delete", did, job_id, compute_delete_endpoint, consumer
@@ -329,8 +329,8 @@ class DataServiceProvider(DataServiceProviderBase):
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
         """
-        _, compute_status_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_status_endpoint = DataServiceProvider.build_endpoint(
+            "computeStatus", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "get", did, job_id, compute_status_endpoint, consumer
@@ -363,11 +363,8 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer.address,
         }
 
-        (
-            _,
-            compute_job_result_endpoint,
-        ) = DataServiceProvider.build_compute_result_file_endpoint(
-            dataset_compute_service.service_endpoint
+        (_, compute_job_result_endpoint,) = DataServiceProvider.build_endpoint(
+            "computeResult", dataset_compute_service.service_endpoint
         )
         req.prepare_url(compute_job_result_endpoint, params)
         compute_job_result_file_url = req.url
@@ -528,17 +525,13 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def check_single_file_info(url_object: dict, provider_uri: str) -> bool:
-        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        response = requests.post(endpoint, json=url_object)
+        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
+        response = DataServiceProvider.post_raw(endpoint, json=url_object)
 
         if response.status_code != 200:
             return False
 
-        response = response.json()
-        for file_info in response:
-            return file_info["valid"]
-
-        return False
+        return any([file_info["valid"] for file_info in response.json()])
 
     @staticmethod
     @enforce_types
@@ -548,7 +541,7 @@ class DataServiceProvider(DataServiceProviderBase):
         if not did:
             return False
 
-        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
+        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
         data = {"did": did, "serviceId": service_id}
 
         if userdata is not None:

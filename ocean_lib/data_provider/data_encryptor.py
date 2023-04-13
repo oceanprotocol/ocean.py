@@ -35,8 +35,8 @@ class DataEncryptor(DataServiceProviderBase):
         else:
             payload = objects_to_encrypt
 
-        _, encrypt_endpoint = DataServiceProviderBase.build_encrypt_endpoint(
-            provider_uri, chain_id
+        _, encrypt_endpoint = DataServiceProviderBase.build_endpoint(
+            "encrypt", provider_uri, {"chainId": chain_id}
         )
 
         response = DataServiceProviderBase._http_method(

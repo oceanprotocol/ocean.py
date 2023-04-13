@@ -11,14 +11,12 @@ from datetime import datetime
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
-from requests.models import PreparedRequest
 
 import requests
 from enforce_typing import enforce_types
 from requests.exceptions import InvalidURL
-from requests.models import Response
+from requests.models import PreparedRequest, Response
 from requests.sessions import Session
-from web3.main import Web3
 
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -50,22 +48,8 @@ class DataServiceProviderBase:
     def sign_message(wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        message_hash = Web3.solidityKeccak(
-            ["bytes"],
-            [Web3.toBytes(text=f"{msg}{nonce}")],
-        )
-        signed = sign_with_key(message_hash, wallet.private_key)
 
-        return nonce, str(signed)
-
-    @staticmethod
-    @enforce_types
-    def _remove_slash(path: str) -> str:
-        if path.endswith("/"):
-            path = path[:-1]
-        if path.startswith("/"):
-            path = path[1:]
-        return path
+        return nonce, str(sign_with_key(f"{msg}{nonce}", wallet.private_key))
 
     @staticmethod
     @enforce_types
@@ -75,7 +59,7 @@ class DataServiceProviderBase:
 
         :return: Url, str
         """
-        return DataServiceProviderBase._remove_slash(config_dict.get("PROVIDER_URL"))
+        return _remove_slash(config_dict.get("PROVIDER_URL"))
 
     @staticmethod
     @enforce_types
@@ -83,9 +67,7 @@ class DataServiceProviderBase:
         """
         Return the service endpoints from the provider URL.
         """
-        provider_info = DataServiceProviderBase._http_method(
-            "get", url=provider_uri
-        ).json()
+        provider_info = DataServiceProviderBase.get(url=provider_uri)
 
         return provider_info["serviceEndpoints"]
 
@@ -96,13 +78,10 @@ class DataServiceProviderBase:
         Return the provider address
         """
         try:
-            _, envs_endpoint = DataServiceProviderBase.build_c2d_environments_endpoint(
-                provider_uri, chain_id
+            _, envs_endpoint = DataServiceProviderBase.build_endpoint(
+                "computeEnvironments", provider_uri, {"chainId": chain_id}
             )
-            environments = DataServiceProviderBase._http_method(
-                "get",
-                envs_endpoint,
-            ).json()
+            environments = DataServiceProviderBase.get(envs_endpoint)
 
             if str(chain_id) not in environments:
                 logger.warning(
@@ -123,9 +102,7 @@ class DataServiceProviderBase:
         Return the provider address
         """
         try:
-            provider_info = DataServiceProviderBase._http_method(
-                "get", provider_uri
-            ).json()
+            provider_info = DataServiceProviderBase.get(provider_uri)
 
             if "providerAddress" in provider_info:
                 logger.warning(
@@ -156,7 +133,7 @@ class DataServiceProviderBase:
         if parts[-2] == "services":
             provider_uri = "/".join(parts[:-2])
 
-        result = DataServiceProviderBase._remove_slash(provider_uri)
+        result = _remove_slash(provider_uri)
 
         if not result:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
@@ -167,15 +144,15 @@ class DataServiceProviderBase:
         except (requests.exceptions.RequestException, JSONDecodeError):
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
-        if "providerAddresses" not in response and "providerAddress" not in response:
-            raise InvalidURL(
-                f"Invalid Provider URL {service_endpoint}, no providerAddresses."
-            )
-
-        if "providerAddress" in response:
-            logger.warning(
-                "You might be using an older provider. ocean.py can not verify the chain id."
-            )
+        if "providerAddresses" not in response:
+            if "providerAddress" in response:
+                logger.warning(
+                    "You might be using an older provider. ocean.py can not verify the chain id."
+                )
+            else:
+                raise InvalidURL(
+                    f"Invalid Provider URL {service_endpoint}, no providerAddresses."
+                )
 
         return result
 
@@ -209,52 +186,6 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def build_encrypt_endpoint(provider_uri: str, chain_id: int) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint(
-            "encrypt", provider_uri, {"chainId": chain_id}
-        )
-
-    @staticmethod
-    @enforce_types
-    def build_initialize_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("initialize", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_initialize_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("initializeCompute", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_download_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("download", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("computeStatus", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_compute_result_file_endpoint(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("computeResult", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_fileinfo(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint("fileinfo", provider_uri)
-
-    @staticmethod
-    @enforce_types
-    def build_c2d_environments_endpoint(
-        provider_uri: str, chain_id: int
-    ) -> Tuple[str, str]:
-        return DataServiceProviderBase.build_endpoint(
-            "computeEnvironments", provider_uri, {"chainId": chain_id}
-        )
-
-    @staticmethod
-    @enforce_types
     def write_file(
         response: Response,
         destination_folder: Union[str, bytes, os.PathLike],
@@ -267,14 +198,14 @@ class DataServiceProviderBase:
         :param index: file index
         :return: None
         """
-
-        if response.status_code == 200:
-            with open(os.path.join(destination_folder, f"file{index}"), "wb") as f:
-                for chunk in response.iter_content(chunk_size=4096):
-                    f.write(chunk)
-            logger.info(f"Saved downloaded file in {f.name}")
-        else:
+        if response.status_code != 200:
             logger.warning(f"consume failed: {response.reason}")
+            return
+
+        with open(os.path.join(destination_folder, f"file{index}"), "wb") as f:
+            for chunk in response.iter_content(chunk_size=4096):
+                f.write(chunk)
+        logger.info(f"Saved downloaded file in {f.name}")
 
     @staticmethod
     @enforce_types
@@ -293,6 +224,7 @@ class DataServiceProviderBase:
                     "Invalid content disposition format. It was not possible to get the file name."
                 )
                 return None
+
             return re.match(
                 r"attachment;filename=(.+)",
                 response.headers.get("content-disposition"),
@@ -316,6 +248,21 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
+    def get(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+        return DataServiceProviderBase._http_method("get", *args, **kwargs).json()
+
+    @staticmethod
+    @enforce_types
+    def post(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+        return DataServiceProviderBase._http_method("post", *args, **kwargs).json()
+
+    @staticmethod
+    @enforce_types
+    def post_raw(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+        return DataServiceProviderBase._http_method("post", *args, **kwargs)
+
+    @staticmethod
+    @enforce_types
     def check_response(
         response,
         endpoint_name: str,
@@ -326,17 +273,14 @@ class DataServiceProviderBase:
     ):
         if not response or not hasattr(response, "status_code"):
             if isinstance(response, Response) and response.status_code == 400:
-                error = response.json().get("error", None)
-                if error is None:
-                    error = response.json().get("errors", "unknown error")
+                error = response.json().get(
+                    "error", response.json().get("errors", "unknown error")
+                )
 
                 raise DataProviderException(f"{endpoint_name} failed: {error}")
 
-            response_content = (
-                getattr(response, "content")
-                if hasattr(response, "content")
-                else "<none>"
-            )
+            response_content = getattr(response, "content", "<none>")
+
             raise DataProviderException(
                 f"Failed to get a response for request: {endpoint_name}={endpoint}, payload={payload}, response is {response_content}"
             )
@@ -360,3 +304,10 @@ def urljoin(*args) -> str:
     trailing_slash = "/" if args[-1].endswith("/") else ""
 
     return "/".join(map(lambda x: str(x).strip("/"), args)) + trailing_slash
+
+
+def _remove_slash(path: str) -> str:
+    path = path[:-1] if path.endswith("/") else path
+    path = path[1:] if path.startswith("/") else path
+
+    return path
