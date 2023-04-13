@@ -25,14 +25,7 @@ class TestReadmes(object):
             "generated-readmes/test_setup-local.py",
         )
         result = runpy.run_path(str(prerequisite), run_name="__main__")
-        for key in [
-            "os",
-            "config",
-            "ocean",
-            "alice",
-            "bob",
-            "carlos"
-        ]:
+        for key in ["os", "config", "ocean", "alice", "bob", "carlos"]:
             globs[key] = result[key]
 
         self.globs = globs
