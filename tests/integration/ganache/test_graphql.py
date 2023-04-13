@@ -25,13 +25,13 @@ def test_consume_simple_graphql_query(
 ):
     data_provider = DataServiceProvider
     ocean = Ocean(config)
-    url = "http://172.15.0.15:8000/subgraphs/name/oceanprotocol/ocean-subgraph"
+    url = "http://172.15.0.15:8030/graphql"
     query = """
         query{
-            nfts(orderby: createdtimestamp,orderdirection:desc){
-                id
-                symbol
-                createdtimestamp
+            indexingStatuses{
+                subgraph
+                chains
+                node
             }
         }
         """
@@ -120,13 +120,13 @@ def test_consume_parametrized_graphql_query(
         "license": "https://market.oceanprotocol.com/terms",
     }
     graphql_query = GraphqlQuery(
-        url="https://v4.subgraph.goerli.oceanprotocol.com/subgraphs/name/oceanprotocol/ocean-subgraph",
+        url="http://172.15.0.15:8030/graphql",
         query="""
-                    query nfts($nftAddress: String){
-                        nfts(where: {id:$nftAddress},orderBy: createdTimestamp,orderDirection:desc){
-                            id
-                            symbol
-                            createdTimestamp
+                    query{
+                        indexingStatuses{
+                            subgraph
+                            chains
+                            node
                         }
                     }
                     """,
