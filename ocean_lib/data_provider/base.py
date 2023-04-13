@@ -237,7 +237,7 @@ class DataServiceProviderBase:
     @enforce_types
     def _http_method(method: str, *args, **kwargs) -> Optional[Union[Mock, Response]]:
         try:
-            return getattr(DataServiceProviderBase._http_client, method)(
+            return getattr(DataServiceProviderBase._http_client, method.lower())(
                 *args, **kwargs
             )
         except Exception:

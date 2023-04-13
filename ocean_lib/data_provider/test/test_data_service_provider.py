@@ -87,22 +87,16 @@ def test_initialize_fails():
         )
 
     mock_service.service_endpoint = DEFAULT_PROVIDER_URL
-    match_message = DataSP.build_endpoint("initialize", mock_service.service_endpoint)[
-        1
-    ]
     with pytest.raises(
         DataProviderException,
-        match=f"Failed to get a response for request: initializeEndpoint={match_message}",
-    ) as err:
+        match="initializeEndpoint failed",
+    ):
         DataSP.initialize(
             "some_did",
             mock_service,
             "some_consumer_address",
             userdata={"test_dict_key": "test_dict_value"},
         )
-    assert err.value.args[0].startswith(
-        "Failed to get a response for request: initializeEndpoint"
-    )
 
 
 @pytest.mark.unit
