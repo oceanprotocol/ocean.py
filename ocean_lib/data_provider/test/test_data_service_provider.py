@@ -28,7 +28,6 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_registered_asset_with_access_service,
 )
-from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     TEST_SERVICE_ENDPOINTS,
     HttpClientEmptyMock,
@@ -297,15 +296,6 @@ def test_provider_address():
     provider_address = DataSP.get_provider_address(provider_uri, 8996)
     assert provider_address, "Failed to get provider address."
 
-
-@pytest.mark.integration
-def test_provider_address_with_url():
-    """Tests that a URL version of provider address exists on the DataServiceProvider."""
-    p_ocean_instance = get_publisher_ocean_instance()
-    provider_address = DataSP.get_provider_address(
-        DataSP.get_url(p_ocean_instance.config_dict), 8996
-    )
-    assert provider_address, "Failed to get provider address."
     assert DataSP.get_provider_address("not a url", 8996) is None
 
 

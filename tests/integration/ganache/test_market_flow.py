@@ -10,7 +10,6 @@ from web3.main import Web3
 
 from ocean_lib.models.datatoken_base import TokenFeeInfo
 from ocean_lib.ocean.util import to_wei
-from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
 
@@ -19,7 +18,7 @@ from tests.resources.helper_functions import get_another_consumer_ocean_instance
 def test_market_flow(
     publisher_wallet,
     consumer_wallet,
-    publisher_ocean,
+    basic_asset,
     consumer_ocean,
     another_consumer_wallet,
     consumer_type,
@@ -31,9 +30,7 @@ def test_market_flow(
     consumer_ocean = consumer_ocean
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
-    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
+    data_nft, datatoken, ddo = basic_asset
     service = ddo.services[0]
 
     # Mint data tokens and assign to publisher
@@ -98,14 +95,12 @@ def test_market_flow(
 
 @pytest.mark.integration
 def test_pay_for_access_service_good_default(
+    basic_asset,
     publisher_wallet,
     consumer_wallet,
-    publisher_ocean,
     consumer_ocean,
 ):
-    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
+    data_nft, datatoken, ddo = basic_asset
     service = ddo.services[0]
 
     # Mint datatokens to consumer
