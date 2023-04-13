@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
-import time
-import uuid
 from datetime import datetime
 from unittest.mock import patch
 
@@ -45,21 +43,29 @@ def test_register_asset(publisher_ocean):
 
 
 @pytest.mark.integration
-def test_update_metadata(publisher_ocean, publisher_wallet):
-    _, _, ddo = get_registered_asset_with_access_service(
+def test_update(publisher_ocean, publisher_wallet):
+    data_nft, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean, publisher_wallet
     )
 
     new_metadata = copy.deepcopy(ddo.metadata)
 
-    # Update only metadata
+    # Update metadata
     _description = "Updated description"
     new_metadata["description"] = _description
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
+    # Update credentials
+    _new_credentials = {
+        "allow": [{"type": "address", "values": ["0x123", "0x456"]}],
+        "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
+    }
+    ddo.credentials = _new_credentials
+
     ddo2 = publisher_ocean.assets.update(ddo, {"from": publisher_wallet})
 
+    # Check metadata update
     assert ddo2.datatokens == ddo.datatokens
     assert len(ddo2.services) == len(ddo.services)
     assert ddo2.services[0].as_dictionary() == ddo.services[0].as_dictionary()
@@ -67,24 +73,17 @@ def test_update_metadata(publisher_ocean, publisher_wallet):
     assert ddo2.metadata["description"] == _description
     assert ddo2.metadata["updated"] == new_metadata["updated"]
 
+    # Check credentials update
+    assert ddo2.credentials == _new_credentials, "Credentials were not updated."
 
-@pytest.mark.integration
-def test_update_credentials(publisher_ocean, publisher_wallet):
-    _, _, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
+    # Check flags update
+    registered_token_event = data_nft.contract.events.get_sequence(
+        ddo2.event.get("block"),
+        network.chain[-1].number,
+        "MetadataUpdated",
     )
 
-    # Update credentials
-    _new_credentials = {
-        "allow": [{"type": "address", "values": ["0x123", "0x456"]}],
-        "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
-    }
-
-    ddo.credentials = _new_credentials
-
-    ddo2 = publisher_ocean.assets.update(ddo, {"from": publisher_wallet})
-
-    assert ddo2.credentials == _new_credentials, "Credentials were not updated."
+    assert registered_token_event[0].args.get("flags") == bytes([3])
 
 
 @pytest.mark.integration
@@ -165,81 +164,9 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
 
 
 @pytest.mark.integration
-def test_update_flags(publisher_ocean, publisher_wallet):
-    data_nft, _, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
-
-    ddo2 = publisher_ocean.assets.update(
-        ddo,
-        {"from": publisher_wallet},
-        compress_flag=True,
-        encrypt_flag=True,
-    )
-
-    registered_token_event = data_nft.contract.events.get_sequence(
-        ddo2.event.get("block"),
-        network.chain[-1].number,
-        "MetadataUpdated",
-    )
-
-    assert registered_token_event[0].args.get("flags") == bytes([3])
-
-
-@pytest.mark.integration
-def test_ocean_assets_search(publisher_ocean, publisher_wallet):
-    identifier = str(uuid.uuid1()).replace("-", "")
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": identifier,
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    assert len(publisher_ocean.assets.search(identifier)) == 0, "DDO search failed."
-
-    get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet, metadata
-    )
-
-    time.sleep(1)  # apparently changes are not instantaneous
-    assert (
-        len(publisher_ocean.assets.search(identifier)) == 1
-    ), "Searched for the occurrences of the identifier failed. "
-
-    assert (
-        len(
-            publisher_ocean.assets.query(
-                {
-                    "query": {
-                        "query_string": {
-                            "query": identifier,
-                            "fields": ["metadata.name"],
-                        }
-                    }
-                }
-            )
-        )
-        == 1
-    ), "Query failed.The identifier was not found in the name."
-    assert (
-        len(
-            publisher_ocean.assets.query(
-                {
-                    "query": {
-                        "query_string": {
-                            "query": "Gorilla",
-                            "fields": ["metadata.name"],
-                        }
-                    }
-                }
-            )
-        )
-        == 0
-    )
+def test_ocean_assets_search():
+    # skipping as tested by the search-and-filter readme
+    assert True
 
 
 @pytest.mark.integration
@@ -260,32 +187,9 @@ def test_ocean_assets_validate(publisher_ocean):
 
 
 @pytest.mark.integration
-def test_ocean_assets_algorithm(publisher_ocean, publisher_wallet):
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample algorithm asset",
-        "type": "algorithm",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-        "algorithm": {
-            "language": "scala",
-            "format": "docker-image",
-            "version": "0.1",
-            "container": {
-                "entrypoint": "node $ALGO",
-                "image": "node",
-                "tag": "10",
-                "checksum": "test",
-            },
-        },
-    }
-
-    _, _, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet, metadata
-    )
-    assert ddo, "DDO None. The ddo is not cached after the creation."
+def test_ocean_assets_algorithm():
+    # skipped because it is covered by c2d tests
+    assert True
 
 
 @pytest.mark.unit
@@ -338,17 +242,9 @@ def test_create_bad_metadata(publisher_ocean, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_url_asset(publisher_ocean, publisher_wallet):
-    ocean = publisher_ocean
-
-    name = "Branin dataset"
-    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(
-        name, url, {"from": publisher_wallet}
-    )
-
-    assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
-    assert len(ddo.datatokens) == 1
+def test_create_url_asset():
+    # skipped because this functionality is intrinsic to the basic_asset fixture
+    assert True
 
 
 @pytest.mark.integration

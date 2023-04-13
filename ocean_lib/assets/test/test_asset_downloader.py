@@ -16,11 +16,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.datatoken_base import TokenFeeInfo
 from ocean_lib.ocean.util import to_wei
 from ocean_lib.services.service import Service
-from tests.resources.ddo_helpers import (
-    get_first_service_by_type,
-    get_registered_asset_with_access_service,
-    get_sample_ddo,
-)
+from tests.resources.ddo_helpers import get_first_service_by_type, get_sample_ddo
 
 
 @pytest.mark.unit
@@ -144,15 +140,13 @@ def test_ocean_assets_download_indexes(publisher_wallet):
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
     tmpdir,
-    publisher_wallet,
     publisher_ocean,
+    publisher_wallet,
+    basic_asset,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
     data_provider = DataServiceProvider
-    data_nft, datatoken, ddo = get_registered_asset_with_access_service(
-        publisher_ocean, publisher_wallet
-    )
-
+    data_nft, datatoken, ddo = basic_asset
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     datatoken.mint(

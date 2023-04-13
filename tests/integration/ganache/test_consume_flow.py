@@ -18,15 +18,14 @@ ARWEAVE_TRANSACTION_ID = "a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
 
 @pytest.mark.integration
 @pytest.mark.parametrize("asset_type", ["simple", "graphql", "onchain", "arweave"])
-def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_type):
+def test_consume_asset(
+    config: dict, publisher_wallet, consumer_wallet, basic_asset, asset_type
+):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
 
     if asset_type == "simple":
-        url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-        data_nft, dt, ddo = ocean_assets.create_url_asset(
-            "Data NFTs in Ocean", url, {"from": publisher_wallet}
-        )
+        data_nft, dt, ddo = basic_asset
     elif asset_type == "arweave":
         data_nft, dt, ddo = ocean_assets.create_arweave_asset(
             "Data NFTs in Ocean", ARWEAVE_TRANSACTION_ID, {"from": publisher_wallet}
@@ -63,7 +62,8 @@ def test_consume_asset(config: dict, publisher_wallet, consumer_wallet, asset_ty
     assert ddo, "The ddo is not created."
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "Data NFTs in Ocean: DT1"
+    if asset_type != "simple":
+        assert ddo.datatokens[0]["name"] == "Data NFTs in Ocean: DT1"
 
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
