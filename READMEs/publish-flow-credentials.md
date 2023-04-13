@@ -12,7 +12,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up lo
 Here are the steps:
 
 1.  Publish a dataset that can only be accessed by Alice and Bob. Everyone else will be denied.
-2.  Update the dataset so only Carlos will be denied, everyone else will have access.
+2.  Update the dataset so only Bob will be denied, everyone else will have access.
 
 
 Let's go through each step.
@@ -24,8 +24,8 @@ Let's go through each step.
 url = 'http://www.example.net'
 name = "Restricted dataset"
 credentials = {
-        "allow": [{"type": "address", "values": [alice.address, bob.address]}],
-        "deny": [],
+    "allow": [{"type": "address", "values": [alice.address, bob.address]}],
+    "deny": [],
 }
 #create asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(name, url, {"from": carlos}, credentials = credentials)
@@ -33,21 +33,22 @@ print(f"Just published asset, with did={ddo.did}")
 ```
 
 
-That's it! You've created a data asset which is accesible only to Alice and Bob. Consume here is just like in [consume-flow](consume-flow.md). 
+That's it! You've created a data asset which is accesible only to Alice and Bob. Consume here is just like in [consume-flow](consume-flow.md).
 
 
-## 2. David updates the asset, allowing everyone, but denying Bob
+## 2. Carlos updates the asset, allowing everyone, but denying Bob
+
+Using the ddo directly, or later using `ddo=ocean.assets.resolve(<DID you wrote down previously>)`
 
 ```python
-ddo2 = ocean.assets.resolve(ddo.did)
-ddo2.credentials = {
-        "allow": [],
-        "deny": [{"type": "address", "values": [bob.address]}],
+ddo.credentials = {
+    "allow": [],
+    "deny": [{"type": "address", "values": [bob.address]}],
 }
-ddo2 = ocean.assets.update(ddo2, {"from": carlos})
+ddo = ocean.assets.update(ddo, {"from": carlos})
 ```
 
 
-That's it! Now everyone can access the dataset, except Bob. Consume here is just like in [consume-flow](consume-flow.md). 
+That's it! Now everyone can access the dataset, except Bob. Consume here is just like in [consume-flow](consume-flow.md).
 
 For more information about credentials, you can refer to [docs](https://docs.oceanprotocol.com/core-concepts/did-ddo#credentials).
