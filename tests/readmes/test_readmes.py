@@ -25,13 +25,7 @@ class TestReadmes(object):
             "generated-readmes/test_setup-local.py",
         )
         result = runpy.run_path(str(prerequisite), run_name="__main__")
-        for key in [
-            "os",
-            "config",
-            "ocean",
-            "alice",
-            "bob",
-        ]:
+        for key in ["os", "config", "ocean", "alice", "bob", "carlos"]:
             globs[key] = result[key]
 
         self.globs = globs
@@ -51,6 +45,7 @@ class TestReadmes(object):
             "services",
             "setup-local",
             "setup-remote",
+            "publish-flow-credentials",
             "publish-flow-restapi",  # TODO: fix and restore
             "gas-strategy-remote",
         ]

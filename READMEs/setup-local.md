@@ -58,6 +58,8 @@ Then, set keys in readmes. As a Linux user, you'll use "`export`". In the same c
 # keys for alice and bob in readmes
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+export TEST_PRIVATE_KEY3=0x732fbb7c355aa8898f4cff92fa7a6a947339eaf026a08a51f171199e35a18ae0
+
 
 # key for minting fake OCEAN
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
@@ -99,11 +101,17 @@ alice = accounts.add(alice_private_key)
 assert alice.balance() > 0, "Alice needs ETH"
 assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
-# Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
+# Create additional wallets. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob = accounts.add(bob_private_key)
 assert bob.balance() > 0, "Bob needs ETH"
 assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
+
+carlos_private_key = os.getenv('TEST_PRIVATE_KEY3')
+carlos = accounts.add(carlos_private_key)
+assert carlos.balance() > 0, "Carlos needs ETH"
+assert OCEAN.balanceOf(carlos) > 0, "Carlos needs OCEAN"
+
 
 # Compact wei <> eth conversion
 from ocean_lib.ocean.util import to_wei, from_wei
