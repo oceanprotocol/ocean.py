@@ -43,7 +43,7 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> Response:
 
-        method, initialize_endpoint = DataServiceProvider.build_endpoint(
+        _, initialize_endpoint = DataServiceProvider.build_endpoint(
             "initialize", service.service_endpoint
         )
 
@@ -57,9 +57,7 @@ class DataServiceProvider(DataServiceProviderBase):
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        response = DataServiceProvider._http_method(
-            method, url=initialize_endpoint, params=payload
-        )
+        response = DataServiceProvider.get_raw(url=initialize_endpoint, params=payload)
 
         DataServiceProviderBase.check_response(
             response, "initializeEndpoint", initialize_endpoint, payload
@@ -88,7 +86,7 @@ class DataServiceProvider(DataServiceProviderBase):
         The first dataset is also required to have a compute service.
         """
         (
-            method,
+            _,
             initialize_compute_endpoint,
         ) = DataServiceProvider.build_endpoint("initializeCompute", service_endpoint)
 
@@ -102,8 +100,7 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer_address,
         }
 
-        response = DataServiceProvider._http_method(
-            method,
+        response = DataServiceProvider.post_raw(
             initialize_compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -144,7 +141,7 @@ class DataServiceProvider(DataServiceProviderBase):
             )
             indexes = [index]
 
-        method, download_endpoint = DataServiceProvider.build_endpoint(
+        _, download_endpoint = DataServiceProvider.build_endpoint(
             "download", service_endpoint
         )
 
@@ -164,8 +161,8 @@ class DataServiceProvider(DataServiceProviderBase):
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet, did
             )
-            response = DataServiceProvider._http_method(
-                method, url=download_endpoint, params=payload, stream=True, timeout=3
+            response = DataServiceProvider.get_raw(
+                url=download_endpoint, params=payload, stream=True, timeout=3
             )
 
             DataServiceProviderBase.check_response(

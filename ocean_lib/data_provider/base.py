@@ -248,12 +248,17 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def get(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+    def get(*args, **kwargs) -> dict:
         return DataServiceProviderBase._http_method("get", *args, **kwargs).json()
 
     @staticmethod
     @enforce_types
-    def post(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+    def get_raw(*args, **kwargs) -> Optional[Union[Mock, Response]]:
+        return DataServiceProviderBase._http_method("get", *args, **kwargs)
+
+    @staticmethod
+    @enforce_types
+    def post(*args, **kwargs) -> dict:
         return DataServiceProviderBase._http_method("post", *args, **kwargs).json()
 
     @staticmethod
