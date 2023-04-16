@@ -42,7 +42,6 @@ import brownie
 from brownie.network import accounts
 import pytest
 from pytest import approx
-
     
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.web3_internal.utils import connect_to_network
@@ -52,7 +51,6 @@ from ocean_lib.ocean.util import from_wei, to_wei
 
 accounts = brownie.network.accounts
 chain = brownie.network.chain
-predictoor1, predictoor2, trader, opf, rando, contract_account = accounts[:6]
 
 def test_main_py():
     _test_main(use_py=True)
@@ -68,47 +66,21 @@ def _test_main(use_py):
     connect_to_network("development")
     config = get_config_dict("development")
     ocean = Ocean(config)
-
-    # Create OCEAN object. Barge auto-created OCEAN, and ocean instance knows
     OCEAN = ocean.OCEAN_token
 
-    # Create Alice's wallet
-    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice = accounts.add(alice_private_key)
-
-    print("Test me: does Alice have OCEAN at this point? If no, ok too")
-    import pdb; db.set_trace() 
-    assert alice.balance() > 0, "Alice needs ETH"
-    assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
-
-    print("We want opf account = alice account, with $$. How?")
-    print(f"  alice.address = {alice.address}")
-    for i, account in enumerate(accounts[6:]):
-        print(f"  accounts[i].address = {account.address}")
-    import pdb; db.set_trace()
-
-    print(f"Do I have private keys? Deployer does minting, key1 is alice")
-    for key_label in ["FACTORY_DEPLOYER_PRIVATE_KEY", "TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2", "TEST_PRIVATE_KEY3"]:
-        key = os.environ.get(key_label)
-        print(f"  {key_label} = {key}")
-    import pdb; db.set_trace()
-
-    # Mint fake OCEAN to envvar TEST_PRIVATE_KEY{1,2,3}. Alice is key 1.
-    mint_fake_OCEAN(config)
-
-    #give OCEAN to key users
-    initbal = 100.0
-    OCEAN.transfer(predictoor1, to_wei(initbal), {"from": alice})
-    OCEAN.transfer(predictoor2, to_wei(initbal), {"from": alice})
-    OCEAN.transfer(trader, to_wei(initbal), {"from": alice})
-    
-    #======================================================================
-    #deploy OCEAN, give some to key users
-    OCEAN = _deployOCEAN(opf)
-    initbal = 1000.0
-    OCEAN.transfer(predictoor1, to_wei(initbal), {"from": opf})
-    OCEAN.transfer(predictoor2, to_wei(initbal), {"from": opf})
-    OCEAN.transfer(trader, to_wei(initbal), {"from": opf})
+    # Ensure that users have OCEAN and ETH as needed
+    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2,3}
+    opf = accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
+    predictoor1 = accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
+    predictoor2 = accounts.add()
+    trader = accounts.add()
+    rando = accounts.add()
+    for acct in [predictoor2, trader, rando]:
+        opf.transfer(acct, to_wei(100.0))
+        OCEAN.transfer(acct, to_wei(100.0), {"from": opf})
+    for i, acct in enumerate([opf, predictoor1, predictoor2, trader, rando]):
+        assert acct.balance() > 0, f"acct {i} needs ETH"
+        assert OCEAN.balanceOf(acct) > 0, f"acct {i} needs OCEAN"
 
     #convenience functions to get OCEAN balance & allowance
     c = ConvClass(OCEAN)
