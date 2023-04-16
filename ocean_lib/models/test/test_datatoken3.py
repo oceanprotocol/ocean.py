@@ -117,7 +117,7 @@ def _test_main(use_py):
     #new DT template with Predictoor functionality
     DT = data_nft.create_datatoken(
         {"from": opf}, name="Datatoken 1", symbol="DT1",
-        template_index=3,
+        template_index=3, #will make it 
         min_blocks_ahead=min_blocks_ahead,
         min_predns_for_payout=min_predns_for_payout,
         num_blocks_subscription=num_blocks_subscription,
@@ -219,35 +219,3 @@ class ConvClass:
 
 def _cur_blocknum():
     return chain[-1].number
-        
-def _predictoor_contract(
-        use_py:bool,
-        min_blocks_ahead:int,
-        num_blocks_before_release:int,
-        pmt_token,
-        DT_price_wei:int,
-        tx_dict:dict,
-        contract_account):
-
-    if use_py: # python version
-        return PyPredictoorContract(
-            min_blocks_ahead,
-            num_blocks_before_release,
-            pmt_token,
-            DT_price_wei,
-            tx_dict,
-            contract_account)
-
-    else: # solidity version
-        assert contract_account is None
-        return B.Predictoor.deploy() #FIXME: put in args when ready to do .sol
-
-    
-def _deployOCEAN(owner):
-    total_supply = 10e3
-    OCEAN = B.Simpletoken.deploy(
-        "OCEAN", "OCEAN", 18, to_wei(total_supply), {"from": owner})
-    bal_opf = from_wei(OCEAN.balanceOf(opf))
-    assert bal_opf == 10e3, "expected deployer to get all OCEAN"
-    return OCEAN
-    
