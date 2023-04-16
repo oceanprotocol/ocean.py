@@ -3,6 +3,10 @@ Copyright 2023 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
+**[Predictoor README](READMEs/predictoor.md).** (Remove this when done prototype)
+
+----
+
 <h1 align="center">
 <img src="https://github.com/oceanprotocol/art/blob/main/splashes/ocean_py.png?raw=true" width="300"/>
 </h1>
@@ -11,6 +15,8 @@ SPDX-License-Identifier: Apache-2.0
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
+
+
 
 With ocean.py, you can:
 
