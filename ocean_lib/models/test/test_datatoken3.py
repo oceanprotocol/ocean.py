@@ -9,6 +9,10 @@ Previous prototypes:
 - Prot 1: OCEAN staking, no DT. https://github.com/oceanprotocol/predictoor/blob/main/tests/test_predictoor.py
 - Prot 2: veOCEAN staking, DT. https://github.com/oceanprotocol/predictoor/blob/main/tests/test_datatoken_approach.py
 
+Q: how to reconcile DNFT/DT with "access control (incl onchain)"?
+SubQ: How to have a *feed* where DT owner doesn't need to claim each time?
+A: new datatoken template (#3) for predictoor.sol functionality
+
 How datatoken (DT) gives predictoor.sol functionality:
 - DT adds methods: submit predictions, get agg predval
   - Staking = as part of submitting predictions
