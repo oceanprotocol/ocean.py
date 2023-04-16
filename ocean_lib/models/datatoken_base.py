@@ -75,12 +75,17 @@ class DatatokenArguments:
         files: Optional[List[FilesType]] = None,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
         cap: Optional[int] = None,
+        min_blocks_ahead: Optional[int] = None,
+        min_predns_for_payout: Optional[int] = None,
+        num_blocks_subscription: Optional[int] = None,
     ):
-        if template_index == 2 and not cap:
-            raise Exception("Cap is needed for Datatoken Template 2 token deployment.")
-
-        self.cap = cap if template_index == 2 else MAX_UINT256
-
+        if template_index == 2:
+            assert cap, "Template 2 needs cap"
+        if template_index == 3:
+            assert min_blocks_ahead, "Template 3 needs min_blocks_ahead"
+            assert min_predns_for_payout, "Template 3 needs min_blocks_ahead"
+            assert num_blocks_subscription, "Template 3 needs min_blocks_ahead"
+            
         self.name = name
         self.symbol = symbol
         self.template_index = template_index
@@ -93,6 +98,11 @@ class DatatokenArguments:
 
         self.publish_market_order_fees = publish_market_order_fees or TokenFeeInfo()
         self.set_default_fees_at_deploy = not publish_market_order_fees
+
+        self.cap = cap if template_index == 2 else MAX_UINT256
+        self.min_blocks_ahead = min_blocks_ahead
+        self.min_predns_for_payout = min_predns_for_payout
+        self.num_blocks_subscription = num_blocks_subscription
 
     def create_datatoken(self, data_nft, tx_dict, with_services=False):
         config_dict = data_nft.config_dict

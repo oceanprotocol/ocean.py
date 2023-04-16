@@ -68,24 +68,39 @@ def _test_main(use_py):
     ocean = Ocean(config)
     OCEAN = ocean.OCEAN_token
 
+    #convenience functions to get OCEAN balance & allowance, ETH balance
+    c = ConvClass(OCEAN)
+    OCEAN_bal = c.fromWei_balanceOf
+    OCEAN_approved = c.fromWei_approved
+    def ETH_bal(acct):
+        return from_wei(acct.balance())
+
     # Ensure that users have OCEAN and ETH as needed
-    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2,3}
+    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
     opf = accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
     predictoor1 = accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
     predictoor2 = accounts.add()
     trader = accounts.add()
     rando = accounts.add()
+    accts = [opf, predictoor1, predictoor2, trader, rando]
+
+    print("n\Balances before moving funds:")
+    for i, acct in enumerate(accts):
+        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
+
+    print("\nMove funds...")
     for acct in [predictoor2, trader, rando]:
         opf.transfer(acct, to_wei(100.0))
         OCEAN.transfer(acct, to_wei(100.0), {"from": opf})
-    for i, acct in enumerate([opf, predictoor1, predictoor2, trader, rando]):
-        assert acct.balance() > 0, f"acct {i} needs ETH"
-        assert OCEAN.balanceOf(acct) > 0, f"acct {i} needs OCEAN"
 
-    #convenience functions to get OCEAN balance & allowance
-    c = ConvClass(OCEAN)
-    OCEAN_bal = c.fromWei_balanceOf
-    OCEAN_approved = c.fromWei_approved
+    print("\nBalances after moving funds:")
+    for i, acct in enumerate(accts):
+        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
+
+    #check if enough funds
+    for i, acct in enumerate(accts):
+        assert ETH_bal(acct) > 0, f"acct {i} needs ETH"
+        assert OCEAN_bal(acct), f"acct {i} needs OCEAN"
 
     #======================================================================
     #SETUP CONTRACTS

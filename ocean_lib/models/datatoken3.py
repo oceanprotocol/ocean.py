@@ -10,7 +10,7 @@ from enforce_typing import enforce_types
 from ocean_lib.models.datatoken1 import Datatoken1
 
 class Datatoken3(Datatoken1):
-    CONTRACT_NAME = "ERC20Template3"
+    CONTRACT_NAME = "ERC20Template" #switch to ERC20Template3 when ready
 
     #placeholders for now
     def submit_predval(self, prediction, stake, predict_blocknum):
