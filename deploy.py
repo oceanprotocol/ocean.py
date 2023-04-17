@@ -52,16 +52,23 @@ def _deploy_contracts(owner) -> dict:
     B = brownie.project.load("./", name="MyProject")
     
     OCEAN = B.OceanToken.deploy(owner, fr)
-    fee_coll = B.OPFCommunityFeeCollector.deploy(owner, owner, fr)
-    router = B.FactoryRouter.deploy(owner, OCEAN, DEAD_ADDRESS, fee_coll, [], fr)
+    fee_collector = B.OPFCommunityFeeCollector.deploy(owner, owner, fr)
+    
+    router = B.FactoryRouter.deploy(
+        owner, OCEAN, DEAD_ADDRESS, fee_collector, [], fr)
+    
     fre = B.FixedRateExchange.deploy(router, fr)
+    router.addFixedRateContract(fre, fr)
+    
+    dispenser = B.Dispenser.deploy(router, fr)
+    router.addDispenserContract(dispenser, fr)
+    
     dt_temp1 = B.ERC20Template.deploy(fr)
     dt_temp2 = B.ERC20TemplateEnterprise.deploy(fr)
     dt_temp3 = B.ERC20Template3.deploy(fr)
     dnft_temp1 = B.ERC721Template.deploy(fr)
-    dispenser = B.Dispenser.deploy(router, fr)
+    
     dnft_factory = B.ERC721Factory.deploy(dnft_temp1, dt_temp1, router, fr)
-
     dnft_factory.addTokenTemplate(dt_temp2, fr)
     dnft_factory.addTokenTemplate(dt_temp3, fr)
     
@@ -81,7 +88,7 @@ def _deploy_contracts(owner) -> dict:
 
     return {
         "Ocean" : OCEAN.address,
-        "OPFCommunityFeeCollector" : fee_coll.address,
+        "OPFCommunityFeeCollector" : fee_collector.address,
         "Router" : router.address,
         "FixedPrice" : fre.address,
         "ERC20Template" : {
