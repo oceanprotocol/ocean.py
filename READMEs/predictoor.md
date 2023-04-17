@@ -63,15 +63,18 @@ export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 5. Compile
+## 5. Compile & deploy contracts
 
 We need to compile once at the beginning, and recompile whenever we change ERC20Template3.sol.
 
 In work console:
 
 ```
-#compile
+#compile contracts
 brownie compile
+
+#deploy contracts to ganache
+./deploy.py
 ```
 
 ## 6. Test
