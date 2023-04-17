@@ -36,6 +36,7 @@ Q: how to reconcile DNFT/DT with "distribute $ from feed?
 Remaining challenges:
 - privacy for submitted predvals, agg predval, when computing agg predval. See Product Design GDoc. 
 """
+import json
 import os
     
 import brownie
@@ -49,8 +50,11 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import from_wei, to_wei
 
-accounts = brownie.network.accounts
+ADDRESS_FILE = "~/.ocean/ocean-contracts/artifacts/address.json"
+
+br_accounts = brownie.network.accounts
 chain = brownie.network.chain
+DEAD_ADDRESS = "0x000000000000000000000000000000000000dead"
 
 def test_main_py():
     _test_main(use_py=True)
@@ -63,33 +67,51 @@ def _test_main(use_py):
 
     #======
     #SETUP SYSTEM
+    
     connect_to_network("development")
-    config = get_config_dict("development")
-    ocean = Ocean(config)
-    OCEAN = ocean.OCEAN
 
-    #convenience functions to get OCEAN balance & allowance, ETH balance
+    #create accounts
+    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
+    predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
+    predictoor2 = br_accounts.add()
+    trader = br_accounts.add()
+    rando = br_accounts.add()
+    accts = [opf, predictoor1, predictoor2, trader, rando]
+
+    #deploy contracts
+    # -with this trick, I can change Ocean contracts all I want, in this repo
+    addresses_at_network = _deploy_contracts(opf) # [contract_name] : address
+
+    #update address file
+    addresses = {"development" : addresses_at_network}
+    address_file = os.path.expanduser(ADDRESS_FILE)
+    with open(address_file, "w") as f:
+        json.dump(addresses, f)
+
+    #set ocean object
+    config = get_config_dict("development")
+    config["ADDRESS_FILE"] = address_file
+    ocean = Ocean(config, "no_provider")
+    
+    #convenience objects
+    OCEAN = ocean.OCEAN_token
+
+    #convenience functions
     c = ConvClass(OCEAN)
     OCEAN_bal = c.fromWei_balanceOf
     OCEAN_approved = c.fromWei_approved
     def ETH_bal(acct):
         return from_wei(acct.balance())
-
+    
     # Ensure that users have OCEAN and ETH as needed
     # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
-    opf = accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
-    predictoor1 = accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
-    predictoor2 = accounts.add()
-    trader = accounts.add()
-    rando = accounts.add()
-    accts = [opf, predictoor1, predictoor2, trader, rando]
 
     print("n\Balances before moving funds:")
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
 
     print("\nMove funds...")
-    for acct in [predictoor2, trader, rando]:
+    for acct in [predictoor1, predictoor2, trader, rando]:
         opf.transfer(acct, to_wei(100.0))
         OCEAN.transfer(acct, to_wei(100.0), {"from": opf})
 
@@ -115,6 +137,14 @@ def _test_main(use_py):
     )
 
     #new DT template with Predictoor functionality
+    #  DataNFT.create_datatoken(tx_dict, *args, **kwargs)
+    #   -> datatoken_args:DatatokenArguments = get_args_object(args, kwargs, DatatokenArguments)
+    #     -> DatatokenArguments.__init__(..., min_blocks_ahead=__, ..)
+    #       -> self.min_blocks_ahead = __
+    #   -> datatoken_args:DatatokenArguments.create_datatoken(self, tx_dict)
+    #     -> config_dict = data_nft.config_dict
+    #     -> data_nft:DataNFT.contract.createERC20(template_index, [.], [.], ..)
+    #     -> datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
     DT = data_nft.create_datatoken(
         {"from": opf}, name="Datatoken 1", symbol="DT1",
         template_index=3, #will make it 
@@ -219,3 +249,58 @@ class ConvClass:
 
 def _cur_blocknum():
     return chain[-1].number
+
+
+def _deploy_contracts(opf) -> dict:
+    """
+    @return
+      addresses_at_ganache -- dict of [contract_name_str] : contract_address
+
+    @notes
+      Inspired by deployment in contracts repo: https://github.com/oceanprotocol/contracts/blob/main/scripts/deploy-contracts.js
+    """
+    fr = {"from": opf}
+
+    B = brownie.project.load("./", name="MyProject")
+    
+    OCEAN = B.OceanToken.deploy(opf, fr)
+    fee_coll = B.OPFCommunityFeeCollector.deploy(opf, opf, fr)
+    router = B.FactoryRouter.deploy(opf, OCEAN, DEAD_ADDRESS, fee_coll, [], fr)
+    fre = B.FixedRateExchange.deploy(router, fr)
+    dt_temp1 = B.ERC20Template.deploy(fr)
+    dt_temp2 = B.ERC20TemplateEnterprise.deploy(fr)
+    dt_temp3 = B.ERC20Template3.deploy(fr)
+    dnft_temp1 = B.ERC721Template.deploy(fr)
+    dispenser = B.Dispenser.deploy(router, fr)
+    dnft_factory = B.ERC721Factory.deploy(dnft_temp1, dt_temp1, router, fr)
+    
+    #code for deploying ve contracts, if needed
+    # import math
+    # import time
+    # timestamp = math.floor(time.time() / 1000)
+    # routerOwner = opf
+    # veOCEAN = B.veOCEAN.deploy(OCEAN, "veOCEAN", "veOCEAN", "0.1.0", fr)
+    # veAllocate = B.veAllocate.deploy(fr)
+    # veDelegation = B.veDelegation.deploy("veDelegation", "", veOCEAN, fr)
+    # veFeeDistributor = B.FeeDistributor.deploy(
+    #     veOCEAN, timestamp, OCEAN, routerOwner, routerOwner, fr)
+    # DelegationProxy = B.DelegationProxy.deploy(veDelegation, routerOwner, fr)
+    # veFeeEstimate(veOCEAN, veFeeDistributor, fr)
+    # SmartWalletChecker = B.SmartWalletChecker.deploy(fr)
+
+    return {
+        "Ocean" : OCEAN.address,
+        "OPFCommunityFeeCollector" : fee_coll.address,
+        "Router" : router.address,
+        "FixedPrice" : fre.address,
+        "ERC20Template" : {
+            "1" : dt_temp1.address,
+            "2" : dt_temp2.address,
+            "3" : dt_temp3.address,
+            },
+        "ERC721Template" : {
+            "1" : dnft_temp1.address,
+            },
+        "Dispenser" : dispenser.address,
+        "ERC721Factory" : dnft_factory.address,
+        }

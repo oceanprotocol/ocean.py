@@ -1,0 +1,7 @@
+compiler:
+    solc:
+        version: 0.8.12
+        remappings:
+          - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@4.2.0"
+          - "@solidity-bytes-utils=GNSPS/solidity-bytes-utils@0.8.0"
+

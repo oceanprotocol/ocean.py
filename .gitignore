@@ -8,7 +8,6 @@ artifacts/address.json
 /venv/
 ocean_lib.egg-info/
 /build/
-/contracts/
 /interfaces/
 /reports/
 /tests/generated-readmes/test*
