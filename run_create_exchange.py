@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import json
 import os
     
@@ -50,49 +52,56 @@ DT = data_nft.create_datatoken(
     minter=alice.address, #is this the issue?? I need this i think
 )
 
-# exchange = DT.create_exchange(
-#     rate=to_wei(3),
-#     base_token_addr=OCEAN.address,
-#     tx_dict={"from": alice},
-#     with_mint=False,
-# )
+use_high_level = False #change to True or False
 
-from ocean_lib.web3_internal.contract_base import ContractBase
-checksum_addr = ContractBase.to_checksum_address
+if use_high_level: #use high-level interface: DatatokenBase.create_exchange()
+    
+    #the following fails with: ValueError: Gas estimation failed: 'VM Exception while processing transaction: revert'. This transaction will likely revert. If you wish to broadcast, you must set the gas limit manually.
+    exchange = DT.create_exchange(
+        rate=to_wei(3),
+        base_token_addr=OCEAN.address,
+        tx_dict={"from": alice},
+        with_mint=False,
+    )
 
-FRE_addr = ocean.fixed_rate_exchange.address
+else:  #use low-level interface: direct call to ERC20Template.createFixedRate()
+    from ocean_lib.web3_internal.contract_base import ContractBase
+    checksum_addr = ContractBase.to_checksum_address
 
-BT_addr = OCEAN.address
-owner_addr = alice.address
-pub_mkt_fee_coll = alice.address
-allowed_swapper = '0x0000000000000000000000000000000000000000'
+    FRE_addr = ocean.fixed_rate_exchange.address
 
-BT_decimals = OCEAN.decimals()
-DT_decimals = DT.decimals()
-rate = to_wei(3)
-pub_mkt_fee = 0
-with_mint = True
+    BT_addr = OCEAN.address
+    owner_addr = alice.address
+    pub_mkt_fee_coll = alice.address
+    allowed_swapper = '0x0000000000000000000000000000000000000000'
 
-addrs = [
-    checksum_addr(BT_addr),
-    checksum_addr(owner_addr),
-    pub_mkt_fee_coll, #should this be checksummed?
-    allowed_swapper,
-    ]
+    BT_decimals = OCEAN.decimals()
+    DT_decimals = DT.decimals()
+    rate = to_wei(3)
+    pub_mkt_fee = 0
+    with_mint = True
 
-ints = [
-    BT_decimals,
-    DT_decimals,
-    rate,
-    pub_mkt_fee,
-    with_mint,
-    ]
+    addrs = [
+        checksum_addr(BT_addr),
+        checksum_addr(owner_addr),
+        pub_mkt_fee_coll, #should this be checksummed?
+        allowed_swapper,
+        ]
 
-from ocean_lib.web3_internal.utils import get_gas_fees
-priority_fee, max_fee = get_gas_fees()
+    ints = [
+        BT_decimals,
+        DT_decimals,
+        rate,
+        pub_mkt_fee,
+        with_mint,
+        ]
 
-#tx_dict = {"from":alice}
-tx_dict = {"from":alice,"gas_limit":12000000}
-#tx_dict = {"from":alice, "priority_fee": priority_fee, "max_fee": max_fee}
+    from ocean_lib.web3_internal.utils import get_gas_fees
+    priority_fee, max_fee = get_gas_fees()
 
-tx = DT.contract.createFixedRate(FRE_addr, addrs, ints, tx_dict)
+    tx_dict = {"from":alice}
+    #tx_dict = {"from":alice,"gas_limit":12000000}
+    #tx_dict = {"from":alice, "priority_fee": priority_fee, "max_fee": max_fee}
+
+    #the following lines fails with: ValueError: Gas estimation failed: 'VM Exception while processing transaction: revert'. This transaction will likely revert. If you wish to broadcast, you must set the gas limit manually.
+    tx = DT.contract.createFixedRate(FRE_addr, addrs, ints, tx_dict)
