@@ -143,9 +143,9 @@ def _test_main(use_py):
     DT = data_nft.create_datatoken(
         {"from": opf}, name="Datatoken 1", symbol="DT1",
         template_index=3, 
-        #min_blocks_ahead=min_blocks_ahead,
-        #min_predns_for_payout=min_predns_for_payout,
-        #num_blocks_subscription=num_blocks_subscription,
+        min_blocks_ahead=min_blocks_ahead,
+        min_predns_for_payout=min_predns_for_payout,
+        num_blocks_subscription=num_blocks_subscription,
         #and any other DatatokenArguments
     )
 
