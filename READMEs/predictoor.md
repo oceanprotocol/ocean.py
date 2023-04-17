@@ -79,6 +79,9 @@ We need to compile once at the beginning, and recompile whenever we change ERC20
 In work console:
 
 ```
+#remove old build artifacts
+rm -rf build
+
 #compile contracts
 brownie compile
 

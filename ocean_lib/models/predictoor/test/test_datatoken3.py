@@ -107,8 +107,8 @@ def _test_main(use_py):
 
     print("\nMove funds...")
     for acct in [predictoor2, trader, rando]:
-        deployer.transfer(acct, to_wei(100.0))
-        OCEAN.transfer(acct, to_wei(100.0), {"from": deployer})
+        deployer.transfer(acct, to_wei(1.0))
+        OCEAN.transfer(acct, to_wei(10.0), {"from": deployer})
 
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
@@ -142,10 +142,10 @@ def _test_main(use_py):
     #     -> datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
     DT = data_nft.create_datatoken(
         {"from": opf}, name="Datatoken 1", symbol="DT1",
-        template_index=3, #will make it 
-        min_blocks_ahead=min_blocks_ahead,
-        min_predns_for_payout=min_predns_for_payout,
-        num_blocks_subscription=num_blocks_subscription,
+        template_index=3, 
+        #min_blocks_ahead=min_blocks_ahead,
+        #min_predns_for_payout=min_predns_for_payout,
+        #num_blocks_subscription=num_blocks_subscription,
         #and any other DatatokenArguments
     )
 
