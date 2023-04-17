@@ -59,6 +59,7 @@ Each of the following shows how to publish & consume a particular type of data.
 - [REST API](READMEs/publish-flow-restapi.md) - Example on Binance ETH price feed
 - [GraphQL](READMEs/publish-flow-graphql.md) - Example on Ocean Data NFTs
 - [On-chain data](READMEs/publish-flow-onchain.md) - Example on Ocean swap fees
+- [Adding credentials](READMEs/publish-flow-credentials.md) - Example on publishing an asset with custom credentials
 
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
@@ -71,7 +72,7 @@ Each of the following shows how to publish & consume a particular type of data.
 
 ## 🏛 License
 
-    Copyright ((C)) 2022 Ocean Protocol Foundation
+    Copyright ((C)) 2023 Ocean Protocol Foundation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
