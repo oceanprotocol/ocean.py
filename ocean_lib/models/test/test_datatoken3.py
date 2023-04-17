@@ -66,7 +66,7 @@ def _test_main(use_py):
     connect_to_network("development")
     config = get_config_dict("development")
     ocean = Ocean(config)
-    OCEAN = ocean.OCEAN_token
+    OCEAN = ocean.OCEAN
 
     #convenience functions to get OCEAN balance & allowance, ETH balance
     c = ConvClass(OCEAN)
