@@ -155,7 +155,7 @@ def _test_main(use_py):
 
     DT_price = 10.0 #denominated in OCEAN
     exchange = DT.create_exchange(
-        {"from": opf}, to_wei(pmt_amount), OCEAN.address)
+        {"from": opf}, to_wei(DT_price), OCEAN.address)
     DT.approve(exchange.address, to_wei(n_DTs), {"from": opf})
 
     predictoors = [predictoor1, predictoor2]
