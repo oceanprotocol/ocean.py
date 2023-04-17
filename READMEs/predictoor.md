@@ -15,12 +15,21 @@ Ensure pre-requisites:
 
 ## 2. Start ganache
 
-Start ganache, and fill TEST_PRIVATE_KEY1's account with 9000 ETH.
+Start ganache and give ETH to accounts.
 
 Open a new console and:
 
 ```console
-ganache-cli --account "0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99,900000000000000000000"
+#set private keys
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
+export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+
+#each account gets 1000 ETH
+export AMT_ETH=1000000000000000000000
+
+#start ganache
+ganache --account "$FACTORY_DEPLOYER_PRIVATE_KEY,$AMT_ETH" --account "$TEST_PRIVATE_KEY1,$AMT_ETH" --account "$TEST_PRIVATE_KEY2,$AMT_ETH" 
 ```
 
 ## 3. Install
@@ -50,17 +59,17 @@ pip install -r requirements_dev.txt
 brownie pm install OpenZeppelin/openzeppelin-contracts@4.2.0
 brownie pm install GNSPS/solidity-bytes-utils@0.8.0
 
-## 4. Set envvars
+## 4. Set envvars in work console
+
+We set these keys in the ganache console. We also need them in our main work console.
 
 In work console:
 
 ```console
-#set private keys of two local (ganache) accounts
+#set private keys
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
-
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
 ## 5. Compile & deploy contracts

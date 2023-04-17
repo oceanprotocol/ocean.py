@@ -70,9 +70,9 @@ def _test_main(use_py):
     connect_to_network("development")
 
     #create accounts
-    deployer = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
-    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
-    predictoor1 = br_accounts.add()
+    deployer = br_accounts.add(os.getenv("FACTORY_DEPLOYER_PRIVATE_KEY"))
+    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
+    predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
     predictoor2 = br_accounts.add()
     trader = br_accounts.add()
     rando = br_accounts.add()
@@ -84,6 +84,9 @@ def _test_main(use_py):
     config = get_config_dict("development")
     config["ADDRESS_FILE"] = address_file
     ocean = Ocean(config, "no_provider")
+
+    #DEPLOYER mints 20K OCEAN, and sends 2K OCEAN to TEST_PRIVATE_KEY1 & 2
+    mint_fake_OCEAN(config)
     
     #convenience objects
     OCEAN = ocean.OCEAN_token
@@ -103,7 +106,7 @@ def _test_main(use_py):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
 
     print("\nMove funds...")
-    for acct in [opf, predictoor1, predictoor2, trader, rando]:
+    for acct in [predictoor2, trader, rando]:
         deployer.transfer(acct, to_wei(100.0))
         OCEAN.transfer(acct, to_wei(100.0), {"from": deployer})
 

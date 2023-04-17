@@ -21,7 +21,7 @@ def do_main():
     connect_to_network("development")
 
     #get account
-    deployer = accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
+    deployer = accounts.add(os.getenv("FACTORY_DEPLOYER_PRIVATE_KEY"))
 
     #deploy contracts
     # -with this trick, I can change Ocean contracts all I want, in this repo
@@ -48,7 +48,7 @@ def _deploy_contracts(owner) -> dict:
       Inspired by deployment in contracts repo: https://github.com/oceanprotocol/contracts/blob/main/scripts/deploy-contracts.js
     """
     fr = {"from": owner}
-
+    
     B = brownie.project.load("./", name="MyProject")
     
     OCEAN = B.OceanToken.deploy(owner, fr)
