@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
-from datetime import datetime
+from datetime import datetime, timezone
 from unittest.mock import patch
 
 import brownie
@@ -53,7 +53,7 @@ def test_update(publisher_ocean, publisher_wallet):
     # Update metadata
     _description = "Updated description"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.utcnow().isoformat()
+    new_metadata["updated"] = datetime.now(timezone.utc).isoformat()
     ddo.metadata = new_metadata
 
     # Update credentials
@@ -131,7 +131,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
     metadata3 = copy.deepcopy(ddo2.metadata)
     _description = "Test delete datatoken"
     metadata3["description"] = _description
-    metadata3["updated"] = datetime.utcnow().isoformat()
+    metadata3["updated"] = datetime.now(timezone.utc).isoformat()
 
     removed_dt = ddo3.datatokens.pop()
 

@@ -7,16 +7,15 @@
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
-from requests.models import PreparedRequest
 
 import requests
 from enforce_typing import enforce_types
 from requests.exceptions import InvalidURL
-from requests.models import Response
+from requests.models import PreparedRequest, Response
 from requests.sessions import Session
 from web3.main import Web3
 
@@ -48,7 +47,7 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.utcnow().timestamp())
+        nonce = str(datetime.now(timezone.utc).timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         message_hash = Web3.solidityKeccak(
             ["bytes"],

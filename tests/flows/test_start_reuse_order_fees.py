@@ -2,7 +2,7 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from time import sleep
 from typing import Tuple
 
@@ -170,7 +170,9 @@ class TestStartReuseOrderFees(object):
 
         # Get provider fees
         provider_fee = int_units(provider_fee_in_unit, bt.decimals())
-        valid_for_two_hours = int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+        valid_for_two_hours = int(
+            (datetime.now(timezone.utc) + timedelta(hours=2)).timestamp()
+        )
         provider_fees = get_provider_fees(
             provider_wallet,
             bt.address,
@@ -422,7 +424,7 @@ def reuse_order_with_mock_provider_fees(
 
     # Mock provider fees
     provider_fee = int_units(provider_fee_in_unit, bt.decimals())
-    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    valid_until = int((datetime.now(timezone.utc) + timedelta(seconds=10)).timestamp())
     provider_fees = get_provider_fees(
         provider_wallet,
         bt.address,
