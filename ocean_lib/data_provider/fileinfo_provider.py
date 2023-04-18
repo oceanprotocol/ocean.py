@@ -35,7 +35,7 @@ class FileInfoProvider(DataServiceProviderBase):
         with_checksum: bool = False,
         userdata: Optional[dict] = None,
     ) -> Response:  # Can not add Service typing due to enforce_type errors.
-        _, fileinfo_endpoint = DataServiceProviderBase.build_endpoint(
+        method, fileinfo_endpoint = DataServiceProviderBase.build_endpoint(
             "fileinfo", service.service_endpoint
         )
 
@@ -47,7 +47,9 @@ class FileInfoProvider(DataServiceProviderBase):
         if with_checksum:
             payload["checksum"] = 1
 
-        response = DataServiceProviderBase.post_raw(fileinfo_endpoint, json=payload)
+        response = DataServiceProviderBase._http_method(
+            method, fileinfo_endpoint, json=payload
+        )
 
         DataServiceProviderBase.check_response(
             response, "fileInfoEndpoint", fileinfo_endpoint, payload

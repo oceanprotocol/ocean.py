@@ -20,7 +20,7 @@ TEST_SERVICE_ENDPOINTS = {
     "decrypt": ["POST", "/api/services/decrypt"],
     "fileinfo": ["POST", "/api/services/fileinfo"],
     "initialize": ["GET", "/api/services/initialize"],
-    "initializeCompute": ["GET", "/api/services/initializeCompute"],
+    "initializeCompute": ["POST", "/api/services/initializeCompute"],
     "nonce": ["GET", "/api/services/nonce"],
     "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
     "create_auth_token": ["GET", "/api/services/createAuthToken"],

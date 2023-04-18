@@ -43,7 +43,7 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> Response:
 
-        _, initialize_endpoint = DataServiceProvider.build_endpoint(
+        method, initialize_endpoint = DataServiceProvider.build_endpoint(
             "initialize", service.service_endpoint
         )
 
@@ -57,7 +57,9 @@ class DataServiceProvider(DataServiceProviderBase):
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        response = DataServiceProvider.get_raw(url=initialize_endpoint, params=payload)
+        response = DataServiceProvider._http_method(
+            method, url=initialize_endpoint, params=payload
+        )
 
         DataServiceProviderBase.check_response(
             response, "initializeEndpoint", initialize_endpoint, payload
@@ -86,7 +88,7 @@ class DataServiceProvider(DataServiceProviderBase):
         The first dataset is also required to have a compute service.
         """
         (
-            _,
+            method,
             initialize_compute_endpoint,
         ) = DataServiceProvider.build_endpoint("initializeCompute", service_endpoint)
 
@@ -100,7 +102,8 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer_address,
         }
 
-        response = DataServiceProvider.post_raw(
+        response = DataServiceProvider._http_method(
+            method,
             initialize_compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -141,7 +144,7 @@ class DataServiceProvider(DataServiceProviderBase):
             )
             indexes = [index]
 
-        _, download_endpoint = DataServiceProvider.build_endpoint(
+        method, download_endpoint = DataServiceProvider.build_endpoint(
             "download", service_endpoint
         )
 
@@ -161,8 +164,8 @@ class DataServiceProvider(DataServiceProviderBase):
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet, did
             )
-            response = DataServiceProvider.get_raw(
-                url=download_endpoint, params=payload, stream=True, timeout=3
+            response = DataServiceProvider._http_method(
+                method, url=download_endpoint, params=payload, stream=True, timeout=3
             )
 
             DataServiceProviderBase.check_response(
@@ -221,10 +224,11 @@ class DataServiceProvider(DataServiceProviderBase):
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
-        _, compute_endpoint = DataServiceProvider.build_endpoint(
+        method, compute_endpoint = DataServiceProvider.build_endpoint(
             "computeStart", dataset_compute_service.service_endpoint
         )
-        response = DataServiceProvider.post_raw(
+        response = DataServiceProvider._http_method(
+            method,
             compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -290,11 +294,11 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: bool whether the job was deleted successfully
         """
-        _, compute_delete_endpoint = DataServiceProvider.build_endpoint(
+        method, compute_delete_endpoint = DataServiceProvider.build_endpoint(
             "computeDelete", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
-            "delete", did, job_id, compute_delete_endpoint, consumer
+            method, did, job_id, compute_delete_endpoint, consumer
         )
 
     @staticmethod
@@ -315,11 +319,11 @@ class DataServiceProvider(DataServiceProviderBase):
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
         """
-        _, compute_status_endpoint = DataServiceProvider.build_endpoint(
+        method, compute_status_endpoint = DataServiceProvider.build_endpoint(
             "computeStatus", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
-            "get", did, job_id, compute_status_endpoint, consumer
+            method, did, job_id, compute_status_endpoint, consumer
         )
 
     @staticmethod
@@ -349,7 +353,7 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer.address,
         }
 
-        (_, compute_job_result_endpoint) = DataServiceProvider.build_endpoint(
+        (method, compute_job_result_endpoint) = DataServiceProvider.build_endpoint(
             "computeResult", dataset_compute_service.service_endpoint
         )
         req.prepare_url(compute_job_result_endpoint, params)
@@ -358,7 +362,7 @@ class DataServiceProvider(DataServiceProviderBase):
         logger.info(
             f"invoke the computeResult endpoint with this url: {compute_job_result_file_url}"
         )
-        response = DataServiceProvider._http_method("get", compute_job_result_file_url)
+        response = DataServiceProvider._http_method(method, compute_job_result_file_url)
 
         DataServiceProviderBase.check_response(
             response, "jobResultEndpoint", compute_job_result_endpoint, params
@@ -508,8 +512,8 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def check_single_file_info(url_object: dict, provider_uri: str) -> bool:
-        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
-        response = DataServiceProvider.post_raw(endpoint, json=url_object)
+        method, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
+        response = DataServiceProvider._http_method(method, endpoint, json=url_object)
 
         if response.status_code != 200:
             return False
@@ -524,13 +528,13 @@ class DataServiceProvider(DataServiceProviderBase):
         if not did:
             return False
 
-        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
+        method, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
         data = {"did": did, "serviceId": service_id}
 
         if userdata is not None:
             data["userdata"] = userdata
 
-        response = DataServiceProvider.post_raw(endpoint, json=data)
+        response = DataServiceProvider._http_method(method, endpoint, json=data)
 
         if not response or response.status_code != 200:
             return False

@@ -35,11 +35,12 @@ class DataEncryptor(DataServiceProviderBase):
         else:
             payload = objects_to_encrypt
 
-        _, encrypt_endpoint = DataServiceProviderBase.build_endpoint(
+        method, encrypt_endpoint = DataServiceProviderBase.build_endpoint(
             "encrypt", provider_uri, {"chainId": chain_id}
         )
 
-        response = DataServiceProviderBase.post_raw(
+        response = DataServiceProviderBase._http_method(
+            method,
             encrypt_endpoint,
             data=payload,
             headers={"Content-type": "application/octet-stream"},
