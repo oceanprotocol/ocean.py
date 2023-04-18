@@ -32,6 +32,19 @@ def to_32byte_hex(val: int) -> str:
 
 
 @enforce_types
+def sign_with_clef(message_hash: str, wallet) -> str:
+    message_hash = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toBytes(text=message_hash)],
+    )
+
+    orig_sig = wallet._provider.make_request(
+        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
+    )["result"]
+    return orig_sig
+
+
+@enforce_types
 def sign_with_key(message_hash: Union[HexBytes, str], key: str) -> str:
     if isinstance(message_hash, str):
         message_hash = Web3.solidityKeccak(
@@ -40,10 +53,12 @@ def sign_with_key(message_hash: Union[HexBytes, str], key: str) -> str:
         )
 
     pk = keys.PrivateKey(Web3.toBytes(hexstr=key))
+
     prefix = "\x19Ethereum Signed Message:\n32"
     signable_hash = Web3.solidityKeccak(
         ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
     )
+
     return keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
 
