@@ -71,6 +71,7 @@ def _deploy_contracts(owner) -> dict:
     dnft_factory = B.ERC721Factory.deploy(dnft_temp1, dt_temp1, router, fr)
     dnft_factory.addTokenTemplate(dt_temp2, fr)
     dnft_factory.addTokenTemplate(dt_temp3, fr)
+    router.addFactory(dnft_factory.address)
     
     #code for deploying ve contracts, if needed
     # import math
