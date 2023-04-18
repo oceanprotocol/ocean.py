@@ -64,6 +64,7 @@ Each of the following shows how to publish & consume a particular type of data.
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
+- [Using hardware wallets with ocean.py](READMEs/using-clef.md) - Learn how to use hardware wallets with ocean.py via Brownie and Clef
 
 ## 🦑 Development
 
