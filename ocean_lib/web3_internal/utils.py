@@ -9,6 +9,7 @@ from typing import Any, Union
 import requests
 from brownie import network
 from brownie.network import chain
+from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -32,7 +33,7 @@ def to_32byte_hex(val: int) -> str:
 
 
 @enforce_types
-def sign_with_clef(message_hash: str, wallet) -> str:
+def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
     message_hash = Web3.solidityKeccak(
         ["bytes"],
         [Web3.toBytes(text=message_hash)],
