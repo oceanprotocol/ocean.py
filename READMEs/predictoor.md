@@ -41,8 +41,8 @@ In work console:
 ```console
 # Clone the repo and enter into it
 git clone https://github.com/oceanprotocol/ocean.py
-git checkout predictoor-pm-issue-3
 cd ocean.py
+git checkout predictoor-pm-issue-3
 
 # Install OS dependencies
 sudo apt-get install -y python3-dev gcc python-pytest
