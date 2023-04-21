@@ -194,6 +194,8 @@ def _test_main(use_py):
         num_blocks_subscription=num_blocks_subscription,
         # and any other DatatokenArguments
     )
+    assert DT.getId() == 3
+    DT = DT.get_typed(config, DT.address)
 
     # post 100 DTs for sale
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
@@ -241,11 +243,13 @@ def _test_main(use_py):
     # trader buys 1 DT with OCEAN
     OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
     OCEAN.approve(exchange.address, to_wei(OCEAN_needed), {"from": trader})
+    OCEAN.mint(trader, (OCEAN_needed), {"from": deployer})
+    assert OCEAN.balanceOf(trader) >= OCEAN_needed
     exchange.buy_DT(to_wei(1), {"from": trader})  # spends OCEAN
 
     # trader starts subscription. Good for 24h.
     # -"start_subscription" is like pay_for_access_service, but w/o DDO
-    DT.approve(DT, to_wei(1), {"from": trader})
+    DT.approve(DT.address, to_wei(1), {"from": trader})
     DT.start_subscription({"from": trader})  # good for next 24h (or 1h, 7d, ..)
 
     # ======================================================================
