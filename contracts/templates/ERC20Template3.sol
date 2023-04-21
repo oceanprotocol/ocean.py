@@ -842,7 +842,7 @@ contract ERC20Template3 is
      *      If you construct your own template, please make sure to change the hardcoded value
      */
     function getId() pure public returns (uint8) {
-        return 1;
+        return 3;
     }
 
     /**
