@@ -185,7 +185,7 @@ class DatatokenBase(ABC, ContractBase):
             template_id = datatoken.getId()
         except Exception:
             template_id = 1
-        print(f"Found datatoken template {template_id} for address {address}")
+
         if template_id == 1:
             return Datatoken1(config, address)
         if template_id == 2:
