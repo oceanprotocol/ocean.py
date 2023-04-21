@@ -251,16 +251,19 @@ def _test_main(use_py):
     predval2, stake2 = 1600, 20.0
     predict_blocknum = 100
 
+    OCEAN.mint(predictoor1, to_wei(stake1), {"from": deployer})
+    OCEAN.mint(predictoor2, to_wei(stake2), {"from": deployer})
+
     OCEAN.approve(DT.address, to_wei(stake1), {"from": predictoor1})
     OCEAN.approve(DT.address, to_wei(stake2), {"from": predictoor2})
     assert OCEAN_approved(predictoor1, DT) == stake1  # new, ready to use
     assert OCEAN_approved(predictoor2, DT) == stake2  # ""
 
     DT.submit_predval(
-        to_wei(predval1), to_wei(stake1), predict_blocknum, {"from": predictoor1}
+        OCEAN, to_wei(predval1), to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
     DT.submit_predval(
-        to_wei(predval1), to_wei(stake2), predict_blocknum, {"from": predictoor2}
+        OCEAN, to_wei(predval1), to_wei(stake2), predict_blocknum, {"from": predictoor2}
     )
 
     # test
