@@ -48,9 +48,6 @@ class Datatoken3(Datatoken1):
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
 
-    def get_agg_predval(self, stake, blocknum):
-        pass
-
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
         self.trueval[blocknum] = trueval
