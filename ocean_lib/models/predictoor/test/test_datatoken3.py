@@ -247,8 +247,8 @@ def _test_main(use_py):
 
     # ======================================================================
     # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
-    predval1, stake1 = 1500, 10.0
-    predval2, stake2 = 1600, 20.0
+    predval1, stake1 = 200, 10.0
+    predval2, stake2 = 500, 20.0
     predict_blocknum = 100
 
     OCEAN.mint(predictoor1, to_wei(stake1), {"from": deployer})
@@ -259,19 +259,23 @@ def _test_main(use_py):
     assert OCEAN_approved(predictoor1, DT) == stake1  # new, ready to use
     assert OCEAN_approved(predictoor2, DT) == stake2  # ""
 
+    initbal1 = OCEAN_bal(predictoor1)
+    initbal2 = OCEAN_bal(predictoor2)
+
     DT.submit_predval(
         OCEAN, to_wei(predval1), to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
     DT.submit_predval(
-        OCEAN, to_wei(predval1), to_wei(stake2), predict_blocknum, {"from": predictoor2}
+        OCEAN, to_wei(predval2), to_wei(stake2), predict_blocknum, {"from": predictoor2}
     )
 
     # test
-    assert OCEAN_bal(DT.address) == (stake1 + stake2)  # just got new stake
-    assert OCEAN_bal(predictoor1) == (initbal - stake1)  # just staked
-    assert OCEAN_bal(predictoor2) == (initbal - stake2)  # ""
-    assert OCEAN_approved(predictoor1, DT.address) == 0.0  # just used up
-    assert OCEAN_approved(predictoor2, DT.address) == 0.0  # ""
+
+    assert OCEAN_bal(DT) == (stake1 + stake2)  # just got new stake
+    assert OCEAN_bal(predictoor1) == approx(initbal1 - stake1)  # just staked
+    assert OCEAN_bal(predictoor2) == approx(initbal2 - stake2)  # ""
+    assert OCEAN_approved(predictoor1, DT) == 0.0  # just used up
+    assert OCEAN_approved(predictoor2, DT) == 0.0  # ""
 
     # ======================================================================
     # TRADER GETS AGG PREDVAL (do every 5min)
@@ -282,6 +286,7 @@ def _test_main(use_py):
     #  asset_downloader.download_asset_files() except there's no downloading,
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
     agg_predval_wei = DT.get_agg_predval(predict_blocknum)
+    assert agg_predval_wei == to_wei(400.0)
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed
@@ -289,14 +294,15 @@ def _test_main(use_py):
 
     # ======================================================================
     # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-    trueval = 1612.0
-    DT.submit_trueval(to_wei(trueval), predict_blocknum, {"from": opf})
+    trueval = 449.0
+    DT.submit_trueval(predict_blocknum, to_wei(trueval), {"from": opf})
 
     # ======================================================================
     # TIME PASSES - enough for predictoors to get claims
 
     # FIXME - we'll need to do 'min_predns_for_payout' loops through this
     #   step and and several prev steps, for predictoors to actually get paid
+    print(int(1.2 * min_blocks_ahead * min_predns_for_payout))
     chain.mine(int(1.2 * min_blocks_ahead * min_predns_for_payout))
 
     # ======================================================================
@@ -304,12 +310,12 @@ def _test_main(use_py):
 
     # Any rando can call release(). Will update amt allowed
     # OR!!! this is where exchange object comes in!!
-    DT.release({"from": rando})
 
-    # Each actor collects its cut of DT sales
-    for acct in predictoors + [opf]:
-        amt = getallow(DT, acct)
-        OCEAN.transferFrom(DT.address, acct.address, to_wei(amt), {"from": acct})
+    for acct in predictoors:
+        balbefore = OCEAN_bal(acct)
+        DT.get_payout(predict_blocknum, OCEAN, acct.address, {"from": rando})
+        balafter = OCEAN_bal(acct)
+        assert balafter > balbefore
 
 
 class ConvClass:
