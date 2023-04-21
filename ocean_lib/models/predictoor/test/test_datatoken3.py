@@ -181,9 +181,6 @@ def _test_main(use_py):
     exchange = DT0.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
     # HACK END
 
-    import pdb
-
-    pdb.set_trace()
     DT = data_nft.create_datatoken(
         {"from": opf},
         name="DT",
@@ -201,10 +198,6 @@ def _test_main(use_py):
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
     exchange = DT.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
     DT.approve(exchange.address, to_wei(n_DTs), {"from": opf})
-
-    import pdb
-
-    pdb.set_trace()
 
     # ======================================================================
     # SETUP USER ACCOUNTS
@@ -256,9 +249,10 @@ def _test_main(use_py):
     # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
     predval1, stake1 = 1500, 10.0
     predval2, stake2 = 1600, 20.0
+    predict_blocknum = 100
 
-    OCEAN.approve(DT, to_wei(stake1), predictoor1)
-    OCEAN.approve(DT, to_wei(stake2), predictoor2)
+    OCEAN.approve(DT.address, to_wei(stake1), {"from": predictoor1})
+    OCEAN.approve(DT.address, to_wei(stake2), {"from": predictoor2})
     assert OCEAN_approved(predictoor1, DT) == stake1  # new, ready to use
     assert OCEAN_approved(predictoor2, DT) == stake2  # ""
 
@@ -270,11 +264,11 @@ def _test_main(use_py):
     )
 
     # test
-    assert OCEAN_bal(DT) == (stake1 + stake2)  # just got new stake
+    assert OCEAN_bal(DT.address) == (stake1 + stake2)  # just got new stake
     assert OCEAN_bal(predictoor1) == (initbal - stake1)  # just staked
     assert OCEAN_bal(predictoor2) == (initbal - stake2)  # ""
-    assert OCEAN_approved(predictoor1, DT) == 0.0  # just used up
-    assert OCEAN_approved(predictoor2, DT) == 0.0  # ""
+    assert OCEAN_approved(predictoor1, DT.address) == 0.0  # just used up
+    assert OCEAN_approved(predictoor2, DT.address) == 0.0  # ""
 
     # ======================================================================
     # TRADER GETS AGG PREDVAL (do every 5min)
