@@ -85,7 +85,7 @@ class DatatokenArguments:
             assert min_blocks_ahead, "Template 3 needs min_blocks_ahead"
             assert min_predns_for_payout, "Template 3 needs min_blocks_ahead"
             assert num_blocks_subscription, "Template 3 needs min_blocks_ahead"
-            
+
         self.name = name
         self.symbol = symbol
         self.template_index = template_index
@@ -177,6 +177,7 @@ class DatatokenBase(ABC, ContractBase):
     def get_typed(config, address):
         from ocean_lib.models.datatoken1 import Datatoken1
         from ocean_lib.models.datatoken2 import Datatoken2
+        from ocean_lib.models.predictoor.datatoken3 import Datatoken3
 
         datatoken = Datatoken1(config, address)
 
@@ -184,8 +185,13 @@ class DatatokenBase(ABC, ContractBase):
             template_id = datatoken.getId()
         except Exception:
             template_id = 1
-
-        return datatoken if template_id == 1 else Datatoken2(config, address)
+        print(f"Found datatoken template {template_id} for address {address}")
+        if template_id == 1:
+            return Datatoken1(config, address)
+        if template_id == 2:
+            return Datatoken2(config, address)
+        if template_id == 3:
+            return Datatoken3(config, address)
 
     @enforce_types
     def start_order(
