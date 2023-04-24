@@ -90,18 +90,6 @@ def _test_main(use_py):
     n_DTs = 100.0
     DT_price = 10.0  # denominated in OCEAN
 
-    # HACK START
-    DT0 = data_nft.create_datatoken(
-        {"from": opf},
-        name="DT0",
-        symbol="DT0",
-        template_index=1,
-        # and any other DatatokenArguments
-    )
-    DT0.mint(opf, to_wei(n_DTs), {"from": opf})
-    exchange = DT0.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
-    # HACK END
-
     DT = data_nft.create_datatoken(
         {"from": opf},
         name="DT",
