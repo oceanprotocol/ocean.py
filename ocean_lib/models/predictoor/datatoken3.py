@@ -31,7 +31,7 @@ class Datatoken3(Datatoken1):
         self.prediction_counter = {}  # [blocknum] = counter
         self.stake_counter = {}  # [blocknum] = counter
 
-        self.aggpredval = {}  # [blocknum] = aggpredval
+        self.agg_predvals = {}  # [blocknum] = aggpredval
         self.sumdiff = {}  # [blocknum] = sumdiff
         self.sumdiff_counter = {}  # [blocknum] = counter
 
@@ -48,7 +48,7 @@ class Datatoken3(Datatoken1):
             self.stake_counter[predict_blocknum] = 0
             self.sumdiff_counter[predict_blocknum] = 0
             self.sumdiff[predict_blocknum] = 0
-            self.aggpredval[predict_blocknum] = 0
+            self.agg_predvals[predict_blocknum] = 0
 
         self.predictions[predict_blocknum][
             self.prediction_counter[predict_blocknum]
@@ -60,7 +60,7 @@ class Datatoken3(Datatoken1):
 
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
-        self.aggpredval[predict_blocknum] += int(
+        self.agg_predvals[predict_blocknum] += int(
             prediction.prediction * prediction.stake
         )  # need to normalize by sum of stakes
 
@@ -94,7 +94,7 @@ class Datatoken3(Datatoken1):
             self.subscribers[tx_dict["from"]] = 100  # mock timestamp
 
     def get_agg_predval(self, blocknum):
-        return int(self.aggpredval[blocknum])
+        return int(self.agg_predvals[blocknum])
 
     def get_payout(self, blocknum, OCEAN, id, tx_dict):
         assert self.predictions[blocknum][id].paid == False
