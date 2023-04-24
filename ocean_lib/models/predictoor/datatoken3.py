@@ -11,7 +11,8 @@ from ocean_lib.models.datatoken1 import Datatoken1
 
 
 class Prediction:
-    def __init__(self, prediction, stake):
+    def __init__(self, prediction, stake, predictoor):
+        self.predictoor = predictoor
         self.prediction = prediction
         self.stake = stake
         self.score = 0
@@ -24,26 +25,31 @@ class Datatoken3(Datatoken1):
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
         self.subscribers = {}  # [address] = timestamp
-        self.predictions = {}  # [predict_blocknum][address] = Prediction
+        self.predictions = {}  # [predict_blocknum][id] = Prediction
         self.trueval = {}  # [blocknum] = trueval
 
         self.prediction_counter = {}  # [blocknum] = counter
         self.stake_counter = {}  # [blocknum] = counter
 
         self.aggpredval = {}  # [blocknum] = aggpredval
+        self.sumdiff = {}  # [blocknum] = sumdiff
+        self.sumdiff_counter = {}  # [blocknum] = counter
 
     # placeholders for now
+
     def submit_predval(self, token, prediction, stake, predict_blocknum, tx_dict):
         # assert blocks_ahead >= self._min_blocks_ahead
 
-        prediction = Prediction(prediction, stake)
+        prediction = Prediction(prediction, stake, predictoor=tx_dict["from"])
 
         if predict_blocknum not in self.predictions:
             self.predictions[predict_blocknum] = {}
             self.prediction_counter[predict_blocknum] = 0
             self.stake_counter[predict_blocknum] = 0
 
-        self.predictions[predict_blocknum][tx_dict["from"]] = prediction
+        self.predictions[predict_blocknum][
+            self.prediction_counter[predict_blocknum]
+        ] = prediction
 
         assert (token.transferFrom(
             tx_dict["from"], self.address, stake, {"from": self.address}
@@ -60,17 +66,22 @@ class Datatoken3(Datatoken1):
         # assert sender == opf
         self.trueval[blocknum] = trueval
 
-        # calc accuracy for each prediction
-        inverse_sum = 0
-        pred_inv = {}
-        for addr in self.predictions[blocknum]:
-            prediction = self.predictions[blocknum][addr]
-            inverse_sum += 1 / prediction.prediction
-            pred_inv[addr] = 1 / prediction.prediction
-
-        for addr in self.predictions[blocknum]:
-            prediction = self.predictions[blocknum][addr]
-            prediction.score = pred_inv[addr] / inverse_sum
+    def calc_sum_diff(self, blocknum, batchsize):
+        checked = 0
+        for i in range(self.sumdiff_counter[blocknum], self.prediction_counter[blocknum]):
+            prediction = self.predictions[blocknum][i]
+            if prediction.paid == False:
+                if prediction.prediction > self.trueval[blocknum]:
+                    self.sumdiff[blocknum] += (
+                        prediction.prediction - self.trueval[blocknum]
+                    )
+                else:
+                    self.sumdiff[blocknum] += (
+                        self.trueval[blocknum] - prediction.prediction
+                    )
+                checked += 1
+            if checked == batchsize:
+                break
 
     def start_subscription(self, tx_dict):
         if tx_dict["from"] not in self.subscribers:
@@ -81,9 +92,12 @@ class Datatoken3(Datatoken1):
 
     def get_payout(self, blocknum, OCEAN, predictoor_addr, tx_dict):
         assert (self.predictions[blocknum][predictoor_addr].paid == False)
+        assert (self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum])
+        prediction = self.predictions[blocknum][predictoor_addr]
+        prediction.score = prediction.prediction * 1e18 / self.sumdiff[blocknum]
 
-        amt = self.predictions[blocknum][predictoor_addr].score * self.stake_counter[blocknum]
+        amt = prediction.score * self.stake_counter[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
         assert (OCEAN.transfer(predictoor_addr, amt, {"from": self.address}))
-        self.predictions[blocknum][predictoor_addr].paid = True
+        prediction.paid = True
