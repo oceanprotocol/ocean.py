@@ -94,6 +94,7 @@ class Datatoken3(Datatoken1):
             self.subscribers[tx_dict["from"]] = 100  # mock timestamp
 
     def get_agg_predval(self, blocknum):
+        # this value will be encrypted
         return int(self.agg_predvals[blocknum])
 
     def get_payout(self, blocknum, OCEAN, id, tx_dict):
