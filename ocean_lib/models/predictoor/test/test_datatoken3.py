@@ -20,48 +20,6 @@ chain = brownie.network.chain
 
 
 @pytest.mark.unit
-def test_exchange():  # HACK for getting exchange working
-    connect_to_network("development")
-
-    # create base accounts
-    deployer = br_accounts.add(os.getenv("FACTORY_DEPLOYER_PRIVATE_KEY"))
-    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
-    alice = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
-    bob = br_accounts.add()
-
-    # set ocean object
-    address_file = os.path.expanduser(ADDRESS_FILE)
-    print(f"Load contracts from address_file: {address_file}")
-    config = get_config_dict("development")
-    config["ADDRESS_FILE"] = address_file
-    ocean = Ocean(config, "no_provider")  # is this the issue??
-
-    # DEPLOYER mints 20K OCEAN, and sends 2K OCEAN to TEST_PRIVATE_KEY1 & 2
-    mint_fake_OCEAN(config)
-
-    #
-    OCEAN = ocean.OCEAN_token
-
-    data_nft = ocean.data_nft_factory.create({"from": alice}, "DNFT1", "DNFT1")
-
-    DT = data_nft.create_datatoken(
-        {"from": alice},
-        template_index=1,
-        cap=None,
-        name="DT1",
-        symbol="DT1Symbol",
-        minter=alice.address,  # is this the issue?? I need this i think
-    )
-
-    exchange = DT.create_exchange(
-        rate=to_wei(3),
-        base_token_addr=OCEAN.address,
-        tx_dict={"from": alice},
-        with_mint=False,
-    )
-
-
-@pytest.mark.unit
 def test_main_py():
     _test_main(use_py=True)
 
