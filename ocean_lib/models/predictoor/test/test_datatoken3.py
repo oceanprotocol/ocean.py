@@ -126,7 +126,7 @@ def _test_main(use_py):
     print("\nMove funds...")
     for acct in [predictoor2, trader, rando]:
         deployer.transfer(acct, to_wei(1.0))
-        OCEAN.transfer(acct, to_wei(10.0), {"from": deployer})
+        OCEAN.transfer(acct, to_wei(25.0), {"from": deployer})
 
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
@@ -143,10 +143,10 @@ def _test_main(use_py):
     # TRADER BUYS SUBSCRIPTION TO AGG PREDVALS (do every 24h)
 
     # trader buys 1 DT with OCEAN
-    OCEAN_needed = exchange.BT_needed(to_wei(1), consume_market_fee=0)
+    OCEAN_needed = from_wei(exchange.BT_needed(to_wei(1), consume_market_fee=0))
+    assert OCEAN_bal(trader) >= OCEAN_needed, "must fund more OCEAN to trader"
+
     OCEAN.approve(exchange.address, to_wei(OCEAN_needed), {"from": trader})
-    OCEAN.mint(trader, (OCEAN_needed), {"from": deployer})
-    assert OCEAN.balanceOf(trader) >= OCEAN_needed
     exchange.buy_DT(to_wei(1), {"from": trader})  # spends OCEAN
 
     # trader starts subscription. Good for 24h.
@@ -156,12 +156,14 @@ def _test_main(use_py):
 
     # ======================================================================
     # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
-    predval1, stake1 = 20000, 10.0  # 200,00
-    predval2, stake2 = 50020, 20.0  # 500,20
+    stake1 = 20.0 # in OCEAN
+    stake2 = 10.0 # ""
+    predval1_trunc = 20000 # "20000" here == "200.00" float
+    predval2_trunc = 50020 # "50020" here == "500.20" float
     predict_blocknum = 100
 
-    OCEAN.mint(predictoor1, to_wei(stake1), {"from": deployer})
-    OCEAN.mint(predictoor2, to_wei(stake2), {"from": deployer})
+    assert OCEAN_bal(predictoor1) >= stake1, "must fund more OCEAN to prdoor1"
+    assert OCEAN_bal(predictoor2) >= stake2, "must fund more OCEAN to prdoor2"
 
     OCEAN.approve(DT.address, to_wei(stake1), {"from": predictoor1})
     OCEAN.approve(DT.address, to_wei(stake2), {"from": predictoor2})
@@ -172,14 +174,13 @@ def _test_main(use_py):
     initbal2 = OCEAN_bal(predictoor2)
 
     DT.submit_predval(
-        OCEAN, predval1, to_wei(stake1), predict_blocknum, {"from": predictoor1}
+        OCEAN, predval1_trunc, to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
     DT.submit_predval(
-        OCEAN, predval2, to_wei(stake2), predict_blocknum, {"from": predictoor2}
+        OCEAN, predval2_trunc, to_wei(stake2), predict_blocknum, {"from": predictoor2}
     )
 
     # test
-
     assert OCEAN_bal(DT) == (stake1 + stake2)  # just got new stake
     assert OCEAN_bal(predictoor1) == approx(initbal1 - stake1)  # just staked
     assert OCEAN_bal(predictoor2) == approx(initbal2 - stake2)  # ""
@@ -194,8 +195,8 @@ def _test_main(use_py):
     # -"get_agg_predval" is like ocean.assets.download_asset //
     #  asset_downloader.download_asset_files() except there's no downloading,
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
-    agg_predval_wei = DT.get_agg_predval(predict_blocknum)
-    assert agg_predval_wei / 1e18 == approx(predval1 * stake1 + predval2 * stake2)
+    agg_predval_trunc = DT.get_agg_predval(predict_blocknum)
+    assert agg_predval_trunc == approx(predval1_trunc * stake1 + predval2_trunc * stake2) # need to normalize by sum of stakes
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed

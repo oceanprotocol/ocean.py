@@ -20,7 +20,7 @@ class Prediction:
 
 
 class Datatoken3(Datatoken1):
-    CONTRACT_NAME = "ERC20Template3"  # switch to ERC20Template3 when ready
+    CONTRACT_NAME = "ERC20Template"  # switch to ERC20Template3 when ready
 
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
@@ -60,7 +60,7 @@ class Datatoken3(Datatoken1):
 
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
-        self.aggpredval[predict_blocknum] += int(prediction.prediction * prediction.stake)
+        self.aggpredval[predict_blocknum] += int(prediction.prediction * prediction.stake) # need to normalize by sum of stakes
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
