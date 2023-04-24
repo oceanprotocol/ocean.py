@@ -62,7 +62,7 @@ class Datatoken3(Datatoken1):
         self.stake_counter[predict_blocknum] += stake
         self.agg_predvals[predict_blocknum] += int(
             prediction.predval * prediction.stake
-        )  # need to normalize by sum of stakes
+        )
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
