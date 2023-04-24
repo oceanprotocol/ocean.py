@@ -1,41 +1,4 @@
-"""
-Summary: 
-This file is an implementation using OCEAN staking, and DTs. 
-Runs end-to-end.
-
-Protototype 3. https://github.com/oceanprotocol/predictoor-pm/issues/10
-
-Previous prototypes:
-- Prot 1: OCEAN staking, no DT. https://github.com/oceanprotocol/predictoor/blob/main/tests/test_predictoor.py
-- Prot 2: veOCEAN staking, DT. https://github.com/oceanprotocol/predictoor/blob/main/tests/test_datatoken_approach.py
-
-Q: how to reconcile DNFT/DT with "access control (incl onchain)"?
-SubQ: How to have a *feed* where DT owner doesn't need to claim each time?
-A: new datatoken template (#3) for predictoor.sol functionality
-
-How datatoken (DT) gives predictoor.sol functionality:
-- DT adds methods: submit predictions, get agg predval
-  - Staking = as part of submitting predictions
-- DT or exchange adds methods: release(). TBD.
-- DT revises access control: all onchain. DT holds list of who's claimed &when
-  - *Not* the usual ocean_assets.py::pay_for_access_service() because that's highly dependent on off-chain Provider & passing in DDOs. Don't need or want.
-- DT maintains existing functionality: DT custody, allow/transfer, buy, fees..
-What about Data NFT (DNFT) ?
-- We don't need a new DNFT template (!)
-- Leverages existing ERC71 functionality: "owner", transfer(), ..
-- Leverages existing Ocean functionality: create_datatoken() // create_ERC20()
-py interface is part of ocean.py (!)
-Prototype by branching "contracts" and "ocean.py" repos
-
-Q: how to reconcile DNFT/DT with "distribute $ from feed?
--Idea 1: leverage the data NFT or DT. Perhaps with a splitter-style contract below. 
--Idea 2: have a new exchange that splits things up when pmts accepted
--Let's explore the answer to this, and the rest, via prototyping.
-
-************
-Remaining challenges:
-- privacy for submitted predvals, agg predval, when computing agg predval. See Product Design GDoc. 
-"""
+"""Prototype 3. Uses OCEAN staking, and DTs."""
 import json
 import os
 
