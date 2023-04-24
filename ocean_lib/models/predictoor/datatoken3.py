@@ -75,11 +75,11 @@ class Datatoken3(Datatoken1):
                 if prediction.prediction > self.trueval[blocknum]:
                     self.sumdiff[blocknum] += (
                         prediction.prediction - self.trueval[blocknum]
-                    )
+                    ) * prediction.stake
                 else:
                     self.sumdiff[blocknum] += (
                         self.trueval[blocknum] - prediction.prediction
-                    )
+                    ) * prediction.stake
                 checked += 1
                 self.sumdiff_counter[blocknum] += 1
             if checked == batchsize:
@@ -96,7 +96,7 @@ class Datatoken3(Datatoken1):
         assert (self.predictions[blocknum][id].paid == False)
         assert (self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum])
         prediction = self.predictions[blocknum][id]
-        prediction.score = prediction.prediction * 1e18 / self.sumdiff[blocknum]
+        prediction.score = (prediction.prediction * 1e18 / self.sumdiff[blocknum]) * prediction.stake
 
         amt = prediction.score * self.stake_counter[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
