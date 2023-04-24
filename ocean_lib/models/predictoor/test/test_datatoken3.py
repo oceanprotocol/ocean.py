@@ -204,7 +204,10 @@ def _test_main(use_py):
     # ======================================================================
     # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
     trueval = 44900  # 449.00
-    DT.submit_trueval(predict_blocknum, to_wei(trueval), {"from": opf})
+    DT.submit_trueval(predict_blocknum, trueval, {"from": opf})
+
+    # anyone can call calc_sum_diff()
+    DT.calc_sum_diff(predict_blocknum, 1000, {"from": opf})
 
     # ======================================================================
     # TIME PASSES - enough for predictoors to get claims
@@ -212,7 +215,7 @@ def _test_main(use_py):
     # FIXME - we'll need to do 'min_predns_for_payout' loops through this
     #   step and and several prev steps, for predictoors to actually get paid
     print(int(1.2 * min_blocks_ahead * min_predns_for_payout))
-    chain.mine(int(1.2 * min_blocks_ahead * min_predns_for_payout))
+    # chain.mine(int(1.2 * min_blocks_ahead * min_predns_for_payout))
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
@@ -222,7 +225,7 @@ def _test_main(use_py):
 
     for acct in predictoors:
         balbefore = OCEAN_bal(acct)
-        DT.get_payout(predict_blocknum, OCEAN, acct.address, {"from": rando})
+        DT.get_payout(predict_blocknum, OCEAN, predictoors.index(acct), {"from": rando})
         balafter = OCEAN_bal(acct)
         assert balafter > balbefore
 
