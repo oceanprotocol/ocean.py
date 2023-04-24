@@ -13,7 +13,7 @@ from ocean_lib.models.datatoken1 import Datatoken1
 class Prediction:
     def __init__(self, prediction, stake, predictoor):
         self.predictoor = predictoor
-        self.prediction = prediction
+        self.predval = prediction
         self.stake = stake
         self.score = 0
         self.paid = False
@@ -61,7 +61,7 @@ class Datatoken3(Datatoken1):
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
         self.agg_predvals[predict_blocknum] += int(
-            prediction.prediction * prediction.stake
+            prediction.predval * prediction.stake
         )  # need to normalize by sum of stakes
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
