@@ -54,13 +54,15 @@ class Datatoken3(Datatoken1):
             self.prediction_counter[predict_blocknum]
         ] = prediction
 
-        assert (token.transferFrom(
+        assert token.transferFrom(
             tx_dict["from"], self.address, stake, {"from": self.address}
-        ))
+        )
 
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
-        self.aggpredval[predict_blocknum] += int(prediction.prediction * prediction.stake) # need to normalize by sum of stakes
+        self.aggpredval[predict_blocknum] += int(
+            prediction.prediction * prediction.stake
+        )  # need to normalize by sum of stakes
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
@@ -69,7 +71,9 @@ class Datatoken3(Datatoken1):
     def calc_sum_diff(self, blocknum, batchsize, tx_dict):
         assert self.sumdiff_counter[blocknum] < self.prediction_counter[blocknum]
         checked = 0
-        for i in range(self.sumdiff_counter[blocknum], self.prediction_counter[blocknum]):
+        for i in range(
+            self.sumdiff_counter[blocknum], self.prediction_counter[blocknum]
+        ):
             prediction = self.predictions[blocknum][i]
             if prediction.paid == False:
                 if prediction.prediction > self.trueval[blocknum]:
@@ -93,13 +97,15 @@ class Datatoken3(Datatoken1):
         return int(self.aggpredval[blocknum])
 
     def get_payout(self, blocknum, OCEAN, id, tx_dict):
-        assert (self.predictions[blocknum][id].paid == False)
-        assert (self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum])
+        assert self.predictions[blocknum][id].paid == False
+        assert self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum]
         prediction = self.predictions[blocknum][id]
-        prediction.score = (prediction.prediction * 1e18 / self.sumdiff[blocknum]) * prediction.stake
+        prediction.score = (
+            prediction.prediction * 1e18 / self.sumdiff[blocknum]
+        ) * prediction.stake
 
         amt = prediction.score * self.stake_counter[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
-        assert (OCEAN.transfer(prediction.predictoor, amt, {"from": self.address}))
+        assert OCEAN.transfer(prediction.predictoor, amt, {"from": self.address})
         prediction.paid = True
