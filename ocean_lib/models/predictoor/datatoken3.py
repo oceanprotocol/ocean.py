@@ -70,23 +70,17 @@ class Datatoken3(Datatoken1):
 
     def calc_sum_diff(self, blocknum, batchsize, tx_dict):
         assert self.num_sumdiff[blocknum] < self.num_prediction[blocknum]
-        checked = 0
+        num_iterations = 0
         for i in range(
             self.num_sumdiff[blocknum], self.num_prediction[blocknum]
         ):
             prediction = self.predictions[blocknum][i]
             if prediction.paid == False:
-                if prediction.predval > self.trueval[blocknum]:
-                    self.sumdiff[blocknum] += (
-                        prediction.predval - self.trueval[blocknum]
-                    ) * prediction.stake
-                else:
-                    self.sumdiff[blocknum] += (
-                        self.trueval[blocknum] - prediction.predval
-                    ) * prediction.stake
-                checked += 1
+                diff = abs(prediction.predval - self.trueval[blocknum])
+                self.sumdiff[blocknum] += diff * prediction.stake
+                num_iterations += 1
                 self.num_sumdiff[blocknum] += 1
-            if checked == batchsize:
+            if num_iterations == batchsize:
                 break
 
     def start_subscription(self, tx_dict):
@@ -101,11 +95,11 @@ class Datatoken3(Datatoken1):
         assert self.predictions[blocknum][id].paid == False
         assert self.num_sumdiff[blocknum] == self.num_prediction[blocknum]
         prediction = self.predictions[blocknum][id]
-        prediction.score = int((
-            prediction.predval * 1e18 / self.sumdiff[blocknum]
-        ) * prediction.stake)
-
-        amt = prediction.score * self.tot_stake[blocknum] / 1e18
+        prediction.score = 1 - prediction.stake * (
+            abs(prediction.predval - self.trueval[blocknum])
+            / self.sumdiff[blocknum]
+        )
+        amt = prediction.score * self.tot_stake[blocknum]
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
         assert OCEAN.transfer(prediction.predictoor, amt, {"from": self.address})
