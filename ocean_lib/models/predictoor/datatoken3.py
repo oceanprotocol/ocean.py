@@ -46,6 +46,9 @@ class Datatoken3(Datatoken1):
             self.predictions[predict_blocknum] = {}
             self.prediction_counter[predict_blocknum] = 0
             self.stake_counter[predict_blocknum] = 0
+            self.sumdiff_counter[predict_blocknum] = 0
+            self.sumdiff[predict_blocknum] = 0
+            self.aggpredval[predict_blocknum] = 0
 
         self.predictions[predict_blocknum][
             self.prediction_counter[predict_blocknum]
@@ -57,16 +60,14 @@ class Datatoken3(Datatoken1):
 
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
-
-        if predict_blocknum not in self.aggpredval:
-            self.aggpredval[predict_blocknum] = 0
         self.aggpredval[predict_blocknum] += int(prediction.prediction * prediction.stake)
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
         self.trueval[blocknum] = trueval
 
-    def calc_sum_diff(self, blocknum, batchsize):
+    def calc_sum_diff(self, blocknum, batchsize, tx_dict):
+        assert self.sumdiff_counter[blocknum] < self.prediction_counter[blocknum]
         checked = 0
         for i in range(self.sumdiff_counter[blocknum], self.prediction_counter[blocknum]):
             prediction = self.predictions[blocknum][i]
