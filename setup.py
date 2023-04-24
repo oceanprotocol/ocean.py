@@ -26,7 +26,7 @@ install_requirements = [
     "eciespy==0.3.11",
     "eth-brownie==1.19.3",
     "cryptography==40.0.2",
-    "yarl==1.8.1",
+    "yarl==1.9.1",
     "bitarray>=2.6.0,<3",
     # brownie requires web3.py, eth-abi, requests, and more,
     # so those will be installed too.
