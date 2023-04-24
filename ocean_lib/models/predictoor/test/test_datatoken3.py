@@ -225,12 +225,16 @@ def _test_main(use_py):
 
     # Any rando can call get_payout(). Will update amt allowed
     # OR!!! this is where exchange object comes in!!
-
+    earnings = {}
     for acct in predictoors:
         balbefore = OCEAN_bal(acct)
         DT.get_payout(predict_blocknum, OCEAN, predictoors.index(acct), {"from": rando})
         balafter = OCEAN_bal(acct)
+        earnings[acct] = balafter - balbefore
         assert balafter > balbefore
+
+    assert OCEAN_bal(DT) == 0.0  # all payouted
+    assert earnings[predictoor2] > earnings[predictoor1]
 
 
 class ConvClass:
