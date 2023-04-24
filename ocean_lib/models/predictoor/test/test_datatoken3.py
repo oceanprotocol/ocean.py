@@ -247,8 +247,8 @@ def _test_main(use_py):
 
     # ======================================================================
     # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
-    predval1, stake1 = 200, 10.0
-    predval2, stake2 = 500, 20.0
+    predval1, stake1 = 20000, 10.0  # 200,00
+    predval2, stake2 = 50020, 20.0  # 500,20
     predict_blocknum = 100
 
     OCEAN.mint(predictoor1, to_wei(stake1), {"from": deployer})
@@ -263,10 +263,10 @@ def _test_main(use_py):
     initbal2 = OCEAN_bal(predictoor2)
 
     DT.submit_predval(
-        OCEAN, to_wei(predval1), to_wei(stake1), predict_blocknum, {"from": predictoor1}
+        OCEAN, predval1, to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
     DT.submit_predval(
-        OCEAN, to_wei(predval2), to_wei(stake2), predict_blocknum, {"from": predictoor2}
+        OCEAN, predval2, to_wei(stake2), predict_blocknum, {"from": predictoor2}
     )
 
     # test
@@ -286,7 +286,7 @@ def _test_main(use_py):
     #  asset_downloader.download_asset_files() except there's no downloading,
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
     agg_predval_wei = DT.get_agg_predval(predict_blocknum)
-    assert agg_predval_wei == to_wei(400.0)
+    assert agg_predval_wei / 1e18 == approx(predval1 * stake1 + predval2 * stake2)
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed
@@ -294,7 +294,7 @@ def _test_main(use_py):
 
     # ======================================================================
     # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-    trueval = 449.0
+    trueval = 44900  # 449.00
     DT.submit_trueval(predict_blocknum, to_wei(trueval), {"from": opf})
 
     # ======================================================================
@@ -308,7 +308,7 @@ def _test_main(use_py):
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
 
-    # Any rando can call release(). Will update amt allowed
+    # Any rando can call get_payout(). Will update amt allowed
     # OR!!! this is where exchange object comes in!!
 
     for acct in predictoors:

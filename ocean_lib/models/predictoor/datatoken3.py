@@ -30,8 +30,12 @@ class Datatoken3(Datatoken1):
         self.prediction_counter = {}  # [blocknum] = counter
         self.stake_counter = {}  # [blocknum] = counter
 
+        self.aggpredval = {}  # [blocknum] = aggpredval
+
     # placeholders for now
     def submit_predval(self, token, prediction, stake, predict_blocknum, tx_dict):
+        # assert blocks_ahead >= self._min_blocks_ahead
+
         prediction = Prediction(prediction, stake)
 
         if predict_blocknum not in self.predictions:
@@ -47,6 +51,10 @@ class Datatoken3(Datatoken1):
 
         self.prediction_counter[predict_blocknum] += 1
         self.stake_counter[predict_blocknum] += stake
+
+        if predict_blocknum not in self.aggpredval:
+            self.aggpredval[predict_blocknum] = 0
+        self.aggpredval[predict_blocknum] += int(prediction.prediction * prediction.stake)
 
     def submit_trueval(self, blocknum, trueval, tx_dict):
         # assert sender == opf
@@ -69,13 +77,7 @@ class Datatoken3(Datatoken1):
             self.subscribers[tx_dict["from"]] = 100  # mock timestamp
 
     def get_agg_predval(self, blocknum):
-        s = 0
-        w = 0
-        for addr in self.predictions[blocknum]:
-            prediction = self.predictions[blocknum][addr]
-            s += prediction.prediction * prediction.stake
-            w += prediction.stake
-        return s / w
+        return int(self.aggpredval[blocknum])
 
     def get_payout(self, blocknum, OCEAN, predictoor_addr, tx_dict):
         assert (self.predictions[blocknum][predictoor_addr].paid == False)
