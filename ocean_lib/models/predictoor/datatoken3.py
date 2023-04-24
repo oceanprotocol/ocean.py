@@ -81,6 +81,7 @@ class Datatoken3(Datatoken1):
                         self.trueval[blocknum] - prediction.prediction
                     )
                 checked += 1
+                self.sumdiff_counter[blocknum] += 1
             if checked == batchsize:
                 break
 
@@ -91,14 +92,14 @@ class Datatoken3(Datatoken1):
     def get_agg_predval(self, blocknum):
         return int(self.aggpredval[blocknum])
 
-    def get_payout(self, blocknum, OCEAN, predictoor_addr, tx_dict):
-        assert (self.predictions[blocknum][predictoor_addr].paid == False)
+    def get_payout(self, blocknum, OCEAN, id, tx_dict):
+        assert (self.predictions[blocknum][id].paid == False)
         assert (self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum])
-        prediction = self.predictions[blocknum][predictoor_addr]
+        prediction = self.predictions[blocknum][id]
         prediction.score = prediction.prediction * 1e18 / self.sumdiff[blocknum]
 
         amt = prediction.score * self.stake_counter[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
-        assert (OCEAN.transfer(predictoor_addr, amt, {"from": self.address}))
+        assert (OCEAN.transfer(prediction.predictoor, amt, {"from": self.address}))
         prediction.paid = True
