@@ -28,12 +28,12 @@ class Datatoken3(Datatoken1):
         self.predictions = {}  # [predict_blocknum][id] = Prediction
         self.trueval = {}  # [blocknum] = trueval
 
-        self.prediction_counter = {}  # [blocknum] = counter
-        self.stake_counter = {}  # [blocknum] = counter
+        self.num_prediction = {}  # [blocknum] = counter
+        self.num_stake = {}  # [blocknum] = counter
 
         self.agg_predvals = {}  # [blocknum] = aggpredval
         self.sumdiff = {}  # [blocknum] = sumdiff
-        self.sumdiff_counter = {}  # [blocknum] = counter
+        self.num_sumdiff = {}  # [blocknum] = counter
 
     # placeholders for now
 
@@ -44,22 +44,22 @@ class Datatoken3(Datatoken1):
 
         if predict_blocknum not in self.predictions:
             self.predictions[predict_blocknum] = {}
-            self.prediction_counter[predict_blocknum] = 0
-            self.stake_counter[predict_blocknum] = 0
-            self.sumdiff_counter[predict_blocknum] = 0
+            self.num_prediction[predict_blocknum] = 0
+            self.num_stake[predict_blocknum] = 0
+            self.num_sumdiff[predict_blocknum] = 0
             self.sumdiff[predict_blocknum] = 0
             self.agg_predvals[predict_blocknum] = 0
 
         self.predictions[predict_blocknum][
-            self.prediction_counter[predict_blocknum]
+            self.num_prediction[predict_blocknum]
         ] = prediction
 
         assert token.transferFrom(
             tx_dict["from"], self.address, stake, {"from": self.address}
         )
 
-        self.prediction_counter[predict_blocknum] += 1
-        self.stake_counter[predict_blocknum] += stake
+        self.num_prediction[predict_blocknum] += 1
+        self.num_stake[predict_blocknum] += stake
         self.agg_predvals[predict_blocknum] += int(
             prediction.predval * prediction.stake
         )
@@ -69,10 +69,10 @@ class Datatoken3(Datatoken1):
         self.trueval[blocknum] = trueval
 
     def calc_sum_diff(self, blocknum, batchsize, tx_dict):
-        assert self.sumdiff_counter[blocknum] < self.prediction_counter[blocknum]
+        assert self.num_sumdiff[blocknum] < self.num_prediction[blocknum]
         checked = 0
         for i in range(
-            self.sumdiff_counter[blocknum], self.prediction_counter[blocknum]
+            self.num_sumdiff[blocknum], self.num_prediction[blocknum]
         ):
             prediction = self.predictions[blocknum][i]
             if prediction.paid == False:
@@ -85,7 +85,7 @@ class Datatoken3(Datatoken1):
                         self.trueval[blocknum] - prediction.prediction
                     ) * prediction.stake
                 checked += 1
-                self.sumdiff_counter[blocknum] += 1
+                self.num_sumdiff[blocknum] += 1
             if checked == batchsize:
                 break
 
@@ -98,13 +98,13 @@ class Datatoken3(Datatoken1):
 
     def get_payout(self, blocknum, OCEAN, id, tx_dict):
         assert self.predictions[blocknum][id].paid == False
-        assert self.sumdiff_counter[blocknum] == self.prediction_counter[blocknum]
+        assert self.num_sumdiff[blocknum] == self.num_prediction[blocknum]
         prediction = self.predictions[blocknum][id]
         prediction.score = (
             prediction.prediction * 1e18 / self.sumdiff[blocknum]
         ) * prediction.stake
 
-        amt = prediction.score * self.stake_counter[blocknum] / 1e18
+        amt = prediction.score * self.num_stake[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
         assert OCEAN.transfer(prediction.predictoor, amt, {"from": self.address})
