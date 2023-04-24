@@ -20,7 +20,7 @@ class Prediction:
 
 
 class Datatoken3(Datatoken1):
-    CONTRACT_NAME = "ERC20Template"  # switch to ERC20Template3 when ready
+    CONTRACT_NAME = "ERC20Template3"  # switch to ERC20Template3 when ready
 
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
@@ -76,13 +76,13 @@ class Datatoken3(Datatoken1):
         ):
             prediction = self.predictions[blocknum][i]
             if prediction.paid == False:
-                if prediction.prediction > self.trueval[blocknum]:
+                if prediction.predval > self.trueval[blocknum]:
                     self.sumdiff[blocknum] += (
-                        prediction.prediction - self.trueval[blocknum]
+                        prediction.predval - self.trueval[blocknum]
                     ) * prediction.stake
                 else:
                     self.sumdiff[blocknum] += (
-                        self.trueval[blocknum] - prediction.prediction
+                        self.trueval[blocknum] - prediction.predval
                     ) * prediction.stake
                 checked += 1
                 self.num_sumdiff[blocknum] += 1
@@ -100,9 +100,9 @@ class Datatoken3(Datatoken1):
         assert self.predictions[blocknum][id].paid == False
         assert self.num_sumdiff[blocknum] == self.num_prediction[blocknum]
         prediction = self.predictions[blocknum][id]
-        prediction.score = (
-            prediction.prediction * 1e18 / self.sumdiff[blocknum]
-        ) * prediction.stake
+        prediction.score = int((
+            prediction.predval * 1e18 / self.sumdiff[blocknum]
+        ) * prediction.stake)
 
         amt = prediction.score * self.num_stake[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
