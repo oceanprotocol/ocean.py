@@ -13,9 +13,7 @@ Ensure pre-requisites:
 - solc 0.8.0+ [[Instructions](https://docs.soliditylang.org/en/v0.8.9/installing-solidity.html)]
 - ganache. [To install](https://github.com/trufflesuite/ganache#readme): `npm install ganache --global`
 
-## 2. Start ganache
-
-Start ganache and give ETH to accounts.
+## 2. Start ganache, fund accounts
 
 Open a new console and:
 
@@ -59,12 +57,11 @@ pip install -r requirements_dev.txt
 #install openzeppelin library, to import from .sol (ignore FileExistsErrors)
 brownie pm install OpenZeppelin/openzeppelin-contracts@4.2.0
 brownie pm install GNSPS/solidity-bytes-utils@0.8.0
+```
 
 ## 4. Set envvars in work console
 
-We set these keys in the ganache console. We also need them in our main work console.
-
-In work console:
+While we already set these envvars in the ganache console, let's also get them in our work console. In work console:
 
 ```console
 #set private keys
@@ -78,8 +75,7 @@ export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699
 We need to compile once at the beginning, and recompile whenever we change ERC20Template3.sol.
 
 In work console:
-
-```
+```console
 #remove old build artifacts
 rm -rf build
 
