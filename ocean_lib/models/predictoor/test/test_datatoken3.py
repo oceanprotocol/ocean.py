@@ -197,7 +197,7 @@ def _test_main(use_py):
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
     agg_predval_trunc = DT.get_agg_predval(predict_blocknum)
     assert agg_predval_trunc == approx(
-        predval1_trunc * stake1 + predval2_trunc * stake2
+        to_wei(predval1_trunc * stake1 + predval2_trunc * stake2)
     )  # need to normalize by sum of stakes
 
     # ======================================================================
