@@ -29,7 +29,7 @@ class Datatoken3(Datatoken1):
         self.trueval = {}  # [blocknum] = trueval
 
         self.num_prediction = {}  # [blocknum] = counter
-        self.num_stake = {}  # [blocknum] = counter
+        self.tot_stake = {}  # [blocknum] = counter
 
         self.agg_predvals = {}  # [blocknum] = aggpredval
         self.sumdiff = {}  # [blocknum] = sumdiff
@@ -45,7 +45,7 @@ class Datatoken3(Datatoken1):
         if predict_blocknum not in self.predictions:
             self.predictions[predict_blocknum] = {}
             self.num_prediction[predict_blocknum] = 0
-            self.num_stake[predict_blocknum] = 0
+            self.tot_stake[predict_blocknum] = 0
             self.num_sumdiff[predict_blocknum] = 0
             self.sumdiff[predict_blocknum] = 0
             self.agg_predvals[predict_blocknum] = 0
@@ -59,7 +59,7 @@ class Datatoken3(Datatoken1):
         )
 
         self.num_prediction[predict_blocknum] += 1
-        self.num_stake[predict_blocknum] += stake
+        self.tot_stake[predict_blocknum] += stake
         self.agg_predvals[predict_blocknum] += int(
             prediction.predval * prediction.stake
         )
@@ -105,7 +105,7 @@ class Datatoken3(Datatoken1):
             prediction.predval * 1e18 / self.sumdiff[blocknum]
         ) * prediction.stake)
 
-        amt = prediction.score * self.num_stake[blocknum] / 1e18
+        amt = prediction.score * self.tot_stake[blocknum] / 1e18
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
         assert OCEAN.transfer(prediction.predictoor, amt, {"from": self.address})
