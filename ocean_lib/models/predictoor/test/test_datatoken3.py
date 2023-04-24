@@ -119,7 +119,7 @@ def _test_main(use_py):
     # Ensure that users have OCEAN and ETH as needed
     # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
 
-    print("n\Balances before moving funds:")
+    print("\nBalances before moving funds:")
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
 
