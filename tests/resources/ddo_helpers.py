@@ -122,6 +122,7 @@ def get_registered_asset_with_compute_service(
         "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
         tx_dict={"from": publisher_wallet},
         compute_values=compute_values,
+        wait_for_aqua=False,
     )
 
 

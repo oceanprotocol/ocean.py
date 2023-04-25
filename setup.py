@@ -25,7 +25,7 @@ install_requirements = [
     "enforce-typing==1.0.0.post1",
     "eciespy==0.3.11",
     "eth-brownie==1.19.3",
-    "cryptography==40.0.1",
+    "cryptography==40.0.2",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
     "pycrypto==2.6.1",
@@ -45,7 +45,7 @@ test_requirements = [
     "pytest-env==0.6.2",
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
     "mkcodes==0.1.1",
-    "pytest-sugar==0.9.6",
+    "pytest-sugar==0.9.7",
 ]
 
 # Possibly required by developers of ocean-lib:
@@ -92,7 +92,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='2.2.2',
+    version='2.2.3',
     # fmt: on
     zip_safe=False,
 )

@@ -44,16 +44,16 @@ def test_consume_asset(
             "Data NFTs in Ocean", router_address, abi, {"from": publisher_wallet}
         )
     else:
-        url = "http://172.15.0.15:8000/subgraphs/name/oceanprotocol/ocean-subgraph"
+        url = "http://172.15.0.15:8030/graphql"
         query = """
-            query{
-                nfts(orderby: createdtimestamp,orderdirection:desc){
-                    id
-                    symbol
-                    createdtimestamp
+                query{
+                    indexingStatuses{
+                        subgraph
+                        chains
+                        node
+                    }
                 }
-            }
-            """
+                """
 
         data_nft, dt, ddo = ocean_assets.create_graphql_asset(
             "Data NFTs in Ocean", url, query, {"from": publisher_wallet}

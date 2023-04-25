@@ -4,11 +4,12 @@
 #
 import logging
 from collections import namedtuple
-from typing import Any
+from typing import Any, Union
 
 import requests
 from brownie import network
 from brownie.network import chain
+from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -32,12 +33,33 @@ def to_32byte_hex(val: int) -> str:
 
 
 @enforce_types
-def sign_with_key(message_hash: HexBytes, key: str) -> str:
+def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
+    message_hash = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toBytes(text=message_hash)],
+    )
+
+    orig_sig = wallet._provider.make_request(
+        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
+    )["result"]
+    return orig_sig
+
+
+@enforce_types
+def sign_with_key(message_hash: Union[HexBytes, str], key: str) -> str:
+    if isinstance(message_hash, str):
+        message_hash = Web3.solidityKeccak(
+            ["bytes"],
+            [Web3.toBytes(text=message_hash)],
+        )
+
     pk = keys.PrivateKey(Web3.toBytes(hexstr=key))
+
     prefix = "\x19Ethereum Signed Message:\n32"
     signable_hash = Web3.solidityKeccak(
         ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
     )
+
     return keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
 

@@ -10,14 +10,12 @@ from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-import requests
 from enforce_typing import enforce_types
 from requests.models import PreparedRequest, Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.base import DataServiceProviderBase
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
-from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -45,8 +43,8 @@ class DataServiceProvider(DataServiceProviderBase):
         userdata: Optional[Dict] = None,
     ) -> Response:
 
-        _, initialize_endpoint = DataServiceProvider.build_initialize_endpoint(
-            service.service_endpoint
+        _, initialize_endpoint = DataServiceProvider.build_endpoint(
+            "initialize", service.service_endpoint
         )
 
         payload = {
@@ -59,21 +57,11 @@ class DataServiceProvider(DataServiceProviderBase):
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        response = DataServiceProvider._http_method(
-            "get", url=initialize_endpoint, params=payload
-        )
-        if not response or not hasattr(response, "status_code"):
-            raise DataProviderException(
-                f"Failed to get a response for request: initializeEndpoint={initialize_endpoint}, payload={payload}, response is {response}"
-            )
+        response = DataServiceProvider.get_raw(url=initialize_endpoint, params=payload)
 
-        if response.status_code != 200:
-            msg = (
-                f"Initialize service failed at the initializeEndpoint "
-                f"{initialize_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise DataProviderException(msg)
+        DataServiceProviderBase.check_response(
+            response, "initializeEndpoint", initialize_endpoint, payload
+        )
 
         logger.info(
             f"Service initialized successfully"
@@ -100,7 +88,7 @@ class DataServiceProvider(DataServiceProviderBase):
         (
             _,
             initialize_compute_endpoint,
-        ) = DataServiceProvider.build_initialize_compute_endpoint(service_endpoint)
+        ) = DataServiceProvider.build_endpoint("initializeCompute", service_endpoint)
 
         payload = {
             "datasets": datasets,
@@ -112,8 +100,7 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer_address,
         }
 
-        response = DataServiceProvider._http_method(
-            "post",
+        response = DataServiceProvider.post_raw(
             initialize_compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -154,8 +141,8 @@ class DataServiceProvider(DataServiceProviderBase):
             )
             indexes = [index]
 
-        _, download_endpoint = DataServiceProvider.build_download_endpoint(
-            service_endpoint
+        _, download_endpoint = DataServiceProvider.build_endpoint(
+            "download", service_endpoint
         )
 
         payload = {
@@ -174,8 +161,8 @@ class DataServiceProvider(DataServiceProviderBase):
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet, did
             )
-            response = DataServiceProvider._http_method(
-                "get", url=download_endpoint, params=payload, stream=True, timeout=3
+            response = DataServiceProvider.get_raw(
+                url=download_endpoint, params=payload, stream=True, timeout=3
             )
 
             DataServiceProviderBase.check_response(
@@ -234,11 +221,10 @@ class DataServiceProvider(DataServiceProviderBase):
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
-        _, compute_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_endpoint = DataServiceProvider.build_endpoint(
+            "computeStart", dataset_compute_service.service_endpoint
         )
-        response = DataServiceProvider._http_method(
-            "post",
+        response = DataServiceProvider.post_raw(
             compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -280,8 +266,8 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: bool whether the job was stopped successfully
         """
-        _, compute_stop_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_stop_endpoint = DataServiceProvider.build_endpoint(
+            "computeStop", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "put", did, job_id, compute_stop_endpoint, consumer
@@ -304,8 +290,8 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: bool whether the job was deleted successfully
         """
-        _, compute_delete_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_delete_endpoint = DataServiceProvider.build_endpoint(
+            "computeDelete", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "delete", did, job_id, compute_delete_endpoint, consumer
@@ -329,8 +315,8 @@ class DataServiceProvider(DataServiceProviderBase):
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
         """
-        _, compute_status_endpoint = DataServiceProvider.build_compute_endpoint(
-            dataset_compute_service.service_endpoint
+        _, compute_status_endpoint = DataServiceProvider.build_endpoint(
+            "computeStatus", dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "get", did, job_id, compute_status_endpoint, consumer
@@ -363,11 +349,8 @@ class DataServiceProvider(DataServiceProviderBase):
             "consumerAddress": consumer.address,
         }
 
-        (
-            _,
-            compute_job_result_endpoint,
-        ) = DataServiceProvider.build_compute_result_file_endpoint(
-            dataset_compute_service.service_endpoint
+        (_, compute_job_result_endpoint) = DataServiceProvider.build_endpoint(
+            "computeResult", dataset_compute_service.service_endpoint
         )
         req.prepare_url(compute_job_result_endpoint, params)
         compute_job_result_file_url = req.url
@@ -447,8 +430,10 @@ class DataServiceProvider(DataServiceProviderBase):
         )
 
         resp_content = json.loads(response.content.decode("utf-8"))
+
         if isinstance(resp_content, list):
             return resp_content[0]
+
         return resp_content
 
     @staticmethod
@@ -472,18 +457,13 @@ class DataServiceProvider(DataServiceProviderBase):
                 f"for `algorithm_meta`, got {type(algorithm_meta)}"
             )
 
+        input_datasets = input_datasets if input_datasets else []
         _input_datasets = []
-        if input_datasets:
-            for _input in input_datasets:
-                assert _input.did, "The received dataset does not have a did."
-                assert (
-                    _input.transfer_tx_id
-                ), "The received dataset does not have a transaction id."
-                assert (
-                    _input.service_id
-                ), "The received dataset does not have a specified service id."
-                if _input.did != dataset.did:
-                    _input_datasets.append(_input.as_dictionary())
+        for _input in input_datasets:
+            for req_key in ["did", "transfer_tx_id", "service_id"]:
+                assert getattr(
+                    _input, req_key
+                ), f"The received dataset does not have a {req_key}."
 
         nonce, signature = DataServiceProvider.sign_message(
             consumer, f"{consumer.address}{dataset.did}"
@@ -528,17 +508,13 @@ class DataServiceProvider(DataServiceProviderBase):
     @staticmethod
     @enforce_types
     def check_single_file_info(url_object: dict, provider_uri: str) -> bool:
-        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        response = requests.post(endpoint, json=url_object)
+        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
+        response = DataServiceProvider.post_raw(endpoint, json=url_object)
 
         if response.status_code != 200:
             return False
 
-        response = response.json()
-        for file_info in response:
-            return file_info["valid"]
-
-        return False
+        return any([file_info["valid"] for file_info in response.json()])
 
     @staticmethod
     @enforce_types
@@ -548,19 +524,15 @@ class DataServiceProvider(DataServiceProviderBase):
         if not did:
             return False
 
-        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
+        _, endpoint = DataServiceProvider.build_endpoint("fileinfo", provider_uri)
         data = {"did": did, "serviceId": service_id}
 
         if userdata is not None:
             data["userdata"] = userdata
 
-        response = requests.post(endpoint, json=data)
+        response = DataServiceProvider.post_raw(endpoint, json=data)
 
         if not response or response.status_code != 200:
             return False
 
-        response = response.json()
-        for ddo_info in response:
-            return ddo_info["valid"]
-
-        return False
+        return any([file_info["valid"] for file_info in response.json()])
