@@ -4,6 +4,7 @@ import os
 
 import brownie
 from brownie.network import accounts as br_accounts
+from enforce_typing import enforce_types
 import pytest
 from pytest import approx
 
@@ -30,6 +31,7 @@ def test_main_sol():
     _test_main(use_py=False)
 
 
+@enforce_types
 def _test_main(use_py):
 
     # ======
@@ -165,6 +167,8 @@ def _test_main(use_py):
     initbal1 = OCEAN_bal(predictoor1)
     initbal2 = OCEAN_bal(predictoor2)
 
+    #error here
+    import pdb; pdb.set_trace()
     DT.submit_predval(
         OCEAN, predval1_trunc, to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
@@ -198,8 +202,8 @@ def _test_main(use_py):
 
     # ======================================================================
     # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-    trueval = 44900  # 449.00
-    DT.submit_trueval(predict_blocknum, trueval, {"from": opf})
+    trueval_trunc = 44900  # "44900" here == "449.00" float
+    DT.submit_trueval(predict_blocknum, trueval_trunc, {"from": opf})
 
     # anyone can call calc_sum_diff()
     DT.calc_sum_diff(predict_blocknum, 1000, {"from": opf})
@@ -229,6 +233,7 @@ def _test_main(use_py):
     assert earnings[predictoor2] > earnings[predictoor1]
 
 
+@enforce_types
 class ConvClass:
     def __init__(self, token):
         self.token = token
@@ -240,5 +245,6 @@ class ConvClass:
         return from_wei(self.token.allowance(obj1.address, obj2.address))
 
 
-def _cur_blocknum():
+@enforce_types
+def _cur_blocknum() -> int:
     return chain[-1].number

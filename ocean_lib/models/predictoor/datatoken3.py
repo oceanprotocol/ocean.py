@@ -8,78 +8,99 @@ from typing import Any, Optional
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken1 import Datatoken1
+from ocean_lib.models.datatoken_base import DatatokenBase
 
 
-class Prediction:
-    def __init__(self, prediction, stake, predictoor):
+@enforce_types
+class PredClass:
+    def __init__(
+            self,
+            predval_trunc: int, # e.g. "50020" here == "500.20" float
+            stake_wei: int,
+            predictoor,
+    ):
+        self.predval_trunc: int = predval_trunc
+        self.stake_wei: int = stake_wei
         self.predictoor = predictoor
-        self.predval = prediction
-        self.stake = stake
+        
         self.score = 0
-        self.paid = False
+        self.paid: bool = False
 
 
+@enforce_types
 class Datatoken3(Datatoken1):
-    CONTRACT_NAME = "ERC20Template3"  # switch to ERC20Template3 when ready
+    CONTRACT_NAME = "ERC20Template3"
 
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
         self.subscribers = {}  # [address] = timestamp
-        self.predictions = {}  # [predict_blocknum][id] = Prediction
-        self.trueval = {}  # [blocknum] = trueval
+        self.predobjs = {}  # [predict_blocknum][id] = predobj
+        self.truevals_trunc = {}  # [blocknum] = trueval_trunc
 
-        self.num_prediction = {}  # [blocknum] = counter
-        self.tot_stake = {}  # [blocknum] = counter
-
+        self.num_predobjs = {}  # [blocknum] = counter
+        self.tot_stakes_wei = {}  # [blocknum] = stake_wei
         self.agg_predvals = {}  # [blocknum] = aggpredval
-        self.sumdiff = {}  # [blocknum] = sumdiff
-        self.num_sumdiff = {}  # [blocknum] = counter
+        self.sumdiffs = {}  # [blocknum] = sumdiff
+        self.num_sumdiffs = {}  # [blocknum] = counter
 
     # placeholders for now
 
-    def submit_predval(self, token, prediction, stake, predict_blocknum, tx_dict):
+    def submit_predval(
+            self,
+            stake_token: DatatokenBase, #e.g. OCEAN
+            predval_trunc: int, # e.g. "50020" here == "500.20" float
+            stake_wei: int,
+            predict_blocknum: int,
+            tx_dict: dict
+    ):
         # assert blocks_ahead >= self._min_blocks_ahead
 
-        prediction = Prediction(prediction, stake, predictoor=tx_dict["from"])
+        predobj = PredClass(
+            predval_trunc, stake_wei, predictoor=tx_dict["from"])
 
-        if predict_blocknum not in self.predictions:
-            self.predictions[predict_blocknum] = {}
-            self.num_prediction[predict_blocknum] = 0
-            self.tot_stake[predict_blocknum] = 0
-            self.num_sumdiff[predict_blocknum] = 0
-            self.sumdiff[predict_blocknum] = 0
+        if predict_blocknum not in self.predobjs:
+            self.predobjs[predict_blocknum] = {}
+            self.num_predobjs[predict_blocknum] = 0
+            self.tot_stakes_wei[predict_blocknum] = 0
+            self.num_sumdiffs[predict_blocknum] = 0
+            self.sumdiffs[predict_blocknum] = 0
             self.agg_predvals[predict_blocknum] = 0
 
-        self.predictions[predict_blocknum][
-            self.num_prediction[predict_blocknum]
-        ] = prediction
+        self.predobjs[predict_blocknum][
+            self.num_predobjs[predict_blocknum]
+        ] = predobj
 
-        assert token.transferFrom(
-            tx_dict["from"], self.address, stake, {"from": self.address}
+        assert stake_token.transferFrom(
+            tx_dict["from"], self.address, stake_wei, {"from": self.address}
         )
 
-        self.num_prediction[predict_blocknum] += 1
-        self.tot_stake[predict_blocknum] += stake
+        self.num_predobjs[predict_blocknum] += 1
+        self.tot_stakes_wei[predict_blocknum] += stake_wei
         self.agg_predvals[predict_blocknum] += int(
-            prediction.predval * prediction.stake
+            predobj.predval_trunc * predobj.stake_wei
         )
 
-    def submit_trueval(self, blocknum, trueval, tx_dict):
+    def submit_trueval(
+            self,
+            blocknum: int,
+            trueval_trunc: int, # e.g. "44900" here == "449.00" float
+            tx_dict: dict,
+    ):
         # assert sender == opf
-        self.trueval[blocknum] = trueval
+        self.truevals_trunc[blocknum] = trueval_trunc
 
     def calc_sum_diff(self, blocknum, batchsize, tx_dict):
-        assert self.num_sumdiff[blocknum] < self.num_prediction[blocknum]
+        assert self.num_sumdiffs[blocknum] < self.num_predobjs[blocknum]
         num_iterations = 0
         for i in range(
-            self.num_sumdiff[blocknum], self.num_prediction[blocknum]
+            self.num_sumdiffs[blocknum], self.num_predobjs[blocknum]
         ):
-            prediction = self.predictions[blocknum][i]
-            if prediction.paid == False:
-                diff = abs(prediction.predval - self.trueval[blocknum])
-                self.sumdiff[blocknum] += diff * prediction.stake
+            predobj = self.predobjs[blocknum][i]
+            if predobj.paid == False:
+                diff = abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
+                self.sumdiffs[blocknum] += diff * predobj.stake_wei
                 num_iterations += 1
-                self.num_sumdiff[blocknum] += 1
+                self.num_sumdiffs[blocknum] += 1
             if num_iterations == batchsize:
                 break
 
@@ -92,15 +113,15 @@ class Datatoken3(Datatoken1):
         return int(self.agg_predvals[blocknum])
 
     def get_payout(self, blocknum, OCEAN, id, tx_dict):
-        assert self.predictions[blocknum][id].paid == False
-        assert self.num_sumdiff[blocknum] == self.num_prediction[blocknum]
-        prediction = self.predictions[blocknum][id]
-        prediction.score = 1 - prediction.stake * (
-            abs(prediction.predval - self.trueval[blocknum])
-            / self.sumdiff[blocknum]
+        assert self.predobjs[blocknum][id].paid == False
+        assert self.num_sumdiffs[blocknum] == self.num_predobjs[blocknum]
+        predobj = self.predobjs[blocknum][id]
+        predobj.score = 1 - predobj.stake_wei * (
+            abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
+            / self.sumdiffs[blocknum]
         )
-        amt = prediction.score * self.tot_stake[blocknum]
+        amt = predobj.score * self.tot_stakes_wei[blocknum]
         if OCEAN.balanceOf(self.address) < amt:  # precision loss
             amt = OCEAN.balanceOf(self.address)
-        assert OCEAN.transfer(prediction.predictoor, amt, {"from": self.address})
-        prediction.paid = True
+        assert OCEAN.transfer(predobj.predictoor, amt, {"from": self.address})
+        predobj.paid = True
