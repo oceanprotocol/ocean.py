@@ -24,7 +24,6 @@ class PredClass:
         self.stake_wei: int = stake_wei
         self.predictoor = predictoor
 
-        self.score = 0
         self.paid: bool = False
 
 
@@ -39,8 +38,8 @@ class Datatoken3(Datatoken1):
         self.predobjs = {}  # [predict_blocknum][id] = predobj
         self.num_predobjs = {}  # [blocknum] = counter
 
-        self.tot_stakes_wei = {}  # [blocknum] = stake_wei
-        self.agg_predvals = {}  # [blocknum] = aggpredval
+        self.agg_predvals_numerator_wei = {}  # [blocknum] = agg_predval_numer
+        self.agg_predvals_denominator_wei = {}  # [blocknum] = agg_predval_denom
 
         self.truevals_trunc = {}  # [blocknum] = trueval_trunc
 
@@ -63,8 +62,8 @@ class Datatoken3(Datatoken1):
             self.predobjs[predict_blocknum] = {}
             self.num_predobjs[predict_blocknum] = 0
 
-            self.tot_stakes_wei[predict_blocknum] = 0
-            self.agg_predvals[predict_blocknum] = 0
+            self.agg_predvals_numerator_wei[predict_blocknum] = 0
+            self.agg_predvals_denominator_wei[predict_blocknum] = 0
 
             self.sumdiffs[predict_blocknum] = 0
             self.num_sumdiffs[predict_blocknum] = 0
@@ -84,10 +83,10 @@ class Datatoken3(Datatoken1):
         )
 
         self.num_predobjs[predict_blocknum] += 1
-        self.tot_stakes_wei[predict_blocknum] += stake_wei
-        self.agg_predvals[predict_blocknum] += int(
+        self.agg_predvals_numerator_wei[predict_blocknum] += int(
             predobj.predval_trunc * predobj.stake_wei
         )
+        self.agg_predvals_denominator_wei[predict_blocknum] += stake_wei
 
     def submit_trueval(
         self,
@@ -121,24 +120,32 @@ class Datatoken3(Datatoken1):
 
     def get_agg_predval(self, blocknum):
         # this value will be encrypted
-        return int(self.agg_predvals[blocknum])
+        # FIXME: we need to return denominator_wei too
+        return int(self.agg_predvals_numerator_wei[blocknum])
 
     def get_payout(self, blocknum, stake_token, id, tx_dict):
         assert self.predobjs[blocknum][id].paid == False
         assert self.num_sumdiffs[blocknum] == self.num_predobjs[blocknum]
+
         predobj = self.predobjs[blocknum][id]
-        predobj.score = 1 - predobj.stake_wei * (
-            abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
-            / self.sumdiffs[blocknum]
-        )
-        amt_wei = predobj.score * self.tot_stakes_wei[blocknum]
-        if stake_token.balanceOf(self.address) < amt_wei:  # precision loss
-            amt_wei = stake_token.balanceOf(self.address)
+
+        predval_trunc = predobj.predval_trunc
+        trueval_trunc = self.truevals_trunc[blocknum]
+        diff = abs(predval_trunc - trueval_trunc)
+        sumdiff = self.sumdiffs[blocknum]
+
+        score = 1.0 - diff / sumdiff * predobj.stake_wei
+
+        tot_stake_wei = self.agg_predvals_denominator_wei[blocknum]
+
+        payout_wei = score * tot_stake_wei
+        if stake_token.balanceOf(self.address) < payout_wei:  # precision loss
+            payout_wei = stake_token.balanceOf(self.address)
 
         # DT contract transfers OCEAN winnings from itself to predictoor
         # (.sol wouldn't have separate "treasurer" concept or the last arg)
         assert stake_token.transfer(
-            predobj.predictoor, amt_wei, {"from": self.treasurer}
+            predobj.predictoor, payout_wei, {"from": self.treasurer}
         )
 
         predobj.paid = True
