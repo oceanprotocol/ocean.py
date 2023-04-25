@@ -35,7 +35,7 @@ class ContractBase(object):
         self.network = config_dict["NETWORK_NAME"]
         check_network(self.network)
 
-        self.contract = load_contract(self.contract_name, address)
+        self.contract = load_contract(config_dict, self.contract_name, address)
         assert not address or (self.contract.address.lower() == address.lower())
 
         transferable = [x for x in dir(self.contract) if not x.startswith("_")]
