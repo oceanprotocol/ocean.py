@@ -211,10 +211,12 @@ def _test_main(use_py):
     # -"get_agg_predval" is like ocean.assets.download_asset //
     #  asset_downloader.download_asset_files() except there's no downloading,
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
-    agg_predval_trunc = DT.get_agg_predval(predict_blocknum)
-    assert agg_predval_trunc == approx(
-        to_wei(predval1_trunc * stake1 + predval2_trunc * stake2)
-    )  # need to normalize by sum of stakes
+    numerator = DT.get_agg_predval_numerator(predict_blocknum)
+    denominator = DT.get_agg_predval_denominator(predict_blocknum)
+    agg_predval = numerator / denominator
+    predval1, predval2 = predval1_trunc / 100.0, predval2_trunc / 100.0
+    target_agg_predval = (stake1 * predval1 + stake2 * predval2) / (stake1 + stake2)
+    assert agg_predval == target_agg_predval
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed
