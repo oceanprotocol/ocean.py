@@ -229,7 +229,7 @@ def _test_main(use_py):
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
 
-    # Any rando can call calc_sum_error()
+    # Any rando can call update_error_calcs()
     DT.update_error_calcs(predict_blocknum, 1000, {"from": rando})
     assert DT.len_agg_SWEs[predict_blocknum] == 2
 
