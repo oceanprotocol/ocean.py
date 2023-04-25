@@ -15,15 +15,15 @@ from ocean_lib.ocean.util import from_wei, to_wei
 @enforce_types
 class PredClass:
     def __init__(
-            self,
-            predval_trunc: int, # e.g. "50020" here == "500.20" float
-            stake_wei: int,
-            predictoor,
+        self,
+        predval_trunc: int,  # e.g. "50020" here == "500.20" float
+        stake_wei: int,
+        predictoor,
     ):
         self.predval_trunc: int = predval_trunc
         self.stake_wei: int = stake_wei
         self.predictoor = predictoor
-        
+
         self.score = 0
         self.paid: bool = False
 
@@ -35,7 +35,7 @@ class Datatoken3(Datatoken1):
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
         self.subscribers = {}  # [address] = timestamp
-        
+
         self.predobjs = {}  # [predict_blocknum][id] = predobj
         self.num_predobjs = {}  # [blocknum] = counter
 
@@ -47,14 +47,13 @@ class Datatoken3(Datatoken1):
         self.sumdiffs = {}  # [blocknum] = sumdiff
         self.num_sumdiffs = {}  # [blocknum] = counter
 
-
     def submit_predval(
-            self,
-            stake_token: DatatokenBase, #e.g. OCEAN
-            predval_trunc: int, # e.g. "50020" here == "500.20" float
-            stake_wei: int,
-            predict_blocknum: int,
-            tx_dict: dict
+        self,
+        stake_token: DatatokenBase,  # e.g. OCEAN
+        predval_trunc: int,  # e.g. "50020" here == "500.20" float
+        stake_wei: int,
+        predict_blocknum: int,
+        tx_dict: dict,
     ):
         # assert blocks_ahead >= self._min_blocks_ahead
         predictoor = tx_dict["from"]
@@ -63,10 +62,10 @@ class Datatoken3(Datatoken1):
         if predict_blocknum not in self.predobjs:
             self.predobjs[predict_blocknum] = {}
             self.num_predobjs[predict_blocknum] = 0
-            
+
             self.tot_stakes_wei[predict_blocknum] = 0
             self.agg_predvals[predict_blocknum] = 0
-            
+
             self.sumdiffs[predict_blocknum] = 0
             self.num_sumdiffs[predict_blocknum] = 0
 
@@ -74,8 +73,9 @@ class Datatoken3(Datatoken1):
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
         bal_wei = stake_token.balanceOf(self.treasurer)
-        assert bal_wei >= stake_wei, \
-            f"Treasurer has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
+        assert (
+            bal_wei >= stake_wei
+        ), f"Treasurer has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
 
         # DT contract transfers OCEAN stake from predictoor to itself
         # (.sol wouldn't have separate "treasurer" concept or the last arg)
@@ -90,10 +90,10 @@ class Datatoken3(Datatoken1):
         )
 
     def submit_trueval(
-            self,
-            blocknum: int,
-            trueval_trunc: int, # e.g. "44900" here == "449.00" float
-            tx_dict: dict,
+        self,
+        blocknum: int,
+        trueval_trunc: int,  # e.g. "44900" here == "449.00" float
+        tx_dict: dict,
     ):
         # assert sender == opf
         self.truevals_trunc[blocknum] = trueval_trunc
@@ -133,7 +133,7 @@ class Datatoken3(Datatoken1):
         )
         amt_wei = predobj.score * self.tot_stakes_wei[blocknum]
         if stake_token.balanceOf(self.address) < amt_wei:  # precision loss
-            amt_wei = stake_token.balanceOf(self.address)        
+            amt_wei = stake_token.balanceOf(self.address)
 
         # DT contract transfers OCEAN winnings from itself to predictoor
         # (.sol wouldn't have separate "treasurer" concept or the last arg)
