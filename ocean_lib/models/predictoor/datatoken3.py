@@ -73,6 +73,7 @@ class Datatoken3(Datatoken1):
         predobj_i = self.num_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
+        import pdb; pdb.set_trace()
         assert stake_token.transferFrom(
             tx_dict["from"], self.address, stake_wei, {"from": self.address}
         )
@@ -100,7 +101,9 @@ class Datatoken3(Datatoken1):
         ):
             predobj = self.predobjs[blocknum][predobj_i]
             if predobj.paid == False:
-                diff = abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
+                predval_trunc = predobj.predval_trunc
+                trueval_trunc = self.truevals_trunc[blocknum]
+                diff = abs(predval_trunc - trueval_trunc)
                 self.sumdiffs[blocknum] += diff * predobj.stake_wei
                 num_loops_done += 1
                 self.num_sumdiffs[blocknum] += 1
