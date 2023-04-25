@@ -178,7 +178,6 @@ def _test_main(use_py):
     initbal1 = OCEAN_bal(predictoor1)
     initbal2 = OCEAN_bal(predictoor2)
 
-    # error here
     DT.submit_predval(
         OCEAN, predval1_trunc, to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
