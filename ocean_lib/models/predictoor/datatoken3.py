@@ -34,16 +34,18 @@ class Datatoken3(Datatoken1):
     def __init__(self, config_dict: dict, address: str) -> None:
         super().__init__(config_dict, address)
         self.subscribers = {}  # [address] = timestamp
+        
         self.predobjs = {}  # [predict_blocknum][id] = predobj
-        self.truevals_trunc = {}  # [blocknum] = trueval_trunc
-
         self.num_predobjs = {}  # [blocknum] = counter
+
         self.tot_stakes_wei = {}  # [blocknum] = stake_wei
         self.agg_predvals = {}  # [blocknum] = aggpredval
+
+        self.truevals_trunc = {}  # [blocknum] = trueval_trunc
+
         self.sumdiffs = {}  # [blocknum] = sumdiff
         self.num_sumdiffs = {}  # [blocknum] = counter
 
-    # placeholders for now
 
     def submit_predval(
             self,
@@ -61,14 +63,15 @@ class Datatoken3(Datatoken1):
         if predict_blocknum not in self.predobjs:
             self.predobjs[predict_blocknum] = {}
             self.num_predobjs[predict_blocknum] = 0
+            
             self.tot_stakes_wei[predict_blocknum] = 0
-            self.num_sumdiffs[predict_blocknum] = 0
-            self.sumdiffs[predict_blocknum] = 0
             self.agg_predvals[predict_blocknum] = 0
+            
+            self.sumdiffs[predict_blocknum] = 0
+            self.num_sumdiffs[predict_blocknum] = 0
 
-        self.predobjs[predict_blocknum][
-            self.num_predobjs[predict_blocknum]
-        ] = predobj
+        predobj_i = self.num_predobjs[predict_blocknum]
+        self.predobjs[predict_blocknum][predobj_i] = predobj
 
         assert stake_token.transferFrom(
             tx_dict["from"], self.address, stake_wei, {"from": self.address}
@@ -89,19 +92,19 @@ class Datatoken3(Datatoken1):
         # assert sender == opf
         self.truevals_trunc[blocknum] = trueval_trunc
 
-    def calc_sum_diff(self, blocknum, batchsize, tx_dict):
+    def calc_sum_diff(self, blocknum, max_num_loops, tx_dict):
         assert self.num_sumdiffs[blocknum] < self.num_predobjs[blocknum]
-        num_iterations = 0
-        for i in range(
+        num_loops_done = 0
+        for predobj_i in range(
             self.num_sumdiffs[blocknum], self.num_predobjs[blocknum]
         ):
-            predobj = self.predobjs[blocknum][i]
+            predobj = self.predobjs[blocknum][predobj_i]
             if predobj.paid == False:
                 diff = abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
                 self.sumdiffs[blocknum] += diff * predobj.stake_wei
-                num_iterations += 1
+                num_loops_done += 1
                 self.num_sumdiffs[blocknum] += 1
-            if num_iterations == batchsize:
+            if num_loops_done == max_num_loops:
                 break
 
     def start_subscription(self, tx_dict):
