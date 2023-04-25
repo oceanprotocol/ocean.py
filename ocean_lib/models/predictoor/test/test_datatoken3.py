@@ -73,11 +73,8 @@ def _test_main(use_py):
 
     def _acct(key_i: int):
         return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
-    predictoor1 = _acct(2)
-    predictoor2 = _acct(3)
-    trader = _acct(4)
-    rando = _acct(5)
-    treasurer = _acct(6)
+    predictoor1, predictoor2, trader, rando, treasurer = \
+        _acct(2), _acct(3), _acct(4), _acct(5), _acct(6)
     
     accts = [deployer, opf, predictoor1, predictoor2, trader, rando, treasurer]
     accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando,treasurer]
