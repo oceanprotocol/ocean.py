@@ -93,7 +93,7 @@ def _deploy_contracts(owner) -> dict:
         "Dispenser": dispenser.address,
         "ERC721Factory": dnft_factory.address,
     }
-    
+
     addresses = {"development": addresses_at_network}
 
     print(f"Deployed these contracts:\n{json.dumps(addresses, indent=INDENT)}")
