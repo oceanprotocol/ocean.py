@@ -71,11 +71,13 @@ def _test_main(use_py):
     # -Note: we don't _need_ to have private keys 3-6. But doing it means
     #  we can give them ETH on launch rather than here, which is faster
 
-    predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
-    predictoor2 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY3"))
-    trader = br_accounts.add(os.getenv("TEST_PRIVATE_KEY4"))
-    rando = br_accounts.add(os.getenv("TEST_PRIVATE_KEY5"))
-    treasurer = br_accounts.add(os.getenv("TEST_PRIVATE_KEY6"))
+    def _acct(key_i: int):
+        return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
+    predictoor1 = _acct(2)
+    predictoor2 = _acct(3)
+    trader = _acct(4)
+    rando = _acct(5)
+    treasurer = _acct(6)
     
     accts = [deployer, opf, predictoor1, predictoor2, trader, rando, treasurer]
     accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando,treasurer]
