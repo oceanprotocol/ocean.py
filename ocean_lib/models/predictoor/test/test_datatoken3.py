@@ -204,7 +204,7 @@ def _test_main(use_py):
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
     numerator = DT.get_agg_predval_numerator(predict_blocknum)
     denominator = DT.get_agg_predval_denominator(predict_blocknum)
-    agg_predval = numerator / denominator
+    agg_predval = numerator / denominator / 100.0
     predval1, predval2 = predval1_trunc / 100.0, predval2_trunc / 100.0
     target_agg_predval = (stake1 * predval1 + stake2 * predval2) / (stake1 + stake2)
     assert agg_predval == target_agg_predval
