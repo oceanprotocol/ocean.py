@@ -66,7 +66,7 @@ def _test_main(use_py):
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
 
     min_blocks_ahead = 20  # Pred'ns must be >= this # blocks ahead
-    min_predns_for_payout = 100  # Predictoor must have >= this # predn's to get paid
+    min_predns_for_payout = 100  # Pred'oor needs >= this # predn's to get paid
     num_blocks_subscription = 86400 / 10  # 1 day
 
     # can reuse existing DNFT template
