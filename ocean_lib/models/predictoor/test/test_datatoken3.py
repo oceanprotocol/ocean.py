@@ -74,7 +74,7 @@ def _test_main(use_py):
     def _acct(key_i: int):
         return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
 
-    predictoor1, predictoor2, trader, rando, treasurer = (
+    predictoor1, predictoor2, trader, rando, DT_treasurer = (
         _acct(2),
         _acct(3),
         _acct(4),
@@ -82,8 +82,8 @@ def _test_main(use_py):
         _acct(6),
     )
 
-    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, treasurer]
-    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, treasurer]
+    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
+    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
     accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
 
     print("\nBalances before moving funds:")
@@ -139,7 +139,9 @@ def _test_main(use_py):
     assert DT.getId() == 3
     DT = DT.get_typed(config, DT.address)
     if use_py:  # py needs a treasurer, sol doesn't
-        DT.treasurer = treasurer
+        DT.treasurer = DT_treasurer
+    else:
+        DT_treasurer = DT
 
     # post 100 DTs for sale
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
@@ -169,20 +171,12 @@ def _test_main(use_py):
     predval2_trunc = 50020  # "50020" here == "500.20" float
     predict_blocknum = 100
 
-    assert OCEAN_bal(predictoor1) >= stake1, "must fund more OCEAN to prdoor1"
-    assert OCEAN_bal(predictoor2) >= stake2, "must fund more OCEAN to prdoor2"
+    OCEAN.approve(DT_treasurer, to_wei(stake1), {"from": predictoor1})
+    OCEAN.approve(DT_treasurer, to_wei(stake2), {"from": predictoor2})
+    assert OCEAN_approved(predictoor1, DT.treasurer) == stake1
+    assert OCEAN_approved(predictoor2, DT.treasurer) == stake2
 
-    if use_py:
-        OCEAN.approve(DT.treasurer, to_wei(stake1), {"from": predictoor1})
-        OCEAN.approve(DT.treasurer, to_wei(stake2), {"from": predictoor2})
-        assert OCEAN_approved(predictoor1, DT.treasurer) == stake1
-        assert OCEAN_approved(predictoor2, DT.treasurer) == stake2
-    else:
-        OCEAN.approve(DT, to_wei(stake1), {"from": predictoor1})
-        OCEAN.approve(DT, to_wei(stake2), {"from": predictoor2})
-        assert OCEAN_approved(predictoor1, DT) == stake1
-        assert OCEAN_approved(predictoor2, DT) == stake2
-
+    initbalDT = OCEAN_bal(DT_treasurer)
     initbal1 = OCEAN_bal(predictoor1)
     initbal2 = OCEAN_bal(predictoor2)
 
@@ -194,10 +188,7 @@ def _test_main(use_py):
     )
 
     # test
-    if use_py:
-        assert OCEAN_bal(DT.treasurer) == (stake1 + stake2)
-    else:
-        assert OCEAN_bal(DT) == (stake1 + stake2)
+    assert OCEAN_bal(DT_treasurer) == (initbalDT + stake1 + stake2)
     assert OCEAN_bal(predictoor1) == approx(initbal1 - stake1)  # just staked
     assert OCEAN_bal(predictoor2) == approx(initbal2 - stake2)  # ""
     assert OCEAN_approved(predictoor1, DT) == 0.0  # just used up
@@ -211,10 +202,12 @@ def _test_main(use_py):
     # -"get_agg_predval" is like ocean.assets.download_asset //
     #  asset_downloader.download_asset_files() except there's no downloading,
     #  rather it simply gives the agg_predval. (To generalize: reveals secret)
-    agg_predval_trunc = DT.get_agg_predval(predict_blocknum)
-    assert agg_predval_trunc == approx(
-        to_wei(predval1_trunc * stake1 + predval2_trunc * stake2)
-    )  # need to normalize by sum of stakes
+    numerator = DT.get_agg_predval_numerator(predict_blocknum)
+    denominator = DT.get_agg_predval_denominator(predict_blocknum)
+    agg_predval = numerator / denominator / 100.0
+    predval1, predval2 = predval1_trunc / 100.0, predval2_trunc / 100.0
+    target_agg_predval = (stake1 * predval1 + stake2 * predval2) / (stake1 + stake2)
+    assert agg_predval == target_agg_predval
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed
@@ -240,7 +233,8 @@ def _test_main(use_py):
     # PREDICTOORS & OPF COLLECT SALES REVENUE
 
     # Any rando can call get_payout(). Will update amt allowed
-    # OR!!! this is where exchange object comes in!!
+    initbalDT = OCEAN_bal(DT_treasurer)
+
     earnings = {}
     for acct in predictoors:
         balbefore = OCEAN_bal(acct)
@@ -249,10 +243,7 @@ def _test_main(use_py):
         earnings[acct] = balafter - balbefore
         assert balafter > balbefore
 
-    if use_py:
-        assert OCEAN_bal(DT.treasurer) == 0.0
-    else:
-        assert OCEAN_bal(DT) == 0.0
+    assert OCEAN_bal(DT_treasurer) == initbalDT - sum(earnings.values())
     assert earnings[predictoor2] > earnings[predictoor1]
 
 
