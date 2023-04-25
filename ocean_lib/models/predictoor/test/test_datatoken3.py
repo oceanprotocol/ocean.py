@@ -63,52 +63,6 @@ def _test_main(use_py):
         return from_wei(acct.balance())
 
     # ======================================================================
-    # DEPLOY DATATOKEN & EXCHANGE CONTRACT
-
-    min_blocks_ahead = 20  # Pred'ns must be >= this # blocks ahead
-    min_predns_for_payout = 100  # Pred'oor needs >= this # predn's to get paid
-    num_blocks_subscription = 86400 / 10  # 1 day
-
-    # can reuse existing DNFT template
-    data_nft = ocean.data_nft_factory.create(
-        {"from": opf},
-        "Data NFT 1",
-        "DNFT1",  # and any other DataNFTArguments
-    )
-
-    # new DT template with Predictoor functionality
-    #  DataNFT.create_datatoken(tx_dict, *args, **kwargs)
-    #   -> datatoken_args:DatatokenArguments = get_args_object(args, kwargs, DatatokenArguments)
-    #     -> DatatokenArguments.__init__(..., min_blocks_ahead=__, ..)
-    #       -> self.min_blocks_ahead = __
-    #   -> datatoken_args:DatatokenArguments.create_datatoken(self, tx_dict)
-    #     -> config_dict = data_nft.config_dict
-    #     -> data_nft:DataNFT.contract.createERC20(template_index, [.], [.], ..)
-    #     -> datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
-
-    # params
-    n_DTs = 100.0
-    DT_price = 10.0  # denominated in OCEAN
-
-    DT = data_nft.create_datatoken(
-        {"from": opf},
-        name="DT",
-        symbol="DT",
-        template_index=3,
-        min_blocks_ahead=min_blocks_ahead,
-        min_predns_for_payout=min_predns_for_payout,
-        num_blocks_subscription=num_blocks_subscription,
-        # and any other DatatokenArguments
-    )
-    assert DT.getId() == 3
-    DT = DT.get_typed(config, DT.address)
-
-    # post 100 DTs for sale
-    DT.mint(opf, to_wei(n_DTs), {"from": opf})
-    exchange = DT.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
-    DT.approve(exchange.address, to_wei(n_DTs), {"from": opf})
-
-    # ======================================================================
     # SETUP USER ACCOUNTS
     predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
     predictoor2 = br_accounts.add()
@@ -138,6 +92,44 @@ def _test_main(use_py):
         assert OCEAN_bal(acct), f"acct {i} needs OCEAN"
 
     predictoors = [predictoor1, predictoor2]
+
+    # ======================================================================
+    # DEPLOY DATATOKEN & EXCHANGE CONTRACT
+
+    min_blocks_ahead = 20  # Pred'ns must be >= this # blocks ahead
+    min_predns_for_payout = 100  # Pred'oor needs >= this # predn's to get paid
+    num_blocks_subscription = 86400 / 10  # 1 day
+
+    # can reuse existing DNFT template
+    data_nft = ocean.data_nft_factory.create(
+        {"from": opf},
+        "Data NFT 1",
+        "DNFT1",  # and any other DataNFTArguments
+    )
+
+    # new DT template with Predictoor functionality
+    
+    # params
+    n_DTs = 100.0
+    DT_price = 10.0  # denominated in OCEAN
+
+    DT = data_nft.create_datatoken(
+        {"from": opf},
+        name="DT",
+        symbol="DT",
+        template_index=3,
+        min_blocks_ahead=min_blocks_ahead,
+        min_predns_for_payout=min_predns_for_payout,
+        num_blocks_subscription=num_blocks_subscription,
+        # and any other DatatokenArguments
+    )
+    assert DT.getId() == 3
+    DT = DT.get_typed(config, DT.address)
+
+    # post 100 DTs for sale
+    DT.mint(opf, to_wei(n_DTs), {"from": opf})
+    exchange = DT.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
+    DT.approve(exchange.address, to_wei(n_DTs), {"from": opf})
 
     # ======================================================================
     # TRADER BUYS SUBSCRIPTION TO AGG PREDVALS (do every 24h)
