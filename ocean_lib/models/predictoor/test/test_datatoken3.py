@@ -234,7 +234,7 @@ def _test_main(use_py):
 
     # Any rando can call get_payout(). Will update amt allowed
     initbalDT = OCEAN_bal(DT_treasurer)
-    
+
     earnings = {}
     for acct in predictoors:
         balbefore = OCEAN_bal(acct)
