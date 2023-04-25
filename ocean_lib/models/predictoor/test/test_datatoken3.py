@@ -66,32 +66,37 @@ def _test_main(use_py):
 
     # ======================================================================
     # SETUP USER ACCOUNTS
+    # Ensure that users have OCEAN and ETH as needed
+    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
+    
     predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
     predictoor2 = br_accounts.add()
     trader = br_accounts.add()
     rando = br_accounts.add()
-    accts = [deployer, opf, predictoor1, predictoor2, trader, rando]
-
-    # Ensure that users have OCEAN and ETH as needed
-    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
+    DT_treasurer = br_accounts.add()
+    accts = [deployer, opf, predictoor1, predictoor2, trader, rando,
+             DT_treasurer]
+    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando,
+                         DT_treasurer]
+    accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
 
     print("\nBalances before moving funds:")
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
 
-    print("\nMove funds...")
-    for acct in [predictoor2, trader, rando]:
-        deployer.transfer(acct, to_wei(1.0))
-        OCEAN.transfer(acct, to_wei(25.0), {"from": deployer})
+    print("\nMove ETH...")
+    for acct in accts_needing_ETH:
+        if ETH_bal(acct) == 0:
+            deployer.transfer(acct, to_wei(1.0))
+
+    print("\nMove OCEAN...")
+    for acct in accts_needing_OCEAN:
+        if OCEAN_bal(acct) <= 25.0:
+            OCEAN.transfer(acct, to_wei(25.0), {"from": deployer})
 
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
-
-    # check if enough funds
-    for i, acct in enumerate(accts):
-        assert ETH_bal(acct) > 0, f"acct {i} needs ETH"
-        assert OCEAN_bal(acct), f"acct {i} needs OCEAN"
 
     predictoors = [predictoor1, predictoor2]
 
@@ -127,6 +132,8 @@ def _test_main(use_py):
     )
     assert DT.getId() == 3
     DT = DT.get_typed(config, DT.address)
+    if use_py: #py needs a treasurer, sol doesn't
+        DT.treasurer = DT_treasurer
 
     # post 100 DTs for sale
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
@@ -159,16 +166,21 @@ def _test_main(use_py):
     assert OCEAN_bal(predictoor1) >= stake1, "must fund more OCEAN to prdoor1"
     assert OCEAN_bal(predictoor2) >= stake2, "must fund more OCEAN to prdoor2"
 
-    OCEAN.approve(DT.address, to_wei(stake1), {"from": predictoor1})
-    OCEAN.approve(DT.address, to_wei(stake2), {"from": predictoor2})
-    assert OCEAN_approved(predictoor1, DT) == stake1  # new, ready to use
-    assert OCEAN_approved(predictoor2, DT) == stake2  # ""
+    if use_py: 
+        OCEAN.approve(DT.treasurer, to_wei(stake1), {"from": predictoor1})
+        OCEAN.approve(DT.treasurer, to_wei(stake2), {"from": predictoor2})
+        assert OCEAN_approved(predictoor1, DT.treasurer) == stake1
+        assert OCEAN_approved(predictoor2, DT.treasurer) == stake2
+    else:
+        OCEAN.approve(DT, to_wei(stake1), {"from": predictoor1})
+        OCEAN.approve(DT, to_wei(stake2), {"from": predictoor2})
+        assert OCEAN_approved(predictoor1, DT) == stake1
+        assert OCEAN_approved(predictoor2, DT) == stake2
 
     initbal1 = OCEAN_bal(predictoor1)
     initbal2 = OCEAN_bal(predictoor2)
 
     #error here
-    import pdb; pdb.set_trace()
     DT.submit_predval(
         OCEAN, predval1_trunc, to_wei(stake1), predict_blocknum, {"from": predictoor1}
     )
@@ -177,7 +189,10 @@ def _test_main(use_py):
     )
 
     # test
-    assert OCEAN_bal(DT) == (stake1 + stake2)  # just got new stake
+    if use_py:
+        assert OCEAN_bal(DT.treasurer) == (stake1 + stake2)
+    else:
+        assert OCEAN_bal(DT) == (stake1 + stake2)
     assert OCEAN_bal(predictoor1) == approx(initbal1 - stake1)  # just staked
     assert OCEAN_bal(predictoor2) == approx(initbal2 - stake2)  # ""
     assert OCEAN_approved(predictoor1, DT) == 0.0  # just used up
@@ -229,7 +244,10 @@ def _test_main(use_py):
         earnings[acct] = balafter - balbefore
         assert balafter > balbefore
 
-    assert OCEAN_bal(DT) == 0.0  # all payouted
+    if use_py:
+        assert OCEAN_bal(DT.treasurer) == 0.0
+    else:
+        assert OCEAN_bal(DT) == 0.0
     assert earnings[predictoor2] > earnings[predictoor1]
 
 

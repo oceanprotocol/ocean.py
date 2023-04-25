@@ -9,6 +9,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.datatoken_base import DatatokenBase
+from ocean_lib.ocean.util import from_wei, to_wei
 
 
 @enforce_types
@@ -56,9 +57,8 @@ class Datatoken3(Datatoken1):
             tx_dict: dict
     ):
         # assert blocks_ahead >= self._min_blocks_ahead
-
-        predobj = PredClass(
-            predval_trunc, stake_wei, predictoor=tx_dict["from"])
+        predictoor = tx_dict["from"]
+        predobj = PredClass(predval_trunc, stake_wei, predictoor)
 
         if predict_blocknum not in self.predobjs:
             self.predobjs[predict_blocknum] = {}
@@ -73,8 +73,14 @@ class Datatoken3(Datatoken1):
         predobj_i = self.num_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
+        bal_wei = stake_token.balanceOf(self.treasurer)
+        assert bal_wei >= stake_wei, \
+            f"Treasurer has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
+
+        # DT contract transfers OCEAN stake from predictoor to itself
+        # (.sol wouldn't have separate "treasurer" concept or the last arg)
         assert stake_token.transferFrom(
-            tx_dict["from"], self.address, stake_wei, {"from": self.address}
+            tx_dict["from"], self.address, stake_wei, {"from": self.treasurer}
         )
 
         self.num_predobjs[predict_blocknum] += 1
@@ -117,7 +123,7 @@ class Datatoken3(Datatoken1):
         # this value will be encrypted
         return int(self.agg_predvals[blocknum])
 
-    def get_payout(self, blocknum, OCEAN, id, tx_dict):
+    def get_payout(self, blocknum, stake_token, id, tx_dict):
         assert self.predobjs[blocknum][id].paid == False
         assert self.num_sumdiffs[blocknum] == self.num_predobjs[blocknum]
         predobj = self.predobjs[blocknum][id]
@@ -125,8 +131,14 @@ class Datatoken3(Datatoken1):
             abs(predobj.predval_trunc - self.truevals_trunc[blocknum])
             / self.sumdiffs[blocknum]
         )
-        amt = predobj.score * self.tot_stakes_wei[blocknum]
-        if OCEAN.balanceOf(self.address) < amt:  # precision loss
-            amt = OCEAN.balanceOf(self.address)
-        assert OCEAN.transfer(predobj.predictoor, amt, {"from": self.address})
+        amt_wei = predobj.score * self.tot_stakes_wei[blocknum]
+        if stake_token.balanceOf(self.address) < amt_wei:  # precision loss
+            amt_wei = stake_token.balanceOf(self.address)        
+
+        # DT contract transfers OCEAN winnings from itself to predictoor
+        # (.sol wouldn't have separate "treasurer" concept or the last arg)
+        assert stake_token.transfer(
+            predobj.predictoor, amt_wei, {"from": self.treasurer}
+        )
+
         predobj.paid = True
