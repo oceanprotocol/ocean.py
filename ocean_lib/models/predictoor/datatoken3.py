@@ -72,10 +72,10 @@ class Datatoken3(Datatoken1):
         predobj_i = self.num_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
-        bal_wei = stake_token.balanceOf(self.treasurer)
+        bal_wei = stake_token.balanceOf(predictoor)
         assert (
             bal_wei >= stake_wei
-        ), f"Treasurer has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
+        ), f"Predictoor has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
 
         # DT contract transfers OCEAN stake from predictoor to itself
         # (.sol wouldn't have separate "treasurer" concept or the last arg)
