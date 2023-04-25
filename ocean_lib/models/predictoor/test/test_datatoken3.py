@@ -92,7 +92,7 @@ def _test_main(use_py):
     print("\nMove OCEAN...")
     for acct in accts_needing_OCEAN:
         if OCEAN_bal(acct) <= 25.0:
-            OCEAN.transfer(acct, to_wei(25.0), {"from": deployer})
+            OCEAN.transfer(acct, to_wei(200.0), {"from": deployer})
 
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
