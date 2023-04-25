@@ -68,14 +68,17 @@ def _test_main(use_py):
     # SETUP USER ACCOUNTS
     # Ensure that users have OCEAN and ETH as needed
     # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
+    # -Note: we don't _need_ to have private keys 3-6. But doing it means
+    #  we can give them ETH on launch rather than here, which is faster
 
     predictoor1 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY2"))
-    predictoor2 = br_accounts.add()
-    trader = br_accounts.add()
-    rando = br_accounts.add()
-    DT_treasurer = br_accounts.add()
-    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
-    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
+    predictoor2 = br_accounts.add(os.getenv("TEST_PRIVATE_KEY3"))
+    trader = br_accounts.add(os.getenv("TEST_PRIVATE_KEY4"))
+    rando = br_accounts.add(os.getenv("TEST_PRIVATE_KEY5"))
+    treasurer = br_accounts.add(os.getenv("TEST_PRIVATE_KEY6"))
+    
+    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, treasurer]
+    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando,treasurer]
     accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
 
     print("\nBalances before moving funds:")
@@ -131,7 +134,7 @@ def _test_main(use_py):
     assert DT.getId() == 3
     DT = DT.get_typed(config, DT.address)
     if use_py:  # py needs a treasurer, sol doesn't
-        DT.treasurer = DT_treasurer
+        DT.treasurer = treasurer
 
     # post 100 DTs for sale
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
