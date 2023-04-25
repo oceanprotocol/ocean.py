@@ -73,7 +73,6 @@ class Datatoken3(Datatoken1):
         predobj_i = self.num_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
-        import pdb; pdb.set_trace()
         assert stake_token.transferFrom(
             tx_dict["from"], self.address, stake_wei, {"from": self.address}
         )
