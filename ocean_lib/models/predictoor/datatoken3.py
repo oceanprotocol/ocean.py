@@ -26,6 +26,12 @@ class PredClass:
 
         self.paid: bool = False
 
+    def calc_swe(self, trueval_trunc: int) -> float:
+        """@return - stake-weighted error (SWE)"""
+        error_trunc = abs(self.predval_trunc - trueval_trunc)
+        swe = error_trunc * self.stake_wei
+        return swe
+
 
 @enforce_types
 class Datatoken3(Datatoken1):
@@ -36,15 +42,15 @@ class Datatoken3(Datatoken1):
         self.subscribers = {}  # [address] = timestamp
 
         self.predobjs = {}  # [predict_blocknum][id] = predobj
-        self.num_predobjs = {}  # [blocknum] = counter
+        self.len_predobjs = {}  # [blocknum] = counter
 
         self.agg_predvals_numerator_wei = {}  # [blocknum] = agg_predval_numer
         self.agg_predvals_denominator_wei = {}  # [blocknum] = agg_predval_denom
 
         self.truevals_trunc = {}  # [blocknum] = trueval_trunc
 
-        self.sumdiffs = {}  # [blocknum] = sumdiff
-        self.num_sumdiffs = {}  # [blocknum] = counter
+        self.agg_SWEs = {}  # [blocknum] = agg_stake_weighted_errors
+        self.len_agg_SWEs = {}  # [blocknum] = counter
 
     def submit_predval(
         self,
@@ -60,15 +66,15 @@ class Datatoken3(Datatoken1):
 
         if predict_blocknum not in self.predobjs:
             self.predobjs[predict_blocknum] = {}
-            self.num_predobjs[predict_blocknum] = 0
+            self.len_predobjs[predict_blocknum] = 0
 
             self.agg_predvals_numerator_wei[predict_blocknum] = 0
             self.agg_predvals_denominator_wei[predict_blocknum] = 0
 
-            self.sumdiffs[predict_blocknum] = 0
-            self.num_sumdiffs[predict_blocknum] = 0
+            self.agg_SWEs[predict_blocknum] = 0
+            self.len_agg_SWEs[predict_blocknum] = 0
 
-        predobj_i = self.num_predobjs[predict_blocknum]
+        predobj_i = self.len_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
         bal_wei = stake_token.balanceOf(predictoor)
@@ -84,7 +90,7 @@ class Datatoken3(Datatoken1):
         # sol version would look something like this:
         # assert stake_token.transferFrom(predictoor, self.address, stake_wei)
 
-        self.num_predobjs[predict_blocknum] += 1
+        self.len_predobjs[predict_blocknum] += 1
         self.agg_predvals_numerator_wei[predict_blocknum] += int(
             predobj.predval_trunc * predobj.stake_wei
         )
@@ -111,39 +117,34 @@ class Datatoken3(Datatoken1):
         # this value will be encrypted
         return int(self.agg_predvals_denominator_wei[blocknum])
 
-    def calc_sum_diff(self, blocknum, max_num_loops, tx_dict):
-        assert self.num_sumdiffs[blocknum] < self.num_predobjs[blocknum]
+    def update_error_calcs(self, blocknum, max_num_loops, tx_dict):
+        assert self.len_agg_SWEs[blocknum] < self.len_predobjs[blocknum], \
+            "don't need to call this, there's nothing left to calc"
+        num_predobjs_done = self.len_agg_SWEs[blocknum]
+        tot_num_predobjs = self.len_predobjs[blocknum]
         num_loops_done = 0
-        for predobj_i in range(
-            self.num_sumdiffs[blocknum], self.num_predobjs[blocknum]
-        ):
+        for predobj_i in range(num_predobjs_done, tot_num_predobjs):
             predobj = self.predobjs[blocknum][predobj_i]
-            if predobj.paid == False:
-                predval_trunc = predobj.predval_trunc
-                trueval_trunc = self.truevals_trunc[blocknum]
-                diff = abs(predval_trunc - trueval_trunc)
-                self.sumdiffs[blocknum] += diff * predobj.stake_wei
+            if not predobj.paid:
+                swe = predobj.calc_swe(self.truevals_trunc[blocknum])
+                self.agg_SWEs[blocknum] += swe
                 num_loops_done += 1
-                self.num_sumdiffs[blocknum] += 1
+                self.len_agg_SWEs[blocknum] += 1
             if num_loops_done == max_num_loops:
                 break
 
     def get_payout(self, blocknum, stake_token, id, tx_dict):
         assert self.predobjs[blocknum][id].paid == False
-        assert self.num_sumdiffs[blocknum] == self.num_predobjs[blocknum]
+        assert self.len_agg_SWEs[blocknum] == self.len_predobjs[blocknum]
 
         predobj = self.predobjs[blocknum][id]
 
-        predval_trunc = predobj.predval_trunc
-        trueval_trunc = self.truevals_trunc[blocknum]
-        diff = abs(predval_trunc - trueval_trunc)
-        sumdiff = self.sumdiffs[blocknum]
+        swe = predobj.calc_swe(self.truevals_trunc[blocknum])
+        tot_swe = self.agg_SWEs[blocknum]
 
-        score = 1.0 - diff / sumdiff * predobj.stake_wei
-
+        perc_payout = 1.0 - swe / tot_swe # % that this predictoor gets
         tot_stake_wei = self.agg_predvals_denominator_wei[blocknum]
-
-        payout_wei = score * tot_stake_wei
+        payout_wei = perc_payout * tot_stake_wei
         if stake_token.balanceOf(self.address) < payout_wei:  # precision loss
             payout_wei = stake_token.balanceOf(self.address)
 

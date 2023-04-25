@@ -218,9 +218,6 @@ def _test_main(use_py):
     trueval_trunc = 44900  # "44900" here == "449.00" float
     DT.submit_trueval(predict_blocknum, trueval_trunc, {"from": opf})
 
-    # anyone can call calc_sum_diff()
-    DT.calc_sum_diff(predict_blocknum, 1000, {"from": opf})
-
     # ======================================================================
     # TIME PASSES - enough for predictoors to get claims
 
@@ -232,19 +229,27 @@ def _test_main(use_py):
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
 
+    # Any rando can call calc_sum_error()
+    DT.update_error_calcs(predict_blocknum, 1000, {"from": rando})
+    assert DT.len_agg_SWEs[predict_blocknum] == 2
+
     # Any rando can call get_payout(). Will update amt allowed
     initbalDT = OCEAN_bal(DT_treasurer)
+    initbal1, initbal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
 
-    earnings = {}
-    for acct in predictoors:
-        balbefore = OCEAN_bal(acct)
-        DT.get_payout(predict_blocknum, OCEAN, predictoors.index(acct), {"from": rando})
-        balafter = OCEAN_bal(acct)
-        earnings[acct] = balafter - balbefore
-        assert balafter > balbefore
+    predictoor0_i, predictoor1_i = 0, 1
+    DT.get_payout(predict_blocknum, OCEAN, predictoor0_i, {"from": rando})
+    DT.get_payout(predict_blocknum, OCEAN, predictoor1_i, {"from": rando})
 
-    assert OCEAN_bal(DT_treasurer) == initbalDT - sum(earnings.values())
-    assert earnings[predictoor2] > earnings[predictoor1]
+    balDT = OCEAN_bal(DT_treasurer)
+    bal1, bal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
+    earned1, earned2 = (bal1 - initbal1), (bal2 - initbal2)
+    earned = earned1 + earned2
+
+    assert balDT == initbalDT - earned
+    assert bal1 > initbal1
+    assert bal2 > initbal2
+    assert earned2 > earned1
 
 
 @enforce_types
