@@ -118,8 +118,9 @@ class Datatoken3(Datatoken1):
         return int(self.agg_predvals_denominator_wei[blocknum])
 
     def update_error_calcs(self, blocknum, max_num_loops, tx_dict):
-        assert self.len_agg_SWEs[blocknum] < self.len_predobjs[blocknum], \
-            "don't need to call this, there's nothing left to calc"
+        assert (
+            self.len_agg_SWEs[blocknum] < self.len_predobjs[blocknum]
+        ), "don't need to call this, there's nothing left to calc"
         num_predobjs_done = self.len_agg_SWEs[blocknum]
         tot_num_predobjs = self.len_predobjs[blocknum]
         num_loops_done = 0
@@ -142,7 +143,7 @@ class Datatoken3(Datatoken1):
         swe = predobj.calc_swe(self.truevals_trunc[blocknum])
         tot_swe = self.agg_SWEs[blocknum]
 
-        perc_payout = 1.0 - swe / tot_swe # % that this predictoor gets
+        perc_payout = 1.0 - swe / tot_swe  # % that this predictoor gets
         tot_stake_wei = self.agg_predvals_denominator_wei[blocknum]
         payout_wei = perc_payout * tot_stake_wei
         if stake_token.balanceOf(self.address) < payout_wei:  # precision loss

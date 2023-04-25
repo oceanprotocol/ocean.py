@@ -103,7 +103,7 @@ class ElGamal:
         self.x = x
         self.Y = Y
 
-    def __add__(self, other: 'ElGamalEncryptedObject') -> 'ElGamalEncryptedObject':
+    def __add__(self, other: "ElGamalEncryptedObject") -> "ElGamalEncryptedObject":
         """
         Adds two ElGamal encrypted objects using homomorphic addition.
 
@@ -117,7 +117,7 @@ class ElGamal:
         bn = (self.a * other.b) % self.p
         return ElGamalEncryptedObject(an, bn)
 
-    def __mul__(self, other: int) -> 'ElGamalEncryptedObject':
+    def __mul__(self, other: int) -> "ElGamalEncryptedObject":
         """
         Multiplies an ElGamal encrypted object by an integer using homomorphic multiplication.
 
@@ -166,7 +166,7 @@ class ElGamal:
         Y = pow(g, x, p)
         return p, g, x, Y
 
-    def encrypt(self, v: int) -> 'ElGamalEncryptedObject':
+    def encrypt(self, v: int) -> "ElGamalEncryptedObject":
         """
         Encrypts an integer using the ElGamal cryptosystem.
 
@@ -181,7 +181,7 @@ class ElGamal:
         b = (pow(self.Y, k, self.p) * pow(self.g, v, self.p)) % self.p
         return ElGamalEncryptedObject(a, b)
 
-    def decrypt(self, obj: 'ElGamalEncryptedObject') -> int:
+    def decrypt(self, obj: "ElGamalEncryptedObject") -> int:
         """
         Decrypts an ElGamal encrypted object and returns the plaintext integer.
 
