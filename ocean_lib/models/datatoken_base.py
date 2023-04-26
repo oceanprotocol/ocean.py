@@ -30,6 +30,7 @@ logger = logging.getLogger("ocean")
 
 
 class TokenFeeInfo:
+    @enforce_types
     def __init__(
         self,
         address: Optional[str] = None,
@@ -43,6 +44,7 @@ class TokenFeeInfo:
 
         self.amount = amount
 
+    @enforce_types
     def to_tuple(self):
         return (self.address, self.token, self.amount)
 
@@ -51,6 +53,7 @@ class TokenFeeInfo:
         address, token, amount = tup
         return cls(address, token, amount)
 
+    @enforce_types
     def __str__(self):
         s = (
             f"TokenFeeInfo: \n"
@@ -61,6 +64,7 @@ class TokenFeeInfo:
         return s
 
 
+@enforce_types
 class DatatokenArguments:
     def __init__(
         self,
@@ -75,16 +79,9 @@ class DatatokenArguments:
         files: Optional[List[FilesType]] = None,
         consumer_parameters: Optional[List[Dict[str, Any]]] = None,
         cap: Optional[int] = None,
-        min_blocks_ahead: Optional[int] = None,
-        min_predns_for_payout: Optional[int] = None,
-        num_blocks_subscription: Optional[int] = None,
     ):
         if template_index == 2:
             assert cap, "Template 2 needs cap"
-        if template_index == 3:
-            assert min_blocks_ahead, "Template 3 needs min_blocks_ahead"
-            assert min_predns_for_payout, "Template 3 needs min_blocks_ahead"
-            assert num_blocks_subscription, "Template 3 needs min_blocks_ahead"
 
         self.name = name
         self.symbol = symbol
@@ -100,9 +97,6 @@ class DatatokenArguments:
         self.set_default_fees_at_deploy = not publish_market_order_fees
 
         self.cap = cap if template_index == 2 else MAX_UINT256
-        self.min_blocks_ahead = min_blocks_ahead
-        self.min_predns_for_payout = min_predns_for_payout
-        self.num_blocks_subscription = num_blocks_subscription
 
     def create_datatoken(self, data_nft, tx_dict, with_services=False):
         config_dict = data_nft.config_dict
@@ -133,7 +127,7 @@ class DatatokenArguments:
         new_elements = [
             item for item in data_nft.getTokensList() if item not in initial_list
         ]
-        assert len(new_elements) == 1, "new data token has no address"
+        assert len(new_elements) == 1, "new datatoken has no address"
 
         datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
 
@@ -158,6 +152,7 @@ class DatatokenArguments:
         return datatoken
 
 
+@enforce_types
 class DatatokenRoles(IntEnum):
     MINTER = 0
     PAYMENT_MANAGER = 1
@@ -410,9 +405,11 @@ class DatatokenBase(ABC, ContractBase):
             consumer_parameters=consumer_parameters,
         )
 
+    @enforce_types
     def get_publish_market_order_fees(self):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
+    @enforce_types
     def get_from_pricing_schema_and_order(self, *args, **kwargs):
         dispensers = self.dispenser_status().active
         exchanges = self.get_exchanges()
@@ -466,15 +463,17 @@ class DatatokenBase(ABC, ContractBase):
         return self.buy_DT_and_order(*args, **kwargs)
 
 
+@enforce_types
 class MockERC20(DatatokenBase):
     CONTRACT_NAME = "MockERC20"
 
-    def getId(self):
+    def getId(self) -> int:
         return 1
 
 
+@enforce_types
 class MockOcean(DatatokenBase):
     CONTRACT_NAME = "MockOcean"
 
-    def getId(self):
+    def getId(self) -> int:
         return 1

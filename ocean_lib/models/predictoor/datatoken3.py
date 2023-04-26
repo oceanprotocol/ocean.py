@@ -54,7 +54,6 @@ class Datatoken3(Datatoken1):
 
     def submit_predval(
         self,
-        stake_token: DatatokenBase,  # e.g. OCEAN
         predval_trunc: int,  # e.g. "50020" here == "500.20" float
         stake_wei: int,
         predict_blocknum: int,
@@ -77,18 +76,18 @@ class Datatoken3(Datatoken1):
         predobj_i = self.len_predobjs[predict_blocknum]
         self.predobjs[predict_blocknum][predobj_i] = predobj
 
-        bal_wei = stake_token.balanceOf(predictoor)
+        bal_wei = self.stake_token.balanceOf(predictoor)
         assert (
             bal_wei >= stake_wei
         ), f"Predictoor has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
 
         # DT contract transfers OCEAN stake from predictoor to itself
         # py version, with "treasurer"  workaround:
-        assert stake_token.transferFrom(
+        assert self.stake_token.transferFrom(
             predictoor, self.treasurer, stake_wei, {"from": self.treasurer}
         )
         # sol version would look something like this:
-        # assert stake_token.transferFrom(predictoor, self.address, stake_wei)
+        # assert self.stake_token.transferFrom(predictoor, self.address, stake_wei)
 
         self.len_predobjs[predict_blocknum] += 1
         self.agg_predvals_numerator_wei[predict_blocknum] += int(
@@ -134,7 +133,7 @@ class Datatoken3(Datatoken1):
             if num_loops_done == max_num_loops:
                 break
 
-    def get_payout(self, blocknum, stake_token, id, tx_dict):
+    def get_payout(self, blocknum, id, tx_dict):
         assert self.predobjs[blocknum][id].paid == False
         assert self.len_agg_SWEs[blocknum] == self.len_predobjs[blocknum]
 
@@ -146,15 +145,15 @@ class Datatoken3(Datatoken1):
         perc_payout = 1.0 - swe / tot_swe  # % that this predictoor gets
         tot_stake_wei = self.agg_predvals_denominator_wei[blocknum]
         payout_wei = perc_payout * tot_stake_wei
-        if stake_token.balanceOf(self.address) < payout_wei:  # precision loss
-            payout_wei = stake_token.balanceOf(self.address)
+        if self.stake_token.balanceOf(self.address) < payout_wei:  # precision loss
+            payout_wei = self.stake_token.balanceOf(self.address)
 
         # DT contract transfers OCEAN winnings from itself to predictoor
         # py version, with "treasurer"  workaround:
-        assert stake_token.transfer(
+        assert self.stake_token.transfer(
             predobj.predictoor, payout_wei, {"from": self.treasurer}
         )
         # sol version would look something like this:
-        # assert stake_token.transfer(predobj.predictoor, payout_wei)
+        # assert self.stake_token.transfer(predobj.predictoor, payout_wei)
 
         predobj.paid = True
