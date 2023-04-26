@@ -9,6 +9,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.datatoken_base import DatatokenBase
+from ocean_lib.models.fixed_rate_exchange import OneExchange
 from ocean_lib.ocean.util import from_wei, to_wei
 
 
@@ -52,6 +53,17 @@ class Datatoken3(Datatoken1):
         self.agg_SWEs = {}  # [blocknum] = agg_stake_weighted_errors
         self.len_agg_SWEs = {}  # [blocknum] = counter
 
+    def setup_exchange(self, tx_dict, rate: int):
+        # Opinionated:
+        # - Exchange's base token == self.stake_token
+        # - Exchange's owner is == this DT itself (!). Why: for payouts
+        self.exchange = self.create_exchange(
+            tx_dict,
+            rate=rate,
+            base_token_addr=self.stake_token.address,
+            owner_addr=self.treasurer.address,
+        )
+        
     def submit_predval(
         self,
         predval_trunc: int,  # e.g. "50020" here == "500.20" float

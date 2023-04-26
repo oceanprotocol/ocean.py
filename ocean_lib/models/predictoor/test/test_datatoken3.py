@@ -35,14 +35,6 @@ def test_main():
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
 
-    # params
-    min_blocks_ahead = 20  # Pred'ns must be >= this # blocks ahead
-    min_predns_for_payout = 100  # Pred'oor needs >= this # predn's to get paid
-    num_blocks_subscription = 86400 / 10  # 1 day
-    
-    n_DTs = 100.0
-    DT_price = 10.0  # denominated in OCEAN
-
     # create Data NFT & DT
     data_nft = ocean.data_nft_factory.create(
         {"from": opf}, "Data NFT 1", "DNFT1")
@@ -57,32 +49,37 @@ def test_main():
     assert DT.getId() == 3
     
     # Add DT attributes specific to template 3. Have as py to evolve quickly.
-    # When we convert to Solidity:
-    # - data_nft.create_datatoken() should input these (as DatatokenArguments)
-    # - ERC20Template3 should store these directly
-    DT.min_blocks_ahead = min_blocks_ahead
-    DT.min_predns_for_payout = min_predns_for_payout
-    DT.num_blocks_subscription = num_blocks_subscription
+    # - When we convert to Solidity:
+    #   - data_nft.create_datatoken() should input these via DatatokenArguments
+    #   - such that ERC20Template3.sol stores these directly
+    DT.min_blocks_ahead = 20  # Pr'dns must be >= this # blocks ahead
+    DT.min_predns_for_payout = 100 # Pr'oor needs >= this # pr'dns to get paid
+    DT.num_blocks_subscription = 86400 / 10  # 1 day
     DT.stake_token = OCEAN
 
     # Mixed sol+py can't have DT to hold OCEAN, so have a different account
-    # When we convert to Solidity, change to: DT_treasurer = DT
+    # - When we convert to Solidity, change to: DT_treasurer = DT
     DT.treasurer = DT_treasurer
 
-    # post 100 DTs for sale
+    # post DTs for sale
+    n_DTs = 100.0 # num DTs for sale
+    DT_price = 10.0 # denominated in OCEAN
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
-    exchange = DT.create_exchange({"from": opf}, to_wei(DT_price), OCEAN.address)
-    DT.approve(exchange.address, to_wei(n_DTs), {"from": opf})
+    
+    DT.setup_exchange({"from": opf}, to_wei(DT_price))
+    assert DT.exchange.details.owner == DT_treasurer.address
+    
+    DT.approve(DT.exchange.address, to_wei(n_DTs), {"from": opf})
 
     # ======================================================================
     # TRADER BUYS SUBSCRIPTION TO AGG PREDVALS (do every 24h)
 
     # trader buys 1 DT with OCEAN
-    OCEAN_needed = from_wei(exchange.BT_needed(to_wei(1), consume_market_fee=0))
+    OCEAN_needed = from_wei(DT.exchange.BT_needed(to_wei(1), consume_market_fee=0))
     assert OCEAN_bal(trader) >= OCEAN_needed, "must fund more OCEAN to trader"
 
-    OCEAN.approve(exchange.address, to_wei(OCEAN_needed), {"from": trader})
-    exchange.buy_DT(to_wei(1), {"from": trader})  # spends OCEAN
+    OCEAN.approve(DT.exchange.address, to_wei(OCEAN_needed), {"from": trader})
+    DT.exchange.buy_DT(to_wei(1), {"from": trader})  # spends OCEAN
 
     # trader starts subscription. Good for 24h.
     # -"start_subscription" is like pay_for_access_service, but w/o DDO
@@ -137,7 +134,7 @@ def test_main():
 
     # ======================================================================
     # TIME PASSES - enough such that predict_blocknum has passed
-    chain.mine(min_blocks_ahead + 10)  # pass enough time (blocks) so that  pass
+    chain.mine(DT.min_blocks_ahead + 10)  # pass enough time (blocks) so that  pass
 
     # ======================================================================
     # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
@@ -149,7 +146,7 @@ def test_main():
 
     # FIXME - we'll need to do 'min_predns_for_payout' loops through this
     #   step and and several prev steps, for predictoors to actually get paid
-    n_step = int(1.2 * min_blocks_ahead * min_predns_for_payout)
+    n_step = int(1.2 * DT.min_blocks_ahead * DT.min_predns_for_payout)
     print(f"n_step = {n_step}")
     # chain.mine(n_step)
 
