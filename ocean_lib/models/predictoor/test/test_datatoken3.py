@@ -34,23 +34,17 @@ def test_main():
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
 
+    # params
     min_blocks_ahead = 20  # Pred'ns must be >= this # blocks ahead
     min_predns_for_payout = 100  # Pred'oor needs >= this # predn's to get paid
     num_blocks_subscription = 86400 / 10  # 1 day
-
-    # can reuse existing DNFT template
-    data_nft = ocean.data_nft_factory.create(
-        {"from": opf},
-        "Data NFT 1",
-        "DNFT1",  # and any other DataNFTArguments
-    )
-
-    # new DT template with Predictoor functionality
-
-    # params
+    
     n_DTs = 100.0
     DT_price = 10.0  # denominated in OCEAN
 
+    # create Data NFT & DT
+    data_nft = ocean.data_nft_factory.create(
+        {"from": opf}, "Data NFT 1", "DNFT1")
     DT = data_nft.create_datatoken(
         {"from": opf},
         name="DT",
