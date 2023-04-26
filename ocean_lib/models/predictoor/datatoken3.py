@@ -78,10 +78,17 @@ class Datatoken3(Datatoken1):
         self.min_predns_for_payout = min_predns_for_payout
         self.stake_token = stake_token # for staking *and* payment
 
+    def epoch(self, blocknum: int) -> int:
+        return int(blocknum // self.blocks_per_epoch)
+    
+    def cur_epoch(self) -> int:
+        return int(_cur_blocknum() // self.blocks_per_epoch)
+        
     def rail_blocknum_to_slot(self, blocknum):
-        return blocknum // self.blocks_per_epoch * self.blocks_per_epoch
+        return int(blocknum // self.blocks_per_epoch * self.blocks_per_epoch)
 
     def blocknum_is_on_a_slot(self, blocknum) -> bool:
+        # a slot == beginning/end of an epoch
         return blocknum == self.rail_blocknum_to_slot(blocknum)
 
     def setup_exchange(self, tx_dict, rate: int):
@@ -101,7 +108,7 @@ class Datatoken3(Datatoken1):
     def soonest_block_to_predict(self) -> int:
         """What's the next block that a predictoor could predict at,
         without breaking the rules about predicting too early?"""
-        cur_blocknum =_cur_blocknum()
+        cur_blocknum = _cur_blocknum()
         slotted_blocknum = self.rail_blocknum_to_slot(cur_blocknum)
         if slotted_blocknum == cur_blocknum: # currently at a slot
             blocknum = slotted_blocknum + self.blocks_per_epoch

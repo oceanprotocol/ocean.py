@@ -1,13 +1,14 @@
 """Prototype 3. Uses OCEAN staking, and DTs."""
 import json
 import os
+import random
+import sys
 
 import brownie
 from brownie.network import accounts as br_accounts
 from enforce_typing import enforce_types
 import pytest
 from pytest import approx
-import random
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.predictoor.datatoken3 import Datatoken3
@@ -92,23 +93,24 @@ def test_main():
     
     n_blocks = n_epochs * DT.blocks_per_epoch + 3
     final_blocknum = int(cur_blocknum() + n_blocks)
-    
+
     while cur_blocknum() < final_blocknum:
-        print("==============================================================")
-        print("Start new loop")
-        print(f"cur_blocknum={cur_blocknum()}, final_blocknum={final_blocknum}")
+        actions_s = ""
+
         # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
         predict_blocknum = DT.soonest_block_to_predict()
         if not DT.submitted_predval(predict_blocknum, predictoor1.address):
             predval1 = random.choice([True, False])
             DT.submit_predval(
                 predval1, stake1, predict_blocknum, {"from": predictoor1})
+            actions_s += "Predictoor1 submitted a prediction\n"
 
         predict_blocknum = DT.soonest_block_to_predict() # in case changed!
         if not DT.submitted_predval(predict_blocknum, predictoor2.address):
             predval2 = random.choice([True, False])
             DT.submit_predval(
                 predval2, stake2, predict_blocknum, {"from": predictoor2})
+            actions_s += "Predictoor2 submitted a prediction\n"
 
         # TRADER GETS AGG PREDVAL (do every 5min)
         predict_blocknum = DT.soonest_block_to_predict() # in case changed!
@@ -116,16 +118,33 @@ def test_main():
             agg_predval = DT.get_agg_predval(predict_blocknum)
             assert 0.0 <= agg_predval <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
+            actions_s += "Trader got an agg_predval\n"
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-        if DT.predobjs:
-            predict_blocknum = min(DT.predobjs.keys()) #earliest one seen
-            if cur_blocknum() >= predict_blocknum: # enough time's passed!
-                trueval = random.choice([True, False])
-                DT.submit_trueval(trueval, predict_blocknum, {"from": opf})
+        for predict_blocknum in DT.predobjs:
+            if predict_blocknum in DT.truevals: # already set 
+                continue
+            if cur_blocknum() < predict_blocknum: # not enough time passed
+                continue
+            trueval = random.choice([True, False])
+            DT.submit_trueval(trueval, predict_blocknum, {"from": opf})
+            chain.mine(1) # forced this, because prev step isn't on chain
+            actions_s += "OPF submitted a trueval\n"
 
-        # always move forward by at least one block
-        chain.mine(1)
+        # MAYBE MINE. LOG OUTPUT
+        block_s = f"Done blocknum={cur_blocknum()}, epoch={DT.cur_epoch()}"
+        if actions_s == "": # nothing happened, so move forward by a block
+            chain.mine(1)
+            if cur_blocknum() % 50 == 0:
+                print(block_s)
+            else:
+                print(".", end="")
+                sys.stdout.flush() #needed for the . to show up immediately
+        else:
+            print()
+            print(f"=" * 30 + "\n" +
+                  block_s + "\n" + 
+                  actions_s)
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
