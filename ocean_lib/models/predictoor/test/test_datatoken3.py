@@ -7,6 +7,7 @@ from brownie.network import accounts as br_accounts
 from enforce_typing import enforce_types
 import pytest
 from pytest import approx
+import random
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.predictoor.datatoken3 import Datatoken3
@@ -19,6 +20,9 @@ from ocean_lib.web3_internal.utils import connect_to_network
 ADDRESS_FILE = "~/.ocean/ocean-contracts/artifacts/address.json"
 
 chain = brownie.network.chain
+
+S_PER_MIN = 60
+S_PER_HOUR = 60 * 60
 
 @enforce_types
 def test_main():
@@ -33,42 +37,32 @@ def test_main():
     OCEAN_approved = ConvClass(OCEAN).fromWei_approved
 
     # ======================================================================
-    # DEPLOY DATATOKEN & EXCHANGE CONTRACT
-
-    # create Data NFT & DT
-    data_nft = ocean.data_nft_factory.create(
-        {"from": opf}, "Data NFT 1", "DNFT1")
-    DT = data_nft.create_datatoken(
-        {"from": opf},
-        name="DT",
-        symbol="DT",
-        template_index=3,
-        # and any other DatatokenArguments
-    )
-    assert isinstance(DT, Datatoken3)
-    assert DT.getId() == 3
+    # PARAMETERS
+    s_per_block = 2 # depends on the chain
+    s_per_epoch = 5 * S_PER_MIN
+    s_per_subscription = 24 * S_PER_HOUR
+    min_predns_for_payout = 10 # ideally, 100+
+    stake_token = OCEAN
     
-    # Add DT attributes specific to template 3. Have as py to evolve quickly.
-    # - When we convert to Solidity:
-    #   - data_nft.create_datatoken() should input these via DatatokenArguments
-    #   - such that ERC20Template3.sol stores these directly
-    DT.min_blocks_ahead = 20  # Pr'dns must be >= this # blocks ahead
-    DT.min_predns_for_payout = 100 # Pr'oor needs >= this # pr'dns to get paid
-    DT.num_blocks_subscription = 86400 / 10  # 1 day
-    DT.stake_token = OCEAN
-
+    n_DTs = 100.0 # num DTs for sale
+    DT_price = 10.0 # denominated in OCEAN
+    
+    # ======================================================================
+    # DEPLOY DATATOKEN & EXCHANGE CONTRACT
+    data_nft = ocean.data_nft_factory.create({"from": opf}, "DN", "DN")
+    DT = data_nft.create_datatoken({"from": opf}, "DT","DT", template_index=3)
+    
+    DT.do_setup(
+        s_per_block, s_per_epoch, s_per_subscription, min_predns_for_payout,
+        stake_token)
+                    
     # Mixed sol+py can't have DT to hold OCEAN, so have a different account
     # - When we convert to Solidity, change to: DT_treasurer = DT
     DT.treasurer = DT_treasurer
 
     # post DTs for sale
-    n_DTs = 100.0 # num DTs for sale
-    DT_price = 10.0 # denominated in OCEAN
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
-    
     DT.setup_exchange({"from": opf}, to_wei(DT_price))
-    assert DT.exchange.details.owner == DT_treasurer.address
-    
     DT.approve(DT.exchange.address, to_wei(n_DTs), {"from": opf})
 
     # ======================================================================
@@ -76,93 +70,72 @@ def test_main():
 
     # trader buys 1 DT with OCEAN
     OCEAN_needed = from_wei(DT.exchange.BT_needed(to_wei(1), consume_market_fee=0))
-    assert OCEAN_bal(trader) >= OCEAN_needed, "must fund more OCEAN to trader"
 
     OCEAN.approve(DT.exchange.address, to_wei(OCEAN_needed), {"from": trader})
     DT.exchange.buy_DT(to_wei(1), {"from": trader})  # spends OCEAN
 
     # trader starts subscription. Good for 24h.
-    # -"start_subscription" is like pay_for_access_service, but w/o DDO
     DT.approve(DT.address, to_wei(1), {"from": trader})
-    DT.start_subscription({"from": trader})  # good for next 24h (or 1h, 7d, ..)
+    DT.start_subscription({"from": trader})  # good for next 24h
 
     # ======================================================================
-    # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
-    stake1 = 20.0  # in OCEAN
-    stake2 = 10.0  # ""
-    predval1_trunc = 20000  # "20000" here == "200.00" float
-    predval2_trunc = 50020  # "50020" here == "500.20" float
-    predict_blocknum = 100
-
-    OCEAN.approve(DT_treasurer, to_wei(stake1), {"from": predictoor1})
-    OCEAN.approve(DT_treasurer, to_wei(stake2), {"from": predictoor2})
-    assert OCEAN_approved(predictoor1, DT.treasurer) == stake1
-    assert OCEAN_approved(predictoor2, DT.treasurer) == stake2
-
-    initbalDT = OCEAN_bal(DT_treasurer)
-    initbal1 = OCEAN_bal(predictoor1)
-    initbal2 = OCEAN_bal(predictoor2)
-
-    DT.submit_predval(
-        predval1_trunc, to_wei(stake1), predict_blocknum, {"from": predictoor1}
-    )
-    DT.submit_predval(
-        predval2_trunc, to_wei(stake2), predict_blocknum, {"from": predictoor2}
-    )
-
-    # test
-    assert OCEAN_bal(DT_treasurer) == (initbalDT + stake1 + stake2)
-    assert OCEAN_bal(predictoor1) == approx(initbal1 - stake1)  # just staked
-    assert OCEAN_bal(predictoor2) == approx(initbal2 - stake2)  # ""
-    assert OCEAN_approved(predictoor1, DT) == 0.0  # just used up
-    assert OCEAN_approved(predictoor2, DT) == 0.0  # ""
-
     # ======================================================================
-    # TRADER GETS AGG PREDVAL (do every 5min)
+    # LOOP across epochs
+    n_epochs = DT.min_predns_for_payout + 3
+    
+    stake1 = 2.0  # Stake per prediction. In OCEAN
+    stake2 = 1.0  # ""
+    OCEAN.approve(DT_treasurer, to_wei(stake1*n_epochs), {"from": predictoor1})
+    OCEAN.approve(DT_treasurer, to_wei(stake2*n_epochs), {"from": predictoor2})
 
-    # trader gets prediction itself
-    # -a tx isn't needed, therefore Solidity can return a value directly
-    # -"get_agg_predval" is like ocean.assets.download_asset //
-    #  asset_downloader.download_asset_files() except there's no downloading,
-    #  rather it simply gives the agg_predval. (To generalize: reveals secret)
-    numerator = DT.get_agg_predval_numerator(predict_blocknum)
-    denominator = DT.get_agg_predval_denominator(predict_blocknum)
-    agg_predval = numerator / denominator / 100.0
-    predval1, predval2 = predval1_trunc / 100.0, predval2_trunc / 100.0
-    target_agg_predval = (stake1 * predval1 + stake2 * predval2) / (stake1 + stake2)
-    assert agg_predval == target_agg_predval
+    blocks_seen_by_trader = set()
+    
+    n_blocks = n_epochs * DT.blocks_per_epoch + 3
+    final_blocknum = int(cur_blocknum() + n_blocks)
+    
+    while cur_blocknum() < final_blocknum:
+        print("==============================================================")
+        print("Start new loop")
+        print(f"cur_blocknum={cur_blocknum()}, final_blocknum={final_blocknum}")
+        # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
+        predict_blocknum = DT.soonest_block_to_predict()
+        if not DT.submitted_predval(predict_blocknum, predictoor1.address):
+            predval1 = random.choice([True, False])
+            DT.submit_predval(
+                predval1, stake1, predict_blocknum, {"from": predictoor1})
 
-    # ======================================================================
-    # TIME PASSES - enough such that predict_blocknum has passed
-    chain.mine(DT.min_blocks_ahead + 10)  # pass enough time (blocks) so that  pass
+        predict_blocknum = DT.soonest_block_to_predict() # in case changed!
+        if not DT.submitted_predval(predict_blocknum, predictoor2.address):
+            predval2 = random.choice([True, False])
+            DT.submit_predval(
+                predval2, stake2, predict_blocknum, {"from": predictoor2})
 
-    # ======================================================================
-    # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-    trueval_trunc = 44900  # "44900" here == "449.00" float
-    DT.submit_trueval(predict_blocknum, trueval_trunc, {"from": opf})
+        # TRADER GETS AGG PREDVAL (do every 5min)
+        predict_blocknum = DT.soonest_block_to_predict() # in case changed!
+        if predict_blocknum not in blocks_seen_by_trader:
+            agg_predval = DT.get_agg_predval(predict_blocknum)
+            assert 0.0 <= agg_predval <= 1.0
+            blocks_seen_by_trader.add(predict_blocknum)
 
-    # ======================================================================
-    # TIME PASSES - enough for predictoors to get claims
+        # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
+        if DT.predobjs:
+            predict_blocknum = min(DT.predobjs.keys()) #earliest one seen
+            if cur_blocknum() >= predict_blocknum: # enough time's passed!
+                trueval = random.choice([True, False])
+                DT.submit_trueval(trueval, predict_blocknum, {"from": opf})
 
-    # FIXME - we'll need to do 'min_predns_for_payout' loops through this
-    #   step and and several prev steps, for predictoors to actually get paid
-    n_step = int(1.2 * DT.min_blocks_ahead * DT.min_predns_for_payout)
-    print(f"n_step = {n_step}")
-    # chain.mine(n_step)
+        # always move forward by at least one block
+        chain.mine(1)
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
 
     # Any rando can call update_error_calcs()
-    DT.update_error_calcs(predict_blocknum, 1000, {"from": rando})
+    DT.update_error_calcs(predict_blocknum, {"from": rando})
 
     # Any rando can call get_payout(). Will update amt allowed
-    initbalDT = OCEAN_bal(DT_treasurer)
-    initbal1, initbal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
-
-    predictoor0_i, predictoor1_i = 0, 1
-    DT.get_payout(predict_blocknum, predictoor0_i, {"from": rando})
-    DT.get_payout(predict_blocknum, predictoor1_i, {"from": rando})
+    DT.get_payout(predict_blocknum, predictoor0.address, {"from": rando})
+    DT.get_payout(predict_blocknum, predictoor1.address, {"from": rando})
 
     balDT = OCEAN_bal(DT_treasurer)
     bal1, bal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
@@ -232,7 +205,7 @@ def _setup():
     print("\nMove OCEAN...")
     for acct in accts_needing_OCEAN:
         if OCEAN_bal(acct) <= 25.0:
-            OCEAN.transfer(acct, to_wei(200.0), {"from": deployer})
+            OCEAN.transfer(acct, to_wei(250.0), {"from": deployer})
 
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
@@ -258,5 +231,5 @@ def ETH_bal(acct) -> int:
     return from_wei(acct.balance())
 
 @enforce_types
-def _cur_blocknum() -> int:
+def cur_blocknum() -> int:
     return chain[-1].number

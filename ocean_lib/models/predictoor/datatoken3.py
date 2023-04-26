@@ -5,6 +5,7 @@
 import logging
 from typing import Any, Optional
 
+import brownie
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken1 import Datatoken1
@@ -17,155 +18,234 @@ from ocean_lib.ocean.util import from_wei, to_wei
 class PredClass:
     def __init__(
         self,
-        predval_trunc: int,  # e.g. "50020" here == "500.20" float
-        stake_wei: int,
+        predval: bool,  # True = predict up, False = down
+        stake: float,
         predictoor,
     ):
-        self.predval_trunc: int = predval_trunc
-        self.stake_wei: int = stake_wei
+        self.predval: bool = predval 
+        self.stake: float = stake
         self.predictoor = predictoor
 
+        self.swe = None #swe = stake-weighted error
         self.paid: bool = False
 
-    def calc_swe(self, trueval_trunc: int) -> float:
+    def set_swe(self, trueval: bool) -> float:
         """@return - stake-weighted error (SWE)"""
-        error_trunc = abs(self.predval_trunc - trueval_trunc)
-        swe = error_trunc * self.stake_wei
-        return swe
+        # SWE = abs(trueval - predicted) * stake
+        # Implementation is simple because of booleans
+        assert self.swe is None, "already set swe"
+        if self.predval == trueval:
+            self.swe = 0.0
+        self.swe = self.stake
 
 
 @enforce_types
 class Datatoken3(Datatoken1):
     CONTRACT_NAME = "ERC20Template3"
 
-    def __init__(self, config_dict: dict, address: str) -> None:
-        super().__init__(config_dict, address)
-        self.subscribers = {}  # [address] = timestamp
+    def do_setup(
+            self,
+            s_per_block: int, # seconds per block
+            s_per_epoch: int, # seconds per epoch
+            s_per_subscription: int, # seconds per subscription
+            min_predns_for_payout: int, # min # pr'dns by a pr'oor for payout
+            stake_token: DatatokenBase, # e.g. OCEAN
+    ):
+        """
+        Set DT-specific attributes.(Eventually, ERC20Template3.sol will hold)
+        """
+        # State variables
+        self.startblock_per_subscriber = {}  # [subscriber_address] : blocknum
+        
+        self.predobjs = {}  # [predict_blocknum][predictoor_addr] : predobj
+        self.agg_predvals_numer = {}  # [blocknum] : agg_predval_numerator
+        self.agg_predvals_denom = {}  # [blocknum] : agg_predval_denominator
+        
+        self.truevals = {}  # [blocknum] : trueval -- float in [0.0, 1.0]
+        
+        self.SWEs = {}  # [blocknum][predictoor_addr] : stake_weighted_errors
 
-        self.predobjs = {}  # [predict_blocknum][id] = predobj
-        self.len_predobjs = {}  # [blocknum] = counter
+        # Calc & set epoch parameters
+        # - Specify epochs in terms of block numbers. Ie give "slots" to epochs.
+        # - When one epoch ends, the next begins
+        assert s_per_subscription % s_per_block == 0, "must cleanly divide"
+        assert s_per_epoch % s_per_block == 0, "must cleanly divide"
+        
+        self.blocks_per_epoch = s_per_epoch / s_per_block
+        self.blocks_per_subscription = s_per_subscription / s_per_block
 
-        self.agg_predvals_numerator_wei = {}  # [blocknum] = agg_predval_numer
-        self.agg_predvals_denominator_wei = {}  # [blocknum] = agg_predval_denom
+        # Set other attributes
+        self.min_predns_for_payout = min_predns_for_payout
+        self.stake_token = stake_token # for staking *and* payment
 
-        self.truevals_trunc = {}  # [blocknum] = trueval_trunc
+    def rail_blocknum_to_slot(self, blocknum):
+        return blocknum // self.blocks_per_epoch * self.blocks_per_epoch
 
-        self.agg_SWEs = {}  # [blocknum] = agg_stake_weighted_errors
-        self.len_agg_SWEs = {}  # [blocknum] = counter
+    def blocknum_is_on_a_slot(self, blocknum) -> bool:
+        return blocknum == self.rail_blocknum_to_slot(blocknum)
 
     def setup_exchange(self, tx_dict, rate: int):
-        # Opinionated:
-        # - Exchange's base token == self.stake_token
-        # - Exchange's owner is == this DT itself (!). Why: for payouts
+        """
+        Create an exchange with opinionated params:
+         - Exchange's base token == self.stake_token
+         - Exchange's owner is == this DT itself (!). Why: for payouts
+        """
         self.exchange = self.create_exchange(
             tx_dict,
-            rate=rate,
+            rate,
             base_token_addr=self.stake_token.address,
+            #when solidity, change to: owner_addr=self
             owner_addr=self.treasurer.address,
         )
+
+    def soonest_block_to_predict(self) -> int:
+        """What's the next block that a predictoor could predict at,
+        without breaking the rules about predicting too early?"""
+        cur_blocknum =_cur_blocknum()
+        slotted_blocknum = self.rail_blocknum_to_slot(cur_blocknum)
+        if slotted_blocknum == cur_blocknum: # currently at a slot
+            blocknum = slotted_blocknum + self.blocks_per_epoch
+        else:
+            blocknum = slotted_blocknum + 2 * self.blocks_per_epoch
+        assert self.blocknum_is_on_a_slot(blocknum)
+        return blocknum
+
+    def submitted_predval(self, blocknum:int, predictoor_addr:str) -> bool:
+        """Did this predictoor submit a predval for this blocknum?"""
+        assert self.blocknum_is_on_a_slot(blocknum)
+        if blocknum not in self.predobjs:
+            return False
+        return predictoor_addr in self.predobjs[blocknum]
         
     def submit_predval(
         self,
-        predval_trunc: int,  # e.g. "50020" here == "500.20" float
-        stake_wei: int,
-        predict_blocknum: int,
+        predval: bool, # True = predict up, False = down
+        stake: float,
+        blocknum: int, # block number to predict at
         tx_dict: dict,
     ):
-        # assert blocks_ahead >= self._min_blocks_ahead
+        """Predictoor submits prediction"""
+        assert self.blocknum_is_on_a_slot(blocknum)
+        assert blocknum >= self.soonest_block_to_predict()
+        
         predictoor = tx_dict["from"]
-        predobj = PredClass(predval_trunc, stake_wei, predictoor)
+        predobj = PredClass(predval, stake, predictoor)
 
-        if predict_blocknum not in self.predobjs:
-            self.predobjs[predict_blocknum] = {}
-            self.len_predobjs[predict_blocknum] = 0
+        if blocknum not in self.predobjs:
+            self.predobjs[blocknum] = {}
+            self.agg_predvals_numer[blocknum] = 0.0
+            self.agg_predvals_denom[blocknum] = 0.0
 
-            self.agg_predvals_numerator_wei[predict_blocknum] = 0
-            self.agg_predvals_denominator_wei[predict_blocknum] = 0
+        self.predobjs[blocknum][predictoor.address] = predobj
 
-            self.agg_SWEs[predict_blocknum] = 0
-            self.len_agg_SWEs[predict_blocknum] = 0
-
-        predobj_i = self.len_predobjs[predict_blocknum]
-        self.predobjs[predict_blocknum][predobj_i] = predobj
-
-        bal_wei = self.stake_token.balanceOf(predictoor)
-        assert (
-            bal_wei >= stake_wei
-        ), f"Predictoor has {from_wei(bal_wei)}, needed {from_wei(stake_wei)}"
+        bal = from_wei(self.stake_token.balanceOf(predictoor))
+        assert bal >= stake
 
         # DT contract transfers OCEAN stake from predictoor to itself
         # py version, with "treasurer"  workaround:
         assert self.stake_token.transferFrom(
-            predictoor, self.treasurer, stake_wei, {"from": self.treasurer}
+            predictoor, self.treasurer, to_wei(stake), {"from": self.treasurer}
         )
         # sol version would look something like this:
         # assert self.stake_token.transferFrom(predictoor, self.address, stake_wei)
 
-        self.len_predobjs[predict_blocknum] += 1
-        self.agg_predvals_numerator_wei[predict_blocknum] += int(
-            predobj.predval_trunc * predobj.stake_wei
-        )
-        self.agg_predvals_denominator_wei[predict_blocknum] += stake_wei
+        self.agg_predvals_numer[blocknum] += predobj.stake * predobj.predval
+        self.agg_predvals_denom[blocknum] += stake
 
     def submit_trueval(
         self,
-        blocknum: int,
-        trueval_trunc: int,  # e.g. "44900" here == "449.00" float
+        trueval: bool, # True = value went up, False = value went down
+        blocknum: int, # block number for this submitted value
         tx_dict: dict,
     ):
+        assert self.blocknum_is_on_a_slot(blocknum)
         # assert sender == opf
-        self.truevals_trunc[blocknum] = trueval_trunc
+        # FIXME: in sol, this should be an oracle
+        self.truevals[blocknum] = trueval
 
-    def start_subscription(self, tx_dict):
-        if tx_dict["from"] not in self.subscribers:
-            self.subscribers[tx_dict["from"]] = 100  # mock timestamp
+    def start_subscription(self, tx_dict: dict):
+        # A bit like pay_for_access_service, but super simple! No need for DDO.
+        subscr_addr = tx_dict["from"].address
+        assert subscr_addr not in self.startblock_per_subscriber, \
+            "this account has already started a subscription"
+        self.startblock_per_subscriber[subscr_addr] = _cur_blocknum
 
-    def get_agg_predval_numerator(self, blocknum):
+    def get_agg_predval(self, blocknum: int) -> float:
+        """Returns a value between 0.0 and 1.0. 
+        = 0.5: expect no change in value
+        > 0.5: expect value to go UP. Closer to 1.0 = more confident
+        < 0.5: expect value to go down. Closer to 0.0 = more confident
+        """
+        assert self.blocknum_is_on_a_slot(blocknum)
+        
         # this value will be encrypted
-        return int(self.agg_predvals_numerator_wei[blocknum])
+        numer = self.agg_predvals_numer[blocknum]
+        denom = self.agg_predvals_denom[blocknum]
 
-    def get_agg_predval_denominator(self, blocknum):
-        # this value will be encrypted
-        return int(self.agg_predvals_denominator_wei[blocknum])
+        return numer / denom
 
-    def update_error_calcs(self, blocknum, max_num_loops, tx_dict):
-        assert (
-            self.len_agg_SWEs[blocknum] < self.len_predobjs[blocknum]
-        ), "don't need to call this, there's nothing left to calc"
-        num_predobjs_done = self.len_agg_SWEs[blocknum]
-        tot_num_predobjs = self.len_predobjs[blocknum]
-        num_loops_done = 0
-        for predobj_i in range(num_predobjs_done, tot_num_predobjs):
-            predobj = self.predobjs[blocknum][predobj_i]
-            if not predobj.paid:
-                swe = predobj.calc_swe(self.truevals_trunc[blocknum])
-                self.agg_SWEs[blocknum] += swe
-                num_loops_done += 1
-                self.len_agg_SWEs[blocknum] += 1
-            if num_loops_done == max_num_loops:
-                break
+    def update_error_calcs(self, blocknum: int, tx_dict: dict):
+        assert self.blocknum_is_on_a_slot(blocknum)
+        trueval = self.truevals[blocknum]
+        for predobj in self.predobjs[blocknum].values():
+            if predobj.swe is None:
+                predobj.set_swe(trueval)
 
-    def get_payout(self, blocknum, id, tx_dict):
-        assert self.predobjs[blocknum][id].paid == False
-        assert self.len_agg_SWEs[blocknum] == self.len_predobjs[blocknum]
+    def get_payout(self, blocknum: int, predictoor_addr: str, tx_dict: dict):
+        assert self.blocknum_is_on_a_slot(blocknum)
+        
+        predobj = self.predobjs[blocknum][predictoor_addr]
+        assert not predobj.paid, "already got paid"
+        
+        swes = [p.swe for p in self.predobjs[blocknum]]
+        assert None not in swes, "must calc all SWEs first"
 
-        predobj = self.predobjs[blocknum][id]
+        # calculate predictoor's score. In range [0.0, 1.0]. 1.0 is best.
+        score01 = 1.0 - predobj.swe / sum(swes)
 
-        swe = predobj.calc_swe(self.truevals_trunc[blocknum])
-        tot_swe = self.agg_SWEs[blocknum]
+        # the DT gets revenue comes from two places:
+        # (1) subscription, ie $ to exchange for DTs
+        # (2) stake reallocation
+        tot_rev_subscr = _subscription_revenue_at_block(self, blocknum)
+        tot_rev_stake = self.agg_predvals_denom[blocknum]
 
-        perc_payout = 1.0 - swe / tot_swe  # % that this predictoor gets
-        tot_stake_wei = self.agg_predvals_denominator_wei[blocknum]
-        payout_wei = perc_payout * tot_stake_wei
-        if self.stake_token.balanceOf(self.address) < payout_wei:  # precision loss
-            payout_wei = self.stake_token.balanceOf(self.address)
+        # the DT's revenue gets paid out to subscribers, pro-rata on score
+        # (FIXME: have a cut to OPC/OPF)
+        payout = score01 * (tot_rev_subscr + tot_rev_stake)
 
-        # DT contract transfers OCEAN winnings from itself to predictoor
-        # py version, with "treasurer"  workaround:
-        assert self.stake_token.transfer(
-            predobj.predictoor, payout_wei, {"from": self.treasurer}
-        )
-        # sol version would look something like this:
-        # assert self.stake_token.transfer(predobj.predictoor, payout_wei)
+        # top up DT's balance if needed by selling DTs into the exchange
+        while self._stake_token_bal() < payout:
+            self.exchange.sell_DT(to_wei(1.0), {"from": self.treasurer})
 
+        # now do payout to the predictoor
+        self.stake_token.transfer(
+            predobj.predictoor, to_wei(rev_stake), {"from": self.treasurer})
         predobj.paid = True
+
+    def _stake_token_bal(self) -> float:
+        """How much e.g. OCEAN does this contract have?"""
+        return from_wei(self.state_token.balanceOf(self.treasurer))
+
+    def _sell_1DT(self):
+        amt_DT_wei = to_wei(1.0)
+        amt_BT_wei = self.exchange.BT_received(amt_DT_wei, consume_market_fee=0)
+        
+
+    def _subscription_revenue_at_block(self, blocknum) -> float:
+        assert self.blocknum_is_on_a_slot(blocknum)
+
+        # revenue per subscriber, at this block
+        price = from_wei(self.exchange.details.fixed_rate)
+        rev_per_subscr = price / self.blocks_per_subscription
+
+        # total number of subscribers at this block
+        n_subscr = 0
+        for startblock in self.startblock_per_subscriber.values():
+            endblock = startblock + self.blocks_per_subscription
+            num_subscr += (startblock <= blocknum < endblock)
+
+        return rev_per_subscr * n_subscr
+
+@enforce_types
+def _cur_blocknum() -> int:
+    return brownie.network.chain[-1].number
