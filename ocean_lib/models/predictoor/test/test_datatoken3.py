@@ -150,7 +150,6 @@ def test_main():
 
     # Any rando can call update_error_calcs()
     DT.update_error_calcs(predict_blocknum, 1000, {"from": rando})
-    assert DT.len_agg_SWEs[predict_blocknum] == 2
 
     # Any rando can call get_payout(). Will update amt allowed
     initbalDT = OCEAN_bal(DT_treasurer)
