@@ -19,92 +19,17 @@ ADDRESS_FILE = "~/.ocean/ocean-contracts/artifacts/address.json"
 
 chain = brownie.network.chain
 
-
-@pytest.mark.unit
-def test_main_py():
-    _test_main(use_py=True)
-
-
-@pytest.mark.unit
-@pytest.mark.skip(reason="turn this on once .sol version is built")
-def test_main_sol():
-    _test_main(use_py=False)
-
-
 @enforce_types
-def _test_main(use_py):
-
-    # ======
-    # SETUP SYSTEM
-
-    connect_to_network("development")
-
-    # create base accounts
-    deployer = br_accounts.add(os.getenv("FACTORY_DEPLOYER_PRIVATE_KEY"))
-    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
-
-    # set ocean object
-    address_file = os.path.expanduser(ADDRESS_FILE)
-    print(f"Load contracts from address_file: {address_file}")
-    config = get_config_dict("development")
-    config["ADDRESS_FILE"] = address_file
-    ocean = Ocean(config, "no_provider")
-
-    # DEPLOYER mints 20K OCEAN, and sends 2K OCEAN to TEST_PRIVATE_KEY1 & 2
-    mint_fake_OCEAN(config)
-
-    # convenience objects
-    OCEAN = ocean.OCEAN_token
+def test_main():
+    # ======================================================================
+    # SETUP
+    config, ocean, OCEAN, accts =_setup()
+    [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer] \
+        = accts
 
     # convenience functions
-    c = ConvClass(OCEAN)
-    OCEAN_bal = c.fromWei_balanceOf
-    OCEAN_approved = c.fromWei_approved
-
-    def ETH_bal(acct):
-        return from_wei(acct.balance())
-
-    # ======================================================================
-    # SETUP USER ACCOUNTS
-    # Ensure that users have OCEAN and ETH as needed
-    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
-    # -Note: we don't _need_ to have private keys 3-6. But doing it means
-    #  we can give them ETH on launch rather than here, which is faster
-
-    def _acct(key_i: int):
-        return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
-
-    predictoor1, predictoor2, trader, rando, DT_treasurer = (
-        _acct(2),
-        _acct(3),
-        _acct(4),
-        _acct(5),
-        _acct(6),
-    )
-
-    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
-    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
-    accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
-
-    print("\nBalances before moving funds:")
-    for i, acct in enumerate(accts):
-        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
-
-    print("\nMove ETH...")
-    for acct in accts_needing_ETH:
-        if ETH_bal(acct) == 0:
-            deployer.transfer(acct, to_wei(1.0))
-
-    print("\nMove OCEAN...")
-    for acct in accts_needing_OCEAN:
-        if OCEAN_bal(acct) <= 25.0:
-            OCEAN.transfer(acct, to_wei(200.0), {"from": deployer})
-
-    print("\nBalances after moving funds:")
-    for i, acct in enumerate(accts):
-        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
-
-    predictoors = [predictoor1, predictoor2]
+    OCEAN_bal = ConvClass(OCEAN).fromWei_balanceOf
+    OCEAN_approved = ConvClass(OCEAN).fromWei_approved
 
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
@@ -138,10 +63,9 @@ def _test_main(use_py):
     )
     assert DT.getId() == 3
     DT = DT.get_typed(config, DT.address)
-    if use_py:  # py needs a treasurer, sol doesn't
-        DT.treasurer = DT_treasurer
-    else:
-        DT_treasurer = DT
+    
+    DT.treasurer = DT_treasurer # mixed sol+py needs a treasurer
+    # DT_treasurer = DT # switch to this when full sol
 
     # post 100 DTs for sale
     DT.mint(opf, to_wei(n_DTs), {"from": opf})
@@ -223,8 +147,9 @@ def _test_main(use_py):
 
     # FIXME - we'll need to do 'min_predns_for_payout' loops through this
     #   step and and several prev steps, for predictoors to actually get paid
-    print(int(1.2 * min_blocks_ahead * min_predns_for_payout))
-    # chain.mine(int(1.2 * min_blocks_ahead * min_predns_for_payout))
+    n_step = int(1.2 * min_blocks_ahead * min_predns_for_payout)
+    print(f"n_step = {n_step}")
+    # chain.mine(n_step)
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
@@ -252,6 +177,73 @@ def _test_main(use_py):
     assert earned2 > earned1
 
 
+def _setup():
+    # ======================================================================
+    # SETUP SYSTEM
+    connect_to_network("development")
+
+    # create base accounts
+    deployer = br_accounts.add(os.getenv("FACTORY_DEPLOYER_PRIVATE_KEY"))
+    opf = br_accounts.add(os.getenv("TEST_PRIVATE_KEY1"))
+
+    # set ocean object
+    address_file = os.path.expanduser(ADDRESS_FILE)
+    print(f"Load contracts from address_file: {address_file}")
+    config = get_config_dict("development")
+    config["ADDRESS_FILE"] = address_file
+    ocean = Ocean(config, "no_provider")
+
+    # DEPLOYER mints 20K OCEAN, and sends 2K OCEAN to TEST_PRIVATE_KEY1 & 2
+    mint_fake_OCEAN(config)
+
+    # convenience objects
+    OCEAN = ocean.OCEAN_token
+    OCEAN_bal = ConvClass(OCEAN).fromWei_balanceOf
+
+    # ======================================================================
+    # SETUP USER ACCOUNTS
+    # Ensure that users have OCEAN and ETH as needed
+    # -Note: Barge minted fake OCEAN and gave it to TEST_PRIVATE_KEY{1,2}
+    # -Note: we don't _need_ to have private keys 3-6. But doing it means
+    #  we can give them ETH on launch rather than here, which is faster
+
+    def _acct(key_i: int):
+        return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
+
+    predictoor1, predictoor2, trader, rando, DT_treasurer = (
+        _acct(2),
+        _acct(3),
+        _acct(4),
+        _acct(5),
+        _acct(6),
+    )
+
+    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
+    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
+    accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
+
+    print("\nBalances before moving funds:")
+    for i, acct in enumerate(accts):
+        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
+
+    print("\nMove ETH...")
+    for acct in accts_needing_ETH:
+        if ETH_bal(acct) == 0:
+            deployer.transfer(acct, to_wei(1.0))
+
+    print("\nMove OCEAN...")
+    for acct in accts_needing_OCEAN:
+        if OCEAN_bal(acct) <= 25.0:
+            OCEAN.transfer(acct, to_wei(200.0), {"from": deployer})
+
+    print("\nBalances after moving funds:")
+    for i, acct in enumerate(accts):
+        print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
+
+    predictoors = [predictoor1, predictoor2]
+
+    return config, ocean, OCEAN, accts
+
 @enforce_types
 class ConvClass:
     def __init__(self, token):
@@ -263,6 +255,9 @@ class ConvClass:
     def fromWei_approved(self, obj1, obj2) -> float:
         return from_wei(self.token.allowance(obj1.address, obj2.address))
 
+@enforce_types
+def ETH_bal(acct) -> int:
+    return from_wei(acct.balance())
 
 @enforce_types
 def _cur_blocknum() -> int:
