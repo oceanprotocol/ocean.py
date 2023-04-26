@@ -156,6 +156,7 @@ def test_main():
     DT.get_payout(predict_blocknum, predictoor0.address, {"from": rando})
     DT.get_payout(predict_blocknum, predictoor1.address, {"from": rando})
 
+    # FIXME update this part
     balDT = OCEAN_bal(DT_treasurer)
     bal1, bal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
     earned1, earned2 = (bal1 - initbal1), (bal2 - initbal2)

@@ -175,7 +175,7 @@ class Datatoken3(Datatoken1):
         subscr_addr = tx_dict["from"].address
         assert subscr_addr not in self.startblock_per_subscriber, \
             "this account has already started a subscription"
-        self.startblock_per_subscriber[subscr_addr] = _cur_blocknum
+        self.startblock_per_subscriber[subscr_addr] = _cur_blocknum()
 
     def get_agg_predval(self, blocknum: int) -> float:
         """Returns a value between 0.0 and 1.0. 
@@ -213,7 +213,7 @@ class Datatoken3(Datatoken1):
         # the DT gets revenue comes from two places:
         # (1) subscription, ie $ to exchange for DTs
         # (2) stake reallocation
-        tot_rev_subscr = _subscription_revenue_at_block(self, blocknum)
+        tot_rev_subscr = self._subscription_revenue_at_block(blocknum)
         tot_rev_stake = self.agg_predvals_denom[blocknum]
 
         # the DT's revenue gets paid out to subscribers, pro-rata on score
@@ -221,6 +221,7 @@ class Datatoken3(Datatoken1):
         payout = score01 * (tot_rev_subscr + tot_rev_stake)
 
         # top up DT's balance if needed by selling DTs into the exchange
+        # FIXME: make this cleaner, without a loop
         while self._stake_token_bal() < payout:
             self.exchange.sell_DT(to_wei(1.0), {"from": self.treasurer})
 
@@ -229,6 +230,9 @@ class Datatoken3(Datatoken1):
             predobj.predictoor, to_wei(rev_stake), {"from": self.treasurer})
         predobj.paid = True
 
+        # Note: we don't need to delete old predobjs, since Solidity
+        # can handle the storage
+
     def _stake_token_bal(self) -> float:
         """How much e.g. OCEAN does this contract have?"""
         return from_wei(self.state_token.balanceOf(self.treasurer))
@@ -236,7 +240,6 @@ class Datatoken3(Datatoken1):
     def _sell_1DT(self):
         amt_DT_wei = to_wei(1.0)
         amt_BT_wei = self.exchange.BT_received(amt_DT_wei, consume_market_fee=0)
-        
 
     def _subscription_revenue_at_block(self, blocknum) -> float:
         assert self.blocknum_is_on_a_slot(blocknum)
