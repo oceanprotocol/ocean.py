@@ -50,6 +50,7 @@ jobs:
         run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
       - name: Test with pytest
         run: |
+          mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           coverage run --source ocean_lib -m py.test
           coverage report
           coverage xml
