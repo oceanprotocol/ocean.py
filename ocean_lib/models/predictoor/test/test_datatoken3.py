@@ -42,7 +42,7 @@ def test_main():
     s_per_block = 2 # depends on the chain
     s_per_epoch = 5 * S_PER_MIN
     s_per_subscription = 24 * S_PER_HOUR
-    min_predns_for_payout = 10 # ideally, 100+
+    min_predns_for_payout = 3 # ideally, 100+
     stake_token = OCEAN
     
     n_DTs = 100.0 # num DTs for sale
@@ -82,40 +82,49 @@ def test_main():
     # ======================================================================
     # ======================================================================
     # LOOP across epochs
-    n_epochs = DT.min_predns_for_payout + 3
+    n_epochs = DT.min_predns_for_payout
 
     predictoors = [predictoor0, predictoor1]
     stakes = [2.0, 1.0] # Stake per prediction. In OCEAN
     for p_i, p in enumerate(predictoors):
         OCEAN.approve(DT_treasurer, to_wei(stakes[p_i]*n_epochs), {"from": p})
 
+    blocks_predicted = set()
     blocks_seen_by_trader = set()
+    n_predns = {0: 0, 1: 0} # [predictoor_i] : n_predns
     
     n_blocks = n_epochs * DT.blocks_per_epoch + 3
     final_blocknum = int(cur_blocknum() + n_blocks)
 
-    while cur_blocknum() < final_blocknum:
+    while True:
         actions_s = ""
 
         # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
         for p_i, p in enumerate([predictoor0, predictoor1]):
+            if n_predns[p_i] >= DT.min_predns_for_payout:
+                continue # for tests, just stop predicting after enough pred'ns
+            
             predict_blocknum = DT.soonest_block_to_predict()
-            if not DT.submitted_predval(predict_blocknum, p.address):
-                predval = random.choice([True, False])
-                amt_b = OCEAN_approved(p, DT_treasurer)
-                DT.submit_predval(
-                    predval, stakes[p_i], predict_blocknum, {"from": p})
-                amt_a = OCEAN_approved(p, DT_treasurer)
-                actions_s += f"Predictoor{p_i+1} submitted a prediction." + \
-                    f"OCEAN approved before={amt_b:.1f}, after={amt_a:.1f}\n"
+            if DT.submitted_predval(predict_blocknum, p.address):
+                continue
+            predval = random.choice([True, False])
+            DT.submit_predval(
+                predval, stakes[p_i], predict_blocknum, {"from": p})
+            aa = OCEAN_approved(p, DT_treasurer)
+            n_predns[p_i] += 1
+            blocks_predicted.add(predict_blocknum)
+            actions_s += f"Predictoor{p_i+1} " +\
+                f" submitted pred'n #{n_predns[p_i]}" + \
+                f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}." + \
+                f" Now, OCEAN approved={aa:.1f}\n"
 
         # TRADER GETS AGG PREDVAL (do every 5min)
-        predict_blocknum = DT.soonest_block_to_predict() # in case changed!
-        if predict_blocknum not in blocks_seen_by_trader:
+        blocks_not_seen = blocks_predicted - blocks_seen_by_trader
+        for predict_blocknum in blocks_not_seen:
             agg_predval = DT.get_agg_predval(predict_blocknum)
             assert 0.0 <= agg_predval <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
-            actions_s += "Trader got an agg_predval\n"
+            actions_s += f"Trader got agg_predval at block {predict_blocknum}\n"
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
         for predict_blocknum in DT.predobjs:
@@ -129,14 +138,14 @@ def test_main():
             actions_s += "OPF submitted a trueval\n"
 
         # MAYBE MINE. LOG OUTPUT
-        block_s = f"Done blocknum={cur_blocknum()}, epoch={DT.cur_epoch()}"
+        block_s = f"[B={cur_blocknum()}, E={DT.cur_epoch()}]"
         if actions_s == "": # nothing happened, so move forward by a block
             chain.mine(1)
+            s = "."
             if cur_blocknum() % 50 == 0:
-                print(block_s)
-            else:
-                print(".", end="")
-                sys.stdout.flush() #needed for the . to show up immediately
+                s = block_s
+            print(s, end="")
+            sys.stdout.flush() #needed to make s show up immediately
         else:
             print()
             print(f"=" * 30 + "\n" +
