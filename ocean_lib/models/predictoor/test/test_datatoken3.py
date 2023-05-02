@@ -30,7 +30,7 @@ def test_main():
     # ======================================================================
     # SETUP
     config, ocean, OCEAN, accts =_setup()
-    [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer] \
+    [deployer, opf, predictoor0, predictoor1, trader, rando, DT_treasurer] \
         = accts
 
     # convenience functions
@@ -83,11 +83,11 @@ def test_main():
     # ======================================================================
     # LOOP across epochs
     n_epochs = DT.min_predns_for_payout + 3
-    
-    stake1 = 2.0  # Stake per prediction. In OCEAN
-    stake2 = 1.0  # ""
-    OCEAN.approve(DT_treasurer, to_wei(stake1*n_epochs), {"from": predictoor1})
-    OCEAN.approve(DT_treasurer, to_wei(stake2*n_epochs), {"from": predictoor2})
+
+    predictoors = [predictoor0, predictoor1]
+    stakes = [2.0, 1.0] # Stake per prediction. In OCEAN
+    for p_i, p in enumerate(predictoors):
+        OCEAN.approve(DT_treasurer, to_wei(stakes[p_i]*n_epochs), {"from": p})
 
     blocks_seen_by_trader = set()
     
@@ -98,19 +98,16 @@ def test_main():
         actions_s = ""
 
         # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
-        predict_blocknum = DT.soonest_block_to_predict()
-        if not DT.submitted_predval(predict_blocknum, predictoor1.address):
-            predval1 = random.choice([True, False])
-            DT.submit_predval(
-                predval1, stake1, predict_blocknum, {"from": predictoor1})
-            actions_s += "Predictoor1 submitted a prediction\n"
-
-        predict_blocknum = DT.soonest_block_to_predict() # in case changed!
-        if not DT.submitted_predval(predict_blocknum, predictoor2.address):
-            predval2 = random.choice([True, False])
-            DT.submit_predval(
-                predval2, stake2, predict_blocknum, {"from": predictoor2})
-            actions_s += "Predictoor2 submitted a prediction\n"
+        for p_i, p in enumerate([predictoor0, predictoor1]):
+            predict_blocknum = DT.soonest_block_to_predict()
+            if not DT.submitted_predval(predict_blocknum, p.address):
+                predval = random.choice([True, False])
+                amt_b = OCEAN_approved(p, DT_treasurer)
+                DT.submit_predval(
+                    predval, stakes[p_i], predict_blocknum, {"from": p})
+                amt_a = OCEAN_approved(p, DT_treasurer)
+                actions_s += f"Predictoor{p_i+1} submitted a prediction." + \
+                    f"OCEAN approved before={amt_b:.1f}, after={amt_a:.1f}\n"
 
         # TRADER GETS AGG PREDVAL (do every 5min)
         predict_blocknum = DT.soonest_block_to_predict() # in case changed!
@@ -154,11 +151,11 @@ def test_main():
 
     # Any rando can call get_payout(). Will update amt allowed
     DT.get_payout(predict_blocknum, predictoor0.address, {"from": rando})
-    DT.get_payout(predict_blocknum, predictoor1.address, {"from": rando})
+    DT.get_payout(predict_blocknum, predictoor0.address, {"from": rando})
 
     # FIXME update this part
     balDT = OCEAN_bal(DT_treasurer)
-    bal1, bal2 = OCEAN_bal(predictoor1), OCEAN_bal(predictoor2)
+    bal1, bal2 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
     earned1, earned2 = (bal1 - initbal1), (bal2 - initbal2)
     earned = earned1 + earned2
 
@@ -201,7 +198,7 @@ def _setup():
     def _acct(key_i: int):
         return br_accounts.add(os.getenv(f"TEST_PRIVATE_KEY{key_i}"))
 
-    predictoor1, predictoor2, trader, rando, DT_treasurer = (
+    predictoor0, predictoor1, trader, rando, DT_treasurer = (
         _acct(2),
         _acct(3),
         _acct(4),
@@ -209,9 +206,9 @@ def _setup():
         _acct(6),
     )
 
-    accts = [deployer, opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
-    accts_needing_ETH = [opf, predictoor1, predictoor2, trader, rando, DT_treasurer]
-    accts_needing_OCEAN = [opf, predictoor1, predictoor2, trader]
+    accts = [deployer, opf, predictoor0, predictoor1, trader, rando, DT_treasurer]
+    accts_needing_ETH = [opf, predictoor0, predictoor1, trader, rando, DT_treasurer]
+    accts_needing_OCEAN = [opf, predictoor0, predictoor1, trader]
 
     print("\nBalances before moving funds:")
     for i, acct in enumerate(accts):
@@ -231,7 +228,7 @@ def _setup():
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
 
-    predictoors = [predictoor1, predictoor2]
+    predictoors = [predictoor0, predictoor1]
 
     return config, ocean, OCEAN, accts
 

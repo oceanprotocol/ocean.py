@@ -145,8 +145,9 @@ class Datatoken3(Datatoken1):
 
         self.predobjs[blocknum][predictoor.address] = predobj
 
-        bal = from_wei(self.stake_token.balanceOf(predictoor))
-        assert bal >= stake
+        # aa = amt allowed, ie what treasurer can spend on behalf of predictoor
+        aa = from_wei(self.stake_token.allowance(predictoor, self.treasurer))
+        assert aa >= stake
 
         # DT contract transfers OCEAN stake from predictoor to itself
         # py version, with "treasurer"  workaround:
