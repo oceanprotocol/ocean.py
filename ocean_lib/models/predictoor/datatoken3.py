@@ -199,13 +199,14 @@ class Datatoken3(Datatoken1):
             if predobj.swe is None:
                 predobj.set_swe(trueval)
 
-    def get_payout(self, blocknum: int, predictoor_addr: str, tx_dict: dict):
+    def update_payouts(self, blocknum: int, predictoor_addr: str, tx_dict: dict):
         assert self.blocknum_is_on_a_slot(blocknum)
         
         predobj = self.predobjs[blocknum][predictoor_addr]
         assert not predobj.paid, "already got paid"
         
-        swes = [p.swe for p in self.predobjs[blocknum]]
+        swes = [other_predobj.swe
+                for other_predobj in self.predobjs[blocknum].values()]
         assert None not in swes, "must calc all SWEs first"
 
         # calculate predictoor's score. In range [0.0, 1.0]. 1.0 is best.
@@ -227,8 +228,9 @@ class Datatoken3(Datatoken1):
             self.exchange.sell_DT(to_wei(1.0), {"from": self.treasurer})
 
         # now do payout to the predictoor
-        self.stake_token.transfer(
-            predobj.predictoor, to_wei(rev_stake), {"from": self.treasurer})
+        # - use "increaseAllowance()", not "approve()", to build on previous amts
+        self.stake_token.increaseAllowance(
+            predobj.predictoor, to_wei(payout), {"from": self.treasurer})
         predobj.paid = True
 
         # Note: we don't need to delete old predobjs, since Solidity
@@ -236,7 +238,7 @@ class Datatoken3(Datatoken1):
 
     def _stake_token_bal(self) -> float:
         """How much e.g. OCEAN does this contract have?"""
-        return from_wei(self.state_token.balanceOf(self.treasurer))
+        return from_wei(self.stake_token.balanceOf(self.treasurer))
 
     def _sell_1DT(self):
         amt_DT_wei = to_wei(1.0)
@@ -253,7 +255,7 @@ class Datatoken3(Datatoken1):
         n_subscr = 0
         for startblock in self.startblock_per_subscriber.values():
             endblock = startblock + self.blocks_per_subscription
-            num_subscr += (startblock <= blocknum < endblock)
+            n_subscr += (startblock <= blocknum < endblock)
 
         return rev_per_subscr * n_subscr
 
