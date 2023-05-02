@@ -32,6 +32,7 @@ def test_main():
     config, ocean, OCEAN, accts =_setup()
     [deployer, opf, predictoor0, predictoor1, trader, rando, DT_treasurer] \
         = accts
+    predictoors = [predictoor0, predictoor1]
 
     # convenience functions
     OCEAN_bal = ConvClass(OCEAN).fromWei_balanceOf
@@ -44,9 +45,12 @@ def test_main():
     s_per_subscription = 24 * S_PER_HOUR
     min_predns_for_payout = 3 # ideally, 100+
     stake_token = OCEAN
+    stakes = [2.0, 1.0] # Stake per predictoor. In OCEAN
     
     n_DTs = 100.0 # num DTs for sale
     DT_price = 10.0 # denominated in OCEAN
+    
+    max_n_predns = min_predns_for_payout #stop loop after this many predn's
     
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
@@ -82,27 +86,20 @@ def test_main():
     # ======================================================================
     # ======================================================================
     # LOOP across epochs
-    n_epochs = DT.min_predns_for_payout
+    for stake, p in zip(stakes, predictoors):
+        amt_approve = stake * max_n_predns
+        OCEAN.approve(DT_treasurer, to_wei(amt_approve), {"from": p})
 
-    predictoors = [predictoor0, predictoor1]
-    stakes = [2.0, 1.0] # Stake per prediction. In OCEAN
-    for p_i, p in enumerate(predictoors):
-        OCEAN.approve(DT_treasurer, to_wei(stakes[p_i]*n_epochs), {"from": p})
-
-    blocks_predicted = set()
     blocks_seen_by_trader = set()
     n_predns = {0: 0, 1: 0} # [predictoor_i] : n_predns
     
-    n_blocks = n_epochs * DT.blocks_per_epoch + 3
-    final_blocknum = int(cur_blocknum() + n_blocks)
-
     while True:
         actions_s = ""
 
         # PREDICTOORS STAKE & SUBMIT PREDVALS (do every 5min)
         for p_i, p in enumerate([predictoor0, predictoor1]):
-            if n_predns[p_i] >= DT.min_predns_for_payout:
-                continue # for tests, just stop predicting after enough pred'ns
+            if n_predns[p_i] >= max_n_predns:
+                continue
             
             predict_blocknum = DT.soonest_block_to_predict()
             if DT.submitted_predval(predict_blocknum, p.address):
@@ -112,11 +109,11 @@ def test_main():
                 predval, stakes[p_i], predict_blocknum, {"from": p})
             aa = OCEAN_approved(p, DT_treasurer)
             n_predns[p_i] += 1
-            blocks_predicted.add(predict_blocknum)
             actions_s += f"Predictoor{p_i+1} " +\
                 f" submitted pred'n #{n_predns[p_i]}" + \
                 f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}." + \
                 f" Now, OCEAN approved={aa:.1f}\n"
+        blocks_predicted = set(DT.predobjs.keys())
 
         # TRADER GETS AGG PREDVAL (do every 5min)
         blocks_not_seen = blocks_predicted - blocks_seen_by_trader
@@ -124,10 +121,11 @@ def test_main():
             agg_predval = DT.get_agg_predval(predict_blocknum)
             assert 0.0 <= agg_predval <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
-            actions_s += f"Trader got agg_predval at block {predict_blocknum}\n"
+            actions_s += f"Trader got agg_predval" + \
+                f"at block B={int(predict_blocknum)}\n"
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
-        for predict_blocknum in DT.predobjs:
+        for predict_blocknum in blocks_predicted:
             if predict_blocknum in DT.truevals: # already set 
                 continue
             if cur_blocknum() < predict_blocknum: # not enough time passed
@@ -151,6 +149,14 @@ def test_main():
             print(f"=" * 30 + "\n" +
                   block_s + "\n" + 
                   actions_s)
+
+        # STOP?
+        blocks_with_truevals = set(DT.truevals.keys())
+        if min(n_predns.values()) >= max_n_predns and \
+           (blocks_with_truevals == blocks_predicted):
+            print("STOP loop. Hit target # predictions, and have truevals.")
+            break
+            
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
@@ -236,8 +242,6 @@ def _setup():
     print("\nBalances after moving funds:")
     for i, acct in enumerate(accts):
         print(f"acct {i}: {ETH_bal(acct)} ETH, {OCEAN_bal(acct)} OCEAN")
-
-    predictoors = [predictoor0, predictoor1]
 
     return config, ocean, OCEAN, accts
 
