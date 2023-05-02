@@ -106,7 +106,7 @@ brownie compile
 In work console:
 ```console
 #run main prototype 3 test. The "-s" gives verbose printing.
-pytest ocean_lib/models/predictoor/test/test_datatoken3.py::test_main_py  -s
+pytest ocean_lib/models/predictoor/test/test_datatoken3.py::test_main  -s
 ```
 
 For envvars that aren't set, `pytest` uses values in `pytest.ini`.
