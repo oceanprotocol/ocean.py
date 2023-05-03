@@ -26,6 +26,7 @@ contract ERC20Template3 is ERC20Template {
     mapping(uint256 => uint256) agg_predvals_numer;
     mapping(uint256 => uint256) agg_predvals_denom;
     mapping(uint256 => bool) truevals;
+    mapping(uint256 => bool) truval_submitted;
 
     uint256 blocks_per_epoch;
     uint256 blocks_per_subscription;
@@ -167,6 +168,7 @@ contract ERC20Template3 is ERC20Template {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
         require(blocknum < soonest_block_to_predict(), "too early to submit");
         truevals[blocknum] = trueval;
+        truval_submitted[blocknum] = true;
     }
 
     function start_subscription() external {
@@ -178,6 +180,7 @@ contract ERC20Template3 is ERC20Template {
         Prediction memory predobj = get_prediction(blocknum, predictoor_addr);
         require(predobj.paid == false, "already paid");
 
+        require(truval_submitted[blocknum], "trueval not submitted");
         require(truevals[blocknum] == predobj.predval, "wrong prediction");
 
         uint256 swe = truevals[blocknum]
