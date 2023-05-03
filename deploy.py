@@ -55,7 +55,7 @@ def _deploy_contracts(owner) -> dict:
 
     dt_temp1 = B.ERC20Template.deploy(fr)
     dt_temp2 = B.ERC20TemplateEnterprise.deploy(fr)
-    dt_temp3 = B.ERC20Template3.deploy(fr)
+    dt_temp3 = B.ERC20TemplatePredictoor.deploy(fr)
     dnft_temp1 = B.ERC721Template.deploy(fr)
 
     dnft_factory = B.ERC721Factory.deploy(dnft_temp1, dt_temp1, router, fr)
