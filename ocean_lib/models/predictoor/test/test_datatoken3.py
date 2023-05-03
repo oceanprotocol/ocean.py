@@ -25,13 +25,13 @@ chain = brownie.network.chain
 S_PER_MIN = 60
 S_PER_HOUR = 60 * 60
 
+
 @enforce_types
 def test_main():
     # ======================================================================
     # SETUP
-    config, ocean, OCEAN, accts =_setup()
-    [deployer, opf, predictoor0, predictoor1, trader, rando, DT_treasurer] \
-        = accts
+    config, ocean, OCEAN, accts = _setup()
+    [deployer, opf, predictoor0, predictoor1, trader, rando, DT_treasurer] = accts
     predictoors = [predictoor0, predictoor1]
 
     # convenience functions
@@ -40,27 +40,27 @@ def test_main():
 
     # ======================================================================
     # PARAMETERS
-    s_per_block = 2 # depends on the chain
+    s_per_block = 2  # depends on the chain
     s_per_epoch = 5 * S_PER_MIN
     s_per_subscription = 24 * S_PER_HOUR
-    min_predns_for_payout = 3 # ideally, 100+
+    min_predns_for_payout = 3  # ideally, 100+
     stake_token = OCEAN
-    stakes = [2.0, 1.0] # Stake per predictoor. In OCEAN
-    
-    n_DTs = 100.0 # num DTs for sale
-    DT_price = 10.0 # denominated in OCEAN
-    
-    max_n_predns = min_predns_for_payout #stop loop after this many predn's
-    
+    stakes = [2.0, 1.0]  # Stake per predictoor. In OCEAN
+
+    n_DTs = 100.0  # num DTs for sale
+    DT_price = 10.0  # denominated in OCEAN
+
+    max_n_predns = min_predns_for_payout  # stop loop after this many predn's
+
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
     data_nft = ocean.data_nft_factory.create({"from": opf}, "DN", "DN")
-    DT = data_nft.create_datatoken({"from": opf}, "DT","DT", template_index=3)
-    
+    DT = data_nft.create_datatoken({"from": opf}, "DT", "DT", template_index=3)
+
     DT.do_setup(
-        s_per_block, s_per_epoch, s_per_subscription, min_predns_for_payout,
-        stake_token)
-                    
+        s_per_block, s_per_epoch, s_per_subscription, min_predns_for_payout, stake_token
+    )
+
     # Mixed sol+py can't have DT to hold OCEAN, so have a different account
     # - When we convert to Solidity, change to: DT_treasurer = DT
     DT.treasurer = DT_treasurer
@@ -91,8 +91,8 @@ def test_main():
         OCEAN.approve(DT_treasurer, to_wei(amt_approve), {"from": p})
 
     blocks_seen_by_trader = set()
-    n_predns = {0: 0, 1: 0} # [predictoor_i] : n_predns
-    
+    n_predns = {0: 0, 1: 0}  # [predictoor_i] : n_predns
+
     while True:
         actions_s = ""
 
@@ -100,19 +100,20 @@ def test_main():
         for p_i, p in enumerate([predictoor0, predictoor1]):
             if n_predns[p_i] >= max_n_predns:
                 continue
-            
+
             predict_blocknum = DT.soonest_block_to_predict()
             if DT.submitted_predval(predict_blocknum, p.address):
                 continue
             predval = random.choice([True, False])
-            DT.submit_predval(
-                predval, stakes[p_i], predict_blocknum, {"from": p})
+            DT.submit_predval(predval, stakes[p_i], predict_blocknum, {"from": p})
             aa = OCEAN_approved(p, DT_treasurer)
             n_predns[p_i] += 1
-            actions_s += f"Predictoor{p_i+1} " +\
-                f" submitted pred'n #{n_predns[p_i]}" + \
-                f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}." + \
-                f" Now, OCEAN approved={aa:.1f}\n"
+            actions_s += (
+                f"Predictoor{p_i+1} "
+                + f" submitted pred'n #{n_predns[p_i]}"
+                + f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}."
+                + f" Now, OCEAN approved={aa:.1f}\n"
+            )
         blocks_predicted = set(DT.predobjs.keys())
 
         # TRADER GETS AGG PREDVAL (do every 5min)
@@ -121,50 +122,46 @@ def test_main():
             agg_predval = DT.get_agg_predval(predict_blocknum)
             assert 0.0 <= agg_predval <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
-            actions_s += f"Trader got agg_predval" + \
-                f"at block B={int(predict_blocknum)}\n"
+            actions_s += (
+                f"Trader got agg_predval" + f"at block B={int(predict_blocknum)}\n"
+            )
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
         for predict_blocknum in blocks_predicted:
-            if predict_blocknum in DT.truevals: # already set 
+            if predict_blocknum in DT.truevals:  # already set
                 continue
-            if cur_blocknum() < predict_blocknum: # not enough time passed
+            if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
             DT.submit_trueval(trueval, predict_blocknum, {"from": opf})
-            chain.mine(1) # forced this, because prev step isn't on chain
+            chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
 
         # MAYBE MINE. LOG OUTPUT
         block_s = f"[B={cur_blocknum()}, E={DT.cur_epoch()}]"
-        if actions_s == "": # nothing happened, so move forward by a block
+        if actions_s == "":  # nothing happened, so move forward by a block
             chain.mine(1)
             s = "."
             if cur_blocknum() % 50 == 0:
                 s = block_s
             print(s, end="")
-            sys.stdout.flush() #needed to make s show up immediately
+            sys.stdout.flush()  # needed to make s show up immediately
         else:
             print()
-            print(f"=" * 30 + "\n" +
-                  block_s + "\n" + 
-                  actions_s)
+            print(f"=" * 30 + "\n" + block_s + "\n" + actions_s)
 
         # STOP?
         blocks_with_truevals = set(DT.truevals.keys())
-        if min(n_predns.values()) >= max_n_predns and \
-           (blocks_with_truevals == blocks_predicted):
+        if min(n_predns.values()) >= max_n_predns and (
+            blocks_with_truevals == blocks_predicted
+        ):
             print("STOP loop. Hit target # predictions, and have truevals.")
             break
-            
 
     # ======================================================================
     # PREDICTOORS & OPF COLLECT SALES REVENUE
     initbalDT = OCEAN_bal(DT_treasurer)
     initbal0, initbal1 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
-    
-    # Any rando can call update_error_calcs()
-    DT.update_error_calcs(predict_blocknum, {"from": rando})
 
     # Any rando can call update_payouts(). Will update allowances
     DT.update_payouts(predict_blocknum, predictoor0.address, {"from": rando})
@@ -173,10 +170,8 @@ def test_main():
     # Predictoors claim allowance $
     allow0 = OCEAN_approved(DT, predictoor0)
     allow1 = OCEAN_approved(DT, predictoor1)
-    OCEAN.transferFrom(
-        DT.address, predictoor0, to_wei(allow0), {"from": predictoor0})
-    OCEAN.transferFrom(
-        DT.address, predictoor1, to_wei(allow1), {"from": predictoor1})
+    OCEAN.transferFrom(DT.address, predictoor0, to_wei(allow0), {"from": predictoor0})
+    OCEAN.transferFrom(DT.address, predictoor1, to_wei(allow1), {"from": predictoor1})
 
     # test
     balDT = OCEAN_bal(DT_treasurer)
@@ -185,8 +180,8 @@ def test_main():
     earned = earned0 + earned1
 
     assert balDT == initbalDT - earned
-    #assert bal0 > initbal0
-    #assert bal1 > initbal1
+    # assert bal0 > initbal0
+    # assert bal1 > initbal1
 
 
 def _setup():
@@ -254,6 +249,7 @@ def _setup():
 
     return config, ocean, OCEAN, accts
 
+
 @enforce_types
 class ConvClass:
     def __init__(self, token):
@@ -265,9 +261,11 @@ class ConvClass:
     def fromWei_approved(self, obj1, obj2) -> float:
         return from_wei(self.token.allowance(obj1.address, obj2.address))
 
+
 @enforce_types
 def ETH_bal(acct) -> int:
     return from_wei(acct.balance())
+
 
 @enforce_types
 def cur_blocknum() -> int:
