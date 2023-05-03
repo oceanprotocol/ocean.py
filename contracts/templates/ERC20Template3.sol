@@ -109,6 +109,7 @@ contract ERC20Template3 is ERC20Template {
         uint256 blocknum
     ) public view returns (uint256, uint256) {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+        // TODO CHECK SUBSCRIPTION
         return (agg_predvals_numer[blocknum], agg_predvals_denom[blocknum]);
     }
 
