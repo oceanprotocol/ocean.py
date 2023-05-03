@@ -841,7 +841,7 @@ contract ERC20Template is
      *      Return template id in case we need different ABIs. 
      *      If you construct your own template, please make sure to change the hardcoded value
      */
-    function getId() pure public returns (uint8) {
+    function getId() pure public virtual returns (uint8) {
         return 1;
     }
 
