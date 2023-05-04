@@ -69,7 +69,7 @@ contract ERC20TemplatePredictoor is
     mapping(address => Subscription) subscriptions; // valid subscription per user
     uint256 blocks_per_epoch;
     uint256 blocks_per_subscription;
-    uint256 truval_submit_timeout = 3;
+    uint256 truval_submit_timeout_block = 3;
     address stake_token;
     bool paused = false;
     // -------------------------- PREDICTOOR --------------------------
@@ -1092,8 +1092,7 @@ contract ERC20TemplatePredictoor is
         // if OPF hasn't submitted trueval in truval_submit_timeout days
         // refund stake to predictoor and cancel round
         if (
-            block.number >
-            blocknum + blocks_per_epoch * truval_submit_timeout &&
+            block.number > blocknum + truval_submit_timeout_block &&
             !truval_submitted[blocknum]
         ) {
             IERC20(stake_token).safeTransfer(predobj.predictoor, predobj.stake);
@@ -1134,6 +1133,22 @@ contract ERC20TemplatePredictoor is
         truevals[blocknum] = trueval;
         truval_submitted[blocknum] = true;
     }
+
+    function update_seconds(
+        uint256 s_per_block,
+        uint256 s_per_epoch,
+        uint256 s_per_subscription,
+        uint256 _truval_submit_timeout
+    ) external onlyERC20Deployer {
+        require(s_per_subscription % s_per_block == 0);
+        require(s_per_epoch % s_per_block == 0);
+
+        blocks_per_epoch = s_per_epoch / s_per_block;
+        blocks_per_subscription = s_per_subscription / s_per_block;
+        truval_submit_timeout_block = _truval_submit_timeout / s_per_block;
+    }
+
+    // ----------------------- INTERNAL FUNCTIONS -----------------------
 
     function add_revenue(uint256 blocknum, uint256 amount) internal {
         blocknum = rail_blocknum_to_slot(blocknum);
