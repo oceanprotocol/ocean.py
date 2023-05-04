@@ -71,7 +71,6 @@ contract ERC20TemplatePredictoor is
     uint256 blocks_per_subscription;
     uint256 min_predns_for_payout;
     address stake_token;
-    uint256 subscription_valability = 86400; // how long a subscription is valid
     // -------------------------- PREDICTOOR --------------------------
 
     // EIP 2612 SUPPORT
@@ -505,7 +504,7 @@ contract ERC20TemplatePredictoor is
         }
         Subscription memory sub = Subscription(
             consumer,
-            block.timestamp + subscription_valability
+            block.number + blocks_per_subscription
         );
         subscriptions[consumer] = sub;
 
@@ -1029,7 +1028,7 @@ contract ERC20TemplatePredictoor is
 
     // ------------ PREDICTOOR ------------
     function is_valid_subscription(address user) public view returns (bool) {
-        return subscriptions[user].expires <= block.timestamp ? false : true;
+        return subscriptions[user].expires <= block.number ? false : true;
     }
 
     function epoch() public view returns (uint256) {
