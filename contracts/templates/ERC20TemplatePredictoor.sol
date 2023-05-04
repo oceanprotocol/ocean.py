@@ -69,7 +69,6 @@ contract ERC20TemplatePredictoor is
     mapping(address => Subscription) subscriptions; // valid subscription per user
     uint256 blocks_per_epoch;
     uint256 blocks_per_subscription;
-    uint256 min_predns_for_payout;
     uint256 truval_submit_timeout = 3;
     address stake_token;
     bool paused = false;
@@ -234,7 +233,6 @@ contract ERC20TemplatePredictoor is
      *                     [2] = s_per_block,
      *                     [3] = s_per_epoch,
      *                     [4] = s_per_subscription,
-     *                     [5] = _min_predns_for_payout,
      * @param bytes_  refers to an array of bytes
      *                     Currently not used, usefull for future templates
      */
@@ -277,7 +275,6 @@ contract ERC20TemplatePredictoor is
      *                     [2] = s_per_block,
      *                     [3] = s_per_epoch,
      *                     [4] = s_per_subscription,
-     *                     [5] = _min_predns_for_payout,
      * param bytes_  refers to an array of bytes
      *                     Currently not used, usefull for future templates
      */
@@ -343,7 +340,6 @@ contract ERC20TemplatePredictoor is
             )
         );
 
-        min_predns_for_payout = uints_[5];
         stake_token = addresses_[4];
 
         require(uints_[4] % uints_[2] == 0, "must be divisible");
