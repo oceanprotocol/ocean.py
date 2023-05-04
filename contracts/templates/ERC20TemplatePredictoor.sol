@@ -210,6 +210,14 @@ contract ERC20TemplatePredictoor is
         _;
     }
 
+    modifier blocknumOnSlot(uint256 num) {
+        require(
+            blocknum_is_on_a_slot(num),
+            "Predictoor: blocknum must be on a slot"
+        );
+        _;
+    }
+
     /**
      * @dev initialize
      *      Called prior contract initialization (e.g creating new Datatoken instance)
@@ -1009,38 +1017,38 @@ contract ERC20TemplatePredictoor is
         } else {
             _blocknum = slotted_blocknum + 2 * blocks_per_epoch;
         }
-        require(blocknum_is_on_a_slot(_blocknum), "blocknum must be on a slot");
         return _blocknum;
     }
 
     function submitted_predval(
         uint256 blocknum,
         address predictoor
-    ) public view returns (bool) {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    ) public view blocknumOnSlot(blocknum) returns (bool) {
         return predobjs[blocknum][predictoor].predictoor != address(0);
     }
 
     function get_agg_predval(
         uint256 blocknum
-    ) public view returns (uint256, uint256) {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    ) public view blocknumOnSlot(blocknum) returns (uint256, uint256) {
         require(is_valid_subscription(msg.sender), "Not valid subscription");
         return (agg_predvals_numer[blocknum], agg_predvals_denom[blocknum]);
     }
 
     function get_subscription_revenue_at_block(
         uint256 blocknum
-    ) public view returns (uint256) {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    ) public view blocknumOnSlot(blocknum) returns (uint256) {
         return (subscription_revenue_at_block[blocknum]);
     }
 
     function get_prediction(
         uint256 blocknum,
         address predictoor
-    ) public view returns (Prediction memory prediction) {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    )
+        public
+        view
+        blocknumOnSlot(blocknum)
+        returns (Prediction memory prediction)
+    {
         if (msg.sender != predictoor) {
             require(blocknum > soonest_block_to_predict(), "too early to view");
         }
@@ -1058,8 +1066,7 @@ contract ERC20TemplatePredictoor is
         bool predval,
         uint256 stake,
         uint256 blocknum
-    ) external {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    ) external blocknumOnSlot(blocknum) {
         require(blocknum > soonest_block_to_predict(), "too late to submit");
         require(!submitted_predval(blocknum, msg.sender), "already submitted");
         require(paused == false, "paused");
@@ -1084,8 +1091,7 @@ contract ERC20TemplatePredictoor is
     function payout(
         uint256 blocknum,
         address predictoor_addr
-    ) external nonReentrant {
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+    ) external blocknumOnSlot(blocknum) nonReentrant {
         Prediction memory predobj = get_prediction(blocknum, predictoor_addr);
         require(predobj.paid == false, "already paid");
 
@@ -1126,9 +1132,8 @@ contract ERC20TemplatePredictoor is
     function submit_trueval(
         uint256 blocknum,
         bool trueval
-    ) external onlyERC20Deployer {
+    ) external blocknumOnSlot(blocknum) onlyERC20Deployer {
         // TODO, is onlyERC20Deployer the right modifier?
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
         require(blocknum < soonest_block_to_predict(), "too early to submit");
         truevals[blocknum] = trueval;
         truval_submitted[blocknum] = true;
