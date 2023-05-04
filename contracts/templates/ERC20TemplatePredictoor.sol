@@ -1084,31 +1084,21 @@ contract ERC20TemplatePredictoor is
         agg_predvals_denom[blocknum] += stake;
     }
 
-    function submit_trueval(
-        uint256 blocknum,
-        bool trueval
-    ) external onlyERC20Deployer {
-        // TODO, is onlyERC20Deployer the right modifier?
-        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
-        require(blocknum < soonest_block_to_predict(), "too early to submit");
-        truevals[blocknum] = trueval;
-        truval_submitted[blocknum] = true;
-    }
-
-    function add_revenue(uint256 blocknum, uint256 amount) internal {
-        blocknum = rail_blocknum_to_slot(blocknum);
-        // for loop and add revenue for blocks_per_epoch blocks
-        for (uint256 i = 0; i < blocks_per_subscription; i++) {
-            subscription_revenue_at_block[blocknum + blocks_per_epoch] +=
-                amount /
-                blocks_per_subscription;
-        }
-    }
-
     function payout(uint256 blocknum, address predictoor_addr) external {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
         Prediction memory predobj = get_prediction(blocknum, predictoor_addr);
         require(predobj.paid == false, "already paid");
+
+        // if OPF hasn't submitted trueval in 3 days
+        // refund stake to predictoor and cancel round
+        if (
+            block.number > blocknum + blocks_per_epoch * 3 &&
+            !trueval_submitted[blocknum]
+        ) {
+            IERC20(stake_token).safeTransfer(predobj.predictoor, predobj.stake);
+            predobj.paid = true;
+            return;
+        }
 
         require(truval_submitted[blocknum], "trueval not submitted");
         require(truevals[blocknum] == predobj.predval, "wrong prediction");
