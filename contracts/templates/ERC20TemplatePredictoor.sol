@@ -45,9 +45,9 @@ contract ERC20TemplatePredictoor is
     address private publishMarketFeeAddress;
     address private publishMarketFeeToken;
     uint256 private publishMarketFeeAmount;
-    
+
     uint256 public constant BASE = 1e18;
-    
+
     //predictoor specific
     struct Prediction {
         bool predval;
@@ -55,7 +55,7 @@ contract ERC20TemplatePredictoor is
         address predictoor;
         bool paid;
     }
-    struct Subscription{
+    struct Subscription {
         address user;
         uint256 expires;
     }
@@ -71,8 +71,7 @@ contract ERC20TemplatePredictoor is
     uint256 blocks_per_subscription;
     uint256 min_predns_for_payout;
     address stake_token;
-    uint256 subscription_valability=86400; // how long a subscription is valid
-
+    uint256 subscription_valability = 86400; // how long a subscription is valid
 
     // EIP 2612 SUPPORT
     bytes32 public DOMAIN_SEPARATOR;
@@ -82,26 +81,26 @@ contract ERC20TemplatePredictoor is
 
     mapping(address => uint256) public nonces;
     address public router;
-    
-    struct fixedRate{
+
+    struct fixedRate {
         address contractAddress;
         bytes32 id;
     }
     fixedRate[] fixedRateExchanges;
     address[] dispensers;
 
-    struct providerFee{
+    struct providerFee {
         address providerFeeAddress;
-        address providerFeeToken; // address of the token 
+        address providerFeeToken; // address of the token
         uint256 providerFeeAmount; // amount to be transfered to provider
         uint8 v; // v of provider signed message
         bytes32 r; // r of provider signed message
         bytes32 s; // s of provider signed message
         uint256 validUntil; //validity expresses in unix timestamp
-        bytes providerData; //data encoded by provider   
+        bytes providerData; //data encoded by provider
     }
 
-    struct consumeMarketFee{
+    struct consumeMarketFee {
         address consumeMarketFeeAddress;
         address consumeMarketFeeToken; // address of the token marketplace wants to add fee on top
         uint256 consumeMarketFeeAmount; // amount to be transfered to marketFeeCollector
@@ -118,13 +117,13 @@ contract ERC20TemplatePredictoor is
     );
 
     event OrderReused(
-            bytes32 orderTxId,
-            address caller,
-            uint256 timestamp,
-            uint256 number
+        bytes32 orderTxId,
+        address caller,
+        uint256 timestamp,
+        uint256 number
     );
 
-    event OrderExecuted( 
+    event OrderExecuted(
         address indexed providerAddress,
         address indexed consumerAddress,
         bytes32 orderTxId,
@@ -135,7 +134,7 @@ contract ERC20TemplatePredictoor is
         uint256 timestamp,
         uint256 blockNumber
     );
-    
+
     // emited for every order
     event PublishMarketFee(
         address indexed PublishMarketFeeAddress,
@@ -161,9 +160,14 @@ contract ERC20TemplatePredictoor is
 
     event MinterApproved(address currentMinter, address newMinter);
 
-    event NewFixedRate(bytes32 exchangeId, address indexed owner, address exchangeContract, address indexed baseToken);
+    event NewFixedRate(
+        bytes32 exchangeId,
+        address indexed owner,
+        address exchangeContract,
+        address indexed baseToken
+    );
     event NewDispenser(address dispenserContract);
-    
+
     event NewPaymentCollector(
         address indexed caller,
         address indexed _newPaymentCollector,
@@ -198,7 +202,8 @@ contract ERC20TemplatePredictoor is
         require(
             IERC721Template(_erc721Address)
                 .getPermissions(msg.sender)
-                .deployERC20 || IERC721Template(_erc721Address).ownerOf(1) == msg.sender,
+                .deployERC20 ||
+                IERC721Template(_erc721Address).ownerOf(1) == msg.sender,
             "ERC20Template: NOT DEPLOYER ROLE"
         );
         _;
@@ -266,7 +271,7 @@ contract ERC20TemplatePredictoor is
      *
      * @param uints_  refers to an array of uints
      *                     [0] = cap_ the total ERC20 cap
-     *                     [1] = publishing Market Fee 
+     *                     [1] = publishing Market Fee
      *                     [2] = s_per_block,
      *                     [3] = s_per_epoch,
      *                     [4] = s_per_subscription,
@@ -298,19 +303,19 @@ contract ERC20TemplatePredictoor is
         _name = strings_[0];
         _symbol = strings_[1];
         _erc721Address = erc721Address;
-        
+
         initialized = true;
         // add a default minter, similar to what happens with manager in the 721 contract
         _addMinter(addresses_[0]);
         // set payment collector to this contract, so we can get the $$$
         _setPaymentCollector(address(this));
         emit NewPaymentCollector(
-                msg.sender,
-                addresses_[1],
-                block.timestamp,
-                block.number
+            msg.sender,
+            addresses_[1],
+            block.timestamp,
+            block.number
         );
-        
+
         publishMarketFeeAddress = addresses_[2];
         publishMarketFeeToken = addresses_[3];
         publishMarketFeeAmount = uints_[1];
@@ -360,8 +365,11 @@ contract ERC20TemplatePredictoor is
         address[] memory addresses,
         uint256[] memory uints
     ) external onlyERC20Deployer nonReentrant returns (bytes32 exchangeId) {
-        require(stake_token == addresses[0], 'Cannot create FRE with baseToken!=stake_token');
-         //force FRE allowedSwapper to this contract address. no one else can swap because we need to record the income
+        require(
+            stake_token == addresses[0],
+            "Cannot create FRE with baseToken!=stake_token"
+        );
+        //force FRE allowedSwapper to this contract address. no one else can swap because we need to record the income
         addresses[3] = address(this);
         if (uints[4] > 0) _addMinter(fixedPriceAddress);
         exchangeId = IFactoryRouter(router).deployFixedRate(
@@ -369,8 +377,13 @@ contract ERC20TemplatePredictoor is
             addresses,
             uints
         );
-        emit NewFixedRate(exchangeId, addresses[1], fixedPriceAddress, addresses[0]);
-        fixedRateExchanges.push(fixedRate(fixedPriceAddress,exchangeId));
+        emit NewFixedRate(
+            exchangeId,
+            addresses[1],
+            fixedPriceAddress,
+            addresses[0]
+        );
+        fixedRateExchanges.push(fixedRate(fixedPriceAddress, exchangeId));
     }
 
     /**
@@ -425,7 +438,7 @@ contract ERC20TemplatePredictoor is
      *      Requires previous approval of consumeFeeToken and publishMarketFeeToken
      * @param consumer is the consumer address (payer could be different address)
      * @param serviceIndex service index in the metadata
-     * @param _providerFee provider fee 
+     * @param _providerFee provider fee
      * @param _consumeMarketFee consume market fee
      */
     function startOrder(
@@ -456,9 +469,12 @@ contract ERC20TemplatePredictoor is
             publishMarketFeeToken != address(0) &&
             publishMarketFeeAddress != address(0)
         ) {
-            _pullUnderlying(publishMarketFeeToken,msg.sender,
+            _pullUnderlying(
+                publishMarketFeeToken,
+                msg.sender,
                 publishMarketFeeAddress,
-                publishMarketFeeAmount);
+                publishMarketFeeAmount
+            );
             emit PublishMarketFee(
                 publishMarketFeeAddress,
                 publishMarketFeeToken,
@@ -467,29 +483,33 @@ contract ERC20TemplatePredictoor is
         }
 
         // consumeMarketFee
-        // Requires approval for the FeeToken 
+        // Requires approval for the FeeToken
         // skip fee if amount == 0 or feeToken == 0x0 address or feeAddress == 0x0 address
         if (
             _consumeMarketFee.consumeMarketFeeAmount > 0 &&
             _consumeMarketFee.consumeMarketFeeToken != address(0) &&
             _consumeMarketFee.consumeMarketFeeAddress != address(0)
         ) {
-            _pullUnderlying(_consumeMarketFee.consumeMarketFeeToken,msg.sender,
+            _pullUnderlying(
+                _consumeMarketFee.consumeMarketFeeToken,
+                msg.sender,
                 _consumeMarketFee.consumeMarketFeeAddress,
-                _consumeMarketFee.consumeMarketFeeAmount);
+                _consumeMarketFee.consumeMarketFeeAmount
+            );
             emit ConsumeMarketFee(
                 _consumeMarketFee.consumeMarketFeeAddress,
                 _consumeMarketFee.consumeMarketFeeToken,
                 _consumeMarketFee.consumeMarketFeeAmount
             );
         }
-        Subscription memory sub = Subscription(consumer, block.timestamp + subscription_valability);
+        Subscription memory sub = Subscription(
+            consumer,
+            block.timestamp + subscription_valability
+        );
         subscriptions[consumer] = sub;
-        
+
         burn(amount);
     }
-
-    
 
     /**
      * @dev addMinter
@@ -520,10 +540,9 @@ contract ERC20TemplatePredictoor is
      * @param _paymentManager new minter address
      */
 
-    function addPaymentManager(address _paymentManager)
-        external
-        onlyERC20Deployer
-    {
+    function addPaymentManager(
+        address _paymentManager
+    ) external onlyERC20Deployer {
         _addPaymentManager(_paymentManager);
     }
 
@@ -534,10 +553,9 @@ contract ERC20TemplatePredictoor is
      * @param _paymentManager _paymentManager address to remove
      */
 
-    function removePaymentManager(address _paymentManager)
-        external
-        onlyERC20Deployer
-    {
+    function removePaymentManager(
+        address _paymentManager
+    ) external onlyERC20Deployer {
         _removePaymentManager(_paymentManager);
     }
 
@@ -578,59 +596,64 @@ contract ERC20TemplatePredictoor is
             "ERC20Template: NOT 721 Contract"
         );
         _internalCleanPermissions();
-        
     }
-    
+
     function _internalCleanPermissions() internal {
         uint256 totalLen = fixedRateExchanges.length + dispensers.length;
         uint256 curentLen = 0;
-        address[] memory previousMinters=new address[](totalLen);
+        address[] memory previousMinters = new address[](totalLen);
         // loop though fixedrates, empty and preserve the minter rols if exists
         uint256 i;
-        for(i=0; i<fixedRateExchanges.length; i++) {
-                IFixedRateExchange fre = IFixedRateExchange(fixedRateExchanges[i].contractAddress);
-                (
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    uint256 dtBalance,
-                    uint256 btBalance,
-                    bool withMint
-                ) = fre.getExchange(fixedRateExchanges[i].id);
-                if(btBalance>0)
-                    fre.collectBT(fixedRateExchanges[i].id, btBalance);
-                if(dtBalance>0)
-                    fre.collectDT(fixedRateExchanges[i].id, dtBalance);
-                // add it to the list of minters
-                if(isMinter(fixedRateExchanges[i].contractAddress) && withMint == true){
-                    previousMinters[curentLen]=fixedRateExchanges[i].contractAddress;
-                    curentLen++;
-                }
+        for (i = 0; i < fixedRateExchanges.length; i++) {
+            IFixedRateExchange fre = IFixedRateExchange(
+                fixedRateExchanges[i].contractAddress
+            );
+            (
+                ,
+                ,
+                ,
+                ,
+                ,
+                ,
+                ,
+                ,
+                ,
+                uint256 dtBalance,
+                uint256 btBalance,
+                bool withMint
+            ) = fre.getExchange(fixedRateExchanges[i].id);
+            if (btBalance > 0)
+                fre.collectBT(fixedRateExchanges[i].id, btBalance);
+            if (dtBalance > 0)
+                fre.collectDT(fixedRateExchanges[i].id, dtBalance);
+            // add it to the list of minters
+            if (
+                isMinter(fixedRateExchanges[i].contractAddress) &&
+                withMint == true
+            ) {
+                previousMinters[curentLen] = fixedRateExchanges[i]
+                    .contractAddress;
+                curentLen++;
+            }
         }
         // loop though dispenser and preserve the minter rols if exists
-        for(i=0; i<dispensers.length; i++) {
-                IDispenser(dispensers[i]).ownerWithdraw(address(this));
-                if(isMinter(dispensers[i])){
-                    previousMinters[curentLen]=dispensers[i];
-                    curentLen++;
-                }
+        for (i = 0; i < dispensers.length; i++) {
+            IDispenser(dispensers[i]).ownerWithdraw(address(this));
+            if (isMinter(dispensers[i])) {
+                previousMinters[curentLen] = dispensers[i];
+                curentLen++;
+            }
         }
         // clear all permisions
-         _cleanPermissions();
+        _cleanPermissions();
         // set collector to 0
         paymentCollector = address(0);
         // add existing minter roles for fixedrate & dispensers
-        for(i=0; i<curentLen; i++) {
+        for (i = 0; i < curentLen; i++) {
             _addMinter(previousMinters[i]);
         }
-        
     }
+
     /**
      * @dev setPaymentCollector
      *      Only feeManager can call it
@@ -660,11 +683,7 @@ contract ERC20TemplatePredictoor is
     function getPublishingMarketFee()
         external
         view
-        returns (
-            address,
-            address,
-            uint256
-        )
+        returns (address, address, uint256)
     {
         return (
             publishMarketFeeAddress,
@@ -707,10 +726,10 @@ contract ERC20TemplatePredictoor is
 
     /**
      * @dev getId
-     *      Return template id in case we need different ABIs. 
+     *      Return template id in case we need different ABIs.
      *      If you construct your own template, please make sure to change the hardcoded value
      */
-    function getId() pure public returns (uint8) {
+    function getId() public pure returns (uint8) {
         return 3;
     }
 
@@ -839,7 +858,7 @@ contract ERC20TemplatePredictoor is
      *      the collected ether.
      */
     receive() external payable {}
-    
+
     /**
      * @dev withdrawETH
      *      transfers all the accumlated ether the collector account
@@ -866,50 +885,30 @@ contract ERC20TemplatePredictoor is
      * @dev buyFromFre
      *      Buys 1 DT from the FRE
      */
-    function buyFromFre(
-        FreParams calldata _freParams
-    ) internal{
+    function buyFromFre(FreParams calldata _freParams) internal {
         // get exchange info
-        IFixedRateExchange fre=IFixedRateExchange(_freParams.exchangeContract);
-        (
-            ,
-            address datatoken,
-            ,
-            address baseToken,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-            ,
-
-        ) = fre.getExchange(_freParams.exchangeId);
+        IFixedRateExchange fre = IFixedRateExchange(
+            _freParams.exchangeContract
+        );
+        (, address datatoken, , address baseToken, , , , , , , , ) = fre
+            .getExchange(_freParams.exchangeId);
         require(
             datatoken == address(this),
             "This FixedRate is not providing this DT"
         );
         // get token amounts needed
-        (
-            uint256 baseTokenAmount
-            ,
-            ,
-            ,
-
-        ) = fre.calcBaseInGivenOutDT(
-                    _freParams.exchangeId,
-                    1e18,  // we always take 1 DT
-                    _freParams.swapMarketFee
-                );
+        (uint256 baseTokenAmount, , , ) = fre.calcBaseInGivenOutDT(
+            _freParams.exchangeId,
+            1e18, // we always take 1 DT
+            _freParams.swapMarketFee
+        );
         require(
             baseTokenAmount <= _freParams.maxBaseTokenAmount,
             "FixedRateExchange: Too many base tokens"
         );
 
         //transfer baseToken to us first
-        _pullUnderlying(baseToken,msg.sender,
-                address(this),
-                baseTokenAmount);
+        _pullUnderlying(baseToken, msg.sender, address(this), baseTokenAmount);
         //approve FRE to spend baseTokens
         IERC20(baseToken).safeIncreaseAllowance(
             _freParams.exchangeContract,
@@ -928,27 +927,16 @@ contract ERC20TemplatePredictoor is
             "Unable to buy DT from FixedRate"
         );
         // collect the basetoken from fixedrate and sent it
-        (
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    ,
-                    uint256 btBalance,
-        ) = fre.getExchange(_freParams.exchangeId);
-        if(btBalance>0){
+        (, , , , , , , , , , uint256 btBalance, ) = fre.getExchange(
+            _freParams.exchangeId
+        );
+        if (btBalance > 0) {
             //record income
-            add_revenue(block.number,btBalance);
+            add_revenue(block.number, btBalance);
             fre.collectBT(_freParams.exchangeId, btBalance);
         }
-
-                
     }
+
     /**
      * @dev buyFromFreAndOrder
      *      Buys 1 DT from the FRE and then startsOrder, while burning that DT
@@ -956,14 +944,18 @@ contract ERC20TemplatePredictoor is
     function buyFromFreAndOrder(
         OrderParams calldata _orderParams,
         FreParams calldata _freParams
-    ) external nonReentrant{
+    ) external nonReentrant {
         //first buy 1.0 DT
         buyFromFre(_freParams);
         //we need the following because startOrder expects msg.sender to have dt
         _transfer(address(this), msg.sender, 1e18);
         //startOrder and burn it
-        startOrder(_orderParams.consumer, _orderParams.serviceIndex,
-        _orderParams._providerFee, _orderParams._consumeMarketFee);
+        startOrder(
+            _orderParams.consumer,
+            _orderParams.serviceIndex,
+            _orderParams._providerFee,
+            _orderParams._consumeMarketFee
+        );
     }
 
     /**
@@ -986,33 +978,41 @@ contract ERC20TemplatePredictoor is
             "Unable to get DT from Dispenser"
         );
         //startOrder and burn it
-        startOrder(_orderParams.consumer, _orderParams.serviceIndex,
-        _orderParams._providerFee, _orderParams._consumeMarketFee);
+        startOrder(
+            _orderParams.consumer,
+            _orderParams.serviceIndex,
+            _orderParams._providerFee,
+            _orderParams._consumeMarketFee
+        );
     }
+
     /**
-    * @dev isERC20Deployer
-    *      returns true if address has deployERC20 role
-    */
-    function isERC20Deployer(address user) public view returns(bool){
-        return(IERC721Template(_erc721Address).getPermissions(user).deployERC20);
+     * @dev isERC20Deployer
+     *      returns true if address has deployERC20 role
+     */
+    function isERC20Deployer(address user) public view returns (bool) {
+        return (
+            IERC721Template(_erc721Address).getPermissions(user).deployERC20
+        );
     }
 
     /**
      * @dev getFixedRates
      *      Returns the list of fixedRateExchanges created for this datatoken
      */
-    function getFixedRates() public view returns(fixedRate[] memory) {
-        return(fixedRateExchanges);
+    function getFixedRates() public view returns (fixedRate[] memory) {
+        return (fixedRateExchanges);
     }
+
     /**
      * @dev getDispensers
      *      Returns the list of dispensers created for this datatoken
      */
-    function getDispensers() public view returns(address[] memory) {
-        return(dispensers);
+    function getDispensers() public view returns (address[] memory) {
+        return (dispensers);
     }
 
-     function _pullUnderlying(
+    function _pullUnderlying(
         address erc20,
         address from,
         address to,
@@ -1020,18 +1020,17 @@ contract ERC20TemplatePredictoor is
     ) internal {
         uint256 balanceBefore = IERC20(erc20).balanceOf(to);
         IERC20(erc20).safeTransferFrom(from, to, amount);
-        require(IERC20(erc20).balanceOf(to) >= balanceBefore.add(amount),
-                    "Transfer amount is too low");
+        require(
+            IERC20(erc20).balanceOf(to) >= balanceBefore.add(amount),
+            "Transfer amount is too low"
+        );
     }
-
-    
-
-
 
     // predictoor
-    function is_valid_subscription(address user) public view returns(bool){
-        return subscriptions[user].expires<=block.timestamp ? false : true;
+    function is_valid_subscription(address user) public view returns (bool) {
+        return subscriptions[user].expires <= block.timestamp ? false : true;
     }
+
     function epoch() public view returns (uint256) {
         return block.number / blocks_per_epoch;
     }
@@ -1074,7 +1073,7 @@ contract ERC20TemplatePredictoor is
         uint256 blocknum
     ) public view returns (uint256, uint256) {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
-        require(is_valid_subscription(msg.sender),"Not valid subscription");
+        require(is_valid_subscription(msg.sender), "Not valid subscription");
         return (agg_predvals_numer[blocknum], agg_predvals_denom[blocknum]);
     }
 
@@ -1082,7 +1081,7 @@ contract ERC20TemplatePredictoor is
         uint256 blocknum
     ) public view returns (uint256) {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
-        return(subscription_revenue_at_block[blocknum]);
+        return (subscription_revenue_at_block[blocknum]);
     }
 
     function get_prediction(
@@ -1093,8 +1092,11 @@ contract ERC20TemplatePredictoor is
         if (msg.sender != predictoor) {
             require(blocknum > soonest_block_to_predict(), "too early to view");
         }
-        //allow predictoors to see their own submissions 
-        require(is_valid_subscription(msg.sender) || msg.sender==predictoor,"Not valid subscription");
+        //allow predictoors to see their own submissions
+        require(
+            is_valid_subscription(msg.sender) || msg.sender == predictoor,
+            "Not valid subscription"
+        );
         prediction = predobjs[blocknum][predictoor];
     }
 
@@ -1137,9 +1139,9 @@ contract ERC20TemplatePredictoor is
         truval_submitted[blocknum] = true;
     }
 
-    function add_revenue(uint256 blocknum,uint256 amount) internal {
+    function add_revenue(uint256 blocknum, uint256 amount) internal {
         blocknum = rail_blocknum_to_slot(blocknum);
-        subscription_revenue_at_block[blocknum]+=amount;
+        subscription_revenue_at_block[blocknum] += amount;
     }
 
     function payout(uint256 blocknum, address predictoor_addr) external {
