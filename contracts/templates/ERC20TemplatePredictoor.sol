@@ -1084,7 +1084,10 @@ contract ERC20TemplatePredictoor is
         agg_predvals_denom[blocknum] += stake;
     }
 
-    function payout(uint256 blocknum, address predictoor_addr) external {
+    function payout(
+        uint256 blocknum,
+        address predictoor_addr
+    ) external nonReentrant {
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
         Prediction memory predobj = get_prediction(blocknum, predictoor_addr);
         require(predobj.paid == false, "already paid");
