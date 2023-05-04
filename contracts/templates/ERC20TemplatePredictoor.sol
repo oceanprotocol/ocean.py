@@ -1096,7 +1096,7 @@ contract ERC20TemplatePredictoor is
         // refund stake to predictoor and cancel round
         if (
             block.number > blocknum + blocks_per_epoch * 3 &&
-            !trueval_submitted[blocknum]
+            !truval_submitted[blocknum]
         ) {
             IERC20(stake_token).safeTransfer(predobj.predictoor, predobj.stake);
             predobj.paid = true;
@@ -1123,7 +1123,7 @@ contract ERC20TemplatePredictoor is
 
     // ----------------------- ADMIN FUNCTIONS -----------------------
     function pause_predictions() external onlyERC20Deployer {
-        predictions_paused = !predictions_paused;
+        paused = !paused;
     }
 
     function submit_trueval(
