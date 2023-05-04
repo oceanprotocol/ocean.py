@@ -48,7 +48,7 @@ contract ERC20TemplatePredictoor is
 
     uint256 public constant BASE = 1e18;
 
-    //predictoor specific
+    // -------------------------- PREDICTOOR --------------------------
     struct Prediction {
         bool predval;
         uint256 stake;
@@ -72,6 +72,7 @@ contract ERC20TemplatePredictoor is
     uint256 min_predns_for_payout;
     address stake_token;
     uint256 subscription_valability = 86400; // how long a subscription is valid
+    // -------------------------- PREDICTOOR --------------------------
 
     // EIP 2612 SUPPORT
     bytes32 public DOMAIN_SEPARATOR;
@@ -1026,7 +1027,7 @@ contract ERC20TemplatePredictoor is
         );
     }
 
-    // predictoor
+    // ------------ PREDICTOOR ------------
     function is_valid_subscription(address user) public view returns (bool) {
         return subscriptions[user].expires <= block.timestamp ? false : true;
     }
