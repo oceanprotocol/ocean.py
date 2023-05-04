@@ -1142,7 +1142,12 @@ contract ERC20TemplatePredictoor is
 
     function add_revenue(uint256 blocknum, uint256 amount) internal {
         blocknum = rail_blocknum_to_slot(blocknum);
-        subscription_revenue_at_block[blocknum] += amount;
+        // for loop and add revenue for blocks_per_epoch blocks
+        for (uint256 i = 0; i < blocks_per_subscription; i++) {
+            subscription_revenue_at_block[blocknum + blocks_per_epoch] +=
+                amount /
+                blocks_per_subscription;
+        }
     }
 
     function payout(uint256 blocknum, address predictoor_addr) external {
