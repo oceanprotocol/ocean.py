@@ -70,6 +70,7 @@ contract ERC20TemplatePredictoor is
     uint256 blocks_per_epoch;
     uint256 blocks_per_subscription;
     uint256 min_predns_for_payout;
+    uint256 truval_submit_timeout = 3;
     address stake_token;
     bool paused = false;
     // -------------------------- PREDICTOOR --------------------------
@@ -1092,10 +1093,11 @@ contract ERC20TemplatePredictoor is
         Prediction memory predobj = get_prediction(blocknum, predictoor_addr);
         require(predobj.paid == false, "already paid");
 
-        // if OPF hasn't submitted trueval in 3 days
+        // if OPF hasn't submitted trueval in truval_submit_timeout days
         // refund stake to predictoor and cancel round
         if (
-            block.number > blocknum + blocks_per_epoch * 3 &&
+            block.number >
+            blocknum + blocks_per_epoch * truval_submit_timeout &&
             !truval_submitted[blocknum]
         ) {
             IERC20(stake_token).safeTransfer(predobj.predictoor, predobj.stake);
