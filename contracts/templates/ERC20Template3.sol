@@ -44,7 +44,7 @@ contract ERC20Template3 is ERC20Template {
         stake_token = _stake_token;
 
         require(s_per_subscription % s_per_block == 0, "must be divisible");
-        re  quire(s_per_epoch % s_per_block == 0, "must be divisible");
+        require(s_per_epoch % s_per_block == 0, "must be divisible");
 
         blocks_per_epoch = s_per_epoch / s_per_block;
         blocks_per_subscription = s_per_subscription / s_per_block;
