@@ -790,52 +790,6 @@ contract ERC20TemplatePredictoor is
     }
 
     /**
-     * @dev permit
-     *      used for signed approvals, see ERC20Template test for more details
-     * @param owner user who signed the message
-     * @param spender spender
-     * @param value token amount
-     * @param deadline deadline after which signed message is no more valid
-     * @param v parameters from signed message
-     * @param r parameters from signed message
-     * @param s parameters from signed message
-     */
-
-    function permit(
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) external {
-        require(deadline >= block.number, "ERC20DT: EXPIRED");
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(
-                    abi.encode(
-                        PERMIT_TYPEHASH,
-                        owner,
-                        spender,
-                        value,
-                        nonces[owner]++,
-                        deadline
-                    )
-                )
-            )
-        );
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(
-            recoveredAddress != address(0) && recoveredAddress == owner,
-            "ERC20DT: INVALID_SIGNATURE"
-        );
-        _approve(owner, spender, value);
-    }
-
-    /**
      * @dev getPaymentCollector
      *      It returns the current paymentCollector
      * @return paymentCollector address
