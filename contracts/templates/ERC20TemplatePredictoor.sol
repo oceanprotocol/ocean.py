@@ -71,6 +71,7 @@ contract ERC20TemplatePredictoor is
     uint256 blocks_per_subscription;
     uint256 min_predns_for_payout;
     address stake_token;
+    bool paused = false;
     // -------------------------- PREDICTOOR --------------------------
 
     // EIP 2612 SUPPORT
@@ -1064,6 +1065,7 @@ contract ERC20TemplatePredictoor is
         require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
         require(blocknum > soonest_block_to_predict(), "too late to submit");
         require(!submitted_predval(blocknum, msg.sender), "already submitted");
+        require(paused == false, "paused");
 
         Prediction memory predobj = Prediction(
             predval,
@@ -1124,5 +1126,31 @@ contract ERC20TemplatePredictoor is
             payout_amt
         );
         predobj.paid = true;
+    }
+
+    // ----------------------- ADMIN FUNCTIONS -----------------------
+    function pause_predictions() external onlyERC20Deployer {
+        predictions_paused = !predictions_paused;
+    }
+
+    function submit_trueval(
+        uint256 blocknum,
+        bool trueval
+    ) external onlyERC20Deployer {
+        // TODO, is onlyERC20Deployer the right modifier?
+        require(blocknum_is_on_a_slot(blocknum), "blocknum must be on a slot");
+        require(blocknum < soonest_block_to_predict(), "too early to submit");
+        truevals[blocknum] = trueval;
+        truval_submitted[blocknum] = true;
+    }
+
+    function add_revenue(uint256 blocknum, uint256 amount) internal {
+        blocknum = rail_blocknum_to_slot(blocknum);
+        // for loop and add revenue for blocks_per_epoch blocks
+        for (uint256 i = 0; i < blocks_per_subscription; i++) {
+            subscription_revenue_at_block[blocknum + blocks_per_epoch] +=
+                amount /
+                blocks_per_subscription;
+        }
     }
 }
