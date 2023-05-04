@@ -349,12 +349,7 @@ contract ERC20TemplatePredictoor is
         );
 
         stake_token = addresses_[4];
-
-        require(uints_[4] % uints_[2] == 0, "must be divisible");
-        require(uints_[3] % uints_[2] == 0, "must be divisible");
-
-        blocks_per_epoch = uints_[3] / uints_[2];
-        blocks_per_subscription = uints_[4] / uints_[2];
+        _update_seconds(uints_[2], uints_[3], uints_[4], uints_[5]);
         return initialized;
     }
 
@@ -1145,6 +1140,22 @@ contract ERC20TemplatePredictoor is
         uint256 s_per_subscription,
         uint256 _truval_submit_timeout
     ) external onlyERC20Deployer {
+        _update_seconds(
+            s_per_block,
+            s_per_epoch,
+            s_per_subscription,
+            _truval_submit_timeout
+        );
+    }
+
+    // ----------------------- INTERNAL FUNCTIONS -----------------------
+
+    function _update_seconds(
+        uint256 s_per_block,
+        uint256 s_per_epoch,
+        uint256 s_per_subscription,
+        uint256 _truval_submit_timeout
+    ) internal {
         require(s_per_subscription % s_per_block == 0);
         require(s_per_epoch % s_per_block == 0);
 
@@ -1152,8 +1163,6 @@ contract ERC20TemplatePredictoor is
         blocks_per_subscription = s_per_subscription / s_per_block;
         truval_submit_timeout_block = _truval_submit_timeout / s_per_block;
     }
-
-    // ----------------------- INTERNAL FUNCTIONS -----------------------
 
     function add_revenue(uint256 blocknum, uint256 amount) internal {
         blocknum = rail_blocknum_to_slot(blocknum);
