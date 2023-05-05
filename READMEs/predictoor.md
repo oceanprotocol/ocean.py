@@ -10,36 +10,21 @@ Ensure pre-requisites:
 
 - Linux/MacOS
 - Python 3.8.5+
-- solc 0.8.0+ [[Instructions](https://docs.soliditylang.org/en/v0.8.9/installing-solidity.html)]
-- ganache. [To install](https://github.com/trufflesuite/ganache#readme): `npm install ganache --global`
 
-## 2. Start ganache, fund accounts
 
-Open a new console and:
+## 2. Start barge
+
+Open a new console, call it "barge console".
+
+In barge console:
 
 ```console
-#set private keys
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
-export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
-export TEST_PRIVATE_KEY3=0xed45162e5e39ecdd5270afdef42eba06a67dd455b6e580cbeefc1c7de31ee4e2
-export TEST_PRIVATE_KEY4=0x9dae18de1b391af0dad691e0566104aedbaf71855ec056feb7567065270a7fd3
-export TEST_PRIVATE_KEY5=0xbe8b3fe8699d05bee83f2522ca24f71900356519936c4dd45a8ca8aa1c0f7f35
-export TEST_PRIVATE_KEY6=0x3ff9bd14c137a8d1eec9980046c0fefde79c5ac2b023b20bed34363246b94b09
-
-#each account gets 1000 ETH
-export AMT_ETH=1000000000000000000000
-
-#start ganache
-ganache \
---account "$FACTORY_DEPLOYER_PRIVATE_KEY,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY1,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY2,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY3,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY4,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY5,$AMT_ETH" \
---account "$TEST_PRIVATE_KEY6,$AMT_ETH" 
+git clone https://github.com/oceanprotocol/barge
+cd barge
+git checkout feature/predictoor
+./start_ocean.sh --predictoor
 ```
+
 
 ## 3. Install
 
@@ -51,7 +36,7 @@ In work console:
 # Clone the repo and enter into it
 git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
-git checkout predictoor-pm-issue-3
+git checkout predictoor-with-barge
 
 # Install OS dependencies
 sudo apt-get install -y python3-dev gcc python-pytest
@@ -65,9 +50,6 @@ source venv/bin/activate
 #install dependencies
 pip install -r requirements_dev.txt
 
-#install openzeppelin library, to import from .sol (ignore FileExistsErrors)
-brownie pm install OpenZeppelin/openzeppelin-contracts@4.2.0
-brownie pm install GNSPS/solidity-bytes-utils@0.8.0
 ```
 
 ## 4. Set envvars in work console
@@ -85,23 +67,7 @@ export TEST_PRIVATE_KEY5=0xbe8b3fe8699d05bee83f2522ca24f71900356519936c4dd45a8ca
 export TEST_PRIVATE_KEY6=0x3ff9bd14c137a8d1eec9980046c0fefde79c5ac2b023b20bed34363246b94b09
 ```
 
-## 5. Compile & deploy contracts
-
-We need to compile once at the beginning, and recompile whenever we change ERC20Template3.sol.
-
-In work console:
-```console
-#remove old build artifacts
-rm -rf build
-
-#compile contracts
-brownie compile
-
-#deploy contracts to ganache
-./deploy.py
-```
-
-## 6. Test
+## 5. Test
 
 In work console:
 ```console
