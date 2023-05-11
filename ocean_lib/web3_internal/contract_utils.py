@@ -2,6 +2,7 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import glob
 import json
 import logging
 import os
@@ -21,14 +22,42 @@ GANACHE_URL = "http://127.0.0.1:8545"
 @enforce_types
 def get_contract_definition(contract_name: str) -> Dict[str, Any]:
     """Returns the abi JSON for a contract name."""
-    path = os.path.join(artifacts.__file__, "..", f"{contract_name}.json")
-    path = Path(path).expanduser().resolve()
+    path = get_contract_filename(contract_name)
 
     if not path.exists():
         raise TypeError("Contract name does not exist in artifacts.")
 
     with open(path) as f:
         return json.load(f)
+
+
+@enforce_types
+def get_contract_filename(contract_name: str) -> str:
+    """Returns full path filename for a contract."""
+    contract_basename = f"{contract_name}.json"
+
+    # first, try to find locally
+    address_filename = os.getenv("ADDRESS_FILE")
+    path = None
+    if address_filename:
+        address_dir = os.path.dirname(address_filename)
+        root_dir = os.path.join(address_dir, "..")
+        os.chdir(root_dir)
+        paths = glob.glob(f"**/{contract_basename}", recursive=True)
+        if paths:
+            assert len(paths) == 1, "had duplicates for {contract_basename}"
+            path = paths[0]
+            path = Path(path).expanduser().resolve()
+            assert (
+                path.exists()
+            ), f"Found path = '{path}' via glob, yet path.exists() is False"
+            return path
+
+    # didn't find locally, so use use artifacts lib
+    path = os.path.join(artifacts.__file__, "..", contract_basename)
+    path = Path(path).expanduser().resolve()
+    if not path.exists():
+        raise TypeError(f"Contract '{contract_name}' not found in artifacts.")
 
 
 @enforce_types
