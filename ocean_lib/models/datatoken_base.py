@@ -298,17 +298,19 @@ class DatatokenBase(ABC, ContractBase):
         return (exchange, tx) if kwargs.get("full_info") else exchange
 
     @enforce_types
-    def get_exchanges(self,active=True) -> list:
+    def get_exchanges(self, active=True) -> list:
         """return List[OneExchange] - all the exchanges for this datatoken"""
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
+
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-        exchanges=[]
+
+        exchanges = []
         addrs_and_exchange_ids = self.getFixedRates()
         for address, exchange_id in addrs_and_exchange_ids:
-            fre = FixedRateExchange(self.config_dict,address)
-            exchange = OneExchange(fre,exchange_id)
+            fre = FixedRateExchange(self.config_dict, address)
+            exchange = OneExchange(fre, exchange_id)
             if active and not exchange.is_active():
                 continue
             exchanges.append(exchange)
@@ -414,11 +416,11 @@ class DatatokenBase(ABC, ContractBase):
         return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
 
     @enforce_types
-    def approve_publish_market_order_fees(self,tx_dict: dict):
+    def approve_publish_market_order_fees(self, tx_dict: dict):
         fees = self.get_publish_market_order_fees()
-        if(fees.amount>0 and fees.address!=ZERO_ADDRESS):
+        if fees.amount > 0 and fees.address != ZERO_ADDRESS:
             from_addr = get_from_address(tx_dict)
-            fee_token = DatatokenBase.get_typed(self.config_dict,fees.token)
+            fee_token = DatatokenBase.get_typed(self.config_dict, fees.token)
             fee_token_balance = fee_token.balanceOf(from_addr)
             if fee_token_balance < fees.amount:
                 raise ValueError(
@@ -426,9 +428,8 @@ class DatatokenBase(ABC, ContractBase):
                     f"to execute the requested service. This service "
                     f"requires {fees.amount} {fee_token.symbol()}."
                 )
-            fee_token.approve(self.address,fees.amount,{"from": from_addr}
-        )
-    
+            fee_token.approve(self.address, fees.amount, {"from": from_addr})
+
     @enforce_types
     def get_from_pricing_schema_and_order(self, *args, **kwargs):
         dispensers = self.dispenser_status().active

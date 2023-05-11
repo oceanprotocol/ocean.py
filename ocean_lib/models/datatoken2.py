@@ -44,7 +44,7 @@ class Datatoken2(DatatokenBase):
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
         exchanges = self.get_exchanges()
         assert (
-            len(exchanges)>1
+            len(exchanges) > 1
         ), "there are no fixed rate exchanges for this datatoken"
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange

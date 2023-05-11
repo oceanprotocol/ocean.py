@@ -45,44 +45,42 @@ class Datatoken3(Datatoken1):
             base_token_addr=self.stake_token(),
         )
 
-    
     def get_empty_provider_fee(self):
         return {
-            "providerFeeAddress":ZERO_ADDRESS,
-            "providerFeeToken":ZERO_ADDRESS,
-            "providerFeeAmount":0,
-            "v":0,
-            "r":0,
-            "s":0,
-            "validUntil":0,
-            "providerData":0
+            "providerFeeAddress": ZERO_ADDRESS,
+            "providerFeeToken": ZERO_ADDRESS,
+            "providerFeeAmount": 0,
+            "v": 0,
+            "r": 0,
+            "s": 0,
+            "validUntil": 0,
+            "providerData": 0,
         }
-    
+
     def start_subscription_with_DT(self, tx_dict: dict):
         # Start subscription if user has DT in his wallet
         subscr_addr = tx_dict["from"].address
-        assert (
-            not self.is_valid_subscription(subscr_addr)
+        assert not self.is_valid_subscription(
+            subscr_addr
         ), "this account has already started a subscription"
         self.approve_publish_market_order_fees(tx_dict)
         # call startOrdrt
-        self.start_order(subscr_addr, 0,self.get_empty_provider_fee(),tx_dict)
-    
+        self.start_order(subscr_addr, 0, self.get_empty_provider_fee(), tx_dict)
 
     def start_subscription_with_buy_DT(self, exchange, tx_dict: dict):
         # Start subscription by buying one DT and call order
         subscr_addr = tx_dict["from"].address
-        assert (
-            not self.is_valid_subscription(subscr_addr)
+        assert not self.is_valid_subscription(
+            subscr_addr
         ), "this account has already started a subscription"
         self.approve_publish_market_order_fees(tx_dict)
         exchanges = self.get_exchanges()
         assert (
-            len(exchanges)>1
+            len(exchanges) > 1
         ), "there are no fixed rate exchanges for this datatoken"
-        exchange=exchanges[0]
+        exchange = exchanges[0]
         amt_needed = exchange.BT_needed(to_wei(1), 0)
-        provider_fees=self.get_empty_provider_fee()
+        provider_fees = self.get_empty_provider_fee()
 
         return self.contract.buyFromFreAndOrder(
             (
@@ -110,11 +108,11 @@ class Datatoken3(Datatoken1):
             tx_dict,
         )
 
-        
-
-    def get_predicted(self,blocknum,tx_dict) -> float:
-        (agg_predvals_numer,agg_predvals_denom)  = self.get_agg_predval(blocknum,tx_dict)
-        return float(agg_predvals_numer/agg_predvals_denom)
+    def get_predicted(self, blocknum, tx_dict) -> float:
+        (agg_predvals_numer, agg_predvals_denom) = self.get_agg_predval(
+            blocknum, tx_dict
+        )
+        return float(agg_predvals_numer / agg_predvals_denom)
 
     def _stake_token_bal(self) -> float:
         """How much e.g. OCEAN does this contract have?"""

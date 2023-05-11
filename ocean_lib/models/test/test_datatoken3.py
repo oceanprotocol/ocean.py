@@ -16,7 +16,7 @@ from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import from_wei, to_wei
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS,MAX_UINT256
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS, MAX_UINT256
 from ocean_lib.web3_internal.utils import connect_to_network
 
 
@@ -56,22 +56,28 @@ def test_main():
     max_n_predns = min_predns_for_payout  # stop loop after this many predn's
 
     x = ocean.data_nft_factory.getCurrentTemplateCount()
-    
+
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
     data_nft = ocean.data_nft_factory.create({"from": opf}, "DN", "DN")
 
-
-    #since data_nft.create_datatoken does not allow us to send all the arrays, we have to do it manually
-    #DT = data_nft.create_datatoken({"from": opf}, "DT", "DT", template_index=3)
+    # since data_nft.create_datatoken does not allow us to send all the arrays, we have to do it manually
+    # DT = data_nft.create_datatoken({"from": opf}, "DT", "DT", template_index=3)
     initial_list = data_nft.getTokensList()
-    data_nft.createERC20(3,["DT3","DT3"],[opf.address,opf.address,opf.address,OCEAN.address,OCEAN.address],[MAX_UINT256,0,s_per_block,s_per_epoch,s_per_subscription,30],[],{"from": opf})
+    data_nft.createERC20(
+        3,
+        ["DT3", "DT3"],
+        [opf.address, opf.address, opf.address, OCEAN.address, OCEAN.address],
+        [MAX_UINT256, 0, s_per_block, s_per_epoch, s_per_subscription, 30],
+        [],
+        {"from": opf},
+    )
     new_elements = [
-            item for item in data_nft.getTokensList() if item not in initial_list
-        ]
+        item for item in data_nft.getTokensList() if item not in initial_list
+    ]
     assert len(new_elements) == 1, "new datatoken has no address"
     DT = DatatokenBase.get_typed(config, new_elements[0])
-    
+
     # Mixed sol+py can't have DT to hold OCEAN, so have a different account
     # - When we convert to Solidity, change to: DT_treasurer = DT
     DT.treasurer = DT_treasurer
@@ -88,20 +94,20 @@ def test_main():
     exchanges = DT.get_exchanges()
     OCEAN_needed = from_wei(exchanges[0].BT_needed(to_wei(1), consume_market_fee=0))
     OCEAN.approve(exchanges[0].address, to_wei(OCEAN_needed), {"from": trader})
-    
+
     consume_market_fee_addr = ZERO_ADDRESS
     consume_market_fee = 0
     tx = exchanges[0].buy_DT(
-            datatoken_amt=to_wei(1),
-            consume_market_fee_addr=consume_market_fee_addr,
-            consume_market_fee=consume_market_fee,
-            tx_dict={"from": trader},
+        datatoken_amt=to_wei(1),
+        consume_market_fee_addr=consume_market_fee_addr,
+        consume_market_fee=consume_market_fee,
+        tx_dict={"from": trader},
     )
     # trader starts subscription. Good for 24h.
     DT.approve(DT.address, to_wei(1), {"from": trader})
     DT.start_subscription_with_DT({"from": trader})  # good for next 24h
 
-    assert(DT.is_valid_subscription(trader.address)==True)
+    assert DT.is_valid_subscription(trader.address) == True
     # ======================================================================
     # ======================================================================
     # LOOP across epochs
@@ -139,11 +145,12 @@ def test_main():
         # TRADER GETS AGG PREDVAL (do every 5min)
         blocks_not_seen = blocks_predicted - blocks_seen_by_trader
         for predict_blocknum in blocks_not_seen:
-            prediction = DT.get_predicted(predict_blocknum, {"from":trader})
+            prediction = DT.get_predicted(predict_blocknum, {"from": trader})
             assert 0.0 <= prediction <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
             actions_s += (
-                f"Trader got agg_predval {prediction}" + f"at block B={int(predict_blocknum)}\n"
+                f"Trader got agg_predval {prediction}"
+                + f"at block B={int(predict_blocknum)}\n"
             )
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
@@ -154,7 +161,7 @@ def test_main():
             if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
-            DT.submit_trueval(predict_blocknum,trueval,  {"from": opf})
+            DT.submit_trueval(predict_blocknum, trueval, {"from": opf})
             blocks_with_truevals.add(predict_blocknum)
             chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
@@ -186,7 +193,7 @@ def test_main():
 
     # Any rando can call update_payouts(). Will update allowances
 
-    #TODO.   This now fails because predictoors are pushing random values, and so does OPF. 
+    # TODO.   This now fails because predictoors are pushing random values, and so does OPF.
     # Chances to hit a match are slim
     DT.payout(predict_blocknum, predictoor0.address, {"from": rando})
     DT.payout(predict_blocknum, predictoor1.address, {"from": rando})
