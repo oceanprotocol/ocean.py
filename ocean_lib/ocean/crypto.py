@@ -2,6 +2,7 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 from base64 import b64encode
 from hashlib import sha256
 

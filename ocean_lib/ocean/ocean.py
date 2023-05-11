@@ -44,7 +44,7 @@ class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
 
     @enforce_types
-    def __init__(self, config_dict: Dict, data_provider=None) -> None:
+    def __init__(self, config_dict: Dict, data_provider: Optional[Type] = None) -> None:
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
@@ -90,13 +90,8 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        if data_provider == "no_provider":
-            # only use when no Provider, Compute, or Aquarius
-            self.assets = None
-            self.compute = None
-        else:
-            self.assets = OceanAssets(self.config_dict, data_provider)
-            self.compute = OceanCompute(self.config_dict, data_provider)
+        self.assets = OceanAssets(self.config_dict, data_provider)
+        self.compute = OceanCompute(self.config_dict, data_provider)
 
         logger.debug("Ocean instance initialized: ")
 
