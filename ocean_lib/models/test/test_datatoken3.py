@@ -185,6 +185,9 @@ def test_main():
     initbal0, initbal1 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
 
     # Any rando can call update_payouts(). Will update allowances
+
+    #TODO.   This now fails because predictoors are pushing random values, and so does OPF. 
+    # Chances to hit a match are slim
     DT.payout(predict_blocknum, predictoor0.address, {"from": rando})
     DT.payout(predict_blocknum, predictoor1.address, {"from": rando})
 
