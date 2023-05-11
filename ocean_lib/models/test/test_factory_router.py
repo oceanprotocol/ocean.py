@@ -47,12 +47,6 @@ def test_is_approved_token(
 
 
 @pytest.mark.unit
-def test_is_ss_contract(config: dict, factory_router: FactoryRouter):
-    """Tests if ssContract address has been added to the mapping"""
-    assert factory_router.isSSContract(get_address_of_type(config, "Staking"))
-
-
-@pytest.mark.unit
 def test_is_fixed_rate_contract(config: dict, factory_router: FactoryRouter):
     """Tests that fixedRateExchange address is added to the mapping"""
     assert factory_router.isFixedRateContract(get_address_of_type(config, "FixedPrice"))
