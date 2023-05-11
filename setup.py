@@ -28,7 +28,6 @@ install_requirements = [
     "cryptography==40.0.2",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
-    "pycrypto==2.6.1",
     # brownie requires web3.py, eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
