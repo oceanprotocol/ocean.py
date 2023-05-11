@@ -11,7 +11,7 @@ import pytest
 from pytest import approx
 
 from ocean_lib.example_config import get_config_dict
-from ocean_lib.models.predictoor.datatoken3 import Datatoken3
+from ocean_lib.models.datatoken3 import Datatoken3
 from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -56,11 +56,7 @@ def test_main():
     max_n_predns = min_predns_for_payout  # stop loop after this many predn's
 
     x = ocean.data_nft_factory.getCurrentTemplateCount()
-    print(x)
-    print(ocean.data_nft_factory.templateList(1))
-    print(ocean.data_nft_factory.templateList(2))
-    print(ocean.data_nft_factory.templateList(3))
-
+    
     # ======================================================================
     # DEPLOY DATATOKEN & EXCHANGE CONTRACT
     data_nft = ocean.data_nft_factory.create({"from": opf}, "DN", "DN")
@@ -89,24 +85,34 @@ def test_main():
     # TRADER BUYS SUBSCRIPTION TO AGG PREDVALS (do every 24h)
 
     # trader buys 1 DT with OCEAN
-    OCEAN_needed = from_wei(DT.exchange.BT_needed(to_wei(1), consume_market_fee=0))
-    OCEAN.approve(DT.address, to_wei(OCEAN_needed), {"from": trader})
-    DT.buy_1DT({"from": trader})  # spends OCEAN
-
+    exchanges = DT.get_exchanges()
+    OCEAN_needed = from_wei(exchanges[0].BT_needed(to_wei(1), consume_market_fee=0))
+    OCEAN.approve(exchanges[0].address, to_wei(OCEAN_needed), {"from": trader})
+    
+    consume_market_fee_addr = ZERO_ADDRESS
+    consume_market_fee = 0
+    tx = exchanges[0].buy_DT(
+            datatoken_amt=to_wei(1),
+            consume_market_fee_addr=consume_market_fee_addr,
+            consume_market_fee=consume_market_fee,
+            tx_dict={"from": trader},
+    )
     # trader starts subscription. Good for 24h.
     DT.approve(DT.address, to_wei(1), {"from": trader})
     DT.start_subscription_with_DT({"from": trader})  # good for next 24h
 
+    assert(DT.is_valid_subscription(trader.address)==True)
     # ======================================================================
     # ======================================================================
     # LOOP across epochs
     for stake, p in zip(stakes, predictoors):
         amt_approve = stake * max_n_predns
-        OCEAN.approve(DT_treasurer, to_wei(amt_approve), {"from": p})
+        OCEAN.approve(DT.address, to_wei(amt_approve), {"from": p})
 
     blocks_seen_by_trader = set()
     n_predns = {0: 0, 1: 0}  # [predictoor_i] : n_predns
-
+    blocks_predicted = set()
+    blocks_with_truevals = set()
     while True:
         actions_s = ""
 
@@ -128,26 +134,28 @@ def test_main():
                 + f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}."
                 + f" Now, OCEAN approved={aa:.1f}\n"
             )
-        blocks_predicted = set(DT.predobjs.keys())
-
+            blocks_predicted.add(predict_blocknum)
+        print(blocks_predicted)
         # TRADER GETS AGG PREDVAL (do every 5min)
         blocks_not_seen = blocks_predicted - blocks_seen_by_trader
         for predict_blocknum in blocks_not_seen:
-            agg_predval = DT.get_agg_predval(predict_blocknum)
-            assert 0.0 <= agg_predval <= 1.0
+            prediction = DT.get_predicted(predict_blocknum, {"from":trader})
+            assert 0.0 <= prediction <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
             actions_s += (
-                f"Trader got agg_predval" + f"at block B={int(predict_blocknum)}\n"
+                f"Trader got agg_predval {prediction}" + f"at block B={int(predict_blocknum)}\n"
             )
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
         for predict_blocknum in blocks_predicted:
-            if predict_blocknum in DT.truevals:  # already set
+            if DT.truval_submitted(predict_blocknum):  # already set
+                blocks_with_truevals.add(predict_blocknum)
                 continue
             if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
-            DT.submit_trueval(trueval, predict_blocknum, {"from": opf})
+            DT.submit_trueval(predict_blocknum,trueval,  {"from": opf})
+            blocks_with_truevals.add(predict_blocknum)
             chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
 
@@ -165,7 +173,6 @@ def test_main():
             print(f"=" * 30 + "\n" + block_s + "\n" + actions_s)
 
         # STOP?
-        blocks_with_truevals = set(DT.truevals.keys())
         if min(n_predns.values()) >= max_n_predns and (
             blocks_with_truevals == blocks_predicted
         ):
@@ -178,14 +185,8 @@ def test_main():
     initbal0, initbal1 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
 
     # Any rando can call update_payouts(). Will update allowances
-    DT.update_payouts(predict_blocknum, predictoor0.address, {"from": rando})
-    DT.update_payouts(predict_blocknum, predictoor1.address, {"from": rando})
-
-    # Predictoors claim allowance $
-    allow0 = OCEAN_approved(DT, predictoor0)
-    allow1 = OCEAN_approved(DT, predictoor1)
-    OCEAN.transferFrom(DT.address, predictoor0, to_wei(allow0), {"from": predictoor0})
-    OCEAN.transferFrom(DT.address, predictoor1, to_wei(allow1), {"from": predictoor1})
+    DT.payout(predict_blocknum, predictoor0.address, {"from": rando})
+    DT.payout(predict_blocknum, predictoor1.address, {"from": rando})
 
     # test
     balDT = OCEAN_bal(DT_treasurer)

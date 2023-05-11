@@ -46,27 +46,76 @@ class Datatoken3(Datatoken1):
         )
 
     
-
+    def get_empty_provider_fee(self):
+        return {
+            "providerFeeAddress":ZERO_ADDRESS,
+            "providerFeeToken":ZERO_ADDRESS,
+            "providerFeeAmount":0,
+            "v":0,
+            "r":0,
+            "s":0,
+            "validUntil":0,
+            "providerData":0
+        }
+    
     def start_subscription_with_DT(self, tx_dict: dict):
         # Start subscription if user has DT in his wallet
         subscr_addr = tx_dict["from"].address
         assert (
             not self.is_valid_subscription(subscr_addr)
         ), "this account has already started a subscription"
-        # TODO  - get publishMarketFee and approve tokens if needed
+        self.approve_publish_market_order_fees(tx_dict)
         # call startOrdrt
+        self.start_order(subscr_addr, 0,self.get_empty_provider_fee(),tx_dict)
+    
 
-    def start_subscription_with_buy_DT(self, tx_dict: dict):
+    def start_subscription_with_buy_DT(self, exchange, tx_dict: dict):
         # Start subscription by buying one DT and call order
         subscr_addr = tx_dict["from"].address
         assert (
             not self.is_valid_subscription(subscr_addr)
         ), "this account has already started a subscription"
-        # TODO  - get publishMarketFee and approve tokens if needed
-        # call buyFromFreAndOrder
+        self.approve_publish_market_order_fees(tx_dict)
+        exchanges = self.get_exchanges()
+        assert (
+            len(exchanges)>1
+        ), "there are no fixed rate exchanges for this datatoken"
+        exchange=exchanges[0]
+        amt_needed = exchange.BT_needed(to_wei(1), 0)
+        provider_fees=self.get_empty_provider_fee()
+
+        return self.contract.buyFromFreAndOrder(
+            (
+                subscr_addr,
+                0,
+                (
+                    provider_fees["providerFeeAddress"],
+                    provider_fees["providerFeeToken"],
+                    int(provider_fees["providerFeeAmount"]),
+                    provider_fees["v"],
+                    provider_fees["r"],
+                    provider_fees["s"],
+                    provider_fees["validUntil"],
+                    provider_fees["providerData"],
+                ),
+                self.TokenFeeInfo(),
+            ),
+            (
+                self.to_checksum_address(exchange.address),
+                exchange.exchange_id,
+                amt_needed,
+                0,
+                ZERO_ADDRESS,
+            ),
+            tx_dict,
+        )
+
         
 
-    
+    def get_predicted(self,blocknum,tx_dict) -> float:
+        (agg_predvals_numer,agg_predvals_denom)  = self.get_agg_predval(blocknum,tx_dict)
+        return float(agg_predvals_numer/agg_predvals_denom)
+
     def _stake_token_bal(self) -> float:
         """How much e.g. OCEAN does this contract have?"""
         return from_wei(self.stake_token.balanceOf(self.treasurer))
@@ -75,30 +124,6 @@ class Datatoken3(Datatoken1):
         amt_DT_wei = to_wei(1.0)
         amt_BT_wei = self.exchange.BT_received(amt_DT_wei, consume_market_fee=0)
 
-    def buy_1DT(
-        self,
-        tx_dict: dict,
-    ):
-        """
-        Buy 1 DT
-        """
-
-        consume_market_fee_addr = ZERO_ADDRESS
-        consume_market_fee = 0
-        exchanges = self.getFixedRates()
-        exchange=exchanges[0]
-        print(exchange)
-        tx = self.contract.buyFromFre(
-            (
-            exchange[0],
-            exchange[1],
-            MAX_UINT256,
-            consume_market_fee,
-            consume_market_fee_addr
-            ),
-            tx_dict
-        )
-        return tx
 
 @enforce_types
 def _cur_blocknum() -> int:

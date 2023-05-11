@@ -42,12 +42,15 @@ class Datatoken2(DatatokenBase):
             consumer = get_from_address(tx_dict)
 
         fre_address = get_address_of_type(self.config_dict, "FixedPrice")
-
+        exchanges = self.get_exchanges()
+        assert (
+            len(exchanges)>1
+        ), "there are no fixed rate exchanges for this datatoken"
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         if not isinstance(exchange, OneExchange):
-            exchange = OneExchange(fre_address, exchange)
+            exchange = exchanges[0]
 
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
