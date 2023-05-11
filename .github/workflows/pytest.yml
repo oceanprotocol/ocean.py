@@ -27,6 +27,8 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
+      - name: Set ADDRESS_FILE
+        run: echo "ADDRESS_FILE=${HOME}/.ocean/ocean-contracts/artifacts/address.json" >> $GITHUB_ENV
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         run: |
