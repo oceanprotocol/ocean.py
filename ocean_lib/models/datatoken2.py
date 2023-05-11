@@ -41,7 +41,6 @@ class Datatoken2(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
         exchanges = self.get_exchanges()
         assert (
             len(exchanges) > 1
@@ -100,7 +99,8 @@ class Datatoken2(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
+        dispensers = self.get_dispensers()
+        assert len(dispensers) > 1, "there are no dispensers for this datatoken"
         return self.contract.buyFromDispenserAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
@@ -117,6 +117,6 @@ class Datatoken2(DatatokenBase):
                 ),
                 consume_market_fees.to_tuple(),
             ),
-            ContractBase.to_checksum_address(dispenser_address),
+            ContractBase.to_checksum_address(dispensers[0].address),
             tx_dict,
         )

@@ -195,21 +195,19 @@ def test_main():
 
     # TODO.   This now fails because predictoors are pushing random values, and so does OPF.
     # Chances to hit a match are slim
-    
-    #DT.payout(predict_blocknum, predictoor0.address, {"from": rando})
-    #DT.payout(predict_blocknum, predictoor1.address, {"from": rando})
-    
-    #balDT = OCEAN_bal(DT_treasurer)
-    #bal0, bal1 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
-    #earned0, earned1 = (bal0 - initbal0), (bal1 - initbal1)
-    #earned = earned0 + earned1
 
-    #assert balDT == initbalDT - earned
+    # DT.payout(predict_blocknum, predictoor0.address, {"from": rando})
+    # DT.payout(predict_blocknum, predictoor1.address, {"from": rando})
+
+    # balDT = OCEAN_bal(DT_treasurer)
+    # bal0, bal1 = OCEAN_bal(predictoor0), OCEAN_bal(predictoor1)
+    # earned0, earned1 = (bal0 - initbal0), (bal1 - initbal1)
+    # earned = earned0 + earned1
+
+    # assert balDT == initbalDT - earned
     # assert bal0 > initbal0
     # assert bal1 > initbal1
-    #End of TODO
-    
-    
+    # End of TODO
 
 
 def _setup():

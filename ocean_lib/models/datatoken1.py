@@ -219,10 +219,9 @@ class Datatoken1(DatatokenBase):
 
         bal = from_wei(self.balanceOf(buyer_addr))
         if bal < 1.0:
-            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-            from ocean_lib.models.dispenser import Dispenser  # isort: skip
-
-            dispenser = Dispenser(self.config_dict, dispenser_addr)
+            dispensers = self.get_dispensers()
+            assert len(dispensers) > 1, "there are no dispensers for this datatoken"
+            dispenser = dispensers[0]
 
             # catch key failure modes
             st = dispenser.status(self.address)
@@ -256,16 +255,18 @@ class Datatoken1(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
-
+        exchanges = self.get_exchanges()
+        assert (
+            len(exchanges) > 1
+        ), "there are no fixed rate exchanges for this datatoken"
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
+        if not isinstance(exchange, OneExchange):
+            exchange = exchanges[0]
+
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
-
-        if not isinstance(exchange, OneExchange):
-            exchange = OneExchange(fre_address, exchange)
 
         exchange.buy_DT(
             datatoken_amt=to_wei(1),

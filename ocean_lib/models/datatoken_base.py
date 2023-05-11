@@ -356,6 +356,22 @@ class DatatokenBase(ABC, ContractBase):
         return tx
 
     @enforce_types
+    def get_dispensers(self, active=True) -> list:
+        """return List[Dispenser] - all the dispensers for this datatoken"""
+        # import here to avoid circular import
+        from ocean_lib.models.dispenser import Dispenser
+
+        dispensers = []
+        addrs = self.getDispensers()
+        for address in addrs:
+            dispenser = Dispenser(self.config_dict, address)
+            is_active = dispenser.status(self.address)
+            if active and not is_active:
+                continue
+            dispensers.append(dispenser)
+        return dispensers
+
+    @enforce_types
     def dispense(self, amount: Union[int, str], tx_dict: dict):
         """
         Dispense free tokens via the dispenser faucet.
