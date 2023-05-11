@@ -30,7 +30,6 @@ logger = logging.getLogger("ocean")
 
 
 class TokenFeeInfo:
-    @enforce_types
     def __init__(
         self,
         address: Optional[str] = None,
@@ -44,7 +43,6 @@ class TokenFeeInfo:
 
         self.amount = amount
 
-    @enforce_types
     def to_tuple(self):
         return (self.address, self.token, self.amount)
 
@@ -53,7 +51,6 @@ class TokenFeeInfo:
         address, token, amount = tup
         return cls(address, token, amount)
 
-    @enforce_types
     def __str__(self):
         s = (
             f"TokenFeeInfo: \n"
@@ -64,7 +61,6 @@ class TokenFeeInfo:
         return s
 
 
-@enforce_types
 class DatatokenArguments:
     def __init__(
         self,
@@ -152,7 +148,6 @@ class DatatokenArguments:
         return datatoken
 
 
-@enforce_types
 class DatatokenRoles(IntEnum):
     MINTER = 0
     PAYMENT_MANAGER = 1
