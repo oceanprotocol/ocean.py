@@ -28,7 +28,7 @@ Since ocean-contracts predictoor branch is WIP, make sure you always pull latest
 ```console
 docker pull oceanprotocol/ocean-contracts:predictoor 
 export CONTRACTS_VERSION=predictoor
-./start_ocean.sh --predictoor
+./start_ocean.sh --no-dashboard --no-provider --no-aquarius --no-elasticsearch --no-ipfs
 ```
 
 
