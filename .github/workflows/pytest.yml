@@ -34,7 +34,7 @@ jobs:
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-c2d --with-thegraph --skip-subgraph-deploy > start_ocean.log &
         env:
-          CONTRACTS_VERSION: v1.1.3
+          CONTRACTS_VERSION: predictoor
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
