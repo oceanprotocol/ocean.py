@@ -69,7 +69,7 @@ def test_nft_creation(
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.getCurrentTemplateCount() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 3
 
 
 @pytest.mark.unit
@@ -230,7 +230,7 @@ def test_start_multiple_order(
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.getCurrentTemplateCount() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 3
 
     # Tests datatoken can be checked as deployed by the factory
     assert data_nft_factory.check_datatoken(datatoken.address)

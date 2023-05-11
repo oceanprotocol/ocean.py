@@ -736,7 +736,7 @@ def test_fail_create_datatoken(
 @pytest.mark.unit
 def test_datatoken_cap(publisher_wallet, consumer_wallet, data_nft_factory):
     # create NFT with ERC20
-    with pytest.raises(Exception, match="Cap is needed for Datatoken Template 2"):
+    with pytest.raises(Exception, match="Template 2 needs cap"):
         DatatokenArguments(template_index=2, name="DTB1", symbol="EntDT1Symbol")
 
 
