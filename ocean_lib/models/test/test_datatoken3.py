@@ -224,7 +224,7 @@ def _setup():
     print(f"Load contracts from address_file: {address_file}")
     config = get_config_dict("development")
     config["ADDRESS_FILE"] = address_file
-    ocean = Ocean(config, "no_provider")
+    ocean = Ocean(config)
 
     # DEPLOYER mints 20K OCEAN, and sends 2K OCEAN to TEST_PRIVATE_KEY1 & 2
     mint_fake_OCEAN(config)
