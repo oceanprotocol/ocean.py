@@ -16,12 +16,18 @@ Ensure pre-requisites:
 
 Open a new console, call it "barge console".
 
-In barge console:
+If you don't have barge:
 
 ```console
 git clone https://github.com/oceanprotocol/barge
 cd barge
-git checkout feature/predictoor
+```
+
+Since ocean-contracts predictoor branch is WIP, make sure you always pull latest version before running barge
+
+```console
+docker pull oceanprotocol/ocean-contracts:predictoor 
+export CONTRACTS_VERSION: predictoor
 ./start_ocean.sh --predictoor
 ```
 
@@ -72,7 +78,7 @@ export TEST_PRIVATE_KEY6=0x3ff9bd14c137a8d1eec9980046c0fefde79c5ac2b023b20bed343
 In work console:
 ```console
 #run main prototype 3 test. The "-s" gives verbose printing.
-pytest ocean_lib/models/predictoor/test/test_datatoken3.py::test_main  -s
+pytest ocean_lib/models/test/test_datatoken3.py::test_main  -s
 ```
 
 For envvars that aren't set, `pytest` uses values in `pytest.ini`.
