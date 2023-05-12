@@ -52,12 +52,12 @@ def get_contract_filename(contract_name: str) -> str:
                 path.exists()
             ), f"Found path = '{path}' via glob, yet path.exists() is False"
             return path
-
     # didn't find locally, so use use artifacts lib
-    path = os.path.join(artifacts.__file__, "..", contract_basename)
+    path = os.path.join(os.path.dirname(artifacts.__file__), "", contract_basename)
     path = Path(path).expanduser().resolve()
     if not path.exists():
         raise TypeError(f"Contract '{contract_name}' not found in artifacts.")
+    return path
 
 
 @enforce_types
