@@ -189,6 +189,7 @@ class TestComputeFlow(object):
         # functionality covered in test_compute_update_trusted_algorithm
         assert True
 
+    @pytest.mark.skip(reason="Fix #642 on provider")
     @pytest.mark.integration
     def test_compute_update_trusted_algorithm(
         self,
