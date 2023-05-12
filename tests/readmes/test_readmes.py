@@ -36,6 +36,7 @@ class TestReadmes(object):
         # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
         skippable = [
+            "c2d-flow",  # temporary until issue 642 from provider is fixed
             "c2d-flow-more-examples",
             "developers",
             "df",

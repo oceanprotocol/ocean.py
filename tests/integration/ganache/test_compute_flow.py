@@ -189,6 +189,7 @@ class TestComputeFlow(object):
         # functionality covered in test_compute_update_trusted_algorithm
         assert True
 
+    @pytest.mark.skip(reason="Fix #642 on provider")
     @pytest.mark.integration
     def test_compute_update_trusted_algorithm(
         self,
@@ -492,7 +493,7 @@ def run_compute_test(
 
     if "with_result" in scenarios:
         succeeded = False
-        for _ in range(0, 200):
+        for _ in range(0, 300):
             status = ocean_instance.compute.status(
                 dataset_and_userdata.ddo, service, job_id, consumer_wallet
             )
