@@ -27,6 +27,7 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
+          ref: 'issue-367-remove-sudo'
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         run: |
