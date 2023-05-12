@@ -493,11 +493,7 @@ def run_compute_test(
 
     if "with_result" in scenarios:
         succeeded = False
-<<<<<<< HEAD
-        for _ in range(0, 150):
-=======
         for _ in range(0, 300):
->>>>>>> main
             status = ocean_instance.compute.status(
                 dataset_and_userdata.ddo, service, job_id, consumer_wallet
             )
