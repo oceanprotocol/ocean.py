@@ -75,7 +75,6 @@ jobs:
         if: ${{ failure() }}
       - name: Setup upterm session
         uses: lhotari/action-upterm@v1
-        if: steps.pytest.outcome == 'failure'
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
         env:
