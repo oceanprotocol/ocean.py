@@ -492,7 +492,7 @@ def run_compute_test(
 
     if "with_result" in scenarios:
         succeeded = False
-        for _ in range(0, 300):
+        for _ in range(0, 150):
             status = ocean_instance.compute.status(
                 dataset_and_userdata.ddo, service, job_id, consumer_wallet
             )

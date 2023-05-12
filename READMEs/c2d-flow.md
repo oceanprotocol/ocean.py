@@ -162,7 +162,7 @@ In the same Python console, you can check the job status as many times as needed
 import time
 from decimal import Decimal
 succeeded = False
-for _ in range(0, 300):
+for _ in range(0, 150):
     status = ocean.compute.status(DATA_ddo, compute_service, job_id, bob)
     if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
