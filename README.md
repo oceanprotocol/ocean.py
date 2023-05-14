@@ -3,10 +3,6 @@ Copyright 2023 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-**[Predictoor README](READMEs/predictoor.md).** (Remove this when done prototype)
-
-----
-
 <h1 align="center">
 <img src="https://github.com/oceanprotocol/art/blob/main/splashes/ocean_py.png?raw=true" width="300"/>
 </h1>
@@ -74,6 +70,10 @@ Each of the following shows how to publish & consume a particular type of data.
 
 - **[Developers flow](READMEs/developers.md)** - to further develop ocean.py
 - [Release process](READMEs/release-process.md) - to do a new release of ocean.py
+
+**[Predictoor README](READMEs/predictoor.md).** (Remove this when done prototype)
+
+----
 
 ## 🏛 License
 
