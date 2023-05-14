@@ -42,9 +42,7 @@ class Datatoken2(DatatokenBase):
             consumer = get_from_address(tx_dict)
 
         exchanges = self.get_exchanges()
-        assert (
-            len(exchanges) > 0
-        ), "there are no fixed rate exchanges for this datatoken"
+        assert exchanges, "there are no fixed rate exchanges for this datatoken"
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
@@ -100,7 +98,8 @@ class Datatoken2(DatatokenBase):
             consumer = get_from_address(tx_dict)
 
         dispensers = self.get_dispensers()
-        assert len(dispensers) > 0, "there are no dispensers for this datatoken"
+        assert dispensers, "there are no dispensers for this datatoken"
+        dispenser = dispensers[0]
         return self.contract.buyFromDispenserAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
@@ -117,6 +116,6 @@ class Datatoken2(DatatokenBase):
                 ),
                 consume_market_fees.to_tuple(),
             ),
-            ContractBase.to_checksum_address(dispensers[0].address),
+            ContractBase.to_checksum_address(dispenser.address),
             tx_dict,
         )

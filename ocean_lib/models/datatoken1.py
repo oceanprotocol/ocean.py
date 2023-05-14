@@ -220,7 +220,7 @@ class Datatoken1(DatatokenBase):
         bal = from_wei(self.balanceOf(buyer_addr))
         if bal < 1.0:
             dispensers = self.get_dispensers()
-            assert len(dispensers) > 0, "there are no dispensers for this datatoken"
+            assert dispensers, "there are no dispensers for this datatoken"
             dispenser = dispensers[0]
 
             # catch key failure modes
@@ -256,9 +256,7 @@ class Datatoken1(DatatokenBase):
             consumer = get_from_address(tx_dict)
 
         exchanges = self.get_exchanges()
-        assert (
-            len(exchanges) > 0
-        ), "there are no fixed rate exchanges for this datatoken"
+        assert exchanges, "there are no fixed rate exchanges for this datatoken"
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
