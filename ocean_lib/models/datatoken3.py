@@ -58,7 +58,7 @@ class Datatoken3(Datatoken1):
         }
 
     def start_subscription_with_DT(self, tx_dict: dict):
-        """ Start subscription if user has DT in his wallet """
+        """Start subscription if user has DT in his wallet"""
         subscr_addr = tx_dict["from"].address
         assert not self.isValidSubscription(
             subscr_addr
@@ -67,7 +67,7 @@ class Datatoken3(Datatoken1):
         self.start_order(subscr_addr, 0, self.get_zero_provider_fee(), tx_dict)
 
     def start_subscription_with_buy_DT(self, exchange, tx_dict: dict):
-        """ Start subscription by buying one DT and call order """
+        """Start subscription by buying one DT and call order"""
         subscr_addr = tx_dict["from"].address
         assert not self.is_valid_subscription(
             subscr_addr
@@ -106,9 +106,7 @@ class Datatoken3(Datatoken1):
         )
 
     def get_agg_predval(self, blocknum, tx_dict) -> float:
-        (agg_predvals_numer, agg_predvals_denom) = self.getAggPredval(
-            blocknum, tx_dict
-        )
+        (agg_predvals_numer, agg_predvals_denom) = self.getAggPredval(blocknum, tx_dict)
         return float(agg_predvals_numer / agg_predvals_denom)
 
     def _stake_token_bal(self) -> float:

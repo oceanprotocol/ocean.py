@@ -126,7 +126,7 @@ def test_main():
             if n_predns[p_i] >= max_n_predns:
                 continue
 
-            predict_blocknum = DT.soonestBlockToPredict(cur_blocknum()+1)
+            predict_blocknum = DT.soonestBlockToPredict(cur_blocknum() + 1)
             if DT.submittedPredval(predict_blocknum, p.address):
                 continue
             predval = random.choice([True, False])
