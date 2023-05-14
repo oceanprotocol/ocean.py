@@ -31,7 +31,7 @@ class PredClass:
 
 @enforce_types
 class Datatoken3(Datatoken1):
-    CONTRACT_NAME = "ERC20TemplatePredictoor"
+    CONTRACT_NAME = "ERC20Template3"
 
     def setup_exchange(self, tx_dict, rate: int):
         """
@@ -42,10 +42,10 @@ class Datatoken3(Datatoken1):
         self.exchange = self.create_exchange(
             tx_dict,
             rate,
-            base_token_addr=self.stake_token(),
+            base_token_addr=self.stakeToken(),
         )
 
-    def get_empty_provider_fee(self):
+    def get_zero_provider_fee(self):
         return {
             "providerFeeAddress": ZERO_ADDRESS,
             "providerFeeToken": ZERO_ADDRESS,
@@ -58,26 +58,23 @@ class Datatoken3(Datatoken1):
         }
 
     def start_subscription_with_DT(self, tx_dict: dict):
-        # Start subscription if user has DT in his wallet
+        """ Start subscription if user has DT in his wallet """
         subscr_addr = tx_dict["from"].address
-        assert not self.is_valid_subscription(
+        assert not self.isValidSubscription(
             subscr_addr
         ), "this account has already started a subscription"
         self.approve_publish_market_order_fees(tx_dict)
-        # call startOrdrt
-        self.start_order(subscr_addr, 0, self.get_empty_provider_fee(), tx_dict)
+        self.start_order(subscr_addr, 0, self.get_zero_provider_fee(), tx_dict)
 
     def start_subscription_with_buy_DT(self, exchange, tx_dict: dict):
-        # Start subscription by buying one DT and call order
+        """ Start subscription by buying one DT and call order """
         subscr_addr = tx_dict["from"].address
         assert not self.is_valid_subscription(
             subscr_addr
         ), "this account has already started a subscription"
         self.approve_publish_market_order_fees(tx_dict)
         exchanges = self.get_exchanges()
-        assert (
-            len(exchanges) > 1
-        ), "there are no fixed rate exchanges for this datatoken"
+        assert exchanges, "there are no fixed rate exchanges for this datatoken"
         exchange = exchanges[0]
         amt_needed = exchange.BT_needed(to_wei(1), 0)
         provider_fees = self.get_empty_provider_fee()
@@ -108,8 +105,8 @@ class Datatoken3(Datatoken1):
             tx_dict,
         )
 
-    def get_predicted(self, blocknum, tx_dict) -> float:
-        (agg_predvals_numer, agg_predvals_denom) = self.get_agg_predval(
+    def get_agg_predval(self, blocknum, tx_dict) -> float:
+        (agg_predvals_numer, agg_predvals_denom) = self.getAggPredval(
             blocknum, tx_dict
         )
         return float(agg_predvals_numer / agg_predvals_denom)

@@ -83,7 +83,6 @@ def test_main():
     DT.treasurer = DT_treasurer
 
     # post DTs for sale
-    DT.mint(opf, to_wei(n_DTs), {"from": opf})
     DT.setup_exchange({"from": opf}, to_wei(DT_price))
     DT.approve(DT.exchange.address, to_wei(n_DTs), {"from": opf})
 
@@ -91,13 +90,13 @@ def test_main():
     # TRADER BUYS SUBSCRIPTION TO AGG PREDVALS (do every 24h)
 
     # trader buys 1 DT with OCEAN
-    exchanges = DT.get_exchanges()
-    OCEAN_needed = from_wei(exchanges[0].BT_needed(to_wei(1), consume_market_fee=0))
-    OCEAN.approve(exchanges[0].address, to_wei(OCEAN_needed), {"from": trader})
+    exchange = DT.get_exchanges()[0]
+    OCEAN_needed = from_wei(exchange.BT_needed(to_wei(1), consume_market_fee=0))
+    OCEAN.approve(exchange.address, to_wei(OCEAN_needed), {"from": trader})
 
     consume_market_fee_addr = ZERO_ADDRESS
     consume_market_fee = 0
-    tx = exchanges[0].buy_DT(
+    tx = exchange.buy_DT(
         datatoken_amt=to_wei(1),
         consume_market_fee_addr=consume_market_fee_addr,
         consume_market_fee=consume_market_fee,
@@ -107,7 +106,7 @@ def test_main():
     DT.approve(DT.address, to_wei(1), {"from": trader})
     DT.start_subscription_with_DT({"from": trader})  # good for next 24h
 
-    assert DT.is_valid_subscription(trader.address) == True
+    assert DT.isValidSubscription(trader.address) == True
     # ======================================================================
     # ======================================================================
     # LOOP across epochs
@@ -127,17 +126,17 @@ def test_main():
             if n_predns[p_i] >= max_n_predns:
                 continue
 
-            predict_blocknum = DT.soonest_block_to_predict()
-            if DT.submitted_predval(predict_blocknum, p.address):
+            predict_blocknum = DT.soonestBlockToPredict(cur_blocknum()+1)
+            if DT.submittedPredval(predict_blocknum, p.address):
                 continue
             predval = random.choice([True, False])
-            DT.submit_predval(predval, stakes[p_i], predict_blocknum, {"from": p})
+            DT.submitPredval(predval, stakes[p_i], predict_blocknum, {"from": p})
             aa = OCEAN_approved(p, DT_treasurer)
             n_predns[p_i] += 1
             actions_s += (
                 f"Predictoor{p_i+1} "
                 + f" submitted pred'n #{n_predns[p_i]}"
-                + f" at block B={predict_blocknum}, epoch E={DT.cur_epoch()}."
+                + f" at block B={predict_blocknum}, epoch E={DT.curEpoch()}."
                 + f" Now, OCEAN approved={aa:.1f}\n"
             )
             blocks_predicted.add(predict_blocknum)
@@ -145,7 +144,7 @@ def test_main():
         # TRADER GETS AGG PREDVAL (do every 5min)
         blocks_not_seen = blocks_predicted - blocks_seen_by_trader
         for predict_blocknum in blocks_not_seen:
-            prediction = DT.get_predicted(predict_blocknum, {"from": trader})
+            prediction = DT.get_agg_predval(predict_blocknum, {"from": trader})
             assert 0.0 <= prediction <= 1.0
             blocks_seen_by_trader.add(predict_blocknum)
             actions_s += (
@@ -155,19 +154,19 @@ def test_main():
 
         # OWNER SUBMITS TRUE VALUE. This will update predictoors' claimable amts
         for predict_blocknum in blocks_predicted:
-            if DT.truval_submitted(predict_blocknum):  # already set
+            if DT.epochStatus(predict_blocknum):  # already set
                 blocks_with_truevals.add(predict_blocknum)
                 continue
             if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
-            DT.submit_trueval(predict_blocknum, trueval, {"from": opf})
+            DT.submitTrueVal(predict_blocknum, trueval, {"from": opf})
             blocks_with_truevals.add(predict_blocknum)
             chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
 
         # MAYBE MINE. LOG OUTPUT
-        block_s = f"[B={cur_blocknum()}, E={DT.cur_epoch()}]"
+        block_s = f"[B={cur_blocknum()}, E={DT.curEpoch()}]"
         if actions_s == "":  # nothing happened, so move forward by a block
             chain.mine(1)
             s = "."
