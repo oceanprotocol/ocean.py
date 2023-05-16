@@ -124,7 +124,7 @@ compute_service = DATA_ddo.services[1]
 algo_service = ALGO_ddo.services[0]
 free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint, DATA_ddo.chain_id)
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from ocean_lib.models.compute_input import ComputeInput
 
 DATA_compute_input = ComputeInput(DATA_ddo, compute_service)
@@ -137,7 +137,7 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     consume_market_order_fee_address=bob.address,
     tx_dict={"from": bob},
     compute_environment=free_c2d_env["id"],
-    valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
+    valid_until=int((datetime.now(timezone.utc) + timedelta(days=1)).timestamp()),
     consumer_address=free_c2d_env["consumerAddress"],
 )
 assert datasets, "pay for dataset unsuccessful"

@@ -7,10 +7,8 @@ import logging
 import logging.config
 import os
 import secrets
-import pytest
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
-from functools import wraps
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
@@ -236,7 +234,10 @@ def get_provider_fees(
     provider_fee_address = provider_wallet.address
 
     provider_data = json.dumps(
-        {"environment": compute_env, "timestamp": datetime.utcnow().timestamp()},
+        {
+            "environment": compute_env,
+            "timestamp": datetime.now(timezone.utc).timestamp(),
+        },
         separators=(",", ":"),
     )
     message_hash = Web3.solidityKeccak(

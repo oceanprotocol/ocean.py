@@ -7,7 +7,7 @@
 import logging
 import os
 import re
-from datetime import datetime
+from datetime import datetime, timezone
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
@@ -47,7 +47,7 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.utcnow().timestamp())
+        nonce = str(datetime.now(timezone.utc).timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
 
         if isinstance(wallet, ClefAccount):

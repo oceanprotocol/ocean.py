@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import pytest
@@ -438,7 +438,7 @@ def run_compute_test(
     time_difference = (
         timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
     )
-    valid_until = int((datetime.utcnow() + time_difference).timestamp())
+    valid_until = int((datetime.now(timezone.utc) + time_difference).timestamp())
 
     if "just_fees" in scenarios:
         fees_response = ocean_instance.retrieve_provider_fees_for_compute(
@@ -539,7 +539,7 @@ def run_compute_test(
         # ensure order expires
         time.sleep(time_difference.seconds + 1)
 
-        valid_until = int((datetime.utcnow() + time_difference).timestamp())
+        valid_until = int((datetime.now(timezone.utc) + time_difference).timestamp())
         datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
