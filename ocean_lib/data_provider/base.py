@@ -71,7 +71,9 @@ class DataServiceProviderBase:
         """
         Return the service endpoints from the provider URL.
         """
-        provider_info = DataServiceProviderBase.get(url=provider_uri)
+        provider_info = DataServiceProviderBase._http_method(
+            "get", url=provider_uri
+        ).json()
 
         return provider_info["serviceEndpoints"]
 
@@ -82,10 +84,12 @@ class DataServiceProviderBase:
         Return the provider address
         """
         try:
-            _, envs_endpoint = DataServiceProviderBase.build_endpoint(
+            method, envs_endpoint = DataServiceProviderBase.build_endpoint(
                 "computeEnvironments", provider_uri, {"chainId": chain_id}
             )
-            environments = DataServiceProviderBase.get(envs_endpoint)
+            environments = DataServiceProviderBase._http_method(
+                method, url=envs_endpoint
+            ).json()
 
             if str(chain_id) not in environments:
                 logger.warning(
@@ -106,7 +110,9 @@ class DataServiceProviderBase:
         Return the provider address
         """
         try:
-            provider_info = DataServiceProviderBase.get(provider_uri)
+            provider_info = DataServiceProviderBase._http_method(
+                "get", provider_uri
+            ).json()
 
             if "providerAddress" in provider_info:
                 logger.warning(
@@ -249,26 +255,6 @@ class DataServiceProviderBase:
                 f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
             )
             raise
-
-    @staticmethod
-    @enforce_types
-    def get(*args, **kwargs) -> dict:
-        return DataServiceProviderBase._http_method("get", *args, **kwargs).json()
-
-    @staticmethod
-    @enforce_types
-    def get_raw(*args, **kwargs) -> Optional[Union[Mock, Response]]:
-        return DataServiceProviderBase._http_method("get", *args, **kwargs)
-
-    @staticmethod
-    @enforce_types
-    def post(*args, **kwargs) -> dict:
-        return DataServiceProviderBase._http_method("post", *args, **kwargs).json()
-
-    @staticmethod
-    @enforce_types
-    def post_raw(*args, **kwargs) -> Optional[Union[Mock, Response]]:
-        return DataServiceProviderBase._http_method("post", *args, **kwargs)
 
     @staticmethod
     @enforce_types
