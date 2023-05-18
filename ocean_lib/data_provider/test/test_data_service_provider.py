@@ -520,27 +520,23 @@ def test_initialize_compute_failure():
 
 
 @pytest.mark.unit
-def test_job_result_failure():
+def test_job_result_failure(consumer_wallet):
     """Tests compute job result failures."""
     service = Mock(spec=Service)
     service.service_endpoint = "http://172.15.0.4:8030"
     service.id = "abc"
 
-    wallet = Mock()
-    wallet.address = "none"
-    wallet.private_key = os.getenv("TEST_PRIVATE_KEY1")
-
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.compute_job_result("0xabc", 0, service, wallet)
+        DataSP.compute_job_result("0xabc", 0, service, consumer_wallet)
 
     http_client = HttpClientEmptyMock()
     DataSP.set_http_client(http_client)
 
     with pytest.raises(DataProviderException):
-        DataSP.compute_job_result("0xabc", 0, service, wallet)
+        DataSP.compute_job_result("0xabc", 0, service, consumer_wallet)
 
     DataSP.set_http_client(get_requests_session())
 
