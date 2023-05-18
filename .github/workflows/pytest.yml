@@ -50,7 +50,7 @@ jobs:
         run: cat "$HOME/.ocean/ocean-contracts/artifacts/address.json"
       - name: Test with pytest
         run: |
-          pytest ocean_lib/data_provider/test_data_service_provider.py::test_job_result_failure
+          pytest ocean_lib/data_provider/test/test_data_service_provider.py::test_job_result_failure
         env:
           REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
           REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
