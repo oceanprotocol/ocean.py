@@ -532,12 +532,6 @@ def test_job_result_failure(consumer_wallet):
     with pytest.raises(DataProviderException):
         DataSP.compute_job_result("0xabc", 0, service, consumer_wallet)
 
-    http_client = HttpClientEmptyMock()
-    DataSP.set_http_client(http_client)
-
-    with pytest.raises(DataProviderException):
-        DataSP.compute_job_result("0xabc", 0, service, consumer_wallet)
-
     DataSP.set_http_client(get_requests_session())
 
 

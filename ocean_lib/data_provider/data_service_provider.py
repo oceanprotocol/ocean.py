@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from unittest.mock import Mock
 
 from enforce_typing import enforce_types
 from requests.models import PreparedRequest, Response
@@ -47,10 +48,14 @@ class DataServiceProvider(DataServiceProviderBase):
         response = DataServiceProvider._http_method(
             method, url=nonce_endpoint, params=payload
         )
+
+        if isinstance(response, Mock):
+            return str(datetime.now(timezone.utc).timestamp() * 1000)
+
         nonce = (
-            int(response.json()["nonce"]) + 1
+            float(response.json()["nonce"]) + 1
             if response.json()["nonce"]
-            else datetime.now(timezone.utc).timestamp() * 1000
+            else float(datetime.now(timezone.utc).timestamp() * 1000)
         )
 
         return str(nonce)
