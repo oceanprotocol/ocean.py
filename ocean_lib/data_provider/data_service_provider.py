@@ -6,6 +6,7 @@
 """Provider module."""
 import json
 import logging
+from datetime import datetime, timezone
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -46,7 +47,11 @@ class DataServiceProvider(DataServiceProviderBase):
         response = DataServiceProvider._http_method(
             method, url=nonce_endpoint, params=payload
         )
-        nonce = response.json()["nonce"] + 1
+        nonce = (
+            response.json()["nonce"] + 1
+            if response.json()["nonce"]
+            else datetime.now(timezone.utc).timestamp() * 1000
+        )
 
         return str(nonce)
 
