@@ -7,13 +7,11 @@
 import logging
 import os
 import re
-from datetime import datetime, timezone
 from json import JSONDecodeError
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
 
 import requests
-from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
 from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
@@ -21,7 +19,6 @@ from requests.sessions import Session
 
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.web3_internal.utils import sign_with_clef, sign_with_key
 
 logger = logging.getLogger(__name__)
 
@@ -43,17 +40,6 @@ class DataServiceProviderBase:
     def set_http_client(http_client: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         DataServiceProviderBase._http_client = http_client
-
-    @staticmethod
-    @enforce_types
-    def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.now(timezone.utc).timestamp())
-        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-
-        if isinstance(wallet, ClefAccount):
-            return nonce, str(sign_with_clef(f"{msg}{nonce}", wallet))
-
-        return nonce, str(sign_with_key(f"{msg}{nonce}", wallet.private_key))
 
     @staticmethod
     @enforce_types

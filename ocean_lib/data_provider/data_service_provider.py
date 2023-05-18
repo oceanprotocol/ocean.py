@@ -16,6 +16,7 @@ from requests.models import PreparedRequest, Response
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.base import DataServiceProviderBase
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
+from ocean_lib.data_provider.utils import sign_message
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -33,6 +34,22 @@ class DataServiceProvider(DataServiceProviderBase):
 
     _http_client = get_requests_session()
     provider_info = None
+
+    @staticmethod
+    @enforce_types
+    def get_nonce(address: str, provider_uri: str) -> str:
+        method, nonce_endpoint = DataServiceProvider.build_endpoint(
+            "nonce", provider_uri=provider_uri
+        )
+
+        payload = {"userAddress": address}
+
+        response = DataServiceProvider._http_method(
+            method, url=nonce_endpoint, params=payload
+        )
+        nonce = response.json()["nonce"] + 1
+
+        return str(nonce)
 
     @staticmethod
     @enforce_types
@@ -161,8 +178,10 @@ class DataServiceProvider(DataServiceProviderBase):
 
         for i in indexes:
             payload["fileIndex"] = i
-            payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
-                consumer_wallet, did
+            payload["nonce"], payload["signature"] = sign_message(
+                consumer_wallet,
+                did,
+                provider_uri=DataServiceProviderBase.get_root_uri(service_endpoint),
             )
             response = DataServiceProvider._http_method(
                 method, url=download_endpoint, params=payload, stream=True, timeout=3
@@ -340,8 +359,12 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: dict of job_id to result urls.
         """
-        nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{job_id}{str(index)}"
+        nonce, signature = sign_message(
+            consumer,
+            f"{consumer.address}{job_id}{str(index)}",
+            provider_uri=DataServiceProviderBase.get_root_uri(
+                dataset_compute_service.service_endpoint
+            ),
         )
 
         req = PreparedRequest()
@@ -409,8 +432,10 @@ class DataServiceProvider(DataServiceProviderBase):
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
-        nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{job_id}{did}"
+        nonce, signature = sign_message(
+            consumer,
+            f"{consumer.address}{job_id}{did}",
+            provider_uri=DataServiceProviderBase.get_root_uri(service_endpoint),
         )
 
         req = PreparedRequest()
@@ -469,8 +494,12 @@ class DataServiceProvider(DataServiceProviderBase):
                     _input, req_key
                 ), f"The received dataset does not have a {req_key}."
 
-        nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{dataset.did}"
+        nonce, signature = sign_message(
+            consumer,
+            f"{consumer.address}{dataset.did}",
+            provider_uri=DataServiceProviderBase.get_root_uri(
+                dataset.service.service_endpoint
+            ),
         )
 
         payload = {
