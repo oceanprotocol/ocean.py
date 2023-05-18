@@ -48,9 +48,9 @@ class DataServiceProvider(DataServiceProviderBase):
             method, url=nonce_endpoint, params=payload
         )
         nonce = (
-            response.json()["nonce"] + 1
+            int(response.json()["nonce"]) + 1
             if response.json()["nonce"]
-            else datetime.now(timezone.utc).timestamp() * 1000
+            else int(datetime.now(timezone.utc).timestamp() * 1000)
         )
 
         return str(nonce)
