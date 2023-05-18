@@ -16,7 +16,6 @@ from requests.models import PreparedRequest, Response
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.base import DataServiceProviderBase
 from ocean_lib.data_provider.fileinfo_provider import FileInfoProvider
-from ocean_lib.data_provider.utils import sign_message
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -175,6 +174,8 @@ class DataServiceProvider(DataServiceProviderBase):
         if userdata:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
+
+        from ocean_lib.data_provider.utils import sign_message  # fix circular import
 
         for i in indexes:
             payload["fileIndex"] = i
@@ -359,6 +360,8 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: dict of job_id to result urls.
         """
+        from ocean_lib.data_provider.utils import sign_message  # fix circular import
+
         nonce, signature = sign_message(
             consumer,
             f"{consumer.address}{job_id}{str(index)}",
@@ -432,6 +435,9 @@ class DataServiceProvider(DataServiceProviderBase):
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
+
+        from ocean_lib.data_provider.utils import sign_message  # fix circular import
+
         nonce, signature = sign_message(
             consumer,
             f"{consumer.address}{job_id}{did}",
@@ -493,6 +499,8 @@ class DataServiceProvider(DataServiceProviderBase):
                 assert getattr(
                     _input, req_key
                 ), f"The received dataset does not have a {req_key}."
+
+        from ocean_lib.data_provider.utils import sign_message  # fix circular import
 
         nonce, signature = sign_message(
             consumer,
