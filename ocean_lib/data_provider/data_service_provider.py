@@ -50,7 +50,7 @@ class DataServiceProvider(DataServiceProviderBase):
         nonce = (
             int(response.json()["nonce"]) + 1
             if response.json()["nonce"]
-            else int(datetime.now(timezone.utc).timestamp() * 1000)
+            else datetime.now(timezone.utc).timestamp() * 1000
         )
 
         return str(nonce)
