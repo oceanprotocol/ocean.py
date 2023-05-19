@@ -66,7 +66,7 @@ def test_main():
     initial_list = data_nft.getTokensList()
     data_nft.createERC20(
         3,
-        ["DT3", "DT3"],
+        ["ETH-USDT", "ETH-USDT"],
         [opf.address, opf.address, opf.address, OCEAN.address, OCEAN.address],
         [MAX_UINT256, 0, s_per_block, s_per_epoch, s_per_subscription, 30],
         [],
@@ -160,7 +160,7 @@ def test_main():
             if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
-            DT.submitTrueVal(predict_blocknum, trueval, {"from": opf})
+            DT.submitTrueVal(predict_blocknum, trueval,0,False, {"from": opf})
             blocks_with_truevals.add(predict_blocknum)
             chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
