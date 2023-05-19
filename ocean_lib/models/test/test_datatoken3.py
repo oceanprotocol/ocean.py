@@ -160,7 +160,7 @@ def test_main():
             if cur_blocknum() < predict_blocknum:  # not enough time passed
                 continue
             trueval = random.choice([True, False])
-            DT.submitTrueVal(predict_blocknum, trueval,0,False, {"from": opf})
+            DT.submitTrueVal(predict_blocknum, trueval, 0, False, {"from": opf})
             blocks_with_truevals.add(predict_blocknum)
             chain.mine(1)  # forced this, because prev step isn't on chain
             actions_s += "OPF submitted a trueval\n"
