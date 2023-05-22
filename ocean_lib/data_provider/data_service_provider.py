@@ -38,30 +38,6 @@ class DataServiceProvider(DataServiceProviderBase):
 
     @staticmethod
     @enforce_types
-    def get_nonce(address: str, provider_uri: str) -> str:
-        method, nonce_endpoint = DataServiceProvider.build_endpoint(
-            "nonce", provider_uri=provider_uri
-        )
-
-        payload = {"userAddress": address}
-
-        response = DataServiceProvider._http_method(
-            method, url=nonce_endpoint, params=payload
-        )
-
-        if isinstance(response, Mock):
-            return str(datetime.now(timezone.utc).timestamp() * 1000)
-
-        nonce = (
-            float(response.json()["nonce"]) + 2
-            if response.json()["nonce"]
-            else float(datetime.now(timezone.utc).timestamp() * 1000)
-        )
-
-        return str(nonce)
-
-    @staticmethod
-    @enforce_types
     def initialize(
         did: str,
         service: Any,  # Can not add Service typing due to enforce_type errors.
