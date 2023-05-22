@@ -53,7 +53,7 @@ class DataServiceProvider(DataServiceProviderBase):
             return str(datetime.now(timezone.utc).timestamp() * 1000)
 
         nonce = (
-            float(response.json()["nonce"]) + 1
+            float(response.json()["nonce"]) + 2
             if response.json()["nonce"]
             else float(datetime.now(timezone.utc).timestamp() * 1000)
         )
@@ -185,14 +185,11 @@ class DataServiceProvider(DataServiceProviderBase):
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        from ocean_lib.data_provider.utils import sign_message  # fix circular import
-
         for i in indexes:
             payload["fileIndex"] = i
-            payload["nonce"], payload["signature"] = sign_message(
+            payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet,
                 did,
-                provider_uri=DataServiceProviderBase.get_root_uri(service_endpoint),
             )
             response = DataServiceProvider._http_method(
                 method, url=download_endpoint, params=payload, stream=True, timeout=3
@@ -370,14 +367,10 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: dict of job_id to result urls.
         """
-        from ocean_lib.data_provider.utils import sign_message  # fix circular import
 
-        nonce, signature = sign_message(
+        nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{job_id}{str(index)}",
-            provider_uri=DataServiceProviderBase.get_root_uri(
-                dataset_compute_service.service_endpoint
-            ),
         )
 
         req = PreparedRequest()
@@ -446,12 +439,9 @@ class DataServiceProvider(DataServiceProviderBase):
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
 
-        from ocean_lib.data_provider.utils import sign_message  # fix circular import
-
-        nonce, signature = sign_message(
+        nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{job_id}{did}",
-            provider_uri=DataServiceProviderBase.get_root_uri(service_endpoint),
         )
 
         req = PreparedRequest()
@@ -510,14 +500,9 @@ class DataServiceProvider(DataServiceProviderBase):
                     _input, req_key
                 ), f"The received dataset does not have a {req_key}."
 
-        from ocean_lib.data_provider.utils import sign_message  # fix circular import
-
-        nonce, signature = sign_message(
+        nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{dataset.did}",
-            provider_uri=DataServiceProviderBase.get_root_uri(
-                dataset.service.service_endpoint
-            ),
         )
 
         payload = {
