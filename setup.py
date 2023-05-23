@@ -56,7 +56,7 @@ dev_requirements = [
     "isort==5.12.0",
     "flake8==6.0.0",
     "black",  # need to keep this up to date to brownie
-    "pre-commit==3.3.1",
+    "pre-commit==3.3.2",
     "licenseheaders==0.8.8",
 ]
 
