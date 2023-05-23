@@ -6,9 +6,11 @@
 """Provider module."""
 import json
 import logging
+from datetime import datetime, timezone
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from unittest.mock import Mock
 
 from enforce_typing import enforce_types
 from requests.models import PreparedRequest, Response
@@ -162,7 +164,8 @@ class DataServiceProvider(DataServiceProviderBase):
         for i in indexes:
             payload["fileIndex"] = i
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
-                consumer_wallet, did
+                consumer_wallet,
+                did,
             )
             response = DataServiceProvider._http_method(
                 method, url=download_endpoint, params=payload, stream=True, timeout=3
@@ -340,8 +343,10 @@ class DataServiceProvider(DataServiceProviderBase):
 
         :return: dict of job_id to result urls.
         """
+
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{job_id}{str(index)}"
+            consumer,
+            f"{consumer.address}{job_id}{str(index)}",
         )
 
         req = PreparedRequest()
@@ -409,8 +414,10 @@ class DataServiceProvider(DataServiceProviderBase):
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
+
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{job_id}{did}"
+            consumer,
+            f"{consumer.address}{job_id}{did}",
         )
 
         req = PreparedRequest()
@@ -470,7 +477,8 @@ class DataServiceProvider(DataServiceProviderBase):
                 ), f"The received dataset does not have a {req_key}."
 
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{dataset.did}"
+            consumer,
+            f"{consumer.address}{dataset.did}",
         )
 
         payload = {

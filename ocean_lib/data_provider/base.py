@@ -47,7 +47,7 @@ class DataServiceProviderBase:
     @staticmethod
     @enforce_types
     def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.now(timezone.utc).timestamp())
+        nonce = str(datetime.now(timezone.utc).timestamp() * 1000)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
 
         if isinstance(wallet, ClefAccount):
