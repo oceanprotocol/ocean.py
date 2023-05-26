@@ -1,0 +1,33 @@
+##
+## Copyright 2023 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
+name: Ocean.py library docs
+
+on:
+  - push
+
+jobs:
+  build:
+    environment: CC_REPORTER_ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Ocean.py
+        uses: actions/checkout@v2
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install dependencies
+        working-directory: ${{ github.workspace }}
+        run: |
+          python -m pip install --upgrade pip
+          pip install ocean-lib
+          pip install pdoc3
+      - name: Generate docs
+        working-directory: ${{ github.workspace }}
+        run: |
+          set +o histexpand
+          mkdir docs
+          find ocean_lib/models/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html {} -o ./docs
+          find ocean_lib/ocean/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html {} -o ./docs
