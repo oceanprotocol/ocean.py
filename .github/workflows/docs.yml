@@ -29,5 +29,5 @@ jobs:
         run: |
           set +o histexpand
           mkdir docs
-          find ocean_lib/models/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html {} -o ./docs
-          find ocean_lib/ocean/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html {} -o ./docs
+          find ocean_lib/models/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html --force {} -o ./docs
+          find ocean_lib/ocean/ -type f -name "*.py" -not -path "*/test/*" | xargs -I{} pdoc --html --force {} -o ./docs
