@@ -25,7 +25,7 @@ install_requirements = [
     "enforce-typing==1.0.0.post1",
     "eciespy==0.3.11",
     "eth-brownie==1.19.3",
-    "cryptography==40.0.2",
+    "cryptography==41.0.1",
     "yarl==1.8.1",
     "bitarray>=2.6.0,<3",
     # brownie requires web3.py, eth-abi, requests, and more,
