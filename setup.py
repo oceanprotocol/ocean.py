@@ -39,7 +39,7 @@ test_requirements = [
     "codacy-coverage==1.3.11",
     "coverage==7.2.6",
     "mccabe==0.7.0",
-    "pytest==6.2.5",
+    "pytest==7.3.2",
     "pytest-watch==4.2.0",
     "pytest-env==0.6.2",
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
