@@ -278,6 +278,7 @@ def test_expose_endpoints():
     ]
 
 
+@pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
 @pytest.mark.integration
 def test_c2d_environments():
     """Tests that the test ocean-compute env exists on the DataServiceProvider."""
