@@ -31,10 +31,6 @@ install_requirements = [
     # brownie requires web3.py, eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
-    "cython<3.0.0",
-    "web3==5.31.3",
-    "py-solc-x==1.1.1",
-    "eth-brownie==1.19.3",
 ]
 # Required to run setup.py:
 setup_requirements = ["pytest-runner"]
