@@ -80,6 +80,7 @@ class TestComputeFlow(object):
 
         return self.published_ddos[ddo.did]
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_raw_algo(
         self,
@@ -113,6 +114,7 @@ class TestComputeFlow(object):
                 algorithm_meta=raw_algorithm,
             )
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_registered_algo(
         self,
@@ -134,6 +136,7 @@ class TestComputeFlow(object):
             algorithm_and_userdata=AssetAndUserdata(self.algorithm, None),
         )
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_reuse_order(
         self,
@@ -156,6 +159,7 @@ class TestComputeFlow(object):
             scenarios=["reuse_order"],
         )
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_multi_inputs(
         self,
@@ -189,6 +193,7 @@ class TestComputeFlow(object):
         # functionality covered in test_compute_update_trusted_algorithm
         assert True
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_update_trusted_algorithm(
         self,
@@ -240,6 +245,7 @@ class TestComputeFlow(object):
                 scenarios=["with_result"],
             )
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_trusted_publisher(
         self,
@@ -277,6 +283,7 @@ class TestComputeFlow(object):
                 ),
             )
 
+    @pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
     @pytest.mark.integration
     def test_compute_just_provider_fees(
         self,
