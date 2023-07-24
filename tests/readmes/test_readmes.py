@@ -49,6 +49,7 @@ class TestReadmes(object):
             "publish-flow-restapi",  # TODO: fix and restore
             "gas-strategy-remote",
             "using-clef",
+            "c2d-flow",  # TODO: fix c2d CI containers in #1449 and restore afterwards
         ]
 
         if script_name.replace("test_", "").replace(".py", "") in skippable:
