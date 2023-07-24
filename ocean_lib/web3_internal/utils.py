@@ -111,7 +111,7 @@ def check_network(network_name: str):
 @enforce_types
 def get_gas_fees() -> tuple:
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
-    gas_resp = requests.get("https://gasstation-mainnet.matic.network/v2")
+    gas_resp = requests.get("https://gasstation.polygon.technology/v2")
 
     if not gas_resp or gas_resp.status_code != 200:
         print("Invalid response from Polygon gas station. Retry with brownie values...")
