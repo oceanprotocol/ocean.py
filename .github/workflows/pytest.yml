@@ -30,7 +30,7 @@ jobs:
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         run: |
-          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-c2d --with-thegraph --skip-subgraph-deploy > start_ocean.log &
+          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --skip-subgraph-deploy > start_ocean.log &
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
@@ -43,7 +43,7 @@ jobs:
         run: |
           for i in $(seq 1 250); do
             sleep 5
-            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
+            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
             done
       - name: "Read address.json contents"
         working-directory: ${{ github.workspace }}
@@ -58,7 +58,7 @@ jobs:
           REMOTE_TEST_PRIVATE_KEY1: ${{secrets.REMOTE_TEST_PRIVATE_KEY1}}
           REMOTE_TEST_PRIVATE_KEY2: ${{secrets.REMOTE_TEST_PRIVATE_KEY2}}
       - name:  docker logs
-        run: docker logs ocean_aquarius_1 && docker logs ocean_provider_1 && docker logs ocean_provider2_1 && docker logs ocean_computetodata_1 && docker logs ocean_kindcluster_1
+        run: docker logs ocean_aquarius_1 && docker logs ocean_provider_1
         if: ${{ failure() }}
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
