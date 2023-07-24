@@ -52,9 +52,11 @@ Issue: MacOS "Unsupported Architecture"
 - If you run MacOS, you may encounter an "Unsupported Architecture" issue.
 - Workaround: install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [Details](https://github.com/oceanprotocol/ocean.py/issues/486).
 
-To install ocean-lib using Python 3.11, run `pip install vyper==0.3.7 --ignore-requires-python` and `sudo apt-get install python3.11-dev` before installing ocean-lib.
-Since the parsimonious dependency does not support Python 3.11, you need to edit the `parsimonious/expressions.py` to `import getfullargspec as getargsspec` instead of the regular import.
-These are temporary fixes until all dependencies are fully supported in Python 3.11. We do not directly use Vyper in ocean-lib.
+Issue: Dependencies and Python 3.11
+
+- ocean.py has two dependencies that don't support Python 3.11 yet. Here's the workaround for each.
+- (1) The `eth-brownie` package uses Vyper which doesn't support Python 3.11. The workaround: before installing ocean-lib, run `pip install vyper==0.3.7 --ignore-requires-python` and `sudo apt-get install python3.11-dev`
+- (2) The `parsimonious` package depends on `getargsspec`, which doesn't support Python 3.11. The workaround: open the package's expressions.py file (e.g. in ./venv/lib/python3.11/site-packages/parsimonious/expressions.py), and change the line `import getfullargspec as getargsspec` instead of the regular import.
 
 ## ocean.py uses Brownie
 
