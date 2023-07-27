@@ -8,6 +8,7 @@ import json
 import logging
 import lzma
 import os
+import time
 from datetime import datetime
 from typing import List, Optional, Tuple, Type, Union
 
@@ -50,8 +51,12 @@ from ocean_lib.structures.file_objects import (
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import check_network
+from tests.resources.mocks.dbs_mock import DBSMock
 
 logger = logging.getLogger("ocean")
+
+# TODO: replace with real DBS
+dbs = DBSMock()
 
 
 class AssetArguments:
@@ -243,6 +248,65 @@ class OceanAssets:
 
         files = [UrlFile(url)]
 
+        return self.create_bundled(files, tx_dict, asset_args)
+
+    @enforce_types
+    def create_dbs_asset(
+        self, name: str, file_type: str, file: str, tx_dict: dict, *args, **kwargs
+    ) -> tuple:
+        """Create asset of type "data", having UrlFiles, with good defaults"""
+        asset_args = get_args_object(args, kwargs, AssetArguments)
+        if not asset_args.metadata:
+            asset_args.metadata = OceanAssets.default_metadata(name, tx_dict)
+
+        dbs_reqs = dbs.get_file_type_requirements(file_type, self._chain_id)
+
+        if not dbs_reqs:
+            raise Exception("Unsupported by decentralised backend storage.")
+
+        # TODO: not necessarily ocean token
+        from ocean_lib.ocean.util import get_ocean_token_address
+
+        token_address = get_ocean_token_address(self._config_dict)
+
+        dbs_quote = dbs.get_quote(
+            file_type, 3600, self._chain_id, token_address, tx_dict["from"]
+        )
+
+        token = DatatokenBase.get_typed(self._config_dict, token_address)
+
+        token.approve(dbs_quote["approveAddress"], dbs_quote["tokenAmount"], tx_dict)
+
+        quote_id = dbs_quote["quoteId"]
+
+        nonce, signature = DataServiceProvider.sign_message(
+            tx_dict["from"],
+            f"{quote_id}",
+        )
+        dbs.upload_quote(quote_id, nonce, signature, file)
+
+        status = dbs.get_status(quote_id)
+        if status == 0:
+            raise Exception("Quote not found.")
+
+        start = time.time()
+
+        while status < 400 and time.time() - start < 60:
+            time.sleep(1)
+            status = dbs.get_status(quote_id)
+
+        if status != 400:
+            raise Exception("DBS got quote status: " + str(status))
+
+        nonce, signature = DataServiceProvider.sign_message(
+            tx_dict["from"],
+            f"{quote_id}",
+        )
+
+        files = dbs.get_link(quote_id, nonce, signature)
+        import pdb
+
+        pdb.set_trace()
         return self.create_bundled(files, tx_dict, asset_args)
 
     @enforce_types

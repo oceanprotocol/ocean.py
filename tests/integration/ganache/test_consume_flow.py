@@ -17,9 +17,11 @@ ARWEAVE_TRANSACTION_ID = "a4qJoQZa1poIv5guEzkfgZYSAD0uYm7Vw4zm_tCswVQ"
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize("asset_type", ["simple", "graphql", "onchain", "arweave"])
+@pytest.mark.parametrize(
+    "asset_type", ["simple", "graphql", "onchain", "arweave", "dbs"]
+)
 def test_consume_asset(
-    config: dict, publisher_wallet, consumer_wallet, basic_asset, asset_type
+    config: dict, publisher_wallet, consumer_wallet, basic_asset, asset_type, tmpdir
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, data_provider)
@@ -29,6 +31,12 @@ def test_consume_asset(
     elif asset_type == "arweave":
         data_nft, dt, ddo = ocean_assets.create_arweave_asset(
             "Data NFTs in Ocean", ARWEAVE_TRANSACTION_ID, {"from": publisher_wallet}
+        )
+    elif asset_type == "dbs":
+        f1 = tmpdir.mkdir("mydir").join("myfile")
+        f1.write("text to myfile")
+        data_nft, dt, ddo = ocean_assets.create_dbs_asset(
+            "Data NFTs in Ocean", "arweave", str(f1), {"from": publisher_wallet}
         )
     elif asset_type == "onchain":
         abi = {
