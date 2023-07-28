@@ -46,8 +46,23 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def sign_message(wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.now(timezone.utc).timestamp() * 1000)
+    def sign_message(
+        wallet, msg: str, provider_uri: Optional[str] = None
+    ) -> Tuple[str, str]:
+        if provider_uri:
+            method, nonce_endpoint = DataServiceProviderBase.build_endpoint(
+                "nonce", provider_uri
+            )
+
+            nonce_response = DataServiceProviderBase._http_method(
+                method, url=nonce_endpoint, params={"userAddress": wallet.address}
+            ).json()
+
+            nonce = int(nonce_response["nonce"]) if nonce_response["nonce"] else 0
+            nonce = nonce + 1
+        else:
+            nonce = str(datetime.now(timezone.utc).timestamp() * 1000)
+
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
 
         if isinstance(wallet, ClefAccount):

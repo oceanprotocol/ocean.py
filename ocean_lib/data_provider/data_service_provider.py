@@ -164,8 +164,7 @@ class DataServiceProvider(DataServiceProviderBase):
         for i in indexes:
             payload["fileIndex"] = i
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
-                consumer_wallet,
-                did,
+                consumer_wallet, did, provider_uri=service_endpoint
             )
             response = DataServiceProvider._http_method(
                 method, url=download_endpoint, params=payload, stream=True, timeout=3
