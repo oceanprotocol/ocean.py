@@ -18,7 +18,7 @@ with open("README.md", encoding="utf8") as readme_file:
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
-    "ocean-contracts==1.1.12",
+    "ocean-contracts==1.1.14",
     "coloredlogs==15.0.1",
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
@@ -54,7 +54,7 @@ dev_requirements = [
     "twine==4.0.2",
     "watchdog==3.0.0",
     "isort==5.12.0",
-    "flake8==6.0.0",
+    "flake8==6.1.0",
     "black",  # need to keep this up to date to brownie
     "pre-commit==3.3.3",
     "licenseheaders==0.8.8",
