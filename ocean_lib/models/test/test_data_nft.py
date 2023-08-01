@@ -29,7 +29,7 @@ def test_permissions(
     data_nft,
 ):
     """Tests permissions' functions."""
-    assert data_nft.contract.name() == "NFT"
+    assert data_nft.name() == "NFT"
     assert data_nft.symbol() == "NFTSYMBOL"
     assert data_nft.balanceOf(publisher_wallet.address) == 1
     # Tests if the NFT was initialized
@@ -240,7 +240,9 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         [],
         {"from": consumer_wallet},
     )
-    assert receipt.events["MetadataCreated"]["decryptorUrl"] == "http://myprovider:8030"
+
+    event = data_nft.contract.events.MetadataCreated().processReceipt(receipt)[0]
+    assert event.args.decryptorUrl == "http://myprovider:8030"
 
     metadata_info = data_nft.getMetaData()
     assert metadata_info[3]
@@ -256,7 +258,9 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         [],
         {"from": consumer_wallet},
     )
-    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
+
+    event = data_nft.contract.events.MetadataUpdated().processReceipt(receipt)[0]
+    assert event.args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.getMetaData()
     assert metadata_info[3]
@@ -278,12 +282,12 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         {"from": publisher_wallet},
     )
 
-    assert (
-        receipt.events["TokenURIUpdate"]["tokenURI"] == "https://anothernewurl.com/nft/"
-    )
-    assert receipt.events["TokenURIUpdate"]["updatedBy"] == publisher_wallet.address
+    event = data_nft.contract.events.TokenURIUpdate().processReceipt(receipt)[0]
+    assert event.args.tokenURI == "https://anothernewurl.com/nft/"
+    assert event.args.updatedBy == publisher_wallet.address
 
-    assert receipt.events["MetadataUpdated"]["decryptorUrl"] == "http://foourl"
+    event = data_nft.contract.events.MetadataUpdated().processReceipt(receipt)[0]
+    assert event.args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.getMetaData()
     assert metadata_info[3]
@@ -469,14 +473,16 @@ def test_erc721_datatoken_functions(
         "https://newurl.com/nft/",
         {"from": publisher_wallet},
     )
-    registered_event = receipt.events["TokenURIUpdate"]
+    registered_event = data_nft.contract.events.TokenURIUpdate().processReceipt(
+        receipt
+    )[0]
 
     assert registered_event, "Cannot find TokenURIUpdate event."
-    assert registered_event["updatedBy"] == publisher_wallet.address
-    assert registered_event["tokenID"] == 1
-    assert registered_event["blockNumber"] == receipt.block_number
+    assert registered_event.args.updatedBy == publisher_wallet.address
+    assert registered_event.args.tokenID == 1
+    assert registered_event.args.blockNumber == receipt.blockNumber
     assert data_nft.tokenURI(1) == "https://newurl.com/nft/"
-    assert data_nft.tokenURI(1) == registered_event["tokenURI"]
+    assert data_nft.tokenURI(1) == registered_event.args.tokenURI
 
     # Tests failing setting token URI by another user
     with pytest.raises(Exception, match="not NFTOwner"):
@@ -571,7 +577,7 @@ def test_transfer_nft(
         "NFTtT",
         additional_datatoken_deployer=consumer_wallet.address,
     )
-    assert data_nft.contract.name() == "NFT to TRANSFER"
+    assert data_nft.name() == "NFT to TRANSFER"
     assert data_nft.symbol() == "NFTtT"
 
     receipt = data_nft.safeTransferFrom(
@@ -580,10 +586,10 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events["Transfer"]
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
 
-    assert transfer_event["from"] == publisher_wallet.address
-    assert transfer_event["to"] == consumer_wallet.address
+    assert getattr(transfer_event.args, "from") == publisher_wallet.address
+    assert transfer_event.args.to == consumer_wallet.address
     assert data_nft.balanceOf(consumer_wallet.address) == 1
     assert data_nft.balanceOf(publisher_wallet.address) == 0
     assert data_nft.isERC20Deployer(consumer_wallet.address)
@@ -598,10 +604,10 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events["Transfer"]
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
 
-    assert transfer_event["from"] == publisher_wallet.address
-    assert transfer_event["to"] == consumer_wallet.address
+    assert getattr(transfer_event.args, "from") == publisher_wallet.address
+    assert transfer_event.args.to == consumer_wallet.address
     assert data_nft.isERC20Deployer(consumer_wallet.address)
 
     # Creates an ERC20
@@ -633,7 +639,9 @@ def test_transfer_nft(
         {"from": publisher_wallet},
     )
 
-    set_publishing_fee_event = receipt.events["PublishMarketFeeChanged"]
+    set_publishing_fee_event = (
+        datatoken.contract.events.PublishMarketFeeChanged().processReceipt(receipt)[0]
+    )
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
 
     publish_fees = datatoken.get_publish_market_order_fees()

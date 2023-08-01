@@ -194,7 +194,7 @@ def test_delete_job_result(provider_wallet):
 @pytest.mark.integration
 def test_encrypt(provider_wallet, file1, file2):
     """Tests successful encrypt job."""
-    key = provider_wallet.private_key
+    key = provider_wallet.privateKey.hex()
     # Encrypt file objects
     res = {"files": [file1.to_dict(), file2.to_dict()]}
     result = DataEncryptor.encrypt(res, DEFAULT_PROVIDER_URL, 8996)

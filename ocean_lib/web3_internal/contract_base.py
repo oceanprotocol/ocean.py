@@ -41,10 +41,10 @@ def function_wrapper(contract, web3, contract_functions, func_name):
         func = getattr(contract_functions, func_name)
         result = func(*args2, **kwargs)
 
-        if not tx_dict and result.abi["stateMutability"] != "view":
+        if not tx_dict and result.abi["stateMutability"] not in ["view", "pure"]:
             raise Exception("Needs tx_dict with 'from' key.")
 
-        if result.abi["stateMutability"] == "view":
+        if result.abi["stateMutability"] in ["view", "pure"]:
             return result.call()
         else:
             tx_dict["from"] = (

@@ -106,7 +106,7 @@ class DatatokenArguments:
                 address=wallet_address, token=OCEAN_address
             )
 
-        data_nft.contract.createERC20(
+        data_nft.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
@@ -395,7 +395,7 @@ class DatatokenBase(ABC, ContractBase):
         )
 
     def get_publish_market_order_fees(self):
-        return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
+        return TokenFeeInfo.from_tuple(self.getPublishingMarketFee())
 
     def get_from_pricing_schema_and_order(self, *args, **kwargs):
         dispensers = self.dispenser_status().active

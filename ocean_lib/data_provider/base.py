@@ -68,7 +68,7 @@ class DataServiceProviderBase:
         if isinstance(wallet, ClefAccount):
             return nonce, str(sign_with_clef(f"{msg}{nonce}", wallet))
 
-        return nonce, str(sign_with_key(f"{msg}{nonce}", wallet.private_key))
+        return nonce, str(sign_with_key(f"{msg}{nonce}", wallet.privateKey.hex()))
 
     @staticmethod
     @enforce_types

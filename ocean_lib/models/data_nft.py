@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-import warnings
 from base64 import b64encode
 from enum import IntEnum, IntFlag
 from typing import Optional
@@ -300,13 +299,13 @@ class DataNFT(ContractBase):
         """Set key/value data via ERC725, with strings for key/value"""
         field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
         field_value_bytes = field_value.encode()  # to array of bytes
-        tx = self.contract.setNewData(field_label_hash, field_value_bytes, tx_dict)
+        tx = self.setNewData(field_label_hash, field_value_bytes, tx_dict)
         return tx
 
     def get_data(self, field_label: str) -> str:
         """Get key/value data via ERC725, with strings for key/value"""
         field_label_hash = Web3.keccak(text=field_label)  # to keccak256 hash
-        field_value_hex = self.contract.getData(field_label_hash)
+        field_value_hex = self.getData(field_label_hash)
         field_value = field_value_hex.decode("ascii")
         return field_value
 
@@ -376,13 +375,9 @@ class DataNFTArguments:
             tx_dict,
         )
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore",
-                message=".*Event log does not contain enough topics for the given ABI.*",
-            )
-            assert receipt and receipt.events, "Missing NFTCreated event"
-            registered_event = receipt.events["NFTCreated"]
+        registered_event = data_nft_factory.contract.events.NFTCreated().processReceipt(
+            receipt
+        )[0]
+        data_nft_address = registered_event.args.newTokenAddress
 
-        data_nft_address = registered_event["newTokenAddress"]
         return DataNFT(config_dict, data_nft_address)
