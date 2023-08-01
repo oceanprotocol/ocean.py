@@ -15,7 +15,6 @@ from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
-from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_another_consumer_wallet,
@@ -40,7 +39,6 @@ setup_logging()
 
 @pytest.fixture(autouse=True)
 def setup_all(request, config, ocean_token):
-    connect_to_network("development")
     accounts.clear()
 
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
@@ -126,7 +124,6 @@ def ocean_address(config) -> str:
 
 @pytest.fixture
 def ocean_token(config, ocean_address) -> Datatoken1:
-    connect_to_network("development")
     return Datatoken1(config, ocean_address)
 
 

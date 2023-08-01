@@ -35,7 +35,6 @@ from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -83,9 +82,6 @@ class Ocean:
             raise Exception(json.dumps(config_errors))
 
         self.config_dict = config_dict
-
-        network_name = config_dict["NETWORK_NAME"]
-        check_network(network_name)
 
         if not data_provider:
             data_provider = DataServiceProvider

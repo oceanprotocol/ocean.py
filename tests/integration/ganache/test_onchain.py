@@ -6,7 +6,6 @@ import os
 import shutil
 
 import pytest
-from brownie import network
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -43,7 +42,9 @@ def test_consume_parametrized_onchain_data(
     }
     router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
-        address=router_address, chainId=network.chain[-1].number, abi=abi
+        address=router_address,
+        chainId=config["web3_instance"].eth.get_block("latest"),
+        abi=abi,
     )
 
     files = [onchain_data]

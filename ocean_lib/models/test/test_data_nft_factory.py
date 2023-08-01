@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
@@ -267,7 +266,7 @@ def test_start_multiple_order(
             0,
         ],
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signed = config["web3_instance"].eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
     order_data = OrderData(

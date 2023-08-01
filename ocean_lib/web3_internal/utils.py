@@ -7,7 +7,6 @@ from collections import namedtuple
 from typing import Any, Union
 
 import requests
-from brownie import network
 from brownie.network import chain
 from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
@@ -81,31 +80,6 @@ def split_signature(signature: Any) -> Signature:
         v = 27 + v % 2
 
     return Signature(v, r, s)
-
-
-@enforce_types
-def connect_to_network(network_name: str):
-    if network.is_connected():
-        if network.show_active() != network_name:
-            network.disconnect()
-            network.connect(network_name)
-    else:
-        network.connect(network_name)
-
-
-@enforce_types
-def check_network(network_name: str):
-    if not network.is_connected():
-        raise Exception(
-            'Brownie network is not connected. Please call network.connect("{network_name}")'
-        )
-
-    active_network = network.show_active()
-
-    if active_network != network_name:
-        raise Exception(
-            'Brownie network is connected to {active_network}. Please call network.connect("{network_name}")'
-        )
 
 
 @enforce_types

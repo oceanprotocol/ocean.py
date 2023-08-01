@@ -11,7 +11,6 @@ import os
 from datetime import datetime
 from typing import List, Optional, Tuple, Type, Union
 
-from brownie import network
 from enforce_typing import enforce_types
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -49,7 +48,6 @@ from ocean_lib.structures.file_objects import (
     UrlFile,
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -82,11 +80,8 @@ class OceanAssets:
     @enforce_types
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
-        network_name = config_dict["NETWORK_NAME"]
-        check_network(network_name)
-
         self._config_dict = config_dict
-        self._chain_id = network.chain.id
+        self._chain_id = config_dict["CHAIN_ID"]
 
         self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider

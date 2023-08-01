@@ -8,7 +8,6 @@ from base64 import b64encode
 from enum import IntEnum, IntFlag
 from typing import Optional
 
-from brownie import network
 from enforce_typing import enforce_types
 from web3 import Web3
 
@@ -21,7 +20,6 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.utils import check_network
 
 """
 def addManager(address: str) -> None:
@@ -295,8 +293,7 @@ class DataNFT(ContractBase):
         return datatoken_args.create_datatoken(self, tx_dict)
 
     def calculate_did(self):
-        check_network(self.network)
-        chain_id = network.chain.id
+        chain_id = self.config_dict["CHAIN_ID"]
         return f"did:op:{create_checksum(self.address + str(chain_id))}"
 
     def set_data(self, field_label: str, field_value: str, tx_dict: dict):

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie import network
 from web3.main import Web3
 
 from ocean_lib.models.datatoken_base import DatatokenRoles, TokenFeeInfo
@@ -138,13 +137,17 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         ["bytes32", "bytes"],
         [receipt.txid, provider_data],
     )
-    provider_signed = network.web3.eth.sign(provider_fee_address, data=provider_message)
+    provider_signed = config["web3_instance"].eth.sign(
+        provider_fee_address, data=provider_message
+    )
 
     message = Web3.solidityKeccak(
         ["bytes"],
         [Web3.toHex(Web3.toBytes(text="12345"))],
     )
-    consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
+    consumer_signed = config["web3_instance"].eth.sign(
+        consumer_wallet.address, data=message
+    )
 
     receipt_interm = datatoken.orderExecuted(
         receipt.txid,
@@ -160,7 +163,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
     assert executed_event["providerAddress"] == provider_fee_address
 
     # Tests exceptions for order_executed
-    consumer_signed = network.web3.eth.sign(provider_fee_address, data=message)
+    consumer_signed = config["web3_instance"].eth.sign(
+        provider_fee_address, data=message
+    )
     with pytest.raises(Exception, match="Consumer signature check failed"):
         datatoken.orderExecuted(
             receipt.txid,
@@ -176,7 +181,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         ["bytes"],
         [Web3.toHex(Web3.toBytes(text="12345"))],
     )
-    consumer_signed = network.web3.eth.sign(consumer_wallet.address, data=message)
+    consumer_signed = config["web3_instance"].eth.sign(
+        consumer_wallet.address, data=message
+    )
 
     with pytest.raises(Exception, match="Provider signature check failed"):
         datatoken.orderExecuted(

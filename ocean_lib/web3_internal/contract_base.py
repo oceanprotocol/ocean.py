@@ -12,7 +12,6 @@ from eth_typing import ChecksumAddress
 from web3.main import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
-from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger(__name__)
 
@@ -31,9 +30,6 @@ class ContractBase(object):
         ), "contract_name property needs to be implemented in subclasses."
 
         self.config_dict = config_dict
-
-        self.network = config_dict["NETWORK_NAME"]
-        check_network(self.network)
 
         self.contract = load_contract(self.contract_name, address)
         assert not address or (self.contract.address.lower() == address.lower())

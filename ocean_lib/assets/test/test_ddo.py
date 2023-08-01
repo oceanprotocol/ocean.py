@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie import network
 
 from ocean_lib.agreements.consumable import MalformedCredential
 from ocean_lib.assets.credentials import simplify_credential_to_address
@@ -31,7 +30,7 @@ def test_ddo_utils():
     )
     did = ddo_dict["id"]
     assert ddo_dict["version"] == "4.1.0"
-    assert ddo_dict["chainId"] == network.chain.id
+    assert ddo_dict["chainId"] == 8996
     chain_id = ddo_dict["chainId"]
 
     assert ddo_dict["metadata"] == {

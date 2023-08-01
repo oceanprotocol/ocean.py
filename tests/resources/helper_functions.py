@@ -12,7 +12,6 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
-from brownie import network
 from brownie.network import accounts
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -346,7 +345,7 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         ],
     )
 
-    signed = network.web3.eth.sign(wallet.address, data=message)
+    signed = config["web3_instance"].eth.sign(wallet.address, data=message)
     signature = split_signature(signed)
 
     return {
