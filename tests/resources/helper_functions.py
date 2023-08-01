@@ -12,8 +12,8 @@ from decimal import Decimal
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
-from brownie.network import accounts
 from enforce_typing import enforce_types
+from eth_account import Account
 from web3 import Web3
 
 from ocean_lib.example_config import get_config_dict
@@ -32,7 +32,7 @@ _NETWORK = "ganache"
 
 @enforce_types
 def get_wallet(index: int):
-    return accounts.add(os.getenv(f"TEST_PRIVATE_KEY{index}"))
+    return Account.from_key(private_key=os.getenv(f"TEST_PRIVATE_KEY{index}"))
 
 
 @enforce_types
@@ -52,7 +52,7 @@ def get_another_consumer_wallet():
 
 @enforce_types
 def get_provider_wallet():
-    return accounts.add(os.getenv("PROVIDER_PRIVATE_KEY"))
+    return Account.from_key(private_key=os.getenv("PROVIDER_PRIVATE_KEY"))
 
 
 def get_factory_deployer_wallet(config):
@@ -64,12 +64,12 @@ def get_factory_deployer_wallet(config):
         return None
 
     config = get_config_dict()
-    return accounts.add(private_key)
+    return Account.from_key(private_key=private_key)
 
 
 def get_ganache_wallet():
-    return accounts.add(
-        "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
+    return Account.from_key(
+        private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
     )
 
 
@@ -80,7 +80,7 @@ def generate_wallet():
     secret = secrets.token_hex(32)
     private_key = "0x" + secret
 
-    new_wallet = accounts.add(private_key)
+    new_wallet = Account.from_key(private_key=private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
     deployer_wallet.transfer(new_wallet, to_wei(3))
 

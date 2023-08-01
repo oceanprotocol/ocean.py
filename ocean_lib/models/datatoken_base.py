@@ -190,7 +190,7 @@ class DatatokenBase(ABC, ContractBase):
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        return self.contract.startOrder(
+        return self.startOrder(
             checksum_addr(consumer),
             service_index,
             (
@@ -214,7 +214,7 @@ class DatatokenBase(ABC, ContractBase):
         provider_fees: dict,
         tx_dict: dict,
     ) -> str:
-        return self.contract.reuseOrder(
+        return self.reuseOrder(
             order_tx_id,
             (
                 checksum_addr(provider_fees["providerFeeAddress"]),

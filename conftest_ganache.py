@@ -5,7 +5,6 @@
 from typing import Tuple
 
 import pytest
-from brownie.network import accounts
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
@@ -39,8 +38,6 @@ setup_logging()
 
 @pytest.fixture(autouse=True)
 def setup_all(request, config, ocean_token):
-    accounts.clear()
-
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
@@ -54,13 +51,16 @@ def setup_all(request, config, ocean_token):
         print("Can not find adddresses.")
         return
 
-    assert wallet.balance() >= to_wei(10), "Need more ETH"
+    balance = config["web3_instance"].eth.get_balance(wallet.address)
+    assert balance >= to_wei(10), "Need more ETH"
 
     amt_distribute = to_wei(1000)
-    ocean_token.mint(wallet, to_wei(2000), {"from": wallet})
+    ocean_token.mint(wallet, to_wei(2000), {"from": wallet.address})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if w.balance() < to_wei(2):
+        balance = config["web3_instance"].eth.get_balance(w.address)
+
+        if balance < to_wei(2):
             wallet.transfer(w, to_wei(4))
 
         if ocean_token.balanceOf(w) < to_wei(100):

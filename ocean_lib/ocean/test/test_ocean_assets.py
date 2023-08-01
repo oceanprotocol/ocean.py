@@ -8,7 +8,6 @@ from unittest.mock import patch
 
 import brownie
 import pytest
-from brownie import network
 from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -43,7 +42,7 @@ def test_register_asset(publisher_ocean):
 
 
 @pytest.mark.integration
-def test_update(publisher_ocean, publisher_wallet):
+def test_update(publisher_ocean, publisher_wallet, config):
     data_nft, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean, publisher_wallet
     )
@@ -79,7 +78,7 @@ def test_update(publisher_ocean, publisher_wallet):
     # Check flags update
     registered_token_event = data_nft.contract.events.get_sequence(
         ddo2.event.get("block"),
-        network.chain[-1].number,
+        config["web3_instance"].eth.get_block("latest"),
         "MetadataUpdated",
     )
 
@@ -151,7 +150,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
     assert ddo4.services[0].datatoken == ddo2_prev_datatokens[0].get("address")
 
     nft_token = publisher_ocean.get_nft_token(ddo4.nft["address"])
-    bn = network.chain[-1].number
+    bn = config["web3_instance"].eth.get_block("latest")
 
     updated_event = nft_token.contract.events.get_sequence(bn, bn, "MetadataUpdated")[0]
     assert updated_event.args.updatedBy == publisher_wallet.address
