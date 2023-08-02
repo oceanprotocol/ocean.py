@@ -33,12 +33,12 @@ def test_single_events(ve_allocate):
     """Test emitted events."""
     nftaddr1 = accounts[1].address
     tx = ve_allocate.setAllocation(100, nftaddr1, 1, {"from": accounts[0]})
-    assert tx.events["AllocationSet"].values() == [
-        accounts[0].address,
-        accounts[1].address,
-        1,
-        100,
-    ]
+    event = ve_allocate.contract.events.AllocationSet().processReceipt(tx)[0]
+
+    assert event.args.sender == accounts[0].address
+    assert event.args.nft == accounts[1].address
+    assert event.args.chainId == 1
+    assert event.args.amount == 100
 
 
 @pytest.mark.unit
@@ -61,12 +61,12 @@ def test_batch_events(ve_allocate):
     tx = ve_allocate.setBatchAllocation(
         [25, 75], [nftaddr1, nftaddr2], [1, 1], {"from": accounts[0]}
     )
-    assert tx.events["AllocationSetMultiple"].values() == [
-        accounts[0].address,
-        [nftaddr1, nftaddr2],
-        [1, 1],
-        [25, 75],
-    ]
+    event = ve_allocate.contract.events.AllocationSetMultiple().processReceipt(tx)[0]
+
+    assert event.args.sender == accounts[0].address
+    assert event.args.nft == [nftaddr1, nftaddr2]
+    assert event.args.chainId == [1, 1]
+    assert event.args.amount == [25, 75]
 
 
 def setup_function():

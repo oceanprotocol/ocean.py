@@ -602,7 +602,7 @@ class OceanAssets:
             tx_dict,
         )
 
-        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
+        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.transactionHash.hex())
 
         return ddo
 
@@ -741,7 +741,7 @@ class OceanAssets:
 
         receipt = dt.start_order(**params)
 
-        return receipt.txid
+        return receipt.transactionHash
 
     @enforce_types
     def pay_for_compute_service(

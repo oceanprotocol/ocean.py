@@ -108,7 +108,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
     ddo.datatokens.append(
         {
             "address": datatoken.address,
-            "name": datatoken.contract.name(),
+            "name": datatoken.name(),
             "symbol": datatoken.symbol(),
             "serviceId": access_service.id,
         }
