@@ -685,14 +685,15 @@ def test_nft_transfer_with_fre(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = receipt.events["Transfer"]
 
-    assert transfer_event["from"] == publisher_wallet.address
-    assert transfer_event["to"] == consumer_wallet.address
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
+
+    assert getattr(transfer_event.args, "from") == publisher_wallet.address
+    assert transfer_event.args.to == consumer_wallet.address
     assert data_nft.balanceOf(consumer_wallet) == 1
     assert data_nft.balanceOf(publisher_wallet) == 0
     assert data_nft.isERC20Deployer(consumer_wallet)
-    assert data_nft.ownerOf(1) == consumer_wallet
+    assert data_nft.ownerOf(1) == consumer_wallet.address
     permissions = datatoken.getPermissions(consumer_wallet)
     assert not permissions[0]  # the newest owner is not the minter
     datatoken.addMinter(consumer_wallet, {"from": consumer_wallet})

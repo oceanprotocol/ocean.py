@@ -73,7 +73,7 @@ class ExchangeArguments:
                 self.dt_decimals,
                 self.rate,
                 self.publish_market_fee,
-                self.with_mint,
+                int(self.with_mint),
             ],
         )
 

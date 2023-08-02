@@ -10,11 +10,8 @@ import pytest
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken_base import DatatokenArguments, DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import to_wei
-from ocean_lib.structures.file_objects import GraphqlQuery
 from tests.resources.ddo_helpers import get_first_service_by_type
 
 
@@ -94,7 +91,7 @@ def test_consume_simple_graphql_query(
         ddo,
         consumer_wallet,
         destination,
-        receipt.txid,
+        receipt.transactionHash.hex(),
         service,
     )
     file_path = os.path.join(destination, os.listdir(destination)[0])

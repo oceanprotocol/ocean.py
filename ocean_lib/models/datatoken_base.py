@@ -280,7 +280,8 @@ class DatatokenBase(ABC, ContractBase):
 
         tx = self.createFixedRate(*(args_tup + (tx_dict,)))
 
-        exchange_id = tx.events["NewFixedRate"]["exchangeId"]
+        event = self.contract.events.NewFixedRate().processReceipt(tx)[0]
+        exchange_id = event.args.exchangeId
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
 

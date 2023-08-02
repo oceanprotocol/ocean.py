@@ -43,7 +43,7 @@ def test_consume_parametrized_onchain_data(
     router_address = get_address_of_type(config, "Router")
     onchain_data = SmartContractCall(
         address=router_address,
-        chainId=config["web3_instance"].eth.get_block("latest"),
+        chainId=config["web3_instance"].eth.chain_id,
         abi=abi,
     )
 
@@ -125,7 +125,12 @@ def test_consume_parametrized_onchain_data(
     # this is where user is sending the required consumer_parameters
     userdata = {"baseToken": ddo.nft_address.lower()}
     ocean_assets.download_asset(
-        ddo, consumer_wallet, destination, receipt.txid, service, userdata=userdata
+        ddo,
+        consumer_wallet,
+        destination,
+        receipt.transactionHash.hex(),
+        service,
+        userdata=userdata,
     )
 
     dir_files = os.listdir(os.path.join(destination, os.listdir(destination)[0]))
