@@ -282,14 +282,14 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     DT_exchange2 = details.dt_balance
 
     # Get Swapped event
-    swapped_event = tx.events["Swapped"]
-    BT_publish_market_fee_amt = swapped_event["marketFeeAmount"]
-    BT_consume_market_fee_amt = swapped_event["consumeMarketFeeAmount"]
-    BT_opc_fee_amt = swapped_event["oceanFeeAmount"]
+    swapped_event = exchange._FRE.contract.events.Swapped().processReceipt(tx)[0]
+    BT_publish_market_fee_amt = swapped_event.args.marketFeeAmount
+    BT_consume_market_fee_amt = swapped_event.args.consumeMarketFeeAmount
+    BT_opc_fee_amt = swapped_event.args.oceanFeeAmount
 
-    if swapped_event["tokenOutAddress"] == dt.address:
-        BT_amt_swapped = swapped_event["baseTokenSwappedAmount"]
-        DT_amt_swapped = swapped_event["datatokenSwappedAmount"]
+    if swapped_event.args.tokenOutAddress == dt.address:
+        BT_amt_swapped = swapped_event.args.baseTokenSwappedAmount
+        DT_amt_swapped = swapped_event.args.datatokenSwappedAmount
         assert (BT_bob1 - BT_amt_swapped) == BT_bob2
         assert (DT_bob1 + DT_amt_swapped) == DT_bob2
 
@@ -304,9 +304,9 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
         # When buying DT, exchange DT bal doesn't change bc exchange *mints* DT
         assert DT_exchange1 == DT_exchange2
 
-    elif swapped_event["tokenOutAddress"] == bt.address:
-        DT_amt_swapped = swapped_event["datatokenSwappedAmount"]
-        BT_amt_swapped = swapped_event["baseTokenSwappedAmount"]
+    elif swapped_event.args.tokenOutAddress == bt.address:
+        DT_amt_swapped = swapped_event.args.datatokenSwappedAmount
+        BT_amt_swapped = swapped_event.args.baseTokenSwappedAmount
         assert (DT_bob1 - DT_amt_swapped) == DT_bob2
         assert (BT_bob1 + BT_amt_swapped) == BT_bob2
 
