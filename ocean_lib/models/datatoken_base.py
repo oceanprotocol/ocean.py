@@ -278,7 +278,7 @@ class DatatokenBase(ABC, ContractBase):
         exchange_args = get_args_object(args, kwargs, ExchangeArguments)
         args_tup = exchange_args.to_tuple(self.config_dict, tx_dict, self.decimals())
 
-        tx = self.contract.createFixedRate(*(args_tup + (tx_dict,)))
+        tx = self.createFixedRate(*(args_tup + (tx_dict,)))
 
         exchange_id = tx.events["NewFixedRate"]["exchangeId"]
         FRE = self._FRE()

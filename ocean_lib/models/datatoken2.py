@@ -98,7 +98,7 @@ class Datatoken2(DatatokenBase):
             consumer = get_from_address(tx_dict)
 
         dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
-        return self.contract.buyFromDispenserAndOrder(
+        return self.buyFromDispenserAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
                 service_index,

@@ -114,7 +114,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
             order._replace(consume_fees=tuple(consume_fees))
 
-        return self.contract.startMultipleTokenOrder(orders, tx_dict)
+        return self.startMultipleTokenOrder(orders, tx_dict)
 
     @enforce_types
     def reuse_multiple_token_order(
@@ -128,7 +128,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             provider_fees[0] = ContractBase.to_checksum_address(order.provider_fees[0])
             provider_fees[1] = ContractBase.to_checksum_address(order.provider_fees[1])
 
-        return self.contract.reuseMultipleTokenOrder(reuse_orders, tx_dict)
+        return self.reuseMultipleTokenOrder(reuse_orders, tx_dict)
 
     @enforce_types
     def create_with_erc20(
@@ -194,7 +194,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithErc20WithFixedRate(
+        receipt = self.createNftWithErc20WithFixedRate(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -254,7 +254,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithErc20WithDispenser(
+        receipt = self.createNftWithErc20WithDispenser(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -315,7 +315,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithMetaData(
+        receipt = self.createNftWithMetaData(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -367,8 +367,8 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
     @enforce_types
     def check_datatoken(self, datatoken_address: str) -> bool:
-        return self.contract.erc20List(datatoken_address)
+        return self.erc20List(datatoken_address)
 
     @enforce_types
     def check_nft(self, nft_address: str) -> bool:
-        return self.contract.erc721List(nft_address) == nft_address
+        return self.erc721List(nft_address) == nft_address
