@@ -9,6 +9,7 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
+from web3.exceptions import MismatchedABI
 from web3.main import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
@@ -116,3 +117,19 @@ class ContractBase(object):
         :return: address, hex str
         """
         return Web3.toChecksumAddress(address.lower())
+
+    # TODO: these are copied now, make sure they are cased, tested and refined
+    @enforce_types
+    def get_event_signature(self, event_name: str) -> str:
+        try:
+            e = getattr(self.contract.events, event_name)
+        except MismatchedABI:
+            raise ValueError(
+                f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
+            )
+
+        abi = e().abi
+        types = [param["type"] for param in abi["inputs"]]
+        sig_str = f'{event_name}({",".join(types)})'
+
+        return Web3.keccak(text=sig_str).hex()

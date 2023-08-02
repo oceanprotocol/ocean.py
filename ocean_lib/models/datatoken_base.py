@@ -235,13 +235,26 @@ class DatatokenBase(ABC, ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        to_block = (
-            to_block
-            if to_block != "latest"
-            else self.config_dict["web3_instance"].block_number
-        )
+        topic0 = self.get_event_signature("OrderStarted")
+        topics = [topic0]
+        if consumer_address:
+            topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
+            topics = [topic0, topic1]
 
-        return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
+        web3 = self.config_dict["web3_instance"]
+        event_filter = web3.eth.filter({"topics": topics})
+
+        orders = []
+
+        for log in event_filter.get_all_entries():
+            receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
+            processed_events = self.contract.events.OrderStarted().processReceipt(
+                receipt
+            )
+            for processed_event in processed_events:
+                orders.append(processed_event)
+
+        return orders
 
     # ======================================================================
     # Priced data: fixed-rate exchange

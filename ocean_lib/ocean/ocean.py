@@ -157,6 +157,7 @@ class Ocean:
         """
         dt = DatatokenBase.get_typed(self.config_dict, datatoken)
         _orders = []
+
         for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
