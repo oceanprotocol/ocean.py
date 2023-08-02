@@ -23,11 +23,6 @@ def test_router_owner(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_factory(config: dict, factory_router: FactoryRouter):
-    assert factory_router.factory() == get_address_of_type(config, "ERC721Factory")
-
-
-@pytest.mark.unit
 def test_swap_ocean_fee(factory_router: FactoryRouter):
     assert factory_router.swapOceanFee() == OPC_SWAP_FEE_APPROVED
 

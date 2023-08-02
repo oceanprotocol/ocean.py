@@ -2,13 +2,12 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import brownie
 import pytest
+from eth_account.account import Account
 
-from ocean_lib.ocean.util import from_wei, to_wei
+from ocean_lib.ocean.util import from_wei, send_ether, to_wei
 
-chain = brownie.network.chain
-accounts = brownie.network.accounts
+# chain = brownie.network.chain
 WEEK = 7 * 86400
 MAXTIME = 4 * 365 * 86400  # 4 years
 
@@ -23,8 +22,13 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
 
     OCEAN = ocean_token
 
-    alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
-    factory_deployer_wallet.transfer(alice_wallet, "1 ether")
+    web3 = ocean.config_dict["web3_instance"]
+    alice_wallet = (
+        web3.eth.account.create()
+    )  # new account avoids "withdraw old tokens first"
+    send_ether(
+        ocean.config_dict, factory_deployer_wallet, alice_wallet.address, to_wei(1)
+    )
 
     TA = to_wei(0.0001)
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
