@@ -12,7 +12,7 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import get_address_of_type, to_wei
+from ocean_lib.ocean.util import get_address_of_type, send_ether, to_wei
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -61,7 +61,7 @@ def setup_all(request, config, ocean_token):
         balance = config["web3_instance"].eth.get_balance(w.address)
 
         if balance < to_wei(2):
-            wallet.transfer(w, to_wei(4))
+            send_ether(config, wallet, w.address, to_wei(4))
 
         if ocean_token.balanceOf(w) < to_wei(100):
             ocean_token.mint(w, amt_distribute, {"from": wallet})

@@ -21,7 +21,7 @@ from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken_base import DatatokenBase
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type, to_wei
+from ocean_lib.ocean.util import get_address_of_type, send_ether, to_wei
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import sign_with_key, split_signature
@@ -82,7 +82,12 @@ def generate_wallet():
 
     new_wallet = Account.from_key(private_key=private_key)
     deployer_wallet = get_factory_deployer_wallet(config)
-    deployer_wallet.transfer(new_wallet, to_wei(3))
+    send_ether(
+        config,
+        deployer_wallet,
+        new_wallet.address,
+        to_wei(3),
+    )
 
     ocean = Ocean(config)
     OCEAN = ocean.OCEAN_token

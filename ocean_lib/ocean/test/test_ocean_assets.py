@@ -6,9 +6,7 @@ import copy
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-import brownie
 import pytest
-from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -22,7 +20,6 @@ from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     build_default_services,
@@ -457,17 +454,6 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
     )
     metadata = get_default_metadata()
 
-    some_random_address = ZERO_ADDRESS
-    with pytest.raises(brownie.exceptions.ContractNotFound):
-        publisher_ocean.assets.create(
-            metadata=metadata,
-            tx_dict={"from": publisher_wallet},
-            services=[],
-            data_nft_address=some_random_address,
-            deployed_datatokens=[datatoken],
-            encrypt_flag=True,
-        )
-
     with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
         mock.return_value = True
         with pytest.raises(AquariusError):
@@ -547,7 +533,7 @@ def test_create_pricing_schemas(
         assert dt_np.get_exchanges() == []
 
         # pay_for_access service has insufficient balance and can't buy or dispense
-        empty_wallet = accounts.add()
+        empty_wallet = config["web3_instance"].eth.account.create()
 
         with pytest.raises(InsufficientBalance):
             ocean_assets.pay_for_access_service(

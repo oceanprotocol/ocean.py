@@ -7,7 +7,6 @@ from abc import ABC
 from enum import IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from brownie.network.state import Chain
 from enforce_typing import enforce_types
 from web3.main import Web3
 
@@ -236,8 +235,11 @@ class DatatokenBase(ABC, ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        chain = Chain()
-        to_block = to_block if to_block != "latest" else chain[-1].number
+        to_block = (
+            to_block
+            if to_block != "latest"
+            else self.config_dict["web3_instance"].block_number
+        )
 
         return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
 

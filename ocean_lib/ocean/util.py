@@ -87,3 +87,25 @@ def get_args_object(args, kwargs, args_class):
         args_to_use = args_class(*args, **kwargs)
 
     return args_to_use
+
+
+@enforce_types
+def send_ether(config, from_wallet, to_address: str, amount: int):
+    if not Web3.isChecksumAddress(to_address):
+        to_address = Web3.toChecksumAddress(to_address)
+
+    web3 = config["web3_instance"]
+    chain_id = web3.eth.chain_id
+    tx = {
+        "from": from_wallet.address,
+        "to": to_address,
+        "value": amount,
+        "chainId": chain_id,
+        "nonce": web3.eth.get_transaction_count(from_wallet.address),
+    }
+    tx["gas"] = web3.eth.estimate_gas(tx)
+    tx["gasPrice"] = int(web3.eth.gas_price * 1.1)
+
+    signed_tx = web3.eth.account.signTransaction(tx, from_wallet.privateKey)
+    tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    return web3.eth.wait_for_transaction_receipt(tx_hash)

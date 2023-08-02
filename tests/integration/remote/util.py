@@ -9,8 +9,8 @@ import time
 import warnings
 
 from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
-from brownie.network import accounts
 from enforce_typing import enforce_types
+from eth_account import Account
 from web3.exceptions import ExtraDataLengthError
 
 from ocean_lib.web3_internal.utils import get_gas_fees
@@ -58,8 +58,8 @@ def get_wallets():
     assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
-    alice_wallet = accounts.add(alice_private_key)
-    bob_wallet = accounts.add(bob_private_key)
+    alice_wallet = Account.from_key(private_key=alice_private_key)
+    bob_wallet = Account.from_key(private_key=bob_private_key)
 
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")
@@ -75,7 +75,8 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
       automatically in remote testnets, then just skip
     """
     # Simplest possible tx: Alice send Bob some fake MATIC
-    bob_eth_before = accounts.at(bob_wallet.address).balance()
+    web3 = ocean.config_dict["web3_instance"]
+    bob_eth_before = web3.eth.get_balance(bob_wallet.address)
     normalized_unixtime = time.time() / 1e9
     amt_send = 1e-8 * (random.random() + normalized_unixtime)
 
@@ -87,7 +88,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
             f"{amt_send:.15f} ether",
             priority_fee=priority_fee,
         )
-        bob_eth_after = accounts.at(bob_wallet.address).balance()
+        bob_eth_after = web3.eth.get_balance(bob_wallet.address)
     except ERRORS_TO_CATCH as e:
         if error_is_skippable(str(e)):
             warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
