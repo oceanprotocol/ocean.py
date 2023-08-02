@@ -350,7 +350,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         registered_nft_event = self.contract.events.NFTCreated().processReceipt(
             receipt
         )[0]
-        data_nft_address = registered_nft_event["newTokenAddress"]
+        data_nft_address = registered_nft_event.args.newTokenAddress
         data_nft_token = DataNFT(self.config_dict, data_nft_address)
 
         return data_nft_token

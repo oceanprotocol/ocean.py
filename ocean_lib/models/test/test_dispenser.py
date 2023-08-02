@@ -63,7 +63,7 @@ def test_main_flow_via_simple_ux_and_good_defaults(
 
     # basic steps
     datatoken.create_dispenser({"from": publisher_wallet})
-    datatoken.dispense("3 ether", {"from": consumer_wallet})
+    datatoken.dispense(to_wei(3), {"from": consumer_wallet})
 
     # check balance
     bal = datatoken.balanceOf(consumer_wallet.address)
@@ -99,7 +99,7 @@ def test_main_flow_via_simple_ux_and_setting_token_counts(
 
     # basic steps
     datatoken.create_dispenser({"from": publisher_wallet}, max_tokens, max_balance)
-    datatoken.dispense("3 ether", {"from": consumer_wallet})
+    datatoken.dispense(to_wei(3), {"from": consumer_wallet})
 
     # check status
     status = datatoken.dispenser_status()

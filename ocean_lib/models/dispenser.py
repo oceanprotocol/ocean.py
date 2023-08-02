@@ -82,7 +82,7 @@ class DispenserArguments:
             ContractBase.to_checksum_address(dispenser_address),
             self.max_tokens,
             self.max_balance,
-            self.with_mint,
+            bool(self.with_mint),
             self.allowed_swapper,
         )
 

@@ -56,7 +56,7 @@ class Datatoken2(DatatokenBase):
             amt_needed = exchange.BT_needed(to_wei(1), consume_market_fees.amount)
             max_base_token_amount = amt_needed
 
-        return self.contract.buyFromFreAndOrder(
+        return self.buyFromFreAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
                 service_index,
