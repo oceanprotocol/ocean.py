@@ -1,3 +1,7 @@
+<!--
+Copyright 2023 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 
 # Custody-light flow
 
@@ -64,7 +68,7 @@ Bob now has the transaction receipt to prove that he dispensed funds! Time to do
 In the same Python console:
 ```python
 # Bob downloads the file. If the connection breaks, Bob can try again
-asset_dir = ocean.assets.download_asset(ddo, bob, './', tx.txid)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', tx.transactionHash.hex())
 
 import os
 file_name = os.path.join(asset_dir, "file0")
@@ -143,7 +147,7 @@ Bob now has the transaction receipt to prove that he bought funds from the excha
 In the same Python console:
 ```python
 # Bob downloads the file. If the connection breaks, Bob can try again
-asset_dir = ocean.assets.download_asset(ddo, bob, './', tx.txid)
+asset_dir = ocean.assets.download_asset(ddo, bob, './', tx.transactionHash.hex())
 
 import os
 file_name = os.path.join(asset_dir, "file0")
