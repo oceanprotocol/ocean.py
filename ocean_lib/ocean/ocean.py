@@ -267,3 +267,6 @@ class Ocean:
     @enforce_types
     def _addr(self, type_str: str) -> str:
         return get_address_of_type(self.config, type_str)
+
+    def wallet_balance(self, w):
+        return self.config["web3_instance"].eth.get_balance(w.address)

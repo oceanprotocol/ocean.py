@@ -90,23 +90,22 @@ mint_fake_OCEAN(config)
 
 # Create Alice's wallet
 import os
-from brownie.network import accounts
-accounts.clear()
+from eth_account import Account
 
 alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice = accounts.add(alice_private_key)
-assert alice.balance() > 0, "Alice needs ETH"
+alice = Account.from_key(private_key=alice_private_key)
+assert ocean.wallet_balance(alice) > 0, "Alice needs ETH"
 assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create additional wallets. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob = accounts.add(bob_private_key)
-assert bob.balance() > 0, "Bob needs ETH"
+bob = Account.from_key(private_key=bob_private_key)
+assert ocean.wallet_balance(bob) > 0, "Bob needs ETH"
 assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
 
 carlos_private_key = os.getenv('TEST_PRIVATE_KEY3')
-carlos = accounts.add(carlos_private_key)
-assert carlos.balance() > 0, "Carlos needs ETH"
+carlos = Account.from_key(private_key=carlos_private_key)
+assert ocean.wallet_balance(carlos) > 0, "Carlos needs ETH"
 assert OCEAN.balanceOf(carlos) > 0, "Carlos needs OCEAN"
 
 
