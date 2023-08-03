@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.contract_utils import load_contract
 logger = logging.getLogger(__name__)
 
 
+# TODO: cleanup
 def function_wrapper(contract, web3, contract_functions, func_name):
     if hasattr(contract, func_name):
         return getattr(contract, func_name)
@@ -49,14 +50,17 @@ def function_wrapper(contract, web3, contract_functions, func_name):
             return result.call()
         else:
             wallet = tx_dict["from"]
-            tx_dict["nonce"] = web3.eth.get_transaction_count(wallet.address)
-            tx_dict["from"] = (
-                tx_dict["from"].address
-                if hasattr(tx_dict["from"], "address")
-                else tx_dict["from"]
-            )
+            tx_dict2 = tx_dict.copy()
+            tx_dict2["nonce"] = web3.eth.get_transaction_count(wallet.address)
 
-            result = result.build_transaction(tx_dict)
+            tx_dict2["from"] = tx_dict["from"].address
+
+            if "gasPrice" in tx_dict:
+                tx_dict2["gasPrice"] = tx_dict["gasPrice"]
+            else:
+                tx_dict2["gasPrice"] = int(web3.eth.gas_price * 1.1)
+
+            result = result.build_transaction(tx_dict2)
             signed_tx = web3.eth.account.sign_transaction(result, wallet.privateKey)
             receipt = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 

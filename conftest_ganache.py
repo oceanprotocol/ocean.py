@@ -55,7 +55,7 @@ def setup_all(request, config, ocean_token):
     assert balance >= to_wei(10), "Need more ETH"
 
     amt_distribute = to_wei(1000)
-    ocean_token.mint(wallet, to_wei(2000), {"from": wallet.address})
+    ocean_token.mint(wallet, to_wei(2000), {"from": wallet})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         balance = config["web3_instance"].eth.get_balance(w.address)

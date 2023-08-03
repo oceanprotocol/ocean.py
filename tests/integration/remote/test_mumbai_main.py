@@ -2,7 +2,6 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from brownie.network import accounts
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
@@ -17,7 +16,6 @@ def test_nonocean_tx(tmp_path, monkeypatch):
 
     config = get_config_dict("mumbai")
     ocean = Ocean(config)
-    accounts.clear()
     (alice_wallet, bob_wallet) = util.get_wallets()
 
     # Do a simple-as-possible test that uses ocean stack, while accounting for gotchas
@@ -32,7 +30,6 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     config = get_config_dict("mumbai")
     ocean = Ocean(config)
 
-    accounts.clear()
     (alice_wallet, _) = util.get_wallets()
 
     # Do a simple-as-possible test that uses ocean stack, while accounting for gotchas

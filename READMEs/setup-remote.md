@@ -202,9 +202,6 @@ ocean = Ocean(config)
 OCEAN = ocean.OCEAN_token
 
 # Create Alice's wallet
-from brownie.network import accounts
-accounts.clear()
-
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
 alice = accounts.add(alice_private_key)
 assert alice.balance() > 0, "Alice needs MATIC"

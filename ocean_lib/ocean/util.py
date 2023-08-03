@@ -63,11 +63,7 @@ def str_with_wei(amt_wei: int) -> str:
 
 @enforce_types
 def get_from_address(tx_dict: dict) -> str:
-    address = (
-        tx_dict["from"].address
-        if hasattr(tx_dict["from"], "address")
-        else tx_dict["from"]
-    )
+    address = tx_dict["from"].address
 
     return Web3.toChecksumAddress(address.lower())
 
