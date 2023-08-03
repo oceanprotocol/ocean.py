@@ -78,6 +78,9 @@ class Ocean:
             if not isinstance(config_dict[key], type(value)):
                 config_errors[key] = f"must be {type(value).__name__}"
 
+        if "web3_instance" not in config_dict:
+            config_errors["web3_instance"] = "required"
+
         if config_errors:
             raise Exception(json.dumps(config_errors))
 

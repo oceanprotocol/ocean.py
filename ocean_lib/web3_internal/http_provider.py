@@ -2,8 +2,6 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
-
 from web3 import HTTPProvider, WebsocketProvider
 
 from ocean_lib.web3_internal.request import make_post_request
@@ -46,24 +44,8 @@ class CustomHTTPProvider(HTTPProvider):
 
 def get_web3_connection_provider(network_url):
     if network_url.startswith("http"):
-        provider = CustomHTTPProvider(network_url)
+        return CustomHTTPProvider(network_url)
     elif network_url.startswith("ws"):
-        provider = WebsocketProvider(network_url)
-    elif network_url == "ganache":
-        provider = CustomHTTPProvider(GANACHE_URL)
-    elif network_url == "polygon":
-        provider = CustomHTTPProvider(POLYGON_URL)
-    else:
-        assert network_url in SUPPORTED_NETWORK_NAMES, (
-            f"The given network_url *{network_url}* does not start with either "
-            f"`http` or `wss`, in this case a network name is expected and must "
-            f"be one of the supported networks {SUPPORTED_NETWORK_NAMES}."
-        )
+        return WebsocketProvider(network_url)
 
-        network_url = os.getenv("NETWORK_URL")
-        if network_url.startswith("http"):
-            provider = CustomHTTPProvider(network_url)
-        else:
-            provider = WebsocketProvider(network_url)
-
-    return provider
+    raise Exception(f"Unsupported network url: {network_url}")

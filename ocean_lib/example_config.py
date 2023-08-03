@@ -9,6 +9,9 @@ import os
 from pathlib import Path
 
 import addresses
+from enforce_typing import enforce_types
+from web3 import Web3
+from web3.exceptions import ExtraDataLengthError
 
 from ocean_lib.web3_internal.http_provider import get_web3_connection_provider
 
@@ -20,7 +23,6 @@ DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
     "NETWORK_NAME": "development",
-    "CHAIN_ID": 8996,
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
     "PROVIDER_URL": "http://172.15.0.4:8030",
     "DOWNLOADS_PATH": "consume-downloads",
@@ -74,6 +76,7 @@ def get_config_dict(network_name=None) -> dict:
     config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[network_name]
     config_dict["NETWORK_NAME"] = network_name
     config_dict["web3_instance"] = get_web3(network_url)
+    config_dict["CHAIN_ID"] = config_dict["web3_instance"].eth.chain_id
 
     if network_name != "development":
         config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
@@ -100,12 +103,6 @@ def get_config_dict(network_name=None) -> dict:
     return config_dict
 
 
-from enforce_typing import enforce_types
-from web3 import Web3
-from web3.exceptions import ExtraDataLengthError
-
-
-# TODO: move these
 @enforce_types
 def get_web3(network_url: str) -> Web3:
     """

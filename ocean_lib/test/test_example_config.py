@@ -35,8 +35,9 @@ def test_polygon_example_config():
 
 
 @pytest.mark.unit
-def test_bsc_example_config():
+def test_bsc_example_config(monkeypatch):
     """Tests the config structure of BSC network."""
+    monkeypatch.setenv("BSC_RPC_URL", "http://localhost:8545")
 
     config = get_config_dict("bsc")
 
@@ -47,6 +48,7 @@ def test_bsc_example_config():
 @pytest.mark.unit
 def test_moonbeam_alpha_example_config(monkeypatch):
     """Tests the config structure of Moonbeam Alpha network."""
+    monkeypatch.setenv("MOONBASE_RPC_URL", "http://localhost:8545")
 
     config = get_config_dict("moonbase")
 

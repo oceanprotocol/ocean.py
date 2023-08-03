@@ -5,6 +5,7 @@
 import json
 
 import pytest
+from web3 import Web3
 
 from ocean_lib.ocean.ocean import Ocean
 
@@ -19,6 +20,8 @@ def test_metadataCacheUri_config_key():
         "PROVIDER_URL": "http://172.15.0.4:8030",
         "DOWNLOADS_PATH": "consume-downloads",
         "ADDRESS_FILE": "~/.ocean/ocean-contracts/artifacts/address.json",
+        "CHAIN_ID": 8996,
+        "web3_instance": Web3(),
     }
     ocean_instance = Ocean(config_dict=config_dict)
     assert (
