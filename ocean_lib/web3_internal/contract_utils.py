@@ -59,11 +59,7 @@ def get_contracts_addresses_all_networks(config: dict):
 def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
     """Get addresses for given NETWORK_NAME, from info in ADDRESS_FILE"""
     network_name = config["NETWORK_NAME"]
-    if network_name == "polygon-test":
-        network_name = "mumbai"
 
-    if network_name == "polygon-main":
-        network_name = "polygon"
     addresses = get_contracts_addresses_all_networks(config)
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]

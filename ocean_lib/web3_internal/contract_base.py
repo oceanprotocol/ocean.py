@@ -48,14 +48,19 @@ def function_wrapper(contract, web3, contract_functions, func_name):
         if result.abi["stateMutability"] in ["view", "pure"]:
             return result.call()
         else:
+            wallet = tx_dict["from"]
+            tx_dict["nonce"] = web3.eth.get_transaction_count(wallet.address)
             tx_dict["from"] = (
                 tx_dict["from"].address
                 if hasattr(tx_dict["from"], "address")
                 else tx_dict["from"]
             )
-            result = result.transact(tx_dict)
 
-            return web3.eth.wait_for_transaction_receipt(result)
+            result = result.build_transaction(tx_dict)
+            signed_tx = web3.eth.account.sign_transaction(result, wallet.privateKey)
+            receipt = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+
+            return web3.eth.wait_for_transaction_receipt(receipt)
 
     return wrap
 

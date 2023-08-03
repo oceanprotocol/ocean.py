@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import hashlib
-from typing import Optional
+from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from web3.main import Web3
@@ -90,7 +90,9 @@ def get_args_object(args, kwargs, args_class):
 
 
 @enforce_types
-def send_ether(config, from_wallet, to_address: str, amount: int):
+def send_ether(
+    config, from_wallet, to_address: str, amount: Union[int, float], priority_fee=None
+):
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)
 
@@ -105,6 +107,9 @@ def send_ether(config, from_wallet, to_address: str, amount: int):
     }
     tx["gas"] = web3.eth.estimate_gas(tx)
     tx["gasPrice"] = int(web3.eth.gas_price * 1.1)
+
+    if priority_fee:
+        tx["gasPrice"] = priority_fee
 
     signed_tx = web3.eth.account.signTransaction(tx, from_wallet.privateKey)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)

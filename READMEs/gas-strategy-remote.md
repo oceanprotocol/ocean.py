@@ -22,7 +22,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up re
 
 ## 2. Define gas strategy
 
-Fees are defined for `polygon-main` & `polygon-test` networks.
+Fees are defined for `polygon` & `mumbai` networks.
 
 ```python
 from ocean_lib.web3_internal.utils import get_gas_fees

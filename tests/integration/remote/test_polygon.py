@@ -17,7 +17,7 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
 
     # setup
-    config = get_config_dict("polygon-main")
+    config = get_config_dict("polygon")
     ocean = Ocean(config)
 
     accounts.clear()

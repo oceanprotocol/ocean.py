@@ -30,29 +30,50 @@ PROVIDER_PER_NETWORK = {
     "mainnet": "https://v4.provider.mainnet.oceanprotocol.com",
     "goerli": "https://v4.provider.goerli.oceanprotocol.com",
     "bsc": "https://v4.provider.bsc.oceanprotocol.com",
-    "polygon-main": "https://v4.provider.polygon.oceanprotocol.com",
+    "polygon": "https://v4.provider.polygon.oceanprotocol.com",
     "energyweb": "https://v4.provider.energyweb.oceanprotocol.com",
     "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
     "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
+    "mumbai": "https://v4.provider.mumbai.oceanprotocol.com",
     "development": DEFAULT_PROVIDER_URL,
-    "polygon-test": "https://v4.provider.mumbai.oceanprotocol.com",
 }
+
+
+def get_rpc_url(network_name: str) -> str:
+    """Return the RPC URL for a given network."""
+    if network_name == "development":
+        return "http://localhost:8545"
+
+    base_url = None
+
+    if os.getenv(f"{network_name.upper()}_RPC_URL"):
+        base_url = os.getenv(f"{network_name.upper()}_RPC_URL")
+
+    if os.getenv("WEB3_INFURA_PROJECT_ID"):
+        base_url = f"{base_url}{os.getenv('WEB3_INFURA_PROJECT_ID')}"
+
+    if base_url:
+        return base_url
+
+    raise Exception(f"Need to set {network_name.upper()}_RPC_URL env variable.")
 
 
 def get_config_dict(network_name=None) -> dict:
     """Return config dict containing default values for a given network.
     Chain ID is determined by querying the RPC specified by network_url.
     """
-    if not network_name:
+    if not network_name or network_name in ["ganache", "development"]:
         network_name = "development"
 
     if network_name not in PROVIDER_PER_NETWORK:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
 
+    network_url = get_rpc_url(network_name)
+
     config_dict = copy.deepcopy(config_defaults)
     config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[network_name]
     config_dict["NETWORK_NAME"] = network_name
-    config_dict["web3_instance"] = get_web3(config_dict["NETWORK_NAME"])
+    config_dict["web3_instance"] = get_web3(network_url)
 
     if network_name != "development":
         config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
@@ -79,8 +100,6 @@ def get_config_dict(network_name=None) -> dict:
     return config_dict
 
 
-from typing import Dict, Optional, Union
-
 from enforce_typing import enforce_types
 from web3 import Web3
 from web3.exceptions import ExtraDataLengthError
@@ -88,7 +107,7 @@ from web3.exceptions import ExtraDataLengthError
 
 # TODO: move these
 @enforce_types
-def get_web3(network_name: str) -> Web3:
+def get_web3(network_url: str) -> Web3:
     """
     Return a web3 instance connected via the given network_url.
     Adds POA middleware when connecting to the Rinkeby Testnet.
@@ -97,10 +116,6 @@ def get_web3(network_name: str) -> Web3:
     - the issue is described here: https://github.com/ethereum/web3.py/issues/549
     - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
     """
-    # TODO:
-    if network_name == "development":
-        network_url = "http://localhost:8545"
-
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
 

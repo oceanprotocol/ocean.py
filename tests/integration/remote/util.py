@@ -8,26 +8,17 @@ import string
 import time
 import warnings
 
-from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
 from enforce_typing import enforce_types
 from eth_account import Account
-from web3.exceptions import ExtraDataLengthError
 
+from ocean_lib.ocean.util import send_ether
 from ocean_lib.web3_internal.utils import get_gas_fees
-
-ERRORS_TO_CATCH = (
-    ContractNotFound,
-    TransactionError,
-    ValueError,
-    VirtualMachineError,
-    ExtraDataLengthError,
-)
 
 
 @enforce_types
 def remote_config_mumbai(tmp_path):
     config = {
-        "NETWORK_NAME": "polygon-test",
+        "NETWORK_NAME": "mumbai",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
@@ -39,7 +30,7 @@ def remote_config_mumbai(tmp_path):
 @enforce_types
 def remote_config_polygon(tmp_path):
     config = {
-        "NETWORK_NAME": "polygon-main",
+        "NETWORK_NAME": "polygon",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
@@ -77,19 +68,22 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     # Simplest possible tx: Alice send Bob some fake MATIC
     web3 = ocean.config_dict["web3_instance"]
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
-    normalized_unixtime = time.time() / 1e9
-    amt_send = 1e-8 * (random.random() + normalized_unixtime)
+    # TODO: amt send??
+    # normalized_unixtime = time.time() / 1e9
+    # amt_send = 1e-8 * (random.random() + normalized_unixtime)
 
     print("Do a send-Ether tx...")
     try:
         priority_fee, _ = get_gas_fees()
-        alice_wallet.transfer(
+        send_ether(
+            ocean.config_dict,
+            alice_wallet,
             bob_wallet.address,
-            f"{amt_send:.15f} ether",
+            1,
             priority_fee=priority_fee,
         )
         bob_eth_after = web3.eth.get_balance(bob_wallet.address)
-    except ERRORS_TO_CATCH as e:
+    except Exception as e:
         if error_is_skippable(str(e)):
             warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
             return
@@ -118,15 +112,15 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
             data_nft = ocean.data_nft_factory.create(
                 {
                     "from": alice_wallet,
-                    "priority_fee": priority_fee,
-                    "max_fee": max_fee,
+                    # "priority_fee": priority_fee,
+                    # "max_fee": max_fee,
                 },
                 symbol,
                 symbol,
             )
             data_nft_symbol = data_nft.symbol()
             break
-        except ERRORS_TO_CATCH as e:
+        except Exception as e:
             if error_is_skippable(str(e)):
                 warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
                 return

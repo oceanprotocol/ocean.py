@@ -93,12 +93,6 @@ def get_gas_fees() -> tuple:
         return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
 
     return (
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-            chain.priority_fee,
-        ),
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
-            chain.base_fee + 2 * chain.priority_fee,
-        ),
+        Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+        Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
     )

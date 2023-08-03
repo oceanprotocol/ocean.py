@@ -15,7 +15,7 @@ def test_nonocean_tx(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
 
-    config = get_config_dict("polygon-test")
+    config = get_config_dict("mumbai")
     ocean = Ocean(config)
     accounts.clear()
     (alice_wallet, bob_wallet) = util.get_wallets()
@@ -29,7 +29,7 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
 
-    config = get_config_dict("polygon-test")
+    config = get_config_dict("mumbai")
     ocean = Ocean(config)
 
     accounts.clear()

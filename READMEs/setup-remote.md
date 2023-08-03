@@ -53,7 +53,7 @@ The network configuration file has settings for each network, e.g. development (
 Each network gets specifications for:
 - `host` - the RPC URL, i.e. what URL do we pass through to talk to the chain
 - `required_confs` - the number of confirmations before a tx is done
-- `id` - e.g. `polygon-main` (Polygon), `polygon-test` (Mumbai)
+- `id` - e.g. `polygon`, `mumbai` (Mumbai)
 
 `development chains` run locally; `live` chains run remotely.
 
@@ -195,7 +195,7 @@ In the Python console:
 import os
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = get_config_dict("polygon-test")
+config = get_config_dict("mumbai")
 ocean = Ocean(config)
 
 # Create OCEAN object. ocean_lib knows where OCEAN is on all remote networks
