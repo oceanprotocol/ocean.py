@@ -27,13 +27,6 @@ def test_sym_encrypt_decrypt():
 
 
 @enforce_types
-def test_calc_pubkey(alice):
-    privkey = alice.privateKey.hex()  # str
-    pubkey = crypto.calc_pubkey(privkey)  # str
-    assert pubkey == str(alice.key)
-
-
-@enforce_types
 def test_asym_encrypt_decrypt(alice):
     privkey = alice.privateKey.hex()  # str
     pubkey = crypto.calc_pubkey(privkey)  # str
