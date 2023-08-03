@@ -50,6 +50,6 @@ def test_main(config):
     assert factory.contract_name == "ERC721Factory"
     assert factory.address == nft_factory_address
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
-    assert factory.contract.createToken
-    assert factory.contract.getCurrentTokenCount
-    assert factory.contract.getTokenTemplate
+    assert factory.createToken
+    assert factory.getCurrentTokenCount
+    assert factory.getTokenTemplate
