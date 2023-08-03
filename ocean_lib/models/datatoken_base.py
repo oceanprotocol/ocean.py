@@ -228,6 +228,7 @@ class DatatokenBase(ABC, ContractBase):
             tx_dict,
         )
 
+    # TODO: fix filtering
     @enforce_types
     def get_start_order_logs(
         self,
@@ -242,7 +243,13 @@ class DatatokenBase(ABC, ContractBase):
             topics = [topic0, topic1]
 
         web3 = self.config_dict["web3_instance"]
-        event_filter = web3.eth.filter({"topics": topics})
+        event_filter = web3.eth.filter(
+            {
+                "topics": topics,
+                "toBlock": to_block,
+                "fromBlock": from_block,
+            }
+        )
 
         orders = []
 

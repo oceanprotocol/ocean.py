@@ -5,7 +5,7 @@
 
 """All contracts inherit from `ContractBase` class."""
 import logging
-from typing import Optional
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
@@ -127,7 +127,6 @@ class ContractBase(object):
         """
         return Web3.toChecksumAddress(address.lower())
 
-    # TODO: these are copied now, make sure they are cased, tested and refined
     @enforce_types
     def get_event_signature(self, event_name: str) -> str:
         try:
@@ -142,3 +141,32 @@ class ContractBase(object):
         sig_str = f'{event_name}({",".join(types)})'
 
         return Web3.keccak(text=sig_str).hex()
+
+    @enforce_types
+    def get_logs(
+        self,
+        event_name: str,
+        from_block: Optional[int] = 0,
+        to_block: Optional[int] = "latest",
+    ) -> List:
+        topic = self.get_event_signature(event_name)
+        web3 = self.config_dict["web3_instance"]
+
+        event_filter = web3.eth.filter(
+            {
+                "topics": [topic],
+                "toBlock": to_block,
+                "fromBlock": from_block,
+            }
+        )
+
+        events = []
+
+        for log in event_filter.get_all_entries():
+            receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
+            fn = getattr(self.contract.events, event_name)
+            processed_events = fn().processReceipt(receipt)
+            for processed_event in processed_events:
+                events.append(processed_event)
+
+        return events
