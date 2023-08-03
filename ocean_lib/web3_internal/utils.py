@@ -7,7 +7,6 @@ from collections import namedtuple
 from typing import Any, Union
 
 import requests
-from brownie.network import chain
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -86,11 +85,6 @@ def split_signature(signature: Any) -> Signature:
 def get_gas_fees() -> tuple:
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
     gas_resp = requests.get("https://gasstation.polygon.technology/v2")
-
-    if not gas_resp or gas_resp.status_code != 200:
-        print("Invalid response from Polygon gas station. Retry with brownie values...")
-
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
 
     return (
         Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),

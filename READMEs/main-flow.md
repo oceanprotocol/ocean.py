@@ -170,7 +170,7 @@ ERC725:
 - Official spec is at [eips.ethereum.org](https://eips.ethereum.org/EIPS/eip-725)
 - Solidity interface: [IERC725X.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725X.sol) (execution) and [IERC725Y.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/interfaces/IERC725Y.sol) (key-value store)
 
-The `data_nft` is a Python object of class [DataNFT](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). Thanks to Brownie, the DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method! Thank you, Brownie :)
+The `data_nft` is a Python object of class [DataNFT](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/data_nft.py). The DataNFT class directly exposes the Solidity ERC721 & ERC725 interfaces. This means your `data_nft` object has a Python method for every Solidity method!
 
 Besides that, DataNFT implements other Python methods like `create_datatoken()` to improve developer experience. And, [ocean_assets.OceanAssets](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean_assets.py) and other higher-level Python classes / methods work with DataNFT.
 
@@ -191,7 +191,7 @@ Ocean's architecture allows for >1 implementations of ERC20, each with its own "
 
 Template 1:
 - Solidity: [ERC20Template.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/templates/ERC20Template.sol)
-- Python wrapper: [Datatoken1](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). It has a Python method for every Solidity method, via Brownie.
+- Python wrapper: [Datatoken1](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/datatoken.py). It has a Python method for every Solidity method.
 - Implements methods like `start_order()`, `create_exchange()`, and `create_dispenser()` to enhance developer experience.
 
 Template 2:
@@ -303,7 +303,7 @@ A given datatoken can create exactly one dispenser for that datatoken.
 
 **Interface via [`Dispenser`](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/models/dispenser.py) Python class:**
 - You can access its instance via `ocean.dispenser`.
-- `Dispenser` wraps [Dispenser.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/dispenser/Dispenser.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods (via Brownie).
+- `Dispenser` wraps [Dispenser.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/dispenser/Dispenser.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods.
 - Note that `Dispenser` is _global_ across all datatokens. Therefore calls to the Solidity contract - or Python calls that pass through - provide the datatoken address as an argument.
 - Example call: `ocean.dispenser.setAllowedSwapper(datatoken_addr, ZERO_ADDRESS, {"from": alice})`
 
@@ -377,7 +377,7 @@ While most interactions are with `OneExchange` described above, sometimes we may
 
 **Interface via [`FixedRateExchange`](https://github.com/oceanprotocol/ocean.py/blob/4aa12afd8a933d64bc2ed68d1e5359d0b9ae62f9/ocean_lib/models/fixed_rate_exchange.py#L106) Python class:**
 - You can access its instance via `ocean.fixed_rate_exchange`.
-- `FixedRateExchange` wraps [FixedRateExchange.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/fixedRate/FixedRateExchange.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods (via Brownie).
+- `FixedRateExchange` wraps [FixedRateExchange.sol](https://github.com/oceanprotocol/contracts/blob/main/contracts/pools/fixedRate/FixedRateExchange.sol) Solidity implementation, to expose `Dispenser.sol`'s methods as Python methods.
 - Note that `FixedRateExchange` is _global_ across all datatokens. Therefore calls to the Solidity contract - or Python calls that pass through - provide the exchange id address as an argument. It's exchange id, and not datatoken, because there may be >1 exchange for a given datatoken.
 - Example call: `ocean.fixed_rate_exchange.getRate(exchange_id)` returns rate (price).
 

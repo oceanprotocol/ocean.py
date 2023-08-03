@@ -33,15 +33,7 @@ docker system prune -a --volumes
 
 Now that we have barge running, we can mostly ignore its console while it runs.
 
-## 2. Brownie local network configuration
-
-(You don't need to do anything in this step, it's just useful to understand.)
-
-Brownie's network configuration file is at `~/.brownie/network-config.yaml`.
-
-When running locally, Brownie will use the chain listed under `development`, having id `development`. This refers to Ganache, which is running in Barge.
-
-## 3. Set envvars
+## 2. Set envvars
 
 From here on, go to a console different than Barge. (E.g. the console where you installed Ocean, or a new one.)
 
@@ -65,7 +57,7 @@ export TEST_PRIVATE_KEY3=0x732fbb7c355aa8898f4cff92fa7a6a947339eaf026a08a51f1711
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 4. Setup in Python
+## 3. Setup in Python
 
 In the same console, run Python console:
 ```console
@@ -113,7 +105,7 @@ assert OCEAN.balanceOf(carlos) > 0, "Carlos needs OCEAN"
 from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
-## 5. Next step
+## 4. Next step
 
 You've now set up everything you need for local testing, congrats!
 

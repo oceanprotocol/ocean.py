@@ -7,7 +7,6 @@ from eth_account.account import Account
 
 from ocean_lib.ocean.util import from_wei, send_ether, to_wei
 
-# chain = brownie.network.chain
 WEEK = 7 * 86400
 MAXTIME = 4 * 365 * 86400  # 4 years
 
@@ -36,9 +35,11 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     veOCEAN.checkpoint({"from": factory_deployer_wallet})
     OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
-    t0 = chain[-1].timestamp  # ve funcs use block.timestamp, not chain.time()
+    latest_block = ocean.config_dict["web3_instance"].eth.get_block("latest")
+    t0 = latest_block.timestamp  # ve funcs use block.timestamp, not chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
     t2 = t1 + WEEK
+    # TODO: mining??
     chain.sleep(t1 - t0)
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
