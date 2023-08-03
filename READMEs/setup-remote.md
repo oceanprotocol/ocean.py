@@ -128,15 +128,17 @@ ocean = Ocean(config)
 OCEAN = ocean.OCEAN_token
 
 # Create Alice's wallet
+from eth_account import Account
+
 alice_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY1')
-alice = accounts.add(alice_private_key)
-assert alice.balance() > 0, "Alice needs MATIC"
+alice = Account.from_key(private_key=alice_private_key)
+assert ocean.wallet_balance(alice) > 0, "Alice needs MATIC"
 assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create Bob's wallet. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('REMOTE_TEST_PRIVATE_KEY2')
-bob = accounts.add(bob_private_key)
-assert bob.balance() > 0, "Bob needs MATIC"
+bob = Account.from_key(private_key=bob_private_key)
+assert ocean.wallet_balance(bob) > 0, "Bob needs MATIC"
 assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
 
 # Compact wei <> eth conversion
