@@ -8,7 +8,6 @@ from typing import Any, Union
 
 import requests
 from brownie.network import chain
-from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -31,17 +30,18 @@ def to_32byte_hex(val: int) -> str:
     return Web3.toHex(Web3.toBytes(val).rjust(32, b"\0"))
 
 
-@enforce_types
-def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
-    message_hash = Web3.solidityKeccak(
-        ["bytes"],
-        [Web3.toBytes(text=message_hash)],
-    )
-
-    orig_sig = wallet._provider.make_request(
-        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
-    )["result"]
-    return orig_sig
+# reinstate as part of #1461
+# @enforce_types
+# def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
+#     message_hash = Web3.solidityKeccak(
+#        ["bytes"],
+#        [Web3.toBytes(text=message_hash)],
+#    )
+#
+#    orig_sig = wallet._provider.make_request(
+#        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
+#    )["result"]
+#    return orig_sig
 
 
 @enforce_types
