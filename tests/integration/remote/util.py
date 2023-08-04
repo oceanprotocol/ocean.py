@@ -112,8 +112,11 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
             data_nft = ocean.data_nft_factory.create(
                 {
                     "from": alice_wallet,
-                    # "priority_fee": priority_fee,
-                    # "max_fee": max_fee,
+                    "maxPriorityFeePerGas": priority_fee,
+                    "maxFeePerGas": max_fee,
+                    "gas": ocean.config_dict["web3_instance"]
+                    .eth.getBlock("latest")
+                    .gasLimit,
                 },
                 symbol,
                 symbol,
