@@ -228,7 +228,6 @@ class DatatokenBase(ABC, ContractBase):
             tx_dict,
         )
 
-    # TODO: fix filtering
     @enforce_types
     def get_start_order_logs(
         self,

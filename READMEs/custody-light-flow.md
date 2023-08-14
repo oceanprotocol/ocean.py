@@ -94,11 +94,11 @@ Steps in this flow:
 
 In the same Python console:
 ```python
-#data info
+# data info
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 
-#create data asset
+# create data asset
 from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.util import to_wei
 

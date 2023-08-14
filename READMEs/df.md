@@ -40,14 +40,16 @@ amt_OCEAN_lock = 10.0
 
 Now, let's lock OCEAN for veOCEAN. In the same Python console:
 ```python
-#simulate passage of time, until next Thursday, the start of DF(X)
-from brownie.network import chain
+# simulate passage of time, until next Thursday, the start of DF(X)
+web3 = ocean.config_dict["web3_instance"]
+provider = web3.provider
+latest_block = web3.eth.getBlock("latest")
+
 WEEK = 7 * 86400 # seconds in a week
-t0 = chain.time()
-t1 = t0 // WEEK * WEEK + WEEK #this is a Thursday, because Jan 1 1970 was
+t0 = latest_block.timestamp()
+t1 = t0 // WEEK * WEEK + WEEK # this is a Thursday, because Jan 1 1970 was
 t2 = t1 + WEEK
-chain.sleep(t1 - t0)
-chain.mine()
+provider.make_request("evm_increaseTime", [(t1 - t0)])
 
 #we're now at the beginning of the week. So, lock
 veOCEAN = ocean.veOCEAN
@@ -83,7 +85,7 @@ DT.approve(exchange.address, to_wei(num_consumes), {"from": alice})
 To stake, you allocate veOCEAN to dataset. In the same Python console:
 ```python
 amt_allocate = 100 #total allocation must be <= 10000 (wei)
-ocean.ve_allocate.setAllocation(amt_allocate, data_NFT.address, chain.id, {"from": alice})
+ocean.ve_allocate.setAllocation(amt_allocate, data_NFT.address, web3.eth.chain_id, {"from": alice})
 ```
 
 ## 5. Fake-consume data
@@ -119,11 +121,12 @@ In the same Python console:
 ```python
 #simulate passage of time, until next Thursday, which is the start of DF(X+1)
 WEEK = 7 * 86400 # seconds in a week
-t0 = chain.time()
+
+latest_block = web3.eth.getBlock("latest")
+t0 = latest_block.timestamp()
 t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
-chain.sleep(t1 - t0)
-chain.mine()
+provider.make_request("evm_increaseTime", [(t1 - t0)])
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 OCEAN_before = from_wei(OCEAN.balanceOf(alice))

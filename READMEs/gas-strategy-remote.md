@@ -40,8 +40,8 @@ url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 tx_dict = (
     {
         "from": alice,
-        "priority_fee": priority_fee,
-        "max_fee": max_fee,
+        "maxPriorityFeePerGas": priority_fee,
+        "maxFeePerGas": max_fee,
     },
 )
 
