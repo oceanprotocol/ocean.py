@@ -9,6 +9,7 @@ import os
 import re
 from datetime import datetime, timezone
 from json import JSONDecodeError
+from math import ceil
 from typing import Dict, List, Optional, Tuple, Union
 from unittest.mock import Mock
 
@@ -57,7 +58,11 @@ class DataServiceProviderBase:
                 method, url=nonce_endpoint, params={"userAddress": wallet.address}
             ).json()
 
-            nonce = int(nonce_response["nonce"]) if nonce_response["nonce"] else 0
+            nonce = (
+                int(ceil(float(nonce_response["nonce"])))
+                if nonce_response["nonce"]
+                else 0
+            )
             nonce = nonce + 1
         else:
             nonce = str(datetime.now(timezone.utc).timestamp() * 1000)
