@@ -37,13 +37,11 @@ The gas strategy can be added to any `tx_dict`, and this is just an example of u
 #data info
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-tx_dict = (
-    {
+tx_dict = {
         "from": alice,
         "maxPriorityFeePerGas": priority_fee,
         "maxFeePerGas": max_fee,
-    },
-)
+}
 
 #create data asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(

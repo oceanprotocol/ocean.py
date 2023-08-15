@@ -98,6 +98,10 @@ As usual, Linux/MacOS needs "`export`" and Windows needs "`set`". In the console
 # For accounts: set private keys
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+
+# network rpc url, e.g.
+export MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
+export POLYGON_RPC_URL=https://polygon-rpc.com
 ```
 
 
@@ -106,6 +110,10 @@ export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 # For accounts: set private keys
 set REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+
+# network rpc url, e.g.
+set MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
+set POLYGON_RPC_URL=https://polygon-rpc.com
 ```
 
 ## 6. Setup in Python
