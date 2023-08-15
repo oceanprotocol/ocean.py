@@ -44,6 +44,9 @@ PROVIDER_PER_NETWORK = {
 def get_rpc_url(network_name: str) -> str:
     """Return the RPC URL for a given network."""
     if network_name == "development":
+        if os.getenv("DEVELOPMENT_RPC_URL"):
+            return os.getenv("DEVELOPMENT_RPC_URL")
+
         return "http://localhost:8545"
 
     base_url = None
