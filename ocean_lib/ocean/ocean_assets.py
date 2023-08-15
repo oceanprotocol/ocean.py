@@ -822,7 +822,7 @@ class OceanAssets:
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(
                 valid_order, provider_fees=provider_fees, tx_dict=tx_dict
-            ).txid
+            ).transactionHash.hex()
             return
 
         asset_compute_input.transfer_tx_id = dt.start_order(
@@ -831,4 +831,4 @@ class OceanAssets:
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
             tx_dict=tx_dict,
-        ).txid
+        ).transactionHash.hex()
