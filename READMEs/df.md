@@ -46,7 +46,7 @@ provider = web3.provider
 latest_block = web3.eth.getBlock("latest")
 
 WEEK = 7 * 86400 # seconds in a week
-t0 = latest_block.timestamp()
+t0 = latest_block.timestamp
 t1 = t0 // WEEK * WEEK + WEEK # this is a Thursday, because Jan 1 1970 was
 t2 = t1 + WEEK
 provider.make_request("evm_increaseTime", [(t1 - t0)])
@@ -123,7 +123,7 @@ In the same Python console:
 WEEK = 7 * 86400 # seconds in a week
 
 latest_block = web3.eth.getBlock("latest")
-t0 = latest_block.timestamp()
+t0 = latest_block.timestamp
 t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
 provider.make_request("evm_increaseTime", [(t1 - t0)])
