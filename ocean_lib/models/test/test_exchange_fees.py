@@ -66,7 +66,7 @@ def test_exchange_swap_fees(
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
     bt_deployer_wallet = factory_deployer_wallet
-    consume_market_swap_fee_collector = get_wallet(9)
+    consume_market_swap_fee_collector = get_wallet(7)
 
     router = FactoryRouter(config, get_address_of_type(config, "Router"))
     FRE = FixedRateExchange(config, get_address_of_type(config, "FixedPrice"))

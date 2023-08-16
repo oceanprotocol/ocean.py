@@ -201,4 +201,4 @@ def carlos():
 
 @pytest.fixture
 def dan():
-    return get_wallet(9)
+    return get_wallet(7)
