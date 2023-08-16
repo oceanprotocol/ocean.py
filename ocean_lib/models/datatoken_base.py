@@ -439,14 +439,14 @@ class DatatokenBase(ABC, ContractBase):
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        wallet_address = get_from_address(kwargs["tx_dict"])
+        wallet = kwargs["tx_dict"]["from"]
         amt_needed = exchange.BT_needed(
             Web3.toWei(1, "ether"), consume_market_fees.amount
         )
         base_token = DatatokenBase.get_typed(
             exchange._FRE.config_dict, exchange.details.base_token
         )
-        base_token_balance = base_token.balanceOf(wallet_address)
+        base_token_balance = base_token.balanceOf(wallet.address)
 
         if base_token_balance < amt_needed:
             raise ValueError(
@@ -466,7 +466,7 @@ class DatatokenBase(ABC, ContractBase):
         base_token.approve(
             approve_address,
             amt_needed,
-            {"from": wallet_address},
+            {"from": wallet},
         )
 
         return self.buy_DT_and_order(*args, **kwargs)
