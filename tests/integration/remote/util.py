@@ -11,7 +11,7 @@ import warnings
 from enforce_typing import enforce_types
 from eth_account import Account
 
-from ocean_lib.ocean.util import send_ether
+from ocean_lib.ocean.util import send_ether, to_wei
 from ocean_lib.web3_internal.utils import get_gas_fees
 
 
@@ -68,9 +68,8 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
     # Simplest possible tx: Alice send Bob some fake MATIC
     web3 = ocean.config_dict["web3_instance"]
     bob_eth_before = web3.eth.get_balance(bob_wallet.address)
-    # TODO: amt send??
-    # normalized_unixtime = time.time() / 1e9
-    # amt_send = 1e-8 * (random.random() + normalized_unixtime)
+    normalized_unixtime = time.time() / 1e9
+    amt_send = 1e-8 * (random.random() + normalized_unixtime)
 
     print("Do a send-Ether tx...")
     try:
@@ -79,7 +78,7 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
             ocean.config_dict,
             alice_wallet,
             bob_wallet.address,
-            1,
+            to_wei(amt_send),
             priority_fee=priority_fee,
         )
         bob_eth_after = web3.eth.get_balance(bob_wallet.address)
