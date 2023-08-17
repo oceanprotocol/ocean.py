@@ -144,6 +144,7 @@ def error_is_skippable(error_s: str) -> bool:
         "insufficient funds" in error_s
         or "underpriced" in error_s
         or "exceeds block gas limit" in error_s
+        or "exceeds the configured cap (1.00 ether)" in error_s
         or "No contract deployed at" in error_s
         or "nonce too low" in error_s
         or "Internal error" in error_s
