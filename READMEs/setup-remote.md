@@ -23,7 +23,7 @@ Let's go!
 
 ### 1.1 Setup network RPC URLs for all desired networks
 
-All [Ocean-deployed](https://docs.oceanprotocol.com/core-concepts/networks) chains (Eth mainnet, Polygon, etc) are supported.
+All [Ocean chain deployments](https://docs.oceanprotocol.com/discover/networks) (Eth mainnet, Polygon, etc) are supported.
 
 Export env vars of the format `NETWORKNAME_RPC_URL` e.g. `export POLYGON_RPC_URL=https://polygon-rpc.com`
 
