@@ -479,6 +479,7 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1
 
+
 @pytest.mark.skip(reason="currently failing")
 @pytest.mark.integration
 def test_create_url_asset_with_gas_strategy(
@@ -489,7 +490,7 @@ def test_create_url_asset_with_gas_strategy(
     ocean_assets = OceanAssets(config, data_provider)
 
     priority_fee, max_fee = get_gas_fees()
-    
+
     name = "Branin dataset"
     url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
     tx_dict = {
@@ -497,14 +498,15 @@ def test_create_url_asset_with_gas_strategy(
         "maxPriorityFeePerGas": priority_fee,
         "maxFeePerGas": max_fee,
     }
-    
+
     ddo = ocean_assets.create_url_asset(
         name,
         url,
         tx_dict,
         dt_template_index=1,
         wait_for_aqua=False,
-        )
+    )
+
 
 @pytest.mark.integration
 def test_create_pricing_schemas(
