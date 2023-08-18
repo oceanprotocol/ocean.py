@@ -33,7 +33,7 @@ git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
 
 # Install OS dependencies
-sudo apt-get install -y python3-dev gcc python-pytest
+sudo apt-get install -y python3-dev gcc
 
 # Initialize virtual environment and activate it.
 # Make sure your Python version inside the venv is >=3.8.
