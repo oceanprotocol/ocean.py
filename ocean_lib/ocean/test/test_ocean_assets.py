@@ -20,6 +20,7 @@ from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
+from ocean_lib.web3_internal.utils import get_gas_fees
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     build_default_services,
@@ -478,6 +479,32 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1
 
+@pytest.mark.skip(reason="currently failing")
+@pytest.mark.integration
+def test_create_url_asset_with_gas_strategy(
+    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN
+):
+    """Directly models READMEs/gas-strategy-remote.md behavior"""
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, data_provider)
+
+    priority_fee, max_fee = get_gas_fees()
+    
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    tx_dict = {
+        "from": publisher_wallet,
+        "maxPriorityFeePerGas": priority_fee,
+        "maxFeePerGas": max_fee,
+    }
+    
+    ddo = ocean_assets.create_url_asset(
+        name,
+        url,
+        tx_dict,
+        dt_template_index=1,
+        wait_for_aqua=False,
+        )
 
 @pytest.mark.integration
 def test_create_pricing_schemas(
