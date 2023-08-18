@@ -54,9 +54,7 @@ Issue: MacOS "Unsupported Architecture"
 
 Issue: Dependencies and Python 3.11
 
-- ocean.py has two dependencies that don't support Python 3.11 yet. Here's the workaround for each.
-- (1) Vyper which doesn't support Python 3.11. The workaround: before installing ocean-lib, run `pip install vyper==0.3.7 --ignore-requires-python` and `sudo apt-get install python3.11-dev`
-- (2) The `parsimonious` package depends on `getargsspec`, which doesn't support Python 3.11. The workaround: open the package's expressions.py file (e.g. in ./venv/lib/python3.11/site-packages/parsimonious/expressions.py), and change the line `import getfullargspec as getargsspec` instead of the regular import.
+- ocean.py depends on the `parsimonious` package. In turn, `parsimonious` depends on `getargsspec`, which doesn't support Python 3.11. The workaround: open the package's expressions.py file (e.g. in ./venv/lib/python3.11/site-packages/parsimonious/expressions.py), and change the line `import getfullargspec as getargsspec` instead of the regular import.
 
 ## Next step
 
