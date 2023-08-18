@@ -100,7 +100,7 @@ export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 
 # network rpc url, e.g.
-export MUMBAI_RPC_URL=https://endpoints.omniatech.io/v1/matic/mumbai/public
+export MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
 export POLYGON_RPC_URL=https://polygon-rpc.com
 ```
 
@@ -112,9 +112,11 @@ set REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 
 # network rpc url, e.g.
-set MUMBAI_RPC_URL=https://endpoints.omniatech.io/v1/matic/mumbai/public
+set MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
 set POLYGON_RPC_URL=https://polygon-rpc.com
 ```
+
+Optionally, chainlist.org has other RPCs for [Mumbai](https://chainlist.org/chain/80001) and [Polygon](https://chainlist.org/chain/137).
 
 ## 6. Setup in Python
 
