@@ -9,6 +9,7 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 from web3 import Web3
+from web3.logs import DISCARD
 
 from ocean_lib.models.datatoken_base import DatatokenArguments, DatatokenBase
 from ocean_lib.ocean.util import (
@@ -376,7 +377,7 @@ class DataNFTArguments:
         )
 
         registered_event = data_nft_factory.contract.events.NFTCreated().processReceipt(
-            receipt
+            receipt, errors=DISCARD
         )[0]
         data_nft_address = registered_event.args.newTokenAddress
 

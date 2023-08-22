@@ -7,6 +7,7 @@ from base64 import b64decode
 
 import pytest
 from web3 import Web3
+from web3.logs import DISCARD
 
 from ocean_lib.models.data_nft import DataNFTPermissions
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
@@ -241,7 +242,9 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         {"from": consumer_wallet},
     )
 
-    event = data_nft.contract.events.MetadataCreated().processReceipt(receipt)[0]
+    event = data_nft.contract.events.MetadataCreated().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     assert event.args.decryptorUrl == "http://myprovider:8030"
 
     metadata_info = data_nft.getMetaData()
@@ -259,7 +262,9 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         {"from": consumer_wallet},
     )
 
-    event = data_nft.contract.events.MetadataUpdated().processReceipt(receipt)[0]
+    event = data_nft.contract.events.MetadataUpdated().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     assert event.args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.getMetaData()
@@ -282,11 +287,15 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         {"from": publisher_wallet},
     )
 
-    event = data_nft.contract.events.TokenURIUpdate().processReceipt(receipt)[0]
+    event = data_nft.contract.events.TokenURIUpdate().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     assert event.args.tokenURI == "https://anothernewurl.com/nft/"
     assert event.args.updatedBy == publisher_wallet.address
 
-    event = data_nft.contract.events.MetadataUpdated().processReceipt(receipt)[0]
+    event = data_nft.contract.events.MetadataUpdated().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     assert event.args.decryptorUrl == "http://foourl"
 
     metadata_info = data_nft.getMetaData()
@@ -474,7 +483,7 @@ def test_erc721_datatoken_functions(
         {"from": publisher_wallet},
     )
     registered_event = data_nft.contract.events.TokenURIUpdate().processReceipt(
-        receipt
+        receipt, errors=DISCARD
     )[0]
 
     assert registered_event, "Cannot find TokenURIUpdate event."
@@ -586,7 +595,9 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
 
     assert getattr(transfer_event.args, "from") == publisher_wallet.address
     assert transfer_event.args.to == consumer_wallet.address
@@ -604,7 +615,9 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
 
     assert getattr(transfer_event.args, "from") == publisher_wallet.address
     assert transfer_event.args.to == consumer_wallet.address
@@ -640,7 +653,9 @@ def test_transfer_nft(
     )
 
     set_publishing_fee_event = (
-        datatoken.contract.events.PublishMarketFeeChanged().processReceipt(receipt)[0]
+        datatoken.contract.events.PublishMarketFeeChanged().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
     )
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
 
@@ -686,7 +701,9 @@ def test_nft_transfer_with_fre(
         {"from": publisher_wallet},
     )
 
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(receipt)[0]
+    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
 
     assert getattr(transfer_event.args, "from") == publisher_wallet.address
     assert transfer_event.args.to == consumer_wallet.address

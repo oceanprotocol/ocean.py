@@ -5,6 +5,7 @@
 import time
 
 import pytest
+from web3.logs import DISCARD
 
 from ocean_lib.models.fixed_rate_exchange import (
     BtNeeded,
@@ -217,14 +218,18 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     DT_alice1 = DT.balanceOf(alice)
     receipt = exchange.collect_DT(details.dt_balance, {"from": alice})
-    event = exchange._FRE.contract.events.TokenCollected().processReceipt(receipt)[0]
+    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     DT_received = event.args.amount
     assert event.args.to == alice.address
     DT_expected = DT_alice1 + DT_received
 
     OCEAN_alice1 = OCEAN.balanceOf(alice)
     receipt = exchange.collect_BT(details.bt_balance, {"from": alice})
-    event = exchange._FRE.contract.events.TokenCollected().processReceipt(receipt)[0]
+    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     OCEAN_received = event.args.amount
     assert event.args.to == alice.address
     OCEAN_expected = OCEAN_alice1 + OCEAN_received

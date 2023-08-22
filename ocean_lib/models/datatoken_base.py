@@ -8,6 +8,7 @@ from enum import IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from enforce_typing import enforce_types
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -255,7 +256,7 @@ class DatatokenBase(ABC, ContractBase):
         for log in event_filter.get_all_entries():
             receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
             processed_events = self.contract.events.OrderStarted().processReceipt(
-                receipt
+                receipt, errors=DISCARD
             )
             for processed_event in processed_events:
                 orders.append(processed_event)
@@ -301,7 +302,9 @@ class DatatokenBase(ABC, ContractBase):
 
         tx = self.createFixedRate(*(args_tup + (tx_dict,)))
 
-        event = self.contract.events.NewFixedRate().processReceipt(tx)[0]
+        event = self.contract.events.NewFixedRate().processReceipt(tx, errors=DISCARD)[
+            0
+        ]
         exchange_id = event.args.exchangeId
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)

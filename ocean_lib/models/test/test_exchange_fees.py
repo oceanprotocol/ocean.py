@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.logs import DISCARD
 
 from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.factory_router import FactoryRouter
@@ -282,7 +283,9 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     DT_exchange2 = details.dt_balance
 
     # Get Swapped event
-    swapped_event = exchange._FRE.contract.events.Swapped().processReceipt(tx)[0]
+    swapped_event = exchange._FRE.contract.events.Swapped().processReceipt(
+        tx, errors=DISCARD
+    )[0]
     BT_publish_market_fee_amt = swapped_event.args.marketFeeAmount
     BT_consume_market_fee_amt = swapped_event.args.consumeMarketFeeAmount
     BT_opc_fee_amt = swapped_event.args.oceanFeeAmount

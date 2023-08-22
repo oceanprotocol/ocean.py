@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.models.datatoken_base import DatatokenRoles, TokenFeeInfo
@@ -159,7 +160,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         {"from": publisher_wallet},
     )
     executed_event = datatoken.contract.events.OrderExecuted().processReceipt(
-        receipt_interm
+        receipt_interm, errors=DISCARD
     )[0]
     assert executed_event.args.orderTxId == receipt.transactionHash
     assert executed_event.args.providerAddress == provider_fee_address
@@ -205,14 +206,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         tx_dict={"from": publisher_wallet},
     )
     reused_event = datatoken.contract.events.OrderReused().processReceipt(
-        receipt_interm
+        receipt_interm, errors=DISCARD
     )[0]
     assert reused_event, "Cannot find OrderReused event"
     assert reused_event.args.orderTxId == receipt.transactionHash
     assert reused_event.args.caller == publisher_wallet.address
 
     provider_fee_event = datatoken.contract.events.ProviderFee().processReceipt(
-        receipt_interm
+        receipt_interm, errors=DISCARD
     )[0]
     assert provider_fee_event, "Cannot find ProviderFee event"
 

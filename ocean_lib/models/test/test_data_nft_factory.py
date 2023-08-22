@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
@@ -297,7 +298,9 @@ def test_start_multiple_order(
     )
 
     registered_erc20_start_order_event = (
-        datatoken.contract.events.OrderStarted().processReceipt(receipt)[0]
+        datatoken.contract.events.OrderStarted().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
     )
 
     assert receipt, "Failed starting multiple token orders."
@@ -324,7 +327,9 @@ def test_start_multiple_order(
         [reuse_order], {"from": consumer_wallet}
     )
 
-    reused_event = datatoken.contract.events.OrderReused().processReceipt(receipt)[0]
+    reused_event = datatoken.contract.events.OrderReused().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
     assert reused_event
 
 

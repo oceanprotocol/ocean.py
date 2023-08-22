@@ -10,6 +10,7 @@ from typing import List, Optional
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from web3.exceptions import MismatchedABI
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.web3_internal.contract_utils import load_contract
@@ -178,7 +179,7 @@ class ContractBase(object):
         for log in event_filter.get_all_entries():
             receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
             fn = getattr(self.contract.events, event_name)
-            processed_events = fn().processReceipt(receipt)
+            processed_events = fn().processReceipt(receipt, errors=DISCARD)
             for processed_event in processed_events:
                 events.append(processed_event)
 

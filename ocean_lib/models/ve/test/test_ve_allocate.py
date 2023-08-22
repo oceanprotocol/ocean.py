@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.logs import DISCARD
 
 from tests.resources.helper_functions import get_wallet
 
@@ -43,7 +44,9 @@ def test_single_events(ve_allocate):
 
     nftaddr1 = accounts[1].address
     tx = ve_allocate.setAllocation(100, nftaddr1, 1, {"from": accounts[0]})
-    event = ve_allocate.contract.events.AllocationSet().processReceipt(tx)[0]
+    event = ve_allocate.contract.events.AllocationSet().processReceipt(
+        tx, errors=DISCARD
+    )[0]
 
     assert event.args.sender == accounts[0].address
     assert event.args.nft == accounts[1].address
@@ -80,7 +83,9 @@ def test_batch_events(ve_allocate):
     tx = ve_allocate.setBatchAllocation(
         [25, 75], [nftaddr1, nftaddr2], [1, 1], {"from": accounts[0]}
     )
-    event = ve_allocate.contract.events.AllocationSetMultiple().processReceipt(tx)[0]
+    event = ve_allocate.contract.events.AllocationSetMultiple().processReceipt(
+        tx, errors=DISCARD
+    )[0]
 
     assert event.args.sender == accounts[0].address
     assert event.args.nft == [nftaddr1, nftaddr2]
