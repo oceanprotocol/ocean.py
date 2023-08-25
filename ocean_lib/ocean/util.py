@@ -100,10 +100,17 @@ def send_ether(
         "value": amount,
         "chainId": chain_id,
         "nonce": web3.eth.get_transaction_count(from_wallet.address),
+        "type": 2,
     }
+    tx["gas"] = web3.eth.estimate_gas(tx)
 
-    if priority_fee:
-        tx["maxPriorityFeePerGas"] = priority_fee
+    if not priority_fee:
+        priority_fee = web3.eth.max_priority_fee
+
+    base_fee = web3.eth.get_block("latest")["baseFeePerGas"]
+
+    tx["maxPriorityFeePerGas"] = priority_fee
+    tx["maxFeePerGas"] = base_fee * 2 + priority_fee
 
     signed_tx = web3.eth.account.signTransaction(tx, from_wallet.privateKey)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
