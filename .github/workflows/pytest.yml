@@ -29,6 +29,8 @@ jobs:
           path: 'barge'
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
+        env:
+          GANACHE_HARDFORK: london
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --skip-subgraph-deploy > start_ocean.log &
       - name: Install dependencies

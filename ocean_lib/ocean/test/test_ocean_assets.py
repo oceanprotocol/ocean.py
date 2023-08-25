@@ -480,7 +480,6 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
     assert len(ddo.datatokens) == 1
 
 
-@pytest.mark.skip(reason="currently failing")
 @pytest.mark.integration
 def test_create_url_asset_with_gas_strategy(
     config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN
@@ -506,6 +505,8 @@ def test_create_url_asset_with_gas_strategy(
         dt_template_index=1,
         wait_for_aqua=False,
     )
+
+    assert ddo
 
 
 @pytest.mark.integration

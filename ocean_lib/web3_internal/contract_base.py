@@ -59,17 +59,7 @@ def function_wrapper(contract, web3, contract_functions, func_name):
             wallet = tx_dict["from"]
             tx_dict2 = tx_dict.copy()
             tx_dict2["nonce"] = web3.eth.get_transaction_count(wallet.address)
-
             tx_dict2["from"] = tx_dict["from"].address
-
-            # estimate gasPrice if not given
-            if "gasPrice" in tx_dict:
-                tx_dict2["gasPrice"] = tx_dict["gasPrice"]
-            else:
-                if ("maxPriorityFeePerGas" not in tx_dict) and (
-                    "maxFeePerGas" not in tx_dict
-                ):
-                    tx_dict2["gasPrice"] = int(web3.eth.gas_price * 1.1)
 
             result = result.build_transaction(tx_dict2)
 

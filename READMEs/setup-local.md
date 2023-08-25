@@ -28,6 +28,8 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# optionally, for support of type 2 transactions
+export GANACHE_HARDFORK=london
 ./start_ocean.sh
 ```
 
