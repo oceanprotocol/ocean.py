@@ -24,7 +24,7 @@ install_requirements = [
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
     "eciespy==0.3.11",
-    "cryptography==41.0.2",
+    "cryptography==41.0.3",
     "web3==5.31.3"
     # web3.py requires eth-abi, requests, and more,
     # so those will be installed too.
