@@ -79,12 +79,12 @@ def test_main(
     ]
 
     # Should succeed to setData if erc20Deployer
-    value = Web3.toHex(text="SomeData")
+    value = Web3.to_hex(text="SomeData")
     key = Web3.keccak(hexstr=datatoken.address)
 
     datatoken.setData(value, {"from": publisher_wallet})
 
-    assert Web3.toHex(data_nft.getData(key)) == value
+    assert Web3.to_hex(data_nft.getData(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
     datatoken.cleanPermissions({"from": publisher_wallet})
@@ -134,7 +134,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
 
     provider_fee_address = publisher_wallet.address
     provider_data = provider_fees["providerData"]
-    provider_message = Web3.solidityKeccak(
+    provider_message = Web3.solidity_keccak(
         ["bytes32", "bytes"],
         [receipt.transactionHash, provider_data],
     )
@@ -142,9 +142,9 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         provider_fee_address, data=provider_message
     )
 
-    message = Web3.solidityKeccak(
+    message = Web3.solidity_keccak(
         ["bytes"],
-        [Web3.toHex(Web3.toBytes(text="12345"))],
+        [Web3.to_hex(Web3.to_bytes(text="12345"))],
     )
     consumer_signed = config["web3_instance"].eth.sign(
         consumer_wallet.address, data=message
@@ -154,12 +154,12 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         receipt.transactionHash,
         provider_data,
         provider_signed,
-        Web3.toHex(Web3.toBytes(text="12345")),
+        Web3.to_hex(Web3.to_bytes(text="12345")),
         consumer_signed,
         consumer_wallet.address,
         {"from": publisher_wallet},
     )
-    executed_event = datatoken.contract.events.OrderExecuted().processReceipt(
+    executed_event = datatoken.contract.events.OrderExecuted().process_receipt(
         receipt_interm, errors=DISCARD
     )[0]
     assert executed_event.args.orderTxId == receipt.transactionHash
@@ -174,15 +174,15 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
             receipt.transactionHash,
             provider_data,
             provider_signed,
-            Web3.toHex(Web3.toBytes(text="12345")),
+            Web3.to_hex(Web3.to_bytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
             {"from": publisher_wallet},
         )
 
-    message = Web3.solidityKeccak(
+    message = Web3.solidity_keccak(
         ["bytes"],
-        [Web3.toHex(Web3.toBytes(text="12345"))],
+        [Web3.to_hex(Web3.to_bytes(text="12345"))],
     )
     consumer_signed = config["web3_instance"].eth.sign(
         consumer_wallet.address, data=message
@@ -193,7 +193,7 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
             receipt.transactionHash,
             provider_data,
             consumer_signed,
-            Web3.toHex(Web3.toBytes(text="12345")),
+            Web3.to_hex(Web3.to_bytes(text="12345")),
             consumer_signed,
             consumer_wallet.address,
             {"from": publisher_wallet},
@@ -205,14 +205,14 @@ def test_start_order(config, publisher_wallet, consumer_wallet, data_NFT_and_DT)
         provider_fees=provider_fees,
         tx_dict={"from": publisher_wallet},
     )
-    reused_event = datatoken.contract.events.OrderReused().processReceipt(
+    reused_event = datatoken.contract.events.OrderReused().process_receipt(
         receipt_interm, errors=DISCARD
     )[0]
     assert reused_event, "Cannot find OrderReused event"
     assert reused_event.args.orderTxId == receipt.transactionHash
     assert reused_event.args.caller == publisher_wallet.address
 
-    provider_fee_event = datatoken.contract.events.ProviderFee().processReceipt(
+    provider_fee_event = datatoken.contract.events.ProviderFee().process_receipt(
         receipt_interm, errors=DISCARD
     )[0]
     assert provider_fee_event, "Cannot find ProviderFee event"
@@ -321,7 +321,7 @@ def test_exceptions(consumer_wallet, config, publisher_wallet, DT):
 
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(Exception, match="NOT DEPLOYER ROLE"):
-        datatoken.setData(Web3.toHex(text="SomeData"), {"from": consumer_wallet})
+        datatoken.setData(Web3.to_hex(text="SomeData"), {"from": consumer_wallet})
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     with pytest.raises(Exception, match="not NFTOwner"):

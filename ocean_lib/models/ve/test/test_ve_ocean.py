@@ -33,7 +33,7 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     TA = to_wei(0.0001)
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
-    latest_block = web3.eth.getBlock("latest")
+    latest_block = web3.eth.get_block("latest")
     veOCEAN.checkpoint({"from": factory_deployer_wallet, "gas": latest_block.gasLimit})
     OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
@@ -47,7 +47,7 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
-    latest_block = web3.eth.getBlock("latest")
+    latest_block = web3.eth.get_block("latest")
     veOCEAN.create_lock(
         TA,
         t2,
@@ -65,7 +65,7 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
 
-    latest_block = web3.eth.getBlock("latest")
+    latest_block = web3.eth.get_block("latest")
     alice_vote_power = float(
         from_wei(veOCEAN.balanceOf(alice_wallet, latest_block.timestamp))
     )
@@ -75,7 +75,7 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     provider.make_request("evm_increaseTime", [t2])
     provider.make_request("evm_mine", [])
 
-    latest_block = web3.eth.getBlock("latest")
+    latest_block = web3.eth.get_block("latest")
     veOCEAN.withdraw(
         {
             "from": alice_wallet,
@@ -85,6 +85,6 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     )
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
-    latest_block = web3.eth.getBlock("latest")
+    latest_block = web3.eth.get_block("latest")
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
     assert veOCEAN.balanceOf(alice_wallet, latest_block.timestamp) == 0

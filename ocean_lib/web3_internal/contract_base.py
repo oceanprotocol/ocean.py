@@ -63,8 +63,8 @@ def function_wrapper(contract, web3, contract_functions, func_name):
 
             result = result.build_transaction(tx_dict2)
 
-            # sign with wallet privateKey and send transaction
-            signed_tx = web3.eth.account.sign_transaction(result, wallet.privateKey)
+            # sign with wallet private key and send transaction
+            signed_tx = web3.eth.account.sign_transaction(result, wallet._private_key)
             receipt = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
             return web3.eth.wait_for_transaction_receipt(receipt)
@@ -129,7 +129,7 @@ class ContractBase(object):
         :param address: Address, hex str
         :return: address, hex str
         """
-        return Web3.toChecksumAddress(address.lower())
+        return Web3.to_checksum_address(address.lower())
 
     @enforce_types
     def get_event_signature(self, event_name: str) -> str:
@@ -169,7 +169,7 @@ class ContractBase(object):
         for log in event_filter.get_all_entries():
             receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
             fn = getattr(self.contract.events, event_name)
-            processed_events = fn().processReceipt(receipt, errors=DISCARD)
+            processed_events = fn().process_receipt(receipt, errors=DISCARD)
             for processed_event in processed_events:
                 events.append(processed_event)
 

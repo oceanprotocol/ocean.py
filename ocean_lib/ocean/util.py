@@ -25,7 +25,7 @@ def get_address_of_type(
         if not isinstance(addresses[address_type], dict)
         else addresses[address_type].get(key, addresses[address_type]["1"])
     )
-    return Web3.toChecksumAddress(address.lower())
+    return Web3.to_checksum_address(address.lower())
 
 
 @enforce_types
@@ -35,7 +35,9 @@ def get_ocean_token_address(config_dict: dict) -> str:
     """
     addresses = get_contracts_addresses(config_dict)
 
-    return Web3.toChecksumAddress(addresses.get("Ocean").lower()) if addresses else None
+    return (
+        Web3.to_checksum_address(addresses.get("Ocean").lower()) if addresses else None
+    )
 
 
 @enforce_types
@@ -65,7 +67,7 @@ def str_with_wei(amt_wei: int) -> str:
 def get_from_address(tx_dict: dict) -> str:
     address = tx_dict["from"].address
 
-    return Web3.toChecksumAddress(address.lower())
+    return Web3.to_checksum_address(address.lower())
 
 
 @enforce_types
@@ -89,8 +91,8 @@ def get_args_object(args, kwargs, args_class):
 def send_ether(
     config, from_wallet, to_address: str, amount: Union[int, float], priority_fee=None
 ):
-    if not Web3.isChecksumAddress(to_address):
-        to_address = Web3.toChecksumAddress(to_address)
+    if not Web3.is_checksum_address(to_address):
+        to_address = Web3.to_checksum_address(to_address)
 
     web3 = config["web3_instance"]
     chain_id = web3.eth.chain_id
@@ -112,6 +114,6 @@ def send_ether(
     tx["maxPriorityFeePerGas"] = priority_fee
     tx["maxFeePerGas"] = base_fee * 2 + priority_fee
 
-    signed_tx = web3.eth.account.signTransaction(tx, from_wallet.privateKey)
+    signed_tx = web3.eth.account.sign_transaction(tx, from_wallet._private_key)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     return web3.eth.wait_for_transaction_receipt(tx_hash)

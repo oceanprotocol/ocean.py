@@ -19,7 +19,7 @@ OPC_PROVIDER_FEE = to_wei(0)  # 0%
 # FactoryRouter methods
 @pytest.mark.unit
 def test_router_owner(factory_router: FactoryRouter):
-    assert Web3.isChecksumAddress(factory_router.routerOwner())
+    assert Web3.is_checksum_address(factory_router.routerOwner())
 
 
 @pytest.mark.unit

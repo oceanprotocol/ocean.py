@@ -44,7 +44,7 @@ def test_single_events(ve_allocate):
 
     nftaddr1 = accounts[1].address
     tx = ve_allocate.setAllocation(100, nftaddr1, 1, {"from": accounts[0]})
-    event = ve_allocate.contract.events.AllocationSet().processReceipt(
+    event = ve_allocate.contract.events.AllocationSet().process_receipt(
         tx, errors=DISCARD
     )[0]
 
@@ -83,7 +83,7 @@ def test_batch_events(ve_allocate):
     tx = ve_allocate.setBatchAllocation(
         [25, 75], [nftaddr1, nftaddr2], [1, 1], {"from": accounts[0]}
     )
-    event = ve_allocate.contract.events.AllocationSetMultiple().processReceipt(
+    event = ve_allocate.contract.events.AllocationSetMultiple().process_receipt(
         tx, errors=DISCARD
     )[0]
 

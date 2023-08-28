@@ -15,7 +15,9 @@ def test_generating_wallets(ocean_token, config):
     generated_wallet = generate_wallet()
     assert generated_wallet.address, "Wallet has not an address."
 
-    assert config["web3_instance"].eth.getBalance(generated_wallet.address) == to_wei(3)
+    assert config["web3_instance"].eth.get_balance(generated_wallet.address) == to_wei(
+        3
+    )
 
     assert ocean_token.balanceOf(generated_wallet.address) == to_wei(50)
 
@@ -35,4 +37,4 @@ def test_generating_wallets(ocean_token, config):
     for key_label in env_key_labels:
         key = os.environ.get(key_label)
         env_private_keys.append(key)
-    assert generated_wallet.privateKey.hex() not in env_private_keys
+    assert generated_wallet._private_key.hex() not in env_private_keys

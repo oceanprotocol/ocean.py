@@ -37,5 +37,5 @@ def mint_fake_OCEAN(config: dict) -> None:
         if OCEAN_token.balanceOf(w.address) < amt_distribute:
             OCEAN_token.mint(w.address, amt_distribute, {"from": deployer_wallet})
 
-        if config["web3_instance"].eth.getBalance(w.address) < to_wei(2):
+        if config["web3_instance"].eth.get_balance(w.address) < to_wei(2):
             send_ether(config, deployer_wallet, w.address, to_wei(4))

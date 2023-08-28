@@ -86,7 +86,7 @@ def test_market_flow(
 
     orders = consumer_ocean.get_user_orders(
         consumer_wallet.address,
-        Web3.toChecksumAddress(datatoken.address),
+        Web3.to_checksum_address(datatoken.address),
     )
     assert (
         orders

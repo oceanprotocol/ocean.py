@@ -23,9 +23,9 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
-    "eciespy==0.3.11",
-    "cryptography==41.0.2",
-    "web3==5.31.3"
+    "eciespy==0.4.0",
+    "cryptography==41.0.3",
+    "web3==6.9.0"
     # web3.py requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -35,11 +35,11 @@ setup_requirements = ["pytest-runner"]
 
 test_requirements = [
     "codacy-coverage==1.3.11",
-    "coverage==7.2.7",
+    "coverage==7.3.0",
     "mccabe==0.7.0",
     "pytest==6.2.5",
     "pytest-watch==4.2.0",
-    "pytest-env==0.6.2",
+    "pytest-env",  # common dependency
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
     "mkcodes==0.1.1",
     "pytest-sugar==0.9.7",

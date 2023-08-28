@@ -283,7 +283,7 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     DT_exchange2 = details.dt_balance
 
     # Get Swapped event
-    swapped_event = exchange._FRE.contract.events.Swapped().processReceipt(
+    swapped_event = exchange._FRE.contract.events.Swapped().process_receipt(
         tx, errors=DISCARD
     )[0]
     BT_publish_market_fee_amt = swapped_event.args.marketFeeAmount

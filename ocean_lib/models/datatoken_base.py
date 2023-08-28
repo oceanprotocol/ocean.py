@@ -37,9 +37,9 @@ class TokenFeeInfo:
         amount: Optional[int] = 0,
     ):
         self.address = (
-            Web3.toChecksumAddress(address.lower()) if address else ZERO_ADDRESS
+            Web3.to_checksum_address(address.lower()) if address else ZERO_ADDRESS
         )
-        self.token = Web3.toChecksumAddress(token.lower()) if token else ZERO_ADDRESS
+        self.token = Web3.to_checksum_address(token.lower()) if token else ZERO_ADDRESS
 
         self.amount = amount
 
@@ -255,7 +255,7 @@ class DatatokenBase(ABC, ContractBase):
 
         for log in event_filter.get_all_entries():
             receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
-            processed_events = self.contract.events.OrderStarted().processReceipt(
+            processed_events = self.contract.events.OrderStarted().process_receipt(
                 receipt, errors=DISCARD
             )
             for processed_event in processed_events:
@@ -302,7 +302,7 @@ class DatatokenBase(ABC, ContractBase):
 
         tx = self.createFixedRate(*(args_tup + (tx_dict,)))
 
-        event = self.contract.events.NewFixedRate().processReceipt(tx, errors=DISCARD)[
+        event = self.contract.events.NewFixedRate().process_receipt(tx, errors=DISCARD)[
             0
         ]
         exchange_id = event.args.exchangeId
@@ -444,7 +444,7 @@ class DatatokenBase(ABC, ContractBase):
 
         wallet = kwargs["tx_dict"]["from"]
         amt_needed = exchange.BT_needed(
-            Web3.toWei(1, "ether"), consume_market_fees.amount
+            Web3.to_wei(1, "ether"), consume_market_fees.amount
         )
         base_token = DatatokenBase.get_typed(
             exchange._FRE.config_dict, exchange.details.base_token
