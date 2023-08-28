@@ -87,6 +87,6 @@ def get_gas_fees() -> tuple:
     gas_resp = requests.get("https://gasstation.polygon.technology/v2")
 
     return (
-        Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-        Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
+        Web3.to_wei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+        Web3.to_wei(gas_resp.json()["fast"]["maxFee"], "gwei"),
     )

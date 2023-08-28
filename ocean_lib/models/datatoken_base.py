@@ -444,7 +444,7 @@ class DatatokenBase(ABC, ContractBase):
 
         wallet = kwargs["tx_dict"]["from"]
         amt_needed = exchange.BT_needed(
-            Web3.toWei(1, "ether"), consume_market_fees.amount
+            Web3.to_wei(1, "ether"), consume_market_fees.amount
         )
         base_token = DatatokenBase.get_typed(
             exchange._FRE.config_dict, exchange.details.base_token

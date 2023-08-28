@@ -114,7 +114,7 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
                     "maxPriorityFeePerGas": priority_fee,
                     "maxFeePerGas": max_fee,
                     "gas": ocean.config_dict["web3_instance"]
-                    .eth.getBlock("latest")
+                    .eth.get_block("latest")
                     .gasLimit,
                 },
                 symbol,

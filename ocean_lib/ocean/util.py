@@ -114,6 +114,6 @@ def send_ether(
     tx["maxPriorityFeePerGas"] = priority_fee
     tx["maxFeePerGas"] = base_fee * 2 + priority_fee
 
-    signed_tx = web3.eth.account.signTransaction(tx, from_wallet._private_key)
+    signed_tx = web3.eth.account.sign_transaction(tx, from_wallet._private_key)
     tx_hash = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
     return web3.eth.wait_for_transaction_receipt(tx_hash)

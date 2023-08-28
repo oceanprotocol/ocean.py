@@ -43,7 +43,7 @@ Now, let's lock OCEAN for veOCEAN. In the same Python console:
 # simulate passage of time, until next Thursday, the start of DF(X)
 web3 = ocean.config_dict["web3_instance"]
 provider = web3.provider
-latest_block = web3.eth.getBlock("latest")
+latest_block = web3.eth.get_block("latest")
 
 WEEK = 7 * 86400 # seconds in a week
 t0 = latest_block.timestamp
@@ -139,7 +139,7 @@ In the same Python console:
 #simulate passage of time, until next Thursday, which is the start of DF(X+1)
 WEEK = 7 * 86400 # seconds in a week
 
-latest_block = web3.eth.getBlock("latest")
+latest_block = web3.eth.get_block("latest")
 t0 = latest_block.timestamp
 t1 = t0 // WEEK * WEEK + WEEK
 t2 = t1 + WEEK
