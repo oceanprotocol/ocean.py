@@ -54,8 +54,25 @@ provider.make_request("evm_increaseTime", [(t1 - t0)])
 #we're now at the beginning of the week. So, lock
 veOCEAN = ocean.veOCEAN
 OCEAN.approve(veOCEAN.address, to_wei(amt_OCEAN_lock), {"from" : alice})
-veOCEAN.withdraw({"from": alice}) #withdraw old tokens first
-veOCEAN.create_lock(to_wei(amt_OCEAN_lock), t2, {"from": alice})
+
+import math
+web3 = ocean.config_dict["web3_instance"]
+latest_block = web3.eth.get_block("latest")
+veOCEAN.withdraw({
+    "from": alice,
+    "gas": latest_block.gasLimit,
+    "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+}) # withdraw old tokens first
+
+latest_block = web3.eth.get_block("latest")
+veOCEAN.create_lock(
+    to_wei(amt_OCEAN_lock),
+    t2,
+    {
+        "from": alice,
+        "gas": latest_block.gasLimit,
+        "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+    })
 ```
 
 
@@ -130,7 +147,11 @@ provider.make_request("evm_increaseTime", [(t1 - t0)])
 
 #Rewards can be claimed via code or webapp, at your leisure. Let's do it now.
 OCEAN_before = from_wei(OCEAN.balanceOf(alice))
-ocean.ve_fee_distributor.claim({"from": alice})
+ocean.ve_fee_distributor.claim({
+    "from": alice,
+    "gas": latest_block.gasLimit,
+    "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+})
 OCEAN_after = from_wei(OCEAN.balanceOf(alice))
 print(f"Just claimed {OCEAN_after - OCEAN_before} OCEAN rewards")
 ```
