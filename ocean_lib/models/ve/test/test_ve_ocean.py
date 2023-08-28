@@ -2,6 +2,8 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import math
+
 import pytest
 
 from ocean_lib.ocean.util import from_wei, send_ether, to_wei
@@ -46,7 +48,15 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
     latest_block = web3.eth.getBlock("latest")
-    veOCEAN.create_lock(TA, t2, {"from": alice_wallet, "gas": latest_block.gasLimit})
+    veOCEAN.create_lock(
+        TA,
+        t2,
+        {
+            "from": alice_wallet,
+            "gas": latest_block.gasLimit,
+            "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+        },
+    )
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
 
@@ -66,7 +76,13 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
     provider.make_request("evm_mine", [])
 
     latest_block = web3.eth.getBlock("latest")
-    veOCEAN.withdraw({"from": alice_wallet, "gas": latest_block.gasLimit})
+    veOCEAN.withdraw(
+        {
+            "from": alice_wallet,
+            "gas": latest_block.gasLimit,
+            "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+        }
+    )
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
     latest_block = web3.eth.getBlock("latest")
