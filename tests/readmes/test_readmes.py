@@ -48,7 +48,7 @@ class TestReadmes(object):
             "publish-flow-credentials",
             "publish-flow-restapi",  # TODO: fix and restore
             "gas-strategy-remote",
-            "using-clef",
+            # "using-clef", # TODO: removed original clef readme, to reinstate in #1461
             "c2d-flow",  # TODO: fix c2d CI containers in #1449 and restore afterwards
         ]
 

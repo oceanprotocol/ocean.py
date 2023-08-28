@@ -28,20 +28,14 @@ cd barge
 docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# for support of type 2 transactions
+export GANACHE_HARDFORK=london
 ./start_ocean.sh
 ```
 
 Now that we have barge running, we can mostly ignore its console while it runs.
 
-## 2. Brownie local network configuration
-
-(You don't need to do anything in this step, it's just useful to understand.)
-
-Brownie's network configuration file is at `~/.brownie/network-config.yaml`.
-
-When running locally, Brownie will use the chain listed under `development`, having id `development`. This refers to Ganache, which is running in Barge.
-
-## 3. Set envvars
+## 2. Set envvars
 
 From here on, go to a console different than Barge. (E.g. the console where you installed Ocean, or a new one.)
 
@@ -65,7 +59,7 @@ export TEST_PRIVATE_KEY3=0x732fbb7c355aa8898f4cff92fa7a6a947339eaf026a08a51f1711
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
-## 4. Setup in Python
+## 3. Setup in Python
 
 In the same console, run Python console:
 ```console
@@ -75,9 +69,6 @@ python
 In the Python console:
 ```python
 # Create Ocean instance
-from ocean_lib.web3_internal.utils import connect_to_network
-connect_to_network("development")
-
 from ocean_lib.example_config import get_config_dict
 config = get_config_dict("development")
 
@@ -93,23 +84,22 @@ mint_fake_OCEAN(config)
 
 # Create Alice's wallet
 import os
-from brownie.network import accounts
-accounts.clear()
+from eth_account import Account
 
 alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice = accounts.add(alice_private_key)
-assert alice.balance() > 0, "Alice needs ETH"
+alice = Account.from_key(private_key=alice_private_key)
+assert ocean.wallet_balance(alice) > 0, "Alice needs ETH"
 assert OCEAN.balanceOf(alice) > 0, "Alice needs OCEAN"
 
 # Create additional wallets. While some flows just use Alice wallet, it's simpler to do all here.
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob = accounts.add(bob_private_key)
-assert bob.balance() > 0, "Bob needs ETH"
+bob = Account.from_key(private_key=bob_private_key)
+assert ocean.wallet_balance(bob) > 0, "Bob needs ETH"
 assert OCEAN.balanceOf(bob) > 0, "Bob needs OCEAN"
 
 carlos_private_key = os.getenv('TEST_PRIVATE_KEY3')
-carlos = accounts.add(carlos_private_key)
-assert carlos.balance() > 0, "Carlos needs ETH"
+carlos = Account.from_key(private_key=carlos_private_key)
+assert ocean.wallet_balance(carlos) > 0, "Carlos needs ETH"
 assert OCEAN.balanceOf(carlos) > 0, "Carlos needs OCEAN"
 
 
@@ -117,7 +107,7 @@ assert OCEAN.balanceOf(carlos) > 0, "Carlos needs OCEAN"
 from ocean_lib.ocean.util import to_wei, from_wei
 ```
 
-## 5. Next step
+## 4. Next step
 
 You've now set up everything you need for local testing, congrats!
 

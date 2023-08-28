@@ -2,13 +2,12 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import brownie
+import math
+
 import pytest
 
-from ocean_lib.ocean.util import from_wei, to_wei
+from ocean_lib.ocean.util import from_wei, send_ether, to_wei
 
-chain = brownie.network.chain
-accounts = brownie.network.accounts
 WEEK = 7 * 86400
 MAXTIME = 4 * 365 * 86400  # 4 years
 
@@ -23,24 +22,40 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
 
     OCEAN = ocean_token
 
-    alice_wallet = accounts.add()  # new account avoids "withdraw old tokens first"
-    factory_deployer_wallet.transfer(alice_wallet, "1 ether")
+    web3 = ocean.config_dict["web3_instance"]
+    alice_wallet = (
+        web3.eth.account.create()
+    )  # new account avoids "withdraw old tokens first"
+    send_ether(
+        ocean.config_dict, factory_deployer_wallet, alice_wallet.address, to_wei(1)
+    )
 
     TA = to_wei(0.0001)
     OCEAN.mint(alice_wallet.address, TA, {"from": factory_deployer_wallet})
 
-    veOCEAN.checkpoint({"from": factory_deployer_wallet})
+    latest_block = web3.eth.getBlock("latest")
+    veOCEAN.checkpoint({"from": factory_deployer_wallet, "gas": latest_block.gasLimit})
     OCEAN.approve(veOCEAN.address, TA, {"from": alice_wallet})
 
-    t0 = chain[-1].timestamp  # ve funcs use block.timestamp, not chain.time()
+    latest_block = ocean.config_dict["web3_instance"].eth.get_block("latest")
+    t0 = latest_block.timestamp  # ve funcs use block.timestamp, not chain.time()
     t1 = t0 // WEEK * WEEK + WEEK  # this is a Thursday, because Jan 1 1970 was
     t2 = t1 + WEEK
-    chain.sleep(t1 - t0)
+
+    provider = web3.provider
+    provider.make_request("evm_increaseTime", [(t1 - t0)])
 
     assert OCEAN.balanceOf(alice_wallet.address) != 0
 
+    latest_block = web3.eth.getBlock("latest")
     veOCEAN.create_lock(
-        TA, t2, {"from": alice_wallet, "gas_limit": chain.block_gas_limit}
+        TA,
+        t2,
+        {
+            "from": alice_wallet,
+            "gas": latest_block.gasLimit,
+            "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+        },
     )
 
     assert OCEAN.balanceOf(alice_wallet.address) == 0
@@ -50,17 +65,26 @@ def test_ve_ocean1(ocean, factory_deployer_wallet, ocean_token):
 
     assert veOCEAN.get_last_user_slope(alice_wallet) != 0
 
+    latest_block = web3.eth.getBlock("latest")
     alice_vote_power = float(
-        from_wei(veOCEAN.balanceOf(alice_wallet, chain[-1].timestamp))
+        from_wei(veOCEAN.balanceOf(alice_wallet, latest_block.timestamp))
     )
     expected_vote_power = float(from_wei(TA)) * WEEK / MAXTIME
     assert alice_vote_power == pytest.approx(expected_vote_power, TA / 20.0)
 
-    brownie.network.chain.sleep(t2)
-    chain.mine()
+    provider.make_request("evm_increaseTime", [t2])
+    provider.make_request("evm_mine", [])
 
-    veOCEAN.withdraw({"from": alice_wallet, "gas_limit": chain.block_gas_limit})
+    latest_block = web3.eth.getBlock("latest")
+    veOCEAN.withdraw(
+        {
+            "from": alice_wallet,
+            "gas": latest_block.gasLimit,
+            "gasPrice": math.ceil(latest_block["baseFeePerGas"] * 1.2),
+        }
+    )
     assert OCEAN.balanceOf(alice_wallet.address) == TA
 
+    latest_block = web3.eth.getBlock("latest")
     assert veOCEAN.get_last_user_slope(alice_wallet) == 0
-    assert veOCEAN.balanceOf(alice_wallet, chain.time()) == 0
+    assert veOCEAN.balanceOf(alice_wallet, latest_block.timestamp) == 0

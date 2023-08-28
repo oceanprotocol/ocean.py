@@ -59,7 +59,7 @@ prefix = "\x19Ethereum Signed Message:\n32"
 msg = Web3.solidityKeccak(
     ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
 )
-signed = sign_with_key(msg, alice.private_key)
+signed = sign_with_key(msg, alice.privateKey.hex())
 symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter

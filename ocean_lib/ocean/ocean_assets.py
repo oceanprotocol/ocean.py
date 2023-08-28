@@ -11,7 +11,6 @@ import os
 from datetime import datetime
 from typing import List, Optional, Tuple, Type, Union
 
-from brownie import network
 from enforce_typing import enforce_types
 
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -49,7 +48,6 @@ from ocean_lib.structures.file_objects import (
     UrlFile,
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -82,11 +80,8 @@ class OceanAssets:
     @enforce_types
     def __init__(self, config_dict, data_provider: Type[DataServiceProvider]) -> None:
         """Initialises OceanAssets object."""
-        network_name = config_dict["NETWORK_NAME"]
-        check_network(network_name)
-
         self._config_dict = config_dict
-        self._chain_id = network.chain.id
+        self._chain_id = config_dict["CHAIN_ID"]
 
         self._metadata_cache_uri = config_dict.get("METADATA_CACHE_URI")
         self._data_provider = data_provider
@@ -607,7 +602,7 @@ class OceanAssets:
             tx_dict,
         )
 
-        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.txid)
+        ddo = self._aquarius.wait_for_ddo_update(ddo, tx_result.transactionHash.hex())
 
         return ddo
 
@@ -746,7 +741,7 @@ class OceanAssets:
 
         receipt = dt.start_order(**params)
 
-        return receipt.txid
+        return receipt.transactionHash
 
     @enforce_types
     def pay_for_compute_service(
@@ -827,7 +822,7 @@ class OceanAssets:
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(
                 valid_order, provider_fees=provider_fees, tx_dict=tx_dict
-            ).txid
+            ).transactionHash.hex()
             return
 
         asset_compute_input.transfer_tx_id = dt.start_order(
@@ -836,4 +831,4 @@ class OceanAssets:
             provider_fees=provider_fees,
             consume_market_fees=consume_market_fees,
             tx_dict=tx_dict,
-        ).txid
+        ).transactionHash.hex()

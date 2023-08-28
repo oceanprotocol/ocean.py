@@ -113,7 +113,7 @@ def test_consume_asset(
         ddo,
         consumer_wallet,
         destination,
-        receipt.txid,
+        receipt.transactionHash.hex(),
         service,
     )
 

@@ -28,15 +28,16 @@ def test_ganache_example_config():
 @pytest.mark.unit
 def test_polygon_example_config():
     """Tests the config structure of Polygon network."""
-    config = get_config_dict("polygon-main")
+    config = get_config_dict("polygon")
 
     assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
     assert config["PROVIDER_URL"] == "https://v4.provider.polygon.oceanprotocol.com"
 
 
 @pytest.mark.unit
-def test_bsc_example_config():
+def test_bsc_example_config(monkeypatch):
     """Tests the config structure of BSC network."""
+    monkeypatch.setenv("BSC_RPC_URL", "http://localhost:8545")
 
     config = get_config_dict("bsc")
 
@@ -47,6 +48,7 @@ def test_bsc_example_config():
 @pytest.mark.unit
 def test_moonbeam_alpha_example_config(monkeypatch):
     """Tests the config structure of Moonbeam Alpha network."""
+    monkeypatch.setenv("MOONBASE_RPC_URL", "http://localhost:8545")
 
     config = get_config_dict("moonbase")
 
@@ -56,7 +58,7 @@ def test_moonbeam_alpha_example_config(monkeypatch):
 
 @pytest.mark.unit
 def test_get_address_of_type(monkeypatch):
-    config = get_config_dict("polygon-main")
+    config = get_config_dict("polygon")
 
     data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)
     addresses = get_contracts_addresses(config)

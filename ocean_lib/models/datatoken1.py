@@ -233,7 +233,7 @@ class Datatoken1(DatatokenBase):
                 raise ValueError(f"Not allowed. allowedSwapper={allowedSwapper}")
 
             # Try to dispense. If other issues, they'll pop out
-            dispenser.dispense(self.address, "1 ether", buyer_addr, tx_dict)
+            dispenser.dispense(self.address, to_wei(1), buyer_addr, tx_dict)
 
         return self.start_order(
             consumer=ContractBase.to_checksum_address(consumer),

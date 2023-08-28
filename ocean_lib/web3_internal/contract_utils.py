@@ -8,8 +8,8 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from brownie import Contract
 from enforce_typing import enforce_types
+from web3.contract import Contract
 from web3.main import Web3
 
 import artifacts  # noqa
@@ -32,12 +32,13 @@ def get_contract_definition(contract_name: str) -> Dict[str, Any]:
 
 
 @enforce_types
-def load_contract(contract_name: str, address: Optional[str]) -> Contract:
+def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> Contract:
     """Loads a contract using its name and address."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
+    bytecode = contract_definition["bytecode"]
 
-    return Contract.from_abi(contract_name, address, abi)
+    return web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
 
 
 @enforce_types
@@ -58,11 +59,7 @@ def get_contracts_addresses_all_networks(config: dict):
 def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
     """Get addresses for given NETWORK_NAME, from info in ADDRESS_FILE"""
     network_name = config["NETWORK_NAME"]
-    if network_name == "polygon-test":
-        network_name = "mumbai"
 
-    if network_name == "polygon-main":
-        network_name = "polygon"
     addresses = get_contracts_addresses_all_networks(config)
 
     network_addresses = [val for key, val in addresses.items() if key == network_name]

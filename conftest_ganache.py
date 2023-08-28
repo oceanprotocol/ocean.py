@@ -5,7 +5,6 @@
 from typing import Tuple
 
 import pytest
-from brownie.network import accounts
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.models.data_nft import DataNFT
@@ -13,9 +12,8 @@ from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken1 import Datatoken1
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import get_address_of_type, to_wei
+from ocean_lib.ocean.util import get_address_of_type, send_ether, to_wei
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses_all_networks
-from ocean_lib.web3_internal.utils import connect_to_network
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_another_consumer_wallet,
@@ -40,9 +38,6 @@ setup_logging()
 
 @pytest.fixture(autouse=True)
 def setup_all(request, config, ocean_token):
-    connect_to_network("development")
-    accounts.clear()
-
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
@@ -56,14 +51,17 @@ def setup_all(request, config, ocean_token):
         print("Can not find adddresses.")
         return
 
-    assert wallet.balance() >= to_wei(10), "Need more ETH"
+    balance = config["web3_instance"].eth.get_balance(wallet.address)
+    assert balance >= to_wei(10), "Need more ETH"
 
     amt_distribute = to_wei(1000)
     ocean_token.mint(wallet, to_wei(2000), {"from": wallet})
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if w.balance() < to_wei(2):
-            wallet.transfer(w, to_wei(4))
+        balance = config["web3_instance"].eth.get_balance(w.address)
+
+        if balance < to_wei(2):
+            send_ether(config, wallet, w.address, to_wei(4))
 
         if ocean_token.balanceOf(w) < to_wei(100):
             ocean_token.mint(w, amt_distribute, {"from": wallet})
@@ -126,7 +124,6 @@ def ocean_address(config) -> str:
 
 @pytest.fixture
 def ocean_token(config, ocean_address) -> Datatoken1:
-    connect_to_network("development")
     return Datatoken1(config, ocean_address)
 
 
@@ -204,4 +201,4 @@ def carlos():
 
 @pytest.fixture
 def dan():
-    return get_wallet(9)
+    return get_wallet(7)

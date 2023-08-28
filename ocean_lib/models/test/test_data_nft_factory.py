@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from brownie import network
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
@@ -31,7 +31,7 @@ def test_nft_creation(
 ):
     """Tests the utils functions."""
     data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
-    assert data_nft.contract.name() == "DT1"
+    assert data_nft.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
@@ -90,9 +90,9 @@ def test_combo_functions(
         ),
         {"from": publisher_wallet},
     )
-    assert data_nft_token2.contract.name() == "72120Bundle"
+    assert data_nft_token2.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
-    assert datatoken2.contract.name() == "DTB1"
+    assert datatoken2.name() == "DTB1"
     assert datatoken2.symbol() == "DT1Symbol"
 
     # Tests creating NFT with ERC20 and with Fixed Rate Exchange successfully.
@@ -136,9 +136,9 @@ def test_combo_functions(
         tx_dict={"from": publisher_wallet},
     )
 
-    assert data_nft_token4.contract.name() == "72120Bundle"
+    assert data_nft_token4.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
-    assert datatoken4.contract.name() == "DTWithPool"
+    assert datatoken4.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
     assert one_fixed_rate.address == fixed_rate_address
 
@@ -155,9 +155,9 @@ def test_combo_functions(
         DispenserArguments(to_wei(1), to_wei(1)),
         tx_dict={"from": publisher_wallet},
     )
-    assert data_nft_token5.contract.name() == "72120Bundle"
+    assert data_nft_token5.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
-    assert datatoken5.contract.name() == "DTWithPool"
+    assert datatoken5.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
     _ = Dispenser(config, dispenser_address)
@@ -188,7 +188,7 @@ def test_start_multiple_order(
 ):
     """Tests the utils functions."""
     data_nft = data_nft_factory.create({"from": publisher_wallet}, "DT1", "DTSYMBOL")
-    assert data_nft.contract.name() == "DT1"
+    assert data_nft.name() == "DT1"
     assert data_nft.symbol() == "DTSYMBOL"
     assert data_nft_factory.check_nft(data_nft.address)
 
@@ -197,7 +197,7 @@ def test_start_multiple_order(
     data_nft = data_nft_factory.create(
         {"from": publisher_wallet}, DataNFTArguments("DT2", "DTSYMBOL1")
     )
-    assert data_nft.contract.name() == "DT2"
+    assert data_nft.name() == "DT2"
     assert data_nft_factory.getCurrentNFTCount() == current_nft_count + 1
 
     # Tests get NFT template
@@ -267,7 +267,7 @@ def test_start_multiple_order(
             0,
         ],
     )
-    signed = network.web3.eth.sign(provider_fee_address, data=message)
+    signed = config["web3_instance"].eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
     order_data = OrderData(
@@ -297,17 +297,21 @@ def test_start_multiple_order(
         orders, {"from": consumer_wallet}
     )
 
-    registered_erc20_start_order_event = receipt.events["OrderStarted"]
+    registered_erc20_start_order_event = (
+        datatoken.contract.events.OrderStarted().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+    )
 
     assert receipt, "Failed starting multiple token orders."
-    assert registered_erc20_start_order_event["consumer"] == consumer_wallet.address
+    assert registered_erc20_start_order_event.args.consumer == consumer_wallet.address
 
     assert datatoken.balanceOf(consumer_wallet.address) == 0
     assert datatoken.balanceOf(datatoken.getPaymentCollector()) == (dt_amount * 0.97)
 
     reuse_order = ReuseOrderData(
         order_data.token_address,
-        receipt.txid,
+        receipt.transactionHash,
         (
             provider_fee_address,
             provider_fee_token,
@@ -323,7 +327,10 @@ def test_start_multiple_order(
         [reuse_order], {"from": consumer_wallet}
     )
 
-    assert receipt.events["OrderReused"]
+    reused_event = datatoken.contract.events.OrderReused().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
+    assert reused_event
 
 
 @pytest.mark.unit
@@ -346,9 +353,7 @@ def test_nonexistent_template_index(data_nft_factory, publisher_wallet):
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
-    with pytest.raises(
-        Exception, match="revert: ERC721DTFactory: Template index doesnt exist"
-    ):
+    with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft_factory.create(
             {"from": publisher_wallet},
             DataNFTArguments(

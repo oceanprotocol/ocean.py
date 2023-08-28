@@ -179,10 +179,16 @@ def test_ocean_assets_download_destination_file(
         publisher_wallet.address, datatoken.address
     )
     assert datatoken.address in [order.address for order in orders]
-    assert receipt.txid in [order.transactionHash.hex() for order in orders]
+    assert receipt.transactionHash.hex() in [
+        order.transactionHash.hex() for order in orders
+    ]
 
     written_path = download_asset_files(
-        ddo, access_service, publisher_wallet, str(tmpdir), receipt.txid
+        ddo,
+        access_service,
+        publisher_wallet,
+        str(tmpdir),
+        receipt.transactionHash.hex(),
     )
 
     assert os.path.exists(written_path)
@@ -194,6 +200,6 @@ def test_ocean_assets_download_destination_file(
             ddo.services[0],
             publisher_wallet,
             str(tmpdir),
-            receipt.txid,
+            receipt.transactionHash.hex(),
             index=4,
         )

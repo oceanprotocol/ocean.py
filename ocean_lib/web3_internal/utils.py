@@ -7,9 +7,6 @@ from collections import namedtuple
 from typing import Any, Union
 
 import requests
-from brownie import network
-from brownie.network import chain
-from brownie.network.account import ClefAccount
 from enforce_typing import enforce_types
 from eth_keys import KeyAPI
 from eth_keys.backends import NativeECCBackend
@@ -32,17 +29,18 @@ def to_32byte_hex(val: int) -> str:
     return Web3.toHex(Web3.toBytes(val).rjust(32, b"\0"))
 
 
-@enforce_types
-def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
-    message_hash = Web3.solidityKeccak(
-        ["bytes"],
-        [Web3.toBytes(text=message_hash)],
-    )
-
-    orig_sig = wallet._provider.make_request(
-        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
-    )["result"]
-    return orig_sig
+# reinstate as part of #1461
+# @enforce_types
+# def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
+#     message_hash = Web3.solidityKeccak(
+#        ["bytes"],
+#        [Web3.toBytes(text=message_hash)],
+#    )
+#
+#    orig_sig = wallet._provider.make_request(
+#        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
+#    )["result"]
+#    return orig_sig
 
 
 @enforce_types
@@ -84,47 +82,11 @@ def split_signature(signature: Any) -> Signature:
 
 
 @enforce_types
-def connect_to_network(network_name: str):
-    if network.is_connected():
-        if network.show_active() != network_name:
-            network.disconnect()
-            network.connect(network_name)
-    else:
-        network.connect(network_name)
-
-
-@enforce_types
-def check_network(network_name: str):
-    if not network.is_connected():
-        raise Exception(
-            'Brownie network is not connected. Please call network.connect("{network_name}")'
-        )
-
-    active_network = network.show_active()
-
-    if active_network != network_name:
-        raise Exception(
-            'Brownie network is connected to {active_network}. Please call network.connect("{network_name}")'
-        )
-
-
-@enforce_types
 def get_gas_fees() -> tuple:
     # Polygon & Mumbai uses EIP-1559. So, dynamically determine priority fee
     gas_resp = requests.get("https://gasstation.polygon.technology/v2")
 
-    if not gas_resp or gas_resp.status_code != 200:
-        print("Invalid response from Polygon gas station. Retry with brownie values...")
-
-        return chain.priority_fee, chain.base_fee + 2 * chain.priority_fee
-
     return (
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
-            chain.priority_fee,
-        ),
-        max(
-            Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
-            chain.base_fee + 2 * chain.priority_fee,
-        ),
+        Web3.toWei(gas_resp.json()["fast"]["maxPriorityFee"], "gwei"),
+        Web3.toWei(gas_resp.json()["fast"]["maxFee"], "gwei"),
     )

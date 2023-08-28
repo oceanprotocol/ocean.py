@@ -7,8 +7,8 @@ from abc import ABC
 from enum import IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-from brownie.network.state import Chain
 from enforce_typing import enforce_types
+from web3.logs import DISCARD
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -106,7 +106,7 @@ class DatatokenArguments:
                 address=wallet_address, token=OCEAN_address
             )
 
-        data_nft.contract.createERC20(
+        data_nft.createERC20(
             self.template_index,
             [self.name, self.symbol],
             [
@@ -190,7 +190,7 @@ class DatatokenBase(ABC, ContractBase):
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        return self.contract.startOrder(
+        return self.startOrder(
             checksum_addr(consumer),
             service_index,
             (
@@ -214,7 +214,7 @@ class DatatokenBase(ABC, ContractBase):
         provider_fees: dict,
         tx_dict: dict,
     ) -> str:
-        return self.contract.reuseOrder(
+        return self.reuseOrder(
             order_tx_id,
             (
                 checksum_addr(provider_fees["providerFeeAddress"]),
@@ -236,10 +236,32 @@ class DatatokenBase(ABC, ContractBase):
         from_block: Optional[int] = 0,
         to_block: Optional[int] = "latest",
     ) -> Tuple:
-        chain = Chain()
-        to_block = to_block if to_block != "latest" else chain[-1].number
+        topic0 = self.get_event_signature("OrderStarted")
+        topics = [topic0]
+        if consumer_address:
+            topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
+            topics = [topic0, topic1]
 
-        return self.contract.events.get_sequence(from_block, to_block, "OrderStarted")
+        web3 = self.config_dict["web3_instance"]
+        event_filter = web3.eth.filter(
+            {
+                "topics": topics,
+                "toBlock": to_block,
+                "fromBlock": from_block,
+            }
+        )
+
+        orders = []
+
+        for log in event_filter.get_all_entries():
+            receipt = web3.eth.wait_for_transaction_receipt(log.transactionHash)
+            processed_events = self.contract.events.OrderStarted().processReceipt(
+                receipt, errors=DISCARD
+            )
+            for processed_event in processed_events:
+                orders.append(processed_event)
+
+        return orders
 
     # ======================================================================
     # Priced data: fixed-rate exchange
@@ -278,9 +300,12 @@ class DatatokenBase(ABC, ContractBase):
         exchange_args = get_args_object(args, kwargs, ExchangeArguments)
         args_tup = exchange_args.to_tuple(self.config_dict, tx_dict, self.decimals())
 
-        tx = self.contract.createFixedRate(*(args_tup + (tx_dict,)))
+        tx = self.createFixedRate(*(args_tup + (tx_dict,)))
 
-        exchange_id = tx.events["NewFixedRate"]["exchangeId"]
+        event = self.contract.events.NewFixedRate().processReceipt(tx, errors=DISCARD)[
+            0
+        ]
+        exchange_id = event.args.exchangeId
         FRE = self._FRE()
         exchange = OneExchange(FRE, exchange_id)
 
@@ -395,7 +420,7 @@ class DatatokenBase(ABC, ContractBase):
         )
 
     def get_publish_market_order_fees(self):
-        return TokenFeeInfo.from_tuple(self.contract.getPublishingMarketFee())
+        return TokenFeeInfo.from_tuple(self.getPublishingMarketFee())
 
     def get_from_pricing_schema_and_order(self, *args, **kwargs):
         dispensers = self.dispenser_status().active
@@ -417,14 +442,14 @@ class DatatokenBase(ABC, ContractBase):
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 
-        wallet_address = get_from_address(kwargs["tx_dict"])
+        wallet = kwargs["tx_dict"]["from"]
         amt_needed = exchange.BT_needed(
             Web3.toWei(1, "ether"), consume_market_fees.amount
         )
         base_token = DatatokenBase.get_typed(
             exchange._FRE.config_dict, exchange.details.base_token
         )
-        base_token_balance = base_token.balanceOf(wallet_address)
+        base_token_balance = base_token.balanceOf(wallet.address)
 
         if base_token_balance < amt_needed:
             raise ValueError(
@@ -444,7 +469,7 @@ class DatatokenBase(ABC, ContractBase):
         base_token.approve(
             approve_address,
             amt_needed,
-            {"from": wallet_address},
+            {"from": wallet},
         )
 
         return self.buy_DT_and_order(*args, **kwargs)

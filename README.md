@@ -16,7 +16,7 @@ With ocean.py, you can:
 
 - **Publish** data services: downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
 - **Sell** datatokens via for a fixed price. Sell data NFTs.
-- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io) or [Brownie](https://eth-brownie.readthedocs.io/en/latest/).
+- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io).
 
 ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
@@ -64,7 +64,6 @@ Each of the following shows how to publish & consume a particular type of data.
 ### Learn more
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
-- [Using hardware wallets with ocean.py](READMEs/using-clef.md) - Learn how to use hardware wallets with ocean.py via Brownie and Clef
 
 ## 🦑 Development
 

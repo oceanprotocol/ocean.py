@@ -5,7 +5,7 @@
 import os
 
 import pytest
-from brownie.network import accounts
+from eth_account import Account
 
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.util import to_wei
@@ -33,5 +33,5 @@ def test_use_mint_fake_ocean(config, factory_deployer_wallet, ocean_token):
         if not key:
             continue
 
-        w = accounts.add(key)
+        w = Account.from_key(private_key=key)
         assert ocean_token.balanceOf(w.address) >= expected_amt_distribute

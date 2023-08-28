@@ -24,11 +24,9 @@ install_requirements = [
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
     "eciespy==0.3.11",
-    "eth-brownie==1.19.3",
     "cryptography==41.0.2",
-    "yarl==1.8.1",
-    "bitarray>=2.6.0,<3",
-    # brownie requires web3.py, eth-abi, requests, and more,
+    "web3==5.31.3"
+    # web3.py requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
 ]
@@ -55,7 +53,7 @@ dev_requirements = [
     "watchdog==3.0.0",
     "isort==5.12.0",
     "flake8==6.1.0",
-    "black",  # need to keep this up to date to brownie
+    "black",
     "pre-commit==3.3.3",
     "licenseheaders==0.8.8",
 ]

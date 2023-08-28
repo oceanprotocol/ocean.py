@@ -33,7 +33,7 @@ git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
 
 # Install OS dependencies
-sudo apt-get install -y python3-dev gcc python-pytest
+sudo apt-get install -y python3-dev gcc
 
 # Initialize virtual environment and activate it.
 # Make sure your Python version inside the venv is >=3.8.
@@ -49,12 +49,15 @@ pip install -r requirements_dev.txt
 In a new console:
 
 ```console
-#grab repo
+# grab repo
 git clone https://github.com/oceanprotocol/barge
 cd barge
 
-#clean up old containers (to be sure)
+# clean up old containers (to be sure)
 docker system prune -a --volumes
+
+# for support of type 2 transactions
+export GANACHE_HARDFORK=london
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 # The `--with-c2d` option tells barge to include the Compute-to-Data backend
@@ -68,17 +71,17 @@ docker system prune -a --volumes
 In work console:
 
 ```console
-#set private keys of two local (ganache) accounts
+# set private keys of two local (ganache) accounts
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
-#needed to mint fake OCEAN for testing with ganache
+# needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
 Some tests run on Mumbai (e.g. test_mumbai.py), which need fake MATIC. So you also need:
 ```console
-#set private keys of two remote accounts
+# set private keys of two remote accounts
 export REMOTE_TEST_PRIVATE_KEY1=<your remote private key 1>
 export REMOTE_TEST_PRIVATE_KEY2=<your remote private key 2>
 ```
@@ -89,22 +92,22 @@ These keys aren't public because bots could eat the fake MATIC. You need to gene
 
 In work console:
 ```console
-#run a single test
+# run a single test
 pytest ocean_lib/models/test/test_data_nft_factory.py::test_start_multiple_order
 
-#run all tests in a file
+# run all tests in a file
 pytest ocean_lib/models/test/test_data_nft_factory.py
 
-#run all regular tests; see details on pytest markers to select specific suites
+# run all regular tests; see details on pytest markers to select specific suites
 pytest
 ```
 
 The README tests are special. Here's how to run them:
 ```console
-#need to auto-generate READMEs first
+# need to auto-generate READMEs first
 mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
-#then run the tests
+# then run the tests
 pytest tests/readmes/test_readmes.py
 pytest /tests/integration/remote/test_mumbai_readme.py
 ```

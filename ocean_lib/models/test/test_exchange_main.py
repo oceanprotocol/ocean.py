@@ -5,6 +5,7 @@
 import time
 
 import pytest
+from web3.logs import DISCARD
 
 from ocean_lib.models.fixed_rate_exchange import (
     BtNeeded,
@@ -197,6 +198,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
     OCEAN_received = exchange.BT_received(DT_sell, consume_market_fee)
     OCEAN_carlos2 = OCEAN.balanceOf(carlos)
     DT_carlos2 = DT.balanceOf(carlos)
+
     assert pytest.approx(from_wei(OCEAN_carlos2), 0.01) == (
         from_wei(OCEAN_carlos1) + from_wei(OCEAN_received)
     )
@@ -216,14 +218,20 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     DT_alice1 = DT.balanceOf(alice)
     receipt = exchange.collect_DT(details.dt_balance, {"from": alice})
-    DT_received = receipt.events["TokenCollected"]["amount"]
-    assert receipt.events["TokenCollected"]["to"] == alice.address
+    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
+    DT_received = event.args.amount
+    assert event.args.to == alice.address
     DT_expected = DT_alice1 + DT_received
 
     OCEAN_alice1 = OCEAN.balanceOf(alice)
     receipt = exchange.collect_BT(details.bt_balance, {"from": alice})
-    OCEAN_received = receipt.events["TokenCollected"]["amount"]
-    assert receipt.events["TokenCollected"]["to"] == alice.address
+    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+        receipt, errors=DISCARD
+    )[0]
+    OCEAN_received = event.args.amount
+    assert event.args.to == alice.address
     OCEAN_expected = OCEAN_alice1 + OCEAN_received
 
     st_time = time.time()  # loop to ensure chain's updated (shouldn't need!!)

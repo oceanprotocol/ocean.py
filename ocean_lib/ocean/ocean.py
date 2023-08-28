@@ -35,7 +35,6 @@ from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.utils import check_network
 
 logger = logging.getLogger("ocean")
 
@@ -79,13 +78,13 @@ class Ocean:
             if not isinstance(config_dict[key], type(value)):
                 config_errors[key] = f"must be {type(value).__name__}"
 
+        if "web3_instance" not in config_dict:
+            config_errors["web3_instance"] = "required"
+
         if config_errors:
             raise Exception(json.dumps(config_errors))
 
         self.config_dict = config_dict
-
-        network_name = config_dict["NETWORK_NAME"]
-        check_network(network_name)
 
         if not data_provider:
             data_provider = DataServiceProvider
@@ -161,6 +160,7 @@ class Ocean:
         """
         dt = DatatokenBase.get_typed(self.config_dict, datatoken)
         _orders = []
+
         for log in dt.get_start_order_logs(address):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
@@ -270,3 +270,6 @@ class Ocean:
     @enforce_types
     def _addr(self, type_str: str) -> str:
         return get_address_of_type(self.config, type_str)
+
+    def wallet_balance(self, w):
+        return self.config["web3_instance"].eth.get_balance(w.address)

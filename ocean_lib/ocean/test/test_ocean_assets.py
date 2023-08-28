@@ -6,10 +6,7 @@ import copy
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-import brownie
 import pytest
-from brownie import network
-from brownie.network import accounts
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.ddo import DDO
@@ -23,7 +20,7 @@ from ocean_lib.models.fixed_rate_exchange import ExchangeArguments
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.util import get_address_of_type, to_wei
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.utils import get_gas_fees
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     build_default_services,
@@ -43,7 +40,7 @@ def test_register_asset(publisher_ocean):
 
 
 @pytest.mark.integration
-def test_update(publisher_ocean, publisher_wallet):
+def test_update(publisher_ocean, publisher_wallet, config):
     data_nft, _, ddo = get_registered_asset_with_access_service(
         publisher_ocean, publisher_wallet
     )
@@ -77,10 +74,10 @@ def test_update(publisher_ocean, publisher_wallet):
     assert ddo2.credentials == _new_credentials, "Credentials were not updated."
 
     # Check flags update
-    registered_token_event = data_nft.contract.events.get_sequence(
-        ddo2.event.get("block"),
-        network.chain[-1].number,
+    registered_token_event = data_nft.get_logs(
         "MetadataUpdated",
+        ddo2.event.get("block"),
+        config["web3_instance"].eth.get_block("latest").number,
     )
 
     assert registered_token_event[0].args.get("flags") == bytes([3])
@@ -109,7 +106,7 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
     ddo.datatokens.append(
         {
             "address": datatoken.address,
-            "name": datatoken.contract.name(),
+            "name": datatoken.name(),
             "symbol": datatoken.symbol(),
             "serviceId": access_service.id,
         }
@@ -151,14 +148,12 @@ def test_update_datatokens(publisher_ocean, publisher_wallet, config, file2):
     assert ddo4.services[0].datatoken == ddo2_prev_datatokens[0].get("address")
 
     nft_token = publisher_ocean.get_nft_token(ddo4.nft["address"])
-    bn = network.chain[-1].number
+    bn = config["web3_instance"].eth.get_block("latest").number
 
-    updated_event = nft_token.contract.events.get_sequence(bn, bn, "MetadataUpdated")[0]
+    updated_event = nft_token.get_logs("MetadataUpdated", bn, bn)[0]
     assert updated_event.args.updatedBy == publisher_wallet.address
 
-    validation_event = nft_token.contract.events.get_sequence(
-        bn, bn, "MetadataValidated"
-    )[0]
+    validation_event = nft_token.get_logs("MetadataValidated", bn, bn)[0]
     assert validation_event.args.validator.startswith("0x")
     assert updated_event.transactionHash == validation_event.transactionHash
 
@@ -458,17 +453,6 @@ def test_asset_creation_errors(publisher_ocean, publisher_wallet, config):
     )
     metadata = get_default_metadata()
 
-    some_random_address = ZERO_ADDRESS
-    with pytest.raises(brownie.exceptions.ContractNotFound):
-        publisher_ocean.assets.create(
-            metadata=metadata,
-            tx_dict={"from": publisher_wallet},
-            services=[],
-            data_nft_address=some_random_address,
-            deployed_datatokens=[datatoken],
-            encrypt_flag=True,
-        )
-
     with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
         mock.return_value = True
         with pytest.raises(AquariusError):
@@ -494,6 +478,35 @@ def test_create_algo_asset(publisher_ocean, publisher_wallet):
 
     assert ddo.nft["name"] == name  # thorough testing is below, on create() directly
     assert len(ddo.datatokens) == 1
+
+
+@pytest.mark.integration
+def test_create_url_asset_with_gas_strategy(
+    config, publisher_wallet, consumer_wallet, consumer_ocean, OCEAN
+):
+    """Directly models READMEs/gas-strategy-remote.md behavior"""
+    data_provider = DataServiceProvider
+    ocean_assets = OceanAssets(config, data_provider)
+
+    priority_fee, max_fee = get_gas_fees()
+
+    name = "Branin dataset"
+    url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    tx_dict = {
+        "from": publisher_wallet,
+        "maxPriorityFeePerGas": priority_fee,
+        "maxFeePerGas": max_fee,
+    }
+
+    ddo = ocean_assets.create_url_asset(
+        name,
+        url,
+        tx_dict,
+        dt_template_index=1,
+        wait_for_aqua=False,
+    )
+
+    assert ddo
 
 
 @pytest.mark.integration
@@ -548,7 +561,7 @@ def test_create_pricing_schemas(
         assert dt_np.get_exchanges() == []
 
         # pay_for_access service has insufficient balance and can't buy or dispense
-        empty_wallet = accounts.add()
+        empty_wallet = config["web3_instance"].eth.account.create()
 
         with pytest.raises(InsufficientBalance):
             ocean_assets.pay_for_access_service(

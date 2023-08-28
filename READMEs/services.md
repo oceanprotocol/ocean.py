@@ -44,10 +44,10 @@ Here are the urls for the local services, for use in the config dict.
 -   Provider url: `http://127.0.0.1:8030`
 -   Aquarius url: `http://127.0.0.1:5000`
 
-Remember, here's how the config dict is set. 
+Remember, here's how the config dict is set.
 ```python
 from ocean_lib.example_config import get_config_dict
-config = get_config_dict("polygon-test") # returns a dict
+config = get_config_dict("mumbai") # returns a dict
 # (then, here you can update the config dict as you wish)
 ocean = Ocean(config)
 ```
@@ -63,4 +63,4 @@ When you follow [remote setup](READMEs/setup-remote.md), it will default to use 
 
 You can run your own Provider or Aquarius, like shown above. And then point to it from your config dict.
 
-You can also point to a Provider or Aquarius instance run by a 3rd party. Simply point to it from your config dict. 
+You can also point to a Provider or Aquarius instance run by a 3rd party. Simply point to it from your config dict.

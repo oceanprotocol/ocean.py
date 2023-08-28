@@ -5,14 +5,11 @@
 import pathlib
 import runpy
 
-from brownie.network import accounts
-
 from . import util
 
 
 def test_simple_remote_readme(monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
-    accounts.clear()
     (ref_alice_wallet, _) = util.get_wallets()
 
     # README generation command:
@@ -27,6 +24,7 @@ def test_simple_remote_readme(monkeypatch):
         if "Alice needs MATIC" in str(e) or "Bob needs MATIC" in str(e):
             return
         raise (e)
+
     ocean = result["ocean"]
     alice = result["alice"]
 

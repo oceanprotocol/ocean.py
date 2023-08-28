@@ -6,6 +6,7 @@ from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
+from web3.logs import DISCARD
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTArguments
 from ocean_lib.models.datatoken_base import DatatokenBase
@@ -114,7 +115,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             consume_fees[1] = ContractBase.to_checksum_address(order.consume_fees[1])
             order._replace(consume_fees=tuple(consume_fees))
 
-        return self.contract.startMultipleTokenOrder(orders, tx_dict)
+        return self.startMultipleTokenOrder(orders, tx_dict)
 
     @enforce_types
     def reuse_multiple_token_order(
@@ -128,7 +129,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             provider_fees[0] = ContractBase.to_checksum_address(order.provider_fees[0])
             provider_fees[1] = ContractBase.to_checksum_address(order.provider_fees[1])
 
-        return self.contract.reuseMultipleTokenOrder(reuse_orders, tx_dict)
+        return self.reuseMultipleTokenOrder(reuse_orders, tx_dict)
 
     @enforce_types
     def create_with_erc20(
@@ -138,7 +139,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         tx_dict: dict,
     ) -> str:
         wallet_address = get_from_address(tx_dict)
-        receipt = self.contract.createNftWithErc20(
+        receipt = self.createNftWithErc20(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -170,12 +171,16 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             tx_dict,
         )
 
-        registered_nft_event = receipt.events["NFTCreated"]
-        data_nft_address = registered_nft_event["newTokenAddress"]
+        registered_nft_event = self.contract.events.NFTCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        data_nft_address = registered_nft_event.args.newTokenAddress
         data_nft_token = DataNFT(self.config_dict, data_nft_address)
 
-        registered_token_event = receipt.events["TokenCreated"]
-        datatoken_address = registered_token_event["newTokenAddress"]
+        registered_token_event = self.contract.events.TokenCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        datatoken_address = registered_token_event.args.newTokenAddress
         datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
         return data_nft_token, datatoken
@@ -190,7 +195,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithErc20WithFixedRate(
+        receipt = self.createNftWithErc20WithFixedRate(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -223,16 +228,24 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             tx_dict,
         )
 
-        registered_nft_event = receipt.events["NFTCreated"]
-        data_nft_address = registered_nft_event["newTokenAddress"]
+        registered_nft_event = self.contract.events.NFTCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        data_nft_address = registered_nft_event.args.newTokenAddress
         data_nft_token = DataNFT(self.config_dict, data_nft_address)
 
-        registered_token_event = receipt.events["TokenCreated"]
-        datatoken_address = registered_token_event["newTokenAddress"]
+        registered_token_event = self.contract.events.TokenCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        datatoken_address = registered_token_event.args.newTokenAddress
         datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
-        registered_fixed_rate_event = receipt.events["NewFixedRate"]
-        exchange_id = registered_fixed_rate_event["exchangeId"]
+        registered_fixed_rate_event = (
+            self.contract.events.NewFixedRate().processReceipt(receipt, errors=DISCARD)[
+                0
+            ]
+        )
+        exchange_id = registered_fixed_rate_event.args.exchangeId
         fixed_rate_exchange = FixedRateExchange(
             self.config_dict, get_address_of_type(self.config_dict, "FixedPrice")
         )
@@ -250,7 +263,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithErc20WithDispenser(
+        receipt = self.createNftWithErc20WithDispenser(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -283,16 +296,24 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             tx_dict,
         )
 
-        registered_nft_event = receipt.events["NFTCreated"]
-        data_nft_address = registered_nft_event["newTokenAddress"]
+        registered_nft_event = self.contract.events.NFTCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        data_nft_address = registered_nft_event.args.newTokenAddress
         data_nft_token = DataNFT(self.config_dict, data_nft_address)
 
-        registered_token_event = receipt.events["TokenCreated"]
-        datatoken_address = registered_token_event["newTokenAddress"]
+        registered_token_event = self.contract.events.TokenCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        datatoken_address = registered_token_event.args.newTokenAddress
         datatoken = DatatokenBase.get_typed(self.config_dict, datatoken_address)
 
-        registered_dispenser_event = receipt.events["DispenserCreated"]
-        assert registered_dispenser_event["datatokenAddress"] == datatoken_address
+        registered_dispenser_event = (
+            self.contract.events.DispenserCreated().processReceipt(
+                receipt, errors=DISCARD
+            )[0]
+        )
+        assert registered_dispenser_event.args.datatokenAddress == datatoken_address
 
         return data_nft_token, datatoken
 
@@ -311,7 +332,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
     ) -> str:
         wallet_address = get_from_address(tx_dict)
 
-        receipt = self.contract.createNftWithMetaData(
+        receipt = self.createNftWithMetaData(
             (
                 data_nft_args.name,
                 data_nft_args.symbol,
@@ -331,8 +352,10 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
             ),
             tx_dict,
         )
-        registered_nft_event = receipt.events["NFTCreated"]
-        data_nft_address = registered_nft_event["newTokenAddress"]
+        registered_nft_event = self.contract.events.NFTCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        data_nft_address = registered_nft_event.args.newTokenAddress
         data_nft_token = DataNFT(self.config_dict, data_nft_address)
 
         return data_nft_token
@@ -359,12 +382,15 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
 
     @enforce_types
     def get_token_address(self, receipt):
-        return receipt.events["NFTCreated"]["newTokenAddress"]
+        event = self.contract.events.NFTCreated().processReceipt(
+            receipt, errors=DISCARD
+        )[0]
+        return event.args.newTokenAddress
 
     @enforce_types
     def check_datatoken(self, datatoken_address: str) -> bool:
-        return self.contract.erc20List(datatoken_address)
+        return self.erc20List(datatoken_address)
 
     @enforce_types
     def check_nft(self, nft_address: str) -> bool:
-        return self.contract.erc721List(nft_address) == nft_address
+        return self.erc721List(nft_address) == nft_address

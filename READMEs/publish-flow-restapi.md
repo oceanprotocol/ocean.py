@@ -57,8 +57,8 @@ In the same Python console:
 ddo_did = ddo.did
 
 # Bob gets a free datatoken, sends it to the service, and downloads
-datatoken.dispense("1 ether", {"from": bob})
-order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob})
+datatoken.dispense(to_wei(1), {"from": bob})
+order_tx_id = ocean.assets.pay_for_access_service(ddo, {"from": bob}).hex()
 asset_dir = ocean.assets.download_asset(ddo, bob, './', order_tx_id)
 
 import os

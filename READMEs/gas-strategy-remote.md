@@ -22,7 +22,7 @@ Ensure that you've already (a) [installed Ocean](install.md), and (b) [set up re
 
 ## 2. Define gas strategy
 
-Fees are defined for `polygon-main` & `polygon-test` networks.
+Fees are defined for `polygon` & `mumbai` networks.
 
 ```python
 from ocean_lib.web3_internal.utils import get_gas_fees
@@ -37,13 +37,11 @@ The gas strategy can be added to any `tx_dict`, and this is just an example of u
 #data info
 name = "Branin dataset"
 url = "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-tx_dict = (
-    {
+tx_dict = {
         "from": alice,
-        "priority_fee": priority_fee,
-        "max_fee": max_fee,
-    },
-)
+        "maxPriorityFeePerGas": priority_fee,
+        "maxFeePerGas": max_fee,
+}
 
 #create data asset
 (data_nft, datatoken, ddo) = ocean.assets.create_url_asset(

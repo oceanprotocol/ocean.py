@@ -59,7 +59,7 @@ model_value = "<insert MLP weights here>"
 # Compute a symmetric key: unique to this (nft, nft field) and (your priv key)
 # Therefore you can calculate it anytime
 from ocean_lib.ocean import crypto
-symkey = crypto.calc_symkey(data_nft.address + model_label + alice.private_key)
+symkey = crypto.calc_symkey(data_nft.address + model_label + alice.privateKey.hex())
 
 # Symmetrically encrypt AI model
 model_value_symenc = crypto.sym_encrypt(model_value, symkey)
@@ -77,8 +77,7 @@ There are many possible ways for Alice to share the symkey to Bob. Here, Alice s
 In the Python console:
 ```python
 # Get Bob's public key. There are various ways; see appendix.
-pubkey = crypto.calc_pubkey(bob.private_key)
-assert pubkey == str(bob.public_key)
+pubkey = crypto.calc_pubkey(bob.privateKey.hex())
 
 # Asymmetrically encrypt symkey, using Bob's public key
 symkey_asymenc = crypto.asym_encrypt(symkey, pubkey)
@@ -98,7 +97,7 @@ In the Python console:
 symkey_asymenc2 = data_nft.get_data("symkey")
 
 # Asymetrically decrypt symkey, with Bob's private key
-symkey2 = crypto.asym_decrypt(symkey_asymenc2, bob.private_key)
+symkey2 = crypto.asym_decrypt(symkey_asymenc2, bob.privateKey.hex())
 ```
 
 ## 6. Retrieve from chain & decrypt AI model

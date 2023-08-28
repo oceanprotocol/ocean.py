@@ -8,26 +8,17 @@ import string
 import time
 import warnings
 
-from brownie.exceptions import ContractNotFound, TransactionError, VirtualMachineError
-from brownie.network import accounts
 from enforce_typing import enforce_types
-from web3.exceptions import ExtraDataLengthError
+from eth_account import Account
 
+from ocean_lib.ocean.util import send_ether, to_wei
 from ocean_lib.web3_internal.utils import get_gas_fees
-
-ERRORS_TO_CATCH = (
-    ContractNotFound,
-    TransactionError,
-    ValueError,
-    VirtualMachineError,
-    ExtraDataLengthError,
-)
 
 
 @enforce_types
 def remote_config_mumbai(tmp_path):
     config = {
-        "NETWORK_NAME": "polygon-test",
+        "NETWORK_NAME": "mumbai",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.mumbai.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
@@ -39,7 +30,7 @@ def remote_config_mumbai(tmp_path):
 @enforce_types
 def remote_config_polygon(tmp_path):
     config = {
-        "NETWORK_NAME": "polygon-main",
+        "NETWORK_NAME": "polygon",
         "METADATA_CACHE_URI": "https://v4.aquarius.oceanprotocol.com",
         "PROVIDER_URL": "https://v4.provider.polygon.oceanprotocol.com",
         "DOWNLOADS_PATH": "consume-downloads",
@@ -58,8 +49,8 @@ def get_wallets():
     assert bob_private_key, f"Need envvar REMOTE_TEST_PRIVATE_KEY2. {instrs}"
 
     # wallets
-    alice_wallet = accounts.add(alice_private_key)
-    bob_wallet = accounts.add(bob_private_key)
+    alice_wallet = Account.from_key(private_key=alice_private_key)
+    bob_wallet = Account.from_key(private_key=bob_private_key)
 
     print(f"alice_wallet.address = '{alice_wallet.address}'")
     print(f"bob_wallet.address = '{bob_wallet.address}'")
@@ -75,20 +66,23 @@ def do_nonocean_tx_and_handle_gotchas(ocean, alice_wallet, bob_wallet):
       automatically in remote testnets, then just skip
     """
     # Simplest possible tx: Alice send Bob some fake MATIC
-    bob_eth_before = accounts.at(bob_wallet.address).balance()
+    web3 = ocean.config_dict["web3_instance"]
+    bob_eth_before = web3.eth.get_balance(bob_wallet.address)
     normalized_unixtime = time.time() / 1e9
     amt_send = 1e-8 * (random.random() + normalized_unixtime)
 
     print("Do a send-Ether tx...")
     try:
         priority_fee, _ = get_gas_fees()
-        alice_wallet.transfer(
+        send_ether(
+            ocean.config_dict,
+            alice_wallet,
             bob_wallet.address,
-            f"{amt_send:.15f} ether",
+            to_wei(amt_send),
             priority_fee=priority_fee,
         )
-        bob_eth_after = accounts.at(bob_wallet.address).balance()
-    except ERRORS_TO_CATCH as e:
+        bob_eth_after = web3.eth.get_balance(bob_wallet.address)
+    except Exception as e:
         if error_is_skippable(str(e)):
             warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
             return
@@ -117,15 +111,18 @@ def do_ocean_tx_and_handle_gotchas(ocean, alice_wallet):
             data_nft = ocean.data_nft_factory.create(
                 {
                     "from": alice_wallet,
-                    "priority_fee": priority_fee,
-                    "max_fee": max_fee,
+                    "maxPriorityFeePerGas": priority_fee,
+                    "maxFeePerGas": max_fee,
+                    "gas": ocean.config_dict["web3_instance"]
+                    .eth.getBlock("latest")
+                    .gasLimit,
                 },
                 symbol,
                 symbol,
             )
             data_nft_symbol = data_nft.symbol()
             break
-        except ERRORS_TO_CATCH as e:
+        except Exception as e:
             if error_is_skippable(str(e)):
                 warnings.warn(UserWarning(f"Warning: EVM reported error: {e}"))
                 return
@@ -146,6 +143,8 @@ def error_is_skippable(error_s: str) -> bool:
     return (
         "insufficient funds" in error_s
         or "underpriced" in error_s
+        or "exceeds block gas limit" in error_s
+        or "exceeds the configured cap" in error_s
         or "No contract deployed at" in error_s
         or "nonce too low" in error_s
         or "Internal error" in error_s

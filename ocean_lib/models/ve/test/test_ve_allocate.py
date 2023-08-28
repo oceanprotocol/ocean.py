@@ -2,15 +2,21 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import brownie
 import pytest
+from web3.logs import DISCARD
 
-accounts = None
+from tests.resources.helper_functions import get_wallet
 
 
 @pytest.mark.unit
 def test_single_allocation(ve_allocate):
     """getveAllocation should return the correct allocation."""
+    accounts = [
+        get_wallet(1),
+        get_wallet(2),
+        get_wallet(3),
+    ]
+
     nftaddr1 = accounts[0].address
     nftaddr2 = accounts[1].address
     nftaddr3 = accounts[2].address
@@ -31,19 +37,30 @@ def test_single_allocation(ve_allocate):
 @pytest.mark.unit
 def test_single_events(ve_allocate):
     """Test emitted events."""
+    accounts = [
+        get_wallet(1),
+        get_wallet(2),
+    ]
+
     nftaddr1 = accounts[1].address
     tx = ve_allocate.setAllocation(100, nftaddr1, 1, {"from": accounts[0]})
-    assert tx.events["AllocationSet"].values() == [
-        accounts[0].address,
-        accounts[1].address,
-        1,
-        100,
-    ]
+    event = ve_allocate.contract.events.AllocationSet().processReceipt(
+        tx, errors=DISCARD
+    )[0]
+
+    assert event.args.sender == accounts[0].address
+    assert event.args.nft == accounts[1].address
+    assert event.args.chainId == 1
+    assert event.args.amount == 100
 
 
 @pytest.mark.unit
 def test_batch_allocation(ve_allocate):
     """getveAllocation should return the correct allocation."""
+    accounts = [
+        get_wallet(1),
+        get_wallet(2),
+    ]
     nftaddr1 = accounts[0].address
     nftaddr2 = accounts[1].address
 
@@ -56,19 +73,21 @@ def test_batch_allocation(ve_allocate):
 @pytest.mark.unit
 def test_batch_events(ve_allocate):
     """Test emitted events."""
+    accounts = [
+        get_wallet(1),
+        get_wallet(2),
+    ]
+
     nftaddr1 = accounts[1].address
     nftaddr2 = accounts[1].address
     tx = ve_allocate.setBatchAllocation(
         [25, 75], [nftaddr1, nftaddr2], [1, 1], {"from": accounts[0]}
     )
-    assert tx.events["AllocationSetMultiple"].values() == [
-        accounts[0].address,
-        [nftaddr1, nftaddr2],
-        [1, 1],
-        [25, 75],
-    ]
+    event = ve_allocate.contract.events.AllocationSetMultiple().processReceipt(
+        tx, errors=DISCARD
+    )[0]
 
-
-def setup_function():
-    global accounts
-    accounts = brownie.network.accounts
+    assert event.args.sender == accounts[0].address
+    assert event.args.nft == [nftaddr1, nftaddr2]
+    assert event.args.chainId == [1, 1]
+    assert event.args.amount == [25, 75]

@@ -1,3 +1,7 @@
+#
+# Copyright 2023 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 from enforce_typing import enforce_types
 
 from ocean_lib.ocean import crypto
@@ -23,15 +27,8 @@ def test_sym_encrypt_decrypt():
 
 
 @enforce_types
-def test_calc_pubkey(alice):
-    privkey = alice.private_key  # str
-    pubkey = crypto.calc_pubkey(privkey)  # str
-    assert pubkey == str(alice.public_key)
-
-
-@enforce_types
 def test_asym_encrypt_decrypt(alice):
-    privkey = alice.private_key  # str
+    privkey = alice.privateKey.hex()  # str
     pubkey = crypto.calc_pubkey(privkey)  # str
 
     value = "hello there"
