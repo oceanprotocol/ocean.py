@@ -218,7 +218,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     DT_alice1 = DT.balanceOf(alice)
     receipt = exchange.collect_DT(details.dt_balance, {"from": alice})
-    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+    event = exchange._FRE.contract.events.TokenCollected().process_receipt(
         receipt, errors=DISCARD
     )[0]
     DT_received = event.args.amount
@@ -227,7 +227,7 @@ def test_with_nondefaults(OCEAN, DT, alice, bob, carlos, dan, FRE):
 
     OCEAN_alice1 = OCEAN.balanceOf(alice)
     receipt = exchange.collect_BT(details.bt_balance, {"from": alice})
-    event = exchange._FRE.contract.events.TokenCollected().processReceipt(
+    event = exchange._FRE.contract.events.TokenCollected().process_receipt(
         receipt, errors=DISCARD
     )[0]
     OCEAN_received = event.args.amount

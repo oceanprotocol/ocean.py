@@ -126,4 +126,6 @@ def get_web3(network_url: str) -> Web3:
 
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
+    web3.strict_bytes_type_checking = False
+
     return web3

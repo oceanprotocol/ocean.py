@@ -75,7 +75,7 @@ def get_contracts_addresses(config: dict) -> Optional[Dict[str, str]]:
 
 
 @enforce_types
-# Check singnet/snet-cli#142 (comment). You need to provide a lowercase address then call web3.toChecksumAddress()
+# Check singnet/snet-cli#142 (comment). You need to provide a lowercase address then call web3.to_checksum_address()
 # for software safety.
 def _checksum_contract_addresses(
     network_addresses: Dict[str, Any]
@@ -87,8 +87,8 @@ def _checksum_contract_addresses(
             continue
         if isinstance(value, dict):
             for k, v in value.items():
-                value.update({k: Web3.toChecksumAddress(v.lower())})
+                value.update({k: Web3.to_checksum_address(v.lower())})
         else:
-            network_addresses.update({key: Web3.toChecksumAddress(value.lower())})
+            network_addresses.update({key: Web3.to_checksum_address(value.lower())})
 
     return network_addresses

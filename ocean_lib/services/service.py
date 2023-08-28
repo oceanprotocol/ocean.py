@@ -137,9 +137,10 @@ class Service:
 
     def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
         trusted_algo_publishers = [
-            Web3.toChecksumAddress(tp) for tp in self.get_trusted_algorithm_publishers()
+            Web3.to_checksum_address(tp)
+            for tp in self.get_trusted_algorithm_publishers()
         ]
-        publisher_address = Web3.toChecksumAddress(publisher_address)
+        publisher_address = Web3.to_checksum_address(publisher_address)
 
         if publisher_address in trusted_algo_publishers:
             return trusted_algo_publishers

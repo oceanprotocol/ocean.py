@@ -376,9 +376,11 @@ class DataNFTArguments:
             tx_dict,
         )
 
-        registered_event = data_nft_factory.contract.events.NFTCreated().processReceipt(
-            receipt, errors=DISCARD
-        )[0]
+        registered_event = (
+            data_nft_factory.contract.events.NFTCreated().process_receipt(
+                receipt, errors=DISCARD
+            )[0]
+        )
         data_nft_address = registered_event.args.newTokenAddress
 
         return DataNFT(config_dict, data_nft_address)

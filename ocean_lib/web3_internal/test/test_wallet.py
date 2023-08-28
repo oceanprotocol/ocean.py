@@ -35,4 +35,4 @@ def test_generating_wallets(ocean_token, config):
     for key_label in env_key_labels:
         key = os.environ.get(key_label)
         env_private_keys.append(key)
-    assert generated_wallet.privateKey.hex() not in env_private_keys
+    assert generated_wallet._private_key.hex() not in env_private_keys

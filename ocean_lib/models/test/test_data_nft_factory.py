@@ -169,7 +169,7 @@ def test_combo_functions(
         metadata_decryptor_url="http://myprovider:8030",
         metadata_decryptor_address=b"0x123",
         metadata_flags=bytes(0),
-        metadata_data=Web3.toHex(text="my cool metadata."),
+        metadata_data=Web3.to_hex(text="my cool metadata."),
         metadata_data_hash=create_checksum("my cool metadata."),
         metadata_proofs=[],
         tx_dict={"from": publisher_wallet},
@@ -257,7 +257,7 @@ def test_start_multiple_order(
     # provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     provider_data = b"\x00"
 
-    message = Web3.solidityKeccak(
+    message = Web3.solidity_keccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
             provider_data,
@@ -298,7 +298,7 @@ def test_start_multiple_order(
     )
 
     registered_erc20_start_order_event = (
-        datatoken.contract.events.OrderStarted().processReceipt(
+        datatoken.contract.events.OrderStarted().process_receipt(
             receipt, errors=DISCARD
         )[0]
     )
@@ -327,7 +327,7 @@ def test_start_multiple_order(
         [reuse_order], {"from": consumer_wallet}
     )
 
-    reused_event = datatoken.contract.events.OrderReused().processReceipt(
+    reused_event = datatoken.contract.events.OrderReused().process_receipt(
         receipt, errors=DISCARD
     )[0]
     assert reused_event

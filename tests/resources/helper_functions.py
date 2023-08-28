@@ -244,10 +244,10 @@ def get_provider_fees(
         },
         separators=(",", ":"),
     )
-    message_hash = Web3.solidityKeccak(
+    message_hash = Web3.solidity_keccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            Web3.to_hex(Web3.to_bytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
@@ -261,11 +261,11 @@ def get_provider_fees(
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
         "providerFeeAmount": str(provider_fee_amount),
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "providerData": Web3.to_hex(Web3.to_bytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         "v": (signed.v + 27) if signed.v <= 1 else signed.v,
-        "r": Web3.toHex(Web3.toBytes(signed.r).rjust(32, b"\0")),
-        "s": Web3.toHex(Web3.toBytes(signed.s).rjust(32, b"\0")),
+        "r": Web3.to_hex(Web3.to_bytes(signed.r).rjust(32, b"\0")),
+        "s": Web3.to_hex(Web3.to_bytes(signed.s).rjust(32, b"\0")),
         "validUntil": valid_until,
     }
     return provider_fee
@@ -339,10 +339,10 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
 
-    message = Web3.solidityKeccak(
+    message = Web3.solidity_keccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            Web3.to_hex(Web3.to_bytes(text=provider_data)),
             wallet.address,
             provider_fee_token,
             provider_fee_amount,
@@ -361,5 +361,5 @@ def get_mock_provider_fees(mock_type, wallet, valid_until=0):
         "r": signature.r,
         "s": signature.s,
         "validUntil": valid_until,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "providerData": Web3.to_hex(Web3.to_bytes(text=provider_data)),
     }

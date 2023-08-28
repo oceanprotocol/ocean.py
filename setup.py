@@ -23,9 +23,9 @@ install_requirements = [
     "requests>=2.21.0",
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
-    "eciespy==0.3.11",
+    "eciespy==0.4.0",
     "cryptography==41.0.2",
-    "web3==5.31.3"
+    "web3==6.9.0"
     # web3.py requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py

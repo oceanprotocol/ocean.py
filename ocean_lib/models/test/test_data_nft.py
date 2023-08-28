@@ -131,7 +131,7 @@ def test_permissions(
             0,
             consumer_wallet.address,
             10,
-            Web3.toHex(text="SomeData"),
+            Web3.to_hex(text="SomeData"),
             {"from": another_consumer_wallet},
         )
 
@@ -141,7 +141,7 @@ def test_permissions(
         0,
         consumer_wallet.address,
         10,
-        Web3.toHex(text="SomeData"),
+        Web3.to_hex(text="SomeData"),
         {"from": consumer_wallet},
     )
     assert tx, "Could not execute call to consumer."
@@ -235,14 +235,14 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         1,
         "http://myprovider:8030",
         b"0x123",
-        Web3.toBytes(hexstr=BLOB),
-        Web3.toBytes(hexstr=BLOB),
-        Web3.toBytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
         [],
         {"from": consumer_wallet},
     )
 
-    event = data_nft.contract.events.MetadataCreated().processReceipt(
+    event = data_nft.contract.events.MetadataCreated().process_receipt(
         receipt, errors=DISCARD
     )[0]
     assert event.args.decryptorUrl == "http://myprovider:8030"
@@ -255,14 +255,14 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         1,
         "http://foourl",
         b"0x123",
-        Web3.toBytes(hexstr=BLOB),
-        Web3.toBytes(hexstr=BLOB),
-        Web3.toBytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
+        Web3.to_bytes(hexstr=BLOB),
         [],
         {"from": consumer_wallet},
     )
 
-    event = data_nft.contract.events.MetadataUpdated().processReceipt(
+    event = data_nft.contract.events.MetadataUpdated().process_receipt(
         receipt, errors=DISCARD
     )[0]
     assert event.args.decryptorUrl == "http://foourl"
@@ -277,9 +277,9 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
             1,
             "http://foourl",
             b"0x123",
-            Web3.toBytes(hexstr=BLOB),
-            Web3.toBytes(hexstr=BLOB),
-            Web3.toBytes(hexstr=BLOB),
+            Web3.to_bytes(hexstr=BLOB),
+            Web3.to_bytes(hexstr=BLOB),
+            Web3.to_bytes(hexstr=BLOB),
             1,
             "https://anothernewurl.com/nft/",
             [],
@@ -287,13 +287,13 @@ def test_success_update_metadata(publisher_wallet, consumer_wallet, config, data
         {"from": publisher_wallet},
     )
 
-    event = data_nft.contract.events.TokenURIUpdate().processReceipt(
+    event = data_nft.contract.events.TokenURIUpdate().process_receipt(
         receipt, errors=DISCARD
     )[0]
     assert event.args.tokenURI == "https://anothernewurl.com/nft/"
     assert event.args.updatedBy == publisher_wallet.address
 
-    event = data_nft.contract.events.MetadataUpdated().processReceipt(
+    event = data_nft.contract.events.MetadataUpdated().process_receipt(
         receipt, errors=DISCARD
     )[0]
     assert event.args.decryptorUrl == "http://foourl"
@@ -482,7 +482,7 @@ def test_erc721_datatoken_functions(
         "https://newurl.com/nft/",
         {"from": publisher_wallet},
     )
-    registered_event = data_nft.contract.events.TokenURIUpdate().processReceipt(
+    registered_event = data_nft.contract.events.TokenURIUpdate().process_receipt(
         receipt, errors=DISCARD
     )[0]
 
@@ -595,7 +595,7 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+    transfer_event = data_nft.contract.events.Transfer().process_receipt(
         receipt, errors=DISCARD
     )[0]
 
@@ -615,7 +615,7 @@ def test_transfer_nft(
         1,
         {"from": publisher_wallet},
     )
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+    transfer_event = data_nft.contract.events.Transfer().process_receipt(
         receipt, errors=DISCARD
     )[0]
 
@@ -653,7 +653,7 @@ def test_transfer_nft(
     )
 
     set_publishing_fee_event = (
-        datatoken.contract.events.PublishMarketFeeChanged().processReceipt(
+        datatoken.contract.events.PublishMarketFeeChanged().process_receipt(
             receipt, errors=DISCARD
         )[0]
     )
@@ -701,7 +701,7 @@ def test_nft_transfer_with_fre(
         {"from": publisher_wallet},
     )
 
-    transfer_event = data_nft.contract.events.Transfer().processReceipt(
+    transfer_event = data_nft.contract.events.Transfer().process_receipt(
         receipt, errors=DISCARD
     )[0]
 

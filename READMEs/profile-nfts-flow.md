@@ -56,10 +56,10 @@ profiledata_name_hash = Web3.keccak(text=profiledata_name)
 preimage = data_nft.address + profiledata_name
 preimage = sha256(preimage.encode('utf-8')).hexdigest()
 prefix = "\x19Ethereum Signed Message:\n32"
-msg = Web3.solidityKeccak(
-    ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(text=preimage)]
+msg = Web3.solidity_keccak(
+    ["bytes", "bytes"], [Web3.to_bytes(text=prefix), Web3.to_bytes(text=preimage)]
 )
-signed = sign_with_key(msg, alice.privateKey.hex())
+signed = sign_with_key(msg, alice._private_key.hex())
 symkey = b64encode(str(signed).encode('ascii'))[:43] + b'='  # bytes
 
 # Prep value for setter

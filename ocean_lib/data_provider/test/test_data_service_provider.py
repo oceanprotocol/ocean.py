@@ -194,7 +194,7 @@ def test_delete_job_result(provider_wallet):
 @pytest.mark.integration
 def test_encrypt(provider_wallet, file1, file2):
     """Tests successful encrypt job."""
-    key = provider_wallet.privateKey.hex()
+    key = provider_wallet._private_key.hex()
     # Encrypt file objects
     res = {"files": [file1.to_dict(), file2.to_dict()]}
     result = DataEncryptor.encrypt(res, DEFAULT_PROVIDER_URL, 8996)
@@ -204,7 +204,7 @@ def test_encrypt(provider_wallet, file1, file2):
     assert encrypted_files.startswith("0x")
 
     if isinstance(encrypted_files, str):
-        encrypted_files = Web3.toBytes(hexstr=encrypted_files)
+        encrypted_files = Web3.to_bytes(hexstr=encrypted_files)
     decrypted_document = ecies.decrypt(key, encrypted_files)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == json.dumps(res, separators=(",", ":"))
@@ -218,7 +218,7 @@ def test_encrypt(provider_wallet, file1, file2):
     assert result.content.decode("utf-8").startswith("0x")
 
     if isinstance(encrypted_document, str):
-        encrypted_document = Web3.toBytes(hexstr=encrypted_document)
+        encrypted_document = Web3.to_bytes(hexstr=encrypted_document)
     decrypted_document = ecies.decrypt(key, encrypted_document)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == test_string

@@ -28,7 +28,7 @@ def test_sym_encrypt_decrypt():
 
 @enforce_types
 def test_asym_encrypt_decrypt(alice):
-    privkey = alice.privateKey.hex()  # str
+    privkey = alice._private_key.hex()  # str
     pubkey = crypto.calc_pubkey(privkey)  # str
 
     value = "hello there"
