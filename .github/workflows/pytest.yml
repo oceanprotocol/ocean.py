@@ -31,6 +31,7 @@ jobs:
         working-directory: ${{ github.workspace }}/barge
         env:
           GANACHE_HARDFORK: london
+          PROVIDER_VERSION: v2.1.3
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --with-c2d --skip-subgraph-deploy > start_ocean.log &
       - name: Install dependencies
