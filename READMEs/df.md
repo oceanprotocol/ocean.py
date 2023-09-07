@@ -176,7 +176,6 @@ It provides convenient access to [DF](https://github.com/oceanprotocol/ocean.py/
 - `ocean.smart_wallet_checker -> SmartWalletChecker`
 - `ocean.ve_allocate -> VeAllocate`
 - `ocean.ve_delegation -> VeDelegation`
-- `ocean.ve_delegation_proxy -> VeDelegationProxy`
 - `ocean.ve_fee_distributor -> VeFeeDistributor`
 - `ocean.ve_fee_estimate(self) -> VeFeeEstimate`
 

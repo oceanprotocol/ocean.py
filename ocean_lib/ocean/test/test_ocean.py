@@ -14,7 +14,6 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
 from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_delegation import VeDelegation
-from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
 from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
 from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
@@ -53,7 +52,6 @@ def test_contract_objects(publisher_ocean):
     assert isinstance(ocean.smart_wallet_checker, SmartWalletChecker)
     assert isinstance(ocean.ve_allocate, VeAllocate)
     assert isinstance(ocean.ve_delegation, VeDelegation)
-    assert isinstance(ocean.ve_delegation_proxy, VeDelegationProxy)
     assert isinstance(ocean.ve_fee_distributor, VeFeeDistributor)
     assert isinstance(ocean.ve_fee_estimate, VeFeeEstimate)
     assert isinstance(ocean.ve_ocean, VeOcean)

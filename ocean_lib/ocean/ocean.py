@@ -26,7 +26,6 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.ve.smart_wallet_checker import SmartWalletChecker
 from ocean_lib.models.ve.ve_allocate import VeAllocate
 from ocean_lib.models.ve.ve_delegation import VeDelegation
-from ocean_lib.models.ve.ve_delegation_proxy import VeDelegationProxy
 from ocean_lib.models.ve.ve_fee_distributor import VeFeeDistributor
 from ocean_lib.models.ve.ve_fee_estimate import VeFeeEstimate
 from ocean_lib.models.ve.ve_ocean import VeOcean
@@ -234,11 +233,6 @@ class Ocean:
     @enforce_types
     def ve_delegation(self) -> VeDelegation:
         return VeDelegation(self.config, self._addr("veDelegation"))
-
-    @property
-    @enforce_types
-    def ve_delegation_proxy(self) -> VeDelegationProxy:
-        return VeDelegationProxy(self.config, self._addr("veDelegationProxy"))
 
     @property
     @enforce_types
