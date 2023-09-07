@@ -32,18 +32,31 @@ jobs:
         env:
           GANACHE_HARDFORK: london
         run: |
-          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --skip-subgraph-deploy > start_ocean.log &
+          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --with-c2d --skip-subgraph-deploy > start_ocean.log &
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements_dev.txt
+      - name: Delete default runner images
+        run: |
+          docker image rm node:14
+          docker image rm node:14-alpine
+          docker image rm node:16
+          docker image rm node:16-alpine
+          docker image rm node:18
+          docker image rm node:18-alpine
+          docker image rm buildpack-deps:buster
+          docker image rm buildpack-deps:bullseye
+          docker image rm debian:10
+          docker image rm debian:11
+          docker image rm moby/buildkit:latest
       - name: Wait for contracts deployment
         working-directory: ${{ github.workspace }}/barge
         run: |
           for i in $(seq 1 250); do
             sleep 5
-            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
+            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean-c2d/ready" ] && break
             done
       - name: "Read address.json contents"
         working-directory: ${{ github.workspace }}

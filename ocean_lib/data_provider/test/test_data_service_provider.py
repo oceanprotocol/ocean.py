@@ -144,7 +144,6 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
         )
 
 
-@pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
 @pytest.mark.unit
 def test_compute_job_result_fails(provider_wallet):
     """Tests failure of compute job starting."""
@@ -164,7 +163,6 @@ def test_compute_job_result_fails(provider_wallet):
         DataSP.compute_job_result("some_job_id", 0, mock_service, provider_wallet)
 
 
-@pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
 @pytest.mark.unit
 def test_delete_job_result(provider_wallet):
     """Tests a failure & a success of compute job deletion."""
@@ -278,7 +276,6 @@ def test_expose_endpoints():
     ]
 
 
-@pytest.mark.skip(reason="Need to fix c2d CI containers in #1449")
 @pytest.mark.integration
 def test_c2d_environments():
     """Tests that the test ocean-compute env exists on the DataServiceProvider."""
