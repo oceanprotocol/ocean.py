@@ -35,7 +35,7 @@ setup_requirements = ["pytest-runner"]
 
 test_requirements = [
     "codacy-coverage==1.3.11",
-    "coverage==7.3.0",
+    "coverage==7.3.1",
     "mccabe==0.7.0",
     "pytest==6.2.5",
     "pytest-watch==4.2.0",
