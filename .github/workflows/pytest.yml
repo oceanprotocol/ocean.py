@@ -64,7 +64,7 @@ jobs:
       - name: Test with pytest
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
-          coverage run --source ocean_lib -m py.test
+          coverage run --source ocean_lib -m pytest
           coverage report
           coverage xml
         env:
