@@ -196,9 +196,6 @@ class OceanAssets:
     ) -> tuple:
         """Create asset of type "algorithm", having UrlFiles, with good defaults"""
 
-        if image == "oceanprotocol/algo_dockers" or tag == "python-branin":
-            assert image == "oceanprotocol/algo_dockers" and tag == "python-branin"
-
         asset_args = get_args_object(args, kwargs, AssetArguments)
 
         if not asset_args.metadata:
