@@ -182,7 +182,6 @@ def test_permissions(
 def test_add_and_remove_permissions(
     publisher_wallet, consumer_wallet, config, data_nft
 ):
-
     # Assert consumer has no permissions
     permissions = data_nft.getPermissions(consumer_wallet.address)
     assert not permissions[DataNFTPermissions.MANAGER]

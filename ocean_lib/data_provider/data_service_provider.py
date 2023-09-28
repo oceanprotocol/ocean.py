@@ -44,7 +44,6 @@ class DataServiceProvider(DataServiceProviderBase):
         consumer_address: str,
         userdata: Optional[Dict] = None,
     ) -> Response:
-
         method, initialize_endpoint = DataServiceProvider.build_endpoint(
             "initialize", service.service_endpoint
         )
@@ -413,7 +412,6 @@ class DataServiceProvider(DataServiceProviderBase):
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer
     ) -> Dict[str, Any]:
-
         nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{job_id}{did}",

@@ -34,7 +34,6 @@ class DDO(AddressCredentialMixin):
         event: Optional[dict] = None,
         stats: Optional[dict] = None,
     ) -> None:
-
         self.did = did
         self.context = context or ["https://w3id.org/did/v1"]
         self.chain_id = chain_id

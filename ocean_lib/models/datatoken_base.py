@@ -186,7 +186,6 @@ class DatatokenBase(ABC, ContractBase):
         tx_dict: dict,
         consume_market_fees=None,
     ) -> str:
-
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
 

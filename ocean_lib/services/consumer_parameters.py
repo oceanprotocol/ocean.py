@@ -27,7 +27,6 @@ class ConsumerParameters:
         description: str,
         options: Optional[List[str]] = None,
     ) -> None:
-
         fn_args = locals().copy()
         for attr_name in ConsumerParameters.required_attrs():
             setattr(self, attr_name, fn_args[attr_name])

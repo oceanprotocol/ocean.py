@@ -177,7 +177,6 @@ class Ocean:
     def retrieve_provider_fees(
         self, ddo: DDO, access_service: Service, publisher_wallet
     ) -> dict:
-
         initialize_response = DataServiceProvider.initialize(
             ddo.did, access_service, consumer_address=publisher_wallet.address
         )
@@ -195,7 +194,6 @@ class Ocean:
         compute_environment: str,
         valid_until: int,
     ) -> dict:
-
         initialize_compute_response = DataServiceProvider.initialize_compute(
             [x.as_dictionary() for x in datasets],
             algorithm_data.as_dictionary(),
