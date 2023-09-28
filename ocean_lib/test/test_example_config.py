@@ -57,7 +57,18 @@ def test_moonbeam_alpha_example_config(monkeypatch):
 
 
 @pytest.mark.unit
-def test_get_address_of_type(monkeypatch):
+def test_sepolia_example_config(monkeypatch):
+    """Tests the config structure of Sepolia network."""
+    monkeypatch.setenv("SEPOLIA_RPC_URL", "https://rpc2.sepolia.org")
+
+    config = get_config_dict("sepolia")
+
+    assert config["METADATA_CACHE_URI"] == METADATA_CACHE_URI
+    assert config["PROVIDER_URL"] == "https://v4.provider.oceanprotocol.com"
+
+
+@pytest.mark.unit
+def test_get_address_of_type():
     config = get_config_dict("polygon")
 
     data_nft_factory = get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME)

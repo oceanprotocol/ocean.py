@@ -20,7 +20,6 @@ from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 
 @pytest.mark.unit
 def test_with_defaults(OCEAN, DT, alice, bob):
-
     # =========================================================================
     # Create exchange
     exchange = DT.create_exchange(
