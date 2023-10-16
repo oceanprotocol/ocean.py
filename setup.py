@@ -54,7 +54,7 @@ dev_requirements = [
     "isort==5.12.0",
     "flake8==6.1.0",
     "black",
-    "pre-commit==3.4.0",
+    "pre-commit==3.5.0",
     "licenseheaders==0.8.8",
 ]
 
