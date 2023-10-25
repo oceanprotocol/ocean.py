@@ -9,6 +9,8 @@ from ocean_lib.ocean.ocean import Ocean
 
 from . import util
 
+POLYGON_RPC_URL = "https://polygon-rpc.com"
+
 
 @pytest.mark.integration
 def test_ocean_tx__create(tmp_path, monkeypatch):
@@ -16,7 +18,7 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
 
     # setup
-    config = get_config_dict("polygon")
+    config = get_config_dict(POLYGON_RPC_URL)
     ocean = Ocean(config)
 
     (alice_wallet, _) = util.get_wallets()

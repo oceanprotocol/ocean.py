@@ -7,6 +7,7 @@ import copy
 import logging
 import os
 from pathlib import Path
+from typing import Optional
 
 import addresses
 from enforce_typing import enforce_types
@@ -22,73 +23,63 @@ METADATA_CACHE_URI = "https://v4.aquarius.oceanprotocol.com"
 DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 
 config_defaults = {
-    "NETWORK_NAME": "development",
     "METADATA_CACHE_URI": "http://172.15.0.5:5000",
     "PROVIDER_URL": "http://172.15.0.4:8030",
     "DOWNLOADS_PATH": "consume-downloads",
 }
 
 PROVIDER_PER_NETWORK = {
-    "mainnet": "https://v4.provider.mainnet.oceanprotocol.com",
-    "goerli": "https://v4.provider.goerli.oceanprotocol.com",
-    "bsc": "https://v4.provider.bsc.oceanprotocol.com",
-    "polygon": "https://v4.provider.polygon.oceanprotocol.com",
-    "energyweb": "https://v4.provider.energyweb.oceanprotocol.com",
-    "moonriver": "https://v4.provider.moonriver.oceanprotocol.com",
-    "moonbase": "https://v4.provider.moonbase.oceanprotocol.com",
-    "mumbai": "https://v4.provider.mumbai.oceanprotocol.com",
-    "sepolia": "https://v4.provider.oceanprotocol.com",
-    "development": DEFAULT_PROVIDER_URL,
+    1: "https://v4.provider.mainnet.oceanprotocol.com",
+    5: "https://v4.provider.goerli.oceanprotocol.com",
+    56: "https://v4.provider.bsc.oceanprotocol.com",
+    137: "https://v4.provider.polygon.oceanprotocol.com",
+    246: "https://v4.provider.energyweb.oceanprotocol.com",
+    1285: "https://v4.provider.moonriver.oceanprotocol.com",
+    1287: "https://v4.provider.moonbase.oceanprotocol.com",
+    80001: "https://v4.provider.mumbai.oceanprotocol.com",
+    58008: "https://v4.provider.oceanprotocol.com",
+    8996: DEFAULT_PROVIDER_URL,
+}
+
+NAME_PER_NETWORK = {
+    1: "mainnet",
+    5: "goerli",
+    56: "bsc",
+    137: "polygon",
+    246: "energyweb",
+    1285: "moonriver",
+    1287: "moonbase",
+    80001: "mumbai",
+    58008: "sepolia",
+    8996: "development",
 }
 
 
-def get_rpc_url(network_name: str) -> str:
-    """Return the RPC URL for a given network."""
-    if network_name == "development":
-        if os.getenv("DEVELOPMENT_RPC_URL"):
-            return os.getenv("DEVELOPMENT_RPC_URL")
-
-        return "http://localhost:8545"
-
-    base_url = None
-
-    if os.getenv(f"{network_name.upper()}_RPC_URL"):
-        base_url = os.getenv(f"{network_name.upper()}_RPC_URL")
-
-    if os.getenv("WEB3_INFURA_PROJECT_ID"):
-        base_url = f"{base_url}{os.getenv('WEB3_INFURA_PROJECT_ID')}"
-
-    if base_url:
-        return base_url
-
-    raise Exception(f"Need to set {network_name.upper()}_RPC_URL env variable.")
-
-
-def get_config_dict(network_name=None) -> dict:
+def get_config_dict(network_url: Optional[str] = None) -> dict:
     """Return config dict containing default values for a given network.
     Chain ID is determined by querying the RPC specified by network_url.
     """
-    if not network_name or network_name in ["ganache", "development"]:
-        network_name = "development"
-
-    if network_name not in PROVIDER_PER_NETWORK:
-        raise ValueError("The chain id for the specific RPC could not be fetched!")
-
-    network_url = get_rpc_url(network_name)
+    if not network_url:
+        network_url = "http://localhost:8545"
 
     config_dict = copy.deepcopy(config_defaults)
-    config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[network_name]
-    config_dict["NETWORK_NAME"] = network_name
     config_dict["web3_instance"] = get_web3(network_url)
     config_dict["CHAIN_ID"] = config_dict["web3_instance"].eth.chain_id
 
-    if network_name != "development":
+    chain_id = config_dict["CHAIN_ID"]
+    if chain_id not in PROVIDER_PER_NETWORK:
+        raise ValueError("The chain id for the specific RPC could not be fetched!")
+
+    config_dict["PROVIDER_URL"] = PROVIDER_PER_NETWORK[chain_id]
+    config_dict["NETWORK_NAME"] = NAME_PER_NETWORK[chain_id]
+
+    if chain_id != 8996:
         config_dict["METADATA_CACHE_URI"] = METADATA_CACHE_URI
 
     if os.getenv("ADDRESS_FILE"):
         base_file = os.getenv("ADDRESS_FILE")
         address_file = os.path.expanduser(base_file)
-    elif network_name == "development":
+    elif chain_id == 8996:
         # this is auto-created when barge is run
         base_file = "~/.ocean/ocean-contracts/artifacts/address.json"
         address_file = os.path.expanduser(base_file)

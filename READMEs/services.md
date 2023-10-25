@@ -47,7 +47,7 @@ Here are the urls for the local services, for use in the config dict.
 Remember, here's how the config dict is set.
 ```python
 from ocean_lib.example_config import get_config_dict
-config = get_config_dict("mumbai") # returns a dict
+config = get_config_dict(<RPC_URL>) # returns a dict
 # (then, here you can update the config dict as you wish)
 ocean = Ocean(config)
 ```
