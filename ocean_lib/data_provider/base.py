@@ -7,7 +7,6 @@
 import logging
 import os
 import re
-from datetime import datetime, timezone
 from json import JSONDecodeError
 from math import ceil
 from typing import Dict, List, Optional, Tuple, Union
@@ -46,26 +45,26 @@ class DataServiceProviderBase:
 
     @staticmethod
     @enforce_types
-    def sign_message(
-        wallet, msg: str, provider_uri: Optional[str] = None
-    ) -> Tuple[str, str]:
-        if provider_uri:
-            method, nonce_endpoint = DataServiceProviderBase.build_endpoint(
-                "nonce", provider_uri
-            )
+    def sign_message(wallet, msg: str, provider_uri: str) -> Tuple[str, str]:
+        method, nonce_endpoint = DataServiceProviderBase.build_endpoint(
+            "nonce", provider_uri
+        )
 
-            nonce_response = DataServiceProviderBase._http_method(
-                method, url=nonce_endpoint, params={"userAddress": wallet.address}
-            ).json()
+        nonce_response = DataServiceProviderBase._http_method(
+            method, url=nonce_endpoint, params={"userAddress": wallet.address}
+        )
 
-            nonce = (
-                int(ceil(float(nonce_response["nonce"])))
-                if nonce_response["nonce"]
-                else 0
-            )
-            nonce = nonce + 1
+        if (
+            not nonce_response
+            or not hasattr(nonce_response, "status_code")
+            or nonce_response.status_code != 200
+            or "nonce" not in nonce_response.json()
+        ):
+            current_nonce = 0
         else:
-            nonce = str(datetime.now(timezone.utc).timestamp() * 1000)
+            current_nonce = int(ceil(float(nonce_response.json()["nonce"])))
+
+        nonce = current_nonce + 1
 
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
 

@@ -48,7 +48,7 @@ class TestReadmes(object):
             "publish-flow-credentials",
             "publish-flow-restapi",  # TODO: fix and restore
             "gas-strategy-remote",
-            # "using-clef", # TODO: removed original clef readme, to reinstate in #1461
+            "using-clef",  # TODO: removed original clef readme, to reinstate in #1461
         ]
 
         if script_name.replace("test_", "").replace(".py", "") in skippable:
