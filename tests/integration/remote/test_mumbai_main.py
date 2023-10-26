@@ -2,13 +2,21 @@
 # Copyright 2023 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import os
 
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
 
 from . import util
 
-MUMBAI_RPC_URL = "https://rpc-mumbai.maticvigil.com"
+
+def _get_mumbai_rpc():
+    infura_id = os.getenv("WEB3_INFURA_PROJECT_ID")
+
+    if not infura_id:
+        return "https://rpc-mumbai.maticvigil.com"
+
+    return f"https://polygon-mumbai.infura.io/v3/{infura_id}"
 
 
 def test_nonocean_tx(tmp_path, monkeypatch):
@@ -16,7 +24,7 @@ def test_nonocean_tx(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
 
-    config = get_config_dict(MUMBAI_RPC_URL)
+    config = get_config_dict(_get_mumbai_rpc())
     ocean = Ocean(config)
     (alice_wallet, bob_wallet) = util.get_wallets()
 
@@ -29,7 +37,7 @@ def test_ocean_tx__create(tmp_path, monkeypatch):
     monkeypatch.delenv("ADDRESS_FILE")
     # setup
 
-    config = get_config_dict(MUMBAI_RPC_URL)
+    config = get_config_dict(_get_mumbai_rpc())
     ocean = Ocean(config)
 
     (alice_wallet, _) = util.get_wallets()

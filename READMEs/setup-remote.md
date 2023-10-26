@@ -88,6 +88,8 @@ As usual, Linux/MacOS needs "`export`" and Windows needs "`set`". In the console
 # For accounts: set private keys
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+
+export MUMBAI_RPC_URL=<your RPC_URL> # exported used for convenience/security, you can also use the direct URL string later
 ```
 
 
@@ -96,6 +98,8 @@ export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 # For accounts: set private keys
 set REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
+
+set MUMBAI_RPC_URL=<your RPC_URL> # exported used for convenience/security, you can also use the direct URL string later
 ```
 
 Optionally, chainlist.org has other RPCs for [Mumbai](https://chainlist.org/chain/80001) and [Polygon](https://chainlist.org/chain/137).
@@ -113,7 +117,7 @@ In the Python console:
 import os
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = get_config_dict("http://rpc-mumbai.maticvigil.com")  # or another RPC url...
+config = get_config_dict(os.getenv("MUMBAI_RPC_URL"))  # you can also input the string directly
 ocean = Ocean(config)
 
 # Create OCEAN object. ocean_lib knows where OCEAN is on all remote networks
