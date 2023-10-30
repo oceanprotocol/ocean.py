@@ -13,6 +13,8 @@ from eth_keys.backends import NativeECCBackend
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
+from ocean_lib.web3_internal.clef import ClefAccount
+
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
@@ -29,18 +31,18 @@ def to_32byte_hex(val: int) -> str:
     return Web3.to_hex(Web3.to_bytes(val).rjust(32, b"\0"))
 
 
-# reinstate as part of #1461
-# @enforce_types
-# def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
-#     message_hash = Web3.solidity_keccak(
-#        ["bytes"],
-#        [Web3.to_bytes(text=message_hash)],
-#    )
-#
-#    orig_sig = wallet._provider.make_request(
-#        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
-#    )["result"]
-#    return orig_sig
+@enforce_types
+def sign_with_clef(message_hash: str, wallet: ClefAccount) -> str:
+    message_hash = Web3.solidity_keccak(
+        ["bytes"],
+        [Web3.to_bytes(text=message_hash)],
+    )
+
+    orig_sig = wallet.provider.make_request(
+        "account_signData", ["data/plain", wallet.address, message_hash.hex()]
+    )["result"]
+
+    return orig_sig
 
 
 @enforce_types

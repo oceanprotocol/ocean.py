@@ -21,7 +21,8 @@ from requests.sessions import Session
 
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.web3_internal.utils import sign_with_key
+from ocean_lib.web3_internal.clef import ClefAccount
+from ocean_lib.web3_internal.utils import sign_with_clef, sign_with_key
 
 logger = logging.getLogger(__name__)
 
@@ -69,9 +70,8 @@ class DataServiceProviderBase:
 
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
 
-        # reinstate as part of #1461
-        # if isinstance(wallet, ClefAccount):
-        #    return nonce, str(sign_with_clef(f"{msg}{nonce}", wallet))
+        if isinstance(wallet, ClefAccount):
+            return nonce, str(sign_with_clef(f"{msg}{nonce}", wallet))
 
         return nonce, str(sign_with_key(f"{msg}{nonce}", wallet._private_key.hex()))
 
