@@ -9,10 +9,12 @@ from typing import List, Optional
 
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
+from web3._utils.abi import abi_to_signature
 from web3.exceptions import MismatchedABI
 from web3.logs import DISCARD
 from web3.main import Web3
 
+from ocean_lib.web3_internal.clef import ClefAccount
 from ocean_lib.web3_internal.contract_utils import load_contract
 
 logger = logging.getLogger(__name__)
@@ -46,6 +48,7 @@ def function_wrapper(contract, web3, contract_functions, func_name):
 
         func = getattr(contract_functions, func_name)
         result = func(*args2, **kwargs)
+        func_signature = abi_to_signature(result.abi)
 
         # view/pure functions don't need "from" key in tx_dict
         if not tx_dict and result.abi["stateMutability"] not in ["view", "pure"]:
@@ -64,8 +67,22 @@ def function_wrapper(contract, web3, contract_functions, func_name):
             result = result.build_transaction(tx_dict2)
 
             # sign with wallet private key and send transaction
-            signed_tx = web3.eth.account.sign_transaction(result, wallet._private_key)
-            receipt = web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            if isinstance(wallet, ClefAccount):
+                for k, v in result.items():
+                    result[k] = Web3.to_hex(v) if not isinstance(v, str) else v
+
+                raw_signed_tx = wallet.provider.make_request(
+                    "account_signTransaction", [result, func_signature]
+                )
+
+                raw_signed_tx = raw_signed_tx["result"]["raw"]
+            else:
+                signed_tx = web3.eth.account.sign_transaction(
+                    result, wallet._private_key
+                )
+                raw_signed_tx = signed_tx.rawTransaction
+
+            receipt = web3.eth.send_raw_transaction(raw_signed_tx)
 
             return web3.eth.wait_for_transaction_receipt(receipt)
 
