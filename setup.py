@@ -24,7 +24,7 @@ install_requirements = [
     "pytz",  # used minimally and unlikely to change, common dependency
     "enforce-typing==1.0.0.post1",
     "eciespy==0.4.0",
-    "cryptography==41.0.4",
+    "cryptography==41.0.5",
     "web3==6.11.1"
     # web3.py requires eth-abi, requests, and more,
     # so those will be installed too.
@@ -37,7 +37,7 @@ test_requirements = [
     "codacy-coverage==1.3.11",
     "coverage==7.3.2",
     "mccabe==0.7.0",
-    "pytest==7.4.2",
+    "pytest==7.4.3",
     "pytest-watch==4.2.0",
     "pytest-env",  # common dependency
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
