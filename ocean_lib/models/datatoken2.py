@@ -7,7 +7,7 @@ from typing import Any, Optional, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
-from ocean_lib.ocean.util import get_address_of_type, get_from_address, to_wei
+from ocean_lib.ocean.util import get_from_address, to_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -41,13 +41,14 @@ class Datatoken2(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
+        exchanges = self.get_exchanges()
+        assert exchanges, "there are no fixed rate exchanges for this datatoken"
 
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
 
         if not isinstance(exchange, OneExchange):
-            exchange = OneExchange(fre_address, exchange)
+            exchange = exchanges[0]
 
         if not consume_market_fees:
             consume_market_fees = TokenFeeInfo()
@@ -97,7 +98,10 @@ class Datatoken2(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        dispenser_address = get_address_of_type(self.config_dict, "Dispenser")
+        dispensers = self.get_dispensers()
+        assert dispensers, "there are no dispensers for this datatoken"
+        dispenser = dispensers[0]
+
         return self.buyFromDispenserAndOrder(
             (
                 ContractBase.to_checksum_address(consumer),
@@ -114,6 +118,6 @@ class Datatoken2(DatatokenBase):
                 ),
                 consume_market_fees.to_tuple(),
             ),
-            ContractBase.to_checksum_address(dispenser_address),
+            ContractBase.to_checksum_address(dispenser.address),
             tx_dict,
         )

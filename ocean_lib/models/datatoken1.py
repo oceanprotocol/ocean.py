@@ -8,7 +8,7 @@ from typing import Any, Optional
 from enforce_typing import enforce_types
 
 from ocean_lib.models.datatoken_base import DatatokenBase, TokenFeeInfo
-from ocean_lib.ocean.util import from_wei, get_address_of_type, get_from_address, to_wei
+from ocean_lib.ocean.util import from_wei, get_from_address, to_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 
@@ -219,10 +219,10 @@ class Datatoken1(DatatokenBase):
 
         bal = from_wei(self.balanceOf(buyer_addr))
         if bal < 1.0:
-            dispenser_addr = get_address_of_type(self.config_dict, "Dispenser")
-            from ocean_lib.models.dispenser import Dispenser  # isort: skip
+            dispensers = self.get_dispensers()
 
-            dispenser = Dispenser(self.config_dict, dispenser_addr)
+            assert dispensers, "there are no dispensers for this datatoken"
+            dispenser = dispensers[0]
 
             # catch key failure modes
             st = dispenser.status(self.address)
@@ -256,7 +256,8 @@ class Datatoken1(DatatokenBase):
         if not consumer:
             consumer = get_from_address(tx_dict)
 
-        fre_address = get_address_of_type(self.config_dict, "FixedPrice")
+        exchanges = self.get_exchanges()
+        assert exchanges, "there are no fixed rate exchanges for this datatoken"
 
         # import now, to avoid circular import
         from ocean_lib.models.fixed_rate_exchange import OneExchange
@@ -265,7 +266,7 @@ class Datatoken1(DatatokenBase):
             consume_market_fees = TokenFeeInfo()
 
         if not isinstance(exchange, OneExchange):
-            exchange = OneExchange(fre_address, exchange)
+            exchange = exchanges[0]
 
         exchange.buy_DT(
             datatoken_amt=to_wei(1),
