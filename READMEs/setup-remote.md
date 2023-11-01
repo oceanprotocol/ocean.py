@@ -25,16 +25,6 @@ Let's go!
 
 All [Ocean chain deployments](https://docs.oceanprotocol.com/discover/networks) (Eth mainnet, Polygon, etc) are supported.
 
-Export env vars of the format `NETWORKNAME_RPC_URL` e.g. `export POLYGON_RPC_URL=https://polygon-rpc.com`
-
-In case you have an Infura project, you need to also export the `WEB3_INFURA_PROJECT_ID` variable *alongside* the base rpc urls.
-
-#### If you do have an Infura account
-
-- Linux & MacOS users: in console: `export WEB3_INFURA_PROJECT_ID=<your infura ID>`
-- Windows: in console: `set WEB3_INFURA_PROJECT_ID=<your infura ID>`
-
-
 ## 2. Create EVM Accounts (One-Time)
 
 An EVM account is singularly defined by its private key. Its address is a function of that key. Let's generate two accounts!
@@ -99,9 +89,7 @@ As usual, Linux/MacOS needs "`export`" and Windows needs "`set`". In the console
 export REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 export REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 
-# network rpc url, e.g.
-export MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
-export POLYGON_RPC_URL=https://polygon-rpc.com
+export MUMBAI_RPC_URL=<your RPC_URL> # exported used for convenience/security, you can also use the direct URL string later
 ```
 
 
@@ -111,9 +99,7 @@ export POLYGON_RPC_URL=https://polygon-rpc.com
 set REMOTE_TEST_PRIVATE_KEY1=<your REMOTE_TEST_PRIVATE_KEY1>
 set REMOTE_TEST_PRIVATE_KEY2=<your REMOTE_TEST_PRIVATE_KEY2>
 
-# network rpc url, e.g.
-set MUMBAI_RPC_URL=https://rpc-mumbai.maticvigil.com
-set POLYGON_RPC_URL=https://polygon-rpc.com
+set MUMBAI_RPC_URL=<your RPC_URL> # exported used for convenience/security, you can also use the direct URL string later
 ```
 
 Optionally, chainlist.org has other RPCs for [Mumbai](https://chainlist.org/chain/80001) and [Polygon](https://chainlist.org/chain/137).
@@ -131,7 +117,7 @@ In the Python console:
 import os
 from ocean_lib.example_config import get_config_dict
 from ocean_lib.ocean.ocean import Ocean
-config = get_config_dict("mumbai")
+config = get_config_dict(os.getenv("MUMBAI_RPC_URL"))  # you can also input the string directly
 ocean = Ocean(config)
 
 # Create OCEAN object. ocean_lib knows where OCEAN is on all remote networks

@@ -17,3 +17,4 @@ ocean_lib.egg-info/
 .tox/
 consume-downloads/
 coverage.xml
+setup-local.sh

@@ -70,7 +70,7 @@ In the Python console:
 ```python
 # Create Ocean instance
 from ocean_lib.example_config import get_config_dict
-config = get_config_dict("development")
+config = get_config_dict("http://localhost:8545")
 
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean(config)

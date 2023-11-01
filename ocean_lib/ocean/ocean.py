@@ -80,6 +80,9 @@ class Ocean:
         if "web3_instance" not in config_dict:
             config_errors["web3_instance"] = "required"
 
+        if "NETWORK_NAME" not in config_dict:
+            config_errors["NETWORK_NAME"] = "required"
+
         if config_errors:
             raise Exception(json.dumps(config_errors))
 
