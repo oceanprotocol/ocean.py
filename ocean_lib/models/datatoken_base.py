@@ -123,7 +123,7 @@ class DatatokenArguments:
         new_elements = [
             item for item in data_nft.getTokensList() if item not in initial_list
         ]
-        assert len(new_elements) == 1, "new data token has no address"
+        assert len(new_elements) == 1, "new datatoken has no address"
 
         datatoken = DatatokenBase.get_typed(config_dict, new_elements[0])
 
@@ -311,17 +311,22 @@ class DatatokenBase(ABC, ContractBase):
         return (exchange, tx) if kwargs.get("full_info") else exchange
 
     @enforce_types
-    def get_exchanges(self) -> list:
+    def get_exchanges(self, only_active=True) -> list:
         """return List[OneExchange] - all the exchanges for this datatoken"""
         # import now, to avoid circular import
-        from ocean_lib.models.fixed_rate_exchange import OneExchange
+        from ocean_lib.models.fixed_rate_exchange import FixedRateExchange, OneExchange
 
-        FRE = self._FRE()
+        exchanges = []
         addrs_and_exchange_ids = self.getFixedRates()
         exchanges = [
-            OneExchange(FRE, exchange_id) for _, exchange_id in addrs_and_exchange_ids
+            OneExchange(FixedRateExchange(self.config_dict, address), exchange_id)
+            for address, exchange_id in addrs_and_exchange_ids
         ]
-        return exchanges
+
+        if not only_active:
+            return exchanges
+
+        return [exchange for exchange in exchanges if exchange.is_active()]
 
     @enforce_types
     def _FRE(self):
@@ -361,6 +366,21 @@ class DatatokenBase(ABC, ContractBase):
         tx = self.createDispenser(*(args_tup + (tx_dict,)))
 
         return tx
+
+    @enforce_types
+    def get_dispensers(self, only_active=True) -> list:
+        """return List[Dispenser] - all the dispensers for this datatoken"""
+        # import here to avoid circular import
+        from ocean_lib.models.dispenser import Dispenser
+
+        dispensers = []
+        addrs = self.getDispensers()
+        dispensers = [Dispenser(self.config_dict, address) for address in addrs]
+
+        if not only_active:
+            return dispensers
+
+        return [disp for disp in dispensers if disp.status(self.address)]
 
     @enforce_types
     def dispense(self, amount: Union[int, str], tx_dict: dict):
