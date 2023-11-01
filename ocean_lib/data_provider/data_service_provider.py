@@ -6,11 +6,9 @@
 """Provider module."""
 import json
 import logging
-from datetime import datetime, timezone
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
-from unittest.mock import Mock
 
 from enforce_typing import enforce_types
 from requests.models import PreparedRequest, Response
@@ -219,6 +217,7 @@ class DataServiceProvider(DataServiceProviderBase):
             consumer=consumer,
             dataset=dataset,
             compute_environment=compute_environment,
+            dataset_compute_service=dataset_compute_service,
             algorithm=algorithm,
             algorithm_meta=algorithm_meta,
             algorithm_custom_data=algorithm_custom_data,
@@ -345,6 +344,7 @@ class DataServiceProvider(DataServiceProviderBase):
         nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{job_id}{str(index)}",
+            provider_uri=dataset_compute_service.service_endpoint,
         )
 
         req = PreparedRequest()
@@ -415,6 +415,7 @@ class DataServiceProvider(DataServiceProviderBase):
         nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{job_id}{did}",
+            provider_uri=service_endpoint,
         )
 
         req = PreparedRequest()
@@ -449,6 +450,7 @@ class DataServiceProvider(DataServiceProviderBase):
     def _prepare_compute_payload(
         consumer,
         dataset: ComputeInput,
+        dataset_compute_service: Any,  # Can not add Service typing due to enforce_type errors.
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
@@ -473,9 +475,12 @@ class DataServiceProvider(DataServiceProviderBase):
                     _input, req_key
                 ), f"The received dataset does not have a {req_key}."
 
+        # TODO: is the nonce correct here?
+        # Should it be the one from the compute service or a dataset?
         nonce, signature = DataServiceProvider.sign_message(
             consumer,
             f"{consumer.address}{dataset.did}",
+            provider_uri=dataset_compute_service.service_endpoint,
         )
 
         payload = {
