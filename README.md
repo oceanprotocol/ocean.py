@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0
 
 With ocean.py, you can:
 
-- **Publish** data services: downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
+- **Publish** data services: data feeds, REST APIs, downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
 - **Sell** datatokens via for a fixed price. Sell data NFTs.
 - **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io).
 
