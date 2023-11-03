@@ -44,7 +44,7 @@ Follow these steps in sequence to ramp into Ocean.
 
 ### Use-case flows
 
-- [Predict ETH](https://github.com/oceanprotocol/predict-eth) - data challenges with prize $$ to predict future ETH price
+- [Challenge DF](https://github.com/oceanprotocol/predict-eth) - prize $$ to predict future ETH price
 - [Data Farming](READMEs/df.md) - curate data assets, earn rewards
 
 ### On-chain key-value store via data NFTs
