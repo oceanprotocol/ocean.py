@@ -22,10 +22,6 @@ ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
 This is in beta state. If you run into problems, please open up a [new issue](/issues).
 
-- [🏄 Quickstart](#-quickstart)
-- [🦑 Development](#-development)
-- [🏛 License](#-license)
-
 ## 🏄 Quickstart
 
 Follow these steps in sequence to ramp into Ocean.
