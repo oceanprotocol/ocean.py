@@ -65,7 +65,7 @@ jobs:
           OCEAN_NETWORK_URL: "http://127.0.0.1:8545"
           OCEAN_CONFIG_FILE: "config.ini"
           FACTORY_DEPLOYER_PRIVATE_KEY: "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
-          MUMBAI_RPC_URL: "https://polygon-mumbai.infura.io/v3/${{ secrets.WEB3_INFURA_PROJECT_ID }}"
+          MUMBAI_RPC_URL: ${{ secrets.MUMBAI_RPC_URL }}
         run: |
           mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
           pytest tests/readmes/test_readmes.py
