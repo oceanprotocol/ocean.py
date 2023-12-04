@@ -742,7 +742,7 @@ def test_fail_create_datatoken(
     with pytest.raises(Exception, match="Template index doesnt exist"):
         data_nft.create_datatoken(
             {"from": consumer_wallet},
-            template_index=3,
+            template_index=4,
             name="DT1",
             symbol="DT1Symbol",
         )
