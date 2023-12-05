@@ -23,7 +23,6 @@ class ExchangeArguments:
         owner_addr: Optional[str] = None,
         publish_market_fee_collector: Optional[str] = None,
         publish_market_fee: Union[int, str] = 0,
-        with_mint: bool = True,
         allowed_swapper: str = ZERO_ADDRESS,
         full_info: bool = False,
         dt_decimals: Optional[int] = None,
@@ -35,7 +34,6 @@ class ExchangeArguments:
         self.allowed_swapper = checksum_addr(allowed_swapper)
         self.rate = rate
         self.publish_market_fee = publish_market_fee
-        self.with_mint = with_mint
         self.dt_decimals = dt_decimals
 
     def to_tuple(self, config_dict, tx_dict, dt_decimals=None):
@@ -73,7 +71,7 @@ class ExchangeArguments:
                 self.dt_decimals,
                 self.rate,
                 self.publish_market_fee,
-                int(self.with_mint),
+                1,  # with mint
             ],
         )
 
@@ -455,11 +453,6 @@ class OneExchange:
     def set_rate(self, new_rate: Union[int, str], tx_dict: dict):
         """Set price = # base tokens needed to buy 1 datatoken"""
         return self._FRE.setRate(self._id, new_rate, tx_dict)
-
-    @enforce_types
-    def toggle_mint_state(self, with_mint: bool, tx_dict: dict):
-        """Switch 'with_mint' from True <> False"""
-        return self._FRE.toggleMintState(self._id, with_mint, tx_dict)
 
     @enforce_types
     def toggle_active(self, tx_dict: dict):
