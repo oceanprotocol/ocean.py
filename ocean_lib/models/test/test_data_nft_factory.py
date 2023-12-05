@@ -58,7 +58,7 @@ def test_nft_creation(
     assert datatoken, "Failed to create ERC20 token."
 
     # Tests templateCount function (one of them should be the Enterprise template)
-    assert data_nft_factory.templateCount() == 2
+    assert data_nft_factory.templateCount() == 3
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
@@ -69,7 +69,7 @@ def test_nft_creation(
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.getCurrentTemplateCount() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 3
 
 
 @pytest.mark.unit
@@ -219,7 +219,7 @@ def test_start_multiple_order(
     assert datatoken, "Failed to create ERC20 token."
 
     # Tests templateCount function (one of them should be the Enterprise template)
-    assert data_nft_factory.templateCount() == 2
+    assert data_nft_factory.templateCount() == 3
 
     # Tests datatoken template list
     datatoken_template_address = get_address_of_type(
@@ -230,7 +230,7 @@ def test_start_multiple_order(
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
-    assert data_nft_factory.getCurrentTemplateCount() == 2
+    assert data_nft_factory.getCurrentTemplateCount() == 3
 
     # Tests datatoken can be checked as deployed by the factory
     assert data_nft_factory.check_datatoken(datatoken.address)
@@ -342,7 +342,7 @@ def test_fail_get_templates(data_nft_factory):
 
     # Should fail to get the Datatoken template if index > templateCount
     with pytest.raises(Exception, match="Template index doesnt exist"):
-        data_nft_factory.getTokenTemplate(3)
+        data_nft_factory.getTokenTemplate(4)
 
 
 @pytest.mark.unit
