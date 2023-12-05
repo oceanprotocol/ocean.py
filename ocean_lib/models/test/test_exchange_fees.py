@@ -24,27 +24,24 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "bt_name, publish_market_swap_fee, consume_market_swap_fee, bt_per_dt, with_mint",
+    "bt_name, publish_market_swap_fee, consume_market_swap_fee, bt_per_dt",
     [
         # Min fees
-        ("Ocean", 0, 0, 1, True),
-        ("MockUSDC", 0, 0, 1, True),
+        ("Ocean", 0, 0, 1),
+        ("MockUSDC", 0, 0, 1),
         # Happy path
-        ("Ocean", 0.003, 0.005, 1, True),
-        ("MockDAI", 0.003, 0.005, 1, True),
-        ("MockUSDC", 0.003, 0.005, 1, True),
+        ("Ocean", 0.003, 0.005, 1),
+        ("MockDAI", 0.003, 0.005, 1),
+        ("MockUSDC", 0.003, 0.005, 1),
         # Max fees
-        ("Ocean", 0.1, 0.1, 1, True),
-        ("MockUSDC", 0.1, 0.1, 1, True),
+        ("Ocean", 0.1, 0.1, 1),
+        ("MockUSDC", 0.1, 0.1, 1),
         # Min rate. Rate must be => 1e10 wei
-        ("Ocean", 0.003, 0.005, 0.000000010000000000, True),
-        ("MockUSDC", 0.003, 0.005, 0.000000010000000000, True),
+        ("Ocean", 0.003, 0.005, 0.000000010000000000),
+        ("MockUSDC", 0.003, 0.005, 0.000000010000000000),
         # High rate. There is no maximum
-        ("Ocean", 0.003, 0.005, 1000, True),
-        ("MockUSDC", 0.003, 0.005, 1000, True),
-        # with_mint = 0
-        ("Ocean", 0.003, 0.005, 1, False),
-        ("MockUSDC", 0.003, 0.005, 1, False),
+        ("Ocean", 0.003, 0.005, 1000),
+        ("MockUSDC", 0.003, 0.005, 1000),
     ],
 )
 def test_exchange_swap_fees(
@@ -57,7 +54,6 @@ def test_exchange_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
-    with_mint: bool,
 ):
     """
     Tests fixed rate exchange swap fees with OCEAN, DAI, and USDC as base token
@@ -104,7 +100,6 @@ def test_exchange_swap_fees(
         owner_addr=alice.address,
         publish_market_fee_collector=alice.address,
         publish_market_fee=publish_market_swap_fee,
-        with_mint=with_mint,
         allowed_swapper=ZERO_ADDRESS,
     )
 
@@ -136,21 +131,11 @@ def test_exchange_swap_fees(
     details = exchange.details
     assert details.bt_balance == 0
     assert details.dt_balance == 0
-    if with_mint:
-        assert details.dt_supply == dt.cap()
-    else:
-        assert details.dt_supply == 0
+    assert details.dt_supply == dt.cap()
 
     # Grant infinite approvals for exchange to spend bob's BT and DT
     dt.approve(exchange.address, MAX_UINT256, {"from": bob})
     bt.approve(exchange.address, MAX_UINT256, {"from": bob})
-
-    # if the exchange cannot mint its own datatokens,
-    # -mint datatokens to alice, and
-    # -grant infinite approval for exchange to spend alice's datatokens
-    if not with_mint:
-        dt.mint(alice.address, MAX_UINT256, {"from": alice})
-        dt.approve(exchange.address, MAX_UINT256, {"from": alice})
 
     one_base_token = int_units("1", bt.decimals())
     dt_per_bt_in_wei = to_wei(1.0 / float(bt_per_dt))

@@ -30,7 +30,7 @@ jobs:
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
-          GANACHE_HARDFORK: london
+          GANACHE_FORK: london
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-thegraph --with-c2d --skip-subgraph-deploy > start_ocean.log &
       - name: Install dependencies
@@ -40,8 +40,6 @@ jobs:
           pip install -r requirements_dev.txt
       - name: Delete default runner images
         run: |
-          docker image rm node:14
-          docker image rm node:14-alpine
           docker image rm node:16
           docker image rm node:16-alpine
           docker image rm node:18

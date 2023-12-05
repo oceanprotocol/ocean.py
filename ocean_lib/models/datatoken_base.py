@@ -284,7 +284,6 @@ class DatatokenBase(ABC, ContractBase):
         - owner_addr
         - publish_market_fee_collector - fee going to publish mkt
         - publish_market_fee - in wei or str, e.g. int(1e15) or "0.001 ether"
-        - with_mint - should the exchange mint datatokens as needed, or
           do they need to by supplied/allowed by participants like base token?
         - allowed_swapper - if ZERO_ADDRESS, anyone can swap
         - full_info - return just OneExchange, or (OneExchange, <other info>)

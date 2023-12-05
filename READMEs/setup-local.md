@@ -29,7 +29,7 @@ docker system prune -a --volumes
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 # for support of type 2 transactions
-export GANACHE_HARDFORK=london
+export GANACHE_FORK=london
 ./start_ocean.sh
 ```
 
