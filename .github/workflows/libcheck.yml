@@ -28,7 +28,7 @@ jobs:
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
-          GANACHE_HARDFORK: london
+          GANACHE_FORK: london
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-c2d > start_ocean.log &
           for i in $(seq 1 108); do

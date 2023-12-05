@@ -26,7 +26,6 @@ def test_with_defaults(OCEAN, DT, alice, bob):
         rate=to_wei(3),
         base_token_addr=OCEAN.address,
         tx_dict={"from": alice},
-        with_mint=False,
     )
 
     # Alice makes 100 datatokens available on the exchange
@@ -35,6 +34,9 @@ def test_with_defaults(OCEAN, DT, alice, bob):
 
     # Bob lets exchange pull the OCEAN needed
     OCEAN.approve(exchange.address, MAX_UINT256, {"from": bob})
+
+    details = exchange.details
+    initial_dt_supply = from_wei(details.dt_supply)
 
     # Bob buys 2 datatokens
     DT_bob1 = DT.balanceOf(bob)
@@ -53,11 +55,11 @@ def test_with_defaults(OCEAN, DT, alice, bob):
     assert details.dt_decimals == DT.decimals()
     assert from_wei(details.fixed_rate) == 3
     assert details.active
-    assert from_wei(details.dt_supply) == (100 - 2)
+
+    assert from_wei(details.dt_supply) == initial_dt_supply - 2
     assert from_wei(details.bt_supply) == 2 * 3
     assert from_wei(details.dt_balance) == 0
     assert from_wei(details.bt_balance) == 2 * 3
-    assert not details.with_mint
 
     # Fees tests
     fees = exchange.exchange_fees_info

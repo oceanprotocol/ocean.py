@@ -57,7 +57,7 @@ cd barge
 docker system prune -a --volumes
 
 # for support of type 2 transactions
-export GANACHE_HARDFORK=london
+export GANACHE_FORK=london
 
 # Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 # The `--with-c2d` option tells barge to include the Compute-to-Data backend
