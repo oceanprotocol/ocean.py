@@ -31,6 +31,7 @@ config_defaults = {
 PROVIDER_PER_NETWORK = {
     1: "https://v4.provider.mainnet.oceanprotocol.com",
     5: "https://v4.provider.goerli.oceanprotocol.com",
+    10: "https://v4.provider.oceanprotocol.com",
     56: "https://v4.provider.bsc.oceanprotocol.com",
     137: "https://v4.provider.polygon.oceanprotocol.com",
     246: "https://v4.provider.energyweb.oceanprotocol.com",
@@ -44,6 +45,7 @@ PROVIDER_PER_NETWORK = {
 NAME_PER_NETWORK = {
     1: "mainnet",
     5: "goerli",
+    10: "optimism",
     56: "bsc",
     137: "polygon",
     246: "energyweb",
