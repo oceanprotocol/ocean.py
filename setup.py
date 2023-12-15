@@ -51,11 +51,11 @@ dev_requirements = [
     "pkginfo==1.9.6",
     "twine==4.0.2",
     "watchdog==3.0.0",
-    "isort==5.13.0",
-    "flake8==6.1.0",
+    "isort",
+    "flake8",
     "black",
-    "pre-commit==3.5.0",
-    "licenseheaders==0.8.8",
+    "pre-commit",
+    "licenseheaders",
 ]
 
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
