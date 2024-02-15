@@ -42,7 +42,7 @@ test_requirements = [
     "pytest-env",  # common dependency
     "matplotlib",  # just used in a readme test and unlikely to change, common dependency
     "mkcodes==0.1.1",
-    "pytest-sugar==0.9.7",
+    "pytest-sugar==1.0.0",
 ]
 
 # Possibly required by developers of ocean-lib:
