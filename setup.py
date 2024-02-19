@@ -50,7 +50,7 @@ dev_requirements = [
     "bumpversion==0.6.0",
     "pkginfo==1.9.6",
     "twine==4.0.2",
-    "watchdog==3.0.0",
+    "watchdog==4.0.0",
     "isort",
     "flake8",
     "black",
