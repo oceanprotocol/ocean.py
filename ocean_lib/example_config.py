@@ -38,7 +38,7 @@ PROVIDER_PER_NETWORK = {
     1285: "https://v4.provider.moonriver.oceanprotocol.com",
     1287: "https://v4.provider.moonbase.oceanprotocol.com",
     80001: "https://v4.provider.mumbai.oceanprotocol.com",
-    58008: "https://v4.provider.oceanprotocol.com",
+    11155111: "https://v4.provider.oceanprotocol.com",
     8996: DEFAULT_PROVIDER_URL,
 }
 
@@ -52,7 +52,7 @@ NAME_PER_NETWORK = {
     1285: "moonriver",
     1287: "moonbase",
     80001: "mumbai",
-    58008: "sepolia",
+    11155111: "sepolia",
     8996: "development",
 }
 
