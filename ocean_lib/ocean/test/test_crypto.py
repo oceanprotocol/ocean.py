@@ -12,7 +12,7 @@ def test_symkey():
     base_str = "foo"
     symkey = crypto.calc_symkey(base_str)
     assert isinstance(symkey, str)
-    wrong_sym_key = calc_symkey("testwrong")
+    wrong_sym_key = crypto.calc_symkey("testwrong")
     assert wrong_sym_key != sym_key, "NOK : wrong_sym_key is the same as sym_key"
 
 
