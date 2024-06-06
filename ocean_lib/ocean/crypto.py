@@ -18,8 +18,8 @@ from eth_utils import decode_hex
 def calc_symkey(base_str: str) -> str:
     """Compute a symmetric private key that's a function of the base_str"""
     base_b = base_str.encode("utf-8")  # bytes
-    hash_b = sha256(base_b)
-    symkey_b = b64encode(str(hash_b).encode("ascii"))[:43] + b"="  # bytes
+    hash_b = sha256(base_b).hexdigest()
+    symkey_b = b64encode(hash_b.encode("ascii"))[:43] + b"="  # bytes
     symkey = symkey_b.decode("ascii")
     return symkey
 
