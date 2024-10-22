@@ -56,6 +56,42 @@ NAME_PER_NETWORK = {
     8996: "development",
 }
 
+def get_ocean_node_config(network_url: Optional[str] = None, node_uri: Optional[str] = None) -> dict:
+    if not network_url:
+        network_url = "http://127.0.0.1:8545"
+    
+    if not node_uri:
+        node_uri = "http://127.0.0.1:8000" # Assuming that HTTP_API_PORT from Ocean Nodes is set to default 8000 as it is in quickstart https://github.com/oceanprotocol/ocean-node/blob/main/scripts/ocean-node-quickstart.sh#L80
+    
+    config_dict = copy.deepcopy(config_defaults)
+    config_dict["web3_instance"] = get_web3(network_url)
+    config_dict["CHAIN_ID"] = config_dict["web3_instance"].eth.chain_id
+    config_dict["METADATA_CACHE_URI"] = node_uri
+    config_dict["PROVIDER_URL"] = node_uri
+    chain_id = config_dict["CHAIN_ID"]
+
+    if os.getenv("ADDRESS_FILE"):
+        base_file = os.getenv("ADDRESS_FILE")
+        address_file = os.path.expanduser(base_file)
+    elif chain_id == 8996:
+        # this is auto-created when barge is run
+        base_file = "~/.ocean/ocean-contracts/artifacts/address.json"
+        address_file = os.path.expanduser(base_file)
+    else:
+        # `contract_addresses` comes from "ocean-contracts" pypi library,
+        # a JSON blob holding addresses of contract deployments, per network
+        address_file = (
+            Path(os.path.join(addresses.__file__, "..", "address.json"))
+            .expanduser()
+            .resolve()
+        )
+    assert os.path.exists(address_file), f"Could not find address_file={address_file}."
+
+    config_dict["ADDRESS_FILE"] = address_file
+
+    return config_dict
+
+
 
 def get_config_dict(network_url: Optional[str] = None) -> dict:
     """Return config dict containing default values for a given network.

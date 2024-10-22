@@ -111,7 +111,23 @@ In your working console, run Python:
 python
 ```
 
-In the Python console:
+Config creation in Python console when using Ocean Nodes:
+```python
+# Create Ocean instance
+import os
+from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.example_config import get_ocean_node_config
+
+network_url = os.getenv("MUMBAI_RPC_URL")
+node_uri = "http://127.0.0.1:8000" # If Ocean Node is hosted in another environment, provide the public DNS or IP
+
+config = get_ocean_node_config(network_url, node_uri)
+ocean = Ocean(config)
+
+# Continue with OCEAN token creation and wallets setup.
+```
+
+Config creation in Python console when using as-is Aquarius & Provider:
 ```python
 # Create Ocean instance
 import os
