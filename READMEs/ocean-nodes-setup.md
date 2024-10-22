@@ -75,15 +75,12 @@ In the Python console:
 # Create Ocean instance
 import os
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.example_config import get_web3
+from ocean_lib.example_config import get_ocean_node_config
 
 network_url = "http://localhost:8545"
-# Follow parameters.md guide for config parameters
-config = {
-   'METADATA_CACHE_URI': "http://127.0.0.1:8000", # Assuming that HTTP_API_PORT from Ocean Nodes is set to default 8000 as it is in quickstart https://github.com/oceanprotocol/ocean-node/blob/main/scripts/ocean-node-quickstart.sh#L80
-   'PROVIDER_URL' : "http://127.0.0.1:8000",
-   "web3_instance": get_web3(network_url)
-}
+node_uri = "http://127.0.0.1:8000"
+
+config = get_ocean_node_config(network_url, node_uri)
 ocean = Ocean(config)
 
 # Create OCEAN object. Barge auto-created OCEAN, and ocean instance knows

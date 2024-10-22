@@ -116,21 +116,18 @@ Config creation in Python console when using Ocean Nodes:
 # Create Ocean instance
 import os
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.example_config import get_web3
+from ocean_lib.example_config import get_ocean_node_config
 
 network_url = os.getenv("MUMBAI_RPC_URL")
-# Follow parameters.md guide for config parameters
-config = {
-   'METADATA_CACHE_URI': "http://127.0.0.1:8000", # Assuming that HTTP_API_PORT from Ocean Nodes is set to default 8000 as it is in quickstart https://github.com/oceanprotocol/ocean-node/blob/main/scripts/ocean-node-quickstart.sh#L80
-   'PROVIDER_URL' : "http://127.0.0.1:8000", # If Ocean Node is hosted in another environment, provide the public DNS or IP
-   "web3_instance": get_web3(network_url)
-}
+node_uri = "http://127.0.0.1:8000" # If Ocean Node is hosted in another environment, provide the public DNS or IP
+
+config = get_ocean_node_config(network_url, node_uri)
 ocean = Ocean(config)
 
 # Continue with OCEAN token creation and wallets setup.
 ```
 
-In the Python console:
+Config creation in Python console when using as-is Aquarius & Provider:
 ```python
 # Create Ocean instance
 import os
