@@ -1,5 +1,5 @@
 <!--
-Copyright 2023 Ocean Protocol Foundation
+Copyright 2025 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -8,6 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 </h1>
 
 > ocean.py: a Python library to privately & securely publish, exchange, and consume data.
+
+⚠ Note: as of early 2025, this codebase is not being maintained. It might work, it might not. If you find a bug, feel free to report it, but do not expect it to be fixed. 
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
@@ -70,7 +72,7 @@ Each of the following shows how to publish & consume a particular type of data.
 
 ## 🏛 License
 
-    Copyright ((C)) 2023 Ocean Protocol Foundation
+    Copyright ((C)) 2025 Ocean Protocol Foundation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
