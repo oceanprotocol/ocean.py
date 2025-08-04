@@ -12,7 +12,7 @@ SPDX-License-Identifier: Apache-2.0
 
 ## Install ocean.py library
 
-Ocean.py requires some basic system dependencies which are standard to development images. If you encounter trouble during installation, please make sure you have autoconf, pkg-config and build-essential or their equivalents installed.
+(If you have issues, see "Potential issues & workarounds" section below.)
 
 In a new console:
 
