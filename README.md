@@ -3,16 +3,9 @@ Copyright 2025 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-<h1 align="center">
-<img src="https://github.com/oceanprotocol/art/blob/main/splashes/ocean_py.png?raw=true" width="300"/>
-</h1>
-
 > ocean.py: a Python library to privately & securely publish, exchange, and consume data.
 
 ⚠ Note: as of early 2025, this codebase is not being maintained. It might work, it might not. If you find a bug, feel free to report it, but do not expect it to be fixed. 
-
-[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
 
 Ocean.py helps data scientists earn $ from their AI models, track provenance of data & compute, and get more data. (More details [here](https://docs.oceanprotocol.com/data-science).)
 
